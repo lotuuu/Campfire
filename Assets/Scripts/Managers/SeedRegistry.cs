@@ -13,7 +13,6 @@ namespace Garden
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
-            DontDestroyOnLoad(gameObject);
 
             foreach (var seed in Resources.LoadAll<SeedData>("Seeds"))
                 seeds[seed.seedName] = seed;
