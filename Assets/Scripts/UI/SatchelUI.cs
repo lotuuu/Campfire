@@ -18,6 +18,9 @@ namespace Garden
 
         private SeedData selectedSeed;
 
+        private int targetEnvIndex = -1;
+        private int targetSlotIndex = -1;
+
         public void Initialize(VisualElement root)
         {
             seedSlotTemplate = Resources.Load<VisualTreeAsset>("UI/Templates/SeedSlot");
@@ -37,6 +40,13 @@ namespace Garden
 
         public void Show()
         {
+            Show(-1, -1);
+        }
+
+        public void Show(int envIndex, int slotIndex)
+        {
+            targetEnvIndex = envIndex;
+            targetSlotIndex = slotIndex;
             panel.style.display = DisplayStyle.Flex;
             RefreshGrid();
             probabilityPanel.style.display = DisplayStyle.None;
@@ -93,8 +103,16 @@ namespace Garden
 
         private void OnPlant()
         {
-            if (selectedSeed == null || PlantManager.Instance.State != PlantState.Empty) return;
-            PlantManager.Instance.Plant(selectedSeed);
+            if (selectedSeed == null) return;
+
+            if (targetEnvIndex >= 0 && targetSlotIndex >= 0)
+            {
+                PlantManager.Instance.Plant(selectedSeed, targetEnvIndex, targetSlotIndex);
+            }
+            else
+            {
+                PlantManager.Instance.Plant(selectedSeed);
+            }
             Hide();
         }
     }
