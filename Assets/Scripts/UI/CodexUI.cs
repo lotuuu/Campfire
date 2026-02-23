@@ -1,32 +1,49 @@
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
+using UnityEngine.UIElements;
 
 namespace Garden
 {
     public class CodexUI : MonoBehaviour
     {
-        [SerializeField] private Transform variantGrid;
-        [SerializeField] private GameObject variantEntryPrefab;
-        [SerializeField] private TextMeshProUGUI detailName;
-        [SerializeField] private TextMeshProUGUI detailDescription;
-        [SerializeField] private TextMeshProUGUI detailRarity;
-        [SerializeField] private Image detailColorSwatch;
-        [SerializeField] private Button closeButton;
+        private VisualTreeAsset variantEntryTemplate;
 
-        private void OnEnable()
+        private VisualElement panel;
+        private ScrollView variantGrid;
+        private Label detailName;
+        private Label detailDescription;
+        private Label detailRarity;
+        private VisualElement detailColorSwatch;
+        private Button closeButton;
+
+        public void Initialize(VisualElement root)
         {
+            variantEntryTemplate = Resources.Load<VisualTreeAsset>("UI/Templates/VariantEntry");
+
+            panel = root.Q<VisualElement>("codex-panel");
+            variantGrid = root.Q<ScrollView>("variant-grid");
+            detailName = root.Q<Label>("detail-name");
+            detailDescription = root.Q<Label>("detail-description");
+            detailRarity = root.Q<Label>("detail-rarity");
+            detailColorSwatch = root.Q<VisualElement>("detail-color-swatch");
+            closeButton = root.Q<Button>("codex-close");
+
+            closeButton.clicked += Hide;
+        }
+
+        public void Show()
+        {
+            panel.style.display = DisplayStyle.Flex;
             RefreshCodex();
         }
 
-        private void Start()
+        public void Hide()
         {
-            closeButton.onClick.AddListener(() => gameObject.SetActive(false));
+            panel.style.display = DisplayStyle.None;
         }
 
         private void RefreshCodex()
         {
-            foreach (Transform child in variantGrid) Destroy(child.gameObject);
+            variantGrid.Clear();
 
             var discovered = SaveManager.Instance.Data.discoveredVariants;
 
@@ -34,25 +51,32 @@ namespace Garden
             {
                 foreach (var variant in seed.variants)
                 {
-                    var entry = Instantiate(variantEntryPrefab, variantGrid);
+                    var entry = variantEntryTemplate.CloneTree();
                     bool isDiscovered = discovered.Contains(variant.variantName);
 
-                    var text = entry.GetComponentInChildren<TextMeshProUGUI>();
-                    var image = entry.GetComponent<Image>();
-                    var button = entry.GetComponent<Button>();
+                    var nameLabel = entry.Q<Label>(className: "variant-name");
+                    var swatch = entry.Q<VisualElement>(className: "variant-swatch");
+                    var button = entry.Q<Button>(className: "variant-entry");
 
                     if (isDiscovered)
                     {
-                        if (text != null) text.text = variant.variantName;
-                        if (image != null) image.color = variant.primaryColor;
+                        if (nameLabel != null) nameLabel.text = variant.variantName;
+                        if (swatch != null) swatch.style.backgroundColor = variant.primaryColor;
                     }
                     else
                     {
-                        if (text != null) text.text = "???";
-                        if (image != null) image.color = new Color(0.2f, 0.2f, 0.2f, 0.8f);
+                        if (nameLabel != null) nameLabel.text = "???";
+                        if (swatch != null) swatch.style.backgroundColor = new Color(0.2f, 0.2f, 0.2f, 0.8f);
                     }
 
-                    button?.onClick.AddListener(() => ShowDetail(variant, isDiscovered));
+                    if (button != null)
+                    {
+                        var v = variant;
+                        var d = isDiscovered;
+                        button.clicked += () => ShowDetail(v, d);
+                    }
+
+                    variantGrid.Add(entry);
                 }
             }
         }
@@ -64,14 +88,14 @@ namespace Garden
                 detailName.text = variant.variantName;
                 detailDescription.text = variant.description;
                 detailRarity.text = variant.rarity.ToString();
-                detailColorSwatch.color = variant.primaryColor;
+                detailColorSwatch.style.backgroundColor = variant.primaryColor;
             }
             else
             {
                 detailName.text = "Unknown Variant";
                 detailDescription.text = variant.discoveryHint;
                 detailRarity.text = "???";
-                detailColorSwatch.color = Color.black;
+                detailColorSwatch.style.backgroundColor = Color.black;
             }
         }
     }

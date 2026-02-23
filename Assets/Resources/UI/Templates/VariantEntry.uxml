@@ -1,0 +1,6 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Button class="grid-item variant-entry">
+        <ui:VisualElement class="variant-swatch" />
+        <ui:Label class="variant-name" />
+    </ui:Button>
+</ui:UXML>

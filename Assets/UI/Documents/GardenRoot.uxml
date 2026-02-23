@@ -1,0 +1,118 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:uie="UnityEditor.UIElements">
+
+    <Style src="../Styles/Variables.uss" />
+    <Style src="../Styles/Common.uss" />
+    <Style src="../Styles/HUD.uss" />
+    <Style src="../Styles/Satchel.uss" />
+    <Style src="../Styles/Codex.uss" />
+    <Style src="../Styles/Greenhouse.uss" />
+    <Style src="../Styles/Debug.uss" />
+
+    <!-- HUD layer (always visible) -->
+    <ui:VisualElement name="hud" picking-mode="Ignore">
+
+        <!-- Top bar: weather + currency -->
+        <ui:VisualElement name="top-bar" picking-mode="Ignore">
+            <ui:Label name="weather-text" text="--°C  ·  --  ·  --" />
+            <ui:VisualElement name="currency-panel">
+                <ui:Label name="dewdrops-text" class="currency-label" text="Dew: 0" />
+                <ui:Label name="sun-shards-text" class="currency-label" text="Sun: 0" />
+                <ui:Label name="aura-dust-text" class="currency-label" text="Dust: 0" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Bottom bar: pulse button + nav -->
+        <ui:VisualElement name="bottom-bar" picking-mode="Ignore">
+            <ui:Button name="pulse-button" text="Plant a Seed" class="btn" />
+            <ui:VisualElement name="nav-bar">
+                <ui:Button name="codex-button" text="Codex" class="nav-btn" />
+                <ui:Button name="greenhouse-button" text="Greenhouse" class="nav-btn" />
+                <ui:Button name="debug-button" text="Debug" class="nav-btn" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- Satchel Panel (hidden by default) -->
+    <ui:VisualElement name="satchel-panel" class="panel" style="display: none;">
+        <ui:Label text="Satchel" class="panel-header" />
+        <ui:Button name="satchel-close" text="X" class="btn btn-close" />
+        <ui:ScrollView name="seed-grid" class="scroll-view" />
+        <ui:VisualElement name="probability-panel" style="display: none;">
+            <ui:Label name="selected-seed-name" text="" />
+            <ui:VisualElement class="separator" />
+            <ui:ScrollView name="probability-grid" />
+        </ui:VisualElement>
+        <ui:Button name="plant-button" text="Plant" class="btn" enabled="false" />
+    </ui:VisualElement>
+
+    <!-- Codex Panel (hidden by default) -->
+    <ui:VisualElement name="codex-panel" class="panel" style="display: none;">
+        <ui:Label text="Codex" class="panel-header" />
+        <ui:Button name="codex-close" text="X" class="btn btn-close" />
+        <ui:ScrollView name="variant-grid" class="scroll-view" />
+        <ui:VisualElement name="detail-panel">
+            <ui:Label name="detail-name" text="" />
+            <ui:Label name="detail-description" text="" />
+            <ui:Label name="detail-rarity" text="" />
+            <ui:VisualElement name="detail-color-swatch" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- Greenhouse Panel (hidden by default) -->
+    <ui:VisualElement name="greenhouse-panel" class="panel" style="display: none;">
+        <ui:Label text="Greenhouse" class="panel-header" />
+        <ui:Button name="greenhouse-close" text="X" class="btn btn-close" />
+        <ui:VisualElement name="greenhouse-header">
+            <ui:Label name="dust-rate" text="+0 Aura Dust/hr" />
+            <ui:Label name="slots-text" text="0 / 0" />
+        </ui:VisualElement>
+        <ui:ScrollView name="plant-grid" class="scroll-view" />
+        <ui:Button name="expand-button" text="Expand" class="btn" />
+    </ui:VisualElement>
+
+    <!-- Debug Panel (hidden by default) -->
+    <ui:VisualElement name="debug-panel" class="panel" style="display: none;">
+        <ui:Label text="Debug Weather" class="panel-header" />
+        <ui:Button name="debug-close" text="X" class="btn btn-close" />
+
+        <ui:Toggle name="debug-mode-toggle" label="Debug Mode" />
+
+        <ui:VisualElement class="debug-row">
+            <ui:Label text="Temp" class="debug-label" />
+            <ui:Slider name="temp-slider" low-value="-20" high-value="50" value="22" />
+            <ui:Label name="temp-value" text="22°C" class="debug-value" />
+        </ui:VisualElement>
+
+        <ui:VisualElement class="debug-row">
+            <ui:Label text="Humidity" class="debug-label" />
+            <ui:Slider name="humidity-slider" low-value="0" high-value="100" value="50" />
+            <ui:Label name="humidity-value" text="50%" class="debug-value" />
+        </ui:VisualElement>
+
+        <ui:VisualElement class="debug-row">
+            <ui:Label text="Wind" class="debug-label" />
+            <ui:Slider name="wind-slider" low-value="0" high-value="50" value="3" />
+            <ui:Label name="wind-value" text="3.0 m/s" class="debug-value" />
+        </ui:VisualElement>
+
+        <ui:DropdownField name="condition-dropdown" label="Condition"
+            choices="Clear,Cloudy,Rain,Storm,Snow" />
+        <ui:DropdownField name="moon-phase-dropdown" label="Moon Phase"
+            choices="New Moon,Waxing Crescent,First Quarter,Waxing Gibbous,Full Moon,Waning Gibbous,Last Quarter,Waning Crescent" />
+        <ui:DropdownField name="time-of-day-dropdown" label="Time of Day"
+            choices="Day,Night,Golden Hour" />
+        <ui:DropdownField name="calendar-event-dropdown" label="Calendar Event"
+            choices="None,Spring Equinox,Fall Equinox,Lunar Eclipse" />
+
+        <ui:VisualElement name="preset-buttons">
+            <ui:Button name="blizzard-button" text="Blizzard" class="btn preset-btn" />
+            <ui:Button name="thunderstorm-button" text="Thunderstorm" class="btn preset-btn" />
+            <ui:Button name="clear-night-button" text="Clear Night" class="btn preset-btn" />
+            <ui:Button name="golden-hour-button" text="Golden Hour" class="btn preset-btn" />
+        </ui:VisualElement>
+
+        <ui:Button name="apply-button" text="Apply" class="btn" />
+    </ui:VisualElement>
+
+</ui:UXML>

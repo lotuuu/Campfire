@@ -1,11 +1,16 @@
 using UnityEngine;
-using TMPro;
+using UnityEngine.UIElements;
 
 namespace Garden
 {
     public class ResonanceBar : MonoBehaviour
     {
-        [SerializeField] private TextMeshProUGUI weatherText;
+        private Label weatherText;
+
+        public void Initialize(VisualElement root)
+        {
+            weatherText = root.Q<Label>("weather-text");
+        }
 
         private void OnEnable()
         {
@@ -27,6 +32,7 @@ namespace Garden
 
         private void UpdateDisplay(WeatherData w)
         {
+            if (weatherText == null) return;
             string temp = $"{w.temperature:F0}\u00b0C";
             string condition = w.condition.ToString();
             string moon = FormatMoonPhase(w.moonPhase);

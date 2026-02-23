@@ -1,13 +1,20 @@
 using UnityEngine;
-using TMPro;
+using UnityEngine.UIElements;
 
 namespace Garden
 {
     public class CurrencyDisplay : MonoBehaviour
     {
-        [SerializeField] private TextMeshProUGUI dewdropsText;
-        [SerializeField] private TextMeshProUGUI sunShardsText;
-        [SerializeField] private TextMeshProUGUI auraDustText;
+        private Label dewdropsText;
+        private Label sunShardsText;
+        private Label auraDustText;
+
+        public void Initialize(VisualElement root)
+        {
+            dewdropsText = root.Q<Label>("dewdrops-text");
+            sunShardsText = root.Q<Label>("sun-shards-text");
+            auraDustText = root.Q<Label>("aura-dust-text");
+        }
 
         private void OnEnable()
         {
@@ -34,7 +41,7 @@ namespace Garden
         private void Refresh()
         {
             var cm = CurrencyManager.Instance;
-            if (cm == null) return;
+            if (cm == null || dewdropsText == null) return;
             dewdropsText.text = $"Dew: {cm.Dewdrops}";
             sunShardsText.text = $"Sun: {cm.SunShards}";
             auraDustText.text = $"Dust: {cm.AuraDust}";
