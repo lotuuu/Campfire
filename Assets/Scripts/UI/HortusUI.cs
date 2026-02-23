@@ -8,21 +8,19 @@ namespace Garden
         [Header("References")]
         [SerializeField] private UIDocument uiDocument;
 
+        private const int DefaultPageIndex = 2; // Terrarium
+
+        private SwipeablePageView pageView;
+        private BottomNavUI bottomNavUI;
         private HearthViewUI hearthViewUI;
         private ResonanceBar resonanceBar;
         private CurrencyDisplay currencyDisplay;
         private SatchelUI satchelUI;
         private CodexUI codexUI;
-        private TerrariumUI terrariumUI;
         private SeedShopUI seedShopUI;
+        private GreenhouseUI greenhouseUI;
         private HarvestResultUI harvestResultUI;
         private DebugWeatherPanel debugPanel;
-
-        private VisualElement satchelPanel;
-        private VisualElement codexPanel;
-        private VisualElement terrariumPanel;
-        private VisualElement shopPanel;
-        private VisualElement debugPanelRoot;
 
         // Location gate
         private VisualElement locationGate;
@@ -33,37 +31,55 @@ namespace Garden
         {
             var root = uiDocument.rootVisualElement;
 
+            // Get sub-controllers
             hearthViewUI = GetComponent<HearthViewUI>();
             resonanceBar = GetComponent<ResonanceBar>();
             currencyDisplay = GetComponent<CurrencyDisplay>();
             satchelUI = GetComponent<SatchelUI>();
             codexUI = GetComponent<CodexUI>();
-            terrariumUI = GetComponent<TerrariumUI>();
             seedShopUI = GetComponent<SeedShopUI>();
+            greenhouseUI = GetComponent<GreenhouseUI>();
             harvestResultUI = GetComponent<HarvestResultUI>();
             debugPanel = GetComponent<DebugWeatherPanel>();
 
+            // Build SwipeablePageView
+            pageView = new SwipeablePageView();
+            var viewport = root.Q<VisualElement>("page-viewport");
+            viewport.Add(pageView);
+
+            // Reparent pages from UXML into the page view
+            string[] pageNames = { "codex-page", "shop-page", "terrarium-page", "greenhouse-page", "locked-page" };
+            foreach (var name in pageNames)
+            {
+                var page = root.Q<VisualElement>(name);
+                page.RemoveFromHierarchy();
+                page.style.display = DisplayStyle.Flex;
+                pageView.AddPage(page);
+            }
+
+            // Initialize sub-controllers
             hearthViewUI?.Initialize(root);
             resonanceBar?.Initialize(root);
             currencyDisplay?.Initialize(root);
             satchelUI?.Initialize(root);
             codexUI?.Initialize(root);
-            terrariumUI?.Initialize(root);
             seedShopUI?.Initialize(root);
+            greenhouseUI?.Initialize(root);
             harvestResultUI?.Initialize(root);
             debugPanel?.Initialize(root);
 
-            satchelPanel = root.Q<VisualElement>("satchel-panel");
-            codexPanel = root.Q<VisualElement>("codex-panel");
-            terrariumPanel = root.Q<VisualElement>("terrarium-panel");
-            shopPanel = root.Q<VisualElement>("shop-panel");
-            debugPanelRoot = root.Q<VisualElement>("debug-panel");
+            // Initialize bottom nav
+            bottomNavUI = GetComponent<BottomNavUI>();
+            bottomNavUI?.Initialize(root, pageView);
 
+            // Page change callbacks — refresh content when page becomes visible
+            pageView.OnPageChanged += OnPageChanged;
+
+            // Wire hearth slot events
             if (hearthViewUI != null)
             {
                 hearthViewUI.OnEmptySlotTapped += (envIdx, slotIdx) =>
                 {
-                    CloseAllPanels();
                     satchelUI?.Show(envIdx, slotIdx);
                 };
 
@@ -71,34 +87,8 @@ namespace Garden
                 {
                     var result = PlantManager.Instance.Harvest(envIdx, slotIdx);
                     if (result.seed != null)
-                    {
                         harvestResultUI?.Show(result);
-                    }
                     hearthViewUI?.RefreshAllSlots();
-                };
-            }
-
-            root.Q<Button>("codex-button").clicked += () => TogglePanel(codexPanel, codexUI);
-            root.Q<Button>("greenhouse-button").clicked += () => TogglePanel(terrariumPanel, terrariumUI);
-            root.Q<Button>("shop-button").clicked += () => TogglePanel(shopPanel, seedShopUI);
-            root.Q<Button>("debug-button").clicked += () => TogglePanel(debugPanelRoot, debugPanel);
-
-            if (terrariumUI != null)
-            {
-                terrariumUI.OnEmptySlotTapped += (envIdx, slotIdx) =>
-                {
-                    CloseAllPanels();
-                    satchelUI?.Show(envIdx, slotIdx);
-                };
-
-                terrariumUI.OnMatureSlotTapped += (envIdx, slotIdx) =>
-                {
-                    var result = PlantManager.Instance.Harvest(envIdx, slotIdx);
-                    if (result.seed != null)
-                    {
-                        harvestResultUI?.Show(result);
-                    }
-                    terrariumUI?.RefreshDisplay();
                 };
             }
 
@@ -106,12 +96,13 @@ namespace Garden
             {
                 harvestResultUI.OnDismissed += () =>
                 {
-                    terrariumUI?.RefreshDisplay();
                     hearthViewUI?.RefreshAllSlots();
+                    greenhouseUI?.RefreshDisplay();
                 };
             }
 
-            CloseAllPanels();
+            // Start on terrarium page
+            pageView.GoToPage(DefaultPageIndex, false);
 
             // Location gate
             locationGate = root.Q<VisualElement>("location-gate");
@@ -126,6 +117,17 @@ namespace Garden
                     OnLocationResolved(WeatherService.Instance.HasLocation);
                 else
                     WeatherService.Instance.OnLocationResolved += OnLocationResolved;
+            }
+        }
+
+        private void OnPageChanged(int pageIndex)
+        {
+            // Refresh page content on navigation
+            switch (pageIndex)
+            {
+                case 0: codexUI?.Show(); break;
+                case 1: seedShopUI?.Show(); break;
+                case 3: greenhouseUI?.Show(); break;
             }
         }
 
@@ -156,29 +158,8 @@ namespace Garden
         {
             if (WeatherService.Instance != null)
                 WeatherService.Instance.OnLocationResolved -= OnLocationResolved;
-        }
-
-        private void TogglePanel(VisualElement panel, object controller)
-        {
-            bool wasVisible = panel != null && panel.resolvedStyle.display == DisplayStyle.Flex;
-            CloseAllPanels();
-            if (!wasVisible)
-            {
-                if (controller is SatchelUI s) s.Show();
-                else if (controller is CodexUI c) c.Show();
-                else if (controller is TerrariumUI t) t.Show();
-                else if (controller is SeedShopUI sh) sh.Show();
-                else if (controller is DebugWeatherPanel d) d.Show();
-            }
-        }
-
-        private void CloseAllPanels()
-        {
-            satchelUI?.Hide();
-            codexUI?.Hide();
-            terrariumUI?.Hide();
-            seedShopUI?.Hide();
-            debugPanel?.Hide();
+            if (pageView != null)
+                pageView.OnPageChanged -= OnPageChanged;
         }
     }
 }
