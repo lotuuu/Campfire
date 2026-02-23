@@ -409,7 +409,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3a26cfd20176463e82a3a820dbf19cf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Garden::Garden.SeedSlotUI
-  iconImage: {fileID: 0}
-  nameText: {fileID: 0}
-  countText: {fileID: 0}
-  selectButton: {fileID: 0}
+  iconImage: {fileID: 6772057022915135843}
+  nameText: {fileID: 4836909254945305180}
+  countText: {fileID: 924250169871219715}
+  selectButton: {fileID: 5611881877046486124}
