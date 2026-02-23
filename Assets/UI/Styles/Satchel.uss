@@ -28,10 +28,11 @@
 #probability-panel {
     margin-top: var(--spacing-md);
     padding: var(--spacing-md);
-    background-color: rgba(30, 45, 30, 0.8);
+    background-color: rgba(15, 30, 40, 0.50);
     border-radius: var(--radius-md);
-    border-width: 2px;
-    border-color: var(--color-border);
+    border-width: 1px;
+    border-color: rgba(120, 200, 220, 0.20);
+    border-top-color: rgba(140, 230, 240, 0.30);
 }
 
 #selected-seed-name {
