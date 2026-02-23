@@ -17,6 +17,7 @@ namespace Garden
         private Label tempValue;
         private Label humidityValue;
         private Label windValue;
+        private IntegerField timeSkipField;
 
         public void Initialize(VisualElement root)
         {
@@ -32,6 +33,9 @@ namespace Garden
             tempValue = root.Q<Label>("temp-value");
             humidityValue = root.Q<Label>("humidity-value");
             windValue = root.Q<Label>("wind-value");
+
+            timeSkipField = root.Q<IntegerField>("time-skip-field");
+            root.Q<Button>("time-skip-button").clicked += SkipTime;
 
             // Slider callbacks
             tempSlider.RegisterValueChangedCallback(evt => tempValue.text = $"{evt.newValue:F0}\u00b0C");
@@ -76,6 +80,14 @@ namespace Garden
             timeOfDayDropdown.index = todIdx;
             moonPhaseDropdown.index = moonIdx;
             ApplySettings();
+        }
+
+        private void SkipTime()
+        {
+            int hours = Mathf.Max(1, timeSkipField.value);
+            PlantManager.Instance?.DebugAdvanceTime(hours);
+            GreenhouseManager.Instance?.DebugAdvanceTime(hours);
+            Debug.Log($"[Debug] Skipped {hours} hour(s) forward.");
         }
 
         private void ApplySettings()
