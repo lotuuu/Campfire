@@ -1,94 +1,145 @@
-/* Debug panel styles */
+/* Debug panel styles - mobile-first sizing */
 
 #debug-panel {
-    padding: var(--spacing-md);
+    padding: var(--spacing-lg);
     padding-top: var(--spacing-xl);
 }
 
 #debug-panel .debug-row {
     flex-direction: row;
     align-items: center;
-    margin-bottom: var(--spacing-sm);
-    min-height: 72px;
+    margin-bottom: var(--spacing-md);
+    min-height: 96px;
 }
 
 #debug-panel .debug-label {
-    width: 160px;
+    width: 180px;
     color: var(--color-text-dim);
-    font-size: var(--font-sm);
+    font-size: var(--font-md);
 }
 
 #debug-panel .debug-value {
-    width: 130px;
+    width: 150px;
     color: var(--color-text);
-    font-size: var(--font-sm);
+    font-size: var(--font-md);
     -unity-text-align: middle-right;
     margin-left: var(--spacing-sm);
 }
 
+/* Sliders */
 #debug-panel .unity-base-slider {
     flex-grow: 1;
-    min-height: 60px;
+    min-height: 80px;
 }
 
 #debug-panel .unity-base-slider .unity-base-slider__dragger {
-    width: 48px;
-    height: 48px;
-    border-radius: 24px;
+    width: 64px;
+    height: 64px;
+    border-radius: 32px;
     background-color: var(--color-text-accent);
 }
 
 #debug-panel .unity-base-slider .unity-base-slider__tracker {
-    height: 8px;
+    height: 12px;
     background-color: var(--color-border);
-    border-radius: 4px;
+    border-radius: 6px;
 }
 
+/* Shared field label */
 #debug-panel .unity-base-field__label {
-    min-width: 160px;
+    min-width: 180px;
     color: var(--color-text-dim);
-    font-size: var(--font-sm);
+    font-size: var(--font-md);
 }
 
+/* Dropdowns */
 #debug-panel .unity-popup-field {
-    margin-bottom: var(--spacing-sm);
-    min-height: 72px;
+    margin-bottom: var(--spacing-md);
+    min-height: 96px;
 }
 
 #debug-panel .unity-popup-field .unity-base-field__label {
-    min-width: 160px;
-    font-size: var(--font-sm);
+    min-width: 180px;
+    font-size: var(--font-md);
 }
 
 #debug-panel .unity-popup-field .unity-base-popup-field__text {
-    font-size: var(--font-sm);
+    font-size: var(--font-md);
 }
 
-#debug-panel .unity-toggle {
+#debug-panel .unity-popup-field .unity-base-popup-field__input {
     min-height: 72px;
-    margin-bottom: var(--spacing-sm);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+}
+
+/* Toggle */
+#debug-panel .unity-toggle {
+    min-height: 96px;
+    margin-bottom: var(--spacing-md);
 }
 
 #debug-panel .unity-toggle .unity-base-field__label {
     color: var(--color-text);
-    font-size: var(--font-md);
+    font-size: var(--font-lg);
 }
 
 #debug-panel .unity-toggle .unity-toggle__checkmark {
-    width: 48px;
-    height: 48px;
+    width: 64px;
+    height: 64px;
+    border-radius: var(--radius-sm);
 }
 
+/* Preset buttons */
 #preset-buttons {
     flex-direction: row;
     flex-wrap: wrap;
-    margin-top: var(--spacing-sm);
-    margin-bottom: var(--spacing-sm);
+    margin-top: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
 }
 
 .preset-btn {
     margin: var(--spacing-xs);
-    font-size: var(--font-xs);
-    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--font-sm);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    min-height: 96px;
+}
+
+/* Text and integer fields */
+#debug-panel .unity-text-field,
+#debug-panel .unity-integer-field {
+    flex-grow: 1;
     min-height: 80px;
+    margin-bottom: 0;
+}
+
+#debug-panel .unity-text-field .unity-text-input,
+#debug-panel .unity-integer-field .unity-text-input {
+    font-size: var(--font-md);
+    min-height: 72px;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    color: var(--color-text);
+    background-color: rgba(20, 35, 50, 0.40);
+    border-width: 1px;
+    border-color: rgba(120, 200, 220, 0.20);
+    border-radius: var(--radius-sm);
+}
+
+#debug-panel .unity-text-field .unity-base-field__label,
+#debug-panel .unity-integer-field .unity-base-field__label {
+    display: none;
+}
+
+/* Current time label */
+#current-time-label {
+    font-size: var(--font-sm);
+    margin-top: var(--spacing-xs);
+    margin-bottom: var(--spacing-sm);
+}
+
+/* Scroll view for debug content */
+#debug-scroll .unity-scroll-view__content-container {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    padding: 0;
 }
