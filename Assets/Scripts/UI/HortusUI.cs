@@ -24,6 +24,11 @@ namespace Garden
         private VisualElement greenhousePanel;
         private VisualElement debugPanelRoot;
 
+        // Location gate
+        private VisualElement locationGate;
+        private Label gateStatus;
+        private Button gateRetry;
+
         private void Start()
         {
             var root = uiDocument.rootVisualElement;
@@ -67,10 +72,47 @@ namespace Garden
             }
 
             CloseAllPanels();
+
+            // Location gate
+            locationGate = root.Q<VisualElement>("location-gate");
+            gateStatus = root.Q<Label>("gate-status");
+            gateRetry = root.Q<Button>("gate-retry");
+            gateRetry.clicked += OnGateRetry;
+
+            if (WeatherService.Instance != null)
+            {
+                if (WeatherService.Instance.IsLocationResolved)
+                    OnLocationResolved(WeatherService.Instance.HasLocation);
+                else
+                    WeatherService.Instance.OnLocationResolved += OnLocationResolved;
+            }
+        }
+
+        private void OnLocationResolved(bool success)
+        {
+            if (success)
+            {
+                locationGate.style.display = DisplayStyle.None;
+            }
+            else
+            {
+                gateStatus.text = "Location access is required to play.\nPlease enable Location Services in Settings.";
+                gateRetry.style.display = DisplayStyle.Flex;
+            }
+        }
+
+        private void OnGateRetry()
+        {
+            gateStatus.text = "Acquiring location...";
+            gateRetry.style.display = DisplayStyle.None;
+            WeatherService.Instance?.RetryLocation();
         }
 
         private void OnDestroy()
         {
+            if (WeatherService.Instance != null)
+                WeatherService.Instance.OnLocationResolved -= OnLocationResolved;
+
             if (PlantManager.Instance != null)
             {
                 PlantManager.Instance.OnPlantStateChanged -= RefreshPlantVisual;
