@@ -1,3 +1,5 @@
+using System;
+using System.Globalization;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -18,6 +20,8 @@ namespace Garden
         private Label humidityValue;
         private Label windValue;
         private IntegerField timeSkipField;
+        private TextField timeOverrideField;
+        private Label currentTimeLabel;
 
         public void Initialize(VisualElement root)
         {
@@ -37,6 +41,12 @@ namespace Garden
             timeSkipField = root.Q<IntegerField>("time-skip-field");
             root.Q<Button>("time-skip-button").clicked += SkipTime;
             root.Q<Button>("clear-save-button").clicked += ClearSaveData;
+
+            timeOverrideField = root.Q<TextField>("time-override-field");
+            currentTimeLabel = root.Q<Label>("current-time-label");
+            root.Q<Button>("set-time-button").clicked += SetTimeOverride;
+            root.Q<Button>("reset-time-button").clicked += ResetTimeOverride;
+            timeOverrideField.value = GameTime.Now.ToString("yyyy-MM-dd HH:mm");
 
             // Slider callbacks
             tempSlider.RegisterValueChangedCallback(evt => tempValue.text = $"{evt.newValue:F0}\u00b0C");
@@ -81,6 +91,36 @@ namespace Garden
             timeOfDayDropdown.index = todIdx;
             moonPhaseDropdown.index = moonIdx;
             ApplySettings();
+        }
+
+        private void Update()
+        {
+            if (currentTimeLabel != null && panel.style.display == DisplayStyle.Flex)
+            {
+                var label = GameTime.IsOverridden ? "[OVERRIDDEN] " : "";
+                currentTimeLabel.text = $"{label}{GameTime.Now:yyyy-MM-dd HH:mm:ss}";
+            }
+        }
+
+        private void SetTimeOverride()
+        {
+            if (DateTime.TryParseExact(timeOverrideField.value, "yyyy-MM-dd HH:mm",
+                    CultureInfo.InvariantCulture, DateTimeStyles.None, out var target))
+            {
+                GameTime.SetOverride(target);
+                Debug.Log($"[Debug] Time overridden to {target:yyyy-MM-dd HH:mm}");
+            }
+            else
+            {
+                Debug.LogWarning("[Debug] Invalid format. Use yyyy-MM-dd HH:mm");
+            }
+        }
+
+        private void ResetTimeOverride()
+        {
+            GameTime.ClearOverride();
+            timeOverrideField.value = GameTime.Now.ToString("yyyy-MM-dd HH:mm");
+            Debug.Log("[Debug] Time override cleared.");
         }
 
         private void ClearSaveData()

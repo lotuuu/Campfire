@@ -93,7 +93,7 @@ namespace Garden
             }
 
             var json = JsonUtility.FromJson<OpenWeatherResponse>(request.downloadHandler.text);
-            var now = DateTime.Now;
+            var now = GameTime.Now;
 
             var weather = new WeatherData
             {
