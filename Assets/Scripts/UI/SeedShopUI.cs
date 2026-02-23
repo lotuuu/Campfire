@@ -9,28 +9,18 @@ namespace Garden
 
         private VisualElement panel;
         private ScrollView shopGrid;
-        private Button closeButton;
 
         public void Initialize(VisualElement root)
         {
             shopCardTemplate = Resources.Load<VisualTreeAsset>("UI/Templates/SeedShopCard");
 
-            panel = root.Q<VisualElement>("shop-panel");
+            panel = root.Q<VisualElement>("shop-page");
             shopGrid = root.Q<ScrollView>("shop-grid");
-            closeButton = root.Q<Button>("shop-close");
-
-            closeButton.clicked += Hide;
         }
 
         public void Show()
         {
-            panel.style.display = DisplayStyle.Flex;
             RefreshDisplay();
-        }
-
-        public void Hide()
-        {
-            panel.style.display = DisplayStyle.None;
         }
 
         private void RefreshDisplay()
