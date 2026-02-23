@@ -10,11 +10,16 @@ namespace Garden
         public int sunShards;
         public int auraDust;
 
+        // v2: multi-slot replaces single activePlant
         public ActivePlantSave activePlant;
+        public List<PlantSlotSave> activeSlots = new();
         public List<GreenhousePlantSave> greenhousePlants = new();
         public List<string> discoveredVariants = new();
         public List<SeedInventoryEntry> seedInventory = new();
         public int greenhouseSlots = 6;
+
+        // v2: terrarium environments
+        public List<string> unlockedEnvironments = new();
     }
 
     [Serializable]
@@ -28,11 +33,23 @@ namespace Garden
     }
 
     [Serializable]
+    public class PlantSlotSave
+    {
+        public int environmentIndex;
+        public int slotIndex;
+        public string seedName;
+        public string variantName;
+        public string plantTimeUtc;
+        public float growthSpeedMultiplier = 1f;
+    }
+
+    [Serializable]
     public class GreenhousePlantSave
     {
         public string seedName;
         public string variantName;
         public string harvestTimeUtc;
+        public QualityTier qualityTier;
     }
 
     [Serializable]

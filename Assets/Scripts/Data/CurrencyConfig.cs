@@ -42,5 +42,35 @@ namespace Garden
             Rarity.Legendary => legendaryDustPerHour,
             _ => commonDustPerHour
         };
+
+        public static float GetQualityMultiplier(QualityTier tier) => tier switch
+        {
+            QualityTier.D => 0.8f,
+            QualityTier.C => 1.0f,
+            QualityTier.B => 1.5f,
+            QualityTier.A => 2.2f,
+            QualityTier.S => 3.5f,
+            _ => 1.0f
+        };
+
+        public static string GetQualityLabel(QualityTier tier) => tier switch
+        {
+            QualityTier.D => "Faded",
+            QualityTier.C => "Stable",
+            QualityTier.B => "Vibrant",
+            QualityTier.A => "Radiant",
+            QualityTier.S => "Eternal",
+            _ => "Unknown"
+        };
+
+        public int GetSellValue(int baseSellPrice, QualityTier tier)
+        {
+            return Mathf.RoundToInt(baseSellPrice * GetQualityMultiplier(tier));
+        }
+
+        public float GetDustPerHourForPlant(Rarity rarity, QualityTier tier)
+        {
+            return GetDustPerHourForRarity(rarity) * GetQualityMultiplier(tier);
+        }
     }
 }

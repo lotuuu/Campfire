@@ -17,4 +17,6 @@ namespace Garden
     public enum CurrencyType { Dewdrops, SunShards, AuraDust }
 
     public enum PlantState { Empty, Growing, Mature }
+
+    public enum QualityTier { D, C, B, A, S }
 }
