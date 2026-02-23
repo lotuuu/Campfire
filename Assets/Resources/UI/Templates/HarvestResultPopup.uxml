@@ -1,0 +1,15 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement class="harvest-overlay">
+        <ui:VisualElement class="harvest-card">
+            <ui:VisualElement class="harvest-swatch" />
+            <ui:Label class="harvest-variant-name" />
+            <ui:Label class="harvest-tier-label" />
+            <ui:Label class="harvest-sync-badge" />
+            <ui:Label class="harvest-dewdrops" />
+            <ui:VisualElement class="harvest-buttons">
+                <ui:Button text="Sell" class="btn harvest-sell-btn" />
+                <ui:Button text="Keep" class="btn harvest-keep-btn" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

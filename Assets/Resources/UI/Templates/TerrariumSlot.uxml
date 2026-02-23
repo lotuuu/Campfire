@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Button class="grid-item terrarium-slot">
+        <ui:VisualElement class="terrarium-swatch" />
+        <ui:Label class="terrarium-slot-label" />
+        <ui:VisualElement class="terrarium-progress-bar">
+            <ui:VisualElement class="terrarium-progress-fill" />
+        </ui:VisualElement>
+    </ui:Button>
+</ui:UXML>
