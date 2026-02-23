@@ -95,6 +95,13 @@ namespace Garden
             SaveState();
         }
 
+        public void DebugAdvanceTime(float hours)
+        {
+            if (State != PlantState.Growing) return;
+            PlantTime = PlantTime.AddHours(-hours);
+            SaveState();
+        }
+
         public float GetRemainingHours()
         {
             if (State != PlantState.Growing) return 0f;

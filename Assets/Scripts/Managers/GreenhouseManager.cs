@@ -81,6 +81,17 @@ namespace Garden
             return total;
         }
 
+        public void DebugAdvanceTime(float hours)
+        {
+            if (Plants.Count == 0) return;
+            var config = CurrencyManager.Instance.Config;
+            int totalDust = 0;
+            foreach (var p in Plants)
+                totalDust += Mathf.RoundToInt(config.GetDustPerHourForRarity(p.rarity) * hours);
+            if (totalDust > 0)
+                CurrencyManager.Instance.Add(CurrencyType.AuraDust, totalDust);
+        }
+
         private void SaveGreenhouse()
         {
             var save = SaveManager.Instance.Data;
