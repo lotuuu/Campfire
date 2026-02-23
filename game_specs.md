@@ -33,7 +33,7 @@ $$V = \int(T, L, H) + S$$
 1.  **Detection:** The app scans the "Local Resonance" (e.g., *It is currently 22°C and Overcast*).
 2.  **Seed Selection:** The player chooses a base seed (e.g., *Stellaris*).
 3.  **Incubation:** The plant grows over 4–72 hours. If the real-world weather matches the plant's "Preferred State," growth speed increases by **25%**.
-4.  **The Bloom Roll (Harvest):** The player harvests the plant to reveal its resulting "Quality Tier" and Variant, cashing it in for currency or saving it in the permanent Greenhouse.
+4.  **The Bloom Roll (Harvest):** The player harvests the plant to reveal its resulting "Quality Tier" and Variant. A harvest popup presents the result and offers two choices: **Sell** (receive Dewdrops = baseSellPrice × qualityMultiplier) or **Keep** (add to the Greenhouse for passive Aura Dust generation).
 
 ---
 
