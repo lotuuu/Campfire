@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b1ea091be0f647ae96e7e3f22d8a36c, type: 3}
+  m_Name: LunaPetal
+  m_EditorClassIdentifier: Garden::Garden.SeedData
+  seedName: Luna-Petal
+  icon: {fileID: 0}
+  description: Only grows during Nighttime
+  baseGrowthHours: 24
+  variants:
+  - {fileID: 11400000, guid: a31391476b1a449a3bbc44774e1eef67, type: 2}
+  - {fileID: 11400000, guid: 22a352f79934c4624a7104d903b824c5, type: 2}
+  - {fileID: 11400000, guid: 6338531ddec3c44fcb8955e516a1960a, type: 2}
+  - {fileID: 11400000, guid: 9d534c06bcb514134be412ddb953d3e4, type: 2}
+  - {fileID: 11400000, guid: 5110998311fcd49a7a3efc565362e292, type: 2}
+  - {fileID: 11400000, guid: ade60f88db99943ea94bfe3cf5e1137f, type: 2}
+  - {fileID: 11400000, guid: 5f7c20767243a4d1484729d7033214c6, type: 2}
+  - {fileID: 11400000, guid: 6e59af145e4de497f8abd49d7ef2f0db, type: 2}
+  - {fileID: 11400000, guid: 4a64db4d487144bf3b72a0fce4f296e5, type: 2}
+  - {fileID: 11400000, guid: fda2e97e9f1f54477aae6a30d6dbf102, type: 2}
+  - {fileID: 11400000, guid: c9284bfa52ff14a608ff55dc30fa7e42, type: 2}
+  - {fileID: 11400000, guid: b05d96cf97ab845f298e47e504bba964, type: 2}
+  buyPrice: 1500
+  baseSellPrice: 1900
+  preferredWeather: 0
+  specialConditions: []

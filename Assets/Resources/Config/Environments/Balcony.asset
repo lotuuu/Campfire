@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 82bc478f3703c4ab995c43e041c63e15, type: 3}
+  m_Name: Balcony
+  m_EditorClassIdentifier: Garden::Garden.EnvironmentData
+  environmentName: The Balcony
+  slotCount: 2
+  unlockCostDewdrops: 5000
+  growthSpeedBonus: 0
+  bonusCondition:
+    useTemperature: 0
+    minTemp: -50
+    maxTemp: 60
+    useWeatherCondition: 0
+    requiredConditions: 
+    useWindSpeed: 0
+    minWindSpeed: 0
+    useHumidity: 0
+    minHumidity: 0
+    useTimeOfDay: 0
+    requiredTimeOfDay: 0
+    useMoonPhase: 0
+    requiredMoonPhase: 0
+    useCalendarEvent: 0
+    requiredCalendarEvent: 0
+  allowsCrossPollination: 0
