@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 378eb429f34474700bc9072998d3ccb9, type: 3}
+  m_Name: EquinoxRoot
+  m_EditorClassIdentifier: Garden::Garden.VariantData
+  variantName: Equinox Root
+  description: 
+  discoveryHint: Appears only during a celestial alignment
+  rarity: 4
+  priority: 1
+  trigger:
+    useTemperature: 0
+    minTemp: -50
+    maxTemp: 60
+    useWeatherCondition: 0
+    requiredConditions: 
+    useWindSpeed: 0
+    minWindSpeed: 0
+    useHumidity: 0
+    minHumidity: 0
+    useTimeOfDay: 0
+    requiredTimeOfDay: 0
+    useMoonPhase: 0
+    requiredMoonPhase: 0
+    useCalendarEvent: 1
+    requiredCalendarEvent: 1
+  primaryColor: {r: 0.85, g: 0.7, b: 0.3, a: 1}
+  secondaryColor: {r: 1, g: 0.85, b: 0.5, a: 1}
+  variantSprite: {fileID: 0}
+  variantMaterial: {fileID: 0}
+  particleEffectPrefab: {fileID: 0}
