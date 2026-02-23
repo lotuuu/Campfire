@@ -120,6 +120,9 @@
             <ui:IntegerField name="time-skip-field" value="1" />
             <ui:Button name="time-skip-button" text="Skip Time" class="btn preset-btn" />
         </ui:VisualElement>
+
+        <ui:VisualElement class="separator" />
+        <ui:Button name="clear-save-button" text="Clear Save Data" class="btn" />
     </ui:VisualElement>
 
 </ui:UXML>

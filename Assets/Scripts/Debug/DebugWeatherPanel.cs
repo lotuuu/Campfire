@@ -36,6 +36,7 @@ namespace Garden
 
             timeSkipField = root.Q<IntegerField>("time-skip-field");
             root.Q<Button>("time-skip-button").clicked += SkipTime;
+            root.Q<Button>("clear-save-button").clicked += ClearSaveData;
 
             // Slider callbacks
             tempSlider.RegisterValueChangedCallback(evt => tempValue.text = $"{evt.newValue:F0}\u00b0C");
@@ -80,6 +81,12 @@ namespace Garden
             timeOfDayDropdown.index = todIdx;
             moonPhaseDropdown.index = moonIdx;
             ApplySettings();
+        }
+
+        private void ClearSaveData()
+        {
+            SaveManager.Instance.DeleteSave();
+            Debug.Log("[Debug] Save data cleared. Restart to take effect.");
         }
 
         private void SkipTime()
