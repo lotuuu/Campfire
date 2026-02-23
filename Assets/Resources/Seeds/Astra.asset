@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b1ea091be0f647ae96e7e3f22d8a36c, type: 3}
+  m_Name: Astra
+  m_EditorClassIdentifier: Garden::Garden.SeedData
+  seedName: Astra
+  icon: {fileID: 0}
+  description: A highly reactive starter seed that morphs based on environmental
+    conditions.
+  baseGrowthHours: 1
+  variants:
+  - {fileID: 11400000, guid: 4ab01d869173143808105ad21ec183d7, type: 2}
+  - {fileID: 11400000, guid: 75a95bca35678467194908bc1f8a6b08, type: 2}
+  - {fileID: 11400000, guid: 9f76e6a3eb06f4098b4025b6d0782fba, type: 2}
+  - {fileID: 11400000, guid: ae14f1cf0a1f74301b1099b2c8052e95, type: 2}
+  - {fileID: 11400000, guid: 2caaf023c5bcc42cabab6e1c352f8075, type: 2}
+  - {fileID: 11400000, guid: 0480c106914094a7f839c17a50f03079, type: 2}
+  - {fileID: 11400000, guid: b11f6b204e86e4fdf9a6131cdf838f39, type: 2}
+  - {fileID: 11400000, guid: 1d361a58682be4f3f99854b3e0d97a52, type: 2}
+  - {fileID: 11400000, guid: c447b2ed1e55b4788accf288b231b5ca, type: 2}
+  - {fileID: 11400000, guid: fa63bc411237c444882743808e0f6942, type: 2}
+  - {fileID: 11400000, guid: e2eb6bb745fa34f64aa9388ae8fb0e50, type: 2}
+  - {fileID: 11400000, guid: 2c80a57f2182c484a837fe21cb060820, type: 2}
