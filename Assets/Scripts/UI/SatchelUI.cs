@@ -9,11 +9,11 @@ namespace Garden
         private VisualTreeAsset probabilityEntryTemplate;
 
         private VisualElement panel;
+        private VisualElement scrim;
         private ScrollView seedGrid;
         private VisualElement probabilityPanel;
         private ScrollView probabilityGrid;
         private Button plantButton;
-        private Button closeButton;
         private Label selectedSeedName;
 
         private SeedData selectedSeed;
@@ -27,15 +27,15 @@ namespace Garden
             probabilityEntryTemplate = Resources.Load<VisualTreeAsset>("UI/Templates/ProbabilityEntry");
 
             panel = root.Q<VisualElement>("satchel-panel");
+            scrim = root.Q<VisualElement>("satchel-scrim");
             seedGrid = root.Q<ScrollView>("seed-grid");
             probabilityPanel = root.Q<VisualElement>("probability-panel");
             probabilityGrid = root.Q<ScrollView>("probability-grid");
             plantButton = root.Q<Button>("plant-button");
-            closeButton = root.Q<Button>("satchel-close");
             selectedSeedName = root.Q<Label>("selected-seed-name");
 
             plantButton.clicked += OnPlant;
-            closeButton.clicked += Hide;
+            scrim.RegisterCallback<ClickEvent>(evt => Hide());
         }
 
         public void Show()
@@ -47,6 +47,7 @@ namespace Garden
         {
             targetEnvIndex = envIndex;
             targetSlotIndex = slotIndex;
+            scrim.style.display = DisplayStyle.Flex;
             panel.style.display = DisplayStyle.Flex;
             RefreshGrid();
             probabilityPanel.style.display = DisplayStyle.None;
@@ -56,6 +57,7 @@ namespace Garden
 
         public void Hide()
         {
+            scrim.style.display = DisplayStyle.None;
             panel.style.display = DisplayStyle.None;
         }
 
