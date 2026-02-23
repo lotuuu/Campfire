@@ -33,7 +33,7 @@ namespace Garden
             if (State != PlantState.Growing) return;
 
             float totalHours = CurrentSeed.baseGrowthHours / GrowthSpeedMultiplier;
-            float elapsed = (float)(DateTime.UtcNow - PlantTime).TotalHours;
+            float elapsed = (float)(GameTime.UtcNow - PlantTime).TotalHours;
             GrowthProgress = Mathf.Clamp01(elapsed / totalHours);
             OnGrowthUpdated?.Invoke(GrowthProgress);
 
@@ -63,7 +63,7 @@ namespace Garden
             CurrentSeed = seed;
             CurrentVariant = result.variant;
             GrowthSpeedMultiplier = result.growthSpeedMultiplier;
-            PlantTime = DateTime.UtcNow;
+            PlantTime = GameTime.UtcNow;
             GrowthProgress = 0f;
             State = PlantState.Growing;
 
@@ -106,7 +106,7 @@ namespace Garden
         {
             if (State != PlantState.Growing) return 0f;
             float totalHours = CurrentSeed.baseGrowthHours / GrowthSpeedMultiplier;
-            float elapsed = (float)(DateTime.UtcNow - PlantTime).TotalHours;
+            float elapsed = (float)(GameTime.UtcNow - PlantTime).TotalHours;
             return Mathf.Max(0f, totalHours - elapsed);
         }
 
@@ -156,7 +156,7 @@ namespace Garden
             GrowthSpeedMultiplier = save.activePlant.growthSpeedMultiplier;
 
             float totalHours = CurrentSeed.baseGrowthHours / GrowthSpeedMultiplier;
-            float elapsed = (float)(DateTime.UtcNow - PlantTime).TotalHours;
+            float elapsed = (float)(GameTime.UtcNow - PlantTime).TotalHours;
             GrowthProgress = Mathf.Clamp01(elapsed / totalHours);
 
             State = GrowthProgress >= 1f ? PlantState.Mature : PlantState.Growing;

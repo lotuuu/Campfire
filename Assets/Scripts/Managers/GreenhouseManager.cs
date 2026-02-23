@@ -53,7 +53,7 @@ namespace Garden
                 variantName = variant.variantName,
                 rarity = variant.rarity,
                 primaryColor = variant.primaryColor,
-                harvestTime = DateTime.UtcNow
+                harvestTime = GameTime.UtcNow
             });
 
             SaveGreenhouse();

@@ -122,6 +122,17 @@
         </ui:VisualElement>
 
         <ui:VisualElement class="separator" />
+        <ui:VisualElement class="debug-row">
+            <ui:Label text="Time" class="debug-label" />
+            <ui:TextField name="time-override-field" value="" />
+        </ui:VisualElement>
+        <ui:VisualElement class="debug-row">
+            <ui:Button name="set-time-button" text="Set Time" class="btn preset-btn" />
+            <ui:Button name="reset-time-button" text="Reset" class="btn preset-btn" />
+        </ui:VisualElement>
+        <ui:Label name="current-time-label" class="label-dim" />
+
+        <ui:VisualElement class="separator" />
         <ui:Button name="clear-save-button" text="Clear Save Data" class="btn" />
     </ui:VisualElement>
 
