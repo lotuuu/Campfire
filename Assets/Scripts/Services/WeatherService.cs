@@ -19,7 +19,10 @@ namespace Garden
 
         public WeatherData CurrentWeather { get; private set; }
         public event Action<WeatherData> OnWeatherUpdated;
+        public event Action<bool> OnLocationResolved;
         public bool IsDebugMode => useDebugOverride;
+        public bool IsLocationResolved { get; private set; }
+        public bool HasLocation => hasLocation;
 
         private float lastPollTime;
         private bool hasLocation;
@@ -39,15 +42,8 @@ namespace Garden
 
         private IEnumerator InitializeLocation()
         {
-            if (!Input.location.isEnabledByUser)
-            {
-                Debug.LogWarning("Location services disabled. Using debug weather.");
-                useDebugOverride = true;
-                ApplyDebugWeather();
-                yield break;
-            }
-
             Input.location.Start(500f, 500f);
+
             int timeout = 20;
             while (Input.location.status == LocationServiceStatus.Initializing && timeout > 0)
             {
@@ -60,13 +56,16 @@ namespace Garden
                 latitude = Input.location.lastData.latitude;
                 longitude = Input.location.lastData.longitude;
                 hasLocation = true;
+                IsLocationResolved = true;
+                Debug.Log($"Location acquired: {latitude}, {longitude}");
+                OnLocationResolved?.Invoke(true);
                 StartCoroutine(FetchWeatherLoop());
             }
             else
             {
-                Debug.LogWarning("Location failed. Using debug weather.");
-                useDebugOverride = true;
-                ApplyDebugWeather();
+                IsLocationResolved = true;
+                Debug.LogWarning($"Location failed (status: {Input.location.status}).");
+                OnLocationResolved?.Invoke(false);
             }
         }
 
@@ -111,6 +110,13 @@ namespace Garden
 
             CurrentWeather = weather;
             OnWeatherUpdated?.Invoke(weather);
+        }
+
+        public void RetryLocation()
+        {
+            IsLocationResolved = false;
+            Input.location.Stop();
+            StartCoroutine(InitializeLocation());
         }
 
         public void SetDebugWeather(WeatherData data)

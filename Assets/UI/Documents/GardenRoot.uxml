@@ -71,6 +71,13 @@
         <ui:Button name="expand-button" text="Expand" class="btn" />
     </ui:VisualElement>
 
+    <!-- Location Gate (visible at startup, blocks game until location acquired) -->
+    <ui:VisualElement name="location-gate" class="gate-panel" picking-mode="Position">
+        <ui:Label name="gate-title" text="Garden" class="gate-title" />
+        <ui:Label name="gate-status" text="Acquiring location..." class="gate-subtitle" />
+        <ui:Button name="gate-retry" text="Retry" class="btn" style="display: none;" />
+    </ui:VisualElement>
+
     <!-- Debug Panel (hidden by default) -->
     <ui:VisualElement name="debug-panel" class="panel" style="display: none;">
         <ui:Label text="Debug Weather" class="panel-header" />

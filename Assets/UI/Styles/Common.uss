@@ -109,3 +109,31 @@
     margin-top: var(--spacing-sm);
     margin-bottom: var(--spacing-sm);
 }
+
+/* Location gate overlay */
+.gate-panel {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: rgba(8, 15, 22, 0.95);
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: var(--spacing-lg);
+}
+
+.gate-title {
+    font-size: var(--font-xxl);
+    color: var(--color-text-bright);
+    -unity-font-style: bold;
+    margin-bottom: var(--spacing-md);
+}
+
+.gate-subtitle {
+    font-size: var(--font-sm);
+    color: var(--color-text-dim);
+    margin-bottom: var(--spacing-lg);
+    -unity-text-align: middle-center;
+}
