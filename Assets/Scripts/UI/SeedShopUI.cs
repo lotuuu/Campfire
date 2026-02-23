@@ -7,14 +7,12 @@ namespace Garden
     {
         private VisualTreeAsset shopCardTemplate;
 
-        private VisualElement panel;
         private ScrollView shopGrid;
 
         public void Initialize(VisualElement root)
         {
             shopCardTemplate = Resources.Load<VisualTreeAsset>("UI/Templates/SeedShopCard");
 
-            panel = root.Q<VisualElement>("shop-page");
             shopGrid = root.Q<ScrollView>("shop-grid");
         }
 

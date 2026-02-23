@@ -7,7 +7,6 @@ namespace Garden
     {
         private VisualTreeAsset variantEntryTemplate;
 
-        private VisualElement panel;
         private ScrollView variantGrid;
         private Label detailName;
         private Label detailDescription;
@@ -18,7 +17,6 @@ namespace Garden
         {
             variantEntryTemplate = Resources.Load<VisualTreeAsset>("UI/Templates/VariantEntry");
 
-            panel = root.Q<VisualElement>("codex-page");
             variantGrid = root.Q<ScrollView>("variant-grid");
             detailName = root.Q<Label>("detail-name");
             detailDescription = root.Q<Label>("detail-description");
