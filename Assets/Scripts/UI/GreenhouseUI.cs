@@ -40,7 +40,7 @@ namespace Garden
             panel.style.display = DisplayStyle.None;
         }
 
-        private void RefreshDisplay()
+        public void RefreshDisplay()
         {
             plantGrid.Clear();
 
