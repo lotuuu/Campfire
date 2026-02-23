@@ -1,0 +1,13 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement class="environment-section">
+        <ui:VisualElement class="environment-header">
+            <ui:Label class="environment-name" />
+            <ui:Label class="environment-slots-text" />
+        </ui:VisualElement>
+        <ui:VisualElement class="environment-slot-grid" />
+        <ui:VisualElement class="environment-locked">
+            <ui:Label class="environment-cost" />
+            <ui:Button text="Unlock" class="btn environment-unlock-btn" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

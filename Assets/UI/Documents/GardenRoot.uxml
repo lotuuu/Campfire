@@ -8,6 +8,9 @@
     <Style src="../Styles/Codex.uss" />
     <Style src="../Styles/Greenhouse.uss" />
     <Style src="../Styles/Debug.uss" />
+    <Style src="../Styles/SeedShop.uss" />
+    <Style src="../Styles/HarvestResult.uss" />
+    <Style src="../Styles/Terrarium.uss" />
 
     <!-- HUD layer (always visible) -->
     <ui:VisualElement name="hud" picking-mode="Ignore">
@@ -28,6 +31,7 @@
             <ui:VisualElement name="nav-bar">
                 <ui:Button name="codex-button" text="Codex" class="nav-btn" />
                 <ui:Button name="greenhouse-button" text="Greenhouse" class="nav-btn" />
+                <ui:Button name="shop-button" text="Shop" class="nav-btn" />
                 <ui:Button name="debug-button" text="Debug" class="nav-btn" />
             </ui:VisualElement>
         </ui:VisualElement>
@@ -59,16 +63,15 @@
         </ui:VisualElement>
     </ui:VisualElement>
 
-    <!-- Greenhouse Panel (hidden by default) -->
-    <ui:VisualElement name="greenhouse-panel" class="panel" style="display: none;">
-        <ui:Label text="Greenhouse" class="panel-header" />
-        <ui:Button name="greenhouse-close" text="X" class="btn btn-close" />
-        <ui:VisualElement name="greenhouse-header">
+    <!-- Terrarium Panel (replaces Greenhouse, hidden by default) -->
+    <ui:VisualElement name="terrarium-panel" class="panel" style="display: none;">
+        <ui:Label text="Terrarium" class="panel-header" />
+        <ui:Button name="terrarium-close" text="X" class="btn btn-close" />
+        <ui:VisualElement name="terrarium-header">
             <ui:Label name="dust-rate" text="+0 Aura Dust/hr" />
-            <ui:Label name="slots-text" text="0 / 0" />
+            <ui:Label name="terrarium-slots-text" text="0 / 0" />
         </ui:VisualElement>
-        <ui:ScrollView name="plant-grid" class="scroll-view" />
-        <ui:Button name="expand-button" text="Expand" class="btn" />
+        <ui:ScrollView name="terrarium-scroll" class="scroll-view" />
     </ui:VisualElement>
 
     <!-- Location Gate (visible at startup, blocks game until location acquired) -->
@@ -144,5 +147,15 @@
             <ui:Button name="clear-save-button" text="Clear Save Data" class="btn" />
         </ui:ScrollView>
     </ui:VisualElement>
+
+    <!-- Shop Panel (hidden by default) -->
+    <ui:VisualElement name="shop-panel" class="panel" style="display: none;">
+        <ui:Label text="Seed Shop" class="panel-header" />
+        <ui:Button name="shop-close" text="X" class="btn btn-close" />
+        <ui:ScrollView name="shop-grid" class="scroll-view" />
+    </ui:VisualElement>
+
+    <!-- Harvest Result Popup (hidden by default) -->
+    <ui:VisualElement name="harvest-popup" style="display: none;" />
 
 </ui:UXML>
