@@ -6,10 +6,9 @@ namespace Garden
     public class HortusUI : MonoBehaviour
     {
         [Header("References")]
-        [SerializeField] private PlantVisual plantVisual;
         [SerializeField] private UIDocument uiDocument;
 
-        private PulseButton pulseButton;
+        private HearthViewUI hearthViewUI;
         private ResonanceBar resonanceBar;
         private CurrencyDisplay currencyDisplay;
         private SatchelUI satchelUI;
@@ -34,7 +33,7 @@ namespace Garden
         {
             var root = uiDocument.rootVisualElement;
 
-            pulseButton = GetComponent<PulseButton>();
+            hearthViewUI = GetComponent<HearthViewUI>();
             resonanceBar = GetComponent<ResonanceBar>();
             currencyDisplay = GetComponent<CurrencyDisplay>();
             satchelUI = GetComponent<SatchelUI>();
@@ -44,7 +43,7 @@ namespace Garden
             harvestResultUI = GetComponent<HarvestResultUI>();
             debugPanel = GetComponent<DebugWeatherPanel>();
 
-            pulseButton?.Initialize(root);
+            hearthViewUI?.Initialize(root);
             resonanceBar?.Initialize(root);
             currencyDisplay?.Initialize(root);
             satchelUI?.Initialize(root);
@@ -60,14 +59,24 @@ namespace Garden
             shopPanel = root.Q<VisualElement>("shop-panel");
             debugPanelRoot = root.Q<VisualElement>("debug-panel");
 
-            pulseButton.OnPulse += () =>
+            if (hearthViewUI != null)
             {
-                var pm = PlantManager.Instance;
-                if (pm.GetMatureCount() > 0 || pm.GetGrowingCount() > 0)
-                    OpenTerrarium();
-                else
-                    OpenSatchel();
-            };
+                hearthViewUI.OnEmptySlotTapped += (envIdx, slotIdx) =>
+                {
+                    CloseAllPanels();
+                    satchelUI?.Show(envIdx, slotIdx);
+                };
+
+                hearthViewUI.OnMatureSlotTapped += (envIdx, slotIdx) =>
+                {
+                    var result = PlantManager.Instance.Harvest(envIdx, slotIdx);
+                    if (result.seed != null)
+                    {
+                        harvestResultUI?.Show(result);
+                    }
+                    hearthViewUI?.RefreshAllSlots();
+                };
+            }
 
             root.Q<Button>("codex-button").clicked += () => TogglePanel(codexPanel, codexUI);
             root.Q<Button>("greenhouse-button").clicked += () => TogglePanel(terrariumPanel, terrariumUI);
@@ -98,15 +107,8 @@ namespace Garden
                 harvestResultUI.OnDismissed += () =>
                 {
                     terrariumUI?.RefreshDisplay();
-                    RefreshPlantVisual();
+                    hearthViewUI?.RefreshAllSlots();
                 };
-            }
-
-            if (PlantManager.Instance != null)
-            {
-                PlantManager.Instance.OnPlantStateChanged += RefreshPlantVisual;
-                PlantManager.Instance.OnGrowthUpdated += OnGrowth;
-                RefreshPlantVisual();
             }
 
             CloseAllPanels();
@@ -154,44 +156,6 @@ namespace Garden
         {
             if (WeatherService.Instance != null)
                 WeatherService.Instance.OnLocationResolved -= OnLocationResolved;
-
-            if (PlantManager.Instance != null)
-            {
-                PlantManager.Instance.OnPlantStateChanged -= RefreshPlantVisual;
-                PlantManager.Instance.OnGrowthUpdated -= OnGrowth;
-            }
-        }
-
-        private void RefreshPlantVisual()
-        {
-            var pm = PlantManager.Instance;
-            var featured = pm.CurrentVariant;
-            if (featured == null)
-            {
-                plantVisual.Clear();
-            }
-            else
-            {
-                plantVisual.SetVariant(featured);
-                plantVisual.SetGrowth(pm.GrowthProgress);
-            }
-        }
-
-        private void OnGrowth(float progress)
-        {
-            plantVisual.SetGrowth(progress);
-        }
-
-        private void OpenSatchel()
-        {
-            CloseAllPanels();
-            satchelUI?.Show();
-        }
-
-        private void OpenTerrarium()
-        {
-            CloseAllPanels();
-            terrariumUI?.Show();
         }
 
         private void TogglePanel(VisualElement panel, object controller)

@@ -11,6 +11,7 @@
     <Style src="../Styles/SeedShop.uss" />
     <Style src="../Styles/HarvestResult.uss" />
     <Style src="../Styles/Terrarium.uss" />
+    <Style src="../Styles/Hearth.uss" />
 
     <!-- HUD layer (always visible) -->
     <ui:VisualElement name="hud" picking-mode="Ignore">
@@ -25,9 +26,35 @@
             </ui:VisualElement>
         </ui:VisualElement>
 
-        <!-- Bottom bar: pulse button + nav -->
+        <!-- Hearth view: isometric farm plot -->
+        <ui:VisualElement name="hearth-view" picking-mode="Ignore">
+            <ui:Label name="hearth-title" text="The Hearth" />
+            <ui:VisualElement name="hearth-plot">
+                <ui:Button name="hearth-slot-0" class="hearth-slot">
+                    <ui:VisualElement class="hearth-slot-inner">
+                        <ui:VisualElement name="hearth-soil-0" class="hearth-soil" />
+                        <ui:VisualElement name="hearth-swatch-0" class="hearth-plant-swatch" style="display: none;" />
+                        <ui:Label name="hearth-label-0" text="Tap to Plant" class="hearth-slot-label" />
+                        <ui:VisualElement class="hearth-progress-bar">
+                            <ui:VisualElement name="hearth-progress-0" class="hearth-progress-fill" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:Button>
+                <ui:Button name="hearth-slot-1" class="hearth-slot">
+                    <ui:VisualElement class="hearth-slot-inner">
+                        <ui:VisualElement name="hearth-soil-1" class="hearth-soil" />
+                        <ui:VisualElement name="hearth-swatch-1" class="hearth-plant-swatch" style="display: none;" />
+                        <ui:Label name="hearth-label-1" text="Tap to Plant" class="hearth-slot-label" />
+                        <ui:VisualElement class="hearth-progress-bar">
+                            <ui:VisualElement name="hearth-progress-1" class="hearth-progress-fill" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:Button>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Bottom bar: nav -->
         <ui:VisualElement name="bottom-bar" picking-mode="Ignore">
-            <ui:Button name="pulse-button" text="Plant a Seed" class="btn" />
             <ui:VisualElement name="nav-bar">
                 <ui:Button name="codex-button" text="Codex" class="nav-btn" />
                 <ui:Button name="greenhouse-button" text="Greenhouse" class="nav-btn" />
