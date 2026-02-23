@@ -34,16 +34,13 @@ namespace Garden
             if (dustAccumulator >= 3600f)
             {
                 dustAccumulator -= 3600f;
-                int totalDust = 0;
-                var config = CurrencyManager.Instance.Config;
-                foreach (var p in Plants)
-                    totalDust += Mathf.RoundToInt(config.GetDustPerHourForRarity(p.rarity));
+                int totalDust = Mathf.RoundToInt(GetTotalDustPerHour());
                 if (totalDust > 0)
                     CurrencyManager.Instance.Add(CurrencyType.AuraDust, totalDust);
             }
         }
 
-        public bool AddPlant(SeedData seed, VariantData variant)
+        public bool AddPlant(SeedData seed, VariantData variant, QualityTier tier = QualityTier.C)
         {
             if (Plants.Count >= MaxSlots) return false;
 
@@ -52,6 +49,7 @@ namespace Garden
                 seedName = seed.seedName,
                 variantName = variant.variantName,
                 rarity = variant.rarity,
+                qualityTier = tier,
                 primaryColor = variant.primaryColor,
                 harvestTime = GameTime.UtcNow
             });
@@ -59,6 +57,28 @@ namespace Garden
             SaveGreenhouse();
             OnGreenhouseChanged?.Invoke();
             return true;
+        }
+
+        public bool AddPlant(SeedData seed, VariantData variant)
+        {
+            return AddPlant(seed, variant, QualityTier.C);
+        }
+
+        public int SellPlant(int index)
+        {
+            if (index < 0 || index >= Plants.Count) return 0;
+
+            var plant = Plants[index];
+            var seed = SeedRegistry.Instance.GetSeed(plant.seedName);
+            int baseSell = seed != null ? seed.baseSellPrice : 100;
+            int value = CurrencyManager.Instance.Config.GetSellValue(baseSell, plant.qualityTier);
+
+            Plants.RemoveAt(index);
+            CurrencyManager.Instance.Add(CurrencyType.Dewdrops, value);
+
+            SaveGreenhouse();
+            OnGreenhouseChanged?.Invoke();
+            return value;
         }
 
         public bool ExpandSlots()
@@ -77,17 +97,14 @@ namespace Garden
             float total = 0;
             var config = CurrencyManager.Instance.Config;
             foreach (var p in Plants)
-                total += config.GetDustPerHourForRarity(p.rarity);
+                total += config.GetDustPerHourForPlant(p.rarity, p.qualityTier);
             return total;
         }
 
         public void DebugAdvanceTime(float hours)
         {
             if (Plants.Count == 0) return;
-            var config = CurrencyManager.Instance.Config;
-            int totalDust = 0;
-            foreach (var p in Plants)
-                totalDust += Mathf.RoundToInt(config.GetDustPerHourForRarity(p.rarity) * hours);
+            int totalDust = Mathf.RoundToInt(GetTotalDustPerHour() * hours);
             if (totalDust > 0)
                 CurrencyManager.Instance.Add(CurrencyType.AuraDust, totalDust);
         }
@@ -102,7 +119,8 @@ namespace Garden
                 {
                     seedName = p.seedName,
                     variantName = p.variantName,
-                    harvestTimeUtc = p.harvestTime.ToString("O")
+                    harvestTimeUtc = p.harvestTime.ToString("O"),
+                    qualityTier = p.qualityTier
                 });
             }
             SaveManager.Instance.Save();
@@ -136,6 +154,7 @@ namespace Garden
                     seedName = ps.seedName,
                     variantName = ps.variantName,
                     rarity = rarity,
+                    qualityTier = ps.qualityTier,
                     primaryColor = color,
                     harvestTime = DateTime.Parse(ps.harvestTimeUtc).ToUniversalTime()
                 });
@@ -148,6 +167,7 @@ namespace Garden
         public string seedName;
         public string variantName;
         public Rarity rarity;
+        public QualityTier qualityTier;
         public Color primaryColor;
         public DateTime harvestTime;
     }
