@@ -7,7 +7,6 @@ namespace Garden
     {
         private VisualTreeAsset plantSlotTemplate;
 
-        private VisualElement panel;
         private ScrollView plantGrid;
         private Label dustRateText;
         private Label slotsText;
@@ -17,7 +16,6 @@ namespace Garden
         {
             plantSlotTemplate = Resources.Load<VisualTreeAsset>("UI/Templates/PlantSlot");
 
-            panel = root.Q<VisualElement>("greenhouse-page");
             plantGrid = root.Q<ScrollView>("greenhouse-grid");
             dustRateText = root.Q<Label>("greenhouse-dust-rate");
             slotsText = root.Q<Label>("greenhouse-slots-text");
