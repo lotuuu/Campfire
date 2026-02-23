@@ -10,6 +10,7 @@ namespace Garden
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
+            Application.targetFrameRate = 120;
         }
 
         private void Start()
