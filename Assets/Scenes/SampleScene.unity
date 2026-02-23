@@ -15273,7 +15273,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4d16cb476c5894aff8b2d36aab4b939d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Garden::Garden.WeatherService
-  apiKey: 
   pollIntervalMinutes: 15
   useDebugOverride: 0
   debugWeather:
