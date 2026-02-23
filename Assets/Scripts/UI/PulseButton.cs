@@ -8,7 +8,6 @@ namespace Garden
         public event System.Action OnPulse;
 
         private Button button;
-        private Label buttonLabel;
 
         public void Initialize(VisualElement root)
         {
@@ -31,14 +30,22 @@ namespace Garden
 
         private void Update()
         {
-            if (button == null) return;
-            if (PlantManager.Instance != null && PlantManager.Instance.State == PlantState.Growing)
+            if (button == null || PlantManager.Instance == null) return;
+
+            int mature = PlantManager.Instance.GetMatureCount();
+            int growing = PlantManager.Instance.GetGrowingCount();
+
+            if (mature > 0)
+            {
+                button.text = $"{mature} plant{(mature > 1 ? "s" : "")} ready!";
+            }
+            else if (growing > 0)
             {
                 float hours = PlantManager.Instance.GetRemainingHours();
                 if (hours > 1f)
-                    button.text = $"{hours:F1}h remaining";
+                    button.text = $"{growing} growing \u2022 {hours:F1}h";
                 else
-                    button.text = $"{hours * 60f:F0}m remaining";
+                    button.text = $"{growing} growing \u2022 {hours * 60f:F0}m";
             }
         }
 
@@ -47,40 +54,23 @@ namespace Garden
             var pm = PlantManager.Instance;
             if (pm == null) return;
 
-            switch (pm.State)
-            {
-                case PlantState.Empty:
-                    OnPulse?.Invoke();
-                    break;
-                case PlantState.Growing:
-                    // Pulse animation via USS transition
-                    if (button != null)
-                    {
-                        button.style.scale = new StyleScale(new Scale(new Vector3(1.1f, 1.1f, 1f)));
-                        button.schedule.Execute(() =>
-                            button.style.scale = new StyleScale(new Scale(Vector3.one))
-                        ).ExecuteLater(200);
-                    }
-                    break;
-                case PlantState.Mature:
-                    pm.Harvest();
-                    break;
-            }
+            OnPulse?.Invoke();
         }
 
         private void UpdateState()
         {
-            if (button == null) return;
-            var pm = PlantManager.Instance;
-            if (pm == null) return;
+            if (button == null || PlantManager.Instance == null) return;
 
-            button.text = pm.State switch
-            {
-                PlantState.Empty => "Plant a Seed",
-                PlantState.Growing => "Growing...",
-                PlantState.Mature => "Harvest!",
-                _ => ""
-            };
+            var pm = PlantManager.Instance;
+            int mature = pm.GetMatureCount();
+            int growing = pm.GetGrowingCount();
+
+            if (mature > 0)
+                button.text = $"{mature} plant{(mature > 1 ? "s" : "")} ready!";
+            else if (growing > 0)
+                button.text = "Growing...";
+            else
+                button.text = "Plant a Seed";
         }
     }
 }

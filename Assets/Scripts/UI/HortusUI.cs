@@ -9,61 +9,94 @@ namespace Garden
         [SerializeField] private PlantVisual plantVisual;
         [SerializeField] private UIDocument uiDocument;
 
-        // Sub-controllers (on same GameObject or children)
         private PulseButton pulseButton;
         private ResonanceBar resonanceBar;
         private CurrencyDisplay currencyDisplay;
         private SatchelUI satchelUI;
         private CodexUI codexUI;
-        private GreenhouseUI greenhouseUI;
+        private TerrariumUI terrariumUI;
+        private SeedShopUI seedShopUI;
+        private HarvestResultUI harvestResultUI;
         private DebugWeatherPanel debugPanel;
 
-        // Panel roots for toggling
         private VisualElement satchelPanel;
         private VisualElement codexPanel;
-        private VisualElement greenhousePanel;
+        private VisualElement terrariumPanel;
+        private VisualElement shopPanel;
         private VisualElement debugPanelRoot;
-
-        // Location gate
-        private VisualElement locationGate;
-        private Label gateStatus;
-        private Button gateRetry;
 
         private void Start()
         {
             var root = uiDocument.rootVisualElement;
 
-            // Get sub-controllers
             pulseButton = GetComponent<PulseButton>();
             resonanceBar = GetComponent<ResonanceBar>();
             currencyDisplay = GetComponent<CurrencyDisplay>();
             satchelUI = GetComponent<SatchelUI>();
             codexUI = GetComponent<CodexUI>();
-            greenhouseUI = GetComponent<GreenhouseUI>();
+            terrariumUI = GetComponent<TerrariumUI>();
+            seedShopUI = GetComponent<SeedShopUI>();
+            harvestResultUI = GetComponent<HarvestResultUI>();
             debugPanel = GetComponent<DebugWeatherPanel>();
 
-            // Initialize all sub-controllers with the root
             pulseButton?.Initialize(root);
             resonanceBar?.Initialize(root);
             currencyDisplay?.Initialize(root);
             satchelUI?.Initialize(root);
             codexUI?.Initialize(root);
-            greenhouseUI?.Initialize(root);
+            terrariumUI?.Initialize(root);
+            seedShopUI?.Initialize(root);
+            harvestResultUI?.Initialize(root);
             debugPanel?.Initialize(root);
 
-            // Cache panel roots
             satchelPanel = root.Q<VisualElement>("satchel-panel");
             codexPanel = root.Q<VisualElement>("codex-panel");
-            greenhousePanel = root.Q<VisualElement>("greenhouse-panel");
+            terrariumPanel = root.Q<VisualElement>("terrarium-panel");
+            shopPanel = root.Q<VisualElement>("shop-panel");
             debugPanelRoot = root.Q<VisualElement>("debug-panel");
 
-            // Nav button wiring
-            pulseButton.OnPulse += OpenSatchel;
+            pulseButton.OnPulse += () =>
+            {
+                var pm = PlantManager.Instance;
+                if (pm.GetMatureCount() > 0 || pm.GetGrowingCount() > 0)
+                    OpenTerrarium();
+                else
+                    OpenSatchel();
+            };
+
             root.Q<Button>("codex-button").clicked += () => TogglePanel(codexPanel, codexUI);
-            root.Q<Button>("greenhouse-button").clicked += () => TogglePanel(greenhousePanel, greenhouseUI);
+            root.Q<Button>("greenhouse-button").clicked += () => TogglePanel(terrariumPanel, terrariumUI);
+            root.Q<Button>("shop-button").clicked += () => TogglePanel(shopPanel, seedShopUI);
             root.Q<Button>("debug-button").clicked += () => TogglePanel(debugPanelRoot, debugPanel);
 
-            // Plant state
+            if (terrariumUI != null)
+            {
+                terrariumUI.OnEmptySlotTapped += (envIdx, slotIdx) =>
+                {
+                    CloseAllPanels();
+                    satchelUI?.Show(envIdx, slotIdx);
+                };
+
+                terrariumUI.OnMatureSlotTapped += (envIdx, slotIdx) =>
+                {
+                    var result = PlantManager.Instance.Harvest(envIdx, slotIdx);
+                    if (result.seed != null)
+                    {
+                        harvestResultUI?.Show(result);
+                    }
+                    terrariumUI?.RefreshDisplay();
+                };
+            }
+
+            if (harvestResultUI != null)
+            {
+                harvestResultUI.OnDismissed += () =>
+                {
+                    terrariumUI?.RefreshDisplay();
+                    RefreshPlantVisual();
+                };
+            }
+
             if (PlantManager.Instance != null)
             {
                 PlantManager.Instance.OnPlantStateChanged += RefreshPlantVisual;
@@ -72,47 +105,10 @@ namespace Garden
             }
 
             CloseAllPanels();
-
-            // Location gate
-            locationGate = root.Q<VisualElement>("location-gate");
-            gateStatus = root.Q<Label>("gate-status");
-            gateRetry = root.Q<Button>("gate-retry");
-            gateRetry.clicked += OnGateRetry;
-
-            if (WeatherService.Instance != null)
-            {
-                if (WeatherService.Instance.IsLocationResolved)
-                    OnLocationResolved(WeatherService.Instance.HasLocation);
-                else
-                    WeatherService.Instance.OnLocationResolved += OnLocationResolved;
-            }
-        }
-
-        private void OnLocationResolved(bool success)
-        {
-            if (success)
-            {
-                locationGate.style.display = DisplayStyle.None;
-            }
-            else
-            {
-                gateStatus.text = "Location access is required to play.\nPlease enable Location Services in Settings.";
-                gateRetry.style.display = DisplayStyle.Flex;
-            }
-        }
-
-        private void OnGateRetry()
-        {
-            gateStatus.text = "Acquiring location...";
-            gateRetry.style.display = DisplayStyle.None;
-            WeatherService.Instance?.RetryLocation();
         }
 
         private void OnDestroy()
         {
-            if (WeatherService.Instance != null)
-                WeatherService.Instance.OnLocationResolved -= OnLocationResolved;
-
             if (PlantManager.Instance != null)
             {
                 PlantManager.Instance.OnPlantStateChanged -= RefreshPlantVisual;
@@ -123,13 +119,14 @@ namespace Garden
         private void RefreshPlantVisual()
         {
             var pm = PlantManager.Instance;
-            if (pm.State == PlantState.Empty)
+            var featured = pm.CurrentVariant;
+            if (featured == null)
             {
                 plantVisual.Clear();
             }
             else
             {
-                plantVisual.SetVariant(pm.CurrentVariant);
+                plantVisual.SetVariant(featured);
                 plantVisual.SetGrowth(pm.GrowthProgress);
             }
         }
@@ -145,15 +142,22 @@ namespace Garden
             satchelUI?.Show();
         }
 
+        private void OpenTerrarium()
+        {
+            CloseAllPanels();
+            terrariumUI?.Show();
+        }
+
         private void TogglePanel(VisualElement panel, object controller)
         {
-            bool wasVisible = panel.resolvedStyle.display == DisplayStyle.Flex;
+            bool wasVisible = panel != null && panel.resolvedStyle.display == DisplayStyle.Flex;
             CloseAllPanels();
             if (!wasVisible)
             {
                 if (controller is SatchelUI s) s.Show();
                 else if (controller is CodexUI c) c.Show();
-                else if (controller is GreenhouseUI g) g.Show();
+                else if (controller is TerrariumUI t) t.Show();
+                else if (controller is SeedShopUI sh) sh.Show();
                 else if (controller is DebugWeatherPanel d) d.Show();
             }
         }
@@ -162,7 +166,8 @@ namespace Garden
         {
             satchelUI?.Hide();
             codexUI?.Hide();
-            greenhouseUI?.Hide();
+            terrariumUI?.Hide();
+            seedShopUI?.Hide();
             debugPanel?.Hide();
         }
     }
