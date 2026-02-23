@@ -21,16 +21,22 @@
 #weather-text {
     color: var(--color-text);
     font-size: var(--font-sm);
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(10, 20, 30, 0.45);
     border-radius: var(--radius-sm);
     padding: var(--spacing-sm) var(--spacing-md);
+    border-width: 1px;
+    border-color: rgba(120, 200, 220, 0.20);
+    border-top-color: rgba(140, 230, 240, 0.30);
 }
 
 #currency-panel {
     align-items: flex-end;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(10, 20, 30, 0.45);
     border-radius: var(--radius-sm);
     padding: var(--spacing-sm) var(--spacing-md);
+    border-width: 1px;
+    border-color: rgba(120, 200, 220, 0.20);
+    border-top-color: rgba(140, 230, 240, 0.30);
 }
 
 .currency-label {
@@ -51,22 +57,24 @@
     min-height: 110px;
     font-size: var(--font-lg);
     -unity-font-style: bold;
-    background-color: rgba(60, 110, 60, 0.9);
-    border-width: 3px;
-    border-color: var(--color-border-accent);
+    background-color: rgba(20, 60, 70, 0.60);
+    border-width: 2px;
+    border-color: rgba(140, 230, 240, 0.40);
+    border-top-color: rgba(160, 240, 250, 0.55);
     border-radius: 55px;
     margin-bottom: var(--spacing-md);
-    transition-property: background-color, scale;
+    transition-property: background-color, border-color, scale;
     transition-duration: 0.2s;
 }
 
 #pulse-button:hover {
-    background-color: rgba(75, 135, 75, 0.95);
+    background-color: rgba(25, 75, 85, 0.70);
+    border-color: rgba(140, 230, 240, 0.60);
     scale: 1.03;
 }
 
 #pulse-button:active {
-    background-color: rgba(90, 160, 90, 1);
+    background-color: rgba(30, 85, 95, 0.80);
 }
 
 /* Nav bar */
@@ -75,31 +83,36 @@
     justify-content: center;
     align-self: stretch;
     padding: var(--spacing-sm) var(--spacing-md);
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(10, 20, 30, 0.50);
     border-top-left-radius: var(--radius-lg);
     border-top-right-radius: var(--radius-lg);
+    border-width: 1px;
+    border-color: rgba(120, 200, 220, 0.10);
+    border-top-color: rgba(140, 230, 240, 0.30);
+    border-bottom-width: 0;
 }
 
 .nav-btn {
     flex-grow: 1;
-    background-color: var(--color-button-bg);
+    background-color: rgba(20, 40, 55, 0.50);
     color: var(--color-text);
-    border-width: 2px;
-    border-color: var(--color-border);
+    border-width: 1px;
+    border-color: rgba(120, 200, 220, 0.20);
     border-radius: var(--radius-md);
     padding: var(--spacing-sm) var(--spacing-md);
     margin-left: var(--spacing-xs);
     margin-right: var(--spacing-xs);
     min-height: 88px;
     font-size: var(--font-md);
-    transition-property: background-color;
-    transition-duration: 0.15s;
+    transition-property: background-color, border-color;
+    transition-duration: 0.2s;
 }
 
 .nav-btn:hover {
-    background-color: var(--color-button-bg-hover);
+    background-color: rgba(30, 55, 70, 0.65);
+    border-color: rgba(140, 230, 240, 0.40);
 }
 
 .nav-btn:active {
-    background-color: var(--color-button-bg-active);
+    background-color: rgba(40, 70, 85, 0.75);
 }
