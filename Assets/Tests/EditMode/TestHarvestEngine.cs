@@ -32,9 +32,10 @@ namespace Garden.Tests
 
             var result = HarvestEngine.Roll(seed, variant, weather);
 
-            Assert.That(result.tier, Is.AnyOf(
-                QualityTier.D, QualityTier.C, QualityTier.B,
-                QualityTier.A, QualityTier.S));
+            Assert.IsTrue(
+                result.tier == QualityTier.D || result.tier == QualityTier.C ||
+                result.tier == QualityTier.B || result.tier == QualityTier.A ||
+                result.tier == QualityTier.S, $"Unexpected tier: {result.tier}");
             Assert.AreEqual(seed, result.seed);
             Assert.AreEqual(variant, result.variant);
         }

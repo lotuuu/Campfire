@@ -155,6 +155,8 @@ Transform:
   - {fileID: 1065642803}
   - {fileID: 2117706240}
   - {fileID: 134425025}
+  - {fileID: 1132555134}
+  - {fileID: 896682760}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &134425024
@@ -14989,6 +14991,50 @@ Transform:
   m_Children: []
   m_Father: {fileID: 171580624}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &896682759
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 896682760}
+  - component: {fileID: 896682761}
+  m_Layer: 0
+  m_Name: SeedShopManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &896682760
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 896682759}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 12194301}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &896682761
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 896682759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 042c3ac70a6b04b2e8f203f8cba3cc0e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Garden::Garden.SeedShopManager
 --- !u!1 &1065642802
 GameObject:
   m_ObjectHideFlags: 0
@@ -15033,6 +15079,50 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d67d3f6aec944f25b2262c798f2d2fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Garden::Garden.PlantManager
+--- !u!1 &1132555133
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1132555134}
+  - component: {fileID: 1132555135}
+  m_Layer: 0
+  m_Name: EnvironmentManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1132555134
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1132555133}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 12194301}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1132555135
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1132555133}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f3e68349c43e4012a5a73a110e171e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Garden::Garden.EnvironmentManager
 --- !u!1 &1293215415
 GameObject:
   m_ObjectHideFlags: 0
@@ -15064,7 +15154,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 471f4c24172834b5bbf8a0c0ac3758af, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Garden::Garden.LivingCanvasController
-  targetRenderer: {fileID: 0}
+  targetRenderer: {fileID: 1293215417}
   crossFadeDuration: 5
   windToParticleScale: 0.02
 --- !u!23 &1293215417
@@ -15259,6 +15349,9 @@ GameObject:
   - component: {fileID: 1564428227}
   - component: {fileID: 1564428226}
   - component: {fileID: 1564428225}
+  - component: {fileID: 1564428235}
+  - component: {fileID: 1564428234}
+  - component: {fileID: 1564428233}
   m_Layer: 0
   m_Name: --- UI ---
   m_TagString: Untagged
@@ -15402,6 +15495,42 @@ MonoBehaviour:
   m_EditorClassIdentifier: Garden::Garden.HortusUI
   plantVisual: {fileID: 1872355013}
   uiDocument: {fileID: 1564428223}
+--- !u!114 &1564428233
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1564428222}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 348573140abf6417bacad245575935ca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Garden::Garden.HarvestResultUI
+--- !u!114 &1564428234
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1564428222}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 042f0d08ac634455da15dfb95eb5d99a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Garden::Garden.SeedShopUI
+--- !u!114 &1564428235
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1564428222}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2054cc6397eb140bbb8e07278fbfa0c4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Garden::Garden.TerrariumUI
 --- !u!1 &1571088094
 GameObject:
   m_ObjectHideFlags: 0
@@ -15466,9 +15595,9 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 2868101353237766674, guid: 5a57c118a7e814b98aef94ad281fb36f, type: 3}
   m_Color: {r: 0.55, g: 0.35, b: 0.2, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -15476,7 +15605,7 @@ SpriteRenderer:
   m_Size: {x: 1, y: 1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 0
+  m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
 --- !u!4 &1571088096
 Transform:
@@ -20565,9 +20694,9 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 2
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 2868101353237766674, guid: 5a57c118a7e814b98aef94ad281fb36f, type: 3}
   m_Color: {r: 0.2, g: 0.7, b: 0.3, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -20575,7 +20704,7 @@ SpriteRenderer:
   m_Size: {x: 1, y: 1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 0
+  m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
 --- !u!1 &2114317314
 GameObject:
@@ -20656,9 +20785,9 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 3
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 2868101353237766674, guid: 5a57c118a7e814b98aef94ad281fb36f, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -20666,7 +20795,7 @@ SpriteRenderer:
   m_Size: {x: 1, y: 1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 0
+  m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
 --- !u!1 &2117706239
 GameObject:
