@@ -20,7 +20,6 @@ namespace Garden
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
-            DontDestroyOnLoad(gameObject);
         }
 
         public void Add(CurrencyType type, int amount)
