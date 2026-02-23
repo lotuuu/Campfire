@@ -1,0 +1,45 @@
+/* Bottom navigation tab bar */
+
+#bottom-nav {
+    flex-direction: row;
+    align-self: stretch;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    padding-bottom: var(--spacing-md);
+    background-color: rgba(10, 20, 30, 0.65);
+    border-top-width: 1px;
+    border-top-color: rgba(120, 200, 220, 0.15);
+}
+
+.nav-tab {
+    flex-grow: 1;
+    background-color: transparent;
+    color: var(--color-text-dim);
+    border-width: 0;
+    border-bottom-width: 2px;
+    border-bottom-color: transparent;
+    border-radius: 0;
+    padding: var(--spacing-sm) var(--spacing-xs);
+    margin: 0 var(--spacing-xs);
+    min-height: 72px;
+    font-size: var(--font-sm);
+    -unity-text-align: middle-center;
+    transition-property: color, border-bottom-color;
+    transition-duration: 0.2s;
+}
+
+.nav-tab--active {
+    color: var(--color-text-accent);
+    border-bottom-color: var(--color-text-accent);
+}
+
+.nav-tab--disabled {
+    color: rgba(120, 150, 170, 0.35);
+}
+
+.nav-tab:hover {
+    color: var(--color-text);
+}
+
+.nav-tab--disabled:hover {
+    color: rgba(120, 150, 170, 0.35);
+}

@@ -4,6 +4,7 @@
     <Style src="../Styles/Variables.uss" />
     <Style src="../Styles/Common.uss" />
     <Style src="../Styles/HUD.uss" />
+    <Style src="../Styles/BottomNav.uss" />
     <Style src="../Styles/Satchel.uss" />
     <Style src="../Styles/Codex.uss" />
     <Style src="../Styles/Greenhouse.uss" />
@@ -13,10 +14,10 @@
     <Style src="../Styles/Terrarium.uss" />
     <Style src="../Styles/Hearth.uss" />
 
-    <!-- HUD layer (always visible) -->
-    <ui:VisualElement name="hud" picking-mode="Ignore">
+    <!-- App shell: vertical stack -->
+    <ui:VisualElement name="app-shell" style="flex-grow: 1;">
 
-        <!-- Top bar: weather + currency -->
+        <!-- Top bar: weather + currency (always visible) -->
         <ui:VisualElement name="top-bar" picking-mode="Ignore">
             <ui:Label name="weather-text" text="--°C  ·  --  ·  --" />
             <ui:VisualElement name="currency-panel">
@@ -26,7 +27,41 @@
             </ui:VisualElement>
         </ui:VisualElement>
 
-        <!-- Hearth view: isometric farm plot -->
+        <!-- Page viewport (SwipeablePageView fills this) -->
+        <ui:VisualElement name="page-viewport" style="flex-grow: 1; overflow: hidden;" />
+
+        <!-- Bottom navigation -->
+        <ui:VisualElement name="bottom-nav">
+            <ui:Button name="tab-codex" text="Codex" class="nav-tab" />
+            <ui:Button name="tab-shop" text="Shop" class="nav-tab" />
+            <ui:Button name="tab-terrarium" text="Terrarium" class="nav-tab nav-tab--active" />
+            <ui:Button name="tab-greenhouse" text="Greenhouse" class="nav-tab" />
+            <ui:Button name="tab-locked" text="..." class="nav-tab nav-tab--disabled" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- ===== PAGE CONTENTS (added to SwipeablePageView by HortusUI) ===== -->
+
+    <!-- Page 0: Codex -->
+    <ui:VisualElement name="codex-page" class="page-content" style="display: none;">
+        <ui:Label text="Codex" class="panel-header" />
+        <ui:ScrollView name="variant-grid" class="scroll-view" />
+        <ui:VisualElement name="detail-panel">
+            <ui:Label name="detail-name" text="" />
+            <ui:Label name="detail-description" text="" />
+            <ui:Label name="detail-rarity" text="" />
+            <ui:VisualElement name="detail-color-swatch" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- Page 1: Shop -->
+    <ui:VisualElement name="shop-page" class="page-content" style="display: none;">
+        <ui:Label text="Seed Shop" class="panel-header" />
+        <ui:ScrollView name="shop-grid" class="scroll-view" />
+    </ui:VisualElement>
+
+    <!-- Page 2: Terrarium (Hearth isometric view) -->
+    <ui:VisualElement name="terrarium-page" class="page-content" style="display: none;">
         <ui:VisualElement name="hearth-view" picking-mode="Ignore">
             <ui:Label name="hearth-title" text="The Hearth" />
             <ui:VisualElement name="hearth-plot">
@@ -52,22 +87,33 @@
                 </ui:Button>
             </ui:VisualElement>
         </ui:VisualElement>
+    </ui:VisualElement>
 
-        <!-- Bottom bar: nav -->
-        <ui:VisualElement name="bottom-bar" picking-mode="Ignore">
-            <ui:VisualElement name="nav-bar">
-                <ui:Button name="codex-button" text="Codex" class="nav-btn" />
-                <ui:Button name="greenhouse-button" text="Greenhouse" class="nav-btn" />
-                <ui:Button name="shop-button" text="Shop" class="nav-btn" />
-                <ui:Button name="debug-button" text="Debug" class="nav-btn" />
-            </ui:VisualElement>
+    <!-- Page 3: Greenhouse -->
+    <ui:VisualElement name="greenhouse-page" class="page-content" style="display: none;">
+        <ui:Label text="Greenhouse" class="panel-header" />
+        <ui:VisualElement name="greenhouse-header">
+            <ui:Label name="greenhouse-dust-rate" text="+0 Aura Dust/hr" />
+            <ui:Label name="greenhouse-slots-text" text="0 / 0" />
+        </ui:VisualElement>
+        <ui:ScrollView name="greenhouse-grid" class="scroll-view" />
+        <ui:Button name="greenhouse-expand-button" text="Expand Slots" class="btn" />
+    </ui:VisualElement>
+
+    <!-- Page 4: Locked -->
+    <ui:VisualElement name="locked-page" class="page-content" style="display: none;">
+        <ui:VisualElement style="flex-grow: 1; justify-content: center; align-items: center;">
+            <ui:Label text="Coming Soon" class="label-dim" style="font-size: var(--font-lg);" />
         </ui:VisualElement>
     </ui:VisualElement>
 
-    <!-- Satchel Panel (hidden by default) -->
-    <ui:VisualElement name="satchel-panel" class="panel" style="display: none;">
+    <!-- ===== OVERLAYS (stay on top of pages) ===== -->
+
+    <!-- Satchel Bottom Sheet -->
+    <ui:VisualElement name="satchel-scrim" class="scrim" style="display: none;" />
+    <ui:VisualElement name="satchel-panel" class="bottom-sheet" style="display: none;">
+        <ui:VisualElement name="satchel-handle" class="bottom-sheet-handle" />
         <ui:Label text="Satchel" class="panel-header" />
-        <ui:Button name="satchel-close" text="X" class="btn btn-close" />
         <ui:ScrollView name="seed-grid" class="scroll-view" />
         <ui:VisualElement name="probability-panel" style="display: none;">
             <ui:Label name="selected-seed-name" text="" />
@@ -77,39 +123,11 @@
         <ui:Button name="plant-button" text="Plant" class="btn" enabled="false" />
     </ui:VisualElement>
 
-    <!-- Codex Panel (hidden by default) -->
-    <ui:VisualElement name="codex-panel" class="panel" style="display: none;">
-        <ui:Label text="Codex" class="panel-header" />
-        <ui:Button name="codex-close" text="X" class="btn btn-close" />
-        <ui:ScrollView name="variant-grid" class="scroll-view" />
-        <ui:VisualElement name="detail-panel">
-            <ui:Label name="detail-name" text="" />
-            <ui:Label name="detail-description" text="" />
-            <ui:Label name="detail-rarity" text="" />
-            <ui:VisualElement name="detail-color-swatch" />
-        </ui:VisualElement>
-    </ui:VisualElement>
+    <!-- Harvest Result Popup -->
+    <ui:VisualElement name="harvest-popup" style="display: none;" />
 
-    <!-- Terrarium Panel (replaces Greenhouse, hidden by default) -->
-    <ui:VisualElement name="terrarium-panel" class="panel" style="display: none;">
-        <ui:Label text="Terrarium" class="panel-header" />
-        <ui:Button name="terrarium-close" text="X" class="btn btn-close" />
-        <ui:VisualElement name="terrarium-header">
-            <ui:Label name="dust-rate" text="+0 Aura Dust/hr" />
-            <ui:Label name="terrarium-slots-text" text="0 / 0" />
-        </ui:VisualElement>
-        <ui:ScrollView name="terrarium-scroll" class="scroll-view" />
-    </ui:VisualElement>
-
-    <!-- Location Gate (visible at startup, blocks game until location acquired) -->
-    <ui:VisualElement name="location-gate" class="gate-panel" picking-mode="Position">
-        <ui:Label name="gate-title" text="Garden" class="gate-title" />
-        <ui:Label name="gate-status" text="Acquiring location..." class="gate-subtitle" />
-        <ui:Button name="gate-retry" text="Retry" class="btn" style="display: none;" />
-    </ui:VisualElement>
-
-    <!-- Debug Panel (hidden by default) -->
-    <ui:VisualElement name="debug-panel" class="panel" style="display: none;">
+    <!-- Debug Panel (overlay, toggled separately) -->
+    <ui:VisualElement name="debug-panel" class="panel overlay-panel" style="display: none;">
         <ui:Label text="Debug Weather" class="panel-header" />
         <ui:Button name="debug-close" text="X" class="btn btn-close" />
 
@@ -175,14 +193,11 @@
         </ui:ScrollView>
     </ui:VisualElement>
 
-    <!-- Shop Panel (hidden by default) -->
-    <ui:VisualElement name="shop-panel" class="panel" style="display: none;">
-        <ui:Label text="Seed Shop" class="panel-header" />
-        <ui:Button name="shop-close" text="X" class="btn btn-close" />
-        <ui:ScrollView name="shop-grid" class="scroll-view" />
+    <!-- Location Gate -->
+    <ui:VisualElement name="location-gate" class="gate-panel" picking-mode="Position">
+        <ui:Label name="gate-title" text="Garden" class="gate-title" />
+        <ui:Label name="gate-status" text="Acquiring location..." class="gate-subtitle" />
+        <ui:Button name="gate-retry" text="Retry" class="btn" style="display: none;" />
     </ui:VisualElement>
-
-    <!-- Harvest Result Popup (hidden by default) -->
-    <ui:VisualElement name="harvest-popup" style="display: none;" />
 
 </ui:UXML>
