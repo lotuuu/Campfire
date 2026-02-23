@@ -10,8 +10,9 @@ namespace Garden
         public static WeatherService Instance { get; private set; }
 
         [Header("API Configuration")]
-        [SerializeField] private string apiKey = "";
         [SerializeField] private float pollIntervalMinutes = 15f;
+
+        private string apiKey;
 
         [Header("Debug Override")]
         [SerializeField] private bool useDebugOverride;
@@ -33,7 +34,24 @@ namespace Garden
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
+            LoadApiKey();
         }
+
+        private void LoadApiKey()
+        {
+            var secrets = Resources.Load<TextAsset>("Config/secrets");
+            if (secrets != null)
+            {
+                var data = JsonUtility.FromJson<SecretsData>(secrets.text);
+                apiKey = data.openWeatherMapApiKey;
+            }
+            else
+            {
+                Debug.LogWarning("Config/secrets.json not found — weather API will not work.");
+            }
+        }
+
+        [Serializable] private class SecretsData { public string openWeatherMapApiKey; }
 
         private void Start()
         {

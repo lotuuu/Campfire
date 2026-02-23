@@ -34,5 +34,9 @@ Thumbs.db
 *.unitypackage
 *.app
 
+# Secrets
+Assets/Resources/Config/secrets.json
+Assets/Resources/Config/secrets.json.meta
+
 # Crashlytics
 crashlytics-build.properties
