@@ -18,6 +18,7 @@ namespace Garden
             {
                 SeedRegistry.Instance.AddSeed("Astra", 5);
                 SaveManager.Instance.Data.sunShards = 10;
+                SaveManager.Instance.Data.dewdrops = 200;
                 SaveManager.Instance.Save();
             }
         }
