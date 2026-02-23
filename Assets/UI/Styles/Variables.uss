@@ -1,0 +1,44 @@
+:root {
+    /* Colors - Dark garden theme */
+    --color-bg-dark: rgb(15, 20, 15);
+    --color-bg-panel: rgba(20, 30, 20, 0.95);
+    --color-bg-slot: rgba(40, 55, 40, 0.7);
+    --color-bg-slot-hover: rgba(55, 75, 55, 0.85);
+    --color-border: rgba(80, 120, 80, 0.4);
+    --color-border-accent: rgba(120, 180, 100, 0.6);
+
+    --color-text: rgb(210, 225, 200);
+    --color-text-dim: rgb(140, 160, 130);
+    --color-text-bright: rgb(240, 255, 230);
+    --color-text-accent: rgb(170, 220, 130);
+
+    --color-button-bg: rgba(50, 80, 50, 0.85);
+    --color-button-bg-hover: rgba(65, 100, 65, 0.95);
+    --color-button-bg-active: rgba(80, 130, 80, 1);
+    --color-button-bg-disabled: rgba(40, 50, 40, 0.5);
+
+    --color-highlight: rgb(255, 220, 80);
+    --color-dim: rgb(120, 120, 120);
+    --color-empty: rgba(80, 80, 80, 0.3);
+    --color-unknown: rgba(50, 50, 50, 0.8);
+
+    /* Spacing - mobile scale at 1080 ref width */
+    --spacing-xs: 8px;
+    --spacing-sm: 16px;
+    --spacing-md: 24px;
+    --spacing-lg: 32px;
+    --spacing-xl: 48px;
+
+    /* Border radius */
+    --radius-sm: 8px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+
+    /* Font sizes - mobile readable at 1080 ref width */
+    --font-xs: 24px;
+    --font-sm: 28px;
+    --font-md: 32px;
+    --font-lg: 40px;
+    --font-xl: 52px;
+    --font-xxl: 64px;
+}

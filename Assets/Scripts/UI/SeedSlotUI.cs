@@ -1,28 +1,28 @@
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
+using UnityEngine.UIElements;
 
 namespace Garden
 {
-    public class SeedSlotUI : MonoBehaviour
+    public static class SeedSlotUI
     {
-        [SerializeField] private Image iconImage;
-        [SerializeField] private TextMeshProUGUI nameText;
-        [SerializeField] private TextMeshProUGUI countText;
-        [SerializeField] private Button selectButton;
-
-        private SeedData seed;
-        private System.Action<SeedData> onSelected;
-
-        public void Setup(SeedData data, int count, System.Action<SeedData> callback)
+        public static VisualElement Create(VisualTreeAsset template, SeedData data, int count, System.Action<SeedData> callback)
         {
-            seed = data;
-            onSelected = callback;
-            nameText.text = data.seedName;
-            countText.text = $"x{count}";
-            if (data.icon != null) iconImage.sprite = data.icon;
-            selectButton.onClick.RemoveAllListeners();
-            selectButton.onClick.AddListener(() => onSelected?.Invoke(seed));
+            var root = template.CloneTree();
+            var slot = root.Q<Button>(className: "seed-slot");
+
+            var nameLabel = root.Q<Label>(className: "seed-name");
+            var countLabel = root.Q<Label>(className: "seed-count");
+            var icon = root.Q<VisualElement>(className: "seed-icon");
+
+            if (nameLabel != null) nameLabel.text = data.seedName;
+            if (countLabel != null) countLabel.text = $"x{count}";
+            if (icon != null && data.icon != null)
+                icon.style.backgroundImage = new StyleBackground(data.icon);
+
+            if (slot != null)
+                slot.clicked += () => callback?.Invoke(data);
+
+            return root;
         }
     }
 }

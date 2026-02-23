@@ -1,0 +1,6 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement class="grid-item plant-slot">
+        <ui:VisualElement class="plant-swatch" />
+        <ui:Label class="plant-name" />
+    </ui:VisualElement>
+</ui:UXML>

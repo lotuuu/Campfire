@@ -1,0 +1,7 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Button class="grid-item seed-slot">
+        <ui:VisualElement class="seed-icon" />
+        <ui:Label class="seed-name" />
+        <ui:Label class="seed-count" />
+    </ui:Button>
+</ui:UXML>

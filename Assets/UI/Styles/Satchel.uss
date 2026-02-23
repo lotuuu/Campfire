@@ -1,0 +1,60 @@
+/* Satchel panel styles */
+
+#satchel-panel .seed-slot {
+    width: 220px;
+    height: 260px;
+    min-height: 260px;
+    align-items: center;
+    justify-content: center;
+}
+
+#satchel-panel .seed-icon {
+    width: 96px;
+    height: 96px;
+    margin-bottom: var(--spacing-sm);
+}
+
+#satchel-panel .seed-name {
+    color: var(--color-text);
+    font-size: var(--font-sm);
+    -unity-text-align: middle-center;
+}
+
+#satchel-panel .seed-count {
+    color: var(--color-text-dim);
+    font-size: var(--font-xs);
+}
+
+#probability-panel {
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-md);
+    background-color: rgba(30, 45, 30, 0.8);
+    border-radius: var(--radius-md);
+    border-width: 2px;
+    border-color: var(--color-border);
+}
+
+#selected-seed-name {
+    font-size: var(--font-lg);
+    color: var(--color-text-bright);
+    -unity-font-style: bold;
+    margin-bottom: var(--spacing-sm);
+}
+
+.probability-entry {
+    padding: var(--spacing-xs) var(--spacing-sm);
+}
+
+.probability-name {
+    font-size: var(--font-sm);
+}
+
+#plant-button {
+    align-self: center;
+    width: 320px;
+    height: 96px;
+    min-height: 96px;
+    margin-top: var(--spacing-md);
+    font-size: var(--font-lg);
+    -unity-font-style: bold;
+}

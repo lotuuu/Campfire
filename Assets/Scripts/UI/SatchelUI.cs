@@ -1,46 +1,64 @@
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
+using UnityEngine.UIElements;
 
 namespace Garden
 {
     public class SatchelUI : MonoBehaviour
     {
-        [SerializeField] private Transform seedGrid;
-        [SerializeField] private GameObject seedSlotPrefab;
-        [SerializeField] private GameObject probabilityPanel;
-        [SerializeField] private Transform probabilityGrid;
-        [SerializeField] private GameObject probabilityEntryPrefab;
-        [SerializeField] private Button plantButton;
-        [SerializeField] private Button closeButton;
-        [SerializeField] private TextMeshProUGUI selectedSeedName;
+        private VisualTreeAsset seedSlotTemplate;
+        private VisualTreeAsset probabilityEntryTemplate;
+
+        private VisualElement panel;
+        private ScrollView seedGrid;
+        private VisualElement probabilityPanel;
+        private ScrollView probabilityGrid;
+        private Button plantButton;
+        private Button closeButton;
+        private Label selectedSeedName;
 
         private SeedData selectedSeed;
 
-        private void OnEnable()
+        public void Initialize(VisualElement root)
         {
-            RefreshGrid();
-            probabilityPanel.SetActive(false);
-            plantButton.interactable = false;
+            seedSlotTemplate = Resources.Load<VisualTreeAsset>("UI/Templates/SeedSlot");
+            probabilityEntryTemplate = Resources.Load<VisualTreeAsset>("UI/Templates/ProbabilityEntry");
+
+            panel = root.Q<VisualElement>("satchel-panel");
+            seedGrid = root.Q<ScrollView>("seed-grid");
+            probabilityPanel = root.Q<VisualElement>("probability-panel");
+            probabilityGrid = root.Q<ScrollView>("probability-grid");
+            plantButton = root.Q<Button>("plant-button");
+            closeButton = root.Q<Button>("satchel-close");
+            selectedSeedName = root.Q<Label>("selected-seed-name");
+
+            plantButton.clicked += OnPlant;
+            closeButton.clicked += Hide;
         }
 
-        private void Start()
+        public void Show()
         {
-            plantButton.onClick.AddListener(OnPlant);
-            closeButton.onClick.AddListener(() => gameObject.SetActive(false));
+            panel.style.display = DisplayStyle.Flex;
+            RefreshGrid();
+            probabilityPanel.style.display = DisplayStyle.None;
+            plantButton.SetEnabled(false);
+            selectedSeed = null;
+        }
+
+        public void Hide()
+        {
+            panel.style.display = DisplayStyle.None;
         }
 
         private void RefreshGrid()
         {
-            foreach (Transform child in seedGrid) Destroy(child.gameObject);
+            seedGrid.Clear();
 
             var seeds = SeedRegistry.Instance.GetOwnedSeeds();
             foreach (var seed in seeds)
             {
-                var slot = Instantiate(seedSlotPrefab, seedGrid);
                 int count = SeedRegistry.Instance.GetSeedCount(seed.seedName);
-                slot.GetComponent<SeedSlotUI>().Setup(seed, count, OnSeedSelected);
+                var slot = SeedSlotUI.Create(seedSlotTemplate, seed, count, OnSeedSelected);
+                seedGrid.Add(slot);
             }
         }
 
@@ -48,27 +66,28 @@ namespace Garden
         {
             selectedSeed = seed;
             selectedSeedName.text = seed.seedName;
-            plantButton.interactable = true;
+            plantButton.SetEnabled(true);
             ShowProbabilities(seed);
         }
 
         private void ShowProbabilities(SeedData seed)
         {
-            probabilityPanel.SetActive(true);
-            foreach (Transform child in probabilityGrid) Destroy(child.gameObject);
+            probabilityPanel.style.display = DisplayStyle.Flex;
+            probabilityGrid.Clear();
 
             var weather = WeatherService.Instance.CurrentWeather;
             var probs = GeneticsEngine.GetProbabilities(seed, weather);
 
             foreach (var (variant, isHigh) in probs)
             {
-                var entry = Instantiate(probabilityEntryPrefab, probabilityGrid);
-                var text = entry.GetComponentInChildren<TextMeshProUGUI>();
-                if (text != null)
+                var entry = probabilityEntryTemplate.CloneTree();
+                var nameLabel = entry.Q<Label>(className: "probability-name");
+                if (nameLabel != null)
                 {
-                    text.text = variant.variantName;
-                    text.color = isHigh ? Color.yellow : Color.gray;
+                    nameLabel.text = variant.variantName;
+                    nameLabel.style.color = isHigh ? Color.yellow : Color.gray;
                 }
+                probabilityGrid.Add(entry);
             }
         }
 
@@ -76,7 +95,7 @@ namespace Garden
         {
             if (selectedSeed == null || PlantManager.Instance.State != PlantState.Empty) return;
             PlantManager.Instance.Plant(selectedSeed);
-            gameObject.SetActive(false);
+            Hide();
         }
     }
 }
