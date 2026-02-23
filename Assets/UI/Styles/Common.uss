@@ -137,3 +137,56 @@
     margin-bottom: var(--spacing-lg);
     -unity-text-align: middle-center;
 }
+
+/* Page content (inside SwipeablePageView) */
+.page-content {
+    flex-grow: 1;
+    padding: var(--spacing-lg);
+    padding-top: var(--spacing-md);
+}
+
+/* Overlay panel (debug etc) - stays absolute */
+.overlay-panel {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: var(--color-bg-panel);
+}
+
+/* Bottom sheet overlay */
+.scrim {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.bottom-sheet {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 70%;
+    background-color: rgba(15, 25, 35, 0.95);
+    border-top-left-radius: var(--radius-lg);
+    border-top-right-radius: var(--radius-lg);
+    border-top-width: 1px;
+    border-top-color: rgba(140, 230, 240, 0.25);
+    padding: var(--spacing-md) var(--spacing-lg);
+    transition-property: translate;
+    transition-duration: 250ms;
+    transition-timing-function: ease-out;
+}
+
+.bottom-sheet-handle {
+    width: 40px;
+    height: 4px;
+    border-radius: 2px;
+    background-color: rgba(120, 150, 170, 0.4);
+    align-self: center;
+    margin-bottom: var(--spacing-sm);
+}
