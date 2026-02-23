@@ -12,32 +12,23 @@ namespace Garden
         private Label dustRateText;
         private Label slotsText;
         private Button expandButton;
-        private Button closeButton;
 
         public void Initialize(VisualElement root)
         {
             plantSlotTemplate = Resources.Load<VisualTreeAsset>("UI/Templates/PlantSlot");
 
-            panel = root.Q<VisualElement>("greenhouse-panel");
-            plantGrid = root.Q<ScrollView>("plant-grid");
-            dustRateText = root.Q<Label>("dust-rate");
-            slotsText = root.Q<Label>("slots-text");
-            expandButton = root.Q<Button>("expand-button");
-            closeButton = root.Q<Button>("greenhouse-close");
+            panel = root.Q<VisualElement>("greenhouse-page");
+            plantGrid = root.Q<ScrollView>("greenhouse-grid");
+            dustRateText = root.Q<Label>("greenhouse-dust-rate");
+            slotsText = root.Q<Label>("greenhouse-slots-text");
+            expandButton = root.Q<Button>("greenhouse-expand-button");
 
             expandButton.clicked += OnExpand;
-            closeButton.clicked += Hide;
         }
 
         public void Show()
         {
-            panel.style.display = DisplayStyle.Flex;
             RefreshDisplay();
-        }
-
-        public void Hide()
-        {
-            panel.style.display = DisplayStyle.None;
         }
 
         public void RefreshDisplay()

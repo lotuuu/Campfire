@@ -13,32 +13,22 @@ namespace Garden
         private Label detailDescription;
         private Label detailRarity;
         private VisualElement detailColorSwatch;
-        private Button closeButton;
 
         public void Initialize(VisualElement root)
         {
             variantEntryTemplate = Resources.Load<VisualTreeAsset>("UI/Templates/VariantEntry");
 
-            panel = root.Q<VisualElement>("codex-panel");
+            panel = root.Q<VisualElement>("codex-page");
             variantGrid = root.Q<ScrollView>("variant-grid");
             detailName = root.Q<Label>("detail-name");
             detailDescription = root.Q<Label>("detail-description");
             detailRarity = root.Q<Label>("detail-rarity");
             detailColorSwatch = root.Q<VisualElement>("detail-color-swatch");
-            closeButton = root.Q<Button>("codex-close");
-
-            closeButton.clicked += Hide;
         }
 
         public void Show()
         {
-            panel.style.display = DisplayStyle.Flex;
             RefreshCodex();
-        }
-
-        public void Hide()
-        {
-            panel.style.display = DisplayStyle.None;
         }
 
         private void RefreshCodex()
