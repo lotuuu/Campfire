@@ -42,6 +42,15 @@ namespace Garden
 
         private IEnumerator InitializeLocation()
         {
+#if UNITY_EDITOR
+            Debug.Log("Editor detected — using simulated weather.");
+            useDebugOverride = true;
+            hasLocation = true;
+            IsLocationResolved = true;
+            ApplyDebugWeather();
+            OnLocationResolved?.Invoke(true);
+            yield break;
+#else
             Input.location.Start(500f, 500f);
 
             int timeout = 20;
@@ -67,6 +76,7 @@ namespace Garden
                 Debug.LogWarning($"Location failed (status: {Input.location.status}).");
                 OnLocationResolved?.Invoke(false);
             }
+#endif
         }
 
         private IEnumerator FetchWeatherLoop()
