@@ -1,23 +1,23 @@
-/* Greenhouse panel styles */
+/* Greenhouse panel styles - mobile-first sizing */
 
 #greenhouse-panel .plant-slot {
-    width: 200px;
-    height: 180px;
-    min-height: 180px;
+    width: 260px;
+    height: 240px;
+    min-height: 240px;
     align-items: center;
     justify-content: center;
 }
 
 #greenhouse-panel .plant-swatch {
-    width: 64px;
-    height: 64px;
-    border-radius: 32px;
+    width: 96px;
+    height: 96px;
+    border-radius: 48px;
     margin-bottom: var(--spacing-sm);
 }
 
 #greenhouse-panel .plant-name {
     color: var(--color-text);
-    font-size: var(--font-xs);
+    font-size: var(--font-sm);
     -unity-text-align: middle-center;
 }
 
@@ -25,21 +25,21 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
 }
 
 #dust-rate {
     color: var(--color-text-accent);
-    font-size: var(--font-sm);
+    font-size: var(--font-md);
 }
 
 #slots-text {
     color: var(--color-text-dim);
-    font-size: var(--font-sm);
+    font-size: var(--font-md);
 }
 
 #expand-button {
     align-self: center;
-    width: 320px;
+    width: 400px;
     margin-top: var(--spacing-md);
 }

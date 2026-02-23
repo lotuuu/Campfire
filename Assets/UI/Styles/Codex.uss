@@ -1,29 +1,29 @@
-/* Codex panel styles */
+/* Codex panel styles - mobile-first sizing */
 
 #codex-panel .variant-entry {
-    width: 200px;
-    height: 180px;
-    min-height: 180px;
+    width: 260px;
+    height: 240px;
+    min-height: 240px;
     align-items: center;
     justify-content: center;
 }
 
 #codex-panel .variant-swatch {
-    width: 64px;
-    height: 64px;
-    border-radius: 32px;
+    width: 96px;
+    height: 96px;
+    border-radius: 48px;
     margin-bottom: var(--spacing-sm);
 }
 
 #codex-panel .variant-name {
     color: var(--color-text);
-    font-size: var(--font-xs);
+    font-size: var(--font-sm);
     -unity-text-align: middle-center;
 }
 
 #detail-panel {
     margin-top: var(--spacing-md);
-    padding: var(--spacing-md);
+    padding: var(--spacing-lg);
     background-color: rgba(15, 30, 40, 0.50);
     border-radius: var(--radius-md);
     border-width: 1px;
@@ -32,28 +32,28 @@
 }
 
 #detail-name {
-    font-size: var(--font-lg);
+    font-size: var(--font-xl);
     color: var(--color-text-bright);
     -unity-font-style: bold;
 }
 
 #detail-description {
-    font-size: var(--font-sm);
+    font-size: var(--font-md);
     color: var(--color-text);
     margin-top: var(--spacing-sm);
     white-space: normal;
 }
 
 #detail-rarity {
-    font-size: var(--font-sm);
+    font-size: var(--font-md);
     color: var(--color-text-accent);
     margin-top: var(--spacing-sm);
 }
 
 #detail-color-swatch {
-    width: 48px;
-    height: 48px;
-    border-radius: 24px;
+    width: 64px;
+    height: 64px;
+    border-radius: 32px;
     margin-top: var(--spacing-sm);
     border-width: 1px;
     border-color: rgba(120, 200, 220, 0.25);
