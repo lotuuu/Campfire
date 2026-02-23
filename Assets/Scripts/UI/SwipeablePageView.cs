@@ -52,9 +52,12 @@ namespace Garden
 
         public void AddPage(VisualElement page)
         {
-            page.style.width = new Length(100, LengthUnit.Percent);
             page.style.height = new Length(100, LengthUnit.Percent);
             page.style.flexShrink = 0;
+            // Width set in absolute pixels by UpdatePageWidths (not percentage,
+            // since the container is N*viewport wide and 100% would resolve too large)
+            if (pageWidth > 0)
+                page.style.width = pageWidth;
             pageContainer.Add(page);
             pageCount = pageContainer.childCount;
             UpdateContainerWidth();
@@ -162,21 +165,32 @@ namespace Garden
                     targetPage = currentPageIndex - 1;
             }
 
+            bool pageChanged = targetPage != currentPageIndex;
             currentPageIndex = targetPage;
             AnimateToCurrentPage(true);
-            OnPageChanged?.Invoke(currentPageIndex);
+            if (pageChanged)
+                OnPageChanged?.Invoke(currentPageIndex);
         }
 
         private void OnGeometryChanged(GeometryChangedEvent evt)
         {
             pageWidth = resolvedStyle.width;
+            UpdatePageWidths();
             UpdateContainerWidth();
             AnimateToCurrentPage(false);
         }
 
+        private void UpdatePageWidths()
+        {
+            if (pageWidth <= 0) return;
+            foreach (var child in pageContainer.Children())
+                child.style.width = pageWidth;
+        }
+
         private void UpdateContainerWidth()
         {
-            pageContainer.style.width = new Length(pageCount * 100, LengthUnit.Percent);
+            if (pageWidth > 0)
+                pageContainer.style.width = pageCount * pageWidth;
         }
     }
 }
