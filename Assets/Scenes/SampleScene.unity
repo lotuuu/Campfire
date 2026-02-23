@@ -15341,7 +15341,6 @@ GameObject:
   - component: {fileID: 1564428224}
   - component: {fileID: 1564428223}
   - component: {fileID: 1564428232}
-  - component: {fileID: 1564428231}
   - component: {fileID: 1564428230}
   - component: {fileID: 1564428229}
   - component: {fileID: 1564428228}
@@ -15351,6 +15350,7 @@ GameObject:
   - component: {fileID: 1564428235}
   - component: {fileID: 1564428234}
   - component: {fileID: 1564428233}
+  - component: {fileID: 1564428236}
   m_Layer: 0
   m_Name: --- UI ---
   m_TagString: Untagged
@@ -15468,18 +15468,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad1fa768ea09b470a8b4b25f4b01f0db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Garden::Garden.ResonanceBar
---- !u!114 &1564428231
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1564428222}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ae3f657c01b7942ed9cfce5cff4b270e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Garden::Garden.PulseButton
 --- !u!114 &1564428232
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15492,7 +15480,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2caa7af616fdf494fb3225456e3fc390, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Garden::Garden.HortusUI
-  plantVisual: {fileID: 1872355013}
   uiDocument: {fileID: 1564428223}
 --- !u!114 &1564428233
 MonoBehaviour:
@@ -15530,6 +15517,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2054cc6397eb140bbb8e07278fbfa0c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Garden::Garden.TerrariumUI
+--- !u!114 &1564428236
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1564428222}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d80899ec7c6ec42b09502d51d533b205, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Garden::Garden.HearthViewUI
 --- !u!1 &1571088094
 GameObject:
   m_ObjectHideFlags: 0
@@ -15693,7 +15692,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1872355013
 MonoBehaviour:
   m_ObjectHideFlags: 0
