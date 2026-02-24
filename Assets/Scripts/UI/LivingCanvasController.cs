@@ -63,6 +63,7 @@ namespace Garden
         private Color currentTop;
         private Color currentBottom;
         private Coroutine fadeCoroutine;
+        private Coroutine _waitCoroutine;
 
         // ── Lifecycle ──────────────────────────────────────────────────
 
@@ -91,12 +92,13 @@ namespace Garden
             }
             else
             {
-                StartCoroutine(WaitForWeatherService());
+                _waitCoroutine = StartCoroutine(WaitForWeatherService());
             }
         }
 
         private void OnDisable()
         {
+            if (_waitCoroutine != null) { StopCoroutine(_waitCoroutine); _waitCoroutine = null; }
             if (WeatherService.Instance != null)
                 WeatherService.Instance.OnWeatherUpdated -= OnWeatherUpdated;
         }
@@ -111,7 +113,7 @@ namespace Garden
         {
             while (WeatherService.Instance == null)
                 yield return null;
-
+            _waitCoroutine = null;
             WeatherService.Instance.OnWeatherUpdated += OnWeatherUpdated;
             OnWeatherUpdated(WeatherService.Instance.CurrentWeather);
         }
