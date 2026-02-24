@@ -28,8 +28,8 @@
 }
 
 .nav-icon {
-    width: 72px;
-    height: 72px;
+    width: 96px;
+    height: 96px;
     -unity-background-scale-mode: scale-to-fit;
     -unity-background-image-tint-color: rgb(185, 210, 225);
     transition-property: -unity-background-image-tint-color;
