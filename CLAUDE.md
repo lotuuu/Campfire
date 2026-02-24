@@ -93,3 +93,25 @@ Backward compat: both v1 (`activePlant`) and v2 (`activeSlots`) fields are writt
 - Templates: `Assets/Resources/UI/Templates/*.uxml`
 - Tests: `Assets/Tests/EditMode/`
 - Scene: `Assets/Scenes/SampleScene.unity`
+
+## Unity Development
+
+When editing Unity prefab/asset values, ALWAYS edit the serialized .asset/.prefab YAML files directly — never rely on changing C# code defaults, as Unity's serialized field values take precedence over code defaults.
+
+When the Unity MCP tool is unavailable or unreliable (especially for asset rename/move operations), fall back immediately to direct filesystem operations (Bash mv + manual .meta file handling) rather than retrying MCP repeatedly.
+
+After implementing any visual/VFX/animation feature in Unity, always verify it will actually render by checking: sorting layers, sorting orders relative to Canvas/HUD, and that the rendering approach is appropriate (e.g., don't use UI.Image for world-space trail effects).
+
+When creating or modifying weapons/items/abilities that interact with player physics (velocity, movement, size), always check for conflicts with PlayerMovement's FixedUpdate loop, existing coroutines, and PlayerAnimator's per-frame overrides before implementing.
+
+### Physics & Movement
+
+Use reasonable, conservative initial values for physics parameters (speed, force, friction, boost multipliers). For reference: typical swipeBoost ~2-4, maxSpeed ~5-8, friction ~0.5-1.5. Never set extreme values like 10-15 without explicit user request.
+
+## Workflow Preferences
+
+When the user reports a specific bug and indicates they already know the cause, apply the minimal targeted fix immediately. Do NOT launch broad debugging investigations or over-investigate unless asked.
+
+For git commits, split changes into logical atomic commits by feature/fix area. When asked to 'commit', check for unrelated changes and offer to split them.
+
+When implementing a plan or feature, always generate ALL required artifacts (code, asset files, audio files, prefab wiring) in one pass. Do not stop at just writing code and wait for the user to say 'do it' for the rest.
