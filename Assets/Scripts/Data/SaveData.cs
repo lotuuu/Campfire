@@ -20,6 +20,16 @@ namespace Garden
 
         // v2: terrarium environments
         public List<string> unlockedEnvironments = new();
+
+        // v3: per-environment unlocked slot counts
+        public List<EnvironmentSlotsSave> environmentSlots = new();
+    }
+
+    [Serializable]
+    public class EnvironmentSlotsSave
+    {
+        public string environmentName;
+        public int unlockedSlots;
     }
 
     [Serializable]

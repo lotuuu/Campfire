@@ -11,6 +11,7 @@ namespace Garden
         private List<EnvironmentData> environments = new();
 
         public event Action<int> OnEnvironmentUnlocked;
+        public event Action<int> OnSlotUnlocked;
 
         public IReadOnlyList<EnvironmentData> Environments => environments;
 
@@ -70,6 +71,47 @@ namespace Garden
         {
             if (envIndex < 0 || envIndex >= environments.Count) return 0;
             return environments[envIndex].slotCount;
+        }
+
+        public int GetActiveSlotCount(int envIndex)
+        {
+            if (envIndex < 0 || envIndex >= environments.Count) return 0;
+            var env = environments[envIndex];
+            var entry = SaveManager.Instance.Data.environmentSlots
+                .Find(e => e.environmentName == env.environmentName);
+            return entry != null ? entry.unlockedSlots : env.slotCount;
+        }
+
+        public bool CanUnlockSlot(int envIndex)
+        {
+            if (envIndex < 0 || envIndex >= environments.Count) return false;
+            var env = environments[envIndex];
+            return GetActiveSlotCount(envIndex) < env.maxSlotCount
+                && CurrencyManager.Instance.CanAfford(CurrencyType.Dewdrops, env.slotUnlockCostDewdrops);
+        }
+
+        public bool UnlockSlot(int envIndex)
+        {
+            if (envIndex < 0 || envIndex >= environments.Count) return false;
+            var env = environments[envIndex];
+            int current = GetActiveSlotCount(envIndex);
+            if (current >= env.maxSlotCount) return false;
+            if (!CurrencyManager.Instance.Spend(CurrencyType.Dewdrops, env.slotUnlockCostDewdrops))
+                return false;
+
+            var save = SaveManager.Instance.Data;
+            var entry = save.environmentSlots.Find(e => e.environmentName == env.environmentName);
+            if (entry == null)
+            {
+                entry = new EnvironmentSlotsSave { environmentName = env.environmentName, unlockedSlots = env.slotCount };
+                save.environmentSlots.Add(entry);
+            }
+            entry.unlockedSlots++;
+            SaveManager.Instance.Save();
+
+            PlantManager.Instance.AddSlot(envIndex, current);
+            OnSlotUnlocked?.Invoke(envIndex);
+            return true;
         }
     }
 }

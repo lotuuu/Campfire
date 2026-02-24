@@ -13,8 +13,10 @@ MonoBehaviour:
   m_Name: Conservatory
   m_EditorClassIdentifier: Garden::Garden.EnvironmentData
   environmentName: Deep Conservatory
-  slotCount: 4
+  slotCount: 2
+  maxSlotCount: 6
   unlockCostDewdrops: 25000
+  slotUnlockCostDewdrops: 5000
   growthSpeedBonus: 0
   bonusCondition:
     useTemperature: 0

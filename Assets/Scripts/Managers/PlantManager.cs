@@ -222,6 +222,12 @@ namespace Garden
                 ?? GetFirstSlotInState(PlantState.Growing);
         }
 
+        public void AddSlot(int envIndex, int slotIndex)
+        {
+            slots.Add(new PlantSlot { environmentIndex = envIndex, slotIndex = slotIndex });
+            OnPlantStateChanged?.Invoke();
+        }
+
         private void InitializeSlots()
         {
             slots.Clear();
@@ -230,7 +236,8 @@ namespace Garden
             var envs = EnvironmentManager.Instance.Environments;
             for (int e = 0; e < envs.Count; e++)
             {
-                for (int s = 0; s < envs[e].slotCount; s++)
+                int count = EnvironmentManager.Instance.GetActiveSlotCount(e);
+                for (int s = 0; s < count; s++)
                 {
                     slots.Add(new PlantSlot
                     {

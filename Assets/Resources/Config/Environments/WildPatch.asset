@@ -13,8 +13,10 @@ MonoBehaviour:
   m_Name: WildPatch
   m_EditorClassIdentifier: Garden::Garden.EnvironmentData
   environmentName: The Wild Patch
-  slotCount: 4
+  slotCount: 2
+  maxSlotCount: 6
   unlockCostDewdrops: 15000
+  slotUnlockCostDewdrops: 3000
   growthSpeedBonus: 0
   bonusCondition:
     useTemperature: 0
