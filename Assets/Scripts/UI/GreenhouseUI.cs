@@ -53,7 +53,7 @@ namespace Garden
 
             var gm = GreenhouseManager.Instance;
             slotsText.text = $"{gm.Plants.Count} / {gm.MaxSlots}";
-            dustRateText.text = $"+{gm.GetTotalDustPerHour():F1} Aura Dust/hr";
+            dustRateText.text = $"+{gm.GetTotalDustPerSecond() * 3600f:F1} Aura Dust/hr";
 
             for (int i = 0; i < gm.Plants.Count; i++)
             {
@@ -97,7 +97,8 @@ namespace Garden
                 filledSlotRoots[selectedIndex]?.RemoveFromClassList("plant-slot--selected");
 
             selectedIndex = index;
-            filledSlotRoots[index]?.AddToClassList("plant-slot--selected");
+            if (index >= 0 && index < filledSlotRoots.Count)
+                filledSlotRoots[index]?.AddToClassList("plant-slot--selected");
             UpdateSellBar(index);
         }
 
@@ -118,7 +119,7 @@ namespace Garden
             var seed = SeedRegistry.Instance.GetSeed(plant.seedName);
             int baseSell = seed != null ? seed.baseSellPrice : 100;
             int sellValue = config.GetSellValue(baseSell, plant.qualityTier);
-            float dustRate = config.GetDustPerHourForPlant(plant.rarity, plant.qualityTier);
+            float dustRate = config.GetDustPerSecondForPlant(plant.rarity, plant.qualityTier) * 3600f;
             string qualityLabel = CurrencyConfig.GetQualityLabel(plant.qualityTier);
 
             if (sellNameLabel != null) sellNameLabel.text = $"{plant.variantName} · {qualityLabel}";
