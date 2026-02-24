@@ -1,6 +1,6 @@
 /* Codex panel styles - mobile-first sizing */
 
-#codex-panel .variant-entry {
+#codex-page .variant-entry {
     width: 300px;
     height: 300px;
     min-height: 300px;
@@ -8,14 +8,14 @@
     justify-content: center;
 }
 
-#codex-panel .variant-swatch {
+#codex-page .variant-swatch {
     width: 128px;
     height: 128px;
     border-radius: 64px;
     margin-bottom: var(--spacing-sm);
 }
 
-#codex-panel .variant-name {
+#codex-page .variant-name {
     color: var(--color-text-bright);
     font-size: var(--font-md);
     -unity-text-align: middle-center;
