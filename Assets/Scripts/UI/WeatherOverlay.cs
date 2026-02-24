@@ -8,6 +8,9 @@ namespace Garden
         [SerializeField] private ParticleSystem rainEffect;
         [SerializeField] private ParticleSystem snowEffect;
         [SerializeField] private ParticleSystem windLines;
+        [SerializeField] private float rainEmissionRate = 300f;
+        [SerializeField] private float stormEmissionRate = 600f;
+        [SerializeField] private float windSpeedThreshold = 5f;
 
         private void OnEnable()
         {
@@ -34,6 +37,7 @@ namespace Garden
         {
             while (WeatherService.Instance == null)
                 yield return null;
+            WeatherService.Instance.OnWeatherUpdated -= UpdateEffects;
             WeatherService.Instance.OnWeatherUpdated += UpdateEffects;
             UpdateEffects(WeatherService.Instance.CurrentWeather);
         }
@@ -49,7 +53,7 @@ namespace Garden
                     if (rainEffect != null)
                     {
                         var emission = rainEffect.emission;
-                        emission.rateOverTime = w.condition == WeatherCondition.Storm ? 600f : 300f;
+                        emission.rateOverTime = w.condition == WeatherCondition.Storm ? stormEmissionRate : rainEmissionRate;
                         rainEffect.Play();
                     }
                     if (w.condition == WeatherCondition.Storm && windLines != null)
@@ -60,7 +64,7 @@ namespace Garden
                     break;
             }
 
-            if (w.windSpeed > 5f && windLines != null && !windLines.isPlaying)
+            if (w.windSpeed > windSpeedThreshold && windLines != null && !windLines.isPlaying)
                 windLines.Play();
         }
 
