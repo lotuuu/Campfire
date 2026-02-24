@@ -32,11 +32,21 @@
 
         <!-- Bottom navigation -->
         <ui:VisualElement name="bottom-nav">
-            <ui:Button name="tab-codex" text="Codex" class="nav-tab" />
-            <ui:Button name="tab-shop" text="Shop" class="nav-tab" />
-            <ui:Button name="tab-terrarium" text="Terrarium" class="nav-tab nav-tab-active" />
-            <ui:Button name="tab-greenhouse" text="Greenhouse" class="nav-tab" />
-            <ui:Button name="tab-locked" text="..." class="nav-tab nav-tab-disabled" />
+            <ui:Button name="tab-codex" class="nav-tab">
+                <ui:VisualElement class="nav-icon" />
+            </ui:Button>
+            <ui:Button name="tab-shop" class="nav-tab">
+                <ui:VisualElement class="nav-icon" />
+            </ui:Button>
+            <ui:Button name="tab-terrarium" class="nav-tab nav-tab-active">
+                <ui:VisualElement class="nav-icon" />
+            </ui:Button>
+            <ui:Button name="tab-greenhouse" class="nav-tab">
+                <ui:VisualElement class="nav-icon" />
+            </ui:Button>
+            <ui:Button name="tab-locked" class="nav-tab nav-tab-disabled">
+                <ui:VisualElement class="nav-icon" />
+            </ui:Button>
         </ui:VisualElement>
     </ui:VisualElement>
 

@@ -14,7 +14,6 @@
 .nav-tab {
     flex-grow: 1;
     background-color: transparent;
-    color: rgb(185, 210, 225);
     border-width: 0;
     border-top-width: 3px;
     border-top-color: transparent;
@@ -22,25 +21,58 @@
     padding: var(--spacing-sm) var(--spacing-xs);
     margin: 0 var(--spacing-xs);
     min-height: 110px;
-    font-size: var(--font-md);
-    -unity-text-align: middle-center;
-    transition-property: color, border-top-color;
+    justify-content: center;
+    align-items: center;
+    transition-property: border-top-color;
+    transition-duration: 0.2s;
+}
+
+.nav-icon {
+    width: 72px;
+    height: 72px;
+    -unity-background-scale-mode: scale-to-fit;
+    -unity-background-image-tint-color: rgb(185, 210, 225);
+    transition-property: -unity-background-image-tint-color;
     transition-duration: 0.2s;
 }
 
 .nav-tab-active {
-    color: rgb(100, 230, 230);
     border-top-color: rgb(100, 230, 230);
 }
 
-.nav-tab-disabled {
-    color: rgba(140, 165, 185, 0.45);
+.nav-tab-active .nav-icon {
+    -unity-background-image-tint-color: rgb(100, 230, 230);
 }
 
-.nav-tab:hover {
-    color: rgb(220, 238, 245);
+.nav-tab-disabled .nav-icon {
+    -unity-background-image-tint-color: rgba(140, 165, 185, 0.40);
 }
 
-.nav-tab-disabled:hover {
-    color: rgba(140, 165, 185, 0.45);
+.nav-tab:hover .nav-icon {
+    -unity-background-image-tint-color: rgb(220, 238, 245);
+}
+
+.nav-tab-disabled:hover .nav-icon {
+    -unity-background-image-tint-color: rgba(140, 165, 185, 0.40);
+}
+
+/* Per-tab icon images */
+#tab-codex .nav-icon {
+    background-image: url('../../ThirdParty/icons/delapouite-greenhouse.png');
+}
+
+#tab-shop .nav-icon {
+    background-image: url('../../ThirdParty/icons/delapouite-shopping-cart.png');
+}
+
+#tab-terrarium .nav-icon {
+    background-image: url('../../ThirdParty/icons/lorc-flower-pot.png');
+}
+
+#tab-greenhouse .nav-icon {
+    background-image: url('../../ThirdParty/icons/delapouite-greenhouse.png');
+}
+
+#tab-locked .nav-icon {
+    background-image: url('../../ThirdParty/icons/lorc-stone-block.png');
 }
