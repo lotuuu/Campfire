@@ -1,5 +1,4 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements"
-         xmlns:uie="UnityEditor.UIElements">
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
 
     <Style src="../Styles/Variables.uss" />
     <Style src="../Styles/Common.uss" />
@@ -22,9 +21,9 @@
             <ui:VisualElement class="top-bar-side">
                 <ui:Button name="debug-toggle" text="⚙" class="btn-debug-toggle" />
             </ui:VisualElement>
-            <ui:Label name="weather-text" text="--°C  ·  --  ·  --" picking-mode="Ignore" />
+            <ui:Label name="weather-text" class="hud-glass-card" text="--°C  ·  --  ·  --" picking-mode="Ignore" />
             <ui:VisualElement name="currency-panel">
-                <ui:VisualElement name="currency-card">
+                <ui:VisualElement name="currency-card" class="hud-glass-card">
                     <ui:Label name="dewdrops-text" class="currency-label" text="Dew: 0" />
                     <ui:Label name="sun-shards-text" class="currency-label" text="Sun: 0" />
                     <ui:Label name="aura-dust-text" class="currency-label" text="Dust: 0" />
@@ -99,7 +98,7 @@
     <!-- Page 4: Locked -->
     <ui:VisualElement name="locked-page" class="page-content" style="display: none;">
         <ui:VisualElement style="flex-grow: 1; justify-content: center; align-items: center;">
-            <ui:Label text="Coming Soon" class="label-dim" style="font-size: 40px;" />
+            <ui:Label text="Coming Soon" class="label-dim label-coming-soon" />
         </ui:VisualElement>
     </ui:VisualElement>
 
@@ -185,6 +184,7 @@
             <ui:Label name="current-time-label" class="label-dim" />
 
             <ui:VisualElement class="separator" />
+            <ui:Button name="max-currency-button" text="Max Currency" class="btn" />
             <ui:Button name="clear-save-button" text="Clear Save Data" class="btn" />
         </ui:ScrollView>
     </ui:VisualElement>

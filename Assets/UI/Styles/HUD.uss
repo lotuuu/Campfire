@@ -1,4 +1,14 @@
 /* HUD: app shell + top bar */
+/* Shared glass card style for top-bar elements */
+.hud-glass-card {
+    background-color: rgba(10, 20, 30, 0.45);
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-width: 1px;
+    border-color: rgba(120, 200, 220, 0.20);
+    border-top-color: rgba(140, 230, 240, 0.30);
+}
+
 
 #app-shell {
     position: absolute;
@@ -24,12 +34,6 @@
 #weather-text {
     color: var(--color-text);
     font-size: var(--font-sm);
-    background-color: rgba(10, 20, 30, 0.45);
-    border-radius: var(--radius-sm);
-    padding: var(--spacing-sm) var(--spacing-md);
-    border-width: 1px;
-    border-color: rgba(120, 200, 220, 0.20);
-    border-top-color: rgba(140, 230, 240, 0.30);
 }
 
 #currency-panel {
@@ -38,12 +42,6 @@
 }
 
 #currency-card {
-    background-color: rgba(10, 20, 30, 0.45);
-    border-radius: var(--radius-sm);
-    padding: var(--spacing-sm) var(--spacing-md);
-    border-width: 1px;
-    border-color: rgba(120, 200, 220, 0.20);
-    border-top-color: rgba(140, 230, 240, 0.30);
     align-items: flex-end;
 }
 

@@ -97,7 +97,8 @@ namespace Garden
                 if (nameLabel != null)
                 {
                     nameLabel.text = variant.variantName;
-                    nameLabel.style.color = isHigh ? Color.yellow : Color.gray;
+                    nameLabel.EnableInClassList("probability-high", isHigh);
+                    nameLabel.EnableInClassList("probability-low", !isHigh);
                 }
                 probabilityGrid.Add(entry);
             }
