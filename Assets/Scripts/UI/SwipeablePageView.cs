@@ -15,6 +15,7 @@ namespace Garden
         private int pageCount;
         private bool isDragging;
         private bool pointerCaptured;
+        private int activePointerId = -1;
         private float dragStartX;
         private float dragStartY;
         private float dragCurrentX;
@@ -94,6 +95,8 @@ namespace Garden
         private void OnPointerDown(PointerDownEvent evt)
         {
             if (evt.button != 0) return;
+            if (activePointerId != -1) return;
+            activePointerId = evt.pointerId;
             isDragging = true;
             pointerCaptured = false;
             dragStartX = evt.position.x;
@@ -110,6 +113,7 @@ namespace Garden
         private void OnPointerMove(PointerMoveEvent evt)
         {
             if (!isDragging) return;
+            if (evt.pointerId != activePointerId) return;
 
             float dx = evt.position.x - dragStartX;
             float dy = evt.position.y - dragStartY;
@@ -128,6 +132,7 @@ namespace Garden
                     else
                     {
                         // Vertical drag — abort tracking so ScrollView keeps control.
+                        activePointerId = -1;
                         isDragging = false;
                         return;
                     }
@@ -149,6 +154,8 @@ namespace Garden
         private void OnPointerUp(PointerUpEvent evt)
         {
             if (!isDragging) return;
+            if (evt.pointerId != activePointerId) return;
+            activePointerId = -1;
             FinishDrag();
             if (pointerCaptured)
             {
@@ -160,6 +167,8 @@ namespace Garden
         private void OnPointerCancel(PointerCancelEvent evt)
         {
             if (!isDragging) return;
+            if (evt.pointerId != activePointerId) return;
+            activePointerId = -1;
             FinishDrag();
             if (pointerCaptured)
             {
