@@ -23,4 +23,4 @@ MonoBehaviour:
   epicDustPerHour: 20
   legendaryDustPerHour: 50
   defaultSlots: 6
-  slotCostSunShards: 50
+  greenhouseExpandCostDewdrops: 300
