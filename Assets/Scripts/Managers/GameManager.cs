@@ -18,9 +18,8 @@ namespace Garden
             if (SaveManager.Instance.Data.seedInventory.Count == 0)
             {
                 SeedRegistry.Instance.AddSeed("Quicksprout", 5);
-                SaveManager.Instance.Data.sunShards = 10;
-                SaveManager.Instance.Data.dewdrops = 200;
-                SaveManager.Instance.Save();
+                CurrencyManager.Instance.Add(CurrencyType.SunShards, 10);
+                CurrencyManager.Instance.Add(CurrencyType.Dewdrops, 200);
             }
         }
     }
