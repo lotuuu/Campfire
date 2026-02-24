@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -8,10 +7,9 @@ namespace Garden
     {
         private Button[] tabs;
         private SwipeablePageView pageView;
-        private int lockedTabIndex = 4;
 
         private static readonly string[] TabNames = {
-            "tab-codex", "tab-shop", "tab-terrarium", "tab-greenhouse", "tab-locked"
+            "tab-codex", "tab-shop", "tab-terrarium", "tab-greenhouse", "tab-construction"
         };
 
         public void Initialize(VisualElement root, SwipeablePageView pageView)
@@ -32,7 +30,6 @@ namespace Garden
 
         private void OnTabClicked(int index)
         {
-            if (index == lockedTabIndex) return;
             pageView.GoToPage(index);
         }
 
