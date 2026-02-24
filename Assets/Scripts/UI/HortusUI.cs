@@ -21,6 +21,7 @@ namespace Garden
         private GreenhouseUI greenhouseUI;
         private HarvestResultUI harvestResultUI;
         private DebugWeatherPanel debugPanel;
+        [SerializeField] private HearthIsometricView hearthIsoView;
 
         // Location gate
         private VisualElement locationGate;
@@ -122,7 +123,10 @@ namespace Garden
 
         private void OnPageChanged(int pageIndex)
         {
-            // Refresh page content on navigation
+            // Show/hide isometric tiles only on terrarium page (index 2)
+            hearthIsoView?.gameObject.SetActive(pageIndex == 2);
+            hearthViewUI?.SetPageActive(pageIndex == 2);
+
             switch (pageIndex)
             {
                 case 0: codexUI?.Show(); break;
