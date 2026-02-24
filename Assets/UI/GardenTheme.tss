@@ -2,13 +2,16 @@
 @import url("unity-theme://default");
 
 .unity-base-dropdown {
+    background-color: transparent;
+}
+
+.unity-base-dropdown__container-outer {
     background-color: rgba(12, 22, 32, 0.97);
     border-width: 1px;
     border-color: rgba(140, 230, 240, 0.25);
     border-radius: 8px;
 }
 
-.unity-base-dropdown__container-outer,
 .unity-base-dropdown__container-inner {
     background-color: transparent;
 }

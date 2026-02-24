@@ -193,13 +193,16 @@
 
 /* ── Dropdown popup (renders at panel root, outside any scoped selector) ── */
 .unity-base-dropdown {
+    background-color: transparent;
+}
+
+.unity-base-dropdown__container-outer {
     background-color: rgba(12, 22, 32, 0.97);
     border-width: 1px;
     border-color: rgba(140, 230, 240, 0.25);
     border-radius: var(--radius-sm);
 }
 
-.unity-base-dropdown__container-outer,
 .unity-base-dropdown__container-inner {
     background-color: transparent;
 }
