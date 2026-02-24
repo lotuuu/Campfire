@@ -30,13 +30,12 @@ namespace Garden
         {
             if (Plants.Count == 0) return;
 
-            dustAccumulator += Time.deltaTime;
-            if (dustAccumulator >= 3600f)
+            dustAccumulator += GetTotalDustPerSecond() * Time.deltaTime;
+            int toAward = Mathf.FloorToInt(dustAccumulator);
+            if (toAward > 0)
             {
-                dustAccumulator -= 3600f;
-                int totalDust = Mathf.RoundToInt(GetTotalDustPerHour());
-                if (totalDust > 0)
-                    CurrencyManager.Instance.Add(CurrencyType.AuraDust, totalDust);
+                dustAccumulator -= toAward;
+                CurrencyManager.Instance.Add(CurrencyType.AuraDust, toAward);
             }
         }
 
@@ -92,19 +91,19 @@ namespace Garden
             return true;
         }
 
-        public float GetTotalDustPerHour()
+        public float GetTotalDustPerSecond()
         {
             float total = 0;
             var config = CurrencyManager.Instance.Config;
             foreach (var p in Plants)
-                total += config.GetDustPerHourForPlant(p.rarity, p.qualityTier);
+                total += config.GetDustPerSecondForPlant(p.rarity, p.qualityTier);
             return total;
         }
 
         public void DebugAdvanceTime(float hours)
         {
             if (Plants.Count == 0) return;
-            int totalDust = Mathf.RoundToInt(GetTotalDustPerHour() * hours);
+            int totalDust = Mathf.RoundToInt(GetTotalDustPerSecond() * hours * 3600f);
             if (totalDust > 0)
                 CurrencyManager.Instance.Add(CurrencyType.AuraDust, totalDust);
         }
