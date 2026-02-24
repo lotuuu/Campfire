@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Garden
@@ -22,6 +23,15 @@ namespace Garden
 
         [Header("Special Conditions")]
         public List<SeedSpecialCondition> specialConditions = new();
+
+        [NonSerialized] private List<VariantData> _sortedVariants;
+
+        internal List<VariantData> GetSortedVariants()
+        {
+            if (_sortedVariants == null)
+                _sortedVariants = variants.OrderBy(v => v.priority).ToList();
+            return _sortedVariants;
+        }
     }
 
     [Serializable]
