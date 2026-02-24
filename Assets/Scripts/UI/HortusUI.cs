@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -22,6 +23,8 @@ namespace Garden
         private HarvestResultUI harvestResultUI;
         private DebugWeatherPanel debugPanel;
         [SerializeField] private HearthIsometricView hearthIsoView;
+
+        private Coroutine hearthHideCoroutine;
 
         // Location gate
         private VisualElement locationGate;
@@ -125,9 +128,20 @@ namespace Garden
 
         private void OnPageChanged(int pageIndex)
         {
-            // Show/hide isometric tiles only on terrarium page (index 2)
-            hearthIsoView?.gameObject.SetActive(pageIndex == 2);
-            hearthViewUI?.SetPageActive(pageIndex == 2);
+            if (pageIndex == 2)
+            {
+                // Switching TO terrarium: show tiles immediately, cancel any pending hide
+                if (hearthHideCoroutine != null) { StopCoroutine(hearthHideCoroutine); hearthHideCoroutine = null; }
+                hearthIsoView?.gameObject.SetActive(true);
+                hearthViewUI?.SetPageActive(true);
+            }
+            else
+            {
+                // Switching AWAY: stop Update immediately but let tiles linger through the slide
+                hearthViewUI?.SetPageActive(false);
+                if (hearthHideCoroutine != null) StopCoroutine(hearthHideCoroutine);
+                hearthHideCoroutine = StartCoroutine(HideHearthAfterSlide());
+            }
 
             switch (pageIndex)
             {
@@ -135,6 +149,13 @@ namespace Garden
                 case 1: seedShopUI?.Show(); break;
                 case 3: greenhouseUI?.Show(); break;
             }
+        }
+
+        private IEnumerator HideHearthAfterSlide()
+        {
+            yield return new WaitForSeconds(0.32f); // slightly past SwipeablePageView.AnimationDurationMs (300ms)
+            hearthIsoView?.gameObject.SetActive(false);
+            hearthHideCoroutine = null;
         }
 
         private void OnLocationResolved(bool success)
