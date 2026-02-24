@@ -29,6 +29,7 @@ namespace Garden
         private bool hasLocation;
         private float latitude;
         private float longitude;
+        private Coroutine _fetchLoopCoroutine;
 
         private void Awake()
         {
@@ -86,7 +87,8 @@ namespace Garden
                 IsLocationResolved = true;
                 Debug.Log($"Location acquired: {latitude}, {longitude}");
                 OnLocationResolved?.Invoke(true);
-                StartCoroutine(FetchWeatherLoop());
+                if (_fetchLoopCoroutine != null) StopCoroutine(_fetchLoopCoroutine);
+                _fetchLoopCoroutine = StartCoroutine(FetchWeatherLoop());
 #if UNITY_ANDROID
                 using var plugin = new AndroidJavaClass("com.garden.WeatherPrefsPlugin");
                 using var unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
@@ -164,8 +166,15 @@ namespace Garden
         public void SetDebugMode(bool enabled)
         {
             useDebugOverride = enabled;
-            if (enabled) ApplyDebugWeather();
-            else if (hasLocation) StartCoroutine(FetchWeather());
+            if (enabled)
+            {
+                ApplyDebugWeather();
+            }
+            else if (hasLocation)
+            {
+                if (_fetchLoopCoroutine != null) StopCoroutine(_fetchLoopCoroutine);
+                _fetchLoopCoroutine = StartCoroutine(FetchWeatherLoop());
+            }
         }
 
         private void ApplyDebugWeather()
