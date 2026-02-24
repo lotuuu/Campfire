@@ -40,6 +40,7 @@ namespace Garden
 
             timeSkipField = root.Q<IntegerField>("time-skip-field");
             root.Q<Button>("time-skip-button").clicked += SkipTime;
+            root.Q<Button>("max-currency-button").clicked += MaxCurrency;
             root.Q<Button>("clear-save-button").clicked += ClearSaveData;
 
             timeOverrideField = root.Q<TextField>("time-override-field");
@@ -122,6 +123,15 @@ namespace Garden
             GameTime.ClearOverride();
             timeOverrideField.value = GameTime.Now.ToString("yyyy-MM-dd HH:mm");
             Debug.Log("[Debug] Time override cleared.");
+        }
+
+        private void MaxCurrency()
+        {
+            var cm = CurrencyManager.Instance;
+            cm.Add(CurrencyType.Dewdrops,  int.MaxValue - cm.Dewdrops);
+            cm.Add(CurrencyType.SunShards, int.MaxValue - cm.SunShards);
+            cm.Add(CurrencyType.AuraDust,  int.MaxValue - cm.AuraDust);
+            Debug.Log("[Debug] All currencies set to int.MaxValue.");
         }
 
         private void ClearSaveData()
