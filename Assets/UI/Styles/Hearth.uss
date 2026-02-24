@@ -1,85 +1,27 @@
-/* Hearth: Isometric farm plot on the home screen */
+/* Hearth: Isometric farm – overlay buttons positioned at runtime by HearthViewUI */
 
-#hearth-view {
-    flex-grow: 1;
-    justify-content: center;
-    align-items: center;
-}
-
-#hearth-title {
+.hearth-title {
     color: var(--color-text-dim);
     font-size: var(--font-sm);
-    margin-bottom: var(--spacing-md);
-    -unity-text-align: middle-center;
+    margin-top: var(--spacing-md);
+    margin-left: var(--spacing-md);
+    -unity-text-align: middle-left;
 }
 
-#hearth-plot {
-    width: 380px;
-    height: 380px;
-    rotate: 45deg;
-    background-color: rgba(20, 50, 40, 0.30);
-    border-width: 2px;
-    border-color: rgba(80, 160, 120, 0.20);
-    border-radius: var(--radius-md);
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    align-content: center;
-}
-
-.hearth-slot {
-    width: 180px;
-    height: 180px;
-    margin: 4px;
-    background-color: rgba(20, 35, 50, 0.40);
-    border-width: 1px;
-    border-color: rgba(120, 200, 220, 0.15);
-    border-radius: var(--radius-sm);
+/* Transparent overlay button sized and positioned to cover each isometric tile */
+.hearth-slot-overlay {
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
     padding: 0;
-    transition-property: background-color, border-color, scale;
-    transition-duration: 0.2s;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
 }
 
-.hearth-slot:hover {
-    background-color: rgba(30, 50, 65, 0.55);
-    border-color: rgba(140, 230, 240, 0.35);
-    scale: 1.03;
-}
-
-.hearth-slot:active {
-    background-color: rgba(40, 70, 85, 0.75);
-}
-
-.hearth-slot-mature {
+.hearth-slot-overlay.hearth-slot-mature {
     border-color: var(--color-highlight);
     border-width: 2px;
-}
-
-.hearth-slot-inner {
-    rotate: -45deg;
-    flex-grow: 1;
-    justify-content: center;
-    align-items: center;
-}
-
-.hearth-soil {
-    width: 80px;
-    height: 80px;
-    border-radius: 40px;
-    background-color: rgba(90, 65, 40, 0.50);
-    border-width: 1px;
-    border-color: rgba(130, 100, 60, 0.30);
-    margin-bottom: var(--spacing-xs);
-}
-
-.hearth-plant-swatch {
-    width: 80px;
-    height: 80px;
-    border-radius: 40px;
-    margin-bottom: var(--spacing-xs);
-    border-width: 1px;
-    border-color: rgba(255, 255, 255, 0.15);
+    border-radius: var(--radius-sm);
 }
 
 .hearth-slot-label {
@@ -90,11 +32,12 @@
 }
 
 .hearth-progress-bar {
-    width: 120px;
-    height: 8px;
+    width: 80%;
+    height: 6px;
     background-color: rgba(20, 35, 50, 0.50);
     border-radius: 4px;
     overflow: hidden;
+    margin-bottom: var(--spacing-xs);
 }
 
 .hearth-progress-fill {
