@@ -22,6 +22,10 @@
     --color-empty: rgba(30, 45, 60, 0.25);
     --color-unknown: rgba(15, 25, 35, 0.60);
 
+    --color-bg-gate: rgba(8, 15, 22, 0.95);
+    --color-bg-sheet: rgba(15, 25, 35, 0.95);
+    --color-bg-popup: rgba(12, 22, 32, 0.97);
+
     /* Spacing - mobile scale at 1080 ref width */
     --spacing-xs: 8px;
     --spacing-sm: 16px;

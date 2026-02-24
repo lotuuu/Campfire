@@ -49,6 +49,13 @@
 .probability-name {
     font-size: var(--font-sm);
 }
+.probability-high {
+    color: var(--color-highlight);
+}
+
+.probability-low {
+    color: var(--color-text-dim);
+}
 
 #plant-button {
     align-self: center;

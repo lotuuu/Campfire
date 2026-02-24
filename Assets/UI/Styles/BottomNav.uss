@@ -58,7 +58,7 @@
 
 /* Per-tab icon images */
 #tab-codex .nav-icon {
-    background-image: url('../../ThirdParty/icons/delapouite-greenhouse.png');
+    background-image: url('../../ThirdParty/icons/lorc-open-book.png');
 }
 
 #tab-shop .nav-icon {

@@ -18,6 +18,7 @@ namespace Garden
         private readonly List<Button> slotButtons = new();
         private readonly List<Label> labels = new();
         private readonly List<VisualElement> progressFills = new();
+        private readonly List<string> _lastLabelText = new();
 
         private bool initialized;
         private bool pageActive;
@@ -83,6 +84,7 @@ namespace Garden
             terrariumPage.Add(btn);
             slotButtons.Add(btn);
             labels.Add(label);
+            _lastLabelText.Add(null);
             progressFills.Add(fill);
         }
 
@@ -111,8 +113,12 @@ namespace Garden
                 if (slot.state == PlantState.Growing)
                 {
                     float hours = PlantManager.Instance.GetRemainingHours(HearthEnvIndex, i);
-                    if (i < labels.Count && labels[i] != null)
-                        labels[i].text = hours > 1f ? $"{hours:F1}h" : $"{hours * 60f:F0}m";
+                    string text = hours > 1f ? $"{hours:F1}h" : $"{hours * 60f:F0}m";
+                    if (i < labels.Count && labels[i] != null && text != _lastLabelText[i])
+                    {
+                        labels[i].text = text;
+                        _lastLabelText[i] = text;
+                    }
                 }
                 else if (slot.state == PlantState.Mature)
                 {
@@ -177,6 +183,7 @@ namespace Garden
                     float hours = PlantManager.Instance.GetRemainingHours(HearthEnvIndex, i);
                     if (label != null)
                         label.text = hours > 1f ? $"{hours:F1}h" : $"{hours * 60f:F0}m";
+                    if (i < _lastLabelText.Count) _lastLabelText[i] = null;
                     if (fill != null)
                         fill.style.width = new Length(slot.growthProgress * 100f, LengthUnit.Percent);
                     slotButtons[i].RemoveFromClassList("hearth-slot-mature");

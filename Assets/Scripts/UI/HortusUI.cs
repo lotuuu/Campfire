@@ -8,7 +8,6 @@ namespace Garden
         [Header("References")]
         [SerializeField] private UIDocument uiDocument;
 
-        private const int DefaultPageIndex = 2; // Terrarium
 
         private SwipeablePageView pageView;
         private BottomNavUI bottomNavUI;
@@ -116,7 +115,7 @@ namespace Garden
             mainCam = Camera.main;
 
             // Start on terrarium page
-            pageView.GoToPage(DefaultPageIndex, false);
+            pageView.GoToPage(TerrariumPageIndex, false);
             hearthIsoView?.gameObject.SetActive(true);
             hearthViewUI?.SetPageActive(true);
 
