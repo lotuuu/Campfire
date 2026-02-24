@@ -12,5 +12,7 @@ namespace Garden
         public DateTime plantTime;
         public float growthSpeedMultiplier = 1f;
         public float growthProgress;
+        // Runtime-only: refreshed on weather change, not persisted
+        public float cachedEnvBonus;
     }
 }
