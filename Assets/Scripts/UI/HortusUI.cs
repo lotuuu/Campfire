@@ -104,6 +104,8 @@ namespace Garden
 
             // Start on terrarium page
             pageView.GoToPage(DefaultPageIndex, false);
+            hearthIsoView?.gameObject.SetActive(true);
+            hearthViewUI?.SetPageActive(true);
 
             // Location gate
             locationGate = root.Q<VisualElement>("location-gate");

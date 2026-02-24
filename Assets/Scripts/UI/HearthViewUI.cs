@@ -141,6 +141,7 @@ namespace Garden
 
             // Make coords relative to terrariumPage
             var pageOrigin = terrariumPage.worldBound;
+            if (pageOrigin.width <= 0) return;
             slotButtons[i].style.left = panelLeft - pageOrigin.x;
             slotButtons[i].style.top = panelTop - pageOrigin.y;
             slotButtons[i].style.width = panelWidth;
