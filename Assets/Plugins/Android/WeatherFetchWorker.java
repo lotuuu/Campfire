@@ -18,6 +18,7 @@ import java.net.URL;
 public class WeatherFetchWorker extends Worker {
 
     private static final String PREFS_NAME   = "garden_weather";
+    // Must match AndroidWeatherChannelId in NotificationService.cs
     private static final String CHANNEL_ID   = "garden_weather";
     private static final String CHANNEL_NAME = "Weather Updates";
 
@@ -103,7 +104,7 @@ public class WeatherFetchWorker extends Worker {
         }
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(ctx, CHANNEL_ID)
-                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setSmallIcon(ctx.getApplicationInfo().icon)
                 .setContentTitle("\uD83C\uDF3F Weather Update")
                 .setContentText(messageForCondition(condition))
                 .setAutoCancel(true);
