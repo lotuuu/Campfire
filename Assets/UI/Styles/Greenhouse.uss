@@ -38,3 +38,34 @@
     font-size: var(--font-md);
 }
 
+/* Selection highlight */
+#greenhouse-page .plant-slot--selected {
+    border-color: var(--color-border-accent);
+    border-width: 2px;
+    background-color: var(--color-bg-slot-hover);
+}
+
+/* Sell bar */
+#greenhouse-sell-bar {
+    background-color: var(--color-bg-panel);
+    border-color: var(--color-border);
+    border-width: 1px;
+    border-radius: var(--radius-md);
+    padding: var(--spacing-sm);
+    margin-top: var(--spacing-sm);
+    flex-direction: column;
+    align-items: stretch;
+}
+
+#greenhouse-sell-name {
+    color: var(--color-text-bright);
+    font-size: var(--font-md);
+    -unity-font-style: bold;
+    margin-bottom: var(--spacing-xs);
+}
+
+#greenhouse-sell-dust {
+    color: var(--color-text-accent);
+    font-size: var(--font-sm);
+    margin-bottom: var(--spacing-xs);
+}

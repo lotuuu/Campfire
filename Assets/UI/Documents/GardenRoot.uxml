@@ -93,6 +93,11 @@
             <ui:Label name="greenhouse-slots-text" text="0 / 0" />
         </ui:VisualElement>
         <ui:ScrollView name="greenhouse-grid" class="scroll-view" />
+        <ui:VisualElement name="greenhouse-sell-bar" style="display: none;">
+            <ui:Label name="greenhouse-sell-name" text="" />
+            <ui:Label name="greenhouse-sell-dust" text="" />
+            <ui:Button name="greenhouse-sell-btn" class="btn" text="Sell" />
+        </ui:VisualElement>
     </ui:VisualElement>
 
     <!-- Page 4: Construction -->
