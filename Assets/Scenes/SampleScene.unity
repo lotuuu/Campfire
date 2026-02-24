@@ -15184,16 +15184,16 @@ MonoBehaviour:
   baseSortingOrder: 0
   gridAnchor: {x: 0, y: -0.3, z: 0}
   plantPrefabs:
-  - {fileID: 100100000, guid: 355f8608ec978844cab41afd1cad1457, type: 3}
-  - {fileID: 100100000, guid: 91fb15e9d2bcf1c4bbf25fac679dde2a, type: 3}
-  - {fileID: 100100000, guid: 340d266c29ab9e843942568a76e50966, type: 3}
-  - {fileID: 100100000, guid: 6958131b474cd624584c455d02513397, type: 3}
-  - {fileID: 100100000, guid: 1f86ac0ee023f7e4aafc912fad73d4fc, type: 3}
-  - {fileID: 100100000, guid: 13ba4b06dfebf5a4fb50625a9c714283, type: 3}
-  - {fileID: 100100000, guid: 86d7edb0f984f0148ac8ceb4d7e5a949, type: 3}
-  - {fileID: 100100000, guid: 629563af380ee3443ababd902827fb7b, type: 3}
-  - {fileID: 100100000, guid: 6662ac34b3a5b194d8afe54b8fc22548, type: 3}
-  - {fileID: 100100000, guid: e32eb0f254cdc7747ba8416dfef94574, type: 3}
+  - {fileID: 6846470340721416821, guid: 355f8608ec978844cab41afd1cad1457, type: 3}
+  - {fileID: 5836257495164524969, guid: 91fb15e9d2bcf1c4bbf25fac679dde2a, type: 3}
+  - {fileID: 6551484830743867302, guid: 340d266c29ab9e843942568a76e50966, type: 3}
+  - {fileID: 3511343664508156533, guid: 6958131b474cd624584c455d02513397, type: 3}
+  - {fileID: 2515660571846044480, guid: 1f86ac0ee023f7e4aafc912fad73d4fc, type: 3}
+  - {fileID: 4275091968543486394, guid: 13ba4b06dfebf5a4fb50625a9c714283, type: 3}
+  - {fileID: 5766750407502193800, guid: 86d7edb0f984f0148ac8ceb4d7e5a949, type: 3}
+  - {fileID: 5236500790592738643, guid: 629563af380ee3443ababd902827fb7b, type: 3}
+  - {fileID: 3887290555157017576, guid: 6662ac34b3a5b194d8afe54b8fc22548, type: 3}
+  - {fileID: 5300746064644077306, guid: e32eb0f254cdc7747ba8416dfef94574, type: 3}
   plantScale: 0.3
 --- !u!1 &1293215415
 GameObject:
