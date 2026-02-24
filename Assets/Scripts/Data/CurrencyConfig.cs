@@ -21,7 +21,7 @@ namespace Garden
 
         [Header("Greenhouse")]
         public int defaultSlots = 6;
-        public int slotCostSunShards = 50;
+        public int greenhouseExpandCostDewdrops = 300;
 
         public int GetDewdropsForRarity(Rarity r) => r switch
         {
