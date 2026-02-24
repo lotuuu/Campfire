@@ -170,6 +170,9 @@ namespace Garden
 
         private void ApplyDebugWeather()
         {
+            // SaveWeatherData is intentionally not called here: lat/lon are 0
+            // in editor/debug mode and arming the native background fetch with
+            // invalid coordinates would break weather polling on-device.
             CurrentWeather = debugWeather;
             OnWeatherUpdated?.Invoke(debugWeather);
         }
