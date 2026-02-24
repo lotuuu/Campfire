@@ -8,7 +8,7 @@
     --color-border-accent: rgba(140, 230, 240, 0.35);
 
     --color-text: rgb(200, 220, 230);
-    --color-text-dim: rgb(120, 150, 170);
+    --color-text-dim: rgb(170, 195, 210);
     --color-text-bright: rgb(230, 245, 255);
     --color-text-accent: rgb(100, 220, 220);
 
