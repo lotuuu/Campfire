@@ -25,6 +25,8 @@ namespace Garden
         [SerializeField] private HearthIsometricView hearthIsoView;
 
         private Coroutine hearthHideCoroutine;
+        private Camera mainCam;
+        private const int TerrariumPageIndex = 2;
 
         // Location gate
         private VisualElement locationGate;
@@ -105,6 +107,8 @@ namespace Garden
                 };
             }
 
+            mainCam = Camera.main;
+
             // Start on terrarium page
             pageView.GoToPage(DefaultPageIndex, false);
             hearthIsoView?.gameObject.SetActive(true);
@@ -124,6 +128,26 @@ namespace Garden
                 else
                     WeatherService.Instance.OnLocationResolved += OnLocationResolved;
             }
+        }
+
+        private void Update()
+        {
+            if (hearthIsoView == null || pageView == null || mainCam == null) return;
+            var panel = pageView.panel;
+            if (panel == null || pageView.PageWidth <= 0) return;
+
+            // Compute how far the terrarium page is from its centered rest position (panel points)
+            float panelDelta = pageView.CurrentPageContainerX + TerrariumPageIndex * pageView.PageWidth;
+
+            // Panel points → screen pixels
+            float screenDeltaX = panelDelta * panel.scaledPixelsPerPoint;
+
+            // Screen pixels → world units via camera
+            float z = Mathf.Abs(mainCam.transform.position.z);
+            float worldDeltaX = mainCam.ScreenToWorldPoint(new Vector3(screenDeltaX, 0, z)).x
+                              - mainCam.ScreenToWorldPoint(new Vector3(0, 0, z)).x;
+
+            hearthIsoView.SetSlideOffset(worldDeltaX);
         }
 
         private void OnPageChanged(int pageIndex)

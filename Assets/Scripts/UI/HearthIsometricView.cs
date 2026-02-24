@@ -14,6 +14,7 @@ namespace Garden
         private readonly List<SpriteRenderer> plantRenderers = new();
         private readonly List<float> plantBaseScales = new();
         private Camera mainCam;
+        private float slideOffsetX;
 
         private const int HearthEnvIndex = 0;
 
@@ -121,7 +122,15 @@ namespace Garden
             // Center of tile cluster in local space
             float localCenterX = (n - 1) * w * 0.25f;
             float localCenterY = (n - 1) * -h * 0.125f;
-            transform.position = gridAnchor - new Vector3(localCenterX, localCenterY, 0f);
+            transform.position = gridAnchor - new Vector3(localCenterX - slideOffsetX, localCenterY, 0f);
+        }
+
+        /// <summary>Shift all tiles horizontally to follow a page slide (world units).</summary>
+        public void SetSlideOffset(float worldDeltaX)
+        {
+            if (Mathf.Approximately(slideOffsetX, worldDeltaX)) return;
+            slideOffsetX = worldDeltaX;
+            RecenterGrid();
         }
 
         /// <summary>Screen-space center of a tile in pixels (bottom-left origin, Y-up).</summary>

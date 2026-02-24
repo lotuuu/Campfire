@@ -27,6 +27,9 @@ namespace Garden
 
         public int CurrentPageIndex => currentPageIndex;
         public int PageCount => pageCount;
+        /// <summary>Current animated X translate of the page container, in panel points.</summary>
+        public float CurrentPageContainerX => pageContainer.resolvedStyle.translate.x.value;
+        public float PageWidth => pageWidth;
         public event Action<int> OnPageChanged;
 
         public SwipeablePageView()
