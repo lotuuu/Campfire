@@ -84,7 +84,7 @@ namespace Garden
         public bool ExpandSlots()
         {
             var config = CurrencyManager.Instance.Config;
-            if (!CurrencyManager.Instance.Spend(CurrencyType.SunShards, config.slotCostSunShards))
+            if (!CurrencyManager.Instance.Spend(CurrencyType.Dewdrops, config.greenhouseExpandCostDewdrops))
                 return false;
             SaveManager.Instance.Data.greenhouseSlots++;
             SaveManager.Instance.Save();
