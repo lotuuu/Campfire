@@ -1,7 +1,10 @@
 {
     "name": "Garden",
     "rootNamespace": "Garden",
-    "references": [],
+    "references": [
+        "Unity.Notifications.iOS",
+        "Unity.Notifications.Android"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
