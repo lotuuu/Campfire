@@ -18,6 +18,7 @@ namespace Garden
         private CodexUI codexUI;
         private SeedShopUI seedShopUI;
         private GreenhouseUI greenhouseUI;
+        private ConstructionUI constructionUI;
         private HarvestResultUI harvestResultUI;
         private DebugWeatherPanel debugPanel;
         [SerializeField] private HearthIsometricView hearthIsoView;
@@ -50,6 +51,7 @@ namespace Garden
             codexUI = GetComponent<CodexUI>();
             seedShopUI = GetComponent<SeedShopUI>();
             greenhouseUI = GetComponent<GreenhouseUI>();
+            constructionUI = GetComponent<ConstructionUI>();
             harvestResultUI = GetComponent<HarvestResultUI>();
             debugPanel = GetComponent<DebugWeatherPanel>();
 
@@ -59,7 +61,7 @@ namespace Garden
             viewport.Add(pageView);
 
             // Reparent pages from UXML into the page view
-            string[] pageNames = { "codex-page", "shop-page", "terrarium-page", "greenhouse-page", "locked-page" };
+            string[] pageNames = { "codex-page", "shop-page", "terrarium-page", "greenhouse-page", "construction-page" };
             foreach (var name in pageNames)
             {
                 var page = root.Q<VisualElement>(name);
@@ -76,6 +78,7 @@ namespace Garden
             codexUI?.Initialize(root);
             seedShopUI?.Initialize(root);
             greenhouseUI?.Initialize(root);
+            constructionUI?.Initialize(root);
             harvestResultUI?.Initialize(root);
             debugPanel?.Initialize(root);
 
@@ -193,6 +196,7 @@ namespace Garden
                 case 0: codexUI?.Show(); break;
                 case 1: seedShopUI?.Show(); break;
                 case 3: greenhouseUI?.Show(); break;
+                case 4: constructionUI?.Show(); break;
             }
         }
 
