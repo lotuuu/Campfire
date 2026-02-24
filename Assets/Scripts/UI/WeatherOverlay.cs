@@ -28,9 +28,15 @@ namespace Garden
         {
             StopAll();
             if (WeatherService.Instance != null)
+            {
+                WeatherService.Instance.OnWeatherUpdated -= UpdateEffects;
+                WeatherService.Instance.OnWeatherUpdated += UpdateEffects;
                 UpdateEffects(WeatherService.Instance.CurrentWeather);
+            }
             else
+            {
                 StartCoroutine(WaitForWeatherService());
+            }
         }
 
         private IEnumerator WaitForWeatherService()
