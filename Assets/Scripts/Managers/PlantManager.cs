@@ -25,6 +25,9 @@ namespace Garden
         public event Action<int, int, PlantState> OnSlotStateChanged;
         public event Action<int, int, float> OnSlotGrowthUpdated;
 
+        private const float GrowthTickInterval = 5f;
+        private float _growthTickTimer;
+
         public IReadOnlyList<PlantSlot> Slots => slots;
 
         private void Awake()
@@ -37,6 +40,30 @@ namespace Garden
         {
             InitializeSlots();
             RestoreFromSave();
+            if (WeatherService.Instance != null)
+            {
+                WeatherService.Instance.OnWeatherUpdated += RefreshMultipliers;
+                RefreshMultipliers(WeatherService.Instance.CurrentWeather);
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (WeatherService.Instance != null)
+                WeatherService.Instance.OnWeatherUpdated -= RefreshMultipliers;
+        }
+
+        private void RefreshMultipliers(WeatherData weather)
+        {
+            foreach (var slot in slots)
+            {
+                if (slot.state != PlantState.Growing) continue;
+                slot.growthSpeedMultiplier = (slot.variant?.trigger != null
+                    && slot.variant.trigger.Evaluate(weather)) ? 1.25f : 1f;
+                slot.cachedEnvBonus = EnvironmentManager.Instance != null
+                    ? EnvironmentManager.Instance.GetGrowthBonus(slot.environmentIndex, weather)
+                    : 0f;
+            }
         }
 
         private void OnApplicationPause(bool pauseStatus)
@@ -51,26 +78,19 @@ namespace Garden
 
         private void Update()
         {
+            _growthTickTimer += Time.deltaTime;
+            if (_growthTickTimer < GrowthTickInterval) return;
+            _growthTickTimer = 0f;
+
             bool anyUpdated = false;
             foreach (var slot in slots)
             {
                 if (slot.state != PlantState.Growing) continue;
 
-                float envBonus = 0f;
-                if (EnvironmentManager.Instance != null && WeatherService.Instance != null)
-                    envBonus = EnvironmentManager.Instance.GetGrowthBonus(
-                        slot.environmentIndex, WeatherService.Instance.CurrentWeather);
-
-                float totalMultiplier = slot.growthSpeedMultiplier + envBonus;
+                float totalMultiplier = Mathf.Max(slot.growthSpeedMultiplier + slot.cachedEnvBonus, 0.01f);
                 float totalHours = slot.seed.baseGrowthHours / totalMultiplier;
                 float elapsed = (float)(GameTime.UtcNow - slot.plantTime).TotalHours;
                 slot.growthProgress = Mathf.Clamp01(elapsed / totalHours);
-
-                if (WeatherService.Instance != null && slot.variant.trigger != null)
-                {
-                    slot.growthSpeedMultiplier = slot.variant.trigger.Evaluate(
-                        WeatherService.Instance.CurrentWeather) ? 1.25f : 1f;
-                }
 
                 OnSlotGrowthUpdated?.Invoke(slot.environmentIndex, slot.slotIndex, slot.growthProgress);
                 anyUpdated = true;
@@ -201,7 +221,8 @@ namespace Garden
         {
             var slot = GetFeaturedSlot();
             if (slot == null || slot.state != PlantState.Growing) return 0f;
-            float totalHours = slot.seed.baseGrowthHours / slot.growthSpeedMultiplier;
+            float totalMultiplier = Mathf.Max(slot.growthSpeedMultiplier + slot.cachedEnvBonus, 0.01f);
+            float totalHours = slot.seed.baseGrowthHours / totalMultiplier;
             float elapsed = (float)(GameTime.UtcNow - slot.plantTime).TotalHours;
             return Mathf.Max(0f, totalHours - elapsed);
         }
@@ -210,7 +231,8 @@ namespace Garden
         {
             var slot = GetSlot(envIndex, slotIndex);
             if (slot == null || slot.state != PlantState.Growing) return 0f;
-            float totalHours = slot.seed.baseGrowthHours / slot.growthSpeedMultiplier;
+            float totalMultiplier = Mathf.Max(slot.growthSpeedMultiplier + slot.cachedEnvBonus, 0.01f);
+            float totalHours = slot.seed.baseGrowthHours / totalMultiplier;
             float elapsed = (float)(GameTime.UtcNow - slot.plantTime).TotalHours;
             return Mathf.Max(0f, totalHours - elapsed);
         }
