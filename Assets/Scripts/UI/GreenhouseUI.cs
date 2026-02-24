@@ -31,7 +31,7 @@ namespace Garden
 
             var gm = GreenhouseManager.Instance;
             slotsText.text = $"{gm.Plants.Count} / {gm.MaxSlots}";
-            dustRateText.text = $"+{gm.GetTotalDustPerHour():F1} Aura Dust/hr";
+            dustRateText.text = $"+{gm.GetTotalDustPerSecond():F1} Aura Dust/s";
 
             foreach (var plant in gm.Plants)
             {

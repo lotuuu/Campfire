@@ -17,10 +17,10 @@ MonoBehaviour:
   rareDewdrops: 50
   epicDewdrops: 100
   legendaryDewdrops: 250
-  commonDustPerHour: 1
-  uncommonDustPerHour: 3
-  rareDustPerHour: 8
-  epicDustPerHour: 20
-  legendaryDustPerHour: 50
+  commonDustPerSecond: 0.5
+  uncommonDustPerSecond: 1.5
+  rareDustPerSecond: 4
+  epicDustPerSecond: 10
+  legendaryDustPerSecond: 25
   defaultSlots: 6
   greenhouseExpandCostDewdrops: 300
