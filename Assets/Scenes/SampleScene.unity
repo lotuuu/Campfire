@@ -235,6 +235,9 @@ MonoBehaviour:
   rainEffect: {fileID: 2057248350}
   snowEffect: {fileID: 546941677}
   windLines: {fileID: 779582599}
+  rainEmissionRate: 300
+  stormEmissionRate: 600
+  windSpeedThreshold: 5
 --- !u!4 &171580624
 Transform:
   m_ObjectHideFlags: 0
@@ -5252,7 +5255,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!198 &546941677
 ParticleSystem:
   m_ObjectHideFlags: 0
@@ -10172,7 +10175,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!198 &779582599
 ParticleSystem:
   m_ObjectHideFlags: 0
@@ -15820,7 +15823,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!198 &2057248350
 ParticleSystem:
   m_ObjectHideFlags: 0

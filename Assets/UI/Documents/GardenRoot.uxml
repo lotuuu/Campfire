@@ -204,6 +204,10 @@
         </ui:ScrollView>
     </ui:VisualElement>
 
+    <!-- Rain overlay (Painter2D, always screen-space) -->
+    <ui:VisualElement name="rain-overlay" picking-mode="Ignore"
+        style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: none;" />
+
     <!-- Location Gate -->
     <ui:VisualElement name="location-gate" class="gate-panel" picking-mode="Position">
         <ui:Label name="gate-title" text="Garden" class="gate-title" />
