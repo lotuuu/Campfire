@@ -12,6 +12,7 @@ namespace Garden
 
         private readonly List<GameObject> tiles = new();
         private readonly List<SpriteRenderer> plantRenderers = new();
+        private readonly List<float> plantBaseScales = new();
         private Camera mainCam;
 
         private const int HearthEnvIndex = 0;
@@ -52,6 +53,7 @@ namespace Garden
             foreach (var t in tiles) if (t) Destroy(t);
             tiles.Clear();
             plantRenderers.Clear();
+            plantBaseScales.Clear();
 
             for (int i = 0; i < count; i++)
                 SpawnTile(i);
@@ -85,6 +87,11 @@ namespace Garden
             {
                 float tileW = tileSprite.rect.width / tileSprite.pixelsPerUnit;
                 plantGO.transform.localScale = Vector3.one * (tileW * 0.35f);
+                plantBaseScales.Add(tileW * 0.35f);
+            }
+            else
+            {
+                plantBaseScales.Add(1f);
             }
 
             plantGO.SetActive(false);
@@ -152,10 +159,11 @@ namespace Garden
             plantRenderers[index].color = color;
         }
 
-        public void SetPlantScale(int index, float uniformScale)
+        public void SetPlantScale(int index, float multiplier)
         {
             if (index < 0 || index >= plantRenderers.Count) return;
-            plantRenderers[index].transform.localScale = Vector3.one * uniformScale;
+            float baseScale = index < plantBaseScales.Count ? plantBaseScales[index] : 1f;
+            plantRenderers[index].transform.localScale = Vector3.one * (baseScale * multiplier);
         }
     }
 }

@@ -20,6 +20,12 @@ namespace Garden
         private readonly List<VisualElement> progressFills = new();
 
         private bool initialized;
+        private bool pageActive;
+
+        public void SetPageActive(bool active)
+        {
+            pageActive = active;
+        }
 
         public void Initialize(VisualElement root)
         {
@@ -89,7 +95,7 @@ namespace Garden
 
         private void Update()
         {
-            if (!initialized || isometricView == null || terrariumPage == null) return;
+            if (!initialized || !pageActive || isometricView == null || terrariumPage == null) return;
 
             // Re-project tile positions each frame (handles screen resize)
             for (int i = 0; i < slotButtons.Count; i++)
