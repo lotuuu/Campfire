@@ -38,8 +38,3 @@
     font-size: var(--font-md);
 }
 
-#greenhouse-expand-button {
-    align-self: center;
-    width: 400px;
-    margin-top: var(--spacing-md);
-}
