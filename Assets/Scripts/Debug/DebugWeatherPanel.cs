@@ -60,6 +60,7 @@ namespace Garden
             calendarEventDropdown.index = 0;
 
             // Buttons
+            root.Q<Button>("debug-toggle")?.RegisterCallback<ClickEvent>(_ => Show());
             root.Q<Button>("apply-button").clicked += ApplySettings;
             root.Q<Button>("debug-close").clicked += Hide;
             root.Q<Button>("blizzard-button").clicked += () =>

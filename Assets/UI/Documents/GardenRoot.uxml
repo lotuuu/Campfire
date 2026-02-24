@@ -18,8 +18,9 @@
     <ui:VisualElement name="app-shell" style="flex-grow: 1;">
 
         <!-- Top bar: weather + currency (always visible) -->
-        <ui:VisualElement name="top-bar" picking-mode="Ignore">
-            <ui:Label name="weather-text" text="--°C  ·  --  ·  --" />
+        <ui:VisualElement name="top-bar" picking-mode="Position">
+            <ui:Button name="debug-toggle" text="⚙" class="btn-debug-toggle" />
+            <ui:Label name="weather-text" text="--°C  ·  --  ·  --" picking-mode="Ignore" />
             <ui:VisualElement name="currency-panel">
                 <ui:Label name="dewdrops-text" class="currency-label" text="Dew: 0" />
                 <ui:Label name="sun-shards-text" class="currency-label" text="Sun: 0" />
