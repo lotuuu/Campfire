@@ -34,9 +34,9 @@
         <ui:VisualElement name="bottom-nav">
             <ui:Button name="tab-codex" text="Codex" class="nav-tab" />
             <ui:Button name="tab-shop" text="Shop" class="nav-tab" />
-            <ui:Button name="tab-terrarium" text="Terrarium" class="nav-tab nav-tab--active" />
+            <ui:Button name="tab-terrarium" text="Terrarium" class="nav-tab nav-tab-active" />
             <ui:Button name="tab-greenhouse" text="Greenhouse" class="nav-tab" />
-            <ui:Button name="tab-locked" text="..." class="nav-tab nav-tab--disabled" />
+            <ui:Button name="tab-locked" text="..." class="nav-tab nav-tab-disabled" />
         </ui:VisualElement>
     </ui:VisualElement>
 
@@ -103,7 +103,7 @@
     <!-- Page 4: Locked -->
     <ui:VisualElement name="locked-page" class="page-content" style="display: none;">
         <ui:VisualElement style="flex-grow: 1; justify-content: center; align-items: center;">
-            <ui:Label text="Coming Soon" class="label-dim" style="font-size: var(--font-lg);" />
+            <ui:Label text="Coming Soon" class="label-dim" style="font-size: 40px;" />
         </ui:VisualElement>
     </ui:VisualElement>
 
