@@ -24,11 +24,10 @@ namespace Garden
 
         private const float SwipeThreshold = 50f;
         private const float DirectionLockThreshold = 10f;
-        private const int AnimationDurationMs = 300;
+        public const int AnimationDurationMs = 300;
 
         public int CurrentPageIndex => currentPageIndex;
         public int PageCount => pageCount;
-        /// <summary>Current animated X translate of the page container, in panel points.</summary>
         public float CurrentPageContainerX => pageContainer.resolvedStyle.translate.x;
         public float PageWidth => pageWidth;
         public event Action<int> OnPageChanged;
