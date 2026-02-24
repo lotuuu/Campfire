@@ -87,6 +87,12 @@ namespace Garden
                 Debug.Log($"Location acquired: {latitude}, {longitude}");
                 OnLocationResolved?.Invoke(true);
                 StartCoroutine(FetchWeatherLoop());
+#if UNITY_ANDROID
+                using var plugin = new AndroidJavaClass("com.garden.WeatherPrefsPlugin");
+                using var unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
+                using var context = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
+                plugin.CallStatic("scheduleWeatherFetch", context);
+#endif
             }
             else
             {
@@ -138,6 +144,7 @@ namespace Garden
 
             CurrentWeather = weather;
             OnWeatherUpdated?.Invoke(weather);
+            NotificationService.Instance?.SaveWeatherData(apiKey, latitude, longitude, weather.condition);
         }
 
         public void RetryLocation()

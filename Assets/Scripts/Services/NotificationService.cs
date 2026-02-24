@@ -12,6 +12,7 @@ namespace Garden
         public static NotificationService Instance { get; private set; }
 
         private const string AndroidChannelId = "garden_plants";
+        private const string AndroidWeatherChannelId = "garden_weather";
 
         private void Awake()
         {
@@ -31,9 +32,38 @@ namespace Garden
                 Importance = Importance.Default
             };
             AndroidNotificationCenter.RegisterNotificationChannel(channel);
+            var weatherChannel = new AndroidNotificationChannel
+            {
+                Id = AndroidWeatherChannelId,
+                Name = "Weather Updates",
+                Description = "Notifications when the weather over your garden changes",
+                Importance = Importance.Default
+            };
+            AndroidNotificationCenter.RegisterNotificationChannel(weatherChannel);
 #elif UNITY_IOS
             using var req = new AuthorizationRequest(
                 AuthorizationOption.Alert | AuthorizationOption.Badge | AuthorizationOption.Sound, false);
+#endif
+        }
+
+        /// <summary>
+        /// Persists API key, GPS coords, and current condition so native background
+        /// fetch code can poll weather independently while the app is backgrounded.
+        /// </summary>
+        public void SaveWeatherData(string apiKey, float lat, float lon, WeatherCondition condition)
+        {
+#if UNITY_IOS
+            // PlayerPrefs maps directly to NSUserDefaults on iOS — readable by native Obj-C.
+            PlayerPrefs.SetString("weather_api_key", apiKey);
+            PlayerPrefs.SetFloat("weather_lat", lat);
+            PlayerPrefs.SetFloat("weather_lon", lon);
+            PlayerPrefs.SetInt("weather_condition", (int)condition);
+            PlayerPrefs.Save();
+#elif UNITY_ANDROID
+            using var plugin = new AndroidJavaClass("com.garden.WeatherPrefsPlugin");
+            using var unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
+            using var context = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
+            plugin.CallStatic("saveWeatherData", context, apiKey, lat, lon, (int)condition);
 #endif
         }
 
