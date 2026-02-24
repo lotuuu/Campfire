@@ -23,6 +23,11 @@ namespace Garden
 
         private void Start()
         {
+            if (tileSprite == null)
+            {
+                Debug.LogError("[HearthIsometricView] tileSprite is not assigned — grid will not render.", this);
+                return;
+            }
             if (EnvironmentManager.Instance == null) return;
             int count = EnvironmentManager.Instance.GetActiveSlotCount(HearthEnvIndex);
             RebuildGrid(count);
@@ -37,7 +42,7 @@ namespace Garden
 
         private void OnSlotUnlocked(int envIndex)
         {
-            if (envIndex != HearthEnvIndex) return;
+            if (envIndex != HearthEnvIndex || tileSprite == null) return;
             SpawnTile(tiles.Count);
             RecenterGrid();
         }
