@@ -92,7 +92,6 @@
             <ui:Label name="greenhouse-slots-text" text="0 / 0" />
         </ui:VisualElement>
         <ui:ScrollView name="greenhouse-grid" class="scroll-view" />
-        <ui:Button name="greenhouse-expand-button" text="Expand Slots" class="btn" />
     </ui:VisualElement>
 
     <!-- Page 4: Locked -->

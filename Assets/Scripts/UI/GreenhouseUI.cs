@@ -10,7 +10,6 @@ namespace Garden
         private ScrollView plantGrid;
         private Label dustRateText;
         private Label slotsText;
-        private Button expandButton;
 
         public void Initialize(VisualElement root)
         {
@@ -19,9 +18,6 @@ namespace Garden
             plantGrid = root.Q<ScrollView>("greenhouse-grid");
             dustRateText = root.Q<Label>("greenhouse-dust-rate");
             slotsText = root.Q<Label>("greenhouse-slots-text");
-            expandButton = root.Q<Button>("greenhouse-expand-button");
-
-            expandButton.clicked += OnExpand;
         }
 
         public void Show()
@@ -56,16 +52,6 @@ namespace Garden
                 if (swatch != null) swatch.style.backgroundColor = new Color(0.3f, 0.3f, 0.3f, 0.3f);
                 plantGrid.Add(slot);
             }
-
-            var config = CurrencyManager.Instance.Config;
-            expandButton.SetEnabled(CurrencyManager.Instance.CanAfford(
-                CurrencyType.SunShards, config.slotCostSunShards));
-        }
-
-        private void OnExpand()
-        {
-            if (GreenhouseManager.Instance.ExpandSlots())
-                RefreshDisplay();
         }
     }
 }
