@@ -1,0 +1,44 @@
+/* Garden global theme — extends Unity default, overrides dropdown popup sizing */
+@import url("unity-theme://default");
+
+.unity-base-dropdown {
+    background-color: rgba(12, 22, 32, 0.97);
+    border-width: 1px;
+    border-color: rgba(140, 230, 240, 0.25);
+    border-radius: 8px;
+}
+
+.unity-base-dropdown__container-outer,
+.unity-base-dropdown__container-inner {
+    background-color: transparent;
+}
+
+.unity-base-dropdown__item {
+    min-height: 96px;
+    padding-left: 24px;
+    padding-right: 24px;
+    background-color: transparent;
+    font-size: 32px;
+    color: rgb(200, 220, 230);
+}
+
+.unity-base-dropdown__item:hover {
+    background-color: rgba(100, 220, 220, 0.12);
+    color: rgb(230, 245, 255);
+}
+
+.unity-base-dropdown__item--is-checked {
+    color: rgb(100, 220, 220);
+}
+
+.unity-base-dropdown__item TextElement,
+.unity-base-dropdown__item Label {
+    font-size: 32px;
+    color: rgb(200, 220, 230);
+}
+
+.unity-base-dropdown__separator {
+    height: 1px;
+    background-color: rgba(120, 200, 220, 0.15);
+    margin: 8px 0;
+}
