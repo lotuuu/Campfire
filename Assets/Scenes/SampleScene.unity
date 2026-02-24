@@ -15144,6 +15144,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 152301}
+  - component: {fileID: 152302}
   m_Layer: 0
   m_Name: HearthIso
   m_TagString: Untagged
@@ -15166,6 +15167,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &152302
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 152300}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a94ff748f6f04ec5beb9459c72ce55a, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Garden::Garden.HearthIsometricView
+  tileSprite: {fileID: 21300000, guid: 7c6dc6b56455f43b695b3d59a7895a69, type: 3}
+  sortingLayerName: Default
+  baseSortingOrder: 0
+  gridAnchor: {x: 0, y: -0.3, z: 0}
 --- !u!1 &1293215415
 GameObject:
   m_ObjectHideFlags: 0
