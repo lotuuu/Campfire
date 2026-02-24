@@ -37,6 +37,11 @@ namespace Garden
                 uiDocument = FindFirstObjectByType<UIDocument>();
 
             _overlay = uiDocument.rootVisualElement.Q("rain-overlay");
+            if (_overlay == null)
+            {
+                Debug.LogError("[RainOverlay] 'rain-overlay' VisualElement not found in UIDocument.", this);
+                return;
+            }
             _overlay.generateVisualContent += Paint;
             _drops = new RainDrop[k_StormCount];
         }
@@ -49,6 +54,7 @@ namespace Garden
 
         public void Show(bool storm)
         {
+            if (_overlay == null) return;
             _activeCount = storm ? k_StormCount : 80;
             _dropWidth   = storm ? k_StormWidth  : k_RainWidth;
             _windAngle   = storm ? k_StormAngle  : k_RainAngle;
@@ -63,6 +69,7 @@ namespace Garden
 
         public void Hide()
         {
+            if (_overlay == null) return;
             _active = false;
             _overlay.style.display = DisplayStyle.None;
         }
