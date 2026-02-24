@@ -13,7 +13,7 @@ namespace Garden
     {
         public static GeneticsResult Resolve(SeedData seed, WeatherData weather)
         {
-            var sorted = seed.variants.OrderBy(v => v.priority).ToList();
+            var sorted = seed.GetSortedVariants();
 
             foreach (var variant in sorted)
             {
