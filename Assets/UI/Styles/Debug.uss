@@ -1,3 +1,24 @@
+/* Debug toggle button — top-left of top bar */
+.btn-debug-toggle {
+    width: 72px;
+    height: 72px;
+    min-height: 72px;
+    border-radius: var(--radius-sm);
+    background-color: rgba(10, 20, 30, 0.45);
+    border-width: 1px;
+    border-color: rgba(120, 200, 220, 0.20);
+    color: var(--color-text-dim);
+    font-size: var(--font-md);
+    -unity-text-align: middle-center;
+    padding: 0;
+    margin-right: var(--spacing-sm);
+}
+
+.btn-debug-toggle:hover {
+    background-color: rgba(20, 40, 55, 0.65);
+    color: var(--color-text);
+}
+
 /* Debug panel styles - mobile-first sizing */
 
 #debug-panel {
