@@ -27,12 +27,12 @@
     transition-duration: 0.2s;
 }
 
-.nav-tab--active {
+.nav-tab-active {
     color: var(--color-text-accent);
     border-bottom-color: var(--color-text-accent);
 }
 
-.nav-tab--disabled {
+.nav-tab-disabled {
     color: rgba(120, 150, 170, 0.35);
 }
 
@@ -40,6 +40,6 @@
     color: var(--color-text);
 }
 
-.nav-tab--disabled:hover {
+.nav-tab-disabled:hover {
     color: rgba(120, 150, 170, 0.35);
 }

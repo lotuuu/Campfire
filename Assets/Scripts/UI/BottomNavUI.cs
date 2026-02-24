@@ -40,11 +40,11 @@ namespace Garden
         {
             for (int i = 0; i < tabs.Length; i++)
             {
-                tabs[i].RemoveFromClassList("nav-tab--active");
+                tabs[i].RemoveFromClassList("nav-tab-active");
             }
             if (activeIndex >= 0 && activeIndex < tabs.Length)
             {
-                tabs[activeIndex].AddToClassList("nav-tab--active");
+                tabs[activeIndex].AddToClassList("nav-tab-active");
             }
         }
 
