@@ -39,6 +39,16 @@ namespace Garden
             RestoreFromSave();
         }
 
+        private void OnApplicationPause(bool pauseStatus)
+        {
+            if (NotificationService.Instance == null) return;
+
+            if (pauseStatus)
+                NotificationService.Instance.RescheduleAll();
+            else
+                NotificationService.Instance.CancelAll();
+        }
+
         private void Update()
         {
             bool anyUpdated = false;
@@ -113,6 +123,18 @@ namespace Garden
 
             var entry = save.seedInventory.Find(e => e.seedName == seed.seedName);
             if (entry != null) entry.count--;
+
+            if (NotificationService.Instance != null)
+            {
+                float envBonus = 0f;
+                if (EnvironmentManager.Instance != null && WeatherService.Instance != null)
+                    envBonus = EnvironmentManager.Instance.GetGrowthBonus(
+                        environmentIndex, WeatherService.Instance.CurrentWeather);
+                float totalMultiplier = result.growthSpeedMultiplier + envBonus;
+                double remainingSeconds = (seed.baseGrowthHours / totalMultiplier) * 3600.0;
+                NotificationService.Instance.SchedulePlantNotification(
+                    environmentIndex, slotIndex, seed.seedName, remainingSeconds);
+            }
 
             OnSlotStateChanged?.Invoke(environmentIndex, slotIndex, PlantState.Growing);
             OnPlantStateChanged?.Invoke();
@@ -250,6 +272,9 @@ namespace Garden
 
         private void ClearSlot(PlantSlot slot)
         {
+            if (NotificationService.Instance != null)
+                NotificationService.Instance.CancelPlantNotification(slot.environmentIndex, slot.slotIndex);
+
             slot.seed = null;
             slot.variant = null;
             slot.growthProgress = 0f;
