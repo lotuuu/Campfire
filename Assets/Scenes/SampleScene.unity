@@ -15352,6 +15352,7 @@ GameObject:
   - component: {fileID: 1564428233}
   - component: {fileID: 1564428236}
   - component: {fileID: 1564428237}
+  - component: {fileID: 1564428238}
   m_Layer: 0
   m_Name: --- UI ---
   m_TagString: Untagged
@@ -15542,6 +15543,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da3e68b5619044a6ba56859a468db644, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Garden::Garden.BottomNavUI
+--- !u!114 &1564428238
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1564428222}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b96595c4d55164adfa9c228f680b3fdf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Garden::Garden.SafeAreaController
 --- !u!1 &1571088094
 GameObject:
   m_ObjectHideFlags: 0
