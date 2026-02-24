@@ -1,0 +1,7 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement class="construction-upgrade-row">
+        <ui:Label class="construction-upgrade-label" name="upgrade-label" text="Add Slot" />
+        <ui:Label class="construction-upgrade-progress" name="upgrade-progress" text="" />
+        <ui:Button class="btn construction-upgrade-btn" name="upgrade-btn" text="+" />
+    </ui:VisualElement>
+</ui:UXML>

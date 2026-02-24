@@ -1,0 +1,15 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement class="construction-card">
+        <ui:VisualElement class="construction-card-header">
+            <ui:Label class="construction-card-name" text="Location" />
+            <ui:Label class="construction-card-badge" text="" />
+        </ui:VisualElement>
+        <!-- Shown when location is locked -->
+        <ui:VisualElement class="construction-locked-section" name="locked-section">
+            <ui:Label class="construction-unlock-cost" name="unlock-cost-label" text="" />
+            <ui:Button class="btn construction-unlock-btn" name="unlock-btn" text="Unlock Location" />
+        </ui:VisualElement>
+        <!-- Shown when location is unlocked: upgrade buttons injected here by ConstructionUI -->
+        <ui:VisualElement class="construction-upgrades-section" name="upgrades-section" />
+    </ui:VisualElement>
+</ui:UXML>
