@@ -9,9 +9,11 @@ namespace Garden
         [SerializeField] private string sortingLayerName = "Default";
         [SerializeField] private int baseSortingOrder = 0;
         [SerializeField] private Vector3 gridAnchor = new Vector3(0f, -0.3f, 0f);
+        [SerializeField] private GameObject[] plantPrefabs;
+        [SerializeField] private float plantScale = 0.3f;
 
         private readonly List<GameObject> tiles = new();
-        private readonly List<SpriteRenderer> plantRenderers = new();
+        private readonly List<GameObject> plantGOs = new();
         private readonly List<float> plantBaseScales = new();
         private Camera mainCam;
         private float slideOffsetX;
@@ -53,7 +55,7 @@ namespace Garden
         {
             foreach (var t in tiles) if (t) Destroy(t);
             tiles.Clear();
-            plantRenderers.Clear();
+            plantGOs.Clear();
             plantBaseScales.Clear();
 
             for (int i = 0; i < count; i++)
@@ -72,32 +74,22 @@ namespace Garden
             sr.sortingLayerName = sortingLayerName;
             sr.sortingOrder = baseSortingOrder;
 
-            // Plant visual: colored circle disc, child of tile
-            var plantGO = new GameObject("PlantDisc");
-            plantGO.transform.SetParent(tileGO.transform, false);
-            plantGO.transform.localPosition = new Vector3(0f, 0.12f, 0f);
-
-            var plantSr = plantGO.AddComponent<SpriteRenderer>();
-            plantSr.sprite = Resources.GetBuiltinResource<Sprite>("UI/Skin/Knob.psd");
-            plantSr.sortingLayerName = sortingLayerName;
-            plantSr.sortingOrder = baseSortingOrder + 1;
-            plantSr.color = Color.clear;
-
-            // Scale disc to ~35% of tile width
-            if (tileSprite != null)
+            // Plant visual: instantiate prefab child
+            GameObject plantGO = null;
+            if (plantPrefabs != null && plantPrefabs.Length > 0)
             {
-                float tileW = tileSprite.rect.width / tileSprite.pixelsPerUnit;
-                plantGO.transform.localScale = Vector3.one * (tileW * 0.35f);
-                plantBaseScales.Add(tileW * 0.35f);
+                var prefab = plantPrefabs[index % plantPrefabs.Length];
+                if (prefab != null)
+                {
+                    plantGO = Instantiate(prefab, tileGO.transform);
+                    plantGO.transform.localPosition = new Vector3(0f, 0.15f, -0.5f);
+                    plantGO.transform.localScale = Vector3.one * plantScale;
+                }
             }
-            else
-            {
-                plantBaseScales.Add(1f);
-            }
-
-            plantGO.SetActive(false);
+            plantBaseScales.Add(plantScale);
+            if (plantGO != null) plantGO.SetActive(false);
             tiles.Add(tileGO);
-            plantRenderers.Add(plantSr);
+            plantGOs.Add(plantGO);
 
             PositionTile(index);
         }
@@ -157,22 +149,19 @@ namespace Garden
 
         public void SetPlantVisual(int index, PlantState state, Color color)
         {
-            if (index < 0 || index >= plantRenderers.Count) return;
-            var go = plantRenderers[index].gameObject;
-            if (state == PlantState.Empty)
-            {
-                go.SetActive(false);
-                return;
-            }
-            go.SetActive(true);
-            plantRenderers[index].color = color;
+            if (index < 0 || index >= plantGOs.Count) return;
+            var go = plantGOs[index];
+            if (go == null) return;
+            go.SetActive(state != PlantState.Empty);
         }
 
         public void SetPlantScale(int index, float multiplier)
         {
-            if (index < 0 || index >= plantRenderers.Count) return;
-            float baseScale = index < plantBaseScales.Count ? plantBaseScales[index] : 1f;
-            plantRenderers[index].transform.localScale = Vector3.one * (baseScale * multiplier);
+            if (index < 0 || index >= plantGOs.Count) return;
+            var go = plantGOs[index];
+            if (go == null) return;
+            float baseScale = index < plantBaseScales.Count ? plantBaseScales[index] : plantScale;
+            go.transform.localScale = Vector3.one * (baseScale * multiplier);
         }
     }
 }
