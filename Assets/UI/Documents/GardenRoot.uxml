@@ -12,6 +12,7 @@
     <Style src="../Styles/HarvestResult.uss" />
     <Style src="../Styles/Terrarium.uss" />
     <Style src="../Styles/Hearth.uss" />
+    <Style src="../Styles/Construction.uss" />
 
     <!-- App shell: vertical stack -->
     <ui:VisualElement name="app-shell" style="flex-grow: 1;">
@@ -52,7 +53,7 @@
             <ui:Button name="tab-greenhouse" class="nav-tab">
                 <ui:VisualElement class="nav-icon" />
             </ui:Button>
-            <ui:Button name="tab-locked" class="nav-tab nav-tab-disabled">
+            <ui:Button name="tab-construction" class="nav-tab">
                 <ui:VisualElement class="nav-icon" />
             </ui:Button>
         </ui:VisualElement>
@@ -94,11 +95,10 @@
         <ui:ScrollView name="greenhouse-grid" class="scroll-view" />
     </ui:VisualElement>
 
-    <!-- Page 4: Locked -->
-    <ui:VisualElement name="locked-page" class="page-content" style="display: none;">
-        <ui:VisualElement style="flex-grow: 1; justify-content: center; align-items: center;">
-            <ui:Label text="Coming Soon" class="label-dim label-coming-soon" />
-        </ui:VisualElement>
+    <!-- Page 4: Construction -->
+    <ui:VisualElement name="construction-page" class="page-content" style="display: none;">
+        <ui:Label text="Construction" class="panel-header" />
+        <ui:ScrollView name="construction-scroll" class="scroll-view" />
     </ui:VisualElement>
 
     <!-- ===== OVERLAYS (stay on top of pages) ===== -->
