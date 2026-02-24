@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 namespace Garden
@@ -25,6 +26,16 @@ namespace Garden
             StopAll();
             if (WeatherService.Instance != null)
                 UpdateEffects(WeatherService.Instance.CurrentWeather);
+            else
+                StartCoroutine(WaitForWeatherService());
+        }
+
+        private IEnumerator WaitForWeatherService()
+        {
+            while (WeatherService.Instance == null)
+                yield return null;
+            WeatherService.Instance.OnWeatherUpdated += UpdateEffects;
+            UpdateEffects(WeatherService.Instance.CurrentWeather);
         }
 
         private void UpdateEffects(WeatherData w)
@@ -35,7 +46,12 @@ namespace Garden
             {
                 case WeatherCondition.Rain:
                 case WeatherCondition.Storm:
-                    rainEffect?.Play();
+                    if (rainEffect != null)
+                    {
+                        var emission = rainEffect.emission;
+                        emission.rateOverTime = w.condition == WeatherCondition.Storm ? 600f : 300f;
+                        rainEffect.Play();
+                    }
                     if (w.condition == WeatherCondition.Storm && windLines != null)
                         windLines.Play();
                     break;
