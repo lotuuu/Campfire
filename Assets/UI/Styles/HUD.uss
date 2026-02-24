@@ -1,4 +1,13 @@
-/* HUD: top bar (weather + currency) */
+/* HUD: app shell + top bar */
+
+#app-shell {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    flex-direction: column;
+}
 
 /* Top bar: weather + currency */
 #top-bar {
