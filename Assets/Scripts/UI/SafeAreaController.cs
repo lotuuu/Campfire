@@ -14,10 +14,12 @@ namespace Garden
         private UIDocument _doc;
         private VisualElement _topBar;
         private VisualElement _bottomNav;
+        private VisualElement _plantButton;
 
         // Base padding from USS, captured once geometry resolves.
         private float _topBarBasePaddingTop;
         private float _bottomNavBasePaddingBottom;
+        private float _plantButtonBaseMarginBottom;
 
         private void Awake()
         {
@@ -27,8 +29,9 @@ namespace Garden
         private void Start()
         {
             var root = _doc.rootVisualElement;
-            _topBar    = root.Q<VisualElement>("top-bar");
-            _bottomNav = root.Q<VisualElement>("bottom-nav");
+            _topBar      = root.Q<VisualElement>("top-bar");
+            _bottomNav   = root.Q<VisualElement>("bottom-nav");
+            _plantButton = root.Q<VisualElement>("plant-button");
 
             // Wait until the layout pass has resolved so we can read base padding.
             root.RegisterCallback<GeometryChangedEvent>(OnGeometryReady);
@@ -39,8 +42,9 @@ namespace Garden
             _doc.rootVisualElement.UnregisterCallback<GeometryChangedEvent>(OnGeometryReady);
 
             // Capture USS-computed base padding before we override with inline styles.
-            if (_topBar    != null) _topBarBasePaddingTop       = _topBar.resolvedStyle.paddingTop;
-            if (_bottomNav != null) _bottomNavBasePaddingBottom = _bottomNav.resolvedStyle.paddingBottom;
+            if (_topBar      != null) _topBarBasePaddingTop         = _topBar.resolvedStyle.paddingTop;
+            if (_bottomNav   != null) _bottomNavBasePaddingBottom   = _bottomNav.resolvedStyle.paddingBottom;
+            if (_plantButton != null) _plantButtonBaseMarginBottom   = _plantButton.resolvedStyle.marginBottom;
 
             ApplySafeArea();
         }
@@ -61,6 +65,9 @@ namespace Garden
 
             if (_bottomNav != null && bottomInset > 0)
                 _bottomNav.style.paddingBottom = _bottomNavBasePaddingBottom + bottomInset;
+
+            if (_plantButton != null && bottomInset > 0)
+                _plantButton.style.marginBottom = _plantButtonBaseMarginBottom + bottomInset;
         }
 
 #if UNITY_EDITOR
