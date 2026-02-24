@@ -5,12 +5,7 @@ namespace Garden
 {
     public class WeatherOverlay : MonoBehaviour
     {
-        [SerializeField] private ParticleSystem rainEffect;
-        [SerializeField] private ParticleSystem snowEffect;
-        [SerializeField] private ParticleSystem windLines;
-        [SerializeField] private float rainEmissionRate = 300f;
-        [SerializeField] private float stormEmissionRate = 600f;
-        [SerializeField] private float windSpeedThreshold = 5f;
+        [SerializeField] private RainOverlay rainOverlay;
 
         private void OnEnable()
         {
@@ -26,7 +21,8 @@ namespace Garden
 
         private void Start()
         {
-            StopAll();
+            rainOverlay?.Hide();
+
             if (WeatherService.Instance != null)
             {
                 WeatherService.Instance.OnWeatherUpdated -= UpdateEffects;
@@ -50,35 +46,18 @@ namespace Garden
 
         private void UpdateEffects(WeatherData w)
         {
-            StopAll();
-
             switch (w.condition)
             {
                 case WeatherCondition.Rain:
-                case WeatherCondition.Storm:
-                    if (rainEffect != null)
-                    {
-                        var emission = rainEffect.emission;
-                        emission.rateOverTime = w.condition == WeatherCondition.Storm ? stormEmissionRate : rainEmissionRate;
-                        rainEffect.Play();
-                    }
-                    if (w.condition == WeatherCondition.Storm && windLines != null)
-                        windLines.Play();
+                    rainOverlay?.Show(storm: false);
                     break;
-                case WeatherCondition.Snow:
-                    snowEffect?.Play();
+                case WeatherCondition.Storm:
+                    rainOverlay?.Show(storm: true);
+                    break;
+                default:
+                    rainOverlay?.Hide();
                     break;
             }
-
-            if (w.windSpeed > windSpeedThreshold && windLines != null && !windLines.isPlaying)
-                windLines.Play();
-        }
-
-        private void StopAll()
-        {
-            rainEffect?.Stop();
-            snowEffect?.Stop();
-            windLines?.Stop();
         }
     }
 }
