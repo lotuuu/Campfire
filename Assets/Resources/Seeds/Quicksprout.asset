@@ -16,12 +16,12 @@ MonoBehaviour:
   icon: {fileID: 0}
   description: A hyperactive seed that erupts from the soil in seconds. Its form
     is shaped entirely by temperature.
-  baseGrowthHours: 0.00139
+  baseGrowthHours: 0.00278
   variants:
   - {fileID: 11400000, guid: 4cce2d96e2aa45fc949eb13c18370488, type: 2}
   - {fileID: 11400000, guid: d0e35fa12d104f47af5018e103f71469, type: 2}
   - {fileID: 11400000, guid: 605ff0f2388a48d5b97bf9f5478014e6, type: 2}
-  buyPrice: 50
-  baseSellPrice: 60
+  buyPrice: 10
+  baseSellPrice: 12
   preferredWeather: 0
   specialConditions: []
