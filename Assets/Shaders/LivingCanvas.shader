@@ -119,7 +119,7 @@ Shader "Garden/LivingCanvas"
             half4 frag(Varyings input) : SV_Target
             {
                 float2 uv = input.uv;
-                half t = _Time.y;
+                float t = _Time.y;
 
                 // --- 1. Vertical gradient ---
                 half3 col = lerp(_BottomColor.rgb, _TopColor.rgb, uv.y);
