@@ -204,14 +204,16 @@ File: `Assets/Scripts/Managers/SeedShopManager.cs`
 ### Shop Inventory
 | Seed | Buy Price | Base Sell (C-Tier) | Special Condition |
 |------|-----------|-------------------|-------------------|
-| Astra | 100 | 120 | None (Starter) |
-| Cinder-Fern | 450 | 550 | +10% S-Tier if Temp > 25°C |
-| Mist-Vine | 800 | 1,000 | +10% S-Tier if Humidity > 70% |
-| Luna-Petal | 1,500 | 1,900 | Only grows during Nighttime |
-| Storm-Root | 3,000 | 4,000 | +20% S-Tier during Wind/Rain |
+| Quicksprout | 10 | 12 | None (Tutorial) |
+| Dashbloom | 50 | 65 | None (Micro-session) |
+| Astra | 150 | 240 | None (Starter) |
+| Cinder-Fern | 500 | 950 | +10% S-Tier if Temp > 25°C |
+| Mist-Vine | 1,200 | 2,600 | +10% S-Tier if Humidity > 70% |
+| Luna-Petal | 3,000 | 7,200 | Only grows during Nighttime |
+| Storm-Root | 8,000 | 22,000 | +20% S-Tier during Wind/Rain |
 
-### Variant Plan (12 per seed, 60 total)
-Each seed follows the same 12-trigger structure as Astra:
+### Variant Plan (12 per seed, 60 total + 6 test)
+Each main seed follows the same 12-trigger structure as Astra:
 1. Base (default)
 2. Frost (Temp < 5°C)
 3. Desert (Temp > 38°C)
@@ -227,6 +229,8 @@ Each seed follows the same 12-trigger structure as Astra:
 
 Visuals and names themed per seed (e.g., Cinder-Fern's frost variant = "Ember-Glass Fern").
 
+Quicksprout has 3 temperature-based variants; Dashbloom has 3 weather-condition variants.
+
 ---
 
 ## 5. Testing Strategy
@@ -236,3 +240,31 @@ Visuals and names themed per seed (e.g., Cinder-Fern's frost variant = "Ember-Gl
 - Unit tests for EnvironmentManager unlock/bonus logic
 - Integration test for full harvest flow (plant → grow → harvest → sell/keep)
 - Existing 7 tests updated for PlantManager API changes
+
+---
+
+## 10. Economic Balance & Seed Data (v2.1)
+
+### Seed Table
+| Seed | Grow Time | Buy | Sell (C) | Profit | Role |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| Quicksprout | 10s | 10 | 12 | +2 | Tutorial / Instant Dopamine |
+| Dashbloom | 2m | 50 | 65 | +15 | Micro-Session engagement |
+| Astra | 1h | 150 | 240 | +90 | The "Hourly" check-in |
+| Cinder-Fern | 4h | 500 | 950 | +450 | Mid-day "Work break" goal |
+| Mist-Vine | 8h | 1,200 | 2,600 | +1,400 | The "Overnight" standard |
+| Luna-Petal | 18h | 3,000 | 7,200 | +4,200 | Strategic scheduling |
+| Storm-Root | 36h | 8,000 | 22,000 | +14,000 | The "Long-Haul" Whale |
+
+### Harvest Multipliers
+* **Tier D:** 0.8x
+* **Tier C:** 1.0x
+* **Tier B:** 1.5x
+* **Tier A:** 2.2x
+* **Tier S:** 3.5x
+
+### Trigger Priority System
+1. **Priority 1 (Calendar):** Overrides all. (Eclipses, Equinoxes).
+2. **Priority 2 (Extreme):** Temp extremes, Storms, High Wind.
+3. **Priority 3 (Time/Humidity):** Day/Night, Dusk, Moon Phase, Humidity.
+4. **Priority 4 (Fallback):** Base Variant.
