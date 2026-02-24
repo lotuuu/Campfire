@@ -15543,6 +15543,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Garden::Garden.HortusUI
   uiDocument: {fileID: 1564428223}
+  hearthIsoView: {fileID: 152300}
 --- !u!114 &1564428233
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15591,6 +15592,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d80899ec7c6ec42b09502d51d533b205, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Garden::Garden.HearthViewUI
+  isometricView: {fileID: 152300}
 --- !u!114 &1564428237
 MonoBehaviour:
   m_ObjectHideFlags: 0
