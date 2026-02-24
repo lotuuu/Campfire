@@ -28,14 +28,14 @@ namespace Garden
         {
             var seed = SeedRegistry.Instance.GetSeed(seedName);
             if (seed == null) return false;
-            return CurrencyManager.Instance.CanAfford(CurrencyType.Dewdrops, seed.buyPrice);
+            return CurrencyManager.Instance.CanAfford(CurrencyType.AuraDust, seed.buyPrice);
         }
 
         public bool BuySeed(string seedName)
         {
             var seed = SeedRegistry.Instance.GetSeed(seedName);
             if (seed == null) return false;
-            if (!CurrencyManager.Instance.Spend(CurrencyType.Dewdrops, seed.buyPrice))
+            if (!CurrencyManager.Instance.Spend(CurrencyType.AuraDust, seed.buyPrice))
                 return false;
 
             SeedRegistry.Instance.AddSeed(seedName);

@@ -41,7 +41,7 @@ namespace Garden
 
                 int owned = SeedRegistry.Instance.GetSeedCount(seed.seedName);
                 if (nameLabel != null) nameLabel.text = $"{seed.seedName} (x{owned})";
-                if (priceLabel != null) priceLabel.text = $"{seed.buyPrice} Dew";
+                if (priceLabel != null) priceLabel.text = $"{seed.buyPrice} Dust";
                 if (conditionLabel != null) conditionLabel.text = seed.description ?? "";
                 if (icon != null && seed.icon != null)
                     icon.style.backgroundImage = new StyleBackground(seed.icon);
@@ -50,7 +50,7 @@ namespace Garden
                 {
                     bool canBuy = SeedShopManager.Instance.CanBuy(seed.seedName);
                     buyBtn.SetEnabled(canBuy);
-                    buyBtn.text = $"Buy ({seed.buyPrice})";
+                    buyBtn.text = $"Buy ({seed.buyPrice} Dust)";
 
                     var seedName = seed.seedName;
                     buyBtn.clicked += () =>
