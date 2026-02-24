@@ -13,8 +13,10 @@ MonoBehaviour:
   m_Name: Hearth
   m_EditorClassIdentifier: Garden::Garden.EnvironmentData
   environmentName: The Hearth
-  slotCount: 2
+  slotCount: 1
+  maxSlotCount: 3
   unlockCostDewdrops: 0
+  slotUnlockCostDewdrops: 250
   growthSpeedBonus: 0.1
   bonusCondition:
     useTemperature: 1

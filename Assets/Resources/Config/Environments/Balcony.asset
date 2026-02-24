@@ -14,7 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Garden::Garden.EnvironmentData
   environmentName: The Balcony
   slotCount: 2
+  maxSlotCount: 5
   unlockCostDewdrops: 5000
+  slotUnlockCostDewdrops: 1500
   growthSpeedBonus: 0
   bonusCondition:
     useTemperature: 0
