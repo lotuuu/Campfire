@@ -103,9 +103,12 @@ namespace Garden
             float dt = Time.deltaTime;
             for (int i = 0; i < _activeCount; i++)
             {
+                _drops[i].x += _windAngle * _drops[i].speed * dt;
                 _drops[i].y += _drops[i].speed * dt;
                 if (_drops[i].y > 1f + _drops[i].length)
                     ResetDrop(ref _drops[i]);
+                else if (_drops[i].x > 1f)
+                    ResetDropFromLeft(ref _drops[i]);
             }
             _overlay.MarkDirtyRepaint();
         }
@@ -114,6 +117,12 @@ namespace Garden
         {
             d.x = Random.value;
             d.y = -d.length;
+        }
+
+        private void ResetDropFromLeft(ref RainDrop d)
+        {
+            d.x = 0f;
+            d.y = Random.value;
         }
 
         private void Paint(MeshGenerationContext ctx)
