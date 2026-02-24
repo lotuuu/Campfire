@@ -5,35 +5,37 @@
 }
 
 .shop-icon {
-    width: 96px;
-    height: 96px;
-    border-radius: var(--radius-sm);
+    width: 128px;
+    height: 128px;
+    border-radius: var(--radius-md);
     background-color: var(--color-bg-slot);
     margin-bottom: var(--spacing-sm);
 }
 
 .shop-seed-name {
-    font-size: var(--font-md);
+    font-size: var(--font-lg);
     color: var(--color-text-bright);
     -unity-font-style: bold;
     margin-bottom: var(--spacing-xs);
+    -unity-text-align: middle-center;
 }
 
 .shop-price {
-    font-size: var(--font-sm);
+    font-size: var(--font-md);
     color: var(--color-text-accent);
     margin-bottom: var(--spacing-xs);
 }
 
 .shop-condition {
-    font-size: var(--font-xs);
-    color: var(--color-text-dim);
+    font-size: var(--font-sm);
+    color: rgb(175, 200, 215);
     -unity-text-align: middle-center;
     margin-bottom: var(--spacing-sm);
     white-space: normal;
 }
 
 .shop-buy-btn {
-    min-height: 64px;
+    min-height: 96px;
     width: 100%;
+    font-size: var(--font-md);
 }

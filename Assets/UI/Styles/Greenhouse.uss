@@ -1,23 +1,23 @@
 /* Greenhouse panel styles - mobile-first sizing */
 
 #greenhouse-panel .plant-slot {
-    width: 260px;
-    height: 240px;
-    min-height: 240px;
+    width: 300px;
+    height: 300px;
+    min-height: 300px;
     align-items: center;
     justify-content: center;
 }
 
 #greenhouse-panel .plant-swatch {
-    width: 96px;
-    height: 96px;
-    border-radius: 48px;
+    width: 128px;
+    height: 128px;
+    border-radius: 64px;
     margin-bottom: var(--spacing-sm);
 }
 
 #greenhouse-panel .plant-name {
-    color: var(--color-text);
-    font-size: var(--font-sm);
+    color: var(--color-text-bright);
+    font-size: var(--font-md);
     -unity-text-align: middle-center;
 }
 
