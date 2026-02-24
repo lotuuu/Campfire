@@ -28,6 +28,14 @@ namespace Garden
         private Camera mainCam;
         private const int TerrariumPageIndex = 2;
 
+        // Iso land slide tracking — mirrors CSS transition independently so Update()
+        // sees a smoothly animated value instead of the snapped resolvedStyle.translate.x
+        private float _isoContainerX;
+        private float _isoAnimStartX;
+        private float _isoAnimTargetX;
+        private float _isoAnimStartTime = -1f;
+        private const float IsoDuration = SwipeablePageView.AnimationDurationMs / 1000f;
+
         // Location gate
         private VisualElement locationGate;
         private Label gateStatus;
@@ -136,8 +144,32 @@ namespace Garden
             var panel = pageView.panel;
             if (panel == null || pageView.PageWidth <= 0) return;
 
+            // Advance our own lerped container position (CSS resolvedStyle.translate.x snaps to
+            // the target immediately during a transition, so we can't use it for smooth iso sync)
+            if (_isoAnimStartTime >= 0f)
+            {
+                float elapsed = Time.time - _isoAnimStartTime;
+                if (elapsed < IsoDuration)
+                {
+                    float t = elapsed / IsoDuration;
+                    t = 1f - Mathf.Pow(1f - t, 3f); // ease-out cubic
+                    _isoContainerX = Mathf.Lerp(_isoAnimStartX, _isoAnimTargetX, t);
+                }
+                else
+                {
+                    _isoContainerX = _isoAnimTargetX;
+                    _isoAnimStartTime = -1f;
+                }
+            }
+            else
+            {
+                // Not animating to a new page — track the real value directly (accurate during drag
+                // because SwipeablePageView sets transitionDuration=0 while dragging)
+                _isoContainerX = pageView.CurrentPageContainerX;
+            }
+
             // Compute how far the terrarium page is from its centered rest position (panel points)
-            float panelDelta = pageView.CurrentPageContainerX + TerrariumPageIndex * pageView.PageWidth;
+            float panelDelta = _isoContainerX + TerrariumPageIndex * pageView.PageWidth;
 
             // Panel points → screen pixels
             float screenDeltaX = panelDelta * panel.scaledPixelsPerPoint;
@@ -152,6 +184,11 @@ namespace Garden
 
         private void OnPageChanged(int pageIndex)
         {
+            // Kick off our own lerp to mirror the CSS transition in SwipeablePageView
+            _isoAnimStartX = _isoContainerX;
+            _isoAnimTargetX = -pageIndex * pageView.PageWidth;
+            _isoAnimStartTime = Time.time;
+
             if (pageIndex == 2)
             {
                 // Switching TO terrarium: show tiles immediately, cancel any pending hide
