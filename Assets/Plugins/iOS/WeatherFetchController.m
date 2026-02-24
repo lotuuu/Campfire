@@ -1,6 +1,6 @@
 #import "UnityAppController.h"
-@import UserNotifications;
-@import Foundation;
+#import <UserNotifications/UserNotifications.h>
+#import <Foundation/Foundation.h>
 
 // NSUserDefaults keys — must match PlayerPrefs keys set from C#.
 static NSString* const kApiKey    = @"weather_api_key";
