@@ -12,10 +12,13 @@
 /* Top bar: weather + currency */
 #top-bar {
     flex-direction: row;
-    justify-content: space-between;
     align-items: flex-start;
     padding: var(--spacing-md);
     padding-top: var(--spacing-lg);
+}
+
+.top-bar-side {
+    flex: 1;
 }
 
 #weather-text {
@@ -30,13 +33,18 @@
 }
 
 #currency-panel {
+    flex: 1;
     align-items: flex-end;
+}
+
+#currency-card {
     background-color: rgba(10, 20, 30, 0.45);
     border-radius: var(--radius-sm);
     padding: var(--spacing-sm) var(--spacing-md);
     border-width: 1px;
     border-color: rgba(120, 200, 220, 0.20);
     border-top-color: rgba(140, 230, 240, 0.30);
+    align-items: flex-end;
 }
 
 .currency-label {

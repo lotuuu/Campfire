@@ -26,6 +26,8 @@ namespace Garden
             popupContainer.Clear();
 
             var popup = popupTemplate.CloneTree();
+            popup.style.flexGrow = 1; // TemplateContainer must fill harvest-popup's height so
+                                      // the absolute harvest-overlay inside it spans the screen.
 
             var swatch = popup.Q<VisualElement>(className: "harvest-swatch");
             var variantName = popup.Q<Label>(className: "harvest-variant-name");

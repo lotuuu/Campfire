@@ -14,6 +14,7 @@ namespace Garden
         private int currentPageIndex;
         private int pageCount;
         private bool isDragging;
+        private bool pointerCaptured;
         private float dragStartX;
         private float dragStartY;
         private float dragCurrentX;
@@ -95,6 +96,7 @@ namespace Garden
         {
             if (evt.button != 0) return;
             isDragging = true;
+            pointerCaptured = false;
             dragStartX = evt.position.x;
             dragStartY = evt.position.y;
             dragCurrentX = evt.position.x;
@@ -102,8 +104,8 @@ namespace Garden
             dragIsHorizontal = false;
 
             pageContainer.style.transitionDuration = new List<TimeValue> { new(0, TimeUnit.Millisecond) };
-
-            this.CapturePointer(evt.pointerId);
+            // Don't capture pointer yet — wait until drag direction is confirmed horizontal.
+            // Capturing immediately would steal events from child ScrollViews.
         }
 
         private void OnPointerMove(PointerMoveEvent evt)
@@ -119,6 +121,17 @@ namespace Garden
                 {
                     dragDirectionLocked = true;
                     dragIsHorizontal = Mathf.Abs(dx) > Mathf.Abs(dy);
+                    if (dragIsHorizontal)
+                    {
+                        this.CapturePointer(evt.pointerId);
+                        pointerCaptured = true;
+                    }
+                    else
+                    {
+                        // Vertical drag — abort tracking so ScrollView keeps control.
+                        isDragging = false;
+                        return;
+                    }
                 }
             }
 
@@ -138,14 +151,22 @@ namespace Garden
         {
             if (!isDragging) return;
             FinishDrag();
-            this.ReleasePointer(evt.pointerId);
+            if (pointerCaptured)
+            {
+                this.ReleasePointer(evt.pointerId);
+                pointerCaptured = false;
+            }
         }
 
         private void OnPointerCancel(PointerCancelEvent evt)
         {
             if (!isDragging) return;
             FinishDrag();
-            this.ReleasePointer(evt.pointerId);
+            if (pointerCaptured)
+            {
+                this.ReleasePointer(evt.pointerId);
+                pointerCaptured = false;
+            }
         }
 
         private void FinishDrag()

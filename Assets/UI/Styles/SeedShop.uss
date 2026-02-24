@@ -1,5 +1,6 @@
 .shop-card {
-    width: 45%;
+    /* Width is set on the TemplateContainer in SeedShopUI.cs — percentage on an inner
+       element resolves against the auto-sized TemplateContainer, not the ScrollView. */
     padding: var(--spacing-md);
     align-items: center;
 }
