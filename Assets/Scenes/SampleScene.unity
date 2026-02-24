@@ -213,6 +213,7 @@ GameObject:
   m_Component:
   - component: {fileID: 171580624}
   - component: {fileID: 171580623}
+  - component: {fileID: 171580625}
   m_Layer: 0
   m_Name: WeatherOverlay
   m_TagString: Untagged
@@ -232,12 +233,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 024b55c21d4604d32af5b9c97bf78da0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Garden::Garden.WeatherOverlay
-  rainEffect: {fileID: 2057248350}
-  snowEffect: {fileID: 546941677}
-  windLines: {fileID: 779582599}
-  rainEmissionRate: 300
-  stormEmissionRate: 600
-  windSpeedThreshold: 5
+  rainOverlay: {fileID: 171580625}
 --- !u!4 &171580624
 Transform:
   m_ObjectHideFlags: 0
@@ -256,6 +252,19 @@ Transform:
   - {fileID: 779582601}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &171580625
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 171580622}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0230d9d985ce44c5f960eb9f4b13e2ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Garden::Garden.RainOverlay
+  uiDocument: {fileID: 0}
 --- !u!1 &321321536
 GameObject:
   m_ObjectHideFlags: 0
