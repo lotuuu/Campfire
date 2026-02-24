@@ -26,6 +26,15 @@
     padding-top: var(--spacing-xl);
 }
 
+#debug-panel > .btn-close {
+    top: var(--spacing-xl);
+    right: var(--spacing-lg);
+    width: 96px;
+    height: 96px;
+    min-height: 96px;
+    border-radius: 48px;
+}
+
 #debug-panel .debug-row {
     flex-direction: row;
     align-items: center;

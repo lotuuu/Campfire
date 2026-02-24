@@ -19,17 +19,25 @@
 
         <!-- Top bar: weather + currency (always visible) -->
         <ui:VisualElement name="top-bar" picking-mode="Position">
-            <ui:Button name="debug-toggle" text="⚙" class="btn-debug-toggle" />
+            <ui:VisualElement class="top-bar-side">
+                <ui:Button name="debug-toggle" text="⚙" class="btn-debug-toggle" />
+            </ui:VisualElement>
             <ui:Label name="weather-text" text="--°C  ·  --  ·  --" picking-mode="Ignore" />
             <ui:VisualElement name="currency-panel">
-                <ui:Label name="dewdrops-text" class="currency-label" text="Dew: 0" />
-                <ui:Label name="sun-shards-text" class="currency-label" text="Sun: 0" />
-                <ui:Label name="aura-dust-text" class="currency-label" text="Dust: 0" />
+                <ui:VisualElement name="currency-card">
+                    <ui:Label name="dewdrops-text" class="currency-label" text="Dew: 0" />
+                    <ui:Label name="sun-shards-text" class="currency-label" text="Sun: 0" />
+                    <ui:Label name="aura-dust-text" class="currency-label" text="Dust: 0" />
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- Page viewport (SwipeablePageView fills this) -->
         <ui:VisualElement name="page-viewport" style="flex-grow: 1; overflow: hidden;" />
+
+        <!-- Rain overlay (Painter2D, always screen-space) -->
+        <ui:VisualElement name="rain-overlay" picking-mode="Ignore"
+            style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: none;" />
 
         <!-- Bottom navigation -->
         <ui:VisualElement name="bottom-nav">
@@ -112,7 +120,7 @@
     </ui:VisualElement>
 
     <!-- Harvest Result Popup -->
-    <ui:VisualElement name="harvest-popup" style="display: none;" />
+    <ui:VisualElement name="harvest-popup" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: none;" />
 
     <!-- Debug Panel (overlay, toggled separately) -->
     <ui:VisualElement name="debug-panel" class="panel overlay-panel" style="display: none;">
@@ -180,10 +188,6 @@
             <ui:Button name="clear-save-button" text="Clear Save Data" class="btn" />
         </ui:ScrollView>
     </ui:VisualElement>
-
-    <!-- Rain overlay (Painter2D, always screen-space) -->
-    <ui:VisualElement name="rain-overlay" picking-mode="Ignore"
-        style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: none;" />
 
     <!-- Location Gate -->
     <ui:VisualElement name="location-gate" class="gate-panel" picking-mode="Position">
