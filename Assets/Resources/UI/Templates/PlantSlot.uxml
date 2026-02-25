@@ -2,5 +2,8 @@
     <ui:VisualElement class="grid-item plant-slot">
         <ui:VisualElement class="plant-swatch" />
         <ui:Label class="plant-name" />
+        <ui:VisualElement class="plant-decay-bar-bg">
+            <ui:VisualElement class="plant-decay-bar-fill" />
+        </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>
