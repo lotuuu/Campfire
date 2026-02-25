@@ -106,6 +106,8 @@ Backward compat: both v1 (`activePlant`) and v2 (`activeSlots`) fields are writt
 
 When editing Unity prefab/asset values, ALWAYS edit the serialized .asset/.prefab YAML files directly — never rely on changing C# code defaults, as Unity's serialized field values take precedence over code defaults.
 
+Do NOT use `[SerializeField]` for config/tuning values (positions, scales, rotations, gameplay constants). Keep those as `static readonly` or `const` in code — code is the single source of truth. `[SerializeField]` is only for asset references (prefabs, sprites, scriptable objects) and structural wiring.
+
 When the Unity MCP tool is unavailable or unreliable (especially for asset rename/move operations), fall back immediately to direct filesystem operations (Bash mv + manual .meta file handling) rather than retrying MCP repeatedly.
 
 After implementing any visual/VFX/animation feature in Unity, always verify it will actually render by checking: sorting layers, sorting orders relative to Canvas/HUD, and that the rendering approach is appropriate (e.g., don't use UI.Image for world-space trail effects).
