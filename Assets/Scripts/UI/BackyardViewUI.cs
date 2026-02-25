@@ -88,6 +88,19 @@ namespace Garden
             int count = EnvironmentManager.Instance.GetActiveSlotCount(envIndex);
             for (int i = 0; i < count; i++)
                 AddSlotButton(i);
+            ReorderSlotButtonsByDepth();
+        }
+
+        /// <summary>
+        /// Reorders slot buttons in the UI hierarchy so that back tiles (lower index)
+        /// sit on top of front tiles. UI Toolkit hit-tests the last child first, so
+        /// back tiles must be last to win click events in overlapping regions.
+        /// </summary>
+        private void ReorderSlotButtonsByDepth()
+        {
+            // BringToFront in descending index order leaves index 0 as the last child (topmost).
+            for (int i = slotButtons.Count - 1; i >= 0; i--)
+                slotButtons[i].BringToFront();
         }
 
         private void RestoreConsumableVisuals(int envIndex)
@@ -263,6 +276,7 @@ namespace Garden
         {
             if (envIndex != ActiveEnv) return;
             AddSlotButton(slotButtons.Count);
+            ReorderSlotButtonsByDepth();
             RefreshAllSlots();
         }
 
