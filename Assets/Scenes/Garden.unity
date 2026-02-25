@@ -15448,6 +15448,7 @@ GameObject:
   - component: {fileID: 1564428237}
   - component: {fileID: 1564428238}
   - component: {fileID: 1564428239}
+  - component: {fileID: 1564428240}
   m_Layer: 0
   m_Name: --- UI ---
   m_TagString: Untagged
@@ -15578,7 +15579,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Garden::Garden.HortusUI
   uiDocument: {fileID: 1564428223}
-  hearthIsoView: {fileID: 152302}
+  backyardIsoView: {fileID: 152302}
 --- !u!114 &1564428233
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15652,6 +15653,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cfbd42bd5ba0a4774a03e01a08286524, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Garden::Garden.ConstructionUI
+--- !u!114 &1564428240
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1564428222}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 77811f532c13945e69b61151eff7a02d, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Garden::Garden.EnvironmentSwitcherBar
 --- !u!1 &1571088094
 GameObject:
   m_ObjectHideFlags: 0
