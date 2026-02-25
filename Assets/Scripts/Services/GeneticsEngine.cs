@@ -35,15 +35,5 @@ namespace Garden
             };
         }
 
-        public static List<(VariantData variant, bool isHighProbability)> GetProbabilities(SeedData seed, WeatherData weather)
-        {
-            var result = new List<(VariantData, bool)>();
-            foreach (var variant in seed.variants)
-            {
-                bool matches = variant.trigger != null && variant.trigger.Evaluate(weather);
-                result.Add((variant, matches));
-            }
-            return result;
-        }
     }
 }

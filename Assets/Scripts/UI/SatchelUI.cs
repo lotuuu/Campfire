@@ -87,10 +87,9 @@ namespace Garden
             probabilityPanel.style.display = DisplayStyle.Flex;
             probabilityGrid.Clear();
 
-            var weather = WeatherService.Instance.CurrentWeather;
-            var probs = GeneticsEngine.GetProbabilities(seed, weather);
+            var variants = seed.variants;
 
-            foreach (var (variant, isHigh) in probs)
+            foreach (var variant in variants)
             {
                 var entry = probabilityEntryTemplate.CloneTree();
                 var nameLabel = entry.Q<Label>(className: "probability-name");
@@ -98,8 +97,6 @@ namespace Garden
                 {
                     bool discovered = SaveManager.Instance.Data.discoveredVariants.Contains(variant.variantName);
                     nameLabel.text = discovered ? variant.variantName : "?????";
-                    nameLabel.EnableInClassList("probability-high", isHigh);
-                    nameLabel.EnableInClassList("probability-low", !isHigh);
                 }
                 probabilityGrid.Add(entry);
             }
