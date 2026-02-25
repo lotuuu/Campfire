@@ -147,12 +147,12 @@ namespace Garden
         {
             float factor = tier switch
             {
-                QualityTier.S => 2.00f,
-                QualityTier.A => 1.00f,
-                QualityTier.B => 0.50f,
-                QualityTier.C => 0.25f,
-                QualityTier.D => 0.125f,
-                _ => 0.125f
+                QualityTier.S => 4.00f,
+                QualityTier.A => 2.00f,
+                QualityTier.B => 1.00f,
+                QualityTier.C => 0.50f,
+                QualityTier.D => 0.25f,
+                _ => 0.25f
             };
             return factor * baseGrowthHours * 60f;
         }
