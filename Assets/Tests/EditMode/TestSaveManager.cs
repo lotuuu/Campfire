@@ -38,14 +38,14 @@ namespace Garden.Tests
                 result = new SaveData();
             }
             Assert.IsNotNull(result);
-            Assert.AreEqual(6, result.greenhouseSlots);
+            Assert.AreEqual(3, result.greenhouseSlots);
         }
 
         [Test]
         public void SaveData_DefaultValues_AreValid()
         {
             var data = new SaveData();
-            Assert.AreEqual(6, data.greenhouseSlots);
+            Assert.AreEqual(3, data.greenhouseSlots);
             Assert.IsNotNull(data.activeSlots);
             Assert.IsNotNull(data.seedInventory);
             Assert.IsNotNull(data.greenhousePlants);

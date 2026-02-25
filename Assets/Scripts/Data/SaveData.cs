@@ -18,7 +18,7 @@ namespace Garden
         public List<SeedInventoryEntry> seedInventory = new();
         public List<ConsumableInventoryEntry> consumableInventory = new();
         public List<EnvironmentConsumableSave> environmentConsumables = new();
-        public int greenhouseSlots = 6;
+        public int greenhouseSlots = 3;
 
         // v2: terrarium environments
         public List<string> unlockedEnvironments = new();
