@@ -15,7 +15,7 @@ namespace Garden
         private readonly List<GameObject> tiles = new();
         private readonly List<GameObject> plantGOs = new();
         private readonly List<float> plantBaseScales = new();
-        [SerializeField] private GameObject[] consumablePrefabs; // length 6, indexed by (int)ConsumableType
+        [SerializeField] private UnityEngine.Object[] consumablePrefabs; // length 6, indexed by (int)ConsumableType
 
         // Slot-scoped consumable GOs: tile index → list of GOs (Fertilizer, QualityDirt)
         private readonly Dictionary<int, List<GameObject>> _slotConsumableGOs = new();
@@ -229,10 +229,17 @@ namespace Garden
                 _slotConsumableGOs[slotIndex] = new List<GameObject>();
 
             int existing = _slotConsumableGOs[slotIndex].Count;
-            var go = Instantiate(prefab, tiles[slotIndex].transform);
-            go.transform.localPosition = new Vector3(0.25f + existing * 0.18f, 0.15f, -0.55f);
-            Debug.Log($"[BackyardIso] SpawnSlot: spawned {type} at slot {slotIndex}, worldPos={go.transform.position}, scale={go.transform.localScale}");
-            _slotConsumableGOs[slotIndex].Add(go);
+            var obj = Instantiate((UnityEngine.Object)prefab);
+            var instance = obj as GameObject;
+            if (instance == null)
+            {
+                Debug.LogWarning($"[BackyardIso] SpawnSlot: {type} asset is not a prefab — assign a prefab on BackyardIsometricView in the Inspector");
+                if (obj != null) DestroyImmediate(obj);
+                return;
+            }
+            instance.transform.SetParent(tiles[slotIndex].transform, false);
+            instance.transform.localPosition = new Vector3(0.25f + existing * 0.18f, 0.15f, -0.55f);
+            _slotConsumableGOs[slotIndex].Add(instance);
         }
 
         /// <summary>Destroys all slot-scoped consumable GOs for a tile (called on harvest/empty).</summary>
@@ -269,12 +276,19 @@ namespace Garden
                 _envConsumableGOs.Remove(type);
             }
 
-            var go = Instantiate(prefab, transform);
+            var obj = Instantiate((UnityEngine.Object)prefab);
+            var instance = obj as GameObject;
+            if (instance == null)
+            {
+                Debug.LogWarning($"[BackyardIso] SpawnEnv: {type} asset is not a prefab — assign a prefab on BackyardIsometricView in the Inspector");
+                if (obj != null) DestroyImmediate(obj);
+                return;
+            }
+            instance.transform.SetParent(transform, false);
             // Use enum index for stable position — no overlap even if types are cleared/re-added
             int typeIndex = (int)type;
-            go.transform.localPosition = new Vector3(-2.0f + typeIndex * 0.5f, 0.8f, -0.5f);
-            Debug.Log($"[BackyardIso] SpawnEnv: spawned {type} worldPos={go.transform.position}, scale={go.transform.localScale}, childCount={go.transform.childCount}");
-            _envConsumableGOs[type] = go;
+            instance.transform.localPosition = new Vector3(-2.0f + typeIndex * 0.5f, 0.8f, -0.5f);
+            _envConsumableGOs[type] = instance;
         }
 
         /// <summary>Removes an env-scoped consumable GO.</summary>
