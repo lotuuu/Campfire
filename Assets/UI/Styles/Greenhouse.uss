@@ -69,3 +69,43 @@
     font-size: var(--font-sm);
     margin-bottom: var(--spacing-xs);
 }
+
+/* Decay bar */
+#greenhouse-page .plant-decay-bar-bg {
+    width: 80%;
+    height: 8px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    margin-top: var(--spacing-xs);
+    overflow: hidden;
+}
+
+#greenhouse-page .plant-decay-bar-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 4px;
+    background-color: rgb(80, 220, 120);
+    transition-property: width;
+    transition-duration: 0.3s;
+}
+
+#greenhouse-page .plant-decay-bar-fill--warning {
+    background-color: rgb(255, 180, 50);
+}
+
+#greenhouse-page .plant-decay-bar-fill--critical {
+    background-color: rgb(255, 70, 60);
+}
+
+/* Withered state */
+#greenhouse-page .plant-slot--withered .plant-swatch {
+    background-color: rgba(60, 50, 40, 0.6) !important;
+}
+
+#greenhouse-page .plant-slot--withered .plant-name {
+    color: rgb(140, 110, 90);
+}
+
+#greenhouse-page .plant-slot--withered .plant-decay-bar-bg {
+    display: none;
+}
