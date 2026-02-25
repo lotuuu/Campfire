@@ -100,6 +100,23 @@ namespace Garden
             return total;
         }
 
+
+        public static float GetStepMinutes(QualityTier tier) => tier switch
+        {
+            QualityTier.S => 360f,
+            QualityTier.A => 240f,
+            QualityTier.B => 60f,
+            QualityTier.C => 40f,
+            QualityTier.D => 20f,
+            _ => 20f
+        };
+
+        public static float ComputeDecayProgress(DateTime tierStartTime, QualityTier tier, DateTime now)
+        {
+            float elapsedMinutes = (float)(now - tierStartTime).TotalMinutes;
+            return elapsedMinutes / GetStepMinutes(tier);
+        }
+
         public void DebugAdvanceTime(float hours)
         {
             if (Plants.Count == 0) return;
