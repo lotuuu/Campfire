@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Garden is a hyper-contextual plant simulation game using real-world weather data. Built with Unity 6 (6000.3.6f1), 2D URP. All runtime code lives under `Assets/Scripts/` in a single assembly (`Garden.asmdef`, namespace `Garden`).
+Garden is a hyper-contextual plant simulation game using real-world weather data. Built with Unity 6 (6000.3.6f1), 2D URP. All runtime code lives under `Assets/Scripts/` in a single assembly (`Garden.asmdef`, namespace `Garden`). Full game spec in `game_specs.md`.
 
 ## Running Tests
 
@@ -20,7 +20,7 @@ No external test runner or CI pipeline exists. The test assembly (`Garden.Tests.
 
 All managers and services are MonoBehaviour singletons with duplicate-destroy guards in `Awake()`. They are **scene-bound** (no `DontDestroyOnLoad`). Access via `ClassName.Instance`.
 
-- **Services** (`Scripts/Services/`): `WeatherService`, `SaveManager`, `CurrencyManager` are MonoBehaviour singletons. `GeneticsEngine` and `HarvestEngine` are **pure static classes** (no Instance pattern).
+- **Services** (`Scripts/Services/`): `WeatherService`, `SaveManager`, `CurrencyManager`, `NotificationService` are MonoBehaviour singletons. `GeneticsEngine` and `HarvestEngine` are **pure static classes** (no Instance pattern).
 - **Managers** (`Scripts/Managers/`): `PlantManager`, `GreenhouseManager`, `GameManager`, `SeedRegistry`, `SeedShopManager`, `EnvironmentManager` — all MonoBehaviour singletons owning runtime state.
 
 ### ScriptableObject Data Model
@@ -54,6 +54,12 @@ Data flows: `SeedData` → contains `List<VariantData>` → each variant has a `
 
 Growth speed is also affected by environment bonus (additive): `totalMultiplier = variantMultiplier + envBonus`.
 
+`HarvestEngine` calculates quality tier (D/C/B/A/S) from RNG with SyncShield boost — also a pure static class.
+
+### Greenhouse System
+
+`GreenhouseManager` owns a `List<GreenhousePlant>` — **data-only, no prefab instances**. Each plant tracks seedName, variantName, rarity, qualityTier, and harvestTime. `Update()` accumulates passive AuraDust every second based on rarity/tier rates from `CurrencyConfig`. `SellPlant(index)` pays Dewdrops and removes from the list.
+
 ### Save System
 
 `SaveManager` serializes `SaveData` to JSON at `Application.persistentDataPath/save.json` using `JsonUtility`. All references stored as **name strings**, resolved at load via `Resources.LoadAll<SeedData>("Seeds")`. Save-on-write: every mutation immediately calls `Save()`.
@@ -63,8 +69,10 @@ Backward compat: both v1 (`activePlant`) and v2 (`activeSlots`) fields are writt
 ### UI Toolkit Architecture
 
 - Single `UIDocument` on `"--- UI ---"` GameObject with `GardenRoot.uxml` as root
+- **`HortusUI`** is the root orchestrator MonoBehaviour — initializes all sub-controllers, owns the `SwipeablePageView` (custom VisualElement with 300ms swipe animation), wires cross-panel events, handles the location gate
+- **5 pages** (index 0–4): Codex (`CodexUI`), Shop (`SeedShopUI`), Terrarium (`HearthViewUI`), Greenhouse (`GreenhouseUI`), Construction (`ConstructionUI`)
 - All panels defined inline in UXML, toggled via `style.display = DisplayStyle.None / Flex`
-- Controllers are MonoBehaviours on the same GameObject, initialized via `Initialize(VisualElement root)` where they cache element refs with `root.Q<>()`
+- Sub-controllers are MonoBehaviours on the same GameObject, initialized via `Initialize(VisualElement root)` where they cache element refs with `root.Q<>()`
 - Dynamic list items use `VisualTreeAsset.CloneTree()` from templates in `Assets/Resources/UI/Templates/`
 - Stylesheets in `Assets/UI/Styles/`; `Variables.uss` defines shared CSS custom properties
 - Location gate blocks all input until weather location resolves (skipped in editor)
@@ -79,7 +87,7 @@ Backward compat: both v1 (`activePlant`) and v2 (`activeSlots`) fields are writt
 
 **`PlantManager.DebugAdvanceTime(hours)`** backdates `slot.plantTime` rather than advancing `GameTime` — these are different mechanisms.
 
-**Three currencies**: Dewdrops (primary, from selling), SunShards (premium, for expansion), AuraDust (passive, from greenhouse). `CurrencyManager` reads/writes directly into `SaveManager.Instance.Data`.
+**Three currencies**: Dewdrops (primary, from selling harvests), SunShards (reserved premium), AuraDust (passive, from greenhouse). `CurrencyManager` reads/writes directly into `SaveManager.Instance.Data`.
 
 ## Key File Locations
 
@@ -92,7 +100,7 @@ Backward compat: both v1 (`activePlant`) and v2 (`activeSlots`) fields are writt
 - Stylesheets: `Assets/UI/Styles/*.uss`
 - Templates: `Assets/Resources/UI/Templates/*.uxml`
 - Tests: `Assets/Tests/EditMode/`
-- Scene: `Assets/Scenes/SampleScene.unity`
+- Scene: `Assets/Scenes/Garden.unity`
 
 ## Unity Development
 
@@ -101,12 +109,6 @@ When editing Unity prefab/asset values, ALWAYS edit the serialized .asset/.prefa
 When the Unity MCP tool is unavailable or unreliable (especially for asset rename/move operations), fall back immediately to direct filesystem operations (Bash mv + manual .meta file handling) rather than retrying MCP repeatedly.
 
 After implementing any visual/VFX/animation feature in Unity, always verify it will actually render by checking: sorting layers, sorting orders relative to Canvas/HUD, and that the rendering approach is appropriate (e.g., don't use UI.Image for world-space trail effects).
-
-When creating or modifying weapons/items/abilities that interact with player physics (velocity, movement, size), always check for conflicts with PlayerMovement's FixedUpdate loop, existing coroutines, and PlayerAnimator's per-frame overrides before implementing.
-
-### Physics & Movement
-
-Use reasonable, conservative initial values for physics parameters (speed, force, friction, boost multipliers). For reference: typical swipeBoost ~2-4, maxSpeed ~5-8, friction ~0.5-1.5. Never set extreme values like 10-15 without explicit user request.
 
 ## Workflow Preferences
 
