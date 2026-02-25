@@ -23,9 +23,9 @@
 .backyard-empty-indicator {
     position: absolute;
     left: 25%;
-    top: 12%;
+    top: 22%;
     width: 50%;
-    height: 28%;
+    height: 43%;
     border-radius: 50%;
     background-color: rgba(150, 170, 185, 0.15);
     border-width: 1.5px;
