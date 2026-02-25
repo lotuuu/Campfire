@@ -18,11 +18,6 @@
     align-items: center;
 }
 
-.backyard-slot-overlay.backyard-slot-mature {
-    border-color: var(--color-highlight);
-    border-width: 2px;
-    border-radius: var(--radius-sm);
-}
 
 .backyard-slot-label {
     color: var(--color-text-dim);
