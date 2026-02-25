@@ -52,11 +52,11 @@ namespace Garden
         }
 
         public bool CanBuy(ConsumableData c)
-            => CurrencyManager.Instance.CanAfford(CurrencyType.Gold, c.buyPrice);
+            => CurrencyManager.Instance.CanAfford(c.currency, c.buyPrice);
 
         public bool Buy(ConsumableData c)
         {
-            if (!CurrencyManager.Instance.Spend(CurrencyType.Gold, c.buyPrice)) return false;
+            if (!CurrencyManager.Instance.Spend(c.currency, c.buyPrice)) return false;
             Add(c.type);
             return true;
         }

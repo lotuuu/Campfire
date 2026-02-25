@@ -87,7 +87,7 @@ namespace Garden
 
                 int owned = ConsumableManager.Instance.GetCount(c.type);
                 if (nameLabel  != null) nameLabel.text  = $"{c.displayName} (x{owned})";
-                if (priceLabel != null) priceLabel.text = $"{c.buyPrice} Gold";
+                if (priceLabel != null) priceLabel.text = $"{c.buyPrice} {c.currency}";
                 if (condLabel  != null) condLabel.text  = c.description ?? "";
                 if (icon != null && c.icon != null)
                     icon.style.backgroundImage = new StyleBackground(c.icon);
@@ -95,7 +95,7 @@ namespace Garden
                 if (buyBtn != null)
                 {
                     buyBtn.SetEnabled(ConsumableManager.Instance.CanBuy(c));
-                    buyBtn.text = $"Buy ({c.buyPrice} Gold)";
+                    buyBtn.text = $"Buy ({c.buyPrice} {c.currency})";
                     var consumable = c;
                     buyBtn.clicked += () => { if (ConsumableManager.Instance.Buy(consumable)) RefreshDisplay(); };
                 }
