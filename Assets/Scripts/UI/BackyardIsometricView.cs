@@ -66,6 +66,8 @@ namespace Garden
             tiles.Clear();
             plantGOs.Clear();
             plantBaseScales.Clear();
+            _slotConsumableGOs.Clear();
+            _envConsumableGOs.Clear();
 
             for (int i = 0; i < count; i++)
                 SpawnTile(i);
@@ -189,7 +191,7 @@ namespace Garden
         {
             if (consumablePrefabs == null || (int)type >= consumablePrefabs.Length) return;
             var prefab = consumablePrefabs[(int)type];
-            if (prefab == null || slotIndex >= tiles.Count) return;
+            if (prefab == null || slotIndex < 0 || slotIndex >= tiles.Count) return;
 
             if (!_slotConsumableGOs.ContainsKey(slotIndex))
                 _slotConsumableGOs[slotIndex] = new List<GameObject>();
@@ -227,9 +229,9 @@ namespace Garden
             }
 
             var go = Instantiate(prefab, transform);
-            // Place env consumables in a row, offset left of the grid
-            int envCount = _envConsumableGOs.Count;
-            go.transform.localPosition = new Vector3(-2.0f + envCount * 0.5f, 0.8f, -0.5f);
+            // Use enum index for stable position — no overlap even if types are cleared/re-added
+            int typeIndex = (int)type;
+            go.transform.localPosition = new Vector3(-2.0f + typeIndex * 0.5f, 0.8f, -0.5f);
             _envConsumableGOs[type] = go;
         }
 
