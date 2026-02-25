@@ -15,6 +15,8 @@ namespace Garden
 
             shopGrid = root.Q<ScrollView>("shop-grid");
             shopGrid.contentContainer.style.flexDirection = FlexDirection.Column;
+            shopGrid.contentContainer.style.flexWrap = Wrap.NoWrap;
+            shopGrid.verticalScrollerVisibility = ScrollerVisibility.Hidden;
         }
 
         public void Show()
