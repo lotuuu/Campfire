@@ -37,6 +37,28 @@ namespace Garden
                 dustAccumulator -= toAward;
                 CurrencyManager.Instance.Add(CurrencyType.AuraDust, toAward);
             }
+
+            for (int i = 0; i < Plants.Count; i++)
+            {
+                var p = Plants[i];
+                if (p.isWithered) continue;
+
+                float progress = ComputeDecayProgress(p.tierStartTime, p.qualityTier, GameTime.UtcNow);
+                if (progress < 1f) continue;
+
+                if (p.qualityTier == QualityTier.D)
+                {
+                    p.isWithered = true;
+                }
+                else
+                {
+                    p.qualityTier = p.qualityTier - 1;
+                    p.tierStartTime = GameTime.UtcNow;
+                }
+
+                SaveGreenhouse();
+                OnGreenhouseChanged?.Invoke();
+            }
         }
 
         public bool AddPlant(SeedData seed, VariantData variant, QualityTier tier = QualityTier.C)
@@ -50,7 +72,9 @@ namespace Garden
                 rarity = variant.rarity,
                 qualityTier = tier,
                 primaryColor = variant.primaryColor,
-                harvestTime = GameTime.UtcNow
+                harvestTime = GameTime.UtcNow,
+                tierStartTime = GameTime.UtcNow,
+                isWithered = false
             });
 
             SaveGreenhouse();
@@ -80,6 +104,22 @@ namespace Garden
             return value;
         }
 
+        public void TrashPlant(int index)
+        {
+            if (index < 0 || index >= Plants.Count) return;
+            Plants.RemoveAt(index);
+            SaveGreenhouse();
+            OnGreenhouseChanged?.Invoke();
+        }
+
+        public float GetDecayProgress(int index)
+        {
+            if (index < 0 || index >= Plants.Count) return 0f;
+            var p = Plants[index];
+            if (p.isWithered) return 1f;
+            return Mathf.Clamp01(ComputeDecayProgress(p.tierStartTime, p.qualityTier, GameTime.UtcNow));
+        }
+
         public bool ExpandSlots()
         {
             var config = CurrencyManager.Instance.Config;
@@ -96,7 +136,8 @@ namespace Garden
             float total = 0;
             var config = CurrencyManager.Instance.Config;
             foreach (var p in Plants)
-                total += config.GetDustPerSecondForPlant(p.rarity, p.qualityTier);
+                if (!p.isWithered)
+                    total += config.GetDustPerSecondForPlant(p.rarity, p.qualityTier);
             return total;
         }
 
@@ -123,6 +164,12 @@ namespace Garden
             int totalDust = Mathf.RoundToInt(GetTotalDustPerSecond() * hours * 3600f);
             if (totalDust > 0)
                 CurrencyManager.Instance.Add(CurrencyType.AuraDust, totalDust);
+
+            foreach (var p in Plants)
+            {
+                if (!p.isWithered)
+                    p.tierStartTime = p.tierStartTime.AddHours(-hours);
+            }
         }
 
         private void SaveGreenhouse()
@@ -136,7 +183,9 @@ namespace Garden
                     seedName = p.seedName,
                     variantName = p.variantName,
                     harvestTimeUtc = p.harvestTime.ToString("O"),
-                    qualityTier = p.qualityTier
+                    qualityTier = p.qualityTier,
+                    tierStartTimeUtc = p.tierStartTime.ToString("O"),
+                    isWithered = p.isWithered
                 });
             }
             SaveManager.Instance.Save();
@@ -172,7 +221,11 @@ namespace Garden
                     rarity = rarity,
                     qualityTier = ps.qualityTier,
                     primaryColor = color,
-                    harvestTime = DateTime.Parse(ps.harvestTimeUtc).ToUniversalTime()
+                    harvestTime = DateTime.Parse(ps.harvestTimeUtc).ToUniversalTime(),
+                    tierStartTime = string.IsNullOrEmpty(ps.tierStartTimeUtc)
+                        ? GameTime.UtcNow
+                        : DateTime.Parse(ps.tierStartTimeUtc).ToUniversalTime(),
+                    isWithered = ps.isWithered
                 });
             }
         }
