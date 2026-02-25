@@ -1,5 +1,9 @@
 /* Greenhouse panel styles - mobile-first sizing */
 
+#greenhouse-grid .unity-scroller--vertical {
+    display: none;
+}
+
 #greenhouse-page .plant-slot {
     width: 300px;
     height: 300px;
