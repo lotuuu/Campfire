@@ -1,62 +1,71 @@
-/* Satchel panel styles */
+/* Satchel — horizontal seed card list */
 
 #satchel-panel .seed-slot {
-    width: 220px;
-    height: 260px;
-    min-height: 260px;
-    align-items: center;
-    justify-content: center;
+    flex-direction: row;
+    align-items: flex-start;
+    width: 100%;
+    padding: var(--spacing-sm) var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+    background-color: rgba(15, 30, 40, 0.60);
+    border-radius: var(--radius-md);
+    border-width: 1px;
+    border-color: rgba(120, 200, 220, 0.15);
 }
 
 #satchel-panel .seed-icon {
-    width: 96px;
-    height: 96px;
-    margin-bottom: var(--spacing-sm);
+    width: 64px;
+    height: 64px;
+    min-width: 64px;
+    margin-right: var(--spacing-md);
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+#satchel-panel .seed-info {
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+}
+
+#satchel-panel .seed-info-top {
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-xs);
 }
 
 #satchel-panel .seed-name {
-    color: var(--color-text);
-    font-size: var(--font-sm);
-    -unity-text-align: middle-center;
+    color: var(--color-text-bright);
+    font-size: var(--font-md);
+    -unity-font-style: bold;
 }
 
 #satchel-panel .seed-count {
     color: var(--color-text-dim);
-    font-size: var(--font-xs);
-}
-
-#probability-panel {
-    margin-top: var(--spacing-md);
-    padding: var(--spacing-md);
-    background-color: rgba(15, 30, 40, 0.50);
-    border-radius: var(--radius-md);
-    border-width: 1px;
-    border-color: rgba(120, 200, 220, 0.20);
-    border-top-color: rgba(140, 230, 240, 0.30);
-}
-
-#selected-seed-name {
-    font-size: var(--font-lg);
-    color: var(--color-text-bright);
-    -unity-font-style: bold;
-    margin-bottom: var(--spacing-sm);
-}
-
-.probability-entry {
-    padding: var(--spacing-xs) var(--spacing-sm);
-}
-
-.probability-name {
     font-size: var(--font-sm);
-    color: var(--color-text);
 }
 
-#plant-button {
-    align-self: center;
-    width: 320px;
-    height: 96px;
-    min-height: 96px;
-    margin-top: var(--spacing-md);
-    font-size: var(--font-lg);
-    -unity-font-style: bold;
+#satchel-panel .seed-meta {
+    color: var(--color-text-dim);
+    font-size: var(--font-xs);
+    margin-bottom: var(--spacing-xs);
+}
+
+#satchel-panel .seed-variants {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.variant-chip {
+    font-size: var(--font-xs);
+    padding: 2px 8px;
+    margin-right: 6px;
+    margin-bottom: 4px;
+    border-radius: var(--radius-sm);
+    background-color: rgba(255, 255, 255, 0.07);
+}
+
+/* Suppresses transition during pointer-drag so the panel tracks the finger instantly */
+.no-transition {
+    transition-duration: 0ms;
 }
