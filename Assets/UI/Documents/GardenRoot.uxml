@@ -123,8 +123,10 @@
 
     <!-- Satchel Bottom Sheet -->
     <ui:VisualElement name="satchel-scrim" class="scrim" style="display: none;" />
-    <ui:VisualElement name="satchel-panel" class="bottom-sheet" style="display: none;">
-        <ui:VisualElement name="satchel-handle" class="bottom-sheet-handle" />
+    <ui:VisualElement name="satchel-panel" class="bottom-sheet" style="translate: 0 100%;">
+        <ui:VisualElement name="satchel-drag-zone" class="bottom-sheet-drag-zone">
+            <ui:VisualElement class="bottom-sheet-handle-pip" />
+        </ui:VisualElement>
         <ui:Label text="Satchel" class="panel-header" />
         <ui:ScrollView name="seed-list" class="scroll-view" />
     </ui:VisualElement>
