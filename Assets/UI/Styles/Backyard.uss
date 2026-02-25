@@ -48,3 +48,63 @@
     transition-property: width;
     transition-duration: 0.1s;
 }
+
+.consumable-picker-btn {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    width: 44px;
+    height: 44px;
+    border-radius: 22px;
+    background-color: rgba(20, 35, 50, 0.75);
+    border-width: 1px;
+    border-color: var(--color-highlight);
+    color: var(--color-text-primary);
+    font-size: var(--font-sm);
+    -unity-text-align: middle-center;
+    translate: 0 -22px;
+}
+
+.consumable-dropdown {
+    position: absolute;
+    right: 60px;
+    top: 50%;
+    width: 180px;
+    background-color: rgba(12, 20, 30, 0.92);
+    border-radius: var(--radius-sm);
+    border-width: 1px;
+    border-color: var(--color-highlight);
+    padding: var(--spacing-xs);
+    translate: 0 -44px;
+}
+
+.consumable-row {
+    flex-direction: row;
+    align-items: center;
+    padding: 6px var(--spacing-xs);
+    background-color: rgba(0,0,0,0);
+    border-width: 0;
+    margin-bottom: 2px;
+}
+
+.consumable-row:hover {
+    background-color: rgba(255,255,255,0.08);
+    border-radius: var(--radius-sm);
+}
+
+.consumable-row-name {
+    flex-grow: 1;
+    color: var(--color-text-primary);
+    font-size: var(--font-xs);
+}
+
+.consumable-row-count {
+    color: var(--color-text-dim);
+    font-size: var(--font-xs);
+}
+
+.backyard-slot-apply-mode {
+    border-color: rgba(255, 220, 80, 0.8);
+    border-width: 2px;
+    border-radius: var(--radius-sm);
+}
