@@ -73,6 +73,6 @@
     background-image: url('../../ThirdParty/icons/delapouite-greenhouse.png');
 }
 
-#tab-locked .nav-icon {
-    background-image: url('../../ThirdParty/icons/lorc-stone-block.png');
+#tab-construction .nav-icon {
+    background-image: url('../../ThirdParty/icons/delapouite-3d-hammer.png');
 }
