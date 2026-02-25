@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: MistVine
   m_EditorClassIdentifier: Garden::Garden.SeedData
   seedName: Mist-Vine
-  icon: {fileID: 0}
+  icon: {fileID: -903508629379018910, guid: 0384867e95799446eb693dad27396638, type: 3}
   description: +10% S-Tier chance if Humidity > 70%
   baseGrowthHours: 8
   variants:

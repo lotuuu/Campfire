@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Dashbloom
   m_EditorClassIdentifier: Garden::Garden.SeedData
   seedName: Dashbloom
-  icon: {fileID: 0}
+  icon: {fileID: -8081504365435175104, guid: 17d3da03dc39e487eb22b34234504a3c, type: 3}
   description: A restless seed that blooms in a single minute. Its color shifts with
     the weather overhead.
   baseGrowthHours: 0.03333
