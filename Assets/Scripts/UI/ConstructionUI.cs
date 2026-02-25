@@ -28,13 +28,13 @@ namespace Garden
 
         private void OnCurrencyChanged(CurrencyType type, int oldVal, int newVal)
         {
-            if (type == CurrencyType.Gold)
-                RefreshDisplay();
+            // Buy buttons call RefreshDisplay() directly; skip the redundant event-driven refresh.
         }
 
         private void RefreshDisplay()
         {
             if (scrollView == null) return;
+            var savedOffset = scrollView.scrollOffset;
             scrollView.Clear();
 
             var em = EnvironmentManager.Instance;
@@ -119,6 +119,7 @@ namespace Garden
             }
 
             AppendGreenhouseCard();
+            scrollView.schedule.Execute(() => scrollView.scrollOffset = savedOffset);
         }
 
         private void AppendGreenhouseCard()
