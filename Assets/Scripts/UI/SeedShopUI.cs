@@ -26,11 +26,13 @@ namespace Garden
             shopGrid.Clear();
 
             var seeds = SeedShopManager.Instance.GetShopSeeds();
+            seeds.Sort((a, b) => a.buyPrice.CompareTo(b.buyPrice));
+            shopGrid.contentContainer.style.flexDirection = FlexDirection.Column;
+
             foreach (var seed in seeds)
             {
                 var card = shopCardTemplate.CloneTree();
                 card.style.flexGrow = 1;
-                card.style.flexBasis = new StyleLength(new Length(45, LengthUnit.Percent));
                 card.style.flexShrink = 0;
 
                 var nameLabel = card.Q<Label>(className: "shop-seed-name");
