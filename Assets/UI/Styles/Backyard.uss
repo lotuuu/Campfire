@@ -49,63 +49,83 @@
     transition-duration: 0.1s;
 }
 
-.consumable-picker-btn {
+/* Consumable picker — pill container that expands downward */
+.consumable-picker {
     position: absolute;
     right: 8px;
     top: 50%;
+    translate: 0 -22px;
     width: 44px;
-    height: 44px;
-    border-radius: 22px;
+    max-height: 44px;
+    overflow: hidden;
     background-color: rgba(20, 35, 50, 0.75);
     border-width: 1px;
     border-color: var(--color-highlight);
+    border-top-left-radius: 22px;
+    border-top-right-radius: 22px;
+    border-bottom-left-radius: 22px;
+    border-bottom-right-radius: 22px;
+    transition-property: max-height, border-bottom-left-radius, border-bottom-right-radius;
+    transition-duration: 0.25s;
+    transition-timing-function: ease-out;
+}
+
+.consumable-picker--open {
+    max-height: 300px;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
+/* Herb icon button — sits at top of container, transparent bg (container provides it) */
+.consumable-picker-btn {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    padding: 8px;
     -unity-background-image-tint-color: rgb(185, 210, 225);
     background-image: url('../../ThirdParty/icons/delapouite-herbs-bundle.png');
     -unity-background-scale-mode: scale-to-fit;
-    padding: 8px;
-    translate: 0 -22px;
 }
 
 .consumable-picker-btn:hover {
     -unity-background-image-tint-color: rgb(220, 238, 245);
 }
 
-.consumable-dropdown {
-    position: absolute;
-    right: 60px;
-    top: 50%;
-    width: 180px;
-    background-color: rgba(12, 20, 30, 0.92);
-    border-radius: var(--radius-sm);
-    border-width: 1px;
-    border-color: var(--color-highlight);
-    padding: var(--spacing-xs);
-    translate: 0 -44px;
-}
-
-.consumable-row {
-    flex-direction: row;
+/* Icon list section below the herb button */
+.consumable-picker-icons {
+    flex-direction: column;
     align-items: center;
-    padding: 6px var(--spacing-xs);
-    background-color: rgba(0,0,0,0);
+    padding-bottom: 6px;
+}
+
+/* Each consumable icon button */
+.consumable-icon-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background-color: rgba(0, 0, 0, 0);
     border-width: 0;
-    margin-bottom: 2px;
+    padding: 6px;
+    margin-top: 2px;
+    -unity-background-scale-mode: scale-to-fit;
+    -unity-background-image-tint-color: rgb(185, 210, 225);
 }
 
-.consumable-row:hover {
-    background-color: rgba(255,255,255,0.08);
-    border-radius: var(--radius-sm);
+.consumable-icon-btn:hover {
+    background-color: rgba(255, 255, 255, 0.10);
+    -unity-background-image-tint-color: rgb(220, 238, 245);
 }
 
-.consumable-row-name {
-    flex-grow: 1;
-    color: var(--color-text-primary);
-    font-size: var(--font-xs);
-}
-
-.consumable-row-count {
+/* Count badge overlaid at bottom-right of each icon button */
+.consumable-icon-badge {
+    position: absolute;
+    right: 1px;
+    bottom: 1px;
     color: var(--color-text-dim);
-    font-size: var(--font-xs);
+    font-size: 8px;
+    -unity-text-align: lower-right;
 }
 
 .backyard-slot-apply-mode {
