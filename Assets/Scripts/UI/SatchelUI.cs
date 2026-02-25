@@ -6,115 +6,126 @@ namespace Garden
     public class SatchelUI : MonoBehaviour
     {
         private VisualTreeAsset seedSlotTemplate;
-        private VisualTreeAsset probabilityEntryTemplate;
 
         private VisualElement panel;
         private VisualElement scrim;
-        private ScrollView seedGrid;
-        private VisualElement probabilityPanel;
-        private ScrollView probabilityGrid;
-        private Button plantButton;
-        private Label selectedSeedName;
-
-        private SeedData selectedSeed;
+        private ScrollView seedList;
 
         private int targetEnvIndex = -1;
         private int targetSlotIndex = -1;
 
+        private bool _isDragging;
+        private float _dragStartY;
+
         public void Initialize(VisualElement root)
         {
             seedSlotTemplate = Resources.Load<VisualTreeAsset>("UI/Templates/SeedSlot");
-            probabilityEntryTemplate = Resources.Load<VisualTreeAsset>("UI/Templates/ProbabilityEntry");
 
-            panel = root.Q<VisualElement>("satchel-panel");
-            scrim = root.Q<VisualElement>("satchel-scrim");
-            seedGrid = root.Q<ScrollView>("seed-grid");
-            probabilityPanel = root.Q<VisualElement>("probability-panel");
-            probabilityGrid = root.Q<ScrollView>("probability-grid");
-            plantButton = root.Q<Button>("plant-button");
-            selectedSeedName = root.Q<Label>("selected-seed-name");
+            panel    = root.Q<VisualElement>("satchel-panel");
+            scrim    = root.Q<VisualElement>("satchel-scrim");
+            seedList = root.Q<ScrollView>("seed-list");
 
-            plantButton.clicked += OnPlant;
-            scrim.RegisterCallback<ClickEvent>(evt => Hide());
+            scrim.RegisterCallback<ClickEvent>(_ => Hide());
+
+            var handle = root.Q<VisualElement>("satchel-handle");
+            handle.RegisterCallback<PointerDownEvent>(OnHandlePointerDown);
+            panel.RegisterCallback<PointerMoveEvent>(OnPanelPointerMove);
+            panel.RegisterCallback<PointerUpEvent>(OnPanelPointerUp);
+            panel.RegisterCallback<PointerCancelEvent>(OnPanelPointerCancel);
         }
 
-        public void Show()
-        {
-            Show(-1, -1);
-        }
+        public void Show() => Show(-1, -1);
 
         public void Show(int envIndex, int slotIndex)
         {
-            targetEnvIndex = envIndex;
+            targetEnvIndex  = envIndex;
             targetSlotIndex = slotIndex;
-            scrim.style.display = DisplayStyle.Flex;
-            panel.style.display = DisplayStyle.Flex;
-            RefreshGrid();
-            probabilityPanel.style.display = DisplayStyle.None;
-            plantButton.SetEnabled(false);
-            selectedSeed = null;
+
+            panel.style.translate = new StyleTranslate(new Translate(0, Length.Percent(100)));
+            scrim.style.display   = DisplayStyle.Flex;
+            panel.style.display   = DisplayStyle.Flex;
+
+            panel.schedule.Execute(() =>
+                panel.style.translate = new StyleTranslate(new Translate(0, 0))
+            );
+
+            RefreshList();
         }
 
         public void Hide()
         {
-            scrim.style.display = DisplayStyle.None;
-            panel.style.display = DisplayStyle.None;
+            panel.RemoveFromClassList("no-transition");
+            panel.style.translate = new StyleTranslate(new Translate(0, Length.Percent(100)));
+            scrim.style.display   = DisplayStyle.None;
+            panel.RegisterCallback<TransitionEndEvent>(OnHideTransitionEnd);
         }
 
-        private void RefreshGrid()
+        private void OnHideTransitionEnd(TransitionEndEvent evt)
         {
-            seedGrid.Clear();
+            panel.UnregisterCallback<TransitionEndEvent>(OnHideTransitionEnd);
+            panel.style.display   = DisplayStyle.None;
+            panel.style.translate = new StyleTranslate(new Translate(0, 0));
+        }
 
+        private void RefreshList()
+        {
+            seedList.Clear();
             var seeds = SeedRegistry.Instance.GetOwnedSeeds();
             foreach (var seed in seeds)
             {
                 int count = SeedRegistry.Instance.GetSeedCount(seed.seedName);
-                var slot = SeedSlotUI.Create(seedSlotTemplate, seed, count, OnSeedSelected);
-                seedGrid.Add(slot);
+                var slot  = SeedSlotUI.Create(seedSlotTemplate, seed, count, OnSeedTapped);
+                seedList.Add(slot);
             }
         }
 
-        private void OnSeedSelected(SeedData seed)
+        private void OnSeedTapped(SeedData seed)
         {
-            selectedSeed = seed;
-            selectedSeedName.text = seed.seedName;
-            plantButton.SetEnabled(true);
-            ShowProbabilities(seed);
-        }
-
-        private void ShowProbabilities(SeedData seed)
-        {
-            probabilityPanel.style.display = DisplayStyle.Flex;
-            probabilityGrid.Clear();
-
-            var variants = seed.variants;
-
-            foreach (var variant in variants)
-            {
-                var entry = probabilityEntryTemplate.CloneTree();
-                var nameLabel = entry.Q<Label>(className: "probability-name");
-                if (nameLabel != null)
-                {
-                    bool discovered = SaveManager.Instance.Data.discoveredVariants.Contains(variant.variantName);
-                    nameLabel.text = discovered ? variant.variantName : "?????";
-                }
-                probabilityGrid.Add(entry);
-            }
-        }
-
-        private void OnPlant()
-        {
-            if (selectedSeed == null) return;
-
             if (targetEnvIndex >= 0 && targetSlotIndex >= 0)
-            {
-                PlantManager.Instance.Plant(selectedSeed, targetEnvIndex, targetSlotIndex);
-            }
+                PlantManager.Instance.Plant(seed, targetEnvIndex, targetSlotIndex);
             else
-            {
-                PlantManager.Instance.Plant(selectedSeed);
-            }
+                PlantManager.Instance.Plant(seed);
             Hide();
+        }
+
+        private void OnHandlePointerDown(PointerDownEvent evt)
+        {
+            _isDragging = true;
+            _dragStartY = evt.position.y;
+            panel.AddToClassList("no-transition");
+            panel.CapturePointer(evt.pointerId);
+            evt.StopPropagation();
+        }
+
+        private void OnPanelPointerMove(PointerMoveEvent evt)
+        {
+            if (!_isDragging) return;
+            float delta = Mathf.Max(0f, evt.position.y - _dragStartY);
+            panel.style.translate = new StyleTranslate(
+                new Translate(0, new Length(delta, LengthUnit.Pixel)));
+        }
+
+        private void OnPanelPointerUp(PointerUpEvent evt)
+        {
+            if (!_isDragging) return;
+            _isDragging = false;
+            panel.ReleasePointer(evt.pointerId);
+            panel.RemoveFromClassList("no-transition");
+
+            float delta = evt.position.y - _dragStartY;
+            if (delta > 80f)
+                Hide();
+            else
+                panel.style.translate = new StyleTranslate(new Translate(0, 0));
+        }
+
+        private void OnPanelPointerCancel(PointerCancelEvent evt)
+        {
+            if (!_isDragging) return;
+            _isDragging = false;
+            panel.ReleasePointer(evt.pointerId);
+            panel.RemoveFromClassList("no-transition");
+            panel.style.translate = new StyleTranslate(new Translate(0, 0));
         }
     }
 }

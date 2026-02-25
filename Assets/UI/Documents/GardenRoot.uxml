@@ -126,13 +126,7 @@
     <ui:VisualElement name="satchel-panel" class="bottom-sheet" style="display: none;">
         <ui:VisualElement name="satchel-handle" class="bottom-sheet-handle" />
         <ui:Label text="Satchel" class="panel-header" />
-        <ui:ScrollView name="seed-grid" class="scroll-view" />
-        <ui:VisualElement name="probability-panel" style="display: none;">
-            <ui:Label name="selected-seed-name" text="" />
-            <ui:VisualElement class="separator" />
-            <ui:ScrollView name="probability-grid" />
-        </ui:VisualElement>
-        <ui:Button name="plant-button" text="Plant" class="btn" enabled="false" />
+        <ui:ScrollView name="seed-list" class="scroll-view" />
     </ui:VisualElement>
 
     <!-- Harvest Result Popup -->
