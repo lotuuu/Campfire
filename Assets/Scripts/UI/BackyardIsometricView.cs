@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Garden
 {
-    public class HearthIsometricView : MonoBehaviour
+    public class BackyardIsometricView : MonoBehaviour
     {
         [SerializeField] private Sprite tileSprite;
         [SerializeField] private string sortingLayerName = "Default";
@@ -18,7 +18,7 @@ namespace Garden
         private Camera mainCam;
         private float slideOffsetX;
 
-        private const int HearthEnvIndex = 0;
+        private const int BackyardEnvIndex = 0;
 
         private void Awake()
         {
@@ -29,11 +29,11 @@ namespace Garden
         {
             if (tileSprite == null)
             {
-                Debug.LogError("[HearthIsometricView] tileSprite is not assigned — grid will not render.", this);
+                Debug.LogError("[BackyardIsometricView] tileSprite is not assigned — grid will not render.", this);
                 return;
             }
             if (EnvironmentManager.Instance == null) return;
-            int count = EnvironmentManager.Instance.GetActiveSlotCount(HearthEnvIndex);
+            int count = EnvironmentManager.Instance.GetActiveSlotCount(BackyardEnvIndex);
             RebuildGrid(count);
             EnvironmentManager.Instance.OnSlotUnlocked += OnSlotUnlocked;
         }
@@ -46,7 +46,7 @@ namespace Garden
 
         private void OnSlotUnlocked(int envIndex)
         {
-            if (envIndex != HearthEnvIndex || tileSprite == null) return;
+            if (envIndex != BackyardEnvIndex || tileSprite == null) return;
             SpawnTile(tiles.Count);
             RecenterGrid();
         }
@@ -66,7 +66,7 @@ namespace Garden
 
         private void SpawnTile(int index)
         {
-            var tileGO = new GameObject($"HearthTile_{index}");
+            var tileGO = new GameObject($"BackyardTile_{index}");
             tileGO.transform.SetParent(transform, false);
 
             var sr = tileGO.AddComponent<SpriteRenderer>();

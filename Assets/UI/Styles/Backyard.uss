@@ -1,6 +1,6 @@
-/* Hearth: Isometric farm – overlay buttons positioned at runtime by HearthViewUI */
+/* Backyard: Isometric farm – overlay buttons positioned at runtime by BackyardViewUI */
 
-.hearth-title {
+.backyard-title {
     color: var(--color-text-dim);
     font-size: var(--font-sm);
     margin-top: var(--spacing-md);
@@ -9,7 +9,7 @@
 }
 
 /* Transparent overlay button sized and positioned to cover each isometric tile */
-.hearth-slot-overlay {
+.backyard-slot-overlay {
     background-color: rgba(0, 0, 0, 0);
     border-width: 0;
     padding: 0;
@@ -18,20 +18,20 @@
     align-items: center;
 }
 
-.hearth-slot-overlay.hearth-slot-mature {
+.backyard-slot-overlay.backyard-slot-mature {
     border-color: var(--color-highlight);
     border-width: 2px;
     border-radius: var(--radius-sm);
 }
 
-.hearth-slot-label {
+.backyard-slot-label {
     color: var(--color-text-dim);
     font-size: var(--font-xs);
     -unity-text-align: middle-center;
     margin-bottom: 4px;
 }
 
-.hearth-progress-bar {
+.backyard-progress-bar {
     width: 80%;
     height: 6px;
     background-color: rgba(20, 35, 50, 0.50);
@@ -40,7 +40,7 @@
     margin-bottom: var(--spacing-xs);
 }
 
-.hearth-progress-fill {
+.backyard-progress-fill {
     height: 100%;
     width: 0;
     background-color: var(--color-text-accent);

@@ -5,11 +5,11 @@ using UnityEngine.UIElements;
 
 namespace Garden
 {
-    public class HearthViewUI : MonoBehaviour
+    public class BackyardViewUI : MonoBehaviour
     {
-        private const int HearthEnvIndex = 0;
+        private const int BackyardEnvIndex = 0;
 
-        [SerializeField] private HearthIsometricView isometricView;
+        [SerializeField] private BackyardIsometricView isometricView;
 
         public event Action<int, int> OnEmptySlotTapped;
         public event Action<int, int> OnMatureSlotTapped;
@@ -40,7 +40,7 @@ namespace Garden
 
             if (EnvironmentManager.Instance != null)
             {
-                int count = EnvironmentManager.Instance.GetActiveSlotCount(HearthEnvIndex);
+                int count = EnvironmentManager.Instance.GetActiveSlotCount(BackyardEnvIndex);
                 for (int i = 0; i < count; i++)
                     AddSlotButton(i);
                 EnvironmentManager.Instance.OnSlotUnlocked += OnSlotUnlocked;
@@ -64,17 +64,17 @@ namespace Garden
         private void AddSlotButton(int slotIndex)
         {
             var btn = new Button();
-            btn.AddToClassList("hearth-slot-overlay");
+            btn.AddToClassList("backyard-slot-overlay");
             btn.style.position = Position.Absolute;
 
             var label = new Label("Tap to Plant");
-            label.AddToClassList("hearth-slot-label");
+            label.AddToClassList("backyard-slot-label");
             btn.Add(label);
 
             var progressBar = new VisualElement();
-            progressBar.AddToClassList("hearth-progress-bar");
+            progressBar.AddToClassList("backyard-progress-bar");
             var fill = new VisualElement();
-            fill.AddToClassList("hearth-progress-fill");
+            fill.AddToClassList("backyard-progress-fill");
             progressBar.Add(fill);
             btn.Add(progressBar);
 
@@ -90,7 +90,7 @@ namespace Garden
 
         private void OnSlotUnlocked(int envIndex)
         {
-            if (envIndex != HearthEnvIndex) return;
+            if (envIndex != BackyardEnvIndex) return;
             AddSlotButton(slotButtons.Count);
             RefreshAllSlots();
         }
@@ -107,12 +107,12 @@ namespace Garden
 
             for (int i = 0; i < slotButtons.Count; i++)
             {
-                var slot = PlantManager.Instance.GetSlot(HearthEnvIndex, i);
+                var slot = PlantManager.Instance.GetSlot(BackyardEnvIndex, i);
                 if (slot == null) continue;
 
                 if (slot.state == PlantState.Growing)
                 {
-                    float hours = PlantManager.Instance.GetRemainingHours(HearthEnvIndex, i);
+                    float hours = PlantManager.Instance.GetRemainingHours(BackyardEnvIndex, i);
                     string text = hours > 1f ? $"{hours:F1}h" : $"{hours * 60f:F0}m";
                     if (i < labels.Count && labels[i] != null && text != _lastLabelText[i])
                     {
@@ -164,7 +164,7 @@ namespace Garden
         {
             if (PlantManager.Instance == null || i >= slotButtons.Count) return;
 
-            var slot = PlantManager.Instance.GetSlot(HearthEnvIndex, i);
+            var slot = PlantManager.Instance.GetSlot(BackyardEnvIndex, i);
             if (slot == null) return;
 
             var label = i < labels.Count ? labels[i] : null;
@@ -175,25 +175,25 @@ namespace Garden
                 case PlantState.Empty:
                     if (label != null) label.text = "Tap to Plant";
                     if (fill != null) fill.style.width = new Length(0, LengthUnit.Percent);
-                    slotButtons[i].RemoveFromClassList("hearth-slot-mature");
+                    slotButtons[i].RemoveFromClassList("backyard-slot-mature");
                     isometricView?.SetPlantVisual(i, PlantState.Empty, Color.clear);
                     break;
 
                 case PlantState.Growing:
-                    float hours = PlantManager.Instance.GetRemainingHours(HearthEnvIndex, i);
+                    float hours = PlantManager.Instance.GetRemainingHours(BackyardEnvIndex, i);
                     if (label != null)
                         label.text = hours > 1f ? $"{hours:F1}h" : $"{hours * 60f:F0}m";
                     if (i < _lastLabelText.Count) _lastLabelText[i] = null;
                     if (fill != null)
                         fill.style.width = new Length(slot.growthProgress * 100f, LengthUnit.Percent);
-                    slotButtons[i].RemoveFromClassList("hearth-slot-mature");
+                    slotButtons[i].RemoveFromClassList("backyard-slot-mature");
                     isometricView?.SetPlantVisual(i, PlantState.Growing, slot.variant?.primaryColor ?? Color.green);
                     break;
 
                 case PlantState.Mature:
                     if (label != null) label.text = "Harvest!";
                     if (fill != null) fill.style.width = new Length(100, LengthUnit.Percent);
-                    slotButtons[i].AddToClassList("hearth-slot-mature");
+                    slotButtons[i].AddToClassList("backyard-slot-mature");
                     isometricView?.SetPlantVisual(i, PlantState.Mature, slot.variant?.primaryColor ?? Color.green);
                     break;
             }
@@ -202,26 +202,26 @@ namespace Garden
         private void OnSlotClicked(int slotIndex)
         {
             if (PlantManager.Instance == null) return;
-            var slot = PlantManager.Instance.GetSlot(HearthEnvIndex, slotIndex);
+            var slot = PlantManager.Instance.GetSlot(BackyardEnvIndex, slotIndex);
             if (slot == null) return;
 
             switch (slot.state)
             {
-                case PlantState.Empty: OnEmptySlotTapped?.Invoke(HearthEnvIndex, slotIndex); break;
-                case PlantState.Mature: OnMatureSlotTapped?.Invoke(HearthEnvIndex, slotIndex); break;
+                case PlantState.Empty: OnEmptySlotTapped?.Invoke(BackyardEnvIndex, slotIndex); break;
+                case PlantState.Mature: OnMatureSlotTapped?.Invoke(BackyardEnvIndex, slotIndex); break;
             }
         }
 
         private void OnSlotStateChanged(int envIndex, int slotIndex, PlantState state)
         {
-            if (envIndex != HearthEnvIndex) return;
+            if (envIndex != BackyardEnvIndex) return;
             if (slotIndex >= 0 && slotIndex < slotButtons.Count)
                 RefreshSlot(slotIndex);
         }
 
         private void OnSlotGrowthUpdated(int envIndex, int slotIndex, float progress)
         {
-            if (envIndex != HearthEnvIndex) return;
+            if (envIndex != BackyardEnvIndex) return;
             if (slotIndex >= 0 && slotIndex < progressFills.Count && progressFills[slotIndex] != null)
                 progressFills[slotIndex].style.width = new Length(progress * 100f, LengthUnit.Percent);
         }

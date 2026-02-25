@@ -11,7 +11,7 @@ namespace Garden
 
         private SwipeablePageView pageView;
         private BottomNavUI bottomNavUI;
-        private HearthViewUI hearthViewUI;
+        private BackyardViewUI backyardViewUI;
         private ResonanceBar resonanceBar;
         private CurrencyDisplay currencyDisplay;
         private SatchelUI satchelUI;
@@ -21,7 +21,7 @@ namespace Garden
         private ConstructionUI constructionUI;
         private HarvestResultUI harvestResultUI;
         private DebugWeatherPanel debugPanel;
-        [SerializeField] private HearthIsometricView hearthIsoView;
+        [SerializeField] private BackyardIsometricView backyardIsoView;
 
         private Camera mainCam;
         private const int TerrariumPageIndex = 2;
@@ -44,7 +44,7 @@ namespace Garden
             var root = uiDocument.rootVisualElement;
 
             // Get sub-controllers
-            hearthViewUI = GetComponent<HearthViewUI>();
+            backyardViewUI = GetComponent<BackyardViewUI>();
             resonanceBar = GetComponent<ResonanceBar>();
             currencyDisplay = GetComponent<CurrencyDisplay>();
             satchelUI = GetComponent<SatchelUI>();
@@ -71,7 +71,7 @@ namespace Garden
             }
 
             // Initialize sub-controllers
-            hearthViewUI?.Initialize(root);
+            backyardViewUI?.Initialize(root);
             resonanceBar?.Initialize(root);
             currencyDisplay?.Initialize(root);
             satchelUI?.Initialize(root);
@@ -90,19 +90,19 @@ namespace Garden
             pageView.OnPageChanged += OnPageChanged;
 
             // Wire hearth slot events
-            if (hearthViewUI != null)
+            if (backyardViewUI != null)
             {
-                hearthViewUI.OnEmptySlotTapped += (envIdx, slotIdx) =>
+                backyardViewUI.OnEmptySlotTapped += (envIdx, slotIdx) =>
                 {
                     satchelUI?.Show(envIdx, slotIdx);
                 };
 
-                hearthViewUI.OnMatureSlotTapped += (envIdx, slotIdx) =>
+                backyardViewUI.OnMatureSlotTapped += (envIdx, slotIdx) =>
                 {
                     var result = PlantManager.Instance.Harvest(envIdx, slotIdx);
                     if (result.seed != null)
                         harvestResultUI?.Show(result);
-                    hearthViewUI?.RefreshAllSlots();
+                    backyardViewUI?.RefreshAllSlots();
                 };
             }
 
@@ -110,7 +110,7 @@ namespace Garden
             {
                 harvestResultUI.OnDismissed += () =>
                 {
-                    hearthViewUI?.RefreshAllSlots();
+                    backyardViewUI?.RefreshAllSlots();
                     greenhouseUI?.RefreshDisplay();
                 };
             }
@@ -119,8 +119,8 @@ namespace Garden
 
             // Start on terrarium page
             pageView.GoToPage(TerrariumPageIndex, false);
-            hearthIsoView?.gameObject.SetActive(true);
-            hearthViewUI?.SetPageActive(true);
+            backyardIsoView?.gameObject.SetActive(true);
+            backyardViewUI?.SetPageActive(true);
 
             // Location gate
             locationGate = root.Q<VisualElement>("location-gate");
@@ -140,7 +140,7 @@ namespace Garden
 
         private void Update()
         {
-            if (hearthIsoView == null || pageView == null || mainCam == null) return;
+            if (backyardIsoView == null || pageView == null || mainCam == null) return;
             var panel = pageView.panel;
             if (panel == null || pageView.PageWidth <= 0) return;
 
@@ -179,7 +179,7 @@ namespace Garden
             float worldDeltaX = mainCam.ScreenToWorldPoint(new Vector3(screenDeltaX, 0, z)).x
                               - mainCam.ScreenToWorldPoint(new Vector3(0, 0, z)).x;
 
-            hearthIsoView.SetSlideOffset(worldDeltaX);
+            backyardIsoView.SetSlideOffset(worldDeltaX);
         }
 
         private void OnPageChanged(int pageIndex)
@@ -189,7 +189,7 @@ namespace Garden
             _isoAnimTargetX = -pageIndex * pageView.PageWidth;
             _isoAnimStartTime = Time.time;
 
-            hearthViewUI?.SetPageActive(pageIndex == 2);
+            backyardViewUI?.SetPageActive(pageIndex == 2);
 
             switch (pageIndex)
             {
