@@ -48,6 +48,7 @@
 
 .probability-name {
     font-size: var(--font-sm);
+    color: var(--color-text);
 }
 
 #plant-button {
