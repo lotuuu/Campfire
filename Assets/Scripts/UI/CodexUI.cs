@@ -13,6 +13,8 @@ namespace Garden
         private Label detailDescription;
         private Label detailRarity;
         private VisualElement detailColorSwatch;
+        private VisualElement detailSeedIcon;
+        private Label detailSeedName;
 
         public void Initialize(VisualElement root)
         {
@@ -23,6 +25,8 @@ namespace Garden
             detailDescription = root.Q<Label>("detail-description");
             detailRarity = root.Q<Label>("detail-rarity");
             detailColorSwatch = root.Q<VisualElement>("detail-color-swatch");
+            detailSeedIcon = root.Q<VisualElement>("detail-seed-icon");
+            detailSeedName = root.Q<Label>("detail-seed-name");
         }
 
         public void Show()
@@ -66,7 +70,8 @@ namespace Garden
                     {
                         var v = variant;
                         var d = isDiscovered;
-                        button.clicked += () => ShowDetail(v, d);
+                        var s = seed;
+                        button.clicked += () => ShowDetail(v, d, s);
                     }
 
                     variantGrid.Add(entry);
@@ -74,7 +79,7 @@ namespace Garden
             }
         }
 
-        private void ShowDetail(VariantData variant, bool discovered)
+        private void ShowDetail(VariantData variant, bool discovered, SeedData seed)
         {
             SetRarityClass(detailRarity, variant.rarity);
 
@@ -92,6 +97,13 @@ namespace Garden
                 detailRarity.text = variant.rarity.ToString();
                 detailColorSwatch.style.backgroundColor = Color.black;
             }
+
+            if (detailSeedIcon != null)
+                detailSeedIcon.style.backgroundImage = seed.icon != null
+                    ? new StyleBackground(seed.icon)
+                    : new StyleBackground();
+            if (detailSeedName != null)
+                detailSeedName.text = seed.seedName;
         }
 
         private static readonly string[] RarityClasses =
