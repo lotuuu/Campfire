@@ -54,7 +54,7 @@ namespace Garden
             if (sellBar != null) sellBar.style.display = DisplayStyle.None;
 
             var gm = GreenhouseManager.Instance;
-            slotsText.text = $"{gm.Plants.Count} / {gm.MaxSlots}";
+            slotsText.text = $"{gm.Plants.Count}";
             dustRateText.text = $"+{gm.GetTotalDustPerSecond() * 60f:F1} Aura Dust/min";
 
             for (int i = 0; i < gm.Plants.Count; i++)
