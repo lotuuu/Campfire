@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Garden::Garden.EnvironmentData
   environmentName: The Hearth
   slotCount: 1
-  maxSlotCount: 3
+  maxSlotCount: 4
   unlockCostGold: 0
   slotUnlockCostGold: 250
   growthSpeedBonus: 0.1
