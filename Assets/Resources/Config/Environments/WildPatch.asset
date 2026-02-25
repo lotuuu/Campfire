@@ -35,3 +35,4 @@ MonoBehaviour:
     useCalendarEvent: 0
     requiredCalendarEvent: 0
   allowsCrossPollination: 0
+  tileSprite: {fileID: 21300000, guid: 7c6dc6b56455f43b695b3d59a7895a69, type: 3}
