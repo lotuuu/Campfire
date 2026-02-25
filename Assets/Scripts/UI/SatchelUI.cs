@@ -75,6 +75,7 @@ namespace Garden
             {
                 int count = SeedRegistry.Instance.GetSeedCount(seed.seedName);
                 var slot  = SeedSlotUI.Create(seedSlotTemplate, seed, count, OnSeedTapped);
+                slot.style.width = new StyleLength(new Length(100, LengthUnit.Percent));
                 seedList.Add(slot);
             }
         }
