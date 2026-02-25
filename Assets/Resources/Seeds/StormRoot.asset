@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: StormRoot
   m_EditorClassIdentifier: Garden::Garden.SeedData
   seedName: Storm-Root
-  icon: {fileID: 0}
+  icon: {fileID: -3962328653419008811, guid: 6ad33faa9696942f2b01f58a97d8688c, type: 3}
   description: +20% S-Tier chance during Wind/Rain
   baseGrowthHours: 36
   variants:

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: CinderFern
   m_EditorClassIdentifier: Garden::Garden.SeedData
   seedName: Cinder-Fern
-  icon: {fileID: 0}
+  icon: {fileID: 4402654967961242039, guid: 8e06265b93bd246a7be61b371d0e8e63, type: 3}
   description: "+10% S-Tier chance if Temp > 25\xB0C"
   baseGrowthHours: 4
   variants:

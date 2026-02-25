@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Quicksprout
   m_EditorClassIdentifier: Garden::Garden.SeedData
   seedName: Quicksprout
-  icon: {fileID: 0}
+  icon: {fileID: -4857783850610417842, guid: 563b411e2084a4005bbb3d44cbb116e2, type: 3}
   description: A hyperactive seed that erupts from the soil in seconds. Its form
     is shaped entirely by temperature.
   baseGrowthHours: 0.00278
