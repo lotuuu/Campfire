@@ -37,6 +37,8 @@ namespace Garden
 
             if (sellButton != null)
                 sellButton.clicked += OnSell;
+
+            GreenhouseManager.Instance.OnGreenhouseChanged += RefreshDisplay;
         }
 
         public void Show()
@@ -63,8 +65,25 @@ namespace Garden
                 var nameLabel = slot.Q<Label>(className: "plant-name");
                 var swatch = slot.Q<VisualElement>(className: "plant-swatch");
 
-                if (nameLabel != null) nameLabel.text = plant.variantName;
+                if (nameLabel != null)
+                    nameLabel.text = plant.isWithered ? "Withered" : plant.variantName;
                 if (swatch != null) swatch.style.backgroundColor = plant.primaryColor;
+
+                if (plant.isWithered && slotRoot != null)
+                    slotRoot.AddToClassList("plant-slot--withered");
+
+                var decayBarFill = slot.Q<VisualElement>(className: "plant-decay-bar-fill");
+                if (decayBarFill != null && !plant.isWithered)
+                {
+                    float progress = gm.GetDecayProgress(i);
+                    decayBarFill.style.width = Length.Percent(progress * 100f);
+                    decayBarFill.RemoveFromClassList("plant-decay-bar-fill--warning");
+                    decayBarFill.RemoveFromClassList("plant-decay-bar-fill--critical");
+                    if (plant.qualityTier == QualityTier.D)
+                        decayBarFill.AddToClassList("plant-decay-bar-fill--critical");
+                    else if (plant.qualityTier == QualityTier.C)
+                        decayBarFill.AddToClassList("plant-decay-bar-fill--warning");
+                }
 
                 filledSlotRoots.Add(slotRoot);
 
@@ -122,16 +141,29 @@ namespace Garden
             float dustRate = config.GetDustPerSecondForPlant(plant.rarity, plant.qualityTier) * 3600f;
             string qualityLabel = CurrencyConfig.GetQualityLabel(plant.qualityTier);
 
-            if (sellNameLabel != null) sellNameLabel.text = $"{plant.variantName} · {qualityLabel}";
-            if (sellDustLabel != null) sellDustLabel.text = $"+{dustRate:F1} Dust/hr";
-            if (sellButton != null) sellButton.text = $"Sell for {sellValue} Dew";
+            if (plant.isWithered)
+            {
+                if (sellNameLabel != null) sellNameLabel.text = $"{plant.variantName} · Withered";
+                if (sellDustLabel != null) sellDustLabel.text = "No value remaining";
+                if (sellButton != null) sellButton.text = "Trash";
+            }
+            else
+            {
+                if (sellNameLabel != null) sellNameLabel.text = $"{plant.variantName} · {qualityLabel}";
+                if (sellDustLabel != null) sellDustLabel.text = $"+{dustRate:F1} Dust/hr";
+                if (sellButton != null) sellButton.text = $"Sell for {sellValue} Dew";
+            }
             if (sellBar != null) sellBar.style.display = DisplayStyle.Flex;
         }
 
         private void OnSell()
         {
             if (selectedIndex < 0) return;
-            GreenhouseManager.Instance.SellPlant(selectedIndex);
+            var plant = GreenhouseManager.Instance.Plants[selectedIndex];
+            if (plant.isWithered)
+                GreenhouseManager.Instance.TrashPlant(selectedIndex);
+            else
+                GreenhouseManager.Instance.SellPlant(selectedIndex);
             RefreshDisplay();
         }
     }
