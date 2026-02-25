@@ -42,7 +42,7 @@ namespace Garden
 
             foreach (var seed in SeedRegistry.Instance.AllSeeds.OrderBy(s => s.buyPrice))
             {
-                foreach (var variant in seed.variants)
+                foreach (var variant in seed.variants.OrderBy(v => v.rarity))
                 {
                     var entry = variantEntryTemplate.CloneTree();
                     bool isDiscovered = discovered.Contains(variant.variantName);
