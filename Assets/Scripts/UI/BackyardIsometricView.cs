@@ -73,12 +73,18 @@ namespace Garden
 
         public void RebuildGrid(int count)
         {
+            // Destroy env-scoped consumable GOs (not parented to tiles, so not auto-destroyed)
+            foreach (var kvp in _envConsumableGOs)
+                if (kvp.Value) Destroy(kvp.Value);
+            _envConsumableGOs.Clear();
+
+            // Clear stale slot consumable refs (tile GOs and their children are about to be destroyed)
+            _slotConsumableGOs.Clear();
+
             foreach (var t in tiles) if (t) Destroy(t);
             tiles.Clear();
             plantGOs.Clear();
             plantBaseScales.Clear();
-            _slotConsumableGOs.Clear();
-            _envConsumableGOs.Clear();
 
             for (int i = 0; i < count; i++)
                 SpawnTile(i);
