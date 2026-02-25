@@ -6,11 +6,13 @@ namespace Garden
     public class WeatherOverlay : MonoBehaviour
     {
         [SerializeField] private RainOverlay rainOverlay;
+        [SerializeField] private SnowOverlay snowOverlay;
         private Coroutine _waitCoroutine;
 
         private void OnEnable()
         {
             rainOverlay?.Hide();
+            snowOverlay?.Hide();
             if (WeatherService.Instance != null)
             {
                 WeatherService.Instance.OnWeatherUpdated += UpdateEffects;
@@ -42,9 +44,22 @@ namespace Garden
         {
             switch (w.condition)
             {
-                case WeatherCondition.Rain:  rainOverlay?.Show(storm: false); break;
-                case WeatherCondition.Storm: rainOverlay?.Show(storm: true);  break;
-                default:                     rainOverlay?.Hide();             break;
+                case WeatherCondition.Rain:
+                    rainOverlay?.Show(storm: false);
+                    snowOverlay?.Hide();
+                    break;
+                case WeatherCondition.Storm:
+                    rainOverlay?.Show(storm: true);
+                    snowOverlay?.Hide();
+                    break;
+                case WeatherCondition.Snow:
+                    rainOverlay?.Hide();
+                    snowOverlay?.Show();
+                    break;
+                default:
+                    rainOverlay?.Hide();
+                    snowOverlay?.Hide();
+                    break;
             }
         }
     }
