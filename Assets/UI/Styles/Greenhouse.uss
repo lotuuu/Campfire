@@ -97,6 +97,13 @@
     background-color: rgb(255, 70, 60);
 }
 
+#greenhouse-page .plant-decay-time {
+    font-size: var(--font-xs);
+    color: var(--color-text-dim);
+    -unity-text-align: middle-center;
+    margin-top: 4px;
+}
+
 /* Withered state */
 #greenhouse-page .plant-slot--withered .plant-swatch {
     background-color: rgba(60, 50, 40, 0.6) !important;
