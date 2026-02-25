@@ -122,7 +122,7 @@ namespace Garden
         private void BuildConsumablePicker()
         {
             _pickerBtn = new Button(ToggleDropdown);
-            _pickerBtn.text = "🌿";
+            _pickerBtn.text = "";
             _pickerBtn.AddToClassList("consumable-picker-btn");
             terrariumPage.Add(_pickerBtn);
 

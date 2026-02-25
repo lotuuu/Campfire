@@ -59,9 +59,10 @@
     background-color: rgba(20, 35, 50, 0.75);
     border-width: 1px;
     border-color: var(--color-highlight);
-    color: var(--color-text-primary);
-    font-size: var(--font-sm);
-    -unity-text-align: middle-center;
+    -unity-background-image-tint-color: rgb(185, 210, 225);
+    background-image: url('../../ThirdParty/icons/delapouite-herbs-bundle.png');
+    -unity-background-scale-mode: scale-to-fit;
+    padding: 8px;
     translate: 0 -22px;
 }
 
