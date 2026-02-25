@@ -5,6 +5,18 @@ namespace Garden
 {
     public class BackyardIsometricView : MonoBehaviour
     {
+        // Per-type local transform for instantiated consumable visuals, indexed by (int)ConsumableType.
+        // Env-scoped (Fan/Igloo/Heater/Cloud) are children of this root; slot-scoped use position as offset from tile center.
+        private static readonly (Vector3 pos, Vector3 euler, Vector3 scale)[] ConsumableTransforms =
+        {
+            (new Vector3(0f,    0f,    0f), Vector3.zero,                new Vector3(0.05f, 0.05f, 0.05f)), // Fertilizer
+            (new Vector3(0f,    0f,    0f), Vector3.zero,                new Vector3(0.05f, 0.05f, 0.05f)), // QualityDirt
+            (new Vector3(1.94f,-0.85f, 0f), new Vector3(158f,-123f,-90f),new Vector3(0.5f,  0.5f,  0.5f)), // Fan
+            (new Vector3(-0.31f,-0.18f,-1.67f),   new Vector3(17.94f,-142.4f,16.59f),new Vector3(2f,    2f,    2f)),    // Igloo
+            (new Vector3(-3f,  -0.33f, 0f), new Vector3(0f, 61f, 0f),    new Vector3(0.005f,0.005f,0.005f)), // Heater
+            (new Vector3(0.118f, 2.337f, 0.069f), new Vector3(0f, 40.3f, 0f),  new Vector3(5f,    5f,    5f)),    // Cloud
+        };
+
         private Sprite tileSprite;
         [SerializeField] private string sortingLayerName = "Default";
         [SerializeField] private int baseSortingOrder = 0;
@@ -238,7 +250,12 @@ namespace Garden
                 return;
             }
             instance.transform.SetParent(tiles[slotIndex].transform, false);
-            instance.transform.localPosition = new Vector3(0.25f + existing * 0.18f, 0.15f, -0.55f);
+            var (pos, euler, scale) = (int)type < ConsumableTransforms.Length
+                ? ConsumableTransforms[(int)type]
+                : (new Vector3(0.25f, 0.15f, -0.55f), Vector3.zero, Vector3.one * 0.05f);
+            instance.transform.localPosition = pos + new Vector3(existing * 0.18f, 0f, 0f);
+            instance.transform.localEulerAngles = euler;
+            instance.transform.localScale = scale;
             _slotConsumableGOs[slotIndex].Add(instance);
         }
 
@@ -285,10 +302,40 @@ namespace Garden
                 return;
             }
             instance.transform.SetParent(transform, false);
-            // Use enum index for stable position — no overlap even if types are cleared/re-added
-            int typeIndex = (int)type;
-            instance.transform.localPosition = new Vector3(-2.0f + typeIndex * 0.5f, 0.8f, -0.5f);
+            var (pos, euler, scale) = (int)type < ConsumableTransforms.Length
+                ? ConsumableTransforms[(int)type]
+                : (Vector3.zero, Vector3.zero, Vector3.one * 0.05f);
+            instance.transform.localPosition = pos;
+            instance.transform.localEulerAngles = euler;
+            instance.transform.localScale = scale;
+            ApplyMaterialOverrides(type, instance);
             _envConsumableGOs[type] = instance;
+        }
+
+        private void ApplyMaterialOverrides(ConsumableType type, GameObject instance)
+        {
+            if (type == ConsumableType.Igloo)
+            {
+                foreach (var r in instance.GetComponentsInChildren<Renderer>())
+                {
+                    // Render above all tile sprites
+                    r.sortingLayerName = sortingLayerName;
+                    r.sortingOrder = 999;
+
+                    foreach (var mat in r.materials)
+                    {
+                        mat.SetFloat("_Surface", 1f);          // URP: 0=Opaque 1=Transparent
+                        mat.SetFloat("_ZWrite", 0f);
+                        mat.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                        mat.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                        mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+                        mat.renderQueue = 3000;
+                        var c = mat.color;
+                        c.a = 0.55f;
+                        mat.color = c;
+                    }
+                }
+            }
         }
 
         /// <summary>Removes an env-scoped consumable GO.</summary>
