@@ -1,3 +1,4 @@
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -35,7 +36,7 @@ namespace Garden
 
             var discovered = SaveManager.Instance.Data.discoveredVariants;
 
-            foreach (var seed in SeedRegistry.Instance.AllSeeds)
+            foreach (var seed in SeedRegistry.Instance.AllSeeds.OrderBy(s => s.buyPrice))
             {
                 foreach (var variant in seed.variants)
                 {
