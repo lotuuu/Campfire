@@ -73,16 +73,25 @@ namespace Garden
                     slotRoot.AddToClassList("plant-slot--withered");
 
                 var decayBarFill = slot.Q<VisualElement>(className: "plant-decay-bar-fill");
-                if (decayBarFill != null && !plant.isWithered)
+                var decayTimeLabel = slot.Q<Label>(className: "plant-decay-time");
+                if (!plant.isWithered)
                 {
                     float progress = gm.GetDecayProgress(i);
-                    decayBarFill.style.width = Length.Percent(progress * 100f);
-                    decayBarFill.RemoveFromClassList("plant-decay-bar-fill--warning");
-                    decayBarFill.RemoveFromClassList("plant-decay-bar-fill--critical");
-                    if (plant.qualityTier == QualityTier.D)
-                        decayBarFill.AddToClassList("plant-decay-bar-fill--critical");
-                    else if (plant.qualityTier == QualityTier.C)
-                        decayBarFill.AddToClassList("plant-decay-bar-fill--warning");
+                    float remaining = (1f - progress) * GreenhouseManager.GetStepMinutes(plant.qualityTier);
+
+                    if (decayBarFill != null)
+                    {
+                        decayBarFill.style.width = Length.Percent((1f - progress) * 100f);
+                        decayBarFill.RemoveFromClassList("plant-decay-bar-fill--warning");
+                        decayBarFill.RemoveFromClassList("plant-decay-bar-fill--critical");
+                        if (plant.qualityTier == QualityTier.D)
+                            decayBarFill.AddToClassList("plant-decay-bar-fill--critical");
+                        else if (plant.qualityTier == QualityTier.C)
+                            decayBarFill.AddToClassList("plant-decay-bar-fill--warning");
+                    }
+
+                    if (decayTimeLabel != null)
+                        decayTimeLabel.text = FormatMinutes(remaining);
                 }
 
                 filledSlotRoots.Add(slotRoot);
@@ -154,6 +163,14 @@ namespace Garden
                 if (sellButton != null) sellButton.text = $"Sell for {sellValue} Gold";
             }
             if (sellBar != null) sellBar.style.display = DisplayStyle.Flex;
+        }
+
+        private static string FormatMinutes(float minutes)
+        {
+            if (minutes < 1f) return "<1m";
+            int h = (int)(minutes / 60f);
+            int m = (int)(minutes % 60f);
+            return h > 0 ? $"{h}h {m}m" : $"{m}m";
         }
 
         private void OnSell()

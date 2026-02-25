@@ -5,5 +5,6 @@
         <ui:VisualElement class="plant-decay-bar-bg">
             <ui:VisualElement class="plant-decay-bar-fill" />
         </ui:VisualElement>
+        <ui:Label class="plant-decay-time" />
     </ui:VisualElement>
 </ui:UXML>
