@@ -193,13 +193,21 @@
     transition-timing-function: ease-out;
 }
 
-.bottom-sheet-handle {
+/* Full-width 44px touch target — pointer events registered on this */
+.bottom-sheet-drag-zone {
+    width: 100%;
+    height: 44px;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* Visual pill inside the drag zone */
+.bottom-sheet-handle-pip {
     width: 40px;
     height: 4px;
     border-radius: 2px;
     background-color: rgba(120, 150, 170, 0.4);
-    align-self: center;
-    margin-bottom: var(--spacing-sm);
 }
 
 /* ── Dropdown popup (renders at panel root, outside any scoped selector) ── */
