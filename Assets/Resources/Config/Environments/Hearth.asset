@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82bc478f3703c4ab995c43e041c63e15, type: 3}
   m_Name: Hearth
   m_EditorClassIdentifier: Garden::Garden.EnvironmentData
-  environmentName: The Hearth
+  environmentName: Backyard
   slotCount: 1
   maxSlotCount: 4
   unlockCostGold: 0
