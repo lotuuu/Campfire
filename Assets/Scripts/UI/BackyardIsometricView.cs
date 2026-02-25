@@ -19,6 +19,7 @@ namespace Garden
         private float slideOffsetX;
 
         private const int BackyardEnvIndex = 0;
+        private const int GridColumns = 2;
 
         private void Awake()
         {
@@ -72,7 +73,7 @@ namespace Garden
             var sr = tileGO.AddComponent<SpriteRenderer>();
             sr.sprite = tileSprite;
             sr.sortingLayerName = sortingLayerName;
-            sr.sortingOrder = baseSortingOrder;
+            sr.sortingOrder = baseSortingOrder + index / GridColumns;
 
             // Plant visual: instantiate prefab child
             GameObject plantGO = null;
@@ -100,8 +101,13 @@ namespace Garden
             float ppu = tileSprite.pixelsPerUnit;
             float w = tileSprite.rect.width / ppu;
             float h = tileSprite.rect.height / ppu;
-            // Isometric east-row: each step = +w/2 right, -h/4 down
-            tiles[index].transform.localPosition = new Vector3(index * w * 0.5f, index * -h * 0.25f, 0f);
+            int col = index % GridColumns;
+            int row = index / GridColumns;
+            // Isometric grid: east step = (+w/2, -h/4), south step = (-w/2, -h/4)
+            tiles[index].transform.localPosition = new Vector3(
+                (col - row) * w * 0.5f,
+                (col + row) * -h * 0.25f,
+                0f);
         }
 
         private void RecenterGrid()
@@ -111,10 +117,16 @@ namespace Garden
             float w = tileSprite.rect.width / ppu;
             float h = tileSprite.rect.height / ppu;
             int n = tiles.Count;
-            // Center of tile cluster in local space
-            float localCenterX = (n - 1) * w * 0.25f;
-            float localCenterY = (n - 1) * -h * 0.125f;
-            transform.position = gridAnchor - new Vector3(localCenterX - slideOffsetX, localCenterY, 0f);
+            // Average position of all tiles in the 2-column grid
+            float sumX = 0f, sumY = 0f;
+            for (int i = 0; i < n; i++)
+            {
+                int col = i % GridColumns;
+                int row = i / GridColumns;
+                sumX += (col - row) * w * 0.5f;
+                sumY += (col + row) * -h * 0.25f;
+            }
+            transform.position = gridAnchor - new Vector3(sumX / n - slideOffsetX, sumY / n, 0f);
         }
 
         /// <summary>Shift all tiles horizontally to follow a page slide (world units).</summary>
