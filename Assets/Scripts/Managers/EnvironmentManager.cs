@@ -22,14 +22,14 @@ namespace Garden
 
             var loaded = Resources.LoadAll<EnvironmentData>("Config/Environments");
             environments.AddRange(loaded);
-            environments.Sort((a, b) => a.unlockCostDewdrops.CompareTo(b.unlockCostDewdrops));
+            environments.Sort((a, b) => a.unlockCostGold.CompareTo(b.unlockCostGold));
         }
 
         public bool IsUnlocked(int envIndex)
         {
             if (envIndex < 0 || envIndex >= environments.Count) return false;
             var env = environments[envIndex];
-            if (env.unlockCostDewdrops == 0) return true;
+            if (env.unlockCostGold == 0) return true;
             return SaveManager.Instance.Data.unlockedEnvironments.Contains(env.environmentName);
         }
 
@@ -39,7 +39,7 @@ namespace Garden
             if (IsUnlocked(envIndex)) return false;
 
             var env = environments[envIndex];
-            if (!CurrencyManager.Instance.Spend(CurrencyType.Dewdrops, env.unlockCostDewdrops))
+            if (!CurrencyManager.Instance.Spend(CurrencyType.Gold, env.unlockCostGold))
                 return false;
 
             SaveManager.Instance.Data.unlockedEnvironments.Add(env.environmentName);
@@ -87,7 +87,7 @@ namespace Garden
             if (envIndex < 0 || envIndex >= environments.Count) return false;
             var env = environments[envIndex];
             return GetActiveSlotCount(envIndex) < env.maxSlotCount
-                && CurrencyManager.Instance.CanAfford(CurrencyType.Dewdrops, env.slotUnlockCostDewdrops);
+                && CurrencyManager.Instance.CanAfford(CurrencyType.Gold, env.slotUnlockCostGold);
         }
 
         public bool UnlockSlot(int envIndex)
@@ -96,7 +96,7 @@ namespace Garden
             var env = environments[envIndex];
             int current = GetActiveSlotCount(envIndex);
             if (current >= env.maxSlotCount) return false;
-            if (!CurrencyManager.Instance.Spend(CurrencyType.Dewdrops, env.slotUnlockCostDewdrops))
+            if (!CurrencyManager.Instance.Spend(CurrencyType.Gold, env.slotUnlockCostGold))
                 return false;
 
             var save = SaveManager.Instance.Data;

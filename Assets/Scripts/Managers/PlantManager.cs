@@ -193,12 +193,12 @@ namespace Garden
 
             var result = Harvest(slot.environmentIndex, slot.slotIndex);
             GreenhouseManager.Instance.AddPlant(result.seed, result.variant, result.tier);
-            CurrencyManager.Instance.Add(CurrencyType.Dewdrops, result.dewdropValue);
+            CurrencyManager.Instance.Add(CurrencyType.Gold, result.goldValue);
         }
 
         public void SellHarvest(HarvestResult result)
         {
-            CurrencyManager.Instance.Add(CurrencyType.Dewdrops, result.dewdropValue);
+            CurrencyManager.Instance.Add(CurrencyType.Gold, result.goldValue);
         }
 
         public void KeepHarvest(HarvestResult result)

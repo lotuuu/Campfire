@@ -5,7 +5,7 @@
             <ui:Label class="harvest-variant-name" />
             <ui:Label class="harvest-tier-label" />
             <ui:Label class="harvest-sync-badge" />
-            <ui:Label class="harvest-dewdrops" />
+            <ui:Label class="harvest-gold" />
             <ui:VisualElement class="harvest-buttons">
                 <ui:Button text="Sell" class="btn harvest-sell-btn" />
                 <ui:Button text="Keep" class="btn harvest-keep-btn" />

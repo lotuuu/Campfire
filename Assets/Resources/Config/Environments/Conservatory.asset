@@ -15,8 +15,8 @@ MonoBehaviour:
   environmentName: Deep Conservatory
   slotCount: 2
   maxSlotCount: 6
-  unlockCostDewdrops: 25000
-  slotUnlockCostDewdrops: 5000
+  unlockCostGold: 25000
+  slotUnlockCostGold: 5000
   growthSpeedBonus: 0
   bonusCondition:
     useTemperature: 0

@@ -5,13 +5,13 @@ namespace Garden
 {
     public class CurrencyDisplay : MonoBehaviour
     {
-        private Label dewdropsText;
+        private Label goldText;
         private Label sunShardsText;
         private Label auraDustText;
 
         public void Initialize(VisualElement root)
         {
-            dewdropsText = root.Q<Label>("dewdrops-text");
+            goldText = root.Q<Label>("gold-text");
             sunShardsText = root.Q<Label>("sun-shards-text");
             auraDustText = root.Q<Label>("aura-dust-text");
 
@@ -31,8 +31,8 @@ namespace Garden
         private void Refresh()
         {
             var cm = CurrencyManager.Instance;
-            if (cm == null || dewdropsText == null) return;
-            dewdropsText.text = $"Dew: {cm.Dewdrops}";
+            if (cm == null || goldText == null) return;
+            goldText.text = $"Gold: {cm.Gold}";
             sunShardsText.text = $"Sun: {cm.SunShards}";
             auraDustText.text = $"Dust: {cm.AuraDust}";
         }

@@ -33,7 +33,7 @@ namespace Garden
             var variantName = popup.Q<Label>(className: "harvest-variant-name");
             var tierLabel = popup.Q<Label>(className: "harvest-tier-label");
             var syncBadge = popup.Q<Label>(className: "harvest-sync-badge");
-            var dewdropsLabel = popup.Q<Label>(className: "harvest-dewdrops");
+            var goldLabel = popup.Q<Label>(className: "harvest-gold");
             var sellBtn = popup.Q<Button>(className: "harvest-sell-btn");
             var keepBtn = popup.Q<Button>(className: "harvest-keep-btn");
 
@@ -61,8 +61,8 @@ namespace Garden
                     ? DisplayStyle.Flex : DisplayStyle.None;
             }
 
-            if (dewdropsLabel != null)
-                dewdropsLabel.text = $"+{result.dewdropValue} Dewdrops";
+            if (goldLabel != null)
+                goldLabel.text = $"+{result.goldValue} Gold";
 
             if (sellBtn != null)
             {

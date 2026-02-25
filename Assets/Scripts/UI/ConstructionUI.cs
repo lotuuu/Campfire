@@ -28,7 +28,7 @@ namespace Garden
 
         private void OnCurrencyChanged(CurrencyType type, int oldVal, int newVal)
         {
-            if (type == CurrencyType.Dewdrops)
+            if (type == CurrencyType.Gold)
                 RefreshDisplay();
         }
 
@@ -73,8 +73,8 @@ namespace Garden
                     {
                         bool canAdd = current < max;
                         bool canAfford = CurrencyManager.Instance.CanAfford(
-                            CurrencyType.Dewdrops, env.slotUnlockCostDewdrops);
-                        upgradeBtn.text = canAdd ? $"+ ({env.slotUnlockCostDewdrops} Dew)" : "Max";
+                            CurrencyType.Gold, env.slotUnlockCostGold);
+                        upgradeBtn.text = canAdd ? $"+ ({env.slotUnlockCostGold} Gold)" : "Max";
                         upgradeBtn.SetEnabled(canAdd && canAfford);
 
                         int capturedIndex = i;
@@ -97,12 +97,12 @@ namespace Garden
                     var costLabel = card.Q<Label>("unlock-cost-label");
                     var unlockBtn = card.Q<Button>("unlock-btn");
 
-                    if (costLabel != null) costLabel.text = $"{env.unlockCostDewdrops} Dewdrops";
+                    if (costLabel != null) costLabel.text = $"{env.unlockCostGold} Gold";
 
                     if (unlockBtn != null)
                     {
                         bool canAfford = CurrencyManager.Instance.CanAfford(
-                            CurrencyType.Dewdrops, env.unlockCostDewdrops);
+                            CurrencyType.Gold, env.unlockCostGold);
                         unlockBtn.text = $"Purchase {env.environmentName}";
                         unlockBtn.SetEnabled(canAfford);
 
@@ -147,8 +147,8 @@ namespace Garden
             if (upgradeBtn != null)
             {
                 bool canAfford = CurrencyManager.Instance.CanAfford(
-                    CurrencyType.Dewdrops, config.greenhouseExpandCostDewdrops);
-                upgradeBtn.text = $"+ ({config.greenhouseExpandCostDewdrops} Dew)";
+                    CurrencyType.Gold, config.greenhouseExpandCostGold);
+                upgradeBtn.text = $"+ ({config.greenhouseExpandCostGold} Gold)";
                 upgradeBtn.SetEnabled(canAfford);
                 upgradeBtn.clicked += () =>
                 {

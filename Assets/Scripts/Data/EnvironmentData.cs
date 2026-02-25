@@ -8,8 +8,8 @@ namespace Garden
         public string environmentName;
         public int slotCount = 1;
         public int maxSlotCount = 4;
-        public int unlockCostDewdrops;
-        public int slotUnlockCostDewdrops = 500;
+        public int unlockCostGold;
+        public int slotUnlockCostGold = 500;
 
         [Header("Growth Bonus")]
         [Range(0f, 0.5f)] public float growthSpeedBonus;

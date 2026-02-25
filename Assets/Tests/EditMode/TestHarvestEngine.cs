@@ -41,7 +41,7 @@ namespace Garden.Tests
         }
 
         [Test]
-        public void Roll_NoSyncShield_DewdropValueUsesBaseSellPrice()
+        public void Roll_NoSyncShield_GoldValueUsesBaseSellPrice()
         {
             var seed = CreateTestSeed(WeatherCondition.Rain);
             var variant = CreateTestVariant();
@@ -51,7 +51,7 @@ namespace Garden.Tests
 
             float expectedMultiplier = CurrencyConfig.GetQualityMultiplier(result.tier);
             int expected = Mathf.RoundToInt(100 * expectedMultiplier);
-            Assert.AreEqual(expected, result.dewdropValue);
+            Assert.AreEqual(expected, result.goldValue);
             Assert.IsFalse(result.syncShieldActive);
         }
 

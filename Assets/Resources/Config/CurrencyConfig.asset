@@ -12,15 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a276892cda01c46f285a5a20e8fc3fc6, type: 3}
   m_Name: CurrencyConfig
   m_EditorClassIdentifier: Garden::Garden.CurrencyConfig
-  commonDewdrops: 10
-  uncommonDewdrops: 25
-  rareDewdrops: 50
-  epicDewdrops: 100
-  legendaryDewdrops: 250
+  commonGold: 10
+  uncommonGold: 25
+  rareGold: 50
+  epicGold: 100
+  legendaryGold: 250
   commonDustPerSecond: 0.5
   uncommonDustPerSecond: 1.5
   rareDustPerSecond: 4
   epicDustPerSecond: 10
   legendaryDustPerSecond: 25
   defaultSlots: 6
-  greenhouseExpandCostDewdrops: 300
+  greenhouseExpandCostGold: 300

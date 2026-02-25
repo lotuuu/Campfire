@@ -15,8 +15,8 @@ MonoBehaviour:
   environmentName: The Wild Patch
   slotCount: 2
   maxSlotCount: 6
-  unlockCostDewdrops: 15000
-  slotUnlockCostDewdrops: 3000
+  unlockCostGold: 15000
+  slotUnlockCostGold: 3000
   growthSpeedBonus: 0
   bonusCondition:
     useTemperature: 0
