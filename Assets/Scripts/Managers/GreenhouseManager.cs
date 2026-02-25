@@ -169,5 +169,7 @@ namespace Garden
         public QualityTier qualityTier;
         public Color primaryColor;
         public DateTime harvestTime;
+        public DateTime tierStartTime;  // when current tier began decaying
+        public bool isWithered;         // true once plant has passed below D
     }
 }
