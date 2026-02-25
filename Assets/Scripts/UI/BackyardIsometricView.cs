@@ -206,9 +206,22 @@ namespace Garden
         /// <summary>Spawns a slot-scoped consumable visual as a child of the tile GO.</summary>
         public void SpawnSlotConsumableVisual(int slotIndex, ConsumableType type)
         {
-            if (consumablePrefabs == null || (int)type >= consumablePrefabs.Length) return;
+            if (consumablePrefabs == null || (int)type >= consumablePrefabs.Length)
+            {
+                Debug.Log($"[BackyardIso] SpawnSlot: no prefab array or {type} out of range (len={consumablePrefabs?.Length})");
+                return;
+            }
             var prefab = consumablePrefabs[(int)type];
-            if (prefab == null || slotIndex < 0 || slotIndex >= tiles.Count) return;
+            if (prefab == null)
+            {
+                Debug.Log($"[BackyardIso] SpawnSlot: prefab for {type} is null — no art assigned");
+                return;
+            }
+            if (slotIndex < 0 || slotIndex >= tiles.Count)
+            {
+                Debug.Log($"[BackyardIso] SpawnSlot: slotIndex {slotIndex} out of range (tiles={tiles.Count})");
+                return;
+            }
 
             if (!_slotConsumableGOs.ContainsKey(slotIndex))
                 _slotConsumableGOs[slotIndex] = new List<GameObject>();
@@ -216,6 +229,7 @@ namespace Garden
             int existing = _slotConsumableGOs[slotIndex].Count;
             var go = Instantiate(prefab, tiles[slotIndex].transform);
             go.transform.localPosition = new Vector3(0.25f + existing * 0.18f, 0.15f, -0.55f);
+            Debug.Log($"[BackyardIso] SpawnSlot: spawned {type} at slot {slotIndex}, worldPos={go.transform.position}, scale={go.transform.localScale}");
             _slotConsumableGOs[slotIndex].Add(go);
         }
 
@@ -234,9 +248,17 @@ namespace Garden
         /// </summary>
         public void SpawnEnvConsumableVisual(ConsumableType type)
         {
-            if (consumablePrefabs == null || (int)type >= consumablePrefabs.Length) return;
+            if (consumablePrefabs == null || (int)type >= consumablePrefabs.Length)
+            {
+                Debug.Log($"[BackyardIso] SpawnEnv: no prefab array or {type} out of range (len={consumablePrefabs?.Length})");
+                return;
+            }
             var prefab = consumablePrefabs[(int)type];
-            if (prefab == null) return;
+            if (prefab == null)
+            {
+                Debug.Log($"[BackyardIso] SpawnEnv: prefab for {type} is null — not assigned in Inspector");
+                return;
+            }
 
             // Remove existing of same type
             if (_envConsumableGOs.TryGetValue(type, out var existing))
@@ -249,6 +271,7 @@ namespace Garden
             // Use enum index for stable position — no overlap even if types are cleared/re-added
             int typeIndex = (int)type;
             go.transform.localPosition = new Vector3(-2.0f + typeIndex * 0.5f, 0.8f, -0.5f);
+            Debug.Log($"[BackyardIso] SpawnEnv: spawned {type} worldPos={go.transform.position}, scale={go.transform.localScale}, childCount={go.transform.childCount}");
             _envConsumableGOs[type] = go;
         }
 
