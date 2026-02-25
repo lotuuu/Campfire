@@ -14,6 +14,7 @@ namespace Garden
             shopCardTemplate = Resources.Load<VisualTreeAsset>("UI/Templates/SeedShopCard");
 
             shopGrid = root.Q<ScrollView>("shop-grid");
+            shopGrid.contentContainer.style.flexDirection = FlexDirection.Column;
         }
 
         public void Show()
@@ -27,7 +28,6 @@ namespace Garden
 
             var seeds = SeedShopManager.Instance.GetShopSeeds();
             seeds.Sort((a, b) => a.buyPrice.CompareTo(b.buyPrice));
-            shopGrid.contentContainer.style.flexDirection = FlexDirection.Column;
 
             foreach (var seed in seeds)
             {
