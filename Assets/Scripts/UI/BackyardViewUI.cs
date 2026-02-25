@@ -20,13 +20,14 @@ namespace Garden
         private readonly List<VisualElement> progressFills = new();
         private readonly List<string> _lastLabelText = new();
 
+        private Button _pickerBtn;
+        private VisualElement _dropdown;
+        private ConsumableType? _pendingType; // only set for slot-scoped apply mode
+
         private bool initialized;
         private bool pageActive;
 
-        public void SetPageActive(bool active)
-        {
-            pageActive = active;
-        }
+        public void SetPageActive(bool active) => pageActive = active;
 
         public void Initialize(VisualElement root)
         {
@@ -46,8 +47,131 @@ namespace Garden
                 EnvironmentManager.Instance.OnSlotUnlocked += OnSlotUnlocked;
             }
 
+            BuildConsumablePicker();
+
+            // Restore slot-scoped consumable visuals for any already-planted slots
+            if (PlantManager.Instance != null && isometricView != null)
+            {
+                foreach (var slot in PlantManager.Instance.Slots)
+                {
+                    if (slot.environmentIndex != BackyardEnvIndex) continue;
+                    foreach (var c in slot.appliedConsumables)
+                        // TODO: Task 8 - uncomment
+                        // isometricView.SpawnSlotConsumableVisual(slot.slotIndex, c.type);
+                        _ = c; // suppress unused warning until Task 8
+                }
+            }
+
+            // Restore env-scoped consumable visuals
+            if (ConsumableManager.Instance != null && isometricView != null)
+            {
+                foreach (var c in ConsumableManager.Instance.GetEnvConsumables(BackyardEnvIndex))
+                    // TODO: Task 8 - uncomment
+                    // isometricView.SpawnEnvConsumableVisual(c.type);
+                    _ = c; // suppress unused warning until Task 8
+            }
+
             initialized = true;
             RefreshAllSlots();
+        }
+
+        private void BuildConsumablePicker()
+        {
+            _pickerBtn = new Button(ToggleDropdown);
+            _pickerBtn.text = "🌿";
+            _pickerBtn.AddToClassList("consumable-picker-btn");
+            terrariumPage.Add(_pickerBtn);
+
+            _dropdown = new VisualElement();
+            _dropdown.AddToClassList("consumable-dropdown");
+            _dropdown.style.display = DisplayStyle.None;
+            terrariumPage.Add(_dropdown);
+        }
+
+        private void ToggleDropdown()
+        {
+            if (_pendingType.HasValue)
+            {
+                CancelApplyMode();
+                return;
+            }
+
+            bool showing = _dropdown.style.display == DisplayStyle.Flex;
+            if (showing)
+            {
+                _dropdown.style.display = DisplayStyle.None;
+                return;
+            }
+
+            RefreshDropdown();
+            _dropdown.style.display = DisplayStyle.Flex;
+        }
+
+        private void RefreshDropdown()
+        {
+            _dropdown.Clear();
+            if (ConsumableManager.Instance == null) return;
+
+            foreach (var c in ConsumableManager.Instance.AllConsumables)
+            {
+                int count = ConsumableManager.Instance.GetCount(c.type);
+                if (count <= 0) continue;
+
+                var row = new Button();
+                row.AddToClassList("consumable-row");
+
+                var nameLabel = new Label(c.displayName);
+                nameLabel.AddToClassList("consumable-row-name");
+
+                var countLabel = new Label($"x{count}");
+                countLabel.AddToClassList("consumable-row-count");
+
+                row.Add(nameLabel);
+                row.Add(countLabel);
+
+                var capturedType = c.type;
+                var capturedIsEnvScoped = c.isEnvironmentScoped;
+                row.clicked += () => OnConsumableRowTapped(capturedType, capturedIsEnvScoped);
+
+                _dropdown.Add(row);
+            }
+
+            if (_dropdown.childCount == 0)
+            {
+                var empty = new Label("No consumables owned");
+                empty.AddToClassList("consumable-row-name");
+                empty.style.padding = new StyleLength(8);
+                _dropdown.Add(empty);
+            }
+        }
+
+        private void OnConsumableRowTapped(ConsumableType type, bool isEnvironmentScoped)
+        {
+            _dropdown.style.display = DisplayStyle.None;
+
+            if (isEnvironmentScoped)
+            {
+                // Apply immediately to entire Backyard — no slot selection needed
+                if (ConsumableManager.Instance != null &&
+                    ConsumableManager.Instance.ApplyToEnvironment(type, BackyardEnvIndex))
+                {
+                    // TODO: Task 8 - uncomment
+                    // isometricView?.SpawnEnvConsumableVisual(type);
+                }
+                return;
+            }
+
+            // Slot-scoped: enter apply mode so player can tap a slot
+            _pendingType = type;
+            foreach (var btn in slotButtons)
+                btn.AddToClassList("backyard-slot-apply-mode");
+        }
+
+        private void CancelApplyMode()
+        {
+            _pendingType = null;
+            foreach (var btn in slotButtons)
+                btn.RemoveFromClassList("backyard-slot-apply-mode");
         }
 
         private void OnDestroy()
@@ -99,7 +223,6 @@ namespace Garden
         {
             if (!initialized || !pageActive || isometricView == null || terrariumPage == null) return;
 
-            // Re-project tile positions each frame (handles screen resize)
             for (int i = 0; i < slotButtons.Count; i++)
                 PositionButton(i);
 
@@ -135,22 +258,19 @@ namespace Garden
             var screenRect = isometricView.GetTileScreenBounds(i);
             var panel = terrariumPage.panel;
 
-            // Convert screen-space corners (bottom-left origin) to panel space (top-left origin)
             var bl = RuntimePanelUtils.ScreenToPanel(panel, new Vector2(screenRect.x, screenRect.y));
             var tr = RuntimePanelUtils.ScreenToPanel(panel, new Vector2(screenRect.xMax, screenRect.yMax));
 
-            // In panel space Y increases downward, so tr.y < bl.y (tr is visually higher)
-            float panelLeft = Mathf.Min(bl.x, tr.x);
-            float panelTop = Mathf.Min(bl.y, tr.y);
-            float panelWidth = Mathf.Abs(tr.x - bl.x);
+            float panelLeft   = Mathf.Min(bl.x, tr.x);
+            float panelTop    = Mathf.Min(bl.y, tr.y);
+            float panelWidth  = Mathf.Abs(tr.x - bl.x);
             float panelHeight = Mathf.Abs(bl.y - tr.y);
 
-            // Make coords relative to terrariumPage
             var pageOrigin = terrariumPage.worldBound;
             if (pageOrigin.width <= 0) return;
-            slotButtons[i].style.left = panelLeft - pageOrigin.x;
-            slotButtons[i].style.top = panelTop - pageOrigin.y;
-            slotButtons[i].style.width = panelWidth;
+            slotButtons[i].style.left   = panelLeft   - pageOrigin.x;
+            slotButtons[i].style.top    = panelTop    - pageOrigin.y;
+            slotButtons[i].style.width  = panelWidth;
             slotButtons[i].style.height = panelHeight;
         }
 
@@ -168,15 +288,17 @@ namespace Garden
             if (slot == null) return;
 
             var label = i < labels.Count ? labels[i] : null;
-            var fill = i < progressFills.Count ? progressFills[i] : null;
+            var fill  = i < progressFills.Count ? progressFills[i] : null;
 
             switch (slot.state)
             {
                 case PlantState.Empty:
                     if (label != null) label.text = "Tap to Plant";
-                    if (fill != null) fill.style.width = new Length(0, LengthUnit.Percent);
+                    if (fill  != null) fill.style.width = new Length(0, LengthUnit.Percent);
                     slotButtons[i].RemoveFromClassList("backyard-slot-mature");
                     isometricView?.SetPlantVisual(i, PlantState.Empty, Color.clear);
+                    // TODO: Task 8 - uncomment
+                    // isometricView?.ClearSlotConsumableVisuals(i);
                     break;
 
                 case PlantState.Growing:
@@ -187,27 +309,44 @@ namespace Garden
                     if (fill != null)
                         fill.style.width = new Length(slot.growthProgress * 100f, LengthUnit.Percent);
                     slotButtons[i].RemoveFromClassList("backyard-slot-mature");
-                    isometricView?.SetPlantVisual(i, PlantState.Growing, slot.variant?.primaryColor ?? Color.green);
+                    isometricView?.SetPlantVisual(i, PlantState.Growing,
+                        slot.variant?.primaryColor ?? Color.green);
                     break;
 
                 case PlantState.Mature:
                     if (label != null) label.text = "Harvest!";
-                    if (fill != null) fill.style.width = new Length(100, LengthUnit.Percent);
+                    if (fill  != null) fill.style.width = new Length(100, LengthUnit.Percent);
                     slotButtons[i].AddToClassList("backyard-slot-mature");
-                    isometricView?.SetPlantVisual(i, PlantState.Mature, slot.variant?.primaryColor ?? Color.green);
+                    isometricView?.SetPlantVisual(i, PlantState.Mature,
+                        slot.variant?.primaryColor ?? Color.green);
                     break;
             }
         }
 
         private void OnSlotClicked(int slotIndex)
         {
+            // Slot-scoped apply mode: apply consumable to this slot
+            if (_pendingType.HasValue)
+            {
+                var type = _pendingType.Value;
+                CancelApplyMode();
+                if (PlantManager.Instance != null &&
+                    PlantManager.Instance.ApplyConsumable(type, BackyardEnvIndex, slotIndex))
+                {
+                    // TODO: Task 8 - uncomment
+                    // isometricView?.SpawnSlotConsumableVisual(slotIndex, type);
+                }
+                return;
+            }
+
+            // Normal interaction
             if (PlantManager.Instance == null) return;
             var slot = PlantManager.Instance.GetSlot(BackyardEnvIndex, slotIndex);
             if (slot == null) return;
 
             switch (slot.state)
             {
-                case PlantState.Empty: OnEmptySlotTapped?.Invoke(BackyardEnvIndex, slotIndex); break;
+                case PlantState.Empty:  OnEmptySlotTapped?.Invoke(BackyardEnvIndex, slotIndex);  break;
                 case PlantState.Mature: OnMatureSlotTapped?.Invoke(BackyardEnvIndex, slotIndex); break;
             }
         }
