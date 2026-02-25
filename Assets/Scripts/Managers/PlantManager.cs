@@ -44,6 +44,9 @@ namespace Garden
                 WeatherService.Instance.OnWeatherUpdated += RefreshMultipliers;
                 RefreshMultipliers(WeatherService.Instance.CurrentWeather);
             }
+            // Re-schedule notifications after restore, in case OnApplicationPause(false)
+            // fired at startup and cancelled them before plant data was loaded.
+            NotificationService.Instance?.RescheduleAll();
         }
 
         private void OnDestroy()

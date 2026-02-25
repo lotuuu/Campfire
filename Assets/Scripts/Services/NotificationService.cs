@@ -132,17 +132,25 @@ namespace Garden
 
             foreach (var slot in PlantManager.Instance.Slots)
             {
-                if (slot.state != PlantState.Growing) continue;
-
-                float remainingHours = PlantManager.Instance.GetRemainingHours(
-                    slot.environmentIndex, slot.slotIndex);
-                double remainingSeconds = remainingHours * 3600.0;
-
-                if (remainingSeconds > 0)
+                if (slot.state == PlantState.Growing)
                 {
+                    float remainingHours = PlantManager.Instance.GetRemainingHours(
+                        slot.environmentIndex, slot.slotIndex);
+                    double remainingSeconds = remainingHours * 3600.0;
+
+                    if (remainingSeconds > 0)
+                    {
+                        SchedulePlantNotification(
+                            slot.environmentIndex, slot.slotIndex,
+                            slot.seed.seedName, remainingSeconds);
+                    }
+                }
+                else if (slot.state == PlantState.Mature)
+                {
+                    // Plant finished while app was open; send a reminder 1s after backgrounding
                     SchedulePlantNotification(
                         slot.environmentIndex, slot.slotIndex,
-                        slot.seed.seedName, remainingSeconds);
+                        slot.seed.seedName, 1.0);
                 }
             }
         }
