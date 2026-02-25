@@ -68,6 +68,7 @@ namespace Garden
         public QualityTier qualityTier;
         public string tierStartTimeUtc;  // when current tier began decaying
         public bool isWithered;          // true once plant has passed below D
+        public float baseGrowthHours = 1f;
     }
 
     [Serializable]

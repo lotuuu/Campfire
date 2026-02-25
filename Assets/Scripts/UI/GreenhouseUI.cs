@@ -77,7 +77,7 @@ namespace Garden
                 if (!plant.isWithered)
                 {
                     float progress = gm.GetDecayProgress(i);
-                    float remaining = (1f - progress) * GreenhouseManager.GetStepMinutes(plant.qualityTier);
+                    float remaining = (1f - progress) * GreenhouseManager.GetStepMinutes(plant.qualityTier, plant.baseGrowthHours);
 
                     if (decayBarFill != null)
                     {

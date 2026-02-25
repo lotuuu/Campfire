@@ -43,7 +43,7 @@ namespace Garden
                 var p = Plants[i];
                 if (p.isWithered) continue;
 
-                float progress = ComputeDecayProgress(p.tierStartTime, p.qualityTier, GameTime.UtcNow);
+                float progress = ComputeDecayProgress(p.tierStartTime, p.qualityTier, p.baseGrowthHours, GameTime.UtcNow);
                 if (progress < 1f) continue;
 
                 if (p.qualityTier == QualityTier.D)
@@ -72,6 +72,7 @@ namespace Garden
                 rarity = variant.rarity,
                 qualityTier = tier,
                 primaryColor = variant.primaryColor,
+                baseGrowthHours = seed.baseGrowthHours,
                 harvestTime = GameTime.UtcNow,
                 tierStartTime = GameTime.UtcNow,
                 isWithered = false
@@ -117,7 +118,7 @@ namespace Garden
             if (index < 0 || index >= Plants.Count) return 0f;
             var p = Plants[index];
             if (p.isWithered) return 1f;
-            return Mathf.Clamp01(ComputeDecayProgress(p.tierStartTime, p.qualityTier, GameTime.UtcNow));
+            return Mathf.Clamp01(ComputeDecayProgress(p.tierStartTime, p.qualityTier, p.baseGrowthHours, GameTime.UtcNow));
         }
 
         public bool ExpandSlots()
@@ -142,20 +143,24 @@ namespace Garden
         }
 
 
-        public static float GetStepMinutes(QualityTier tier) => tier switch
+        public static float GetStepMinutes(QualityTier tier, float baseGrowthHours)
         {
-            QualityTier.S => 360f,
-            QualityTier.A => 240f,
-            QualityTier.B => 60f,
-            QualityTier.C => 40f,
-            QualityTier.D => 20f,
-            _ => 20f
-        };
+            float factor = tier switch
+            {
+                QualityTier.S => 2.00f,
+                QualityTier.A => 1.00f,
+                QualityTier.B => 0.50f,
+                QualityTier.C => 0.25f,
+                QualityTier.D => 0.125f,
+                _ => 0.125f
+            };
+            return factor * baseGrowthHours * 60f;
+        }
 
-        public static float ComputeDecayProgress(DateTime tierStartTime, QualityTier tier, DateTime now)
+        public static float ComputeDecayProgress(DateTime tierStartTime, QualityTier tier, float baseGrowthHours, DateTime now)
         {
             float elapsedMinutes = (float)(now - tierStartTime).TotalMinutes;
-            return elapsedMinutes / GetStepMinutes(tier);
+            return elapsedMinutes / GetStepMinutes(tier, baseGrowthHours);
         }
 
         public void DebugAdvanceTime(float hours)
@@ -185,7 +190,8 @@ namespace Garden
                     harvestTimeUtc = p.harvestTime.ToString("O"),
                     qualityTier = p.qualityTier,
                     tierStartTimeUtc = p.tierStartTime.ToString("O"),
-                    isWithered = p.isWithered
+                    isWithered = p.isWithered,
+                    baseGrowthHours = p.baseGrowthHours
                 });
             }
             SaveManager.Instance.Save();
@@ -221,6 +227,7 @@ namespace Garden
                     rarity = rarity,
                     qualityTier = ps.qualityTier,
                     primaryColor = color,
+                    baseGrowthHours = ps.baseGrowthHours,
                     harvestTime = DateTime.Parse(ps.harvestTimeUtc).ToUniversalTime(),
                     tierStartTime = string.IsNullOrEmpty(ps.tierStartTimeUtc)
                         ? GameTime.UtcNow
@@ -238,6 +245,7 @@ namespace Garden
         public Rarity rarity;
         public QualityTier qualityTier;
         public Color primaryColor;
+        public float baseGrowthHours;
         public DateTime harvestTime;
         public DateTime tierStartTime;  // when current tier began decaying
         public bool isWithered;         // true once plant has passed below D
