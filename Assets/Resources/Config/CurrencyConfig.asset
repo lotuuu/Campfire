@@ -22,5 +22,5 @@ MonoBehaviour:
   rareDustPerSecond: 4
   epicDustPerSecond: 10
   legendaryDustPerSecond: 25
-  defaultSlots: 6
+  defaultSlots: 3
   greenhouseExpandCostGold: 300
