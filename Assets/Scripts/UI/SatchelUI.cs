@@ -27,8 +27,8 @@ namespace Garden
 
             scrim.RegisterCallback<ClickEvent>(_ => Hide());
 
-            var handle = root.Q<VisualElement>("satchel-handle");
-            handle.RegisterCallback<PointerDownEvent>(OnHandlePointerDown);
+            var dragZone = root.Q<VisualElement>("satchel-drag-zone");
+            dragZone.RegisterCallback<PointerDownEvent>(OnHandlePointerDown);
             panel.RegisterCallback<PointerMoveEvent>(OnPanelPointerMove);
             panel.RegisterCallback<PointerUpEvent>(OnPanelPointerUp);
             panel.RegisterCallback<PointerCancelEvent>(OnPanelPointerCancel);
@@ -41,13 +41,8 @@ namespace Garden
             targetEnvIndex  = envIndex;
             targetSlotIndex = slotIndex;
 
-            panel.style.translate = new StyleTranslate(new Translate(0, Length.Percent(100)));
-            scrim.style.display   = DisplayStyle.Flex;
-            panel.style.display   = DisplayStyle.Flex;
-
-            panel.schedule.Execute(() =>
-                panel.style.translate = new StyleTranslate(new Translate(0, 0))
-            );
+            scrim.style.display = DisplayStyle.Flex;
+            panel.style.translate = new StyleTranslate(new Translate(0, 0));
 
             RefreshList();
         }
@@ -63,8 +58,6 @@ namespace Garden
         private void OnHideTransitionEnd(TransitionEndEvent evt)
         {
             panel.UnregisterCallback<TransitionEndEvent>(OnHideTransitionEnd);
-            panel.style.display   = DisplayStyle.None;
-            panel.style.translate = new StyleTranslate(new Translate(0, 0));
         }
 
         private void RefreshList()
