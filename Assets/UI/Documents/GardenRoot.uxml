@@ -66,10 +66,16 @@
         <ui:Label text="Codex" class="panel-header" />
         <ui:ScrollView name="variant-grid" class="scroll-view" />
         <ui:VisualElement name="detail-panel">
-            <ui:Label name="detail-name" text="" />
-            <ui:Label name="detail-description" text="" />
-            <ui:Label name="detail-rarity" text="" />
-            <ui:VisualElement name="detail-color-swatch" />
+            <ui:VisualElement name="detail-info">
+                <ui:Label name="detail-name" text="" />
+                <ui:Label name="detail-description" text="" />
+                <ui:Label name="detail-rarity" text="" />
+                <ui:VisualElement name="detail-color-swatch" />
+            </ui:VisualElement>
+            <ui:VisualElement name="detail-seed">
+                <ui:VisualElement name="detail-seed-icon" />
+                <ui:Label name="detail-seed-name" text="" />
+            </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
 
