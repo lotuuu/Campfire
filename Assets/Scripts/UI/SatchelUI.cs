@@ -96,7 +96,8 @@ namespace Garden
                 var nameLabel = entry.Q<Label>(className: "probability-name");
                 if (nameLabel != null)
                 {
-                    nameLabel.text = variant.variantName;
+                    bool discovered = SaveManager.Instance.Data.discoveredVariants.Contains(variant.variantName);
+                    nameLabel.text = discovered ? variant.variantName : "?????";
                     nameLabel.EnableInClassList("probability-high", isHigh);
                     nameLabel.EnableInClassList("probability-low", !isHigh);
                 }
