@@ -77,7 +77,9 @@ namespace Garden
 
         private void Update()
         {
-            // Update progress every frame for smooth UI
+            bool anyMatured = false;
+
+            // Update progress every frame for smooth UI; transition to Mature immediately when done
             foreach (var slot in slots)
             {
                 if (slot.state != PlantState.Growing) continue;
@@ -87,21 +89,24 @@ namespace Garden
                 float elapsed = (float)(GameTime.UtcNow - slot.plantTime).TotalHours;
                 slot.growthProgress = Mathf.Clamp01(elapsed / totalHours);
 
-                OnSlotGrowthUpdated?.Invoke(slot.environmentIndex, slot.slotIndex, slot.growthProgress);
+                if (slot.growthProgress >= 1f)
+                {
+                    slot.state = PlantState.Mature;
+                    OnSlotStateChanged?.Invoke(slot.environmentIndex, slot.slotIndex, PlantState.Mature);
+                    OnPlantStateChanged?.Invoke();
+                    anyMatured = true;
+                }
+                else
+                {
+                    OnSlotGrowthUpdated?.Invoke(slot.environmentIndex, slot.slotIndex, slot.growthProgress);
+                }
             }
 
-            // Tick for maturity check and save only
+            // Tick only for periodic save
             _growthTickTimer += Time.deltaTime;
-            if (_growthTickTimer < GrowthTickInterval) return;
-            _growthTickTimer = 0f;
-
-            foreach (var slot in slots)
+            if (anyMatured || _growthTickTimer >= GrowthTickInterval)
             {
-                if (slot.state != PlantState.Growing || slot.growthProgress < 1f) continue;
-
-                slot.state = PlantState.Mature;
-                OnSlotStateChanged?.Invoke(slot.environmentIndex, slot.slotIndex, PlantState.Mature);
-                OnPlantStateChanged?.Invoke();
+                _growthTickTimer = 0f;
                 SaveState();
             }
         }
