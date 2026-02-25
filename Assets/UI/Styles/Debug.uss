@@ -7,16 +7,16 @@
     background-color: rgba(10, 20, 30, 0.45);
     border-width: 1px;
     border-color: rgba(120, 200, 220, 0.20);
-    color: var(--color-text-dim);
-    font-size: var(--font-md);
-    -unity-text-align: middle-center;
-    padding: 0;
+    -unity-background-image-tint-color: rgb(185, 210, 225);
+    background-image: url('../../ThirdParty/icons/darkzaitzev-big-gear.png');
+    -unity-background-scale-mode: scale-to-fit;
+    padding: 12px;
     margin-right: var(--spacing-sm);
 }
 
 .btn-debug-toggle:hover {
     background-color: rgba(20, 40, 55, 0.65);
-    color: var(--color-text);
+    -unity-background-image-tint-color: rgb(220, 238, 245);
 }
 
 /* Debug panel styles - mobile-first sizing */

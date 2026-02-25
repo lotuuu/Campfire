@@ -20,7 +20,7 @@
         <!-- Top bar: weather + currency (always visible) -->
         <ui:VisualElement name="top-bar" picking-mode="Position">
             <ui:VisualElement class="top-bar-side">
-                <ui:Button name="debug-toggle" text="⚙" class="btn-debug-toggle" />
+                <ui:Button name="debug-toggle" text="" class="btn-debug-toggle" />
             </ui:VisualElement>
             <ui:Label name="weather-text" class="hud-glass-card" text="--°C  ·  --  ·  --" picking-mode="Ignore" />
             <ui:VisualElement name="currency-panel">
