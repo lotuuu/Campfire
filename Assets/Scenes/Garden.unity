@@ -130,7 +130,7 @@ GameObject:
   - component: {fileID: 152301}
   - component: {fileID: 152302}
   m_Layer: 0
-  m_Name: HearthIso
+  m_Name: BackyardIso
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -15615,7 +15615,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d80899ec7c6ec42b09502d51d533b205, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Garden::Garden.HearthViewUI
+  m_EditorClassIdentifier: Garden::Garden.BackyardViewUI
   isometricView: {fileID: 152302}
 --- !u!114 &1564428237
 MonoBehaviour:

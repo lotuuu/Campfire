@@ -92,10 +92,10 @@
         <ui:ScrollView name="shop-grid" class="scroll-view" />
     </ui:VisualElement>
 
-    <!-- Page 2: Terrarium (Hearth isometric view) -->
+    <!-- Page 2: Terrarium (Backyard isometric view) -->
     <ui:VisualElement name="terrarium-page" class="page-content" style="display: none;">
-        <ui:Label name="hearth-title" text="Backyard" class="backyard-title" />
-        <!-- Slot overlay buttons are added at runtime by HearthViewUI -->
+        <ui:Label name="backyard-title" text="Backyard" class="backyard-title" />
+        <!-- Slot overlay buttons are added at runtime by BackyardViewUI -->
     </ui:VisualElement>
 
     <!-- Page 3: Greenhouse -->

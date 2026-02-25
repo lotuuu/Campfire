@@ -8,7 +8,7 @@ namespace Garden
     public class BackyardViewUI : MonoBehaviour
     {
         [SerializeField] private BackyardIsometricView isometricView;
-        private Label hearthTitle;
+        private Label backyardTitle;
         private int ActiveEnv => EnvironmentManager.Instance != null
             ? EnvironmentManager.Instance.ActiveEnvironmentIndex : 0;
 
@@ -33,7 +33,7 @@ namespace Garden
         public void Initialize(VisualElement root)
         {
             terrariumPage = root.Q<VisualElement>("terrarium-page");
-            hearthTitle = root.Q<Label>("hearth-title");
+            backyardTitle = root.Q<Label>("backyard-title");
 
             if (PlantManager.Instance != null)
             {
@@ -107,10 +107,10 @@ namespace Garden
 
         private void UpdateTitle()
         {
-            if (hearthTitle == null || EnvironmentManager.Instance == null) return;
+            if (backyardTitle == null || EnvironmentManager.Instance == null) return;
             var envs = EnvironmentManager.Instance.Environments;
             int idx = ActiveEnv;
-            hearthTitle.text = (idx >= 0 && idx < envs.Count) ? envs[idx].environmentName : "Backyard";
+            backyardTitle.text = (idx >= 0 && idx < envs.Count) ? envs[idx].environmentName : "Backyard";
         }
 
         private void BuildConsumablePicker()
