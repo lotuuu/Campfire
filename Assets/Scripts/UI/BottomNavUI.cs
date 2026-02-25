@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -5,6 +6,10 @@ namespace Garden
 {
     public class BottomNavUI : MonoBehaviour
     {
+        public event Action OnTerrariumReactivated;
+
+        private const int TerrariumIndex = 2;
+
         private Button[] tabs;
         private SwipeablePageView pageView;
 
@@ -30,6 +35,11 @@ namespace Garden
 
         private void OnTabClicked(int index)
         {
+            if (index == TerrariumIndex && pageView.CurrentPageIndex == TerrariumIndex)
+            {
+                OnTerrariumReactivated?.Invoke();
+                return;
+            }
             pageView.GoToPage(index);
         }
 
