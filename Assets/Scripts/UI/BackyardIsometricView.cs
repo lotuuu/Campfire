@@ -186,7 +186,11 @@ namespace Garden
             return mainCam.WorldToScreenPoint(tiles[index].transform.position);
         }
 
-        /// <summary>Screen-space bounds of a tile sprite in pixels (bottom-left origin, Y-up).</summary>
+        /// <summary>
+        /// Screen-space hit bounds for a tile in pixels (bottom-left origin, Y-up).
+        /// Uses only the upper half of the sprite (the isometric "top face" diamond) so the
+        /// hitbox matches the visible tile and doesn't extend into the foreground tile below.
+        /// </summary>
         public Rect GetTileScreenBounds(int index)
         {
             if (index < 0 || index >= tiles.Count || tileSprite == null || mainCam == null)
@@ -195,8 +199,9 @@ namespace Garden
             float ppu = tileSprite.pixelsPerUnit;
             float halfW = tileSprite.rect.width * 0.5f / ppu;
             float halfH = tileSprite.rect.height * 0.5f / ppu;
-            var bl = (Vector2)mainCam.WorldToScreenPoint(worldPos + new Vector3(-halfW, -halfH));
-            var tr = (Vector2)mainCam.WorldToScreenPoint(worldPos + new Vector3(halfW, halfH));
+            // bl = left edge at sprite centre; tr = top-right of sprite
+            var bl = (Vector2)mainCam.WorldToScreenPoint(worldPos + new Vector3(-halfW, 0f));
+            var tr = (Vector2)mainCam.WorldToScreenPoint(worldPos + new Vector3( halfW, halfH));
             return new Rect(bl.x, bl.y, tr.x - bl.x, tr.y - bl.y);
         }
 
