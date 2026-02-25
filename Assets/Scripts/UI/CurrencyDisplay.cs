@@ -14,17 +14,7 @@ namespace Garden
             dewdropsText = root.Q<Label>("dewdrops-text");
             sunShardsText = root.Q<Label>("sun-shards-text");
             auraDustText = root.Q<Label>("aura-dust-text");
-        }
 
-        private void OnEnable()
-        {
-            if (CurrencyManager.Instance != null)
-                CurrencyManager.Instance.OnCurrencyChanged += OnChanged;
-            Refresh();
-        }
-
-        private void Start()
-        {
             if (CurrencyManager.Instance != null)
                 CurrencyManager.Instance.OnCurrencyChanged += OnChanged;
             Refresh();
