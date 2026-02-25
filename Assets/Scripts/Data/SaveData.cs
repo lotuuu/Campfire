@@ -25,6 +25,9 @@ namespace Garden
 
         // v3: per-environment unlocked slot counts
         public List<EnvironmentSlotsSave> environmentSlots = new();
+
+        // v4: active environment shown in terrarium
+        public int activeEnvironmentIndex;
     }
 
     [Serializable]
