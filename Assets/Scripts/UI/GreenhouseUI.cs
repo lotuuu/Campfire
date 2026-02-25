@@ -55,7 +55,7 @@ namespace Garden
 
             var gm = GreenhouseManager.Instance;
             slotsText.text = $"{gm.Plants.Count} / {gm.MaxSlots}";
-            dustRateText.text = $"+{gm.GetTotalDustPerSecond() * 3600f:F1} Aura Dust/hr";
+            dustRateText.text = $"+{gm.GetTotalDustPerSecond() * 60f:F1} Aura Dust/min";
 
             for (int i = 0; i < gm.Plants.Count; i++)
             {
@@ -138,7 +138,7 @@ namespace Garden
             var seed = SeedRegistry.Instance.GetSeed(plant.seedName);
             int baseSell = seed != null ? seed.baseSellPrice : 100;
             int sellValue = config.GetSellValue(baseSell, plant.qualityTier);
-            float dustRate = config.GetDustPerSecondForPlant(plant.rarity, plant.qualityTier) * 3600f;
+            float dustRate = config.GetDustPerSecondForPlant(plant.rarity, plant.qualityTier) * 60f;
             string qualityLabel = CurrencyConfig.GetQualityLabel(plant.qualityTier);
 
             if (plant.isWithered)
@@ -150,7 +150,7 @@ namespace Garden
             else
             {
                 if (sellNameLabel != null) sellNameLabel.text = $"{plant.variantName} · {qualityLabel}";
-                if (sellDustLabel != null) sellDustLabel.text = $"+{dustRate:F1} Dust/hr";
+                if (sellDustLabel != null) sellDustLabel.text = $"+{dustRate:F1} Dust/min";
                 if (sellButton != null) sellButton.text = $"Sell for {sellValue} Dew";
             }
             if (sellBar != null) sellBar.style.display = DisplayStyle.Flex;
