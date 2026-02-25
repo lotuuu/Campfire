@@ -163,7 +163,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a94ff748f6f04ec5beb9459c72ce55a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Garden::Garden.BackyardIsometricView
-  tileSprite: {fileID: 21300000, guid: 7c6dc6b56455f43b695b3d59a7895a69, type: 3}
   sortingLayerName: Default
   baseSortingOrder: 0
   gridAnchor: {x: 0, y: -0.3, z: 0}
@@ -182,10 +181,10 @@ MonoBehaviour:
   consumablePrefabs:
   - {fileID: 0}
   - {fileID: 0}
-  - {fileID: 100100000, guid: 4f9c87da82bfa4a2192488bbb1565195, type: 3}
-  - {fileID: 100100000, guid: 7987ca5f217d54fdc8497e35e1152479, type: 3}
-  - {fileID: 100100000, guid: fd6467b8d3cd04f66b8483b8c6aaf6e6, type: 3}
-  - {fileID: 100100000, guid: fb0578abddaf74a66b71a4c461692f68, type: 3}
+  - {fileID: 1223917363670787659, guid: 66fcf32c0d024a0fbbb3d5c8b97e22a5, type: 3}
+  - {fileID: 919132149155446097, guid: 7987ca5f217d54fdc8497e35e1152479, type: 3}
+  - {fileID: 919132149155446097, guid: fd6467b8d3cd04f66b8483b8c6aaf6e6, type: 3}
+  - {fileID: 919132149155446097, guid: fb0578abddaf74a66b71a4c461692f68, type: 3}
 --- !u!1 &12194300
 GameObject:
   m_ObjectHideFlags: 0
@@ -227,6 +226,18 @@ Transform:
   - {fileID: 219540831}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &126855092
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 786579303}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 520fb9e67bf04056bca48b5132c625e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Garden::Garden.ConsumableManager
 --- !u!1 &134425024
 GameObject:
   m_ObjectHideFlags: 0
@@ -348,6 +359,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Garden::Garden.SnowOverlay
   uiDocument: {fileID: 0}
+--- !u!4 &219540831
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 786579303}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 12194301}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &321321536
 GameObject:
   m_ObjectHideFlags: 0
@@ -15086,6 +15112,23 @@ Transform:
   m_Children: []
   m_Father: {fileID: 171580624}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &786579303
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 219540831}
+  - component: {fileID: 126855092}
+  m_Layer: 0
+  m_Name: ConsumableManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
 --- !u!1 &896682759
 GameObject:
   m_ObjectHideFlags: 0
@@ -15663,7 +15706,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 77811f532c13945e69b61151eff7a02d, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Garden::Garden.EnvironmentSwitcherBar
 --- !u!1 &1571088094
 GameObject:
@@ -21019,50 +21062,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f8381111cbb241398588a48759cb351, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Garden::Garden.SeedRegistry
---- !u!1 &786579303
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 219540831}
-  - component: {fileID: 126855092}
-  m_Layer: 0
-  m_Name: ConsumableManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &219540831
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 786579303}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 12194301}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &126855092
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 786579303}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 520fb9e67bf04056bca48b5132c625e7, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Garden::Garden.ConsumableManager
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
