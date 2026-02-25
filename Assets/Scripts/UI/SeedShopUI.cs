@@ -6,28 +6,28 @@ namespace Garden
     public class SeedShopUI : MonoBehaviour
     {
         private VisualTreeAsset shopCardTemplate;
-
         private ScrollView shopGrid;
 
         public void Initialize(VisualElement root)
         {
             shopCardTemplate = Resources.Load<VisualTreeAsset>("UI/Templates/SeedShopCard");
-
             shopGrid = root.Q<ScrollView>("shop-grid");
             shopGrid.contentContainer.style.flexDirection = FlexDirection.Column;
             shopGrid.contentContainer.style.flexWrap = Wrap.NoWrap;
             shopGrid.verticalScrollerVisibility = ScrollerVisibility.Hidden;
         }
 
-        public void Show()
-        {
-            RefreshDisplay();
-        }
+        public void Show() => RefreshDisplay();
 
         private void RefreshDisplay()
         {
             shopGrid.Clear();
+            AddSeedSection();
+            AddConsumableSection();
+        }
 
+        private void AddSeedSection()
+        {
             var seeds = SeedShopManager.Instance.GetShopSeeds();
             seeds.Sort((a, b) => a.buyPrice.CompareTo(b.buyPrice));
 
@@ -37,33 +37,68 @@ namespace Garden
                 card.style.flexGrow = 1;
                 card.style.flexShrink = 0;
 
-                var nameLabel = card.Q<Label>(className: "shop-seed-name");
+                var nameLabel  = card.Q<Label>(className: "shop-seed-name");
                 var priceLabel = card.Q<Label>(className: "shop-price");
-                var conditionLabel = card.Q<Label>(className: "shop-condition");
-                var icon = card.Q<VisualElement>(className: "shop-icon");
-                var buyBtn = card.Q<Button>(className: "shop-buy-btn");
+                var condLabel  = card.Q<Label>(className: "shop-condition");
+                var icon       = card.Q<VisualElement>(className: "shop-icon");
+                var buyBtn     = card.Q<Button>(className: "shop-buy-btn");
 
                 int owned = SeedRegistry.Instance.GetSeedCount(seed.seedName);
-                if (nameLabel != null) nameLabel.text = $"{seed.seedName} (x{owned})";
+                if (nameLabel  != null) nameLabel.text  = $"{seed.seedName} (x{owned})";
                 if (priceLabel != null) priceLabel.text = $"{seed.buyPrice} Dust";
-                if (conditionLabel != null) conditionLabel.text = seed.description ?? "";
+                if (condLabel  != null) condLabel.text  = seed.description ?? "";
                 if (icon != null && seed.icon != null)
                     icon.style.backgroundImage = new StyleBackground(seed.icon);
 
                 if (buyBtn != null)
                 {
-                    bool canBuy = SeedShopManager.Instance.CanBuy(seed.seedName);
-                    buyBtn.SetEnabled(canBuy);
+                    buyBtn.SetEnabled(SeedShopManager.Instance.CanBuy(seed.seedName));
                     buyBtn.text = $"Buy ({seed.buyPrice} Dust)";
-
                     var seedName = seed.seedName;
-                    buyBtn.clicked += () =>
-                    {
-                        if (SeedShopManager.Instance.BuySeed(seedName))
-                            RefreshDisplay();
-                    };
+                    buyBtn.clicked += () => { if (SeedShopManager.Instance.BuySeed(seedName)) RefreshDisplay(); };
                 }
+                shopGrid.Add(card);
+            }
+        }
 
+        private void AddConsumableSection()
+        {
+            if (ConsumableManager.Instance == null) return;
+
+            var header = new Label("Consumables");
+            header.AddToClassList("shop-section-header");
+            shopGrid.Add(header);
+
+            var consumables = new System.Collections.Generic.List<ConsumableData>(
+                ConsumableManager.Instance.AllConsumables);
+            consumables.Sort((a, b) => a.buyPrice.CompareTo(b.buyPrice));
+
+            foreach (var c in consumables)
+            {
+                var card = shopCardTemplate.CloneTree();
+                card.style.flexGrow = 1;
+                card.style.flexShrink = 0;
+
+                var nameLabel  = card.Q<Label>(className: "shop-seed-name");
+                var priceLabel = card.Q<Label>(className: "shop-price");
+                var condLabel  = card.Q<Label>(className: "shop-condition");
+                var icon       = card.Q<VisualElement>(className: "shop-icon");
+                var buyBtn     = card.Q<Button>(className: "shop-buy-btn");
+
+                int owned = ConsumableManager.Instance.GetCount(c.type);
+                if (nameLabel  != null) nameLabel.text  = $"{c.displayName} (x{owned})";
+                if (priceLabel != null) priceLabel.text = $"{c.buyPrice} Gold";
+                if (condLabel  != null) condLabel.text  = c.description ?? "";
+                if (icon != null && c.icon != null)
+                    icon.style.backgroundImage = new StyleBackground(c.icon);
+
+                if (buyBtn != null)
+                {
+                    buyBtn.SetEnabled(ConsumableManager.Instance.CanBuy(c));
+                    buyBtn.text = $"Buy ({c.buyPrice} Gold)";
+                    var consumable = c;
+                    buyBtn.clicked += () => { if (ConsumableManager.Instance.Buy(consumable)) RefreshDisplay(); };
+                }
                 shopGrid.Add(card);
             }
         }
