@@ -102,6 +102,8 @@ namespace Garden
             // BringToFront in descending index order leaves index 0 as the last child (topmost).
             for (int i = slotButtons.Count - 1; i >= 0; i--)
                 slotButtons[i].BringToFront();
+            // Picker must always sit above slot buttons so its hit area isn't swallowed.
+            _pickerContainer?.BringToFront();
         }
 
         private void RestoreConsumableVisuals(int envIndex)
