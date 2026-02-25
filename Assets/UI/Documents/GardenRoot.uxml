@@ -116,7 +116,7 @@
     <!-- Page 4: Construction -->
     <ui:VisualElement name="construction-page" class="page-content" style="display: none;">
         <ui:Label text="Construction" class="panel-header" />
-        <ui:ScrollView name="construction-scroll" class="scroll-view" />
+        <ui:ScrollView name="construction-scroll" class="scroll-view" touch-scroll-type="Clamped" />
     </ui:VisualElement>
 
     <!-- ===== OVERLAYS (stay on top of pages) ===== -->
