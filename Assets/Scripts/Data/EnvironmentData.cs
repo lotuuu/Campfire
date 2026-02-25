@@ -11,6 +11,9 @@ namespace Garden
         public int unlockCostGold;
         public int slotUnlockCostGold = 500;
 
+        [Header("Visuals")]
+        public Sprite tileSprite;
+
         [Header("Growth Bonus")]
         [Range(0f, 0.5f)] public float growthSpeedBonus;
         public TriggerCondition bonusCondition;

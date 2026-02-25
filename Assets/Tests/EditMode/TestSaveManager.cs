@@ -76,5 +76,21 @@ namespace Garden.Tests
             Assert.AreEqual("Astra", restored.seedInventory[0].seedName);
             Assert.AreEqual(3, restored.seedInventory[0].count);
         }
+
+        [Test]
+        public void SaveData_Default_ActiveEnvironmentIndex_IsZero()
+        {
+            var data = new SaveData();
+            Assert.AreEqual(0, data.activeEnvironmentIndex);
+        }
+
+        [Test]
+        public void SaveData_RoundTrip_Preserves_ActiveEnvironmentIndex()
+        {
+            var data = new SaveData { activeEnvironmentIndex = 2 };
+            var json = JsonUtility.ToJson(data, true);
+            var restored = JsonUtility.FromJson<SaveData>(json);
+            Assert.AreEqual(2, restored.activeEnvironmentIndex);
+        }
     }
 }
