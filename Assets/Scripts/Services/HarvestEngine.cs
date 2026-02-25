@@ -29,9 +29,9 @@ namespace Garden
             };
         }
 
-        public static HarvestResult Roll(SeedData seed, VariantData variant, WeatherData weather)
+        public static HarvestResult Roll(SeedData seed, VariantData variant, WeatherData weather, bool qualityBoosted = false)
         {
-            bool syncShield = weather.condition == seed.preferredWeather;
+            bool syncShield = qualityBoosted || weather.condition == seed.preferredWeather;
             var probs = syncShield ? GetSyncShieldProbabilities() : GetBaseProbabilities();
 
             ApplySpecialConditions(seed, weather, probs);

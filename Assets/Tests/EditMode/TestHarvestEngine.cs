@@ -108,6 +108,24 @@ namespace Garden.Tests
         }
 
         [Test]
+        public void Roll_QualityBoosted_NeverRollsD()
+        {
+            var seed = ScriptableObject.CreateInstance<SeedData>();
+            seed.baseSellPrice = 100;
+            seed.preferredWeather = WeatherCondition.Clear;
+            var variant = ScriptableObject.CreateInstance<VariantData>();
+            var weather = new WeatherData { condition = WeatherCondition.Rain };
+
+            int dCount = 0;
+            for (int i = 0; i < 1000; i++)
+            {
+                var result = HarvestEngine.Roll(seed, variant, weather, qualityBoosted: true);
+                if (result.tier == QualityTier.D) dCount++;
+            }
+            Assert.AreEqual(0, dCount, "Quality Dirt should prevent D-tier rolls");
+        }
+
+        [Test]
         public void Roll_SpecialCondition_ModifiesProbabilities()
         {
             var seed = CreateTestSeed(WeatherCondition.Clear);
