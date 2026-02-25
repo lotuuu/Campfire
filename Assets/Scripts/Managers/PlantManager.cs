@@ -21,7 +21,6 @@ namespace Garden
         public DateTime PlantTime => GetFeaturedSlot()?.plantTime ?? DateTime.MinValue;
 
         public event Action OnPlantStateChanged;
-        public event Action<float> OnGrowthUpdated;
         public event Action<int, int, PlantState> OnSlotStateChanged;
         public event Action<int, int, float> OnSlotGrowthUpdated;
 
