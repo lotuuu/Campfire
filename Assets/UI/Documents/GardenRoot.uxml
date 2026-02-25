@@ -11,7 +11,7 @@
     <Style src="../Styles/SeedShop.uss" />
     <Style src="../Styles/HarvestResult.uss" />
     <Style src="../Styles/Terrarium.uss" />
-    <Style src="../Styles/Hearth.uss" />
+    <Style src="../Styles/Backyard.uss" />
     <Style src="../Styles/Construction.uss" />
 
     <!-- App shell: vertical stack -->
@@ -91,7 +91,7 @@
 
     <!-- Page 2: Terrarium (Hearth isometric view) -->
     <ui:VisualElement name="terrarium-page" class="page-content" style="display: none;">
-        <ui:Label name="hearth-title" text="Backyard" class="hearth-title" />
+        <ui:Label name="hearth-title" text="Backyard" class="backyard-title" />
         <!-- Slot overlay buttons are added at runtime by HearthViewUI -->
     </ui:VisualElement>
 
