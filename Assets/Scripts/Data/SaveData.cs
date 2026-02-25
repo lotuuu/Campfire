@@ -77,7 +77,7 @@ namespace Garden
     [Serializable]
     public class ConsumableInventoryEntry
     {
-        public ConsumableType consumableType;
+        public string consumableType; // ConsumableType.ToString()
         public int count;
     }
 
