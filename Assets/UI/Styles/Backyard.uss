@@ -66,6 +66,10 @@
     translate: 0 -22px;
 }
 
+.consumable-picker-btn:hover {
+    -unity-background-image-tint-color: rgb(220, 238, 245);
+}
+
 .consumable-dropdown {
     position: absolute;
     right: 60px;
