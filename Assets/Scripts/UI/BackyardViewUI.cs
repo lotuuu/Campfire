@@ -157,20 +157,20 @@ namespace Garden
                 return;
             }
 
-            bool showing = _dropdown.style.display == DisplayStyle.Flex;
-            if (showing)
+            bool open = _pickerContainer.ClassListContains("consumable-picker--open");
+            if (open)
             {
-                _dropdown.style.display = DisplayStyle.None;
+                _pickerContainer.RemoveFromClassList("consumable-picker--open");
                 return;
             }
 
-            RefreshDropdown();
-            _dropdown.style.display = DisplayStyle.Flex;
+            RefreshIcons();
+            _pickerContainer.AddToClassList("consumable-picker--open");
         }
 
-        private void RefreshDropdown()
+        private void RefreshIcons()
         {
-            _dropdown.Clear();
+            _iconsContainer.Clear();
             if (ConsumableManager.Instance == null) return;
 
             foreach (var c in ConsumableManager.Instance.AllConsumables)
@@ -178,38 +178,26 @@ namespace Garden
                 int count = ConsumableManager.Instance.GetCount(c.type);
                 if (count <= 0) continue;
 
-                var row = new Button();
-                row.AddToClassList("consumable-row");
+                var btn = new Button();
+                btn.AddToClassList("consumable-icon-btn");
+                if (c.icon != null)
+                    btn.style.backgroundImage = new StyleBackground(c.icon);
 
-                var nameLabel = new Label(c.displayName);
-                nameLabel.AddToClassList("consumable-row-name");
-
-                var countLabel = new Label($"x{count}");
-                countLabel.AddToClassList("consumable-row-count");
-
-                row.Add(nameLabel);
-                row.Add(countLabel);
+                var badge = new Label($"x{count}");
+                badge.AddToClassList("consumable-icon-badge");
+                btn.Add(badge);
 
                 var capturedType = c.type;
                 var capturedIsEnvScoped = c.isEnvironmentScoped;
-                row.clicked += () => OnConsumableRowTapped(capturedType, capturedIsEnvScoped);
+                btn.clicked += () => OnConsumableRowTapped(capturedType, capturedIsEnvScoped);
 
-                _dropdown.Add(row);
-            }
-
-            if (_dropdown.childCount == 0)
-            {
-                var empty = new Label("No consumables owned");
-                empty.AddToClassList("consumable-row-name");
-                empty.style.paddingTop = empty.style.paddingBottom =
-                    empty.style.paddingLeft = empty.style.paddingRight = new StyleLength(8);
-                _dropdown.Add(empty);
+                _iconsContainer.Add(btn);
             }
         }
 
         private void OnConsumableRowTapped(ConsumableType type, bool isEnvironmentScoped)
         {
-            _dropdown.style.display = DisplayStyle.None;
+            _pickerContainer.RemoveFromClassList("consumable-picker--open");
 
             if (isEnvironmentScoped)
             {
