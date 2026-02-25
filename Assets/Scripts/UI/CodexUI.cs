@@ -54,7 +54,11 @@ namespace Garden
                     }
                     else
                     {
-                        if (nameLabel != null) nameLabel.text = "???";
+                        if (nameLabel != null)
+                        {
+                            nameLabel.text = $"??? · {variant.rarity}";
+                            nameLabel.AddToClassList(RarityClass(variant.rarity));
+                        }
                         if (swatch != null) swatch.style.backgroundColor = new Color(0.2f, 0.2f, 0.2f, 0.8f);
                     }
 
@@ -72,6 +76,8 @@ namespace Garden
 
         private void ShowDetail(VariantData variant, bool discovered)
         {
+            SetRarityClass(detailRarity, variant.rarity);
+
             if (discovered)
             {
                 detailName.text = variant.variantName;
@@ -83,9 +89,28 @@ namespace Garden
             {
                 detailName.text = "Unknown Variant";
                 detailDescription.text = variant.discoveryHint;
-                detailRarity.text = "???";
+                detailRarity.text = variant.rarity.ToString();
                 detailColorSwatch.style.backgroundColor = Color.black;
             }
+        }
+
+        private static readonly string[] RarityClasses =
+            { "rarity-common", "rarity-uncommon", "rarity-rare", "rarity-epic", "rarity-legendary" };
+
+        private static string RarityClass(Rarity r) => r switch
+        {
+            Rarity.Common    => "rarity-common",
+            Rarity.Uncommon  => "rarity-uncommon",
+            Rarity.Rare      => "rarity-rare",
+            Rarity.Epic      => "rarity-epic",
+            Rarity.Legendary => "rarity-legendary",
+            _                => "rarity-common"
+        };
+
+        private static void SetRarityClass(Label label, Rarity rarity)
+        {
+            foreach (var c in RarityClasses) label.RemoveFromClassList(c);
+            label.AddToClassList(RarityClass(rarity));
         }
     }
 }

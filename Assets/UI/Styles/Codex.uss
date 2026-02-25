@@ -50,9 +50,15 @@
 
 #detail-rarity {
     font-size: var(--font-md);
-    color: var(--color-text-accent);
     margin-top: var(--spacing-sm);
 }
+
+/* Rarity color overrides for grid entry names (beat #codex-page .variant-name specificity) */
+#codex-page .variant-name.rarity-common    { color: var(--color-rarity-common); }
+#codex-page .variant-name.rarity-uncommon  { color: var(--color-rarity-uncommon); }
+#codex-page .variant-name.rarity-rare      { color: var(--color-rarity-rare); }
+#codex-page .variant-name.rarity-epic      { color: var(--color-rarity-epic); }
+#codex-page .variant-name.rarity-legendary { color: var(--color-rarity-legendary); }
 
 #detail-color-swatch {
     width: 64px;

@@ -17,6 +17,12 @@
     --color-button-bg-active: rgba(40, 70, 85, 0.75);
     --color-button-bg-disabled: rgba(15, 25, 35, 0.35);
 
+    --color-rarity-common:    rgb(160, 175, 185);
+    --color-rarity-uncommon:  rgb(80,  200, 120);
+    --color-rarity-rare:      rgb(80,  160, 255);
+    --color-rarity-epic:      rgb(190,  80, 255);
+    --color-rarity-legendary: rgb(255, 185,  50);
+
     --color-highlight: rgb(255, 220, 80);
     --color-dim: rgb(100, 130, 150);
     --color-empty: rgba(30, 45, 60, 0.25);
