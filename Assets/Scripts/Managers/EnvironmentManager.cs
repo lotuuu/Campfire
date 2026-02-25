@@ -12,6 +12,9 @@ namespace Garden
 
         public event Action<int> OnEnvironmentUnlocked;
         public event Action<int> OnSlotUnlocked;
+        public event Action<int> OnActiveEnvironmentChanged;
+
+        public int ActiveEnvironmentIndex { get; private set; }
 
         public IReadOnlyList<EnvironmentData> Environments => environments;
 
@@ -23,6 +26,26 @@ namespace Garden
             var loaded = Resources.LoadAll<EnvironmentData>("Config/Environments");
             environments.AddRange(loaded);
             environments.Sort((a, b) => a.unlockCostGold.CompareTo(b.unlockCostGold));
+        }
+
+        private void Start()
+        {
+            int saved = SaveManager.Instance.Data.activeEnvironmentIndex;
+            ActiveEnvironmentIndex = (saved >= 0 && saved < environments.Count && IsUnlocked(saved))
+                ? saved : 0;
+        }
+
+        public bool SetActiveEnvironment(int envIndex)
+        {
+            if (envIndex < 0 || envIndex >= environments.Count) return false;
+            if (!IsUnlocked(envIndex)) return false;
+            if (ActiveEnvironmentIndex == envIndex) return false;
+
+            ActiveEnvironmentIndex = envIndex;
+            SaveManager.Instance.Data.activeEnvironmentIndex = envIndex;
+            SaveManager.Instance.Save();
+            OnActiveEnvironmentChanged?.Invoke(envIndex);
+            return true;
         }
 
         public bool IsUnlocked(int envIndex)
