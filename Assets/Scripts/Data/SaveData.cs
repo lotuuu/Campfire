@@ -6,7 +6,7 @@ namespace Garden
     [Serializable]
     public class SaveData
     {
-        public int gold = 200;
+        public int gold;
         public int sunShards;
         public int auraDust;
 
