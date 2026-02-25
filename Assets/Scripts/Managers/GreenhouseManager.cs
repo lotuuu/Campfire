@@ -97,7 +97,7 @@ namespace Garden
             int value = CurrencyManager.Instance.Config.GetSellValue(baseSell, plant.qualityTier);
 
             Plants.RemoveAt(index);
-            CurrencyManager.Instance.Add(CurrencyType.Dewdrops, value);
+            CurrencyManager.Instance.Add(CurrencyType.Gold, value);
 
             SaveGreenhouse();
             OnGreenhouseChanged?.Invoke();
@@ -123,7 +123,7 @@ namespace Garden
         public bool ExpandSlots()
         {
             var config = CurrencyManager.Instance.Config;
-            if (!CurrencyManager.Instance.Spend(CurrencyType.Dewdrops, config.greenhouseExpandCostDewdrops))
+            if (!CurrencyManager.Instance.Spend(CurrencyType.Gold, config.greenhouseExpandCostGold))
                 return false;
             SaveManager.Instance.Data.greenhouseSlots++;
             SaveManager.Instance.Save();

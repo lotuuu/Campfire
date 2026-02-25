@@ -14,7 +14,7 @@ namespace Garden
 
     public enum CalendarEvent { None, SpringEquinox, FallEquinox, LunarEclipse }
 
-    public enum CurrencyType { Dewdrops, SunShards, AuraDust }
+    public enum CurrencyType { Gold, SunShards, AuraDust }
 
     public enum PlantState { Empty, Growing, Mature }
 

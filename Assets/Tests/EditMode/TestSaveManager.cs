@@ -20,7 +20,7 @@ namespace Garden.Tests
             }
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(0, result.dewdrops);
+            Assert.AreEqual(0, result.gold);
         }
 
         [Test]
@@ -59,7 +59,7 @@ namespace Garden.Tests
         {
             var data = new SaveData
             {
-                dewdrops = 500,
+                gold = 500,
                 sunShards = 10,
                 auraDust = 25,
                 greenhouseSlots = 8
@@ -69,7 +69,7 @@ namespace Garden.Tests
             var json = JsonUtility.ToJson(data, true);
             var restored = JsonUtility.FromJson<SaveData>(json);
 
-            Assert.AreEqual(500, restored.dewdrops);
+            Assert.AreEqual(500, restored.gold);
             Assert.AreEqual(10, restored.sunShards);
             Assert.AreEqual(8, restored.greenhouseSlots);
             Assert.AreEqual(1, restored.seedInventory.Count);

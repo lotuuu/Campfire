@@ -128,7 +128,7 @@ namespace Garden
         private void MaxCurrency()
         {
             var cm = CurrencyManager.Instance;
-            cm.Add(CurrencyType.Dewdrops,  int.MaxValue - cm.Dewdrops);
+            cm.Add(CurrencyType.Gold,  int.MaxValue - cm.Gold);
             cm.Add(CurrencyType.SunShards, int.MaxValue - cm.SunShards);
             cm.Add(CurrencyType.AuraDust,  int.MaxValue - cm.AuraDust);
             Debug.Log("[Debug] All currencies set to int.MaxValue.");

@@ -15,8 +15,8 @@ MonoBehaviour:
   environmentName: The Hearth
   slotCount: 1
   maxSlotCount: 3
-  unlockCostDewdrops: 0
-  slotUnlockCostDewdrops: 250
+  unlockCostGold: 0
+  slotUnlockCostGold: 250
   growthSpeedBonus: 0.1
   bonusCondition:
     useTemperature: 1

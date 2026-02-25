@@ -45,7 +45,7 @@ namespace Garden
                 tier = tier,
                 valueMultiplier = multiplier,
                 syncShieldActive = syncShield,
-                dewdropValue = Mathf.RoundToInt(seed.baseSellPrice * multiplier),
+                goldValue = Mathf.RoundToInt(seed.baseSellPrice * multiplier),
                 variant = variant,
                 seed = seed
             };

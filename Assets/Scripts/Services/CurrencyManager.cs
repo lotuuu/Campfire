@@ -10,7 +10,7 @@ namespace Garden
         [SerializeField] private CurrencyConfig config;
 
         public CurrencyConfig Config => config;
-        public int Dewdrops => SaveManager.Instance.Data.dewdrops;
+        public int Gold => SaveManager.Instance.Data.gold;
         public int SunShards => SaveManager.Instance.Data.sunShards;
         public int AuraDust => SaveManager.Instance.Data.auraDust;
 
@@ -28,9 +28,9 @@ namespace Garden
             int old;
             switch (type)
             {
-                case CurrencyType.Dewdrops:
-                    old = data.dewdrops; data.dewdrops += amount;
-                    OnCurrencyChanged?.Invoke(type, old, data.dewdrops); break;
+                case CurrencyType.Gold:
+                    old = data.gold; data.gold += amount;
+                    OnCurrencyChanged?.Invoke(type, old, data.gold); break;
                 case CurrencyType.SunShards:
                     old = data.sunShards; data.sunShards += amount;
                     OnCurrencyChanged?.Invoke(type, old, data.sunShards); break;
@@ -52,7 +52,7 @@ namespace Garden
         {
             return type switch
             {
-                CurrencyType.Dewdrops => Dewdrops >= amount,
+                CurrencyType.Gold => Gold >= amount,
                 CurrencyType.SunShards => SunShards >= amount,
                 CurrencyType.AuraDust => AuraDust >= amount,
                 _ => false

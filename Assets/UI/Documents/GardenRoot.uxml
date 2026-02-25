@@ -25,7 +25,7 @@
             <ui:Label name="weather-text" class="hud-glass-card" text="--°C  ·  --  ·  --" picking-mode="Ignore" />
             <ui:VisualElement name="currency-panel">
                 <ui:VisualElement name="currency-card" class="hud-glass-card">
-                    <ui:Label name="dewdrops-text" class="currency-label" text="Dew: 0" />
+                    <ui:Label name="gold-text" class="currency-label" text="Gold: 0" />
                     <ui:Label name="sun-shards-text" class="currency-label" text="Sun: 0" />
                     <ui:Label name="aura-dust-text" class="currency-label" text="Dust: 0" />
                 </ui:VisualElement>

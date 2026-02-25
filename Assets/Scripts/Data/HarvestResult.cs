@@ -5,7 +5,7 @@ namespace Garden
         public QualityTier tier;
         public float valueMultiplier;
         public bool syncShieldActive;
-        public int dewdropValue;
+        public int goldValue;
         public VariantData variant;
         public SeedData seed;
     }

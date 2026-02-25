@@ -151,7 +151,7 @@ namespace Garden
             {
                 if (sellNameLabel != null) sellNameLabel.text = $"{plant.variantName} · {qualityLabel}";
                 if (sellDustLabel != null) sellDustLabel.text = $"+{dustRate:F1} Dust/min";
-                if (sellButton != null) sellButton.text = $"Sell for {sellValue} Dew";
+                if (sellButton != null) sellButton.text = $"Sell for {sellValue} Gold";
             }
             if (sellBar != null) sellBar.style.display = DisplayStyle.Flex;
         }

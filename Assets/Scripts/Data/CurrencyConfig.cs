@@ -5,12 +5,12 @@ namespace Garden
     [CreateAssetMenu(fileName = "CurrencyConfig", menuName = "Garden/Currency Config")]
     public class CurrencyConfig : ScriptableObject
     {
-        [Header("Dewdrops per Harvest (by rarity)")]
-        public int commonDewdrops = 10;
-        public int uncommonDewdrops = 25;
-        public int rareDewdrops = 50;
-        public int epicDewdrops = 100;
-        public int legendaryDewdrops = 250;
+        [Header("Gold per Harvest (by rarity)")]
+        public int commonGold = 10;
+        public int uncommonGold = 25;
+        public int rareGold = 50;
+        public int epicGold = 100;
+        public int legendaryGold = 250;
 
         [Header("Aura Dust per Second (by rarity)")]
         public float commonDustPerSecond = 0.5f;
@@ -21,16 +21,16 @@ namespace Garden
 
         [Header("Greenhouse")]
         public int defaultSlots = 6;
-        public int greenhouseExpandCostDewdrops = 300;
+        public int greenhouseExpandCostGold = 300;
 
-        public int GetDewdropsForRarity(Rarity r) => r switch
+        public int GetGoldForRarity(Rarity r) => r switch
         {
-            Rarity.Common => commonDewdrops,
-            Rarity.Uncommon => uncommonDewdrops,
-            Rarity.Rare => rareDewdrops,
-            Rarity.Epic => epicDewdrops,
-            Rarity.Legendary => legendaryDewdrops,
-            _ => commonDewdrops
+            Rarity.Common => commonGold,
+            Rarity.Uncommon => uncommonGold,
+            Rarity.Rare => rareGold,
+            Rarity.Epic => epicGold,
+            Rarity.Legendary => legendaryGold,
+            _ => commonGold
         };
 
         public float GetDustPerSecondForRarity(Rarity r) => r switch
