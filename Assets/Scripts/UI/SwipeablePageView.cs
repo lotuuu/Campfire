@@ -5,9 +5,9 @@ using UnityEngine.UIElements;
 
 namespace Garden
 {
-    public class SwipeablePageView : VisualElement
+    [UxmlElement]
+    public partial class SwipeablePageView : VisualElement
     {
-        public new class UxmlFactory : UxmlFactory<SwipeablePageView> { }
 
         private readonly VisualElement pageContainer;
 
