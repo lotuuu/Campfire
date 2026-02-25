@@ -136,7 +136,8 @@ namespace Garden
             {
                 var empty = new Label("No consumables owned");
                 empty.AddToClassList("consumable-row-name");
-                empty.style.padding = new StyleLength(8);
+                empty.style.paddingTop = empty.style.paddingBottom =
+                    empty.style.paddingLeft = empty.style.paddingRight = new StyleLength(8);
                 _dropdown.Add(empty);
             }
         }
