@@ -21,8 +21,9 @@ namespace Garden
         private readonly List<VisualElement> progressFills = new();
         private readonly List<string> _lastLabelText = new();
 
+        private VisualElement _pickerContainer;
         private Button _pickerBtn;
-        private VisualElement _dropdown;
+        private VisualElement _iconsContainer;
         private ConsumableType? _pendingType; // only set for slot-scoped apply mode
 
         private bool initialized;
@@ -134,15 +135,18 @@ namespace Garden
 
         private void BuildConsumablePicker()
         {
+            _pickerContainer = new VisualElement();
+            _pickerContainer.AddToClassList("consumable-picker");
+            terrariumPage.Add(_pickerContainer);
+
             _pickerBtn = new Button(ToggleDropdown);
             _pickerBtn.text = "";
             _pickerBtn.AddToClassList("consumable-picker-btn");
-            terrariumPage.Add(_pickerBtn);
+            _pickerContainer.Add(_pickerBtn);
 
-            _dropdown = new VisualElement();
-            _dropdown.AddToClassList("consumable-dropdown");
-            _dropdown.style.display = DisplayStyle.None;
-            terrariumPage.Add(_dropdown);
+            _iconsContainer = new VisualElement();
+            _iconsContainer.AddToClassList("consumable-picker-icons");
+            _pickerContainer.Add(_iconsContainer);
         }
 
         private void ToggleDropdown()
