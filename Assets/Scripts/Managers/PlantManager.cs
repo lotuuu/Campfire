@@ -60,12 +60,22 @@ namespace Garden
             foreach (var slot in slots)
             {
                 if (slot.state != PlantState.Growing) continue;
+                var envConsumables = ConsumableManager.Instance != null
+                    ? ConsumableManager.Instance.GetEnvConsumables(slot.environmentIndex)
+                    : new List<ConsumableData>();
+                var effective = ApplyConsumableOverrides(envConsumables, weather);
                 slot.growthSpeedMultiplier = (slot.variant?.trigger != null
-                    && slot.variant.trigger.Evaluate(weather)) ? 1.25f : 1f;
+                    && slot.variant.trigger.Evaluate(effective)) ? 1.25f : 1f;
                 slot.cachedEnvBonus = EnvironmentManager.Instance != null
-                    ? EnvironmentManager.Instance.GetGrowthBonus(slot.environmentIndex, weather)
+                    ? EnvironmentManager.Instance.GetGrowthBonus(slot.environmentIndex, effective)
                     : 0f;
             }
+        }
+
+        public void ForceRefreshMultipliers()
+        {
+            if (WeatherService.Instance != null)
+                RefreshMultipliers(WeatherService.Instance.CurrentWeather);
         }
 
         private void OnApplicationPause(bool pauseStatus)
@@ -87,7 +97,11 @@ namespace Garden
             {
                 if (slot.state != PlantState.Growing) continue;
 
-                float totalMultiplier = Mathf.Max(slot.growthSpeedMultiplier + slot.cachedEnvBonus, 0.01f);
+                bool hasFertilizer = slot.appliedConsumables != null &&
+                    slot.appliedConsumables.Exists(c => c.type == ConsumableType.Fertilizer);
+                float fertilizerBonus = hasFertilizer ? 1f : 0f;
+                float totalMultiplier = Mathf.Max(
+                    slot.growthSpeedMultiplier + slot.cachedEnvBonus + fertilizerBonus, 0.01f);
                 float totalHours = slot.seed.baseGrowthHours / totalMultiplier;
                 float elapsed = (float)(GameTime.UtcNow - slot.plantTime).TotalHours;
                 slot.growthProgress = Mathf.Clamp01(elapsed / totalHours);
@@ -182,8 +196,14 @@ namespace Garden
             if (slot == null || slot.state != PlantState.Mature)
                 return default;
 
-            var weather = WeatherService.Instance.CurrentWeather;
-            var result = HarvestEngine.Roll(slot.seed, slot.variant, weather);
+            var globalWeather = WeatherService.Instance.CurrentWeather;
+            var envConsumables = ConsumableManager.Instance != null
+                ? ConsumableManager.Instance.GetEnvConsumables(environmentIndex)
+                : new List<ConsumableData>();
+            var effectiveWeather = ApplyConsumableOverrides(envConsumables, globalWeather);
+            bool qualityBoosted = slot.appliedConsumables != null &&
+                slot.appliedConsumables.Exists(c => c.type == ConsumableType.QualityDirt);
+            var result = HarvestEngine.Roll(slot.seed, slot.variant, effectiveWeather, qualityBoosted);
 
             ClearSlot(slot);
             return result;
@@ -233,7 +253,11 @@ namespace Garden
         {
             var slot = GetSlot(envIndex, slotIndex);
             if (slot == null || slot.state != PlantState.Growing) return 0f;
-            float totalMultiplier = Mathf.Max(slot.growthSpeedMultiplier + slot.cachedEnvBonus, 0.01f);
+            bool hasFertilizer = slot.appliedConsumables != null &&
+                slot.appliedConsumables.Exists(c => c.type == ConsumableType.Fertilizer);
+            float fertilizerBonus = hasFertilizer ? 1f : 0f;
+            float totalMultiplier = Mathf.Max(
+                slot.growthSpeedMultiplier + slot.cachedEnvBonus + fertilizerBonus, 0.01f);
             float totalHours = slot.seed.baseGrowthHours / totalMultiplier;
             float elapsed = (float)(GameTime.UtcNow - slot.plantTime).TotalHours;
             return Mathf.Max(0f, totalHours - elapsed);
@@ -274,6 +298,26 @@ namespace Garden
             OnPlantStateChanged?.Invoke();
         }
 
+        /// <summary>
+        /// Spends one slot-scoped consumable (Fertilizer or QualityDirt) and applies it to the slot.
+        /// Returns false if: consumable is env-scoped, slot is empty, already has this type, or out of stock.
+        /// </summary>
+        public bool ApplyConsumable(ConsumableType type, int environmentIndex, int slotIndex)
+        {
+            var consumableData = ConsumableManager.Instance?.GetConsumableData(type);
+            if (consumableData == null || consumableData.isEnvironmentScoped) return false;
+
+            var slot = GetSlot(environmentIndex, slotIndex);
+            if (slot == null || slot.state == PlantState.Empty) return false;
+            if (slot.appliedConsumables.Exists(c => c.type == type)) return false;
+
+            if (!ConsumableManager.Instance.Spend(type)) return false;
+
+            slot.appliedConsumables.Add(consumableData);
+            SaveState();
+            return true;
+        }
+
         private void InitializeSlots()
         {
             slots.Clear();
@@ -303,6 +347,7 @@ namespace Garden
             slot.variant = null;
             slot.growthProgress = 0f;
             slot.state = PlantState.Empty;
+            slot.appliedConsumables.Clear();
 
             OnSlotStateChanged?.Invoke(slot.environmentIndex, slot.slotIndex, PlantState.Empty);
             OnPlantStateChanged?.Invoke();
@@ -323,7 +368,9 @@ namespace Garden
                     seedName = slot.seed.seedName,
                     variantName = slot.variant.variantName,
                     plantTimeUtc = slot.plantTime.ToString("O"),
-                    growthSpeedMultiplier = slot.growthSpeedMultiplier
+                    growthSpeedMultiplier = slot.growthSpeedMultiplier,
+                    appliedConsumables = slot.appliedConsumables
+                        .ConvertAll(c => c.type.ToString())
                 });
             }
             var featured = GetFeaturedSlot();
@@ -366,6 +413,18 @@ namespace Garden
                     slot.plantTime = DateTime.Parse(ps.plantTimeUtc).ToUniversalTime();
                     slot.growthSpeedMultiplier = ps.growthSpeedMultiplier;
 
+                    if (ps.appliedConsumables != null && ConsumableManager.Instance != null)
+                    {
+                        foreach (var typeName in ps.appliedConsumables)
+                        {
+                            if (System.Enum.TryParse<ConsumableType>(typeName, out var ctype))
+                            {
+                                var cd = ConsumableManager.Instance.GetConsumableData(ctype);
+                                if (cd != null) slot.appliedConsumables.Add(cd);
+                            }
+                        }
+                    }
+
                     float totalHours = seed.baseGrowthHours / slot.growthSpeedMultiplier;
                     float elapsed = (float)(GameTime.UtcNow - slot.plantTime).TotalHours;
                     slot.growthProgress = Mathf.Clamp01(elapsed / totalHours);
@@ -401,6 +460,28 @@ namespace Garden
                 }
                 OnPlantStateChanged?.Invoke();
             }
+        }
+
+        /// <summary>
+        /// Returns a copy of globalWeather with env-scoped consumable overrides applied.
+        /// Only Fan/Igloo/Heater/Cloud modify the weather struct.
+        /// WeatherData is a struct so assignment gives a copy — globalWeather is never mutated.
+        /// </summary>
+        internal static WeatherData ApplyConsumableOverrides(
+            List<ConsumableData> consumables, WeatherData globalWeather)
+        {
+            var w = globalWeather;
+            foreach (var c in consumables)
+            {
+                switch (c.type)
+                {
+                    case ConsumableType.Fan:    w.windSpeed   += c.magnitude; break;
+                    case ConsumableType.Igloo:  w.temperature -= c.magnitude; break;
+                    case ConsumableType.Heater: w.temperature += c.magnitude; break;
+                    case ConsumableType.Cloud:  w.condition    = WeatherCondition.Rain; break;
+                }
+            }
+            return w;
         }
     }
 }
