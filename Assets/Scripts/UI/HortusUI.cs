@@ -21,6 +21,7 @@ namespace Garden
         private ConstructionUI constructionUI;
         private HarvestResultUI harvestResultUI;
         private DebugWeatherPanel debugPanel;
+        private EnvironmentSwitcherBar envSwitcherBar;
         [SerializeField] private BackyardIsometricView backyardIsoView;
 
         private Camera mainCam;
@@ -85,6 +86,16 @@ namespace Garden
             // Initialize bottom nav
             bottomNavUI = GetComponent<BottomNavUI>();
             bottomNavUI?.Initialize(root, pageView);
+
+            // Initialize env switcher bar
+            envSwitcherBar = GetComponent<EnvironmentSwitcherBar>();
+            envSwitcherBar?.Initialize(root);
+
+            // Wire env switcher events
+            if (bottomNavUI != null)
+                bottomNavUI.OnTerrariumReactivated += OnTerrariumReactivated;
+            if (envSwitcherBar != null)
+                envSwitcherBar.OnEnvironmentSelected += OnEnvironmentSelected;
 
             // Page change callbacks — refresh content when page becomes visible
             pageView.OnPageChanged += OnPageChanged;
@@ -191,6 +202,9 @@ namespace Garden
 
             backyardViewUI?.SetPageActive(pageIndex == 2);
 
+            if (pageIndex != TerrariumPageIndex)
+                envSwitcherBar?.Hide();
+
             switch (pageIndex)
             {
                 case 0: codexUI?.Show(); break;
@@ -198,6 +212,22 @@ namespace Garden
                 case 3: greenhouseUI?.Show(); break;
                 case 4: constructionUI?.Show(); break;
             }
+        }
+
+        private void OnTerrariumReactivated()
+        {
+            if (EnvironmentManager.Instance == null) return;
+            int unlocked = 0;
+            for (int i = 0; i < EnvironmentManager.Instance.Environments.Count; i++)
+                if (EnvironmentManager.Instance.IsUnlocked(i)) unlocked++;
+            if (unlocked <= 1) return;
+            envSwitcherBar?.Toggle();
+        }
+
+        private void OnEnvironmentSelected(int envIndex)
+        {
+            EnvironmentManager.Instance?.SetActiveEnvironment(envIndex);
+            envSwitcherBar?.Hide();
         }
 
         private void OnLocationResolved(bool success)
@@ -229,6 +259,10 @@ namespace Garden
                 WeatherService.Instance.OnLocationResolved -= OnLocationResolved;
             if (pageView != null)
                 pageView.OnPageChanged -= OnPageChanged;
+            if (bottomNavUI != null)
+                bottomNavUI.OnTerrariumReactivated -= OnTerrariumReactivated;
+            if (envSwitcherBar != null)
+                envSwitcherBar.OnEnvironmentSelected -= OnEnvironmentSelected;
         }
     }
 }
