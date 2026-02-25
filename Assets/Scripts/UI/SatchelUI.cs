@@ -49,16 +49,17 @@ namespace Garden
 
         public void Hide()
         {
+            if (_isDragging) return;
             panel.UnregisterCallback<TransitionEndEvent>(OnHideTransitionEnd);
             panel.RemoveFromClassList("no-transition");
             panel.style.translate = new StyleTranslate(new Translate(0, Length.Percent(100)));
-            scrim.style.display   = DisplayStyle.None;
             panel.RegisterCallback<TransitionEndEvent>(OnHideTransitionEnd);
         }
 
         private void OnHideTransitionEnd(TransitionEndEvent evt)
         {
             panel.UnregisterCallback<TransitionEndEvent>(OnHideTransitionEnd);
+            scrim.style.display = DisplayStyle.None;
         }
 
         private void RefreshList()
