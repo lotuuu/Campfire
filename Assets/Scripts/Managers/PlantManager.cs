@@ -243,7 +243,11 @@ namespace Garden
         {
             var slot = GetFeaturedSlot();
             if (slot == null || slot.state != PlantState.Growing) return 0f;
-            float totalMultiplier = Mathf.Max(slot.growthSpeedMultiplier + slot.cachedEnvBonus, 0.01f);
+            bool hasFertilizer = slot.appliedConsumables != null &&
+                slot.appliedConsumables.Exists(c => c.type == ConsumableType.Fertilizer);
+            float fertilizerBonus = hasFertilizer ? 1f : 0f;
+            float totalMultiplier = Mathf.Max(
+                slot.growthSpeedMultiplier + slot.cachedEnvBonus + fertilizerBonus, 0.01f);
             float totalHours = slot.seed.baseGrowthHours / totalMultiplier;
             float elapsed = (float)(GameTime.UtcNow - slot.plantTime).TotalHours;
             return Mathf.Max(0f, totalHours - elapsed);
