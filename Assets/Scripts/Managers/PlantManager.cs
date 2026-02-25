@@ -78,11 +78,7 @@ namespace Garden
 
         private void Update()
         {
-            _growthTickTimer += Time.deltaTime;
-            if (_growthTickTimer < GrowthTickInterval) return;
-            _growthTickTimer = 0f;
-
-            bool anyUpdated = false;
+            // Update progress every frame for smooth UI
             foreach (var slot in slots)
             {
                 if (slot.state != PlantState.Growing) continue;
@@ -93,22 +89,21 @@ namespace Garden
                 slot.growthProgress = Mathf.Clamp01(elapsed / totalHours);
 
                 OnSlotGrowthUpdated?.Invoke(slot.environmentIndex, slot.slotIndex, slot.growthProgress);
-                anyUpdated = true;
-
-                if (slot.growthProgress >= 1f)
-                {
-                    slot.state = PlantState.Mature;
-                    OnSlotStateChanged?.Invoke(slot.environmentIndex, slot.slotIndex, PlantState.Mature);
-                    OnPlantStateChanged?.Invoke();
-                    SaveState();
-                }
             }
 
-            if (anyUpdated)
+            // Tick for maturity check and save only
+            _growthTickTimer += Time.deltaTime;
+            if (_growthTickTimer < GrowthTickInterval) return;
+            _growthTickTimer = 0f;
+
+            foreach (var slot in slots)
             {
-                var featured = GetFeaturedSlot();
-                if (featured != null)
-                    OnGrowthUpdated?.Invoke(featured.growthProgress);
+                if (slot.state != PlantState.Growing || slot.growthProgress < 1f) continue;
+
+                slot.state = PlantState.Mature;
+                OnSlotStateChanged?.Invoke(slot.environmentIndex, slot.slotIndex, PlantState.Mature);
+                OnPlantStateChanged?.Invoke();
+                SaveState();
             }
         }
 
