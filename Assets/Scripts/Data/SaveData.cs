@@ -60,6 +60,8 @@ namespace Garden
         public string variantName;
         public string harvestTimeUtc;
         public QualityTier qualityTier;
+        public string tierStartTimeUtc;  // when current tier began decaying
+        public bool isWithered;          // true once plant has passed below D
     }
 
     [Serializable]
