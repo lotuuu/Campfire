@@ -49,6 +49,7 @@ namespace Garden
 
         public void Hide()
         {
+            panel.UnregisterCallback<TransitionEndEvent>(OnHideTransitionEnd);
             panel.RemoveFromClassList("no-transition");
             panel.style.translate = new StyleTranslate(new Translate(0, Length.Percent(100)));
             scrim.style.display   = DisplayStyle.None;
