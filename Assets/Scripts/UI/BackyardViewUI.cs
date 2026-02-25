@@ -63,6 +63,12 @@ namespace Garden
 
         private void RebuildForEnvironment(int envIndex)
         {
+            // Rebuild the iso view first so new tiles exist before we spawn slot buttons
+            // and consumable visuals on them. This also makes ordering deterministic —
+            // BackyardIsometricView no longer subscribes to OnActiveEnvironmentChanged;
+            // we drive it explicitly here instead.
+            isometricView?.SetEnvironment(envIndex);
+
             foreach (var btn in slotButtons)
                 btn.RemoveFromHierarchy();
             slotButtons.Clear();

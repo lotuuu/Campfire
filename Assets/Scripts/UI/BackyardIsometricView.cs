@@ -37,17 +37,13 @@ namespace Garden
         {
             if (EnvironmentManager.Instance == null) return;
             EnvironmentManager.Instance.OnSlotUnlocked += OnSlotUnlocked;
-            EnvironmentManager.Instance.OnActiveEnvironmentChanged += SetEnvironment;
             SetEnvironment(EnvironmentManager.Instance.ActiveEnvironmentIndex);
         }
 
         private void OnDestroy()
         {
             if (EnvironmentManager.Instance != null)
-            {
                 EnvironmentManager.Instance.OnSlotUnlocked -= OnSlotUnlocked;
-                EnvironmentManager.Instance.OnActiveEnvironmentChanged -= SetEnvironment;
-            }
         }
 
         public void SetEnvironment(int envIndex)
@@ -73,15 +69,21 @@ namespace Garden
 
         public void RebuildGrid(int count)
         {
-            // Destroy env-scoped consumable GOs (not parented to tiles, so not auto-destroyed)
+            // SetActive(false) before Destroy so objects stop rendering immediately
+            // (Unity defers Destroy to end-of-frame; without this, old tiles render
+            // at wrong world positions for one frame after RecenterGrid repositions the transform)
             foreach (var kvp in _envConsumableGOs)
-                if (kvp.Value) Destroy(kvp.Value);
+            {
+                if (kvp.Value) { kvp.Value.SetActive(false); Destroy(kvp.Value); }
+            }
             _envConsumableGOs.Clear();
 
-            // Clear stale slot consumable refs (tile GOs and their children are about to be destroyed)
             _slotConsumableGOs.Clear();
 
-            foreach (var t in tiles) if (t) Destroy(t);
+            foreach (var t in tiles)
+            {
+                if (t) { t.SetActive(false); Destroy(t); }
+            }
             tiles.Clear();
             plantGOs.Clear();
             plantBaseScales.Clear();
