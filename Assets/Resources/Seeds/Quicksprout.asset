@@ -23,5 +23,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d0e35fa12d104f47af5018e103f71469, type: 2}
   buyPrice: 0
   baseSellPrice: 6
+  infinite: 1
   preferredWeather: 0
   specialConditions: []

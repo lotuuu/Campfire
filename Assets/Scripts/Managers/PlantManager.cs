@@ -144,7 +144,7 @@ namespace Garden
                 save.discoveredVariants.Add(result.variant.variantName);
 
             var entry = save.seedInventory.Find(e => e.seedName == seed.seedName);
-            if (entry != null) entry.count--;
+            if (entry != null && !seed.infinite) entry.count--;
 
             if (NotificationService.Instance != null)
             {

@@ -20,7 +20,8 @@ namespace Garden
         {
             var result = new List<SeedData>();
             foreach (var seed in SeedRegistry.Instance.AllSeeds)
-                result.Add(seed);
+                if (!seed.infinite)
+                    result.Add(seed);
             return result;
         }
 

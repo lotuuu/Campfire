@@ -24,10 +24,21 @@ namespace Garden
         public List<SeedData> GetOwnedSeeds()
         {
             var result = new List<SeedData>();
+            var added = new System.Collections.Generic.HashSet<string>();
             var save = SaveManager.Instance.Data;
+
+            foreach (var seed in seeds.Values)
+            {
+                if (seed.infinite)
+                {
+                    result.Add(seed);
+                    added.Add(seed.seedName);
+                }
+            }
+
             foreach (var entry in save.seedInventory)
             {
-                if (entry.count > 0 && seeds.TryGetValue(entry.seedName, out var seed))
+                if (entry.count > 0 && seeds.TryGetValue(entry.seedName, out var seed) && !added.Contains(entry.seedName))
                     result.Add(seed);
             }
             return result;
@@ -35,6 +46,8 @@ namespace Garden
 
         public int GetSeedCount(string seedName)
         {
+            if (seeds.TryGetValue(seedName, out var seed) && seed.infinite)
+                return -1;
             var entry = SaveManager.Instance.Data.seedInventory.Find(e => e.seedName == seedName);
             return entry?.count ?? 0;
         }
