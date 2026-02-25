@@ -7,9 +7,10 @@ namespace Garden
 {
     public class BackyardViewUI : MonoBehaviour
     {
-        private const int BackyardEnvIndex = 0;
-
         [SerializeField] private BackyardIsometricView isometricView;
+        private Label hearthTitle;
+        private int ActiveEnv => EnvironmentManager.Instance != null
+            ? EnvironmentManager.Instance.ActiveEnvironmentIndex : 0;
 
         public event Action<int, int> OnEmptySlotTapped;
         public event Action<int, int> OnMatureSlotTapped;
@@ -32,6 +33,7 @@ namespace Garden
         public void Initialize(VisualElement root)
         {
             terrariumPage = root.Q<VisualElement>("terrarium-page");
+            hearthTitle = root.Q<Label>("hearth-title");
 
             if (PlantManager.Instance != null)
             {
@@ -41,34 +43,74 @@ namespace Garden
 
             if (EnvironmentManager.Instance != null)
             {
-                int count = EnvironmentManager.Instance.GetActiveSlotCount(BackyardEnvIndex);
-                for (int i = 0; i < count; i++)
-                    AddSlotButton(i);
                 EnvironmentManager.Instance.OnSlotUnlocked += OnSlotUnlocked;
+                EnvironmentManager.Instance.OnActiveEnvironmentChanged += OnActiveEnvironmentChanged;
+                BuildSlotsForEnv(ActiveEnv);
             }
 
             BuildConsumablePicker();
+            RestoreConsumableVisuals(ActiveEnv);
 
-            // Restore slot-scoped consumable visuals for any already-planted slots
-            if (PlantManager.Instance != null && isometricView != null)
+            initialized = true;
+            RefreshAllSlots();
+            UpdateTitle();
+        }
+
+        private void OnActiveEnvironmentChanged(int envIndex)
+        {
+            RebuildForEnvironment(envIndex);
+        }
+
+        private void RebuildForEnvironment(int envIndex)
+        {
+            foreach (var btn in slotButtons)
+                btn.RemoveFromHierarchy();
+            slotButtons.Clear();
+            labels.Clear();
+            progressFills.Clear();
+            _lastLabelText.Clear();
+
+            BuildSlotsForEnv(envIndex);
+            RestoreConsumableVisuals(envIndex);
+            RefreshAllSlots();
+            UpdateTitle();
+        }
+
+        private void BuildSlotsForEnv(int envIndex)
+        {
+            if (EnvironmentManager.Instance == null) return;
+            int count = EnvironmentManager.Instance.GetActiveSlotCount(envIndex);
+            for (int i = 0; i < count; i++)
+                AddSlotButton(i);
+        }
+
+        private void RestoreConsumableVisuals(int envIndex)
+        {
+            if (isometricView == null) return;
+
+            if (PlantManager.Instance != null)
             {
                 foreach (var slot in PlantManager.Instance.Slots)
                 {
-                    if (slot.environmentIndex != BackyardEnvIndex) continue;
+                    if (slot.environmentIndex != envIndex) continue;
                     foreach (var c in slot.appliedConsumables)
                         isometricView.SpawnSlotConsumableVisual(slot.slotIndex, c.type);
                 }
             }
 
-            // Restore env-scoped consumable visuals
-            if (ConsumableManager.Instance != null && isometricView != null)
+            if (ConsumableManager.Instance != null)
             {
-                foreach (var c in ConsumableManager.Instance.GetEnvConsumables(BackyardEnvIndex))
+                foreach (var c in ConsumableManager.Instance.GetEnvConsumables(envIndex))
                     isometricView.SpawnEnvConsumableVisual(c.type);
             }
+        }
 
-            initialized = true;
-            RefreshAllSlots();
+        private void UpdateTitle()
+        {
+            if (hearthTitle == null || EnvironmentManager.Instance == null) return;
+            var envs = EnvironmentManager.Instance.Environments;
+            int idx = ActiveEnv;
+            hearthTitle.text = (idx >= 0 && idx < envs.Count) ? envs[idx].environmentName : "Backyard";
         }
 
         private void BuildConsumablePicker()
@@ -148,9 +190,9 @@ namespace Garden
 
             if (isEnvironmentScoped)
             {
-                // Apply immediately to entire Backyard — no slot selection needed
+                // Apply immediately to entire active environment — no slot selection needed
                 if (ConsumableManager.Instance != null &&
-                    ConsumableManager.Instance.ApplyToEnvironment(type, BackyardEnvIndex))
+                    ConsumableManager.Instance.ApplyToEnvironment(type, ActiveEnv))
                 {
                     isometricView?.SpawnEnvConsumableVisual(type);
                 }
@@ -178,7 +220,10 @@ namespace Garden
                 PlantManager.Instance.OnSlotGrowthUpdated -= OnSlotGrowthUpdated;
             }
             if (EnvironmentManager.Instance != null)
+            {
                 EnvironmentManager.Instance.OnSlotUnlocked -= OnSlotUnlocked;
+                EnvironmentManager.Instance.OnActiveEnvironmentChanged -= OnActiveEnvironmentChanged;
+            }
         }
 
         private void AddSlotButton(int slotIndex)
@@ -210,7 +255,7 @@ namespace Garden
 
         private void OnSlotUnlocked(int envIndex)
         {
-            if (envIndex != BackyardEnvIndex) return;
+            if (envIndex != ActiveEnv) return;
             AddSlotButton(slotButtons.Count);
             RefreshAllSlots();
         }
@@ -226,12 +271,12 @@ namespace Garden
 
             for (int i = 0; i < slotButtons.Count; i++)
             {
-                var slot = PlantManager.Instance.GetSlot(BackyardEnvIndex, i);
+                var slot = PlantManager.Instance.GetSlot(ActiveEnv, i);
                 if (slot == null) continue;
 
                 if (slot.state == PlantState.Growing)
                 {
-                    float hours = PlantManager.Instance.GetRemainingHours(BackyardEnvIndex, i);
+                    float hours = PlantManager.Instance.GetRemainingHours(ActiveEnv, i);
                     string text = hours > 1f ? $"{hours:F1}h" : $"{hours * 60f:F0}m";
                     if (i < labels.Count && labels[i] != null && text != _lastLabelText[i])
                     {
@@ -280,7 +325,7 @@ namespace Garden
         {
             if (PlantManager.Instance == null || i >= slotButtons.Count) return;
 
-            var slot = PlantManager.Instance.GetSlot(BackyardEnvIndex, i);
+            var slot = PlantManager.Instance.GetSlot(ActiveEnv, i);
             if (slot == null) return;
 
             var label = i < labels.Count ? labels[i] : null;
@@ -297,7 +342,7 @@ namespace Garden
                     break;
 
                 case PlantState.Growing:
-                    float hours = PlantManager.Instance.GetRemainingHours(BackyardEnvIndex, i);
+                    float hours = PlantManager.Instance.GetRemainingHours(ActiveEnv, i);
                     if (label != null)
                         label.text = hours > 1f ? $"{hours:F1}h" : $"{hours * 60f:F0}m";
                     if (i < _lastLabelText.Count) _lastLabelText[i] = null;
@@ -326,7 +371,7 @@ namespace Garden
                 var type = _pendingType.Value;
                 CancelApplyMode();
                 if (PlantManager.Instance != null &&
-                    PlantManager.Instance.ApplyConsumable(type, BackyardEnvIndex, slotIndex))
+                    PlantManager.Instance.ApplyConsumable(type, ActiveEnv, slotIndex))
                 {
                     isometricView?.SpawnSlotConsumableVisual(slotIndex, type);
                 }
@@ -335,26 +380,26 @@ namespace Garden
 
             // Normal interaction
             if (PlantManager.Instance == null) return;
-            var slot = PlantManager.Instance.GetSlot(BackyardEnvIndex, slotIndex);
+            var slot = PlantManager.Instance.GetSlot(ActiveEnv, slotIndex);
             if (slot == null) return;
 
             switch (slot.state)
             {
-                case PlantState.Empty:  OnEmptySlotTapped?.Invoke(BackyardEnvIndex, slotIndex);  break;
-                case PlantState.Mature: OnMatureSlotTapped?.Invoke(BackyardEnvIndex, slotIndex); break;
+                case PlantState.Empty:  OnEmptySlotTapped?.Invoke(ActiveEnv, slotIndex);  break;
+                case PlantState.Mature: OnMatureSlotTapped?.Invoke(ActiveEnv, slotIndex); break;
             }
         }
 
         private void OnSlotStateChanged(int envIndex, int slotIndex, PlantState state)
         {
-            if (envIndex != BackyardEnvIndex) return;
+            if (envIndex != ActiveEnv) return;
             if (slotIndex >= 0 && slotIndex < slotButtons.Count)
                 RefreshSlot(slotIndex);
         }
 
         private void OnSlotGrowthUpdated(int envIndex, int slotIndex, float progress)
         {
-            if (envIndex != BackyardEnvIndex) return;
+            if (envIndex != ActiveEnv) return;
             if (slotIndex >= 0 && slotIndex < progressFills.Count && progressFills[slotIndex] != null)
                 progressFills[slotIndex].style.width = new Length(progress * 100f, LengthUnit.Percent);
         }
