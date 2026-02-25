@@ -56,7 +56,7 @@ namespace Garden
                 if (unlocked)
                 {
                     lockedSection?.Hide();
-                    if (badge != null) badge.text = "✓";
+                    if (badge != null) badge.AddToClassList("construction-card-badge--unlocked");
 
                     int current = em.GetActiveSlotCount(i);
                     int max = env.maxSlotCount;
@@ -133,7 +133,7 @@ namespace Garden
             var upgradesSection = card.Q<VisualElement>("upgrades-section");
 
             if (nameLabel != null) nameLabel.text = "Greenhouse";
-            if (badge != null) badge.text = "✓";
+            if (badge != null) badge.AddToClassList("construction-card-badge--unlocked");
             lockedSection?.Hide();
 
             var upgradeRow = upgradeButtonTemplate.CloneTree();

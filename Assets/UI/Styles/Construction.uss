@@ -30,8 +30,14 @@
 }
 
 .construction-card-badge {
-    font-size: var(--font-xs);
-    color: var(--color-text-accent);
+    width: 28px;
+    height: 28px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.construction-card-badge--unlocked {
+    background-image: url('../../ThirdParty/icons/delapouite-check-mark.png');
+    -unity-background-image-tint-color: rgb(100, 230, 230);
 }
 
 /* Locked state */
