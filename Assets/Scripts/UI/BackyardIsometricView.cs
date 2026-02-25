@@ -15,6 +15,14 @@ namespace Garden
         private readonly List<GameObject> tiles = new();
         private readonly List<GameObject> plantGOs = new();
         private readonly List<float> plantBaseScales = new();
+        [SerializeField] private GameObject[] consumablePrefabs; // length 6, indexed by (int)ConsumableType
+
+        // Slot-scoped consumable GOs: tile index → list of GOs (Fertilizer, QualityDirt)
+        private readonly Dictionary<int, List<GameObject>> _slotConsumableGOs = new();
+
+        // Env-scoped consumable GOs: type → single GO (Fan, Igloo, Heater, Cloud)
+        private readonly Dictionary<ConsumableType, GameObject> _envConsumableGOs = new();
+
         private Camera mainCam;
         private float slideOffsetX;
 
@@ -174,6 +182,65 @@ namespace Garden
             if (go == null) return;
             float baseScale = index < plantBaseScales.Count ? plantBaseScales[index] : plantScale;
             go.transform.localScale = Vector3.one * (baseScale * multiplier);
+        }
+
+        /// <summary>Spawns a slot-scoped consumable visual as a child of the tile GO.</summary>
+        public void SpawnSlotConsumableVisual(int slotIndex, ConsumableType type)
+        {
+            if (consumablePrefabs == null || (int)type >= consumablePrefabs.Length) return;
+            var prefab = consumablePrefabs[(int)type];
+            if (prefab == null || slotIndex >= tiles.Count) return;
+
+            if (!_slotConsumableGOs.ContainsKey(slotIndex))
+                _slotConsumableGOs[slotIndex] = new List<GameObject>();
+
+            int existing = _slotConsumableGOs[slotIndex].Count;
+            var go = Instantiate(prefab, tiles[slotIndex].transform);
+            go.transform.localPosition = new Vector3(0.25f + existing * 0.18f, 0.15f, -0.55f);
+            _slotConsumableGOs[slotIndex].Add(go);
+        }
+
+        /// <summary>Destroys all slot-scoped consumable GOs for a tile (called on harvest/empty).</summary>
+        public void ClearSlotConsumableVisuals(int slotIndex)
+        {
+            if (!_slotConsumableGOs.TryGetValue(slotIndex, out var gos)) return;
+            foreach (var go in gos) if (go) Destroy(go);
+            gos.Clear();
+            _slotConsumableGOs.Remove(slotIndex);
+        }
+
+        /// <summary>
+        /// Spawns an env-scoped consumable visual as a child of this transform at a fixed position.
+        /// Replaces any existing GO of the same type.
+        /// </summary>
+        public void SpawnEnvConsumableVisual(ConsumableType type)
+        {
+            if (consumablePrefabs == null || (int)type >= consumablePrefabs.Length) return;
+            var prefab = consumablePrefabs[(int)type];
+            if (prefab == null) return;
+
+            // Remove existing of same type
+            if (_envConsumableGOs.TryGetValue(type, out var existing))
+            {
+                if (existing) Destroy(existing);
+                _envConsumableGOs.Remove(type);
+            }
+
+            var go = Instantiate(prefab, transform);
+            // Place env consumables in a row, offset left of the grid
+            int envCount = _envConsumableGOs.Count;
+            go.transform.localPosition = new Vector3(-2.0f + envCount * 0.5f, 0.8f, -0.5f);
+            _envConsumableGOs[type] = go;
+        }
+
+        /// <summary>Removes an env-scoped consumable GO.</summary>
+        public void ClearEnvConsumableVisual(ConsumableType type)
+        {
+            if (_envConsumableGOs.TryGetValue(type, out var go))
+            {
+                if (go) Destroy(go);
+                _envConsumableGOs.Remove(type);
+            }
         }
     }
 }

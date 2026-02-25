@@ -56,9 +56,7 @@ namespace Garden
                 {
                     if (slot.environmentIndex != BackyardEnvIndex) continue;
                     foreach (var c in slot.appliedConsumables)
-                        // TODO: Task 8 - uncomment
-                        // isometricView.SpawnSlotConsumableVisual(slot.slotIndex, c.type);
-                        _ = c; // suppress unused warning until Task 8
+                        isometricView.SpawnSlotConsumableVisual(slot.slotIndex, c.type);
                 }
             }
 
@@ -66,9 +64,7 @@ namespace Garden
             if (ConsumableManager.Instance != null && isometricView != null)
             {
                 foreach (var c in ConsumableManager.Instance.GetEnvConsumables(BackyardEnvIndex))
-                    // TODO: Task 8 - uncomment
-                    // isometricView.SpawnEnvConsumableVisual(c.type);
-                    _ = c; // suppress unused warning until Task 8
+                    isometricView.SpawnEnvConsumableVisual(c.type);
             }
 
             initialized = true;
@@ -155,8 +151,7 @@ namespace Garden
                 if (ConsumableManager.Instance != null &&
                     ConsumableManager.Instance.ApplyToEnvironment(type, BackyardEnvIndex))
                 {
-                    // TODO: Task 8 - uncomment
-                    // isometricView?.SpawnEnvConsumableVisual(type);
+                    isometricView?.SpawnEnvConsumableVisual(type);
                 }
                 return;
             }
@@ -297,8 +292,7 @@ namespace Garden
                     if (fill  != null) fill.style.width = new Length(0, LengthUnit.Percent);
                     slotButtons[i].RemoveFromClassList("backyard-slot-mature");
                     isometricView?.SetPlantVisual(i, PlantState.Empty, Color.clear);
-                    // TODO: Task 8 - uncomment
-                    // isometricView?.ClearSlotConsumableVisuals(i);
+                    isometricView?.ClearSlotConsumableVisuals(i);
                     break;
 
                 case PlantState.Growing:
@@ -333,8 +327,7 @@ namespace Garden
                 if (PlantManager.Instance != null &&
                     PlantManager.Instance.ApplyConsumable(type, BackyardEnvIndex, slotIndex))
                 {
-                    // TODO: Task 8 - uncomment
-                    // isometricView?.SpawnSlotConsumableVisual(slotIndex, type);
+                    isometricView?.SpawnSlotConsumableVisual(slotIndex, type);
                 }
                 return;
             }
