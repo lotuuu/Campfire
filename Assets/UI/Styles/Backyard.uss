@@ -19,6 +19,19 @@
 }
 
 
+/* Isometric planting ring — shown on empty slots only, absolutely positioned on the top face */
+.backyard-empty-indicator {
+    position: absolute;
+    left: 25%;
+    top: 12%;
+    width: 50%;
+    height: 28%;
+    border-radius: 50%;
+    background-color: rgba(150, 170, 185, 0.15);
+    border-width: 1.5px;
+    border-color: rgba(180, 205, 220, 0.40);
+}
+
 .backyard-slot-label {
     color: var(--color-text-dim);
     font-size: var(--font-xs);
