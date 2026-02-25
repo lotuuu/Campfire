@@ -100,7 +100,7 @@ namespace Garden
             // Page change callbacks — refresh content when page becomes visible
             pageView.OnPageChanged += OnPageChanged;
 
-            // Wire hearth slot events
+            // Wire backyard slot events
             if (backyardViewUI != null)
             {
                 backyardViewUI.OnEmptySlotTapped += (envIdx, slotIdx) =>
