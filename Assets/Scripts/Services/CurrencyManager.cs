@@ -29,13 +29,13 @@ namespace Garden
             switch (type)
             {
                 case CurrencyType.Gold:
-                    old = data.gold; data.gold += amount;
+                    old = data.gold; data.gold = (int)System.Math.Clamp((long)data.gold + amount, 0L, (long)int.MaxValue);
                     OnCurrencyChanged?.Invoke(type, old, data.gold); break;
                 case CurrencyType.SunShards:
-                    old = data.sunShards; data.sunShards += amount;
+                    old = data.sunShards; data.sunShards = (int)System.Math.Clamp((long)data.sunShards + amount, 0L, (long)int.MaxValue);
                     OnCurrencyChanged?.Invoke(type, old, data.sunShards); break;
                 case CurrencyType.AuraDust:
-                    old = data.auraDust; data.auraDust += amount;
+                    old = data.auraDust; data.auraDust = (int)System.Math.Clamp((long)data.auraDust + amount, 0L, (long)int.MaxValue);
                     OnCurrencyChanged?.Invoke(type, old, data.auraDust); break;
             }
             SaveManager.Instance.Save();
