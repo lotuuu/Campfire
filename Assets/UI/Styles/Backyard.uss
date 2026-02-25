@@ -125,7 +125,7 @@
     bottom: 1px;
     color: var(--color-text-dim);
     font-size: 8px;
-    -unity-text-align: lower-right;
+    -unity-text-align: middle-right;
 }
 
 .backyard-slot-apply-mode {
