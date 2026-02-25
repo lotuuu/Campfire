@@ -29,7 +29,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a6f2a6f2f859b44c894b5a51a2060d8b, type: 2}
   - {fileID: 11400000, guid: 87ef8cae2ad0c43218456dc9b4090889, type: 2}
   - {fileID: 11400000, guid: 483620b5de233436886e31919e073547, type: 2}
-  buyPrice: 1200
+  buyPrice: 5000
   baseSellPrice: 2600
   preferredWeather: 2
   specialConditions:
