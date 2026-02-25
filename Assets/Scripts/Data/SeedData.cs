@@ -17,6 +17,7 @@ namespace Garden
         [Header("Shop")]
         public int buyPrice;
         public int baseSellPrice = 120;
+        public bool infinite;
 
         [Header("Sync Shield")]
         public WeatherCondition preferredWeather = WeatherCondition.Clear;

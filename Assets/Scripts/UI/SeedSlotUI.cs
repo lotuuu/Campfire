@@ -15,7 +15,7 @@ namespace Garden
             var icon = root.Q<VisualElement>(className: "seed-icon");
 
             if (nameLabel != null) nameLabel.text = data.seedName;
-            if (countLabel != null) countLabel.text = $"x{count}";
+            if (countLabel != null) countLabel.text = count < 0 ? "∞" : $"x{count}";
             if (icon != null && data.icon != null)
                 icon.style.backgroundImage = new StyleBackground(data.icon);
 
