@@ -1,5 +1,12 @@
 /* Construction Tab */
 
+/* Vertical list — override Common.uss grid default */
+#construction-scroll .unity-scroll-view__content-container {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    padding: var(--spacing-sm);
+}
+
 .construction-card {
     background-color: var(--color-bg-panel);
     border-color: var(--color-border);
@@ -66,4 +73,33 @@
 .construction-unlock-btn,
 .construction-upgrade-btn {
     min-width: 200px;
+}
+
+/* Purchase (locked) card — distinct CTA style */
+.construction-card.is-locked {
+    background-color: rgba(20, 35, 50, 0.45);
+    border-color: var(--color-border-accent);
+}
+
+.construction-card.is-locked .construction-card-name {
+    color: var(--color-text-accent);
+}
+
+.construction-card.is-locked .construction-locked-section {
+    align-items: stretch;
+    margin-top: var(--spacing-xs);
+}
+
+.construction-card.is-locked .construction-unlock-cost {
+    -unity-text-align: middle-center;
+    color: var(--color-text-dim);
+    margin-bottom: var(--spacing-sm);
+}
+
+.construction-card.is-locked .construction-unlock-btn {
+    min-width: 0;
+    align-self: stretch;
+    height: 64px;
+    font-size: var(--font-sm);
+    -unity-font-style: bold;
 }

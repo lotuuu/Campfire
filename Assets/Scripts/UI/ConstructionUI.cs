@@ -90,17 +90,20 @@ namespace Garden
                 else
                 {
                     upgradesSection?.Hide();
-                    if (badge != null) badge.text = "🔒";
+                    if (badge != null) badge.text = "";
+
+                    card.Q<VisualElement>(className: "construction-card")?.AddToClassList("is-locked");
 
                     var costLabel = card.Q<Label>("unlock-cost-label");
                     var unlockBtn = card.Q<Button>("unlock-btn");
 
-                    if (costLabel != null) costLabel.text = $"{env.unlockCostDewdrops} Dewdrops to unlock";
+                    if (costLabel != null) costLabel.text = $"{env.unlockCostDewdrops} Dewdrops";
 
                     if (unlockBtn != null)
                     {
                         bool canAfford = CurrencyManager.Instance.CanAfford(
                             CurrencyType.Dewdrops, env.unlockCostDewdrops);
+                        unlockBtn.text = $"Purchase {env.environmentName}";
                         unlockBtn.SetEnabled(canAfford);
 
                         int capturedIndex = i;
