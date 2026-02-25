@@ -16,6 +16,8 @@ namespace Garden
         public List<GreenhousePlantSave> greenhousePlants = new();
         public List<string> discoveredVariants = new();
         public List<SeedInventoryEntry> seedInventory = new();
+        public List<ConsumableInventoryEntry> consumableInventory = new();
+        public List<EnvironmentConsumableSave> environmentConsumables = new();
         public int greenhouseSlots = 6;
 
         // v2: terrarium environments
@@ -51,6 +53,7 @@ namespace Garden
         public string variantName;
         public string plantTimeUtc;
         public float growthSpeedMultiplier = 1f;
+        public List<string> appliedConsumables = new(); // ConsumableType.ToString() — slot-scoped only (Fertilizer, QualityDirt)
     }
 
     [Serializable]
@@ -69,5 +72,19 @@ namespace Garden
     {
         public string seedName;
         public int count;
+    }
+
+    [Serializable]
+    public class ConsumableInventoryEntry
+    {
+        public ConsumableType consumableType;
+        public int count;
+    }
+
+    [Serializable]
+    public class EnvironmentConsumableSave
+    {
+        public int envIndex;
+        public string consumableType; // ConsumableType.ToString()
     }
 }

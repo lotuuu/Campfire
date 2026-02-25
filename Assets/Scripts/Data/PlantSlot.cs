@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Garden
 {
@@ -14,5 +15,7 @@ namespace Garden
         public float growthProgress;
         // Runtime-only: refreshed on weather change, not persisted
         public float cachedEnvBonus;
+        // Slot-scoped consumables (Fertilizer, QualityDirt); cleared on harvest
+        public List<ConsumableData> appliedConsumables = new();
     }
 }
