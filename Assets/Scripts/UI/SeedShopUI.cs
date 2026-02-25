@@ -21,9 +21,11 @@ namespace Garden
 
         private void RefreshDisplay()
         {
+            var savedOffset = shopGrid.scrollOffset;
             shopGrid.Clear();
             AddSeedSection();
             AddConsumableSection();
+            shopGrid.schedule.Execute(() => shopGrid.scrollOffset = savedOffset);
         }
 
         private void AddSeedSection()
