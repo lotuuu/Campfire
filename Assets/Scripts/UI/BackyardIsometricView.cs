@@ -5,7 +5,7 @@ namespace Garden
 {
     public class BackyardIsometricView : MonoBehaviour
     {
-        [SerializeField] private Sprite tileSprite;
+        private Sprite tileSprite;
         [SerializeField] private string sortingLayerName = "Default";
         [SerializeField] private int baseSortingOrder = 0;
         [SerializeField] private Vector3 gridAnchor = new Vector3(0f, -0.3f, 0f);
@@ -26,7 +26,6 @@ namespace Garden
         private Camera mainCam;
         private float slideOffsetX;
 
-        private const int BackyardEnvIndex = 0;
         private const int GridColumns = 2;
 
         private void Awake()
@@ -36,26 +35,38 @@ namespace Garden
 
         private void Start()
         {
-            if (tileSprite == null)
-            {
-                Debug.LogError("[BackyardIsometricView] tileSprite is not assigned — grid will not render.", this);
-                return;
-            }
             if (EnvironmentManager.Instance == null) return;
-            int count = EnvironmentManager.Instance.GetActiveSlotCount(BackyardEnvIndex);
-            RebuildGrid(count);
             EnvironmentManager.Instance.OnSlotUnlocked += OnSlotUnlocked;
+            EnvironmentManager.Instance.OnActiveEnvironmentChanged += SetEnvironment;
+            SetEnvironment(EnvironmentManager.Instance.ActiveEnvironmentIndex);
         }
 
         private void OnDestroy()
         {
             if (EnvironmentManager.Instance != null)
+            {
                 EnvironmentManager.Instance.OnSlotUnlocked -= OnSlotUnlocked;
+                EnvironmentManager.Instance.OnActiveEnvironmentChanged -= SetEnvironment;
+            }
+        }
+
+        public void SetEnvironment(int envIndex)
+        {
+            if (EnvironmentManager.Instance == null) return;
+            var envs = EnvironmentManager.Instance.Environments;
+            if (envIndex < 0 || envIndex >= envs.Count) return;
+
+            tileSprite = envs[envIndex].tileSprite;
+            if (tileSprite == null)
+                Debug.LogWarning($"[BackyardIsometricView] No tileSprite assigned on {envs[envIndex].environmentName}.", this);
+
+            int count = EnvironmentManager.Instance.GetActiveSlotCount(envIndex);
+            RebuildGrid(count);
         }
 
         private void OnSlotUnlocked(int envIndex)
         {
-            if (envIndex != BackyardEnvIndex || tileSprite == null) return;
+            if (EnvironmentManager.Instance == null || envIndex != EnvironmentManager.Instance.ActiveEnvironmentIndex || tileSprite == null) return;
             SpawnTile(tiles.Count);
             RecenterGrid();
         }
