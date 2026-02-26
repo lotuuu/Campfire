@@ -208,7 +208,6 @@ namespace Garden
                 GreenhouseManager.Instance.TrashPlant(selectedIndex);
             else
                 GreenhouseManager.Instance.SellPlant(selectedIndex);
-            RefreshDisplay();
         }
     }
 }

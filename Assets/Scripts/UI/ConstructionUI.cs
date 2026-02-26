@@ -75,11 +75,7 @@ namespace Garden
                         upgradeBtn.SetEnabled(canAdd && canAfford);
 
                         int capturedIndex = i;
-                        upgradeBtn.clicked += () =>
-                        {
-                            EnvironmentManager.Instance.UnlockSlot(capturedIndex);
-                            RefreshDisplay();
-                        };
+                        upgradeBtn.clicked += () => EnvironmentManager.Instance.UnlockSlot(capturedIndex);
                     }
 
                     upgradesSection?.Add(upgradeRow);
@@ -104,11 +100,7 @@ namespace Garden
                         unlockBtn.SetEnabled(canAfford);
 
                         int capturedIndex = i;
-                        unlockBtn.clicked += () =>
-                        {
-                            EnvironmentManager.Instance.Unlock(capturedIndex);
-                            RefreshDisplay();
-                        };
+                        unlockBtn.clicked += () => EnvironmentManager.Instance.Unlock(capturedIndex);
                     }
                 }
 
@@ -148,11 +140,7 @@ namespace Garden
                     CurrencyType.Gold, config.greenhouseExpandCostGold);
                 upgradeBtn.text = $"+ ({config.greenhouseExpandCostGold} Gold)";
                 upgradeBtn.SetEnabled(canAfford);
-                upgradeBtn.clicked += () =>
-                {
-                    GreenhouseManager.Instance.ExpandSlots();
-                    RefreshDisplay();
-                };
+                upgradeBtn.clicked += () => GreenhouseManager.Instance.ExpandSlots();
             }
 
             upgradesSection?.Add(upgradeRow);
