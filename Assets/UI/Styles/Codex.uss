@@ -1,6 +1,7 @@
 /* Codex panel styles - mobile-first sizing */
 
-#variant-grid .unity-scroller--vertical {
+#variant-grid .unity-scroller--vertical,
+#variant-grid .unity-scroller--horizontal {
     display: none;
 }
 
