@@ -32,12 +32,32 @@ namespace Garden.Tests
             var envList = new List<EnvironmentConsumableSave>();
             envList.Add(new EnvironmentConsumableSave { envIndex = 0, consumableType = "Fan" });
 
-            // Simulate "no stacking" logic: remove existing before adding
-            envList.RemoveAll(e => e.envIndex == 0 && e.consumableType == "Fan");
+            // New logic: remove ALL for this env before adding
+            envList.RemoveAll(e => e.envIndex == 0);
             envList.Add(new EnvironmentConsumableSave { envIndex = 0, consumableType = "Fan" });
 
             int fanCount = envList.FindAll(e => e.consumableType == "Fan").Count;
             Assert.AreEqual(1, fanCount);
+        }
+
+        [Test]
+        public void EnvironmentConsumableSave_OnlyOnePerEnv()
+        {
+            var envList = new List<EnvironmentConsumableSave>();
+            envList.Add(new EnvironmentConsumableSave { envIndex = 0, consumableType = "Fan" });
+
+            // Replacing Fan with Cloud: remove all for env 0
+            envList.RemoveAll(e => e.envIndex == 0);
+            envList.Add(new EnvironmentConsumableSave { envIndex = 0, consumableType = "Cloud" });
+
+            // env 0 has exactly one entry, and it's Cloud
+            var env0 = envList.FindAll(e => e.envIndex == 0);
+            Assert.AreEqual(1, env0.Count);
+            Assert.AreEqual("Cloud", env0[0].consumableType);
+
+            // env 1 is unaffected
+            envList.Add(new EnvironmentConsumableSave { envIndex = 1, consumableType = "Heater" });
+            Assert.AreEqual(1, envList.FindAll(e => e.envIndex == 1).Count);
         }
     }
 }
