@@ -15,7 +15,8 @@ MonoBehaviour:
   seedName: Storm-Root
   icon: {fileID: -3962328653419008811, guid: 6ad33faa9696942f2b01f58a97d8688c, type: 3}
   description: +20% S-Tier chance during Wind/Rain
-  baseGrowthHours: 36
+  baseGrowthHours: 24
+  greenhouseDecayHours: 288
   variants:
   - {fileID: 11400000, guid: 9d9bbb9ffc88e4906a90695fa182bd7d, type: 2}
   - {fileID: 11400000, guid: a62153c3354d74f6a8ad0e35c43150a3, type: 2}
@@ -29,8 +30,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 52a0698c4726a4fe483753beabffc343, type: 2}
   - {fileID: 11400000, guid: 480bcbf07f91548389ef8bac196c8980, type: 2}
   - {fileID: 11400000, guid: 0c29485103c624ec2adbfc1500a7024d, type: 2}
-  buyPrice: 30000
+  buyPrice: 100000
   baseSellPrice: 22000
+  greenhouseYield: 100000
   preferredWeather: 3
   specialConditions:
   - targetTier: 4

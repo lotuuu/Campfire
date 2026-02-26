@@ -15,7 +15,8 @@ MonoBehaviour:
   seedName: Luna-Petal
   icon: {fileID: 1499585370954235563, guid: 1f28bbb8d8afb45f29b02864edd63f7b, type: 3}
   description: Only grows during Nighttime
-  baseGrowthHours: 18
+  baseGrowthHours: 8
+  greenhouseDecayHours: 96
   variants:
   - {fileID: 11400000, guid: a31391476b1a449a3bbc44774e1eef67, type: 2}
   - {fileID: 11400000, guid: 22a352f79934c4624a7104d903b824c5, type: 2}
@@ -29,7 +30,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: fda2e97e9f1f54477aae6a30d6dbf102, type: 2}
   - {fileID: 11400000, guid: c9284bfa52ff14a608ff55dc30fa7e42, type: 2}
   - {fileID: 11400000, guid: b05d96cf97ab845f298e47e504bba964, type: 2}
-  buyPrice: 12000
+  buyPrice: 50000
   baseSellPrice: 7200
+  greenhouseYield: 50000
   preferredWeather: 0
   specialConditions: []

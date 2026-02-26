@@ -12,11 +12,13 @@ namespace Garden
         public Sprite icon;
         [TextArea] public string description;
         [Range(0.01f, 72f)] public float baseGrowthHours = 24f;
+        public float greenhouseDecayHours;
         public List<VariantData> variants = new();
 
         [Header("Shop")]
         public int buyPrice;
         public int baseSellPrice = 120;
+        public int greenhouseYield;
         public bool infinite;
 
         [Header("Sync Shield")]

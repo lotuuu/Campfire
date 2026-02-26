@@ -72,7 +72,7 @@ namespace Garden
                 rarity = variant.rarity,
                 qualityTier = tier,
                 primaryColor = variant.primaryColor,
-                baseGrowthHours = seed.baseGrowthHours,
+                baseGrowthHours = seed.greenhouseDecayHours,
                 harvestTime = GameTime.UtcNow,
                 tierStartTime = GameTime.UtcNow,
                 isWithered = false
@@ -94,8 +94,8 @@ namespace Garden
 
             var plant = Plants[index];
             var seed = SeedRegistry.Instance.GetSeed(plant.seedName);
-            int baseSell = seed != null ? seed.baseSellPrice : 100;
-            int value = CurrencyManager.Instance.Config.GetSellValue(baseSell, plant.qualityTier);
+            int baseSell = seed != null ? seed.greenhouseYield : 100;
+            int value = CurrencyManager.Instance.Config.GetGreenhouseSellValue(baseSell, plant.qualityTier);
 
             Plants.RemoveAt(index);
             CurrencyManager.Instance.Add(CurrencyType.Gold, value);
