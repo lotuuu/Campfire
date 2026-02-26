@@ -6,7 +6,7 @@
 
 **Architecture:** `HarvestResult` gains an `isNewDiscovery` flag set in `PlantManager.Harvest()` (discovery tracking moves from plant-time to harvest-time). `HortusUI` routes to `DiscoveryPopupUI` when the flag is true. All animation is CSS keyframes in UI Toolkit.
 
-**Tech Stack:** Unity 6 UI Toolkit (UXML/USS), NativeShare (yasirkula/UnityNativeShare), Unity ScreenCapture API.
+**Tech Stack:** Unity 6 UI Toolkit (UXML/USS), NativeShare (yasirkula/UnityNativeShare), Unity ScreenCapture API (`com.unity.modules.screencapture` already in manifest).
 
 ---
 
@@ -17,15 +17,24 @@
 
 **Step 1: Add NativeShare to manifest**
 
-Open `Packages/manifest.json`. Inside the `"dependencies"` object add:
+In `Packages/manifest.json`, insert a new line inside the `"dependencies"` object, directly after the `com.coplaydev.unity-mcp` line:
 
+Old:
 ```json
-"com.yasirkula.nativeshare": "https://github.com/yasirkula/UnityNativeShare.git"
+    "com.coplaydev.unity-mcp": "https://github.com/CoplayDev/unity-mcp.git?path=/MCPForUnity#main",
+    "com.unity.2d.animation": "13.0.2",
+```
+
+New:
+```json
+    "com.coplaydev.unity-mcp": "https://github.com/CoplayDev/unity-mcp.git?path=/MCPForUnity#main",
+    "com.yasirkula.nativeshare": "https://github.com/yasirkula/UnityNativeShare.git",
+    "com.unity.2d.animation": "13.0.2",
 ```
 
 **Step 2: Let Unity resolve the package**
 
-Save the file. Switch to Unity Editor — it will fetch and compile the package. Watch for compilation errors in the Console. NativeShare has no namespace; it exposes a single `NativeShare` class.
+Save the file and switch to Unity Editor. Watch Console for compilation errors. NativeShare exposes a single `NativeShare` class with no namespace.
 
 **Step 3: Commit**
 
@@ -103,46 +112,57 @@ namespace Garden.Tests
 }
 ```
 
-**Step 2: Run tests — expect compile failure**
+**Step 2: Verify tests fail to compile**
 
-In Unity Test Runner (Window > General > Test Runner > EditMode), these tests will fail to compile because `PlantManager.CheckAndMarkDiscovered` doesn't exist yet. That's expected.
+In Unity Test Runner (Window > General > Test Runner > EditMode), these will fail to compile because `PlantManager.CheckAndMarkDiscovered` doesn't exist yet. Expected.
 
-**Step 3: Add `isNewDiscovery` field to HarvestResult**
+**Step 3: Add `isNewDiscovery` to HarvestResult**
 
-Read `Assets/Scripts/Data/HarvestResult.cs` (currently 12 lines). Add one field:
-
+`Assets/Scripts/Data/HarvestResult.cs` currently ends with:
 ```csharp
-namespace Garden
-{
-    public struct HarvestResult
-    {
-        public QualityTier tier;
-        public float valueMultiplier;
-        public bool syncShieldActive;
-        public int goldValue;
         public VariantData variant;
         public SeedData seed;
-        public bool isNewDiscovery;   // ← add this line
+    }
+}
+```
+
+Change to:
+```csharp
+        public VariantData variant;
+        public SeedData seed;
+        public bool isNewDiscovery;
     }
 }
 ```
 
 **Step 4: Add `CheckAndMarkDiscovered` to PlantManager**
 
-Read `Assets/Scripts/Managers/PlantManager.cs`. Add this `internal static` method anywhere in the class body (e.g. after `KeepHarvest`):
-
+Read `Assets/Scripts/Managers/PlantManager.cs`. Find the `KeepHarvest` method:
 ```csharp
-internal static bool CheckAndMarkDiscovered(VariantData variant, SaveData save)
-{
-    if (save.discoveredVariants.Contains(variant.variantName)) return false;
-    save.discoveredVariants.Add(variant.variantName);
-    return true;
-}
+        public void KeepHarvest(HarvestResult result)
+        {
+            GreenhouseManager.Instance.AddPlant(result.seed, result.variant, result.tier);
+        }
+```
+
+Add the new static helper directly after it:
+```csharp
+        public void KeepHarvest(HarvestResult result)
+        {
+            GreenhouseManager.Instance.AddPlant(result.seed, result.variant, result.tier);
+        }
+
+        internal static bool CheckAndMarkDiscovered(VariantData variant, SaveData save)
+        {
+            if (save.discoveredVariants.Contains(variant.variantName)) return false;
+            save.discoveredVariants.Add(variant.variantName);
+            return true;
+        }
 ```
 
 **Step 5: Run tests — expect all 3 to pass**
 
-Run `TestDiscovery` in Unity Test Runner. All 3 tests must pass before continuing.
+Run `TestDiscovery` in Unity Test Runner. All 3 must pass before continuing.
 
 **Step 6: Commit**
 
@@ -161,67 +181,51 @@ git commit -m "feat: add isNewDiscovery to HarvestResult with discovery helper"
 **Files:**
 - Modify: `Assets/Scripts/Managers/PlantManager.cs`
 
-**Step 1: Read PlantManager.cs**
+**Step 1: Remove discovery from Plant()**
 
-Read the file. Locate:
-
-1. `Plant(SeedData seed, int environmentIndex, int slotIndex)` — lines ~157–158 contain:
-   ```csharp
-   if (!save.discoveredVariants.Contains(result.variant.variantName))
-       save.discoveredVariants.Add(result.variant.variantName);
-   ```
-
-2. `Harvest(int environmentIndex, int slotIndex)` — lines ~193–210.
-
-**Step 2: Remove discovery from Plant()**
-
-Delete the two discovery lines from `Plant()` (they live just after `slot.state = PlantState.Growing`). The `var save = ...` line above them is still needed for `seedInventory` — keep it.
-
-Before:
+In `PlantManager.Plant(SeedData seed, int environmentIndex, int slotIndex)`, find:
 ```csharp
-var save = SaveManager.Instance.Data;
-if (!save.discoveredVariants.Contains(result.variant.variantName))
-    save.discoveredVariants.Add(result.variant.variantName);
+            var save = SaveManager.Instance.Data;
+            if (!save.discoveredVariants.Contains(result.variant.variantName))
+                save.discoveredVariants.Add(result.variant.variantName);
 
-var entry = save.seedInventory.Find(e => e.seedName == seed.seedName);
+            var entry = save.seedInventory.Find(e => e.seedName == seed.seedName);
 ```
 
-After:
+Replace with (keep `var save` — it's used for `seedInventory` below):
 ```csharp
-var save = SaveManager.Instance.Data;
+            var save = SaveManager.Instance.Data;
 
-var entry = save.seedInventory.Find(e => e.seedName == seed.seedName);
+            var entry = save.seedInventory.Find(e => e.seedName == seed.seedName);
 ```
 
-**Step 3: Add discovery check to Harvest()**
+**Step 2: Add discovery check to Harvest()**
 
-In `Harvest(int environmentIndex, int slotIndex)`, insert the discovery check just before `ClearSlot(slot)`:
-
-Before:
+In `Harvest(int environmentIndex, int slotIndex)`, find:
 ```csharp
-var result = HarvestEngine.Roll(slot.seed, slot.variant, effectiveWeather, qualityBoosted);
+            var result = HarvestEngine.Roll(slot.seed, slot.variant, effectiveWeather, qualityBoosted);
 
-ClearSlot(slot);
-return result;
+            ClearSlot(slot);
+            return result;
 ```
 
-After:
+Replace with:
 ```csharp
-var result = HarvestEngine.Roll(slot.seed, slot.variant, effectiveWeather, qualityBoosted);
+            var result = HarvestEngine.Roll(slot.seed, slot.variant, effectiveWeather, qualityBoosted);
 
-result.isNewDiscovery = CheckAndMarkDiscovered(slot.variant, SaveManager.Instance.Data);
-if (result.isNewDiscovery)
-    SaveManager.Instance.Save();
+            result.isNewDiscovery = CheckAndMarkDiscovered(slot.variant, SaveManager.Instance.Data);
+            if (result.isNewDiscovery)
+                SaveManager.Instance.Save();
 
-ClearSlot(slot);
-return result;
+            ClearSlot(slot);
+            return result;
 ```
 
-**Step 4: Run existing tests**
+**Step 3: Run all EditMode tests**
 
-Run all EditMode tests in Unity Test Runner. All 18 + 3 (21 total) must still pass — discovery change shouldn't break anything.
+All 21 tests (18 existing + 3 new) must pass.
 
-**Step 5: Commit**
+**Step 4: Commit**
 
 ```bash
 git add Assets/Scripts/Managers/PlantManager.cs
@@ -235,7 +239,7 @@ git commit -m "feat: move variant discovery tracking from plant-time to harvest-
 **Files:**
 - Create: `Assets/Resources/UI/Templates/DiscoveryPopup.uxml`
 
-**Step 1: Create the template**
+**Step 1: Create the file**
 
 ```xml
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
@@ -256,8 +260,6 @@ git commit -m "feat: move variant discovery tracking from plant-time to harvest-
 </ui:UXML>
 ```
 
-No `.meta` file needed — Unity generates it on import.
-
 ---
 
 ### Task 5: Create DiscoveryPopup.uss with animations
@@ -265,7 +267,7 @@ No `.meta` file needed — Unity generates it on import.
 **Files:**
 - Create: `Assets/UI/Styles/DiscoveryPopup.uss`
 
-**Step 1: Create the stylesheet**
+**Step 1: Create the file**
 
 ```css
 /* ── Keyframes ───────────────────────────────────────────── */
@@ -399,7 +401,7 @@ No `.meta` file needed — Unity generates it on import.
     animation-fill-mode: both;
 }
 
-/* Rarity color classes (must match those used in CodexUI) */
+/* Rarity color classes — must match Rarity enum: Common, Uncommon, Rare, Epic, Legendary */
 .rarity-common    { color: rgb(180, 180, 180); }
 .rarity-uncommon  { color: rgb(100, 220, 120); }
 .rarity-rare      { color: rgb(100, 160, 255); }
@@ -470,8 +472,6 @@ No `.meta` file needed — Unity generates it on import.
 }
 ```
 
-**Note on rarity class names:** Check `CodexUI.cs` or `HarvestResultUI.cs` for the exact rarity CSS class naming convention used in this project and update the `.rarity-*` selectors to match.
-
 ---
 
 ### Task 6: Create DiscoveryPopupUI.cs
@@ -482,6 +482,7 @@ No `.meta` file needed — Unity generates it on import.
 **Step 1: Create the controller**
 
 ```csharp
+using System;
 using System.Collections;
 using System.IO;
 using UnityEngine;
@@ -491,7 +492,7 @@ namespace Garden
 {
     public class DiscoveryPopupUI : MonoBehaviour
     {
-        public event System.Action OnDismissed;
+        public event Action OnDismissed;
 
         private VisualElement _container;
         private VisualTreeAsset _template;
@@ -499,7 +500,7 @@ namespace Garden
 
         public void Initialize(VisualElement root)
         {
-            _container = root.Q("discovery-popup");
+            _container = root.Q<VisualElement>("discovery-popup");
             _template = Resources.Load<VisualTreeAsset>("UI/Templates/DiscoveryPopup");
         }
 
@@ -513,13 +514,12 @@ namespace Garden
             _container.style.display = DisplayStyle.Flex;
 
             // Variant sprite
-            var spriteContainer = popup.Q("sprite-container");
+            var spriteContainer = popup.Q<VisualElement>("sprite-container");
             if (variant.variantSprite != null)
                 spriteContainer.style.backgroundImage = new StyleBackground(variant.variantSprite);
 
             // Glow color from variant primary color
-            var glowBg = popup.Q("glow-bg");
-            glowBg.style.backgroundColor = new StyleColor(variant.primaryColor);
+            popup.Q<VisualElement>("glow-bg").style.backgroundColor = new StyleColor(variant.primaryColor);
 
             // Text
             popup.Q<Label>("variant-name").text = variant.variantName;
@@ -533,11 +533,11 @@ namespace Garden
             _pendingVariantName = variant.variantName;
             popup.Q<Button>("share-button").clicked += OnShareClicked;
 
-            // Tap card stops propagation so it doesn't dismiss
-            popup.Q("discovery-card").RegisterCallback<ClickEvent>(evt => evt.StopPropagation());
+            // Tap card stops propagation — prevents card taps from dismissing the overlay
+            popup.Q<VisualElement>("discovery-card").RegisterCallback<ClickEvent>(evt => evt.StopPropagation());
 
-            // Tap overlay to dismiss
-            popup.Q("discovery-overlay").RegisterCallback<ClickEvent>(_ => Dismiss());
+            // Tap overlay background to dismiss
+            popup.Q<VisualElement>("discovery-overlay").RegisterCallback<ClickEvent>(_ => Dismiss());
         }
 
         private void OnShareClicked()
@@ -570,9 +570,7 @@ namespace Garden
 }
 ```
 
-**Step 2: Check compilation**
-
-Switch to Unity Editor. Open Console (Window > General > Console). Confirm zero compilation errors before proceeding.
+**Step 2: Check compilation in Unity Console — zero errors required before continuing.**
 
 ---
 
@@ -581,106 +579,160 @@ Switch to Unity Editor. Open Console (Window > General > Console). Confirm zero 
 **Files:**
 - Modify: `Assets/UI/Documents/GardenRoot.uxml`
 
-**Step 1: Read GardenRoot.uxml**
+**Step 1: Add the stylesheet import**
 
-Read the file. Find the line that declares `harvest-popup`:
+The stylesheet block ends at line 15. Insert the new import after `Construction.uss`:
+
 ```xml
-<ui:VisualElement name="harvest-popup" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: none;" />
+    <Style src="../Styles/Construction.uss" />
+```
+→
+```xml
+    <Style src="../Styles/Construction.uss" />
+    <Style src="../Styles/DiscoveryPopup.uss" />
 ```
 
-**Step 2: Add discovery-popup container directly after harvest-popup**
+**Step 2: Add the discovery-popup container**
 
+Line 140 is:
 ```xml
-<ui:VisualElement name="harvest-popup" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: none;" />
-<ui:VisualElement name="discovery-popup" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: none;" />
+    <!-- Harvest Result Popup -->
+    <ui:VisualElement name="harvest-popup" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: none;" />
 ```
 
-**Step 3: Link the new stylesheet**
-
-At the top of GardenRoot.uxml, find the `<Style>` block (near the `HarvestResult.uss` line). Add:
+Add the discovery popup directly after it:
 ```xml
-<Style src="../Styles/DiscoveryPopup.uss" />
+    <!-- Harvest Result Popup -->
+    <ui:VisualElement name="harvest-popup" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: none;" />
+
+    <!-- Discovery Popup (first-time variant reveal) -->
+    <ui:VisualElement name="discovery-popup" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: none;" />
 ```
 
 ---
 
-### Task 8: Wire DiscoveryPopupUI in HortusUI
+### Task 8: Add DiscoveryPopupUI component to scene + wire in HortusUI
 
 **Files:**
 - Modify: `Assets/Scripts/UI/HortusUI.cs`
+- Modify: `Assets/Scenes/Garden.unity` (via Unity Editor)
 
-**Step 1: Read HortusUI.cs**
+**Step 1: Add DiscoveryPopupUI component to the scene**
 
-Read the full file. Find:
-1. The field declaration for `harvestResultUI` (it's a `[SerializeField]` or similar)
-2. The `Initialize` method where `harvestResultUI.Initialize(root)` is called
-3. The `backyardViewUI.OnMatureSlotTapped +=` lambda
+In Unity Editor, select the `--- UI ---` GameObject (the one that has `HortusUI`, `HarvestResultUI`, etc.). In the Inspector, click **Add Component** and add `DiscoveryPopupUI`. This makes `GetComponent<DiscoveryPopupUI>()` work.
 
-**Step 2: Add discoveryPopupUI field**
+**Step 2: Add field to HortusUI**
 
-Near the `harvestResultUI` field declaration, add:
+In `HortusUI.cs`, the private fields block (lines 12–24) currently ends with:
 ```csharp
-private DiscoveryPopupUI discoveryPopupUI;
+        private HarvestResultUI harvestResultUI;
+        private DebugWeatherPanel debugPanel;
 ```
 
-(Use `private` — it's wired in `Initialize`, not via Inspector.)
-
-**Step 3: Initialize in the Initialize method**
-
-After the line `harvestResultUI?.Initialize(root);`, add:
+Add the new field after `harvestResultUI`:
 ```csharp
-discoveryPopupUI = gameObject.GetComponent<DiscoveryPopupUI>();
-if (discoveryPopupUI == null)
-    discoveryPopupUI = gameObject.AddComponent<DiscoveryPopupUI>();
-discoveryPopupUI.Initialize(root);
+        private HarvestResultUI harvestResultUI;
+        private DiscoveryPopupUI discoveryPopupUI;
+        private DebugWeatherPanel debugPanel;
 ```
 
-**Step 4: Update the OnMatureSlotTapped handler**
+**Step 3: Get the component in Start()**
 
-Replace the existing handler:
+The component-fetch block (lines 48–57) currently ends with:
 ```csharp
-backyardViewUI.OnMatureSlotTapped += (envIdx, slotIdx) =>
-{
-    var result = PlantManager.Instance.Harvest(envIdx, slotIdx);
-    if (result.seed != null)
-        harvestResultUI?.Show(result);
-    backyardViewUI?.RefreshAllSlots();
-};
+        harvestResultUI = GetComponent<HarvestResultUI>();
+        debugPanel = GetComponent<DebugWeatherPanel>();
 ```
 
-With:
+Add the new fetch after `harvestResultUI`:
 ```csharp
-backyardViewUI.OnMatureSlotTapped += (envIdx, slotIdx) =>
-{
-    var result = PlantManager.Instance.Harvest(envIdx, slotIdx);
-    if (result.seed != null)
-    {
-        if (result.isNewDiscovery)
-            discoveryPopupUI?.Show(result.variant, result);
-        else
-            harvestResultUI?.Show(result);
-    }
-    backyardViewUI?.RefreshAllSlots();
-};
+        harvestResultUI = GetComponent<HarvestResultUI>();
+        discoveryPopupUI = GetComponent<DiscoveryPopupUI>();
+        debugPanel = GetComponent<DebugWeatherPanel>();
 ```
 
-**Step 5: Subscribe discoveryPopupUI to OnDismissed for UI refresh**
+**Step 4: Initialize in Start()**
 
-Find the `harvestResultUI.OnDismissed +=` block. Add an equivalent subscription directly after it:
+The initialize block (lines 75–84) currently ends with:
 ```csharp
-if (discoveryPopupUI != null)
-{
-    discoveryPopupUI.OnDismissed += () =>
-    {
-        backyardViewUI?.RefreshAllSlots();
-        greenhouseUI?.RefreshDisplay();
-    };
-}
+        harvestResultUI?.Initialize(root);
+        debugPanel?.Initialize(root);
 ```
 
-**Step 6: Check compilation in Unity Console — zero errors required**
+Add after `harvestResultUI`:
+```csharp
+        harvestResultUI?.Initialize(root);
+        discoveryPopupUI?.Initialize(root);
+        debugPanel?.Initialize(root);
+```
 
-**Step 7: Commit**
+**Step 5: Update the OnMatureSlotTapped handler**
+
+Lines 111–117 currently read:
+```csharp
+                backyardViewUI.OnMatureSlotTapped += (envIdx, slotIdx) =>
+                {
+                    var result = PlantManager.Instance.Harvest(envIdx, slotIdx);
+                    if (result.seed != null)
+                        harvestResultUI?.Show(result);
+                    backyardViewUI?.RefreshAllSlots();
+                };
+```
+
+Replace with:
+```csharp
+                backyardViewUI.OnMatureSlotTapped += (envIdx, slotIdx) =>
+                {
+                    var result = PlantManager.Instance.Harvest(envIdx, slotIdx);
+                    if (result.seed != null)
+                    {
+                        if (result.isNewDiscovery)
+                            discoveryPopupUI?.Show(result.variant, result);
+                        else
+                            harvestResultUI?.Show(result);
+                    }
+                    backyardViewUI?.RefreshAllSlots();
+                };
+```
+
+**Step 6: Subscribe discoveryPopupUI to OnDismissed**
+
+Lines 120–127 currently read:
+```csharp
+            if (harvestResultUI != null)
+            {
+                harvestResultUI.OnDismissed += () =>
+                {
+                    backyardViewUI?.RefreshAllSlots();
+                    greenhouseUI?.RefreshDisplay();
+                };
+            }
+```
+
+Add a matching block directly after:
+```csharp
+            if (harvestResultUI != null)
+            {
+                harvestResultUI.OnDismissed += () =>
+                {
+                    backyardViewUI?.RefreshAllSlots();
+                    greenhouseUI?.RefreshDisplay();
+                };
+            }
+
+            if (discoveryPopupUI != null)
+            {
+                discoveryPopupUI.OnDismissed += () =>
+                {
+                    backyardViewUI?.RefreshAllSlots();
+                    greenhouseUI?.RefreshDisplay();
+                };
+            }
+```
+
+**Step 7: Check compilation — zero errors in Console.**
+
+**Step 8: Commit**
 
 ```bash
 git add Assets/Scripts/UI/DiscoveryPopupUI.cs \
@@ -690,7 +742,8 @@ git add Assets/Scripts/UI/DiscoveryPopupUI.cs \
         Assets/Resources/UI/Templates/DiscoveryPopup.uxml.meta \
         Assets/UI/Styles/DiscoveryPopup.uss \
         Assets/UI/Styles/DiscoveryPopup.uss.meta \
-        Assets/UI/Documents/GardenRoot.uxml
+        Assets/UI/Documents/GardenRoot.uxml \
+        Assets/Scenes/Garden.unity
 git commit -m "feat: add discovery popup with animated variant reveal and share button"
 ```
 
@@ -698,36 +751,39 @@ git commit -m "feat: add discovery popup with animated variant reveal and share 
 
 ### Task 9: Manual verification in Unity Editor
 
-**Step 1: Plant a seed you've never grown**
+**Step 1: Enter Play Mode**
 
-In Play Mode, open the Satchel and plant any seed. Note the variant that resolves (check Console or Codex).
+**Step 2: Plant a seed**
 
-**Step 2: Advance time to mature**
+Open the Satchel (tap an empty slot) and plant any seed. Note which variant resolves in the Console or Codex — make sure it's one that isn't already in `discoveredVariants` (clear save data via debug panel if needed).
 
-Use the debug panel (`DebugAdvanceTime`) to instantly mature the plant.
+**Step 3: Advance time to mature**
 
-**Step 3: Harvest**
+Use debug panel > Skip Time to mature the plant instantly.
 
-Tap the mature slot. Confirm the Discovery popup appears (not the normal harvest popup).
+**Step 4: Harvest and verify discovery popup**
+
+Tap the mature slot. Confirm the **Discovery popup** appears (not the normal harvest popup).
 
 **Checklist:**
-- [ ] Dark scrim fades in
-- [ ] Card bounces in with overshoot
+- [ ] Dark scrim fades in smoothly
+- [ ] Card bounces in with overshoot spring
 - [ ] Sprite scales up with bounce
-- [ ] Variant name slides up and fades in
-- [ ] Rarity label appears with correct color
+- [ ] Variant name slides up and fades in (~0.5s in)
+- [ ] Rarity label appears with correct color (check `Rarity` enum: Common=grey, Uncommon=green, Rare=blue, Epic=purple, Legendary=gold)
 - [ ] Divider fades in
-- [ ] Description fades in ~1 second in
-- [ ] Share button and dismiss hint appear last
-- [ ] Share button triggers share sheet (on device) or logs intent (Editor)
-- [ ] Tapping the overlay (outside card) dismisses and shows no crash
+- [ ] Description fades in (~1s in)
+- [ ] Share button and dismiss hint appear last (~1.5s in)
+- [ ] Tapping outside the card (on the scrim) dismisses and returns to game
+- [ ] Tapping the card itself does NOT dismiss
+- [ ] After dismiss: backyard slots refresh, greenhouse refreshes
 - [ ] Harvesting the **same** variant again shows the **normal** harvest popup
 
-**Step 4: Run all EditMode tests**
+**Step 5: Run all EditMode tests**
 
 Window > General > Test Runner > EditMode > Run All. All 21 tests must pass.
 
-**Step 5: Commit if anything was tweaked**
+**Step 6: Commit any tweaks**
 
 ```bash
 git add -p
