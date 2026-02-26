@@ -28,12 +28,21 @@ namespace Garden
         private readonly List<GameObject> plantGOs = new();
         private readonly List<float> plantBaseScales = new();
         [SerializeField] private UnityEngine.Object[] consumablePrefabs; // length 6, indexed by (int)ConsumableType
+        [SerializeField] private Sprite emptyIndicatorSprite;
+
+        // Local position/scale for the empty-slot ring, in tile-GO local space (pre-TileScale).
+        // Y=0.32 centers the ring on the isometric top face (midpoint of upper sprite half).
+        private static readonly Vector3 IndicatorLocalPos   = new Vector3(0f, 0.32f, -0.3f);
+        private static readonly Vector3 IndicatorLocalScale = new Vector3(0.69f, 0.69f, 1f);
+        private static readonly Color   IndicatorColor      = new Color(0.63f, 0.90f, 0.71f, 0.75f);
 
         // Slot-scoped consumable GOs: tile index → list of GOs (Fertilizer, QualityDirt)
         private readonly Dictionary<int, List<GameObject>> _slotConsumableGOs = new();
 
         // Env-scoped consumable GOs: type → single GO (Fan, Igloo, Heater, Cloud)
         private readonly Dictionary<ConsumableType, GameObject> _envConsumableGOs = new();
+
+        private readonly List<GameObject> _emptyIndicatorGOs = new();
 
         private Camera mainCam;
         private float slideOffsetX;
@@ -100,6 +109,7 @@ namespace Garden
             tiles.Clear();
             plantGOs.Clear();
             plantBaseScales.Clear();
+            _emptyIndicatorGOs.Clear();
 
             for (int i = 0; i < count; i++)
                 SpawnTile(i);
@@ -134,6 +144,23 @@ namespace Garden
             if (plantGO != null) plantGO.SetActive(false);
             tiles.Add(tileGO);
             plantGOs.Add(plantGO);
+
+            // Empty-slot indicator ring (world-space sprite child of tile GO)
+            GameObject indicatorGO = null;
+            if (emptyIndicatorSprite != null)
+            {
+                indicatorGO = new GameObject("EmptyIndicator");
+                indicatorGO.transform.SetParent(tileGO.transform, false);
+                indicatorGO.transform.localPosition = IndicatorLocalPos;
+                indicatorGO.transform.localScale = IndicatorLocalScale;
+                var isr = indicatorGO.AddComponent<SpriteRenderer>();
+                isr.sprite = emptyIndicatorSprite;
+                isr.sortingLayerName = sortingLayerName;
+                isr.sortingOrder = baseSortingOrder + index / GridColumns + 1;
+                isr.color = IndicatorColor;
+                indicatorGO.SetActive(false);
+            }
+            _emptyIndicatorGOs.Add(indicatorGO);
 
             PositionTile(index);
         }
@@ -205,6 +232,14 @@ namespace Garden
             var bl = (Vector2)mainCam.WorldToScreenPoint(worldPos + new Vector3(-halfW, 0f));
             var tr = (Vector2)mainCam.WorldToScreenPoint(worldPos + new Vector3( halfW, halfH));
             return new Rect(bl.x, bl.y, tr.x - bl.x, tr.y - bl.y);
+        }
+
+        /// <summary>Shows or hides the empty-slot indicator ring for a tile.</summary>
+        public void SetEmptyIndicator(int index, bool visible)
+        {
+            if (index < 0 || index >= _emptyIndicatorGOs.Count) return;
+            var go = _emptyIndicatorGOs[index];
+            if (go != null) go.SetActive(visible);
         }
 
         public void SetPlantVisual(int index, PlantState state, Color color)

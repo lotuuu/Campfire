@@ -20,7 +20,6 @@ namespace Garden
         private readonly List<Label> labels = new();
         private readonly List<VisualElement> progressFills = new();
         private readonly List<VisualElement> progressBars = new();
-        private readonly List<VisualElement> emptyIndicators = new();
         private readonly List<string> _lastLabelText = new();
 
         private VisualElement _pickerContainer;
@@ -83,7 +82,6 @@ namespace Garden
             labels.Clear();
             progressFills.Clear();
             progressBars.Clear();
-            emptyIndicators.Clear();
             _lastLabelText.Clear();
 
             BuildSlotsForEnv(envIndex);
@@ -316,10 +314,6 @@ namespace Garden
             btn.AddToClassList("backyard-slot-overlay");
             btn.style.position = Position.Absolute;
 
-            var emptyIndicator = new VisualElement();
-            emptyIndicator.AddToClassList("backyard-empty-indicator");
-            btn.Add(emptyIndicator);
-
             var label = new Label();
             label.AddToClassList("backyard-slot-label");
             btn.Add(label);
@@ -340,7 +334,6 @@ namespace Garden
             _lastLabelText.Add(null);
             progressFills.Add(fill);
             progressBars.Add(progressBar);
-            emptyIndicators.Add(emptyIndicator);
         }
 
         private void OnSlotUnlocked(int envIndex)
@@ -419,16 +412,15 @@ namespace Garden
             var slot = PlantManager.Instance.GetSlot(ActiveEnv, i);
             if (slot == null) return;
 
-            var label         = i < labels.Count         ? labels[i]         : null;
-            var fill          = i < progressFills.Count  ? progressFills[i]  : null;
-            var progressBar   = i < progressBars.Count   ? progressBars[i]   : null;
-            var emptyIndicator = i < emptyIndicators.Count ? emptyIndicators[i] : null;
+            var label       = i < labels.Count        ? labels[i]        : null;
+            var fill        = i < progressFills.Count ? progressFills[i] : null;
+            var progressBar = i < progressBars.Count  ? progressBars[i]  : null;
 
             switch (slot.state)
             {
                 case PlantState.Empty:
-                    if (emptyIndicator != null) emptyIndicator.style.display = DisplayStyle.Flex;
-                    if (label != null)      label.style.display      = DisplayStyle.None;
+                    isometricView?.SetEmptyIndicator(i, true);
+                    if (label != null)       label.style.display       = DisplayStyle.None;
                     if (progressBar != null) progressBar.style.display = DisplayStyle.None;
                     if (fill != null) fill.style.width = new Length(0, LengthUnit.Percent);
                     slotButtons[i].RemoveFromClassList("backyard-slot-mature");
@@ -437,7 +429,7 @@ namespace Garden
                     break;
 
                 case PlantState.Growing:
-                    if (emptyIndicator != null) emptyIndicator.style.display = DisplayStyle.None;
+                    isometricView?.SetEmptyIndicator(i, false);
                     if (label != null)       label.style.display       = DisplayStyle.Flex;
                     if (progressBar != null) progressBar.style.display = DisplayStyle.Flex;
                     float hours = PlantManager.Instance.GetRemainingHours(ActiveEnv, i);
@@ -452,7 +444,7 @@ namespace Garden
                     break;
 
                 case PlantState.Mature:
-                    if (emptyIndicator != null) emptyIndicator.style.display = DisplayStyle.None;
+                    isometricView?.SetEmptyIndicator(i, false);
                     if (label != null)       label.style.display       = DisplayStyle.Flex;
                     if (progressBar != null) progressBar.style.display = DisplayStyle.Flex;
                     if (label != null) label.text = "Harvest!";

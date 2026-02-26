@@ -166,6 +166,7 @@ MonoBehaviour:
   sortingLayerName: Default
   baseSortingOrder: 0
   gridAnchor: {x: 0, y: -0.5, z: 0}
+  emptyIndicatorSprite: {fileID: 21300000, guid: 4f3c7c84615841018d094308a4fa88db, type: 3}
   plantPrefabs:
   - {fileID: 6846470340721416821, guid: 355f8608ec978844cab41afd1cad1457, type: 3}
   - {fileID: 5836257495164524969, guid: 91fb15e9d2bcf1c4bbf25fac679dde2a, type: 3}
