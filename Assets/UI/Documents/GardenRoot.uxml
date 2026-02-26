@@ -50,18 +50,23 @@
         <ui:VisualElement name="bottom-nav">
             <ui:Button name="tab-codex" class="nav-tab">
                 <ui:VisualElement class="nav-icon" />
+                <ui:Label class="nav-label" text="Codex" />
             </ui:Button>
             <ui:Button name="tab-shop" class="nav-tab">
                 <ui:VisualElement class="nav-icon" />
+                <ui:Label class="nav-label" text="Shop" />
             </ui:Button>
             <ui:Button name="tab-terrarium" class="nav-tab nav-tab-active">
                 <ui:VisualElement class="nav-icon" />
+                <ui:Label class="nav-label" text="Garden" />
             </ui:Button>
             <ui:Button name="tab-greenhouse" class="nav-tab">
                 <ui:VisualElement class="nav-icon" />
+                <ui:Label class="nav-label" text="Greenhouse" />
             </ui:Button>
             <ui:Button name="tab-construction" class="nav-tab">
                 <ui:VisualElement class="nav-icon" />
+                <ui:Label class="nav-label" text="Build" />
             </ui:Button>
         </ui:VisualElement>
     </ui:VisualElement>

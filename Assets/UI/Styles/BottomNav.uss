@@ -8,7 +8,7 @@
     background-color: rgba(8, 16, 24, 0.92);
     border-top-width: 2px;
     border-top-color: rgba(140, 230, 240, 0.20);
-    min-height: 120px;
+    min-height: 148px;
 }
 
 .nav-tab {
@@ -20,7 +20,7 @@
     border-radius: 0;
     padding: var(--spacing-sm) var(--spacing-xs);
     margin: 0 var(--spacing-xs);
-    min-height: 110px;
+    min-height: 140px;
     justify-content: center;
     align-items: center;
     transition-property: border-top-color;
@@ -54,6 +54,31 @@
 
 .nav-tab-disabled:hover .nav-icon {
     -unity-background-image-tint-color: rgba(140, 165, 185, 0.40);
+}
+
+.nav-label {
+    font-size: var(--font-xs);
+    color: rgb(185, 210, 225);
+    -unity-text-align: middle-center;
+    margin-top: var(--spacing-xxs);
+    transition-property: color;
+    transition-duration: 0.2s;
+}
+
+.nav-tab-active .nav-label {
+    color: rgb(100, 230, 230);
+}
+
+.nav-tab-disabled .nav-label {
+    color: rgba(140, 165, 185, 0.40);
+}
+
+.nav-tab:hover .nav-label {
+    color: rgb(220, 238, 245);
+}
+
+.nav-tab-disabled:hover .nav-label {
+    color: rgba(140, 165, 185, 0.40);
 }
 
 /* Per-tab icon images */
