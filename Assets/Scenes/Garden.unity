@@ -165,7 +165,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Garden::Garden.BackyardIsometricView
   sortingLayerName: Default
   baseSortingOrder: 0
-  gridAnchor: {x: 0, y: -0.3, z: 0}
+  gridAnchor: {x: 0, y: -0.5, z: 0}
   plantPrefabs:
   - {fileID: 6846470340721416821, guid: 355f8608ec978844cab41afd1cad1457, type: 3}
   - {fileID: 5836257495164524969, guid: 91fb15e9d2bcf1c4bbf25fac679dde2a, type: 3}
