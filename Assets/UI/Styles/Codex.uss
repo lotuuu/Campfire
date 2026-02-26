@@ -62,7 +62,6 @@
 #detail-seed-name {
     font-size: var(--font-sm);
     color: var(--color-text-dim);
-    -unity-text-align: middle-center;
     margin-top: var(--spacing-xs);
     white-space: normal;
     -unity-text-align: upper-center;

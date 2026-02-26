@@ -30,8 +30,8 @@
 }
 
 .construction-card-badge {
-    width: 28px;
-    height: 28px;
+    width: 40px;
+    height: 40px;
     -unity-background-scale-mode: scale-to-fit;
 }
 
@@ -105,7 +105,6 @@
 .construction-card.is-locked .construction-unlock-btn {
     min-width: 0;
     align-self: stretch;
-    height: 64px;
     font-size: var(--font-sm);
     -unity-font-style: bold;
 }

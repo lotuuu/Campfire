@@ -58,9 +58,9 @@
 
 .variant-chip {
     font-size: var(--font-xs);
-    padding: 2px 8px;
-    margin-right: 6px;
-    margin-bottom: 4px;
+    padding: var(--spacing-xxs) var(--spacing-xs);
+    margin-right: var(--spacing-xs);
+    margin-bottom: var(--spacing-xxs);
     border-radius: var(--radius-sm);
     background-color: rgba(255, 255, 255, 0.07);
 }

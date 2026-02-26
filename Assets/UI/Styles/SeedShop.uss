@@ -29,7 +29,7 @@
 
 .shop-condition {
     font-size: var(--font-sm);
-    color: rgb(175, 200, 215);
+    color: var(--color-text-dim);
     -unity-text-align: middle-center;
     margin-bottom: var(--spacing-sm);
     white-space: normal;
