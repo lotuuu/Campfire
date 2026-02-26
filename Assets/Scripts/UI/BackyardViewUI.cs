@@ -27,6 +27,7 @@ namespace Garden
         private Button _pickerBtn;
         private VisualElement _iconsContainer;
         private ConsumableType? _pendingType; // only set for slot-scoped apply mode
+        private ConsumableType? _pendingEnvConfirmType; // set while inline env-replace confirmation is showing
 
         private bool initialized;
         private bool pageActive;
@@ -52,6 +53,7 @@ namespace Garden
             }
 
             BuildConsumablePicker();
+            RefreshPickerIndicator();
             RestoreConsumableVisuals(ActiveEnv);
 
             initialized = true;
@@ -85,6 +87,7 @@ namespace Garden
             RestoreConsumableVisuals(envIndex);
             RefreshAllSlots();
             UpdateTitle();
+            RefreshPickerIndicator();
         }
 
         private void BuildSlotsForEnv(int envIndex)
@@ -158,6 +161,11 @@ namespace Garden
 
         private void ToggleDropdown()
         {
+            if (_pendingEnvConfirmType.HasValue)
+            {
+                CancelEnvConfirm();
+                return;
+            }
             if (_pendingType.HasValue)
             {
                 CancelApplyMode();
@@ -208,11 +216,17 @@ namespace Garden
 
             if (isEnvironmentScoped)
             {
-                // Apply immediately to entire active environment — no slot selection needed
+                var existingList = ConsumableManager.Instance?.GetEnvConsumables(ActiveEnv);
+                if (existingList != null && existingList.Count > 0)
+                {
+                    ShowEnvReplaceConfirmation(type, existingList[0]);
+                    return;
+                }
                 if (ConsumableManager.Instance != null &&
                     ConsumableManager.Instance.ApplyToEnvironment(type, ActiveEnv))
                 {
                     isometricView?.SpawnEnvConsumableVisual(type);
+                    RefreshPickerIndicator();
                 }
                 return;
             }
@@ -228,6 +242,55 @@ namespace Garden
             _pendingType = null;
             foreach (var btn in slotButtons)
                 btn.RemoveFromClassList("backyard-slot-apply-mode");
+        }
+
+        private void RefreshPickerIndicator()
+        {
+            if (_pickerBtn == null || ConsumableManager.Instance == null) return;
+            bool occupied = ConsumableManager.Instance.GetEnvConsumables(ActiveEnv).Count > 0;
+            if (occupied)
+                _pickerBtn.AddToClassList("consumable-picker-btn--occupied");
+            else
+                _pickerBtn.RemoveFromClassList("consumable-picker-btn--occupied");
+        }
+
+        private void ShowEnvReplaceConfirmation(ConsumableType newType, ConsumableData existingData)
+        {
+            _pendingEnvConfirmType = newType;
+            _iconsContainer.Clear();
+            _pickerContainer.AddToClassList("consumable-picker--open");
+
+            var label = new Label($"Replace {existingData.displayName}?");
+            label.AddToClassList("consumable-confirm-label");
+            _iconsContainer.Add(label);
+
+            var confirmBtn = new Button(() => ConfirmEnvReplace(newType));
+            confirmBtn.text = "Replace";
+            confirmBtn.AddToClassList("consumable-confirm-btn");
+            _iconsContainer.Add(confirmBtn);
+
+            var cancelBtn = new Button(CancelEnvConfirm);
+            cancelBtn.text = "Cancel";
+            cancelBtn.AddToClassList("consumable-confirm-cancel-btn");
+            _iconsContainer.Add(cancelBtn);
+        }
+
+        private void ConfirmEnvReplace(ConsumableType newType)
+        {
+            _pendingEnvConfirmType = null;
+            _pickerContainer.RemoveFromClassList("consumable-picker--open");
+            if (ConsumableManager.Instance != null &&
+                ConsumableManager.Instance.ApplyToEnvironment(newType, ActiveEnv))
+            {
+                isometricView?.SpawnEnvConsumableVisual(newType);
+                RefreshPickerIndicator();
+            }
+        }
+
+        private void CancelEnvConfirm()
+        {
+            _pendingEnvConfirmType = null;
+            _pickerContainer.RemoveFromClassList("consumable-picker--open");
         }
 
         private void OnDestroy()
