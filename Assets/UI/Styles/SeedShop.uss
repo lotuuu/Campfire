@@ -41,11 +41,54 @@
     font-size: var(--font-md);
 }
 
-.shop-section-header {
-    color: var(--color-text-dim);
-    font-size: var(--font-sm);
-    margin-top: var(--spacing-md);
-    margin-left: var(--spacing-sm);
+.shop-section-banner {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    background-color: rgba(30, 50, 65, 0.60);
+    padding: var(--spacing-sm) var(--spacing-md);
     margin-bottom: var(--spacing-xs);
+    border-radius: var(--radius-sm);
+}
+
+.shop-section-banner-title {
+    font-size: var(--font-md);
+    color: var(--color-text-bright);
     -unity-font-style: bold;
+}
+
+.shop-currency-badge {
+    font-size: var(--font-xs);
+    background-color: rgba(20, 35, 50, 0.60);
+    border-radius: var(--radius-sm);
+    padding-left: var(--spacing-sm);
+    padding-right: var(--spacing-sm);
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
+.shop-currency-badge--aura-dust {
+    color: var(--color-aura-dust);
+}
+
+.shop-currency-badge--sun-shards {
+    color: var(--color-sun-shards);
+}
+
+.shop-card--seeds .shop-card {
+    border-left-width: 4px;
+    border-left-color: var(--color-aura-dust);
+}
+
+.shop-card--seeds .shop-price {
+    color: var(--color-aura-dust);
+}
+
+.shop-card--consumables .shop-card {
+    border-left-width: 4px;
+    border-left-color: var(--color-sun-shards);
+}
+
+.shop-card--consumables .shop-price {
+    color: var(--color-sun-shards);
 }
