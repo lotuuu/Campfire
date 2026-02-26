@@ -145,13 +145,6 @@ namespace Garden
                             slot.seed.seedName, remainingSeconds);
                     }
                 }
-                else if (slot.state == PlantState.Mature)
-                {
-                    // Plant finished while app was open; send a reminder 1s after backgrounding
-                    SchedulePlantNotification(
-                        slot.environmentIndex, slot.slotIndex,
-                        slot.seed.seedName, 1.0);
-                }
             }
         }
     }
