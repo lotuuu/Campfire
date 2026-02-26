@@ -22,6 +22,10 @@ namespace Garden
         private int selectedIndex = -1;
         private readonly List<VisualElement> filledSlotRoots = new();
 
+        // Live decay tracking
+        private readonly List<(VisualElement bar, Label label, int plantIndex)> _decayWidgets = new();
+        private float _decayTick;
+
         public void Initialize(VisualElement root)
         {
             plantSlotTemplate = Resources.Load<VisualTreeAsset>("UI/Templates/PlantSlot");
@@ -50,6 +54,7 @@ namespace Garden
         {
             plantGrid.Clear();
             filledSlotRoots.Clear();
+            _decayWidgets.Clear();
             selectedIndex = -1;
             if (sellBar != null) sellBar.style.display = DisplayStyle.None;
 
@@ -92,6 +97,8 @@ namespace Garden
 
                     if (decayTimeLabel != null)
                         decayTimeLabel.text = FormatMinutes(remaining);
+
+                    _decayWidgets.Add((decayBarFill, decayTimeLabel, i));
                 }
 
                 filledSlotRoots.Add(slotRoot);
@@ -167,10 +174,30 @@ namespace Garden
 
         private static string FormatMinutes(float minutes)
         {
-            if (minutes < 1f) return "<1m";
+            if (minutes < 1f) return $"{Mathf.Max(0, (int)(minutes * 60f))}s";
             int h = (int)(minutes / 60f);
             int m = (int)(minutes % 60f);
             return h > 0 ? $"{h}h {m}m" : $"{m}m";
+        }
+
+        private void Update()
+        {
+            if (_decayWidgets.Count == 0) return;
+            _decayTick += Time.deltaTime;
+            if (_decayTick < 1f) return;
+            _decayTick = 0f;
+
+            var gm = GreenhouseManager.Instance;
+            foreach (var (bar, label, idx) in _decayWidgets)
+            {
+                if (idx >= gm.Plants.Count) continue;
+                var plant = gm.Plants[idx];
+                if (plant.isWithered) continue;
+                float progress = gm.GetDecayProgress(idx);
+                float remaining = (1f - progress) * GreenhouseManager.GetStepMinutes(plant.qualityTier, plant.baseGrowthHours);
+                if (bar != null) bar.style.width = Length.Percent((1f - progress) * 100f);
+                if (label != null) label.text = FormatMinutes(remaining);
+            }
         }
 
         private void OnSell()

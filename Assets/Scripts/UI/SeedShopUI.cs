@@ -15,7 +15,18 @@ namespace Garden
             shopGrid.contentContainer.style.flexDirection = FlexDirection.Column;
             shopGrid.contentContainer.style.flexWrap = Wrap.NoWrap;
             shopGrid.verticalScrollerVisibility = ScrollerVisibility.Hidden;
+
+            if (CurrencyManager.Instance != null)
+                CurrencyManager.Instance.OnCurrencyChanged += OnCurrencyChanged;
         }
+
+        private void OnDestroy()
+        {
+            if (CurrencyManager.Instance != null)
+                CurrencyManager.Instance.OnCurrencyChanged -= OnCurrencyChanged;
+        }
+
+        private void OnCurrencyChanged(CurrencyType type, int oldVal, int newVal) => RefreshDisplay();
 
         public void Show() => RefreshDisplay();
 

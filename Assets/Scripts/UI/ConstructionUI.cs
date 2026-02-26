@@ -26,10 +26,7 @@ namespace Garden
             RefreshDisplay();
         }
 
-        private void OnCurrencyChanged(CurrencyType type, int oldVal, int newVal)
-        {
-            // Buy buttons call RefreshDisplay() directly; skip the redundant event-driven refresh.
-        }
+        private void OnCurrencyChanged(CurrencyType type, int oldVal, int newVal) => RefreshDisplay();
 
         private void RefreshDisplay()
         {
