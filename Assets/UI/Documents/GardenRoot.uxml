@@ -88,7 +88,7 @@
 
     <!-- Page 1: Shop -->
     <ui:VisualElement name="shop-page" class="page-content" style="display: none;">
-        <ui:Label text="Seed Shop" class="panel-header" />
+        <ui:Label text="Shop" class="panel-header" />
         <ui:ScrollView name="shop-grid" class="scroll-view" />
     </ui:VisualElement>
 
