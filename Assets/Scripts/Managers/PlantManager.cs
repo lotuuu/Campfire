@@ -229,6 +229,13 @@ namespace Garden
             GreenhouseManager.Instance.AddPlant(result.seed, result.variant, result.tier);
         }
 
+        public static bool CheckAndMarkDiscovered(VariantData variant, SaveData save)
+        {
+            if (save.discoveredVariants.Contains(variant.variantName)) return false;
+            save.discoveredVariants.Add(variant.variantName);
+            return true;
+        }
+
         public void DebugAdvanceTime(float hours)
         {
             foreach (var slot in slots)

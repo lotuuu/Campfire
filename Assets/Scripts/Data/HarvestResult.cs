@@ -8,5 +8,6 @@ namespace Garden
         public int goldValue;
         public VariantData variant;
         public SeedData seed;
+        public bool isNewDiscovery;
     }
 }
