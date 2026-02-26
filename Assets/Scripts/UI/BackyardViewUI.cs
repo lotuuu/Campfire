@@ -308,9 +308,25 @@ namespace Garden
             }
         }
 
+        // Button subclass that restricts hit-testing to the isometric diamond (top face).
+        // The bounding rect covers the upper half of the tile sprite; the actual top face
+        // is a diamond that exactly fits that rect, so we apply |dx/hw| + |dy/hh| <= 1.
+        private class DiamondButton : Button
+        {
+            public override bool ContainsPoint(Vector2 localPoint)
+            {
+                float w = layout.width;
+                float h = layout.height;
+                if (w <= 0 || h <= 0) return false;
+                float hw = w * 0.5f;
+                float hh = h * 0.5f;
+                return Mathf.Abs(localPoint.x - hw) / hw + Mathf.Abs(localPoint.y - hh) / hh <= 1f;
+            }
+        }
+
         private void AddSlotButton(int slotIndex)
         {
-            var btn = new Button();
+            var btn = new DiamondButton();
             btn.AddToClassList("backyard-slot-overlay");
             btn.style.position = Position.Absolute;
 
