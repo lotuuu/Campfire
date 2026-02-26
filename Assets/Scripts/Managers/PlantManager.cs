@@ -154,8 +154,6 @@ namespace Garden
             slot.state = PlantState.Growing;
 
             var save = SaveManager.Instance.Data;
-            if (!save.discoveredVariants.Contains(result.variant.variantName))
-                save.discoveredVariants.Add(result.variant.variantName);
 
             var entry = save.seedInventory.Find(e => e.seedName == seed.seedName);
             if (entry != null && !seed.infinite) entry.count--;
@@ -204,6 +202,10 @@ namespace Garden
             bool qualityBoosted = slot.appliedConsumables != null &&
                 slot.appliedConsumables.Exists(c => c.type == ConsumableType.QualityDirt);
             var result = HarvestEngine.Roll(slot.seed, slot.variant, effectiveWeather, qualityBoosted);
+
+            result.isNewDiscovery = CheckAndMarkDiscovered(slot.variant, SaveManager.Instance.Data);
+            if (result.isNewDiscovery)
+                SaveManager.Instance.Save();
 
             ClearSlot(slot);
             return result;
