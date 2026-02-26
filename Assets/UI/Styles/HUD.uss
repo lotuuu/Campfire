@@ -47,7 +47,7 @@
 
 .currency-label {
     font-size: var(--font-sm);
-    margin-bottom: 4px;
+    margin-bottom: var(--spacing-xxs);
 }
 
 #gold-text        { color: var(--color-highlight); }
