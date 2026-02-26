@@ -143,6 +143,7 @@ namespace Garden
         {
             _pickerContainer = new VisualElement();
             _pickerContainer.AddToClassList("consumable-picker");
+            _pickerContainer.pickingMode = PickingMode.Ignore;
             terrariumPage.Add(_pickerContainer);
 
             _pickerBtn = new Button(ToggleDropdown);
