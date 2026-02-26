@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Garden::Garden.ConsumableData
   type: 5
   displayName: Cloud
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 5efbcc427b76b48908fbb7aa1b47890b, type: 3}
   buyPrice: 200
   magnitude: 0
   isEnvironmentScoped: 1

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Garden::Garden.ConsumableData
   type: 2
   displayName: Fan
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 88bc6d19914f047eaacad105c697a9cd, type: 3}
   buyPrice: 150
   magnitude: 5
   isEnvironmentScoped: 1

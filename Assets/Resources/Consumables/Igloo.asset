@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Garden::Garden.ConsumableData
   type: 3
   displayName: Igloo
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 9f1e66fd1469a458f9100401d970ba60, type: 3}
   buyPrice: 150
   magnitude: 10
   isEnvironmentScoped: 1
