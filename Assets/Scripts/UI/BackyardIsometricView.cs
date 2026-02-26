@@ -217,8 +217,8 @@ namespace Garden
 
         /// <summary>
         /// Screen-space hit bounds for a tile in pixels (bottom-left origin, Y-up).
-        /// Uses only the upper half of the sprite (the isometric "top face" diamond) so the
-        /// hitbox matches the visible tile and doesn't extend into the foreground tile below.
+        /// Covers the full sprite so sides are hittable on a single tile. Overlap between
+        /// adjacent tiles is resolved by DOM ordering (front tile is last child, wins first).
         /// </summary>
         public Rect GetTileScreenBounds(int index)
         {
@@ -228,9 +228,8 @@ namespace Garden
             float ppu = tileSprite.pixelsPerUnit;
             float halfW = tileSprite.rect.width * 0.5f / ppu * TileScale;
             float halfH = tileSprite.rect.height * 0.5f / ppu * TileScale;
-            // bl = left edge at sprite centre; tr = top-right of sprite
-            var bl = (Vector2)mainCam.WorldToScreenPoint(worldPos + new Vector3(-halfW, 0f));
-            var tr = (Vector2)mainCam.WorldToScreenPoint(worldPos + new Vector3( halfW, halfH));
+            var bl = (Vector2)mainCam.WorldToScreenPoint(worldPos + new Vector3(-halfW, -halfH));
+            var tr = (Vector2)mainCam.WorldToScreenPoint(worldPos + new Vector3( halfW,  halfH));
             return new Rect(bl.x, bl.y, tr.x - bl.x, tr.y - bl.y);
         }
 

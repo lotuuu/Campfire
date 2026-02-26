@@ -101,14 +101,14 @@ namespace Garden
         }
 
         /// <summary>
-        /// Reorders slot buttons in the UI hierarchy so that back tiles (lower index)
-        /// sit on top of front tiles. UI Toolkit hit-tests the last child first, so
-        /// back tiles must be last to win click events in overlapping regions.
+        /// Reorders slot buttons in the UI hierarchy so that front tiles (higher index,
+        /// higher sortingOrder) are the last DOM children. UI Toolkit hit-tests the last
+        /// child first, so front tiles win click events in overlapping regions.
         /// </summary>
         private void ReorderSlotButtonsByDepth()
         {
-            // BringToFront in descending index order leaves index 0 as the last child (topmost).
-            for (int i = slotButtons.Count - 1; i >= 0; i--)
+            // BringToFront in ascending index order leaves the highest index as the last child (topmost).
+            for (int i = 0; i < slotButtons.Count; i++)
                 slotButtons[i].BringToFront();
             // Picker must always sit above slot buttons so its hit area isn't swallowed.
             _pickerContainer?.BringToFront();
@@ -308,25 +308,9 @@ namespace Garden
             }
         }
 
-        // Button subclass that restricts hit-testing to the isometric diamond (top face).
-        // The bounding rect covers the upper half of the tile sprite; the actual top face
-        // is a diamond that exactly fits that rect, so we apply |dx/hw| + |dy/hh| <= 1.
-        private class DiamondButton : Button
-        {
-            public override bool ContainsPoint(Vector2 localPoint)
-            {
-                float w = layout.width;
-                float h = layout.height;
-                if (w <= 0 || h <= 0) return false;
-                float hw = w * 0.5f;
-                float hh = h * 0.5f;
-                return Mathf.Abs(localPoint.x - hw) / hw + Mathf.Abs(localPoint.y - hh) / hh <= 1f;
-            }
-        }
-
         private void AddSlotButton(int slotIndex)
         {
-            var btn = new DiamondButton();
+            var btn = new Button();
             btn.AddToClassList("backyard-slot-overlay");
             btn.style.position = Position.Absolute;
 
@@ -409,8 +393,10 @@ namespace Garden
 
             var pageOrigin = terrariumPage.worldBound;
             if (pageOrigin.width <= 0) return;
-            slotButtons[i].style.left   = panelLeft   - pageOrigin.x;
-            slotButtons[i].style.top    = panelTop    - pageOrigin.y;
+            float contentX = pageOrigin.x + terrariumPage.resolvedStyle.paddingLeft;
+            float contentY = pageOrigin.y + terrariumPage.resolvedStyle.paddingTop;
+            slotButtons[i].style.left   = panelLeft   - contentX;
+            slotButtons[i].style.top    = panelTop    - contentY;
             slotButtons[i].style.width  = panelWidth;
             slotButtons[i].style.height = panelHeight;
         }
