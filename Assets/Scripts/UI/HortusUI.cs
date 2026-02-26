@@ -21,6 +21,7 @@ namespace Garden
         private ConstructionUI constructionUI;
         private HarvestResultUI harvestResultUI;
         private DiscoveryPopupUI discoveryPopupUI;
+        private HarvestResult _pendingDiscoveryResult;
         private DebugWeatherPanel debugPanel;
         private EnvironmentSwitcherBar envSwitcherBar;
         [SerializeField] private BackyardIsometricView backyardIsoView;
@@ -117,7 +118,10 @@ namespace Garden
                     if (result.seed != null)
                     {
                         if (result.isNewDiscovery)
+                        {
+                            _pendingDiscoveryResult = result;
                             discoveryPopupUI?.Show(result.variant);
+                        }
                         else
                             harvestResultUI?.Show(result);
                     }
@@ -137,8 +141,7 @@ namespace Garden
             {
                 discoveryPopupUI.OnDismissed += () =>
                 {
-                    backyardViewUI?.RefreshAllSlots();
-                    greenhouseUI?.RefreshDisplay();
+                    harvestResultUI?.Show(_pendingDiscoveryResult);
                 };
             }
 
