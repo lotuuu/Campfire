@@ -50,6 +50,12 @@
     border-color: var(--color-border);
 }
 
+.btn-loading {
+    background-color: var(--color-button-bg-disabled);
+    color: var(--color-text-dim);
+    border-color: var(--color-border);
+}
+
 .btn-close {
     position: absolute;
     right: var(--spacing-md);
@@ -57,7 +63,7 @@
     width: 80px;
     height: 80px;
     font-size: var(--font-lg);
-    min-height: 80px;
+    min-height: 88px;
     padding: 0;
     border-radius: 40px;
 }
@@ -152,8 +158,10 @@
 /* Page content (inside SwipeablePageView) */
 .page-content {
     flex-grow: 1;
-    padding: var(--spacing-lg);
     padding-top: var(--spacing-md);
+    padding-right: var(--spacing-lg);
+    padding-bottom: var(--spacing-lg);
+    padding-left: var(--spacing-lg);
 }
 
 /* Overlay panel (debug etc) - stays absolute */
