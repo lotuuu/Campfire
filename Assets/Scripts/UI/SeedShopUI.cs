@@ -39,14 +39,34 @@ namespace Garden
             shopGrid.schedule.Execute(() => shopGrid.scrollOffset = savedOffset);
         }
 
+        private VisualElement MakeSectionBanner(string title, string currencyLabel, string badgeClass)
+        {
+            var banner = new VisualElement();
+            banner.AddToClassList("shop-section-banner");
+
+            var titleLabel = new Label(title);
+            titleLabel.AddToClassList("shop-section-banner-title");
+
+            var badge = new Label(currencyLabel);
+            badge.AddToClassList("shop-currency-badge");
+            badge.AddToClassList(badgeClass);
+
+            banner.Add(titleLabel);
+            banner.Add(badge);
+            return banner;
+        }
+
         private void AddSeedSection()
         {
+            shopGrid.Add(MakeSectionBanner("Seeds", "AuraDust", "shop-currency-badge--aura-dust"));
+
             var seeds = SeedShopManager.Instance.GetShopSeeds();
             seeds.Sort((a, b) => a.buyPrice.CompareTo(b.buyPrice));
 
             foreach (var seed in seeds)
             {
                 var card = shopCardTemplate.CloneTree();
+                card.AddToClassList("shop-card--seeds");
                 card.style.flexGrow = 1;
                 card.style.flexShrink = 0;
 
@@ -78,9 +98,9 @@ namespace Garden
         {
             if (ConsumableManager.Instance == null) return;
 
-            var header = new Label("Consumables");
-            header.AddToClassList("shop-section-header");
-            shopGrid.Add(header);
+            var banner = MakeSectionBanner("Consumables", "SunShards", "shop-currency-badge--sun-shards");
+            banner.style.marginTop = 32;
+            shopGrid.Add(banner);
 
             var consumables = new System.Collections.Generic.List<ConsumableData>(
                 ConsumableManager.Instance.AllConsumables);
@@ -89,6 +109,7 @@ namespace Garden
             foreach (var c in consumables)
             {
                 var card = shopCardTemplate.CloneTree();
+                card.AddToClassList("shop-card--consumables");
                 card.style.flexGrow = 1;
                 card.style.flexShrink = 0;
 
