@@ -61,37 +61,36 @@
 .consumable-picker {
     position: absolute;
     right: 8px;
-    top: 50%;
-    translate: 0 -22px;
-    width: 44px;
-    max-height: 44px;
+    top: 8px;
+    width: 132px;
+    max-height: 132px;
     overflow: hidden;
     background-color: rgba(20, 35, 50, 0.75);
     border-width: 1px;
     border-color: var(--color-highlight);
-    border-top-left-radius: 22px;
-    border-top-right-radius: 22px;
-    border-bottom-left-radius: 22px;
-    border-bottom-right-radius: 22px;
+    border-top-left-radius: 66px;
+    border-top-right-radius: 66px;
+    border-bottom-left-radius: 66px;
+    border-bottom-right-radius: 66px;
     transition-property: max-height, border-bottom-left-radius, border-bottom-right-radius;
     transition-duration: 0.25s;
     transition-timing-function: ease-out;
 }
 
 .consumable-picker--open {
-    max-height: 300px;
-    border-bottom-left-radius: 12px;
-    border-bottom-right-radius: 12px;
+    max-height: 900px;
+    border-bottom-left-radius: 36px;
+    border-bottom-right-radius: 36px;
 }
 
 /* Herb icon button — sits at top of container, transparent bg (container provides it) */
 .consumable-picker-btn {
-    width: 44px;
-    height: 44px;
+    width: 132px;
+    height: 132px;
     flex-shrink: 0;
     background-color: rgba(0, 0, 0, 0);
     border-width: 0;
-    padding: 8px;
+    padding: 24px;
     -unity-background-image-tint-color: rgb(185, 210, 225);
     background-image: url('../../ThirdParty/icons/delapouite-herbs-bundle.png');
     -unity-background-scale-mode: scale-to-fit;
@@ -105,18 +104,18 @@
 .consumable-picker-icons {
     flex-direction: column;
     align-items: center;
-    padding-bottom: 6px;
+    padding-bottom: 18px;
 }
 
 /* Each consumable icon button */
 .consumable-icon-btn {
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
+    width: 108px;
+    height: 108px;
+    border-radius: 24px;
     background-color: rgba(0, 0, 0, 0);
     border-width: 0;
-    padding: 6px;
-    margin-top: 2px;
+    padding: 18px;
+    margin-top: 6px;
     -unity-background-scale-mode: scale-to-fit;
     -unity-background-image-tint-color: rgb(185, 210, 225);
 }
@@ -129,10 +128,10 @@
 /* Count badge overlaid at bottom-right of each icon button */
 .consumable-icon-badge {
     position: absolute;
-    right: 1px;
-    bottom: 1px;
+    right: 3px;
+    bottom: 3px;
     color: var(--color-text-dim);
-    font-size: 8px;
+    font-size: 24px;
     -unity-text-align: middle-right;
 }
 
