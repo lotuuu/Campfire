@@ -291,12 +291,8 @@ namespace Garden
                 return;
             }
 
-            // Remove existing of same type
-            if (_envConsumableGOs.TryGetValue(type, out var existing))
-            {
-                if (existing) Destroy(existing);
-                _envConsumableGOs.Remove(type);
-            }
+            // Clear all env consumable GOs — only one allowed at a time
+            ClearAllEnvConsumableVisuals();
 
             var obj = Instantiate((UnityEngine.Object)prefab);
             var instance = obj as GameObject;
@@ -351,6 +347,14 @@ namespace Garden
                 if (go) Destroy(go);
                 _envConsumableGOs.Remove(type);
             }
+        }
+
+        /// <summary>Destroys all env-scoped consumable GOs (called before spawning a replacement).</summary>
+        public void ClearAllEnvConsumableVisuals()
+        {
+            foreach (var kvp in _envConsumableGOs)
+                if (kvp.Value) Destroy(kvp.Value);
+            _envConsumableGOs.Clear();
         }
     }
 }
