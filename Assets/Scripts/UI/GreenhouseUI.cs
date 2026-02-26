@@ -53,6 +53,7 @@ namespace Garden
         public void RefreshDisplay()
         {
             plantGrid.Clear();
+            plantGrid.scrollOffset = Vector2.zero;
             filledSlotRoots.Clear();
             _decayWidgets.Clear();
             selectedIndex = -1;
