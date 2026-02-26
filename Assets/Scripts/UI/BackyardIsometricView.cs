@@ -39,6 +39,7 @@ namespace Garden
         private float slideOffsetX;
 
         private const int GridColumns = 2;
+        private const float TileScale = 1.3f;
 
         private void Awake()
         {
@@ -110,6 +111,7 @@ namespace Garden
         {
             var tileGO = new GameObject($"BackyardTile_{index}");
             tileGO.transform.SetParent(transform, false);
+            tileGO.transform.localScale = Vector3.one * TileScale;
 
             var sr = tileGO.AddComponent<SpriteRenderer>();
             sr.sprite = tileSprite;
@@ -140,8 +142,8 @@ namespace Garden
         {
             if (index >= tiles.Count || tileSprite == null) return;
             float ppu = tileSprite.pixelsPerUnit;
-            float w = tileSprite.rect.width / ppu;
-            float h = tileSprite.rect.height / ppu;
+            float w = tileSprite.rect.width / ppu * TileScale;
+            float h = tileSprite.rect.height / ppu * TileScale;
             int col = index % GridColumns;
             int row = index / GridColumns;
             // Isometric grid: east step = (+w/2, -h/4), south step = (-w/2, -h/4)
@@ -155,8 +157,8 @@ namespace Garden
         {
             if (tiles.Count == 0 || tileSprite == null) return;
             float ppu = tileSprite.pixelsPerUnit;
-            float w = tileSprite.rect.width / ppu;
-            float h = tileSprite.rect.height / ppu;
+            float w = tileSprite.rect.width / ppu * TileScale;
+            float h = tileSprite.rect.height / ppu * TileScale;
             int n = tiles.Count;
             // Average position of all tiles in the 2-column grid
             float sumX = 0f, sumY = 0f;
@@ -197,8 +199,8 @@ namespace Garden
                 return Rect.zero;
             var worldPos = tiles[index].transform.position;
             float ppu = tileSprite.pixelsPerUnit;
-            float halfW = tileSprite.rect.width * 0.5f / ppu;
-            float halfH = tileSprite.rect.height * 0.5f / ppu;
+            float halfW = tileSprite.rect.width * 0.5f / ppu * TileScale;
+            float halfH = tileSprite.rect.height * 0.5f / ppu * TileScale;
             // bl = left edge at sprite centre; tr = top-right of sprite
             var bl = (Vector2)mainCam.WorldToScreenPoint(worldPos + new Vector3(-halfW, 0f));
             var tr = (Vector2)mainCam.WorldToScreenPoint(worldPos + new Vector3( halfW, halfH));
@@ -353,7 +355,7 @@ namespace Garden
         public void ClearAllEnvConsumableVisuals()
         {
             foreach (var kvp in _envConsumableGOs)
-                if (kvp.Value) Destroy(kvp.Value);
+                if (kvp.Value) { kvp.Value.SetActive(false); Destroy(kvp.Value); }
             _envConsumableGOs.Clear();
         }
     }
