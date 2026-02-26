@@ -12,7 +12,6 @@ namespace Garden
 
         private VisualElement _container;
         private VisualTreeAsset _template;
-        private string _pendingVariantName;
 
         public void Initialize(VisualElement root)
         {
@@ -20,9 +19,10 @@ namespace Garden
             _template = Resources.Load<VisualTreeAsset>("UI/Templates/DiscoveryPopup");
         }
 
-        public void Show(VariantData variant, HarvestResult result)
+        public void Show(VariantData variant)
         {
             _container.Clear();
+            if (_template == null) { Debug.LogError("[DiscoveryPopupUI] Template not loaded — was Initialize() called?"); return; }
 
             var popup = _template.CloneTree();
             popup.style.flexGrow = 1;
@@ -46,8 +46,8 @@ namespace Garden
             rarityLabel.AddToClassList($"rarity-{variant.rarity.ToString().ToLower()}");
 
             // Share button
-            _pendingVariantName = variant.variantName;
-            popup.Q<Button>("share-button").clicked += OnShareClicked;
+            string capturedName = variant.variantName;
+            popup.Q<Button>("share-button").clicked += () => StartCoroutine(ShareCoroutine(capturedName));
 
             // Tap card stops propagation — prevents card taps from dismissing the overlay
             popup.Q<VisualElement>("discovery-card").RegisterCallback<ClickEvent>(evt => evt.StopPropagation());
@@ -56,12 +56,7 @@ namespace Garden
             popup.Q<VisualElement>("discovery-overlay").RegisterCallback<ClickEvent>(_ => Dismiss());
         }
 
-        private void OnShareClicked()
-        {
-            StartCoroutine(ShareCoroutine());
-        }
-
-        private IEnumerator ShareCoroutine()
+        private IEnumerator ShareCoroutine(string variantName)
         {
             yield return new WaitForEndOfFrame();
 
@@ -72,7 +67,7 @@ namespace Garden
 
             new NativeShare()
                 .AddFile(path)
-                .SetText($"I just discovered {_pendingVariantName} in Garden! 🌱")
+                .SetText($"I just discovered {variantName} in Garden! 🌱")
                 .Share();
         }
 
