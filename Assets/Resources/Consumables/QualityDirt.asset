@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Garden::Garden.ConsumableData
   type: 1
   displayName: Quality Dirt
-  icon: {fileID: 21300000, guid: be9e8efae834c425ab3d9cda22dd3800, type: 3}
+  icon: {fileID: -8275502208090371910, guid: be9e8efae834c425ab3d9cda22dd3800, type: 3}
   buyPrice: 300
   magnitude: 0
   isEnvironmentScoped: 0

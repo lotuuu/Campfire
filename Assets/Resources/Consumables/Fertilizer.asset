@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Garden::Garden.ConsumableData
   type: 0
   displayName: Fertilizer
-  icon: {fileID: 21300000, guid: 218d133608b774d699266c01bb1577c6, type: 3}
+  icon: {fileID: -8418608994802070764, guid: 218d133608b774d699266c01bb1577c6, type: 3}
   buyPrice: 200
   magnitude: 0
   isEnvironmentScoped: 0
