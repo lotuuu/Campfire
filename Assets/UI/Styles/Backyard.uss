@@ -27,9 +27,9 @@
     width: 50%;
     height: 43%;
     border-radius: 50%;
-    background-color: rgba(150, 170, 185, 0.15);
-    border-width: 1.5px;
-    border-color: rgba(180, 205, 220, 0.40);
+    background-color: rgba(140, 210, 160, 0.18);
+    border-width: 2px;
+    border-color: rgba(160, 230, 180, 0.75);
 }
 
 .backyard-slot-label {
