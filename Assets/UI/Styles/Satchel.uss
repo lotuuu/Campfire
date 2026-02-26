@@ -69,3 +69,12 @@
 .no-transition {
     transition-duration: 0ms;
 }
+
+.satchel-empty-hint {
+    color: var(--color-text-dim);
+    font-size: var(--font-sm);
+    -unity-text-align: middle-center;
+    white-space: normal;
+    width: 100%;
+    padding: var(--spacing-xl) var(--spacing-lg);
+}

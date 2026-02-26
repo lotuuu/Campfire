@@ -66,6 +66,15 @@ namespace Garden
         {
             seedList.Clear();
             var seeds = SeedRegistry.Instance.GetOwnedSeeds();
+
+            if (seeds.Count == 0)
+            {
+                var hint = new Label("No seeds in your Satchel.\nVisit the Shop to buy some.");
+                hint.AddToClassList("satchel-empty-hint");
+                seedList.Add(hint);
+                return;
+            }
+
             foreach (var seed in seeds)
             {
                 int count = SeedRegistry.Instance.GetSeedCount(seed.seedName);
