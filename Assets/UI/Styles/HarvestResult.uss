@@ -65,8 +65,8 @@
     min-width: 200px;
 }
 
-.tier-d { color: rgb(150, 150, 150); }
-.tier-c { color: rgb(100, 200, 120); }
-.tier-b { color: rgb(80, 160, 255); }
-.tier-a { color: rgb(255, 200, 60); }
-.tier-s { color: rgb(200, 100, 255); }
+.tier-d { color: rgb(150, 150, 150); }     /* neutral gray — base/dull quality */
+.tier-c { color: rgb(200, 155, 75); }      /* bronze amber — clearly different from uncommon green */
+.tier-b { color: rgb(80, 210, 210); }      /* teal cyan — distinct from rare blue */
+.tier-a { color: rgb(255, 200, 60); }      /* gold — kept (reads as "excellent") */
+.tier-s { color: rgb(200, 100, 255); }     /* violet — kept (reads as "special/legendary") */
