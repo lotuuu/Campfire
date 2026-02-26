@@ -68,6 +68,9 @@ namespace Garden
 
         private void RebuildForEnvironment(int envIndex)
         {
+            // Dismiss any in-flight env replacement confirmation before rebuilding
+            CancelEnvConfirm();
+
             // Rebuild the iso view first so new tiles exist before we spawn slot buttons
             // and consumable visuals on them. This also makes ordering deterministic —
             // BackyardIsometricView no longer subscribes to OnActiveEnvironmentChanged;
@@ -283,8 +286,8 @@ namespace Garden
                 ConsumableManager.Instance.ApplyToEnvironment(newType, ActiveEnv))
             {
                 isometricView?.SpawnEnvConsumableVisual(newType);
-                RefreshPickerIndicator();
             }
+            RefreshPickerIndicator();
         }
 
         private void CancelEnvConfirm()

@@ -147,3 +147,38 @@
     border-width: 2px;
     border-radius: var(--radius-sm);
 }
+
+/* Inline env-replace confirmation dialog — shown inside the consumable picker */
+.consumable-confirm-label {
+    color: var(--color-text-dim);
+    font-size: var(--font-sm);
+    -unity-text-align: middle-center;
+    margin-top: 12px;
+    margin-bottom: 6px;
+    white-space: normal;
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+.consumable-confirm-btn {
+    width: 108px;
+    height: 60px;
+    border-radius: 12px;
+    background-color: var(--color-highlight);
+    border-width: 0;
+    color: var(--color-text);
+    font-size: var(--font-sm);
+    margin-top: 6px;
+}
+
+.consumable-confirm-cancel-btn {
+    width: 108px;
+    height: 60px;
+    border-radius: 12px;
+    background-color: rgba(255, 255, 255, 0.08);
+    border-width: 0;
+    color: var(--color-text-dim);
+    font-size: var(--font-sm);
+    margin-top: 4px;
+    margin-bottom: 18px;
+}
