@@ -54,6 +54,10 @@
     border-radius: var(--radius-sm);
 }
 
+.shop-section-banner--divider {
+    margin-top: var(--spacing-lg);
+}
+
 .shop-section-banner-title {
     font-size: var(--font-md);
     color: var(--color-text-bright);

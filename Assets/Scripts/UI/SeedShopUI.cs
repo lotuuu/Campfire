@@ -99,7 +99,7 @@ namespace Garden
             if (ConsumableManager.Instance == null) return;
 
             var banner = MakeSectionBanner("Consumables", "SunShards", "shop-currency-badge--sun-shards");
-            banner.style.marginTop = 32;
+            banner.AddToClassList("shop-section-banner--divider");
             shopGrid.Add(banner);
 
             var consumables = new System.Collections.Generic.List<ConsumableData>(
