@@ -20,6 +20,7 @@ namespace Garden
         private GreenhouseUI greenhouseUI;
         private ConstructionUI constructionUI;
         private HarvestResultUI harvestResultUI;
+        private DiscoveryPopupUI discoveryPopupUI;
         private DebugWeatherPanel debugPanel;
         private EnvironmentSwitcherBar envSwitcherBar;
         [SerializeField] private BackyardIsometricView backyardIsoView;
@@ -54,6 +55,7 @@ namespace Garden
             greenhouseUI = GetComponent<GreenhouseUI>();
             constructionUI = GetComponent<ConstructionUI>();
             harvestResultUI = GetComponent<HarvestResultUI>();
+            discoveryPopupUI = GetComponent<DiscoveryPopupUI>();
             debugPanel = GetComponent<DebugWeatherPanel>();
 
             // Build SwipeablePageView
@@ -81,6 +83,7 @@ namespace Garden
             greenhouseUI?.Initialize(root);
             constructionUI?.Initialize(root);
             harvestResultUI?.Initialize(root);
+            discoveryPopupUI?.Initialize(root);
             debugPanel?.Initialize(root);
 
             // Initialize bottom nav
@@ -112,7 +115,12 @@ namespace Garden
                 {
                     var result = PlantManager.Instance.Harvest(envIdx, slotIdx);
                     if (result.seed != null)
-                        harvestResultUI?.Show(result);
+                    {
+                        if (result.isNewDiscovery)
+                            discoveryPopupUI?.Show(result.variant);
+                        else
+                            harvestResultUI?.Show(result);
+                    }
                     backyardViewUI?.RefreshAllSlots();
                 };
             }
@@ -120,6 +128,14 @@ namespace Garden
             if (harvestResultUI != null)
             {
                 harvestResultUI.OnDismissed += () =>
+                {
+                    backyardViewUI?.RefreshAllSlots();
+                    greenhouseUI?.RefreshDisplay();
+                };
+            }
+            if (discoveryPopupUI != null)
+            {
+                discoveryPopupUI.OnDismissed += () =>
                 {
                     backyardViewUI?.RefreshAllSlots();
                     greenhouseUI?.RefreshDisplay();

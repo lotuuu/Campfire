@@ -166,7 +166,6 @@ MonoBehaviour:
   sortingLayerName: Default
   baseSortingOrder: 0
   gridAnchor: {x: 0, y: -0.5, z: 0}
-  emptyIndicatorSprite: {fileID: 21300000, guid: 4f3c7c84615841018d094308a4fa88db, type: 3}
   plantPrefabs:
   - {fileID: 6846470340721416821, guid: 355f8608ec978844cab41afd1cad1457, type: 3}
   - {fileID: 5836257495164524969, guid: 91fb15e9d2bcf1c4bbf25fac679dde2a, type: 3}
@@ -186,6 +185,7 @@ MonoBehaviour:
   - {fileID: 919132149155446097, guid: 7987ca5f217d54fdc8497e35e1152479, type: 3}
   - {fileID: 919132149155446097, guid: fd6467b8d3cd04f66b8483b8c6aaf6e6, type: 3}
   - {fileID: 919132149155446097, guid: fb0578abddaf74a66b71a4c461692f68, type: 3}
+  emptyIndicatorSprite: {fileID: 21300000, guid: 4f3c7c84615841018d094308a4fa88db, type: 3}
 --- !u!1 &12194300
 GameObject:
   m_ObjectHideFlags: 0
@@ -15470,50 +15470,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4fb10d33dd33d4db79da34d4489cfa04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Garden::Garden.SaveManager
---- !u!1 &9001234561
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 9001234562}
-  - component: {fileID: 9001234563}
-  m_Layer: 0
-  m_Name: NotificationService
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &9001234562
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9001234561}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 12194301}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &9001234563
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9001234561}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 523009a472dfe4ffa887016d2743211a, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Garden::Garden.NotificationService
 --- !u!1 &1564428222
 GameObject:
   m_ObjectHideFlags: 0
@@ -15538,6 +15494,7 @@ GameObject:
   - component: {fileID: 1564428238}
   - component: {fileID: 1564428239}
   - component: {fileID: 1564428240}
+  - component: {fileID: 1564428241}
   m_Layer: 0
   m_Name: --- UI ---
   m_TagString: Untagged
@@ -15754,6 +15711,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 77811f532c13945e69b61151eff7a02d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Garden::Garden.EnvironmentSwitcherBar
+--- !u!114 &1564428241
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1564428222}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cd32dac36d24424da9fcf92b27dec1c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Garden::Garden.DiscoveryPopupUI
 --- !u!1 &1571088094
 GameObject:
   m_ObjectHideFlags: 0
@@ -21108,6 +21077,50 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f8381111cbb241398588a48759cb351, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Garden::Garden.SeedRegistry
+--- !u!1 &9001234561
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 9001234562}
+  - component: {fileID: 9001234563}
+  m_Layer: 0
+  m_Name: NotificationService
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &9001234562
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9001234561}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 12194301}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &9001234563
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9001234561}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 523009a472dfe4ffa887016d2743211a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Garden::Garden.NotificationService
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
