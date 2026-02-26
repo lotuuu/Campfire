@@ -31,7 +31,6 @@ namespace Garden
         private void RefreshDisplay()
         {
             if (scrollView == null) return;
-            var savedOffset = scrollView.scrollOffset;
             scrollView.Clear();
 
             var em = EnvironmentManager.Instance;
@@ -108,7 +107,6 @@ namespace Garden
             }
 
             AppendGreenhouseCard();
-            scrollView.schedule.Execute(() => scrollView.scrollOffset = savedOffset);
         }
 
         private void AppendGreenhouseCard()
