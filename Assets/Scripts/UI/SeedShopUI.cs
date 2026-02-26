@@ -58,6 +58,8 @@ namespace Garden
 
         private void AddSeedSection()
         {
+            if (SeedShopManager.Instance == null) return;
+
             shopGrid.Add(MakeSectionBanner("Seeds", "AuraDust", "shop-currency-badge--aura-dust"));
 
             var seeds = SeedShopManager.Instance.GetShopSeeds();
