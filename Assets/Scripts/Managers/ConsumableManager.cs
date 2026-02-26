@@ -84,7 +84,8 @@ namespace Garden
 
         /// <summary>
         /// Spends one consumable from inventory and applies it to the environment.
-        /// Replaces any existing consumable of the same type. Only env-scoped types allowed.
+        /// Replaces any existing env-scoped consumable on this environment (one per env).
+        /// Only env-scoped types allowed. The replaced consumable is discarded.
         /// </summary>
         public bool ApplyToEnvironment(ConsumableType type, int envIndex)
         {
@@ -93,8 +94,8 @@ namespace Garden
             if (!Spend(type)) return false;
 
             var envList = SaveManager.Instance.Data.environmentConsumables;
-            // Replace same type (no stacking)
-            envList.RemoveAll(e => e.envIndex == envIndex && e.consumableType == type.ToString());
+            // One consumable per environment — discard any existing (regardless of type)
+            envList.RemoveAll(e => e.envIndex == envIndex);
             envList.Add(new EnvironmentConsumableSave
             {
                 envIndex = envIndex,
