@@ -32,9 +32,9 @@ namespace Garden
         {
             var cm = CurrencyManager.Instance;
             if (cm == null || goldText == null) return;
-            goldText.text = $"Gold: {cm.Gold}";
-            sunShardsText.text = $"Sun: {cm.SunShards}";
-            pollenText.text = $"Pollen: {cm.Pollen}";
+            goldText.text = $"◆ {cm.Gold}";
+            sunShardsText.text = $"✦ {cm.SunShards}";
+            pollenText.text = $"❋ {cm.Pollen}";
         }
     }
 }

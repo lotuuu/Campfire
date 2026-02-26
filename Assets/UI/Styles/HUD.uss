@@ -46,7 +46,10 @@
 }
 
 .currency-label {
-    color: var(--color-text-accent);
     font-size: var(--font-sm);
     margin-bottom: 4px;
 }
+
+#gold-text        { color: var(--color-highlight); }
+#sun-shards-text  { color: var(--color-sun-shards); }
+#pollen-text      { color: var(--color-pollen); }
