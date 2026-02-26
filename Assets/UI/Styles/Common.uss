@@ -7,8 +7,10 @@
     top: 0;
     bottom: 0;
     background-color: var(--color-bg-panel);
-    padding: var(--spacing-lg);
     padding-top: var(--spacing-xl);
+    padding-right: var(--spacing-lg);
+    padding-bottom: var(--spacing-lg);
+    padding-left: var(--spacing-lg);
     border-width: 1px;
     border-color: var(--color-border);
     border-top-color: rgba(140, 230, 240, 0.25);
@@ -60,12 +62,11 @@
     position: absolute;
     right: var(--spacing-md);
     top: var(--spacing-md);
-    width: 80px;
-    height: 80px;
+    width: 88px;
+    height: 88px;
     font-size: var(--font-lg);
-    min-height: 88px;
     padding: 0;
-    border-radius: 40px;
+    border-radius: 44px;
 }
 
 .label {
