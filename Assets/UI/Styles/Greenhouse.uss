@@ -110,7 +110,7 @@
 
 /* Withered state */
 #greenhouse-page .plant-slot--withered .plant-swatch {
-    background-color: rgba(60, 50, 40, 0.6) !important;
+    background-color: rgba(60, 50, 40, 0.6);
 }
 
 #greenhouse-page .plant-slot--withered .plant-name {

@@ -73,7 +73,10 @@ namespace Garden
 
                 if (nameLabel != null)
                     nameLabel.text = plant.isWithered ? "Withered" : plant.variantName;
-                if (swatch != null) swatch.style.backgroundColor = plant.primaryColor;
+                if (swatch != null)
+                    swatch.style.backgroundColor = plant.isWithered
+                        ? new Color(0.235f, 0.196f, 0.157f, 0.6f)   // rgba(60,50,40,0.6) normalized
+                        : plant.primaryColor;
 
                 if (plant.isWithered && slotRoot != null)
                     slotRoot.AddToClassList("plant-slot--withered");
