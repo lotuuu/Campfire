@@ -8,7 +8,7 @@ namespace Garden
     {
         public int gold;
         public int sunShards;
-        public int auraDust;
+        public int pollen;
 
         // v2: multi-slot replaces single activePlant
         public ActivePlantSave activePlant;

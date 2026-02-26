@@ -60,7 +60,7 @@ namespace Garden
         {
             if (SeedShopManager.Instance == null) return;
 
-            shopGrid.Add(MakeSectionBanner("Seeds", "AuraDust", "shop-currency-badge--aura-dust"));
+            shopGrid.Add(MakeSectionBanner("Seeds", "Pollen", "shop-currency-badge--pollen"));
 
             var seeds = SeedShopManager.Instance.GetShopSeeds();
             seeds.Sort((a, b) => a.buyPrice.CompareTo(b.buyPrice));
@@ -80,7 +80,7 @@ namespace Garden
 
                 int owned = SeedRegistry.Instance.GetSeedCount(seed.seedName);
                 if (nameLabel  != null) nameLabel.text  = $"{seed.seedName} (x{owned})";
-                if (priceLabel != null) priceLabel.text = $"{seed.buyPrice} Dust";
+                if (priceLabel != null) priceLabel.text = $"{seed.buyPrice} Pollen";
                 if (condLabel  != null) condLabel.text  = seed.description ?? "";
                 if (icon != null && seed.icon != null)
                     icon.style.backgroundImage = new StyleBackground(seed.icon);

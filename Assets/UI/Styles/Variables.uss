@@ -24,7 +24,7 @@
     --color-rarity-legendary: rgb(255, 185,  50);
 
     /* Currency */
-    --color-aura-dust: rgb(80, 200, 160);
+    --color-pollen: rgb(80, 200, 160);
     --color-sun-shards: rgb(255, 145, 30);
 
     --color-highlight: rgb(255, 220, 80);

@@ -9,13 +9,13 @@ namespace Garden
         private VisualTreeAsset plantSlotTemplate;
 
         private ScrollView plantGrid;
-        private Label dustRateText;
+        private Label pollenRateText;
         private Label slotsText;
 
         // Sell bar
         private VisualElement sellBar;
         private Label sellNameLabel;
-        private Label sellDustLabel;
+        private Label sellPollenLabel;
         private Button sellButton;
 
         // Selection state
@@ -31,12 +31,12 @@ namespace Garden
             plantSlotTemplate = Resources.Load<VisualTreeAsset>("UI/Templates/PlantSlot");
 
             plantGrid = root.Q<ScrollView>("greenhouse-grid");
-            dustRateText = root.Q<Label>("greenhouse-dust-rate");
+            pollenRateText = root.Q<Label>("greenhouse-pollen-rate");
             slotsText = root.Q<Label>("greenhouse-slots-text");
 
             sellBar = root.Q<VisualElement>("greenhouse-sell-bar");
             sellNameLabel = root.Q<Label>("greenhouse-sell-name");
-            sellDustLabel = root.Q<Label>("greenhouse-sell-dust");
+            sellPollenLabel = root.Q<Label>("greenhouse-sell-pollen");
             sellButton = root.Q<Button>("greenhouse-sell-btn");
 
             if (sellButton != null)
@@ -61,7 +61,7 @@ namespace Garden
 
             var gm = GreenhouseManager.Instance;
             slotsText.text = $"{gm.Plants.Count}";
-            dustRateText.text = $"+{gm.GetTotalDustPerSecond() * 60f:F1} Aura Dust/min";
+            pollenRateText.text = $"+{gm.GetTotalPollenPerSecond() * 60f:F1} Pollen/min";
 
             for (int i = 0; i < gm.Plants.Count; i++)
             {
@@ -155,19 +155,19 @@ namespace Garden
             var seed = SeedRegistry.Instance.GetSeed(plant.seedName);
             int baseSell = seed != null ? seed.greenhouseYield : 100;
             int sellValue = config.GetGreenhouseSellValue(baseSell, plant.qualityTier);
-            float dustRate = config.GetDustPerSecondForPlant(plant.rarity, plant.qualityTier) * 60f;
+            float dustRate = config.GetPollenPerSecondForPlant(plant.rarity, plant.qualityTier) * 60f;
             string qualityLabel = CurrencyConfig.GetQualityLabel(plant.qualityTier);
 
             if (plant.isWithered)
             {
                 if (sellNameLabel != null) sellNameLabel.text = $"{plant.variantName} · Withered";
-                if (sellDustLabel != null) sellDustLabel.text = "No value remaining";
+                if (sellPollenLabel != null) sellPollenLabel.text = "No value remaining";
                 if (sellButton != null) sellButton.text = "Trash";
             }
             else
             {
                 if (sellNameLabel != null) sellNameLabel.text = $"{plant.variantName} · {qualityLabel}";
-                if (sellDustLabel != null) sellDustLabel.text = $"+{dustRate:F1} Dust/min";
+                if (sellPollenLabel != null) sellPollenLabel.text = $"+{dustRate:F1} Pollen/min";
                 if (sellButton != null) sellButton.text = $"Sell for {sellValue} Gold";
             }
             if (sellBar != null) sellBar.style.display = DisplayStyle.Flex;

@@ -130,7 +130,7 @@ namespace Garden
             var cm = CurrencyManager.Instance;
             cm.Add(CurrencyType.Gold,  int.MaxValue - cm.Gold);
             cm.Add(CurrencyType.SunShards, int.MaxValue - cm.SunShards);
-            cm.Add(CurrencyType.AuraDust,  int.MaxValue - cm.AuraDust);
+            cm.Add(CurrencyType.Pollen,  int.MaxValue - cm.Pollen);
             Debug.Log("[Debug] All currencies set to int.MaxValue.");
         }
 

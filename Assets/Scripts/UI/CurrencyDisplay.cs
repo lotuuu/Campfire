@@ -7,13 +7,13 @@ namespace Garden
     {
         private Label goldText;
         private Label sunShardsText;
-        private Label auraDustText;
+        private Label pollenText;
 
         public void Initialize(VisualElement root)
         {
             goldText = root.Q<Label>("gold-text");
             sunShardsText = root.Q<Label>("sun-shards-text");
-            auraDustText = root.Q<Label>("aura-dust-text");
+            pollenText = root.Q<Label>("pollen-text");
 
             if (CurrencyManager.Instance != null)
                 CurrencyManager.Instance.OnCurrencyChanged += OnChanged;
@@ -34,7 +34,7 @@ namespace Garden
             if (cm == null || goldText == null) return;
             goldText.text = $"Gold: {cm.Gold}";
             sunShardsText.text = $"Sun: {cm.SunShards}";
-            auraDustText.text = $"Dust: {cm.AuraDust}";
+            pollenText.text = $"Pollen: {cm.Pollen}";
         }
     }
 }

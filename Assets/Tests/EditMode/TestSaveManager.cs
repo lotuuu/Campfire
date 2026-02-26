@@ -61,7 +61,7 @@ namespace Garden.Tests
             {
                 gold = 500,
                 sunShards = 10,
-                auraDust = 25,
+                pollen = 25,
                 greenhouseSlots = 8
             };
             data.seedInventory.Add(new SeedInventoryEntry { seedName = "Astra", count = 3 });

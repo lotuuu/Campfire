@@ -32,7 +32,7 @@
     margin-bottom: var(--spacing-md);
 }
 
-#greenhouse-dust-rate {
+#greenhouse-pollen-rate {
     color: var(--color-text-accent);
     font-size: var(--font-md);
 }
@@ -68,7 +68,7 @@
     margin-bottom: var(--spacing-xs);
 }
 
-#greenhouse-sell-dust {
+#greenhouse-sell-pollen {
     color: var(--color-text-accent);
     font-size: var(--font-sm);
     margin-bottom: var(--spacing-xs);

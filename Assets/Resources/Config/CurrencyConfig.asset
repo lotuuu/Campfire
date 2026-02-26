@@ -17,10 +17,10 @@ MonoBehaviour:
   rareGold: 50
   epicGold: 100
   legendaryGold: 250
-  commonDustPerSecond: 0.5
-  uncommonDustPerSecond: 1.5
-  rareDustPerSecond: 4
-  epicDustPerSecond: 10
-  legendaryDustPerSecond: 25
+  commonPollenPerSecond: 0.5
+  uncommonPollenPerSecond: 1.5
+  rarePollenPerSecond: 4
+  epicPollenPerSecond: 10
+  legendaryPollenPerSecond: 25
   defaultSlots: 3
   greenhouseExpandCostGold: 300

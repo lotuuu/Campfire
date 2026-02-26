@@ -13,7 +13,7 @@ namespace Garden
 
         public event Action OnGreenhouseChanged;
 
-        private float dustAccumulator;
+        private float pollenAccumulator;
 
         private void Awake()
         {
@@ -30,12 +30,12 @@ namespace Garden
         {
             if (Plants.Count == 0) return;
 
-            dustAccumulator += GetTotalDustPerSecond() * Time.deltaTime;
-            int toAward = Mathf.FloorToInt(dustAccumulator);
+            pollenAccumulator += GetTotalPollenPerSecond() * Time.deltaTime;
+            int toAward = Mathf.FloorToInt(pollenAccumulator);
             if (toAward > 0)
             {
-                dustAccumulator -= toAward;
-                CurrencyManager.Instance.Add(CurrencyType.AuraDust, toAward);
+                pollenAccumulator -= toAward;
+                CurrencyManager.Instance.Add(CurrencyType.Pollen, toAward);
             }
 
             for (int i = 0; i < Plants.Count; i++)
@@ -132,13 +132,13 @@ namespace Garden
             return true;
         }
 
-        public float GetTotalDustPerSecond()
+        public float GetTotalPollenPerSecond()
         {
             float total = 0;
             var config = CurrencyManager.Instance.Config;
             foreach (var p in Plants)
                 if (!p.isWithered)
-                    total += config.GetDustPerSecondForPlant(p.rarity, p.qualityTier);
+                    total += config.GetPollenPerSecondForPlant(p.rarity, p.qualityTier);
             return total;
         }
 
@@ -166,9 +166,9 @@ namespace Garden
         public void DebugAdvanceTime(float hours)
         {
             if (Plants.Count == 0) return;
-            int totalDust = Mathf.RoundToInt(GetTotalDustPerSecond() * hours * 3600f);
+            int totalDust = Mathf.RoundToInt(GetTotalPollenPerSecond() * hours * 3600f);
             if (totalDust > 0)
-                CurrencyManager.Instance.Add(CurrencyType.AuraDust, totalDust);
+                CurrencyManager.Instance.Add(CurrencyType.Pollen, totalDust);
 
             foreach (var p in Plants)
             {

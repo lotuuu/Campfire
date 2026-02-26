@@ -12,12 +12,12 @@ namespace Garden
         public int epicGold = 100;
         public int legendaryGold = 250;
 
-        [Header("Aura Dust per Second (by rarity)")]
-        public float commonDustPerSecond = 0.5f;
-        public float uncommonDustPerSecond = 1.5f;
-        public float rareDustPerSecond = 4f;
-        public float epicDustPerSecond = 10f;
-        public float legendaryDustPerSecond = 25f;
+        [Header("Pollen per Second (by rarity)")]
+        public float commonPollenPerSecond = 0.5f;
+        public float uncommonPollenPerSecond = 1.5f;
+        public float rarePollenPerSecond = 4f;
+        public float epicPollenPerSecond = 10f;
+        public float legendaryPollenPerSecond = 25f;
 
         [Header("Greenhouse")]
         public int defaultSlots = 6;
@@ -33,14 +33,14 @@ namespace Garden
             _ => commonGold
         };
 
-        public float GetDustPerSecondForRarity(Rarity r) => r switch
+        public float GetPollenPerSecondForRarity(Rarity r) => r switch
         {
-            Rarity.Common => commonDustPerSecond,
-            Rarity.Uncommon => uncommonDustPerSecond,
-            Rarity.Rare => rareDustPerSecond,
-            Rarity.Epic => epicDustPerSecond,
-            Rarity.Legendary => legendaryDustPerSecond,
-            _ => commonDustPerSecond
+            Rarity.Common => commonPollenPerSecond,
+            Rarity.Uncommon => uncommonPollenPerSecond,
+            Rarity.Rare => rarePollenPerSecond,
+            Rarity.Epic => epicPollenPerSecond,
+            Rarity.Legendary => legendaryPollenPerSecond,
+            _ => commonPollenPerSecond
         };
 
         public static float GetGreenhouseQualityMultiplier(QualityTier tier) => tier switch
@@ -83,9 +83,9 @@ namespace Garden
             return Mathf.RoundToInt(baseSellPrice * GetQualityMultiplier(tier));
         }
 
-        public float GetDustPerSecondForPlant(Rarity rarity, QualityTier tier)
+        public float GetPollenPerSecondForPlant(Rarity rarity, QualityTier tier)
         {
-            return GetDustPerSecondForRarity(rarity) * GetQualityMultiplier(tier);
+            return GetPollenPerSecondForRarity(rarity) * GetQualityMultiplier(tier);
         }
     }
 }

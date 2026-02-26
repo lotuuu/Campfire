@@ -12,7 +12,7 @@ namespace Garden
         public CurrencyConfig Config => config;
         public int Gold => SaveManager.Instance.Data.gold;
         public int SunShards => SaveManager.Instance.Data.sunShards;
-        public int AuraDust => SaveManager.Instance.Data.auraDust;
+        public int Pollen => SaveManager.Instance.Data.pollen;
 
         public event Action<CurrencyType, int, int> OnCurrencyChanged;
 
@@ -34,9 +34,9 @@ namespace Garden
                 case CurrencyType.SunShards:
                     old = data.sunShards; data.sunShards = (int)System.Math.Clamp((long)data.sunShards + amount, 0L, (long)int.MaxValue);
                     OnCurrencyChanged?.Invoke(type, old, data.sunShards); break;
-                case CurrencyType.AuraDust:
-                    old = data.auraDust; data.auraDust = (int)System.Math.Clamp((long)data.auraDust + amount, 0L, (long)int.MaxValue);
-                    OnCurrencyChanged?.Invoke(type, old, data.auraDust); break;
+                case CurrencyType.Pollen:
+                    old = data.pollen; data.pollen = (int)System.Math.Clamp((long)data.pollen + amount, 0L, (long)int.MaxValue);
+                    OnCurrencyChanged?.Invoke(type, old, data.pollen); break;
             }
             SaveManager.Instance.Save();
         }
@@ -54,7 +54,7 @@ namespace Garden
             {
                 CurrencyType.Gold => Gold >= amount,
                 CurrencyType.SunShards => SunShards >= amount,
-                CurrencyType.AuraDust => AuraDust >= amount,
+                CurrencyType.Pollen => Pollen >= amount,
                 _ => false
             };
         }
