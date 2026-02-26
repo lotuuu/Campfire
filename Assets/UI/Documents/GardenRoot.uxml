@@ -13,6 +13,7 @@
     <Style src="../Styles/Terrarium.uss" />
     <Style src="../Styles/Backyard.uss" />
     <Style src="../Styles/Construction.uss" />
+    <Style src="../Styles/DiscoveryPopup.uss" />
 
     <!-- App shell: vertical stack -->
     <ui:VisualElement name="app-shell" style="flex-grow: 1;">
@@ -138,6 +139,9 @@
 
     <!-- Harvest Result Popup -->
     <ui:VisualElement name="harvest-popup" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: none;" />
+
+    <!-- Discovery Popup (first-time variant reveal) -->
+    <ui:VisualElement name="discovery-popup" style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: none;" />
 
     <!-- Debug Panel (overlay, toggled separately) -->
     <ui:VisualElement name="debug-panel" class="panel overlay-panel" style="display: none;">

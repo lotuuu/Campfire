@@ -3,7 +3,8 @@
     "rootNamespace": "Garden",
     "references": [
         "Unity.Notifications.iOS",
-        "Unity.Notifications.Android"
+        "Unity.Notifications.Android",
+        "NativeShare.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -1,0 +1,16 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="discovery-overlay" class="discovery-overlay" picking-mode="Position">
+        <ui:VisualElement name="discovery-card" class="discovery-card">
+            <ui:VisualElement name="glow-bg" class="discovery-glow" />
+            <ui:VisualElement name="sprite-container" class="discovery-sprite" />
+            <ui:Label name="variant-name" class="discovery-name" text="" />
+            <ui:Label name="rarity-label" class="discovery-rarity" text="" />
+            <ui:VisualElement class="discovery-divider" />
+            <ui:Label name="variant-description" class="discovery-description" text="" />
+            <ui:VisualElement class="discovery-actions">
+                <ui:Button name="share-button" text="Share Discovery" class="discovery-share-btn" />
+                <ui:Label class="discovery-dismiss-hint" text="Tap anywhere to continue" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
