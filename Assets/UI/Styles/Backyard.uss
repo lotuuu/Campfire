@@ -1,7 +1,7 @@
 /* Backyard: Isometric farm – overlay buttons positioned at runtime by BackyardViewUI */
 
 .backyard-title {
-    color: var(--color-text-dim);
+    color: var(--color-text);
     font-size: var(--font-sm);
     margin-top: var(--spacing-md);
     margin-left: var(--spacing-md);
