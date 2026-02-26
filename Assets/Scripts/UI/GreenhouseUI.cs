@@ -63,6 +63,13 @@ namespace Garden
             slotsText.text = $"{gm.Plants.Count}";
             pollenRateText.text = $"+{gm.GetTotalPollenPerSecond() * 60f:F1} Pollen/min";
 
+            if (gm.Plants.Count == 0)
+            {
+                var hint = new Label("Harvest plants from your Backyard\nto fill the Greenhouse.");
+                hint.AddToClassList("greenhouse-empty-hint");
+                plantGrid.Add(hint);
+            }
+
             for (int i = 0; i < gm.Plants.Count; i++)
             {
                 var plant = gm.Plants[i];

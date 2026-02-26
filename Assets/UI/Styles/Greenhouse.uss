@@ -120,3 +120,12 @@
 #greenhouse-page .plant-slot--withered .plant-decay-bar-bg {
     display: none;
 }
+
+.greenhouse-empty-hint {
+    color: var(--color-text-dim);
+    font-size: var(--font-sm);
+    -unity-text-align: middle-center;
+    white-space: normal;
+    width: 100%;
+    padding: var(--spacing-xl) var(--spacing-lg);
+}
