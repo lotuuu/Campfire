@@ -36,7 +36,7 @@
     color: var(--color-text-dim);
     font-size: var(--font-xs);
     -unity-text-align: middle-center;
-    margin-bottom: 4px;
+    margin-bottom: var(--spacing-xxs);
 }
 
 .backyard-progress-bar {
@@ -90,7 +90,7 @@
     flex-shrink: 0;
     background-color: rgba(0, 0, 0, 0);
     border-width: 0;
-    padding: 24px;
+    padding: var(--spacing-md);
     -unity-background-image-tint-color: rgb(185, 210, 225);
     background-image: url('../../ThirdParty/icons/delapouite-herbs-bundle.png');
     -unity-background-scale-mode: scale-to-fit;
@@ -111,7 +111,7 @@
 .consumable-picker-icons {
     flex-direction: column;
     align-items: center;
-    padding-bottom: 18px;
+    padding-bottom: var(--spacing-sm);
 }
 
 /* Each consumable icon button */
@@ -121,8 +121,8 @@
     border-radius: 24px;
     background-color: rgba(0, 0, 0, 0);
     border-width: 0;
-    padding: 18px;
-    margin-top: 6px;
+    padding: var(--spacing-sm);
+    margin-top: var(--spacing-xs);
     -unity-background-scale-mode: scale-to-fit;
     -unity-background-image-tint-color: rgb(185, 210, 225);
 }
@@ -135,10 +135,10 @@
 /* Count badge overlaid at bottom-right of each icon button */
 .consumable-icon-badge {
     position: absolute;
-    right: 3px;
-    bottom: 3px;
+    right: var(--spacing-xxs);
+    bottom: var(--spacing-xxs);
     color: var(--color-text-dim);
-    font-size: 24px;
+    font-size: var(--font-xs);
     -unity-text-align: middle-right;
 }
 
@@ -153,32 +153,32 @@
     color: var(--color-text-dim);
     font-size: var(--font-sm);
     -unity-text-align: middle-center;
-    margin-top: 12px;
-    margin-bottom: 6px;
+    margin-top: var(--spacing-xs);
+    margin-bottom: var(--spacing-xs);
     white-space: normal;
-    padding-left: 12px;
-    padding-right: 12px;
+    padding-left: var(--spacing-xs);
+    padding-right: var(--spacing-xs);
 }
 
 .consumable-confirm-btn {
     width: 108px;
     height: 60px;
-    border-radius: 12px;
+    border-radius: var(--radius-md);
     background-color: var(--color-highlight);
     border-width: 0;
     color: var(--color-text);
     font-size: var(--font-sm);
-    margin-top: 6px;
+    margin-top: var(--spacing-xs);
 }
 
 .consumable-confirm-cancel-btn {
     width: 108px;
     height: 60px;
-    border-radius: 12px;
+    border-radius: var(--radius-md);
     background-color: rgba(255, 255, 255, 0.08);
     border-width: 0;
     color: var(--color-text-dim);
     font-size: var(--font-sm);
-    margin-top: 4px;
-    margin-bottom: 18px;
+    margin-top: var(--spacing-xxs);
+    margin-bottom: var(--spacing-sm);
 }
