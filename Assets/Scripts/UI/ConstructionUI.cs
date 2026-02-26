@@ -19,6 +19,15 @@ namespace Garden
 
             if (CurrencyManager.Instance != null)
                 CurrencyManager.Instance.OnCurrencyChanged += OnCurrencyChanged;
+
+            if (EnvironmentManager.Instance != null)
+            {
+                EnvironmentManager.Instance.OnEnvironmentUnlocked += OnEnvironmentUnlocked;
+                EnvironmentManager.Instance.OnSlotUnlocked += OnSlotUnlocked;
+            }
+
+            if (GreenhouseManager.Instance != null)
+                GreenhouseManager.Instance.OnGreenhouseChanged += RefreshDisplay;
         }
 
         public void Show()
@@ -27,6 +36,8 @@ namespace Garden
         }
 
         private void OnCurrencyChanged(CurrencyType type, int oldVal, int newVal) => RefreshDisplay();
+        private void OnEnvironmentUnlocked(int index) => RefreshDisplay();
+        private void OnSlotUnlocked(int index) => RefreshDisplay();
 
         private void RefreshDisplay()
         {
@@ -157,6 +168,15 @@ namespace Garden
         {
             if (CurrencyManager.Instance != null)
                 CurrencyManager.Instance.OnCurrencyChanged -= OnCurrencyChanged;
+
+            if (EnvironmentManager.Instance != null)
+            {
+                EnvironmentManager.Instance.OnEnvironmentUnlocked -= OnEnvironmentUnlocked;
+                EnvironmentManager.Instance.OnSlotUnlocked -= OnSlotUnlocked;
+            }
+
+            if (GreenhouseManager.Instance != null)
+                GreenhouseManager.Instance.OnGreenhouseChanged -= RefreshDisplay;
         }
     }
 
