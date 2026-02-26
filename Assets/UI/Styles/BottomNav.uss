@@ -81,6 +81,30 @@
     color: rgba(140, 165, 185, 0.40);
 }
 
+/* Expand caret: replaces the top-edge bar when terrarium is expandable */
+.nav-expand-caret {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    -unity-text-align: middle-center;
+    font-size: 18px;
+    -unity-font-style: bold;
+    color: rgb(100, 230, 230);
+    opacity: 0;
+    transition-property: opacity;
+    transition-duration: 0.2s;
+}
+
+/* When expandable: hide the flat border, show the caret */
+.nav-tab-expandable {
+    border-top-color: transparent;
+}
+
+.nav-tab-expandable .nav-expand-caret {
+    opacity: 1;
+}
+
 /* Per-tab icon images */
 #tab-codex .nav-icon {
     background-image: url('../../ThirdParty/icons/lorc-open-book.png');

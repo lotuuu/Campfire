@@ -58,6 +58,7 @@
                 <ui:Label class="nav-label" text="Shop" />
             </ui:Button>
             <ui:Button name="tab-terrarium" class="nav-tab nav-tab-active">
+                <ui:Label class="nav-expand-caret" text="^" />
                 <ui:VisualElement class="nav-icon" />
                 <ui:Label class="nav-label" text="Garden" />
             </ui:Button>

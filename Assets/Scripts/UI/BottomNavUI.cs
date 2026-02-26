@@ -9,6 +9,7 @@ namespace Garden
         public event Action OnTerrariumReactivated;
 
         private const int TerrariumIndex = 2;
+        private const string ExpandableClass = "nav-tab-expandable";
 
         private Button[] tabs;
         private SwipeablePageView pageView;
@@ -31,6 +32,9 @@ namespace Garden
 
             pageView.OnPageChanged += UpdateActiveTab;
             UpdateActiveTab(pageView.CurrentPageIndex);
+
+            if (EnvironmentManager.Instance != null)
+                EnvironmentManager.Instance.OnEnvironmentUnlocked += OnEnvironmentUnlocked;
         }
 
         private void OnTabClicked(int index)
@@ -53,12 +57,38 @@ namespace Garden
             {
                 tabs[activeIndex].AddToClassList("nav-tab-active");
             }
+            UpdateExpandableState(activeIndex);
         }
+
+        private void UpdateExpandableState(int activeIndex)
+        {
+            bool expandable = activeIndex == TerrariumIndex && HasMultipleUnlockedEnvironments();
+            if (expandable)
+                tabs[TerrariumIndex].AddToClassList(ExpandableClass);
+            else
+                tabs[TerrariumIndex].RemoveFromClassList(ExpandableClass);
+        }
+
+        private bool HasMultipleUnlockedEnvironments()
+        {
+            if (EnvironmentManager.Instance == null) return false;
+            int count = 0;
+            for (int i = 0; i < EnvironmentManager.Instance.Environments.Count; i++)
+            {
+                if (EnvironmentManager.Instance.IsUnlocked(i) && ++count >= 2) return true;
+            }
+            return false;
+        }
+
+        private void OnEnvironmentUnlocked(int _) =>
+            UpdateExpandableState(pageView?.CurrentPageIndex ?? -1);
 
         private void OnDestroy()
         {
             if (pageView != null)
                 pageView.OnPageChanged -= UpdateActiveTab;
+            if (EnvironmentManager.Instance != null)
+                EnvironmentManager.Instance.OnEnvironmentUnlocked -= OnEnvironmentUnlocked;
         }
     }
 }
