@@ -231,6 +231,7 @@ namespace Garden
 
         public static bool CheckAndMarkDiscovered(VariantData variant, SaveData save)
         {
+            if (variant == null || string.IsNullOrEmpty(variant.variantName)) return false;
             if (save.discoveredVariants.Contains(variant.variantName)) return false;
             save.discoveredVariants.Add(variant.variantName);
             return true;
