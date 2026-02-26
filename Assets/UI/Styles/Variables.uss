@@ -24,6 +24,8 @@
     --color-rarity-legendary: rgb(255, 185,  50);
 
     --color-highlight: rgb(255, 220, 80);
+    --color-aura-dust: rgb(80, 200, 160);
+    --color-sun-shards: rgb(255, 185, 80);
     --color-dim: rgb(100, 130, 150);
     --color-empty: rgba(30, 45, 60, 0.25);
     --color-unknown: rgba(15, 25, 35, 0.60);
