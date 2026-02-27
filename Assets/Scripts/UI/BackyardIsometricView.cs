@@ -48,8 +48,8 @@ namespace Garden
         private readonly List<SpriteRenderer> _progressFills = new();
         private static Sprite _pixelSprite;
 
-        private static readonly Vector3 ProgressLocalPos = new Vector3(0f, -0.05f, -1f);
-        private static readonly Vector3 LabelLocalPos    = new Vector3(0f, -0.15f, -1f);
+        private static readonly Vector3 ProgressLocalPos = new Vector3(0f, 0.0f, -1f);
+        private static readonly Vector3 LabelLocalPos    = new Vector3(0f, -0.07f, -1f);
         private const float ProgressBarWidth  = 0.4f;
         private const float ProgressBarHeight = 0.04f;
 
@@ -142,7 +142,7 @@ namespace Garden
             // Plant visual: SpriteRenderer driven by SeedData.growthSprites
             var plantGO = new GameObject("PlantSprite");
             plantGO.transform.SetParent(tileGO.transform, false);
-            plantGO.transform.localPosition = new Vector3(0f, 0.1f, -0.5f);
+            plantGO.transform.localPosition = new Vector3(0f, 0.3f, -0.5f);
             plantGO.transform.localScale = Vector3.one * PlantSpriteScale;
             var plantSR = plantGO.AddComponent<SpriteRenderer>();
             plantSR.sortingLayerName = sortingLayerName;
@@ -175,7 +175,7 @@ namespace Garden
             var tm = labelGO.AddComponent<TextMesh>();
             tm.text = "";
             tm.fontSize = 28;
-            tm.characterSize = 0.06f;
+            tm.characterSize = 0.035f;
             tm.anchor = TextAnchor.UpperCenter;
             tm.alignment = TextAlignment.Center;
             tm.color = new Color(0.78f, 0.84f, 0.9f);
