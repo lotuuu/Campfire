@@ -48,8 +48,8 @@ namespace Garden
         private readonly List<SpriteRenderer> _progressFills = new();
         private static Sprite _pixelSprite;
 
-        private static readonly Vector3 LabelLocalPos    = new Vector3(0f, -0.05f, -1f);
-        private static readonly Vector3 ProgressLocalPos = new Vector3(0f, -0.15f, -1f);
+        private static readonly Vector3 ProgressLocalPos = new Vector3(0f, -0.05f, -1f);
+        private static readonly Vector3 LabelLocalPos    = new Vector3(0f, -0.15f, -1f);
         private const float ProgressBarWidth  = 0.4f;
         private const float ProgressBarHeight = 0.04f;
 
