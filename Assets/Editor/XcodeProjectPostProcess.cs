@@ -24,9 +24,10 @@ namespace Garden.Editor
             string mainTarget = project.GetUnityMainTargetGuid();
             string frameworkTarget = project.GetUnityFrameworkTargetGuid();
 
-            // Set team ID on both targets.
-            project.SetTeamId(mainTarget, TeamId);
-            project.SetTeamId(frameworkTarget, TeamId);
+            // Set team ID on both targets (use SetBuildProperty to avoid
+            // duplicate-key crash in SetTeamId when Unity already wrote the attribute).
+            project.SetBuildProperty(mainTarget, "DEVELOPMENT_TEAM", TeamId);
+            project.SetBuildProperty(frameworkTarget, "DEVELOPMENT_TEAM", TeamId);
 
             // Set bundle identifier on the main app target.
             project.SetBuildProperty(mainTarget, "PRODUCT_BUNDLE_IDENTIFIER", BundleIdentifier);
