@@ -85,15 +85,17 @@
     <ui:VisualElement name="codex-page" class="page-content" style="display: none;">
         <ui:Label text="Codex" class="panel-header" />
         <ui:ScrollView name="variant-grid" class="scroll-view" />
-        <ui:VisualElement name="detail-panel">
+        <ui:VisualElement name="detail-panel" style="display: none;">
+            <ui:VisualElement name="detail-sprite-area">
+                <ui:VisualElement name="detail-sprite-glow" />
+                <ui:VisualElement name="detail-sprite" />
+            </ui:VisualElement>
             <ui:VisualElement name="detail-info">
                 <ui:Label name="detail-name" text="" />
+                <ui:VisualElement name="detail-rarity-badge">
+                    <ui:Label name="detail-rarity" text="" />
+                </ui:VisualElement>
                 <ui:Label name="detail-description" text="" />
-                <ui:Label name="detail-rarity" text="" />
-                <ui:VisualElement name="detail-color-swatch" />
-            </ui:VisualElement>
-            <ui:VisualElement name="detail-seed">
-                <ui:VisualElement name="detail-seed-icon" />
                 <ui:Label name="detail-seed-name" text="" />
             </ui:VisualElement>
         </ui:VisualElement>
@@ -120,8 +122,13 @@
         </ui:VisualElement>
         <ui:ScrollView name="greenhouse-grid" class="scroll-view" />
         <ui:VisualElement name="greenhouse-sell-bar" style="display: none;">
-            <ui:Label name="greenhouse-sell-name" text="" />
-            <ui:Label name="greenhouse-sell-pollen" text="" />
+            <ui:VisualElement name="sell-bar-row">
+                <ui:VisualElement name="sell-bar-sprite" />
+                <ui:VisualElement name="sell-bar-info">
+                    <ui:Label name="greenhouse-sell-name" text="" />
+                    <ui:Label name="greenhouse-sell-pollen" text="" />
+                </ui:VisualElement>
+            </ui:VisualElement>
             <ui:Button name="greenhouse-sell-btn" class="btn" text="Sell" />
         </ui:VisualElement>
     </ui:VisualElement>

@@ -1,30 +1,11 @@
-/* Greenhouse panel styles - mobile-first sizing */
+/* Greenhouse panel styles */
 
+/* --- Grid Scrollbar --- */
 #greenhouse-grid .unity-scroller--vertical {
     display: none;
 }
 
-#greenhouse-page .plant-slot {
-    width: 300px;
-    height: 300px;
-    min-height: 300px;
-    align-items: center;
-    justify-content: center;
-}
-
-#greenhouse-page .plant-swatch {
-    width: 128px;
-    height: 128px;
-    border-radius: 64px;
-    margin-bottom: var(--spacing-sm);
-}
-
-#greenhouse-page .plant-name {
-    color: var(--color-text-bright);
-    font-size: var(--font-md);
-    -unity-text-align: middle-center;
-}
-
+/* --- Header --- */
 #greenhouse-header {
     flex-direction: row;
     justify-content: space-between;
@@ -35,6 +16,7 @@
 #greenhouse-pollen-rate {
     color: var(--color-text-accent);
     font-size: var(--font-md);
+    -unity-font-style: bold;
 }
 
 #greenhouse-slots-text {
@@ -42,52 +24,73 @@
     font-size: var(--font-md);
 }
 
-/* Selection highlight */
-#greenhouse-page .plant-slot--selected {
-    border-color: var(--color-border-accent);
-    border-width: 2px;
-    background-color: var(--color-bg-slot-hover);
+/* --- Plant Slot Card --- */
+#greenhouse-page .plant-slot {
+    width: 280px;
+    height: 380px;
+    min-height: 380px;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 16px;
+    padding-bottom: 0;
+    padding-left: var(--spacing-sm);
+    padding-right: var(--spacing-sm);
+    overflow: hidden;
 }
 
-/* Sell bar */
-#greenhouse-sell-bar {
-    background-color: var(--color-bg-panel);
-    border-color: var(--color-border);
-    border-width: 1px;
-    border-radius: var(--radius-md);
-    padding: var(--spacing-sm);
-    margin-top: var(--spacing-sm);
-    flex-direction: column;
-    align-items: stretch;
+/* Sprite frame */
+.plant-sprite-frame {
+    width: 160px;
+    height: 160px;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--spacing-xs);
 }
 
-#greenhouse-sell-name {
+.plant-glow {
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    opacity: 0;
+    /* background-color set inline from C# */
+}
+
+.plant-sprite {
+    width: 140px;
+    height: 140px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* Name & quality */
+#greenhouse-page .plant-name {
     color: var(--color-text-bright);
-    font-size: var(--font-md);
-    -unity-font-style: bold;
-    margin-bottom: var(--spacing-xs);
+    font-size: var(--font-sm);
+    -unity-text-align: middle-center;
+    white-space: normal;
+    padding: 0 var(--spacing-xxs);
 }
 
-#greenhouse-sell-pollen {
-    color: var(--color-text-accent);
-    font-size: var(--font-sm);
+.plant-quality {
+    font-size: 20px;
+    -unity-text-align: middle-center;
     margin-bottom: var(--spacing-xs);
+    /* color set inline from C# per tier */
 }
 
 /* Decay bar */
 #greenhouse-page .plant-decay-bar-bg {
     width: 80%;
-    height: 8px;
-    background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
-    margin-top: var(--spacing-xs);
+    height: 6px;
+    background-color: rgba(255, 255, 255, 0.08);
+    border-radius: 3px;
     overflow: hidden;
 }
 
 #greenhouse-page .plant-decay-bar-fill {
     height: 100%;
     width: 0%;
-    border-radius: 4px;
+    border-radius: 3px;
     background-color: rgb(80, 220, 120);
     transition-property: width;
     transition-duration: 0.3s;
@@ -102,25 +105,104 @@
 }
 
 #greenhouse-page .plant-decay-time {
-    font-size: var(--font-xs);
+    font-size: 20px;
     color: var(--color-text-dim);
     -unity-text-align: middle-center;
-    margin-top: 4px;
+    margin-top: 2px;
 }
 
-/* Withered state */
-#greenhouse-page .plant-slot--withered .plant-swatch {
-    background-color: rgba(60, 50, 40, 0.6);
+/* Rarity bar at card bottom */
+.plant-rarity-bar {
+    align-self: stretch;
+    height: 3px;
+    border-radius: 2px;
+    margin-top: var(--spacing-xs);
+    /* background-color set inline from C# */
+}
+
+/* --- Selection --- */
+#greenhouse-page .plant-slot--selected {
+    border-color: var(--color-border-accent);
+    border-width: 2px;
+    background-color: var(--color-bg-slot-hover);
+}
+
+/* --- Withered State --- */
+#greenhouse-page .plant-slot--withered {
+    opacity: 0.55;
 }
 
 #greenhouse-page .plant-slot--withered .plant-name {
     color: rgb(140, 110, 90);
 }
 
+#greenhouse-page .plant-slot--withered .plant-quality {
+    display: none;
+}
+
 #greenhouse-page .plant-slot--withered .plant-decay-bar-bg {
     display: none;
 }
 
+#greenhouse-page .plant-slot--withered .plant-decay-time {
+    display: none;
+}
+
+/* --- Empty Slot --- */
+.plant-slot--empty {
+    opacity: 0.35;
+}
+
+.plant-slot--empty .plant-name {
+    color: var(--color-dim);
+}
+
+/* --- Sell Bar --- */
+#greenhouse-sell-bar {
+    background-color: rgba(15, 30, 40, 0.55);
+    border-color: rgba(120, 200, 220, 0.20);
+    border-top-color: rgba(140, 230, 240, 0.30);
+    border-width: 1px;
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    margin-top: var(--spacing-sm);
+    flex-direction: column;
+    align-items: stretch;
+}
+
+#sell-bar-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: var(--spacing-sm);
+}
+
+#sell-bar-sprite {
+    width: 80px;
+    height: 80px;
+    -unity-background-scale-mode: scale-to-fit;
+    margin-right: var(--spacing-md);
+    flex-shrink: 0;
+}
+
+#sell-bar-info {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+#greenhouse-sell-name {
+    color: var(--color-text-bright);
+    font-size: var(--font-md);
+    -unity-font-style: bold;
+    white-space: normal;
+    margin-bottom: var(--spacing-xxs);
+}
+
+#greenhouse-sell-pollen {
+    color: var(--color-text-accent);
+    font-size: var(--font-sm);
+}
+
+/* --- Empty Hint --- */
 .greenhouse-empty-hint {
     color: var(--color-text-dim);
     font-size: var(--font-sm);

@@ -14,6 +14,7 @@ namespace Garden
 
         // Sell bar
         private VisualElement sellBar;
+        private VisualElement sellBarSprite;
         private Label sellNameLabel;
         private Label sellPollenLabel;
         private Button sellButton;
@@ -35,6 +36,7 @@ namespace Garden
             slotsText = root.Q<Label>("greenhouse-slots-text");
 
             sellBar = root.Q<VisualElement>("greenhouse-sell-bar");
+            sellBarSprite = root.Q<VisualElement>("sell-bar-sprite");
             sellNameLabel = root.Q<Label>("greenhouse-sell-name");
             sellPollenLabel = root.Q<Label>("greenhouse-sell-pollen");
             sellButton = root.Q<Button>("greenhouse-sell-btn");
@@ -75,22 +77,49 @@ namespace Garden
                 var slot = plantSlotTemplate.CloneTree();
                 var slotRoot = slot.Q<VisualElement>(className: "plant-slot");
                 var nameLabel = slot.Q<Label>(className: "plant-name");
-                var swatch = slot.Q<VisualElement>(className: "plant-swatch");
+                var sprite = slot.Q<VisualElement>(className: "plant-sprite");
+                var glow = slot.Q<VisualElement>(className: "plant-glow");
+                var qualityLabel = slot.Q<Label>(className: "plant-quality");
+                var rarityBar = slot.Q<VisualElement>(className: "plant-rarity-bar");
 
-                if (nameLabel != null)
-                    nameLabel.text = plant.isWithered ? "Withered" : plant.variantName;
-                if (swatch != null)
-                    swatch.style.backgroundColor = plant.isWithered
-                        ? new Color(0.235f, 0.196f, 0.157f, 0.6f)   // rgba(60,50,40,0.6) normalized
-                        : plant.primaryColor;
+                // Look up seed for growth sprites
+                var seed = SeedRegistry.Instance.GetSeed(plant.seedName);
 
-                if (plant.isWithered && slotRoot != null)
-                    slotRoot.AddToClassList("plant-slot--withered");
+                // Plant sprite (fully grown)
+                if (sprite != null && seed?.growthSprites is { Length: > 0 })
+                    sprite.style.backgroundImage = new StyleBackground(seed.growthSprites[^1]);
 
-                var decayBarFill = slot.Q<VisualElement>(className: "plant-decay-bar-fill");
-                var decayTimeLabel = slot.Q<Label>(className: "plant-decay-time");
-                if (!plant.isWithered)
+                // Rarity bar
+                if (rarityBar != null)
+                    rarityBar.style.backgroundColor = new StyleColor(GetRarityColor(plant.rarity));
+
+                if (plant.isWithered)
                 {
+                    if (nameLabel != null) nameLabel.text = "Withered";
+                    if (slotRoot != null) slotRoot.AddToClassList("plant-slot--withered");
+                }
+                else
+                {
+                    // Glow from variant color
+                    if (glow != null)
+                    {
+                        glow.style.backgroundColor = new StyleColor(plant.primaryColor);
+                        glow.style.opacity = 0.10f;
+                    }
+
+                    if (nameLabel != null) nameLabel.text = plant.variantName;
+
+                    // Quality tier label
+                    if (qualityLabel != null)
+                    {
+                        qualityLabel.text = CurrencyConfig.GetQualityLabel(plant.qualityTier);
+                        qualityLabel.style.color = new StyleColor(GetTierColor(plant.qualityTier));
+                    }
+
+                    // Decay bar
+                    var decayBarFill = slot.Q<VisualElement>(className: "plant-decay-bar-fill");
+                    var decayTimeLabel = slot.Q<Label>(className: "plant-decay-time");
+
                     float progress = gm.GetDecayProgress(i);
                     float remaining = (1f - progress) * GreenhouseManager.GetStepMinutes(plant.qualityTier, plant.baseGrowthHours);
 
@@ -119,13 +148,14 @@ namespace Garden
                 plantGrid.Add(slot);
             }
 
+            // Empty slots
             for (int i = gm.Plants.Count; i < gm.MaxSlots; i++)
             {
                 var slot = plantSlotTemplate.CloneTree();
+                var slotRoot = slot.Q<VisualElement>(className: "plant-slot");
                 var nameLabel = slot.Q<Label>(className: "plant-name");
-                var swatch = slot.Q<VisualElement>(className: "plant-swatch");
                 if (nameLabel != null) nameLabel.text = "Empty";
-                if (swatch != null) swatch.style.backgroundColor = new Color(0.3f, 0.3f, 0.3f, 0.3f);
+                if (slotRoot != null) slotRoot.AddToClassList("plant-slot--empty");
                 plantGrid.Add(slot);
             }
 
@@ -169,15 +199,21 @@ namespace Garden
             float dustRate = config.GetPollenPerSecondForPlant(plant.rarity, plant.qualityTier) * 60f;
             string qualityLabel = CurrencyConfig.GetQualityLabel(plant.qualityTier);
 
+            // Sell bar sprite
+            if (sellBarSprite != null && seed?.growthSprites is { Length: > 0 })
+                sellBarSprite.style.backgroundImage = new StyleBackground(seed.growthSprites[^1]);
+            else if (sellBarSprite != null)
+                sellBarSprite.style.backgroundImage = new StyleBackground();
+
             if (plant.isWithered)
             {
-                if (sellNameLabel != null) sellNameLabel.text = $"{plant.variantName} · Withered";
+                if (sellNameLabel != null) sellNameLabel.text = $"{plant.variantName} \u00b7 Withered";
                 if (sellPollenLabel != null) sellPollenLabel.text = "No value remaining";
                 if (sellButton != null) sellButton.text = "Trash";
             }
             else
             {
-                if (sellNameLabel != null) sellNameLabel.text = $"{plant.variantName} · {qualityLabel}";
+                if (sellNameLabel != null) sellNameLabel.text = $"{plant.variantName} \u00b7 {qualityLabel}";
                 if (sellPollenLabel != null) sellPollenLabel.text = $"+{dustRate:F1} Pollen/min";
                 if (sellButton != null) sellButton.text = $"Sell for {sellValue} Gold";
             }
@@ -221,5 +257,25 @@ namespace Garden
             else
                 GreenhouseManager.Instance.SellPlant(selectedIndex);
         }
+
+        private static Color GetRarityColor(Rarity r) => r switch
+        {
+            Rarity.Common    => new Color(0.627f, 0.686f, 0.725f),
+            Rarity.Uncommon  => new Color(0.314f, 0.784f, 0.471f),
+            Rarity.Rare      => new Color(0.314f, 0.627f, 1f),
+            Rarity.Epic      => new Color(0.745f, 0.314f, 1f),
+            Rarity.Legendary => new Color(1f, 0.725f, 0.196f),
+            _                => new Color(0.627f, 0.686f, 0.725f)
+        };
+
+        private static Color GetTierColor(QualityTier tier) => tier switch
+        {
+            QualityTier.D => new Color(1f, 0.275f, 0.235f),
+            QualityTier.C => new Color(1f, 0.706f, 0.196f),
+            QualityTier.B => new Color(0.314f, 0.863f, 0.471f),
+            QualityTier.A => new Color(0.392f, 0.863f, 1f),
+            QualityTier.S => new Color(1f, 0.863f, 0.196f),
+            _             => new Color(0.667f, 0.765f, 0.824f)
+        };
     }
 }
