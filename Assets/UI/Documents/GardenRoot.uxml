@@ -50,23 +50,29 @@
         <!-- Bottom navigation -->
         <ui:VisualElement name="bottom-nav">
             <ui:Button name="tab-codex" class="nav-tab">
+                <ui:VisualElement class="nav-tab-bar" />
                 <ui:VisualElement class="nav-icon" />
                 <ui:Label class="nav-label" text="Codex" />
             </ui:Button>
             <ui:Button name="tab-shop" class="nav-tab">
+                <ui:VisualElement class="nav-tab-bar" />
                 <ui:VisualElement class="nav-icon" />
                 <ui:Label class="nav-label" text="Shop" />
             </ui:Button>
             <ui:Button name="tab-terrarium" class="nav-tab nav-tab-active">
-                <ui:Label class="nav-expand-caret" text="^" />
+                <ui:VisualElement class="nav-tab-bar">
+                    <ui:Label class="nav-expand-caret" text="^" />
+                </ui:VisualElement>
                 <ui:VisualElement class="nav-icon" />
                 <ui:Label class="nav-label" text="Garden" />
             </ui:Button>
             <ui:Button name="tab-greenhouse" class="nav-tab">
+                <ui:VisualElement class="nav-tab-bar" />
                 <ui:VisualElement class="nav-icon" />
                 <ui:Label class="nav-label" text="Greenhouse" />
             </ui:Button>
             <ui:Button name="tab-construction" class="nav-tab">
+                <ui:VisualElement class="nav-tab-bar" />
                 <ui:VisualElement class="nav-icon" />
                 <ui:Label class="nav-label" text="Build" />
             </ui:Button>
