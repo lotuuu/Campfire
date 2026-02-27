@@ -95,7 +95,18 @@ namespace Garden
         private void OnPointerDown(PointerDownEvent evt)
         {
             if (evt.button != 0) return;
-            if (activePointerId != -1) return;
+            if (activePointerId != -1)
+            {
+                // Previous drag never received PointerUp (e.g. an overlay stole it).
+                // Reset stale state so this fresh press is tracked normally.
+                if (pointerCaptured)
+                {
+                    this.ReleasePointer(activePointerId);
+                    pointerCaptured = false;
+                }
+                isDragging = false;
+                AnimateToCurrentPage(true);
+            }
             activePointerId = evt.pointerId;
             isDragging = true;
             pointerCaptured = false;
