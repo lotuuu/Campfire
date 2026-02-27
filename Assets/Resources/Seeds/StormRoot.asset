@@ -54,3 +54,11 @@ MonoBehaviour:
       requiredMoonPhase: 0
       useCalendarEvent: 0
       requiredCalendarEvent: 0
+  growthSprites:
+  - {fileID: 194267116164964566, guid: ab215a7ab56234623807760e6bd66d20, type: 3}
+  - {fileID: 9101181456426357815, guid: ab215a7ab56234623807760e6bd66d20, type: 3}
+  - {fileID: 4181659106735188333, guid: ab215a7ab56234623807760e6bd66d20, type: 3}
+  - {fileID: -1350516855039397963, guid: ab215a7ab56234623807760e6bd66d20, type: 3}
+  - {fileID: -5342611985012148377, guid: ab215a7ab56234623807760e6bd66d20, type: 3}
+  - {fileID: 2936854889071815667, guid: ab215a7ab56234623807760e6bd66d20, type: 3}
+  - {fileID: -2554423718808871482, guid: ab215a7ab56234623807760e6bd66d20, type: 3}

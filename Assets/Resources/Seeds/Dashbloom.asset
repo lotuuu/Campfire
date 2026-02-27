@@ -26,3 +26,11 @@ MonoBehaviour:
   baseSellPrice: 65
   preferredWeather: 0
   specialConditions: []
+  growthSprites:
+  - {fileID: 545875093725613961, guid: 41c76df0d424c44a9acd4bb3968d4777, type: 3}
+  - {fileID: -5019460042083156780, guid: 41c76df0d424c44a9acd4bb3968d4777, type: 3}
+  - {fileID: -2052989375147577111, guid: 41c76df0d424c44a9acd4bb3968d4777, type: 3}
+  - {fileID: -5798943023362794153, guid: 41c76df0d424c44a9acd4bb3968d4777, type: 3}
+  - {fileID: -3290009382604648816, guid: 41c76df0d424c44a9acd4bb3968d4777, type: 3}
+  - {fileID: -7837112974398592697, guid: 41c76df0d424c44a9acd4bb3968d4777, type: 3}
+  - {fileID: -8729117017457196703, guid: 41c76df0d424c44a9acd4bb3968d4777, type: 3}

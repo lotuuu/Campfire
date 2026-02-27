@@ -21,12 +21,10 @@ namespace Garden
         [SerializeField] private string sortingLayerName = "Default";
         [SerializeField] private int baseSortingOrder = 0;
         [SerializeField] private Vector3 gridAnchor = new Vector3(0f, -0.3f, 0f);
-        [SerializeField] private GameObject[] plantPrefabs;
-        [SerializeField] private float plantScale = 0.3f;
+        private const float PlantSpriteScale = 1.5f;
 
         private readonly List<GameObject> tiles = new();
-        private readonly List<GameObject> plantGOs = new();
-        private readonly List<float> plantBaseScales = new();
+        private readonly List<SpriteRenderer> _plantRenderers = new();
         [SerializeField] private UnityEngine.Object[] consumablePrefabs; // length 6, indexed by (int)ConsumableType
         [SerializeField] private Sprite emptyIndicatorSprite;
 
@@ -107,8 +105,7 @@ namespace Garden
                 if (t) { t.SetActive(false); Destroy(t); }
             }
             tiles.Clear();
-            plantGOs.Clear();
-            plantBaseScales.Clear();
+            _plantRenderers.Clear();
             _emptyIndicatorGOs.Clear();
 
             for (int i = 0; i < count; i++)
@@ -128,22 +125,17 @@ namespace Garden
             sr.sortingLayerName = sortingLayerName;
             sr.sortingOrder = baseSortingOrder + index / GridColumns;
 
-            // Plant visual: instantiate prefab child
-            GameObject plantGO = null;
-            if (plantPrefabs != null && plantPrefabs.Length > 0)
-            {
-                var prefab = plantPrefabs[index % plantPrefabs.Length];
-                if (prefab != null)
-                {
-                    plantGO = Instantiate(prefab, tileGO.transform);
-                    plantGO.transform.localPosition = new Vector3(0f, 0.15f, -0.5f);
-                    plantGO.transform.localScale = Vector3.one * plantScale;
-                }
-            }
-            plantBaseScales.Add(plantScale);
-            if (plantGO != null) plantGO.SetActive(false);
+            // Plant visual: SpriteRenderer driven by SeedData.growthSprites
+            var plantGO = new GameObject("PlantSprite");
+            plantGO.transform.SetParent(tileGO.transform, false);
+            plantGO.transform.localPosition = new Vector3(0f, 0.3f, -0.5f);
+            plantGO.transform.localScale = Vector3.one * PlantSpriteScale;
+            var plantSR = plantGO.AddComponent<SpriteRenderer>();
+            plantSR.sortingLayerName = sortingLayerName;
+            plantSR.sortingOrder = baseSortingOrder + index / GridColumns + 1;
+            plantGO.SetActive(false);
+            _plantRenderers.Add(plantSR);
             tiles.Add(tileGO);
-            plantGOs.Add(plantGO);
 
             // Empty-slot indicator ring (world-space sprite child of tile GO)
             GameObject indicatorGO = null;
@@ -243,19 +235,25 @@ namespace Garden
 
         public void SetPlantVisual(int index, PlantState state, Color color)
         {
-            if (index < 0 || index >= plantGOs.Count) return;
-            var go = plantGOs[index];
-            if (go == null) return;
-            go.SetActive(state != PlantState.Empty);
+            if (index < 0 || index >= _plantRenderers.Count) return;
+            var sr = _plantRenderers[index];
+            if (sr == null) return;
+            sr.gameObject.SetActive(state != PlantState.Empty);
+        }
+
+        public void SetPlantSprite(int index, Sprite sprite)
+        {
+            if (index < 0 || index >= _plantRenderers.Count) return;
+            var sr = _plantRenderers[index];
+            if (sr != null) sr.sprite = sprite;
         }
 
         public void SetPlantScale(int index, float multiplier)
         {
-            if (index < 0 || index >= plantGOs.Count) return;
-            var go = plantGOs[index];
-            if (go == null) return;
-            float baseScale = index < plantBaseScales.Count ? plantBaseScales[index] : plantScale;
-            go.transform.localScale = Vector3.one * (baseScale * multiplier);
+            if (index < 0 || index >= _plantRenderers.Count) return;
+            var sr = _plantRenderers[index];
+            if (sr == null) return;
+            sr.transform.localScale = Vector3.one * (PlantSpriteScale * multiplier);
         }
 
         /// <summary>Spawns a slot-scoped consumable visual as a child of the tile GO.</summary>

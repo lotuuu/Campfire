@@ -428,6 +428,7 @@ namespace Garden
                         labels[i].text = text;
                         _lastLabelText[i] = text;
                     }
+                    isometricView?.SetPlantSprite(i, GetGrowthSprite(slot));
                 }
                 else if (slot.state == PlantState.Mature)
                 {
@@ -502,6 +503,7 @@ namespace Garden
                     slotButtons[i].RemoveFromClassList("backyard-slot-mature");
                     isometricView?.SetPlantVisual(i, PlantState.Growing,
                         slot.variant?.primaryColor ?? Color.green);
+                    isometricView?.SetPlantSprite(i, GetGrowthSprite(slot));
                     break;
 
                 case PlantState.Mature:
@@ -513,6 +515,11 @@ namespace Garden
                     slotButtons[i].AddToClassList("backyard-slot-mature");
                     isometricView?.SetPlantVisual(i, PlantState.Mature,
                         slot.variant?.primaryColor ?? Color.green);
+                    {
+                        var sprites = slot.seed?.growthSprites;
+                        if (sprites != null && sprites.Length > 0)
+                            isometricView?.SetPlantSprite(i, sprites[sprites.Length - 1]);
+                    }
                     break;
             }
         }
@@ -549,6 +556,15 @@ namespace Garden
             if (envIndex != ActiveEnv) return;
             if (slotIndex >= 0 && slotIndex < slotButtons.Count)
                 RefreshSlot(slotIndex);
+        }
+
+        private static Sprite GetGrowthSprite(PlantSlot slot)
+        {
+            var sprites = slot?.seed?.growthSprites;
+            if (sprites == null || sprites.Length == 0) return null;
+            int stage = Mathf.Clamp(Mathf.FloorToInt(slot.growthProgress * sprites.Length),
+                0, sprites.Length - 1);
+            return sprites[stage];
         }
 
         private void OnSlotGrowthUpdated(int envIndex, int slotIndex, float progress)

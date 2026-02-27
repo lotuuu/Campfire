@@ -27,3 +27,11 @@ MonoBehaviour:
   infinite: 1
   preferredWeather: 0
   specialConditions: []
+  growthSprites:
+  - {fileID: 4307378007268850688, guid: e4fb74d91300145d89f696db589e6207, type: 3}
+  - {fileID: 2273677755071612814, guid: e4fb74d91300145d89f696db589e6207, type: 3}
+  - {fileID: -692221865464707011, guid: e4fb74d91300145d89f696db589e6207, type: 3}
+  - {fileID: 4525994946834316553, guid: e4fb74d91300145d89f696db589e6207, type: 3}
+  - {fileID: -8842254622017158575, guid: e4fb74d91300145d89f696db589e6207, type: 3}
+  - {fileID: 5532095042636414718, guid: e4fb74d91300145d89f696db589e6207, type: 3}
+  - {fileID: 1643049495080330476, guid: e4fb74d91300145d89f696db589e6207, type: 3}

@@ -26,6 +26,9 @@ namespace Garden
         [Header("Special Conditions")]
         public List<SeedSpecialCondition> specialConditions = new();
 
+        [Header("Growth Visuals")]
+        public Sprite[] growthSprites;
+
         [NonSerialized] private List<VariantData> _sortedVariants;
 
         internal List<VariantData> GetSortedVariants()
