@@ -18,7 +18,6 @@ namespace Garden
         [Header("Shop")]
         public int buyPrice;
         public int baseSellPrice = 120;
-        public int greenhouseYield;
         public bool infinite;
 
         [Header("Sync Shield")]

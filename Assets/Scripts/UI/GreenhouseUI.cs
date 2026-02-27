@@ -163,8 +163,8 @@ namespace Garden
             var plant = gm.Plants[index];
 
             var seed = SeedRegistry.Instance.GetSeed(plant.seedName);
-            int baseSell = seed != null ? seed.greenhouseYield : 100;
-            int sellValue = config.GetGreenhouseSellValue(baseSell, plant.qualityTier);
+            int baseSell = seed != null ? seed.baseSellPrice : 100;
+            int sellValue = config.GetSellValue(baseSell, plant.qualityTier);
             float dustRate = config.GetPollenPerSecondForPlant(plant.rarity, plant.qualityTier) * 60f;
             string qualityLabel = CurrencyConfig.GetQualityLabel(plant.qualityTier);
 

@@ -33,6 +33,5 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 2c80a57f2182c484a837fe21cb060820, type: 2}
   buyPrice: 1000
   baseSellPrice: 240
-  greenhouseYield: 1000
   preferredWeather: 0
   specialConditions: []

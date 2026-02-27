@@ -43,21 +43,6 @@ namespace Garden
             _ => commonPollenPerSecond
         };
 
-        public static float GetGreenhouseQualityMultiplier(QualityTier tier) => tier switch
-        {
-            QualityTier.D => 1.0f,
-            QualityTier.C => 1.5f,
-            QualityTier.B => 2.0f,
-            QualityTier.A => 2.5f,
-            QualityTier.S => 3.0f,
-            _ => 1.5f
-        };
-
-        public int GetGreenhouseSellValue(int greenhouseYield, QualityTier tier)
-        {
-            return Mathf.RoundToInt(greenhouseYield * GetGreenhouseQualityMultiplier(tier));
-        }
-
         public static float GetQualityMultiplier(QualityTier tier) => tier switch
         {
             QualityTier.D => 0.8f,
