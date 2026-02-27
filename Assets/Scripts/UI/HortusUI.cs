@@ -222,6 +222,8 @@ namespace Garden
             backyardViewUI?.SetPageActive(pageIndex == 2);
 
             if (pageIndex != TerrariumPageIndex)
+                backyardViewUI?.CloseConsumablePicker();
+            if (pageIndex != TerrariumPageIndex)
                 envSwitcherBar?.Hide();
 
             switch (pageIndex)

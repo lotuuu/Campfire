@@ -318,6 +318,13 @@ namespace Garden
             _pickerContainer.RemoveFromClassList("consumable-picker--open");
         }
 
+        public void CloseConsumablePicker()
+        {
+            CancelApplyMode();
+            CancelEnvConfirm();
+            _pickerContainer?.RemoveFromClassList("consumable-picker--open");
+        }
+
         private void OnDestroy()
         {
             if (PlantManager.Instance != null)
