@@ -128,7 +128,7 @@ namespace Garden
             // Plant visual: SpriteRenderer driven by SeedData.growthSprites
             var plantGO = new GameObject("PlantSprite");
             plantGO.transform.SetParent(tileGO.transform, false);
-            plantGO.transform.localPosition = new Vector3(0f, 0.3f, -0.5f);
+            plantGO.transform.localPosition = new Vector3(0f, 0.1f, -0.5f);
             plantGO.transform.localScale = Vector3.one * PlantSpriteScale;
             var plantSR = plantGO.AddComponent<SpriteRenderer>();
             plantSR.sortingLayerName = sortingLayerName;
