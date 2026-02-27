@@ -84,7 +84,7 @@
     <!-- Page 0: Codex -->
     <ui:VisualElement name="codex-page" class="page-content" style="display: none;">
         <ui:Label text="Codex" class="panel-header" />
-        <ui:ScrollView name="variant-grid" class="scroll-view" />
+        <ui:ScrollView name="variant-grid" class="scroll-view" vertical-scroller-visibility="Hidden" horizontal-scroller-visibility="Hidden" />
         <ui:VisualElement name="detail-panel" style="display: none;">
             <ui:VisualElement name="detail-sprite-area">
                 <ui:VisualElement name="detail-sprite-glow" />
@@ -104,7 +104,7 @@
     <!-- Page 1: Shop -->
     <ui:VisualElement name="shop-page" class="page-content" style="display: none;">
         <ui:Label text="Shop" class="panel-header" />
-        <ui:ScrollView name="shop-grid" class="scroll-view" />
+        <ui:ScrollView name="shop-grid" class="scroll-view" vertical-scroller-visibility="Hidden" horizontal-scroller-visibility="Hidden" />
     </ui:VisualElement>
 
     <!-- Page 2: Terrarium (Backyard isometric view) -->
@@ -120,7 +120,7 @@
             <ui:Label name="greenhouse-pollen-rate" text="+0 Pollen/hr" />
             <ui:Label name="greenhouse-slots-text" text="0 / 0" />
         </ui:VisualElement>
-        <ui:ScrollView name="greenhouse-grid" class="scroll-view" />
+        <ui:ScrollView name="greenhouse-grid" class="scroll-view" vertical-scroller-visibility="Hidden" horizontal-scroller-visibility="Hidden" />
         <ui:VisualElement name="greenhouse-sell-bar" style="display: none;">
             <ui:VisualElement name="sell-bar-row">
                 <ui:VisualElement name="sell-bar-sprite" />
@@ -136,7 +136,7 @@
     <!-- Page 4: Construction -->
     <ui:VisualElement name="construction-page" class="page-content" style="display: none;">
         <ui:Label text="Construction" class="panel-header" />
-        <ui:ScrollView name="construction-scroll" class="scroll-view" touch-scroll-type="Clamped" />
+        <ui:ScrollView name="construction-scroll" class="scroll-view" touch-scroll-type="Clamped" vertical-scroller-visibility="Hidden" horizontal-scroller-visibility="Hidden" />
     </ui:VisualElement>
 
     <!-- ===== OVERLAYS (stay on top of pages) ===== -->
@@ -148,7 +148,7 @@
             <ui:VisualElement class="bottom-sheet-handle-pip" />
         </ui:VisualElement>
         <ui:Label text="Satchel" class="panel-header" />
-        <ui:ScrollView name="seed-list" class="scroll-view" />
+        <ui:ScrollView name="seed-list" class="scroll-view" vertical-scroller-visibility="Hidden" horizontal-scroller-visibility="Hidden" />
     </ui:VisualElement>
 
     <!-- Harvest Result Popup -->
