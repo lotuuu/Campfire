@@ -42,6 +42,17 @@ namespace Garden
 
         private readonly List<GameObject> _emptyIndicatorGOs = new();
 
+        // World-space slot labels and progress bars (children of tile GOs).
+        private readonly List<TextMesh> _slotLabels = new();
+        private readonly List<SpriteRenderer> _progressBgs = new();
+        private readonly List<SpriteRenderer> _progressFills = new();
+        private static Sprite _pixelSprite;
+
+        private static readonly Vector3 LabelLocalPos    = new Vector3(0f, -0.05f, -1f);
+        private static readonly Vector3 ProgressLocalPos = new Vector3(0f, -0.15f, -1f);
+        private const float ProgressBarWidth  = 0.4f;
+        private const float ProgressBarHeight = 0.04f;
+
         private Camera mainCam;
         private float slideOffsetX;
 
@@ -107,6 +118,9 @@ namespace Garden
             tiles.Clear();
             _plantRenderers.Clear();
             _emptyIndicatorGOs.Clear();
+            _slotLabels.Clear();
+            _progressBgs.Clear();
+            _progressFills.Clear();
 
             for (int i = 0; i < count; i++)
                 SpawnTile(i);
@@ -154,6 +168,51 @@ namespace Garden
             }
             _emptyIndicatorGOs.Add(indicatorGO);
 
+            // World-space label (TextMesh)
+            var labelGO = new GameObject("SlotLabel");
+            labelGO.transform.SetParent(tileGO.transform, false);
+            labelGO.transform.localPosition = LabelLocalPos;
+            var tm = labelGO.AddComponent<TextMesh>();
+            tm.text = "";
+            tm.fontSize = 28;
+            tm.characterSize = 0.06f;
+            tm.anchor = TextAnchor.UpperCenter;
+            tm.alignment = TextAlignment.Center;
+            tm.color = new Color(0.78f, 0.84f, 0.9f);
+            var labelMR = labelGO.GetComponent<MeshRenderer>();
+            labelMR.sortingLayerName = sortingLayerName;
+            labelMR.sortingOrder = baseSortingOrder + 50;
+            labelGO.SetActive(false);
+            _slotLabels.Add(tm);
+
+            // World-space progress bar (two sprites: bg + fill)
+            EnsurePixelSprite();
+            var barGO = new GameObject("ProgressBar");
+            barGO.transform.SetParent(tileGO.transform, false);
+            barGO.transform.localPosition = ProgressLocalPos;
+
+            var bgGO = new GameObject("Bg");
+            bgGO.transform.SetParent(barGO.transform, false);
+            bgGO.transform.localScale = new Vector3(ProgressBarWidth, ProgressBarHeight, 1f);
+            var bgSR = bgGO.AddComponent<SpriteRenderer>();
+            bgSR.sprite = _pixelSprite;
+            bgSR.color = new Color(0.08f, 0.14f, 0.2f, 0.5f);
+            bgSR.sortingLayerName = sortingLayerName;
+            bgSR.sortingOrder = baseSortingOrder + 49;
+            _progressBgs.Add(bgSR);
+
+            var fillGO = new GameObject("Fill");
+            fillGO.transform.SetParent(barGO.transform, false);
+            fillGO.transform.localScale = new Vector3(0f, ProgressBarHeight, 1f);
+            var fillSR = fillGO.AddComponent<SpriteRenderer>();
+            fillSR.sprite = _pixelSprite;
+            fillSR.color = new Color(0.4f, 0.75f, 0.95f, 1f);
+            fillSR.sortingLayerName = sortingLayerName;
+            fillSR.sortingOrder = baseSortingOrder + 50;
+            _progressFills.Add(fillSR);
+
+            barGO.SetActive(false);
+
             PositionTile(index);
         }
 
@@ -189,6 +248,38 @@ namespace Garden
                 sumY += (col + row) * -h * 0.25f;
             }
             transform.position = gridAnchor - new Vector3(sumX / n - slideOffsetX, sumY / n, 0f);
+        }
+
+        private static void EnsurePixelSprite()
+        {
+            if (_pixelSprite != null) return;
+            var tex = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+            tex.SetPixel(0, 0, Color.white);
+            tex.Apply();
+            _pixelSprite = Sprite.Create(tex, new Rect(0, 0, 1, 1), new Vector2(0.5f, 0.5f), 1f);
+        }
+
+        public void SetSlotLabel(int index, string text, bool visible)
+        {
+            if (index < 0 || index >= _slotLabels.Count) return;
+            var tm = _slotLabels[index];
+            if (tm == null) return;
+            tm.gameObject.SetActive(visible);
+            tm.text = text ?? "";
+        }
+
+        public void SetSlotProgress(int index, float progress, bool visible)
+        {
+            if (index < 0 || index >= _progressBgs.Count) return;
+            var bg = _progressBgs[index];
+            if (bg == null) return;
+            bg.transform.parent.gameObject.SetActive(visible);
+            if (index < _progressFills.Count && _progressFills[index] != null)
+            {
+                float w = ProgressBarWidth * Mathf.Clamp01(progress);
+                _progressFills[index].transform.localScale = new Vector3(w, ProgressBarHeight, 1f);
+                _progressFills[index].transform.localPosition = new Vector3((w - ProgressBarWidth) * 0.5f, 0f, -0.01f);
+            }
         }
 
         /// <summary>Shift all tiles horizontally to follow a page slide (world units).</summary>

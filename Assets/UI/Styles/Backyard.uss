@@ -14,7 +14,7 @@
     border-width: 0;
     padding: 0;
     flex-direction: column;
-    justify-content: flex-end;
+    justify-content: flex-start;
     align-items: center;
 }
 
@@ -45,7 +45,6 @@
     background-color: rgba(20, 35, 50, 0.50);
     border-radius: 4px;
     overflow: hidden;
-    margin-bottom: var(--spacing-xs);
 }
 
 .backyard-progress-fill {

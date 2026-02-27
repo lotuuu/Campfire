@@ -17,14 +17,7 @@ namespace Garden
         public event Action<int, int> OnMatureSlotTapped;
 
         private VisualElement terrariumPage;
-        // Root-level container for slot visual overlays (labels, progress bars).
-        // Position:absolute at (0,0) so panel coords map directly onto it.
-        private VisualElement _slotContainer;
-        private readonly List<VisualElement> slotButtons = new();
-        private readonly List<Label> labels = new();
-        private readonly List<VisualElement> progressFills = new();
-        private readonly List<VisualElement> progressBars = new();
-        private readonly List<string> _lastLabelText = new();
+        private int _slotCount;
 
         private VisualElement _pickerContainer;
         private Button _pickerBtn;
@@ -43,10 +36,8 @@ namespace Garden
         public void SetPageActive(bool active)
         {
             pageActive = active;
-            if (_slotContainer != null)
-                _slotContainer.style.display = active ? DisplayStyle.Flex : DisplayStyle.None;
             if (active && initialized)
-                PositionAllSlots();
+                RefreshAllSlots();
         }
 
         public void Initialize(VisualElement root)
@@ -57,19 +48,6 @@ namespace Garden
             _satchelScrim    = root.Q<VisualElement>("satchel-scrim");
             _harvestPopup    = root.Q<VisualElement>("harvest-popup");
             _discoveryPopup  = root.Q<VisualElement>("discovery-popup");
-
-            // Create a root-level overlay container for slot visuals so they are never
-            // clipped by SwipeablePageView / pageContainer overflow:hidden.
-            _slotContainer = new VisualElement();
-            _slotContainer.style.position = Position.Absolute;
-            _slotContainer.style.left = 0;
-            _slotContainer.style.top = 0;
-            _slotContainer.style.right = 0;
-            _slotContainer.style.bottom = 0;
-            _slotContainer.pickingMode = PickingMode.Ignore;
-            _slotContainer.style.display = DisplayStyle.None;
-            // Insert after app-shell (index 1) so it sits below the overlay panels.
-            root.Insert(1, _slotContainer);
 
             if (PlantManager.Instance != null)
             {
@@ -109,18 +87,10 @@ namespace Garden
             // we drive it explicitly here instead.
             isometricView?.SetEnvironment(envIndex);
 
-            foreach (var btn in slotButtons)
-                btn.RemoveFromHierarchy();
-            slotButtons.Clear();
-            labels.Clear();
-            progressFills.Clear();
-            progressBars.Clear();
-            _lastLabelText.Clear();
-
+            _slotCount = 0;
             BuildSlotsForEnv(envIndex);
             RestoreConsumableVisuals(envIndex);
             RefreshAllSlots();
-            PositionAllSlots();
             UpdateTitle();
             RefreshPickerIndicator();
         }
@@ -128,17 +98,7 @@ namespace Garden
         private void BuildSlotsForEnv(int envIndex)
         {
             if (EnvironmentManager.Instance == null) return;
-            int count = EnvironmentManager.Instance.GetActiveSlotCount(envIndex);
-            for (int i = 0; i < count; i++)
-                AddSlotButton(i);
-            ReorderSlotButtonsByDepth();
-        }
-
-        private void ReorderSlotButtonsByDepth()
-        {
-            // Visual-only overlays have no pointer-event Z-order concern.
-            // Picker still needs to sit above slot overlays.
-            _pickerContainer?.BringToFront();
+            _slotCount = EnvironmentManager.Instance.GetActiveSlotCount(envIndex);
         }
 
         private void RestoreConsumableVisuals(int envIndex)
@@ -261,15 +221,11 @@ namespace Garden
 
             // Slot-scoped: enter apply mode so player can tap a slot
             _pendingType = type;
-            foreach (var btn in slotButtons)
-                btn.AddToClassList("backyard-slot-apply-mode");
         }
 
         private void CancelApplyMode()
         {
             _pendingType = null;
-            foreach (var btn in slotButtons)
-                btn.RemoveFromClassList("backyard-slot-apply-mode");
         }
 
         private void RefreshPickerIndicator()
@@ -342,46 +298,16 @@ namespace Garden
             }
         }
 
-        private void AddSlotButton(int slotIndex)
-        {
-            var overlay = new VisualElement();
-            overlay.AddToClassList("backyard-slot-overlay");
-            overlay.style.position = Position.Absolute;
-            overlay.pickingMode = PickingMode.Ignore;
-
-            var label = new Label();
-            label.AddToClassList("backyard-slot-label");
-            overlay.Add(label);
-
-            var progressBar = new VisualElement();
-            progressBar.AddToClassList("backyard-progress-bar");
-            var fill = new VisualElement();
-            fill.AddToClassList("backyard-progress-fill");
-            progressBar.Add(fill);
-            overlay.Add(progressBar);
-
-            _slotContainer.Add(overlay);
-            slotButtons.Add(overlay);
-            labels.Add(label);
-            _lastLabelText.Add(null);
-            progressFills.Add(fill);
-            progressBars.Add(progressBar);
-        }
-
         private void OnSlotUnlocked(int envIndex)
         {
             if (envIndex != ActiveEnv) return;
-            AddSlotButton(slotButtons.Count);
-            ReorderSlotButtonsByDepth();
+            _slotCount++;
             RefreshAllSlots();
         }
 
         private void Update()
         {
-            if (!initialized || !pageActive || isometricView == null || terrariumPage == null) return;
-
-            for (int i = 0; i < slotButtons.Count; i++)
-                PositionButton(i);
+            if (!initialized || !pageActive || isometricView == null) return;
 
             // Direct screen-space hit test — bypasses UI Toolkit coordinate systems entirely.
             // Pointer.current unifies mouse (editor) and primary touch (mobile).
@@ -404,7 +330,7 @@ namespace Garden
                 if (!overlayOpen)
                 {
                     // Test front tiles first (higher index = visually in front).
-                    for (int i = slotButtons.Count - 1; i >= 0; i--)
+                    for (int i = _slotCount - 1; i >= 0; i--)
                     {
                         if (isometricView.GetTileScreenBounds(i).Contains(tapScreenPos))
                         {
@@ -417,7 +343,7 @@ namespace Garden
 
             if (PlantManager.Instance == null) return;
 
-            for (int i = 0; i < slotButtons.Count; i++)
+            for (int i = 0; i < _slotCount; i++)
             {
                 var slot = PlantManager.Instance.GetSlot(ActiveEnv, i);
                 if (slot == null) continue;
@@ -426,12 +352,9 @@ namespace Garden
                 {
                     float hours = PlantManager.Instance.GetRemainingHours(ActiveEnv, i);
                     string text = hours > 1f ? $"{hours:F1}h" : $"{hours * 60f:F0}m";
-                    if (i < labels.Count && labels[i] != null && text != _lastLabelText[i])
-                    {
-                        labels[i].text = text;
-                        _lastLabelText[i] = text;
-                    }
-                    isometricView?.SetPlantSprite(i, GetGrowthSprite(slot));
+                    isometricView.SetSlotLabel(i, text, true);
+                    isometricView.SetSlotProgress(i, slot.growthProgress, true);
+                    isometricView.SetPlantSprite(i, GetGrowthSprite(slot));
                 }
                 else if (slot.state == PlantState.Mature)
                 {
@@ -441,76 +364,35 @@ namespace Garden
             }
         }
 
-        private void PositionAllSlots()
-        {
-            if (isometricView == null || terrariumPage?.panel == null) return;
-            for (int i = 0; i < slotButtons.Count; i++)
-                PositionButton(i);
-        }
-
-        private void PositionButton(int i)
-        {
-            if (i >= slotButtons.Count || terrariumPage?.panel == null) return;
-
-            var screenRect = isometricView.GetTileScreenBounds(i);
-            var panel = terrariumPage.panel;
-
-            var bl = RuntimePanelUtils.ScreenToPanel(panel, new Vector2(screenRect.x, screenRect.y));
-            var tr = RuntimePanelUtils.ScreenToPanel(panel, new Vector2(screenRect.xMax, screenRect.yMax));
-
-            float panelLeft   = Mathf.Min(bl.x, tr.x);
-            float panelTop    = Mathf.Min(bl.y, tr.y);
-            float panelWidth  = Mathf.Abs(tr.x - bl.x);
-            float panelHeight = Mathf.Abs(bl.y - tr.y);
-
-            if (panelWidth <= 0) return;
-            // _slotContainer is at panel origin (0,0), so panel coords map directly.
-            slotButtons[i].style.left   = panelLeft;
-            slotButtons[i].style.top    = panelTop;
-            slotButtons[i].style.width  = panelWidth;
-            slotButtons[i].style.height = panelHeight;
-        }
-
         public void RefreshAllSlots()
         {
-            for (int i = 0; i < slotButtons.Count; i++)
+            for (int i = 0; i < _slotCount; i++)
                 RefreshSlot(i);
         }
 
         private void RefreshSlot(int i)
         {
-            if (PlantManager.Instance == null || i >= slotButtons.Count) return;
+            if (PlantManager.Instance == null || i >= _slotCount) return;
 
             var slot = PlantManager.Instance.GetSlot(ActiveEnv, i);
             if (slot == null) return;
-
-            var label       = i < labels.Count        ? labels[i]        : null;
-            var fill        = i < progressFills.Count ? progressFills[i] : null;
-            var progressBar = i < progressBars.Count  ? progressBars[i]  : null;
 
             switch (slot.state)
             {
                 case PlantState.Empty:
                     isometricView?.SetEmptyIndicator(i, true);
-                    if (label != null)       label.style.display       = DisplayStyle.None;
-                    if (progressBar != null) progressBar.style.display = DisplayStyle.None;
-                    if (fill != null) fill.style.width = new Length(0, LengthUnit.Percent);
-                    slotButtons[i].RemoveFromClassList("backyard-slot-mature");
+                    isometricView?.SetSlotLabel(i, "", false);
+                    isometricView?.SetSlotProgress(i, 0, false);
                     isometricView?.SetPlantVisual(i, PlantState.Empty, Color.clear);
                     isometricView?.ClearSlotConsumableVisuals(i);
                     break;
 
                 case PlantState.Growing:
                     isometricView?.SetEmptyIndicator(i, false);
-                    if (label != null)       label.style.display       = DisplayStyle.Flex;
-                    if (progressBar != null) progressBar.style.display = DisplayStyle.Flex;
                     float hours = PlantManager.Instance.GetRemainingHours(ActiveEnv, i);
-                    if (label != null)
-                        label.text = hours > 1f ? $"{hours:F1}h" : $"{hours * 60f:F0}m";
-                    if (i < _lastLabelText.Count) _lastLabelText[i] = null;
-                    if (fill != null)
-                        fill.style.width = new Length(slot.growthProgress * 100f, LengthUnit.Percent);
-                    slotButtons[i].RemoveFromClassList("backyard-slot-mature");
+                    string text = hours > 1f ? $"{hours:F1}h" : $"{hours * 60f:F0}m";
+                    isometricView?.SetSlotLabel(i, text, true);
+                    isometricView?.SetSlotProgress(i, slot.growthProgress, true);
                     isometricView?.SetPlantVisual(i, PlantState.Growing,
                         slot.variant?.primaryColor ?? Color.green);
                     isometricView?.SetPlantSprite(i, GetGrowthSprite(slot));
@@ -518,11 +400,8 @@ namespace Garden
 
                 case PlantState.Mature:
                     isometricView?.SetEmptyIndicator(i, false);
-                    if (label != null)       label.style.display       = DisplayStyle.Flex;
-                    if (progressBar != null) progressBar.style.display = DisplayStyle.Flex;
-                    if (label != null) label.text = "Harvest!";
-                    if (fill  != null) fill.style.width = new Length(100, LengthUnit.Percent);
-                    slotButtons[i].AddToClassList("backyard-slot-mature");
+                    isometricView?.SetSlotLabel(i, "Harvest!", true);
+                    isometricView?.SetSlotProgress(i, 1f, true);
                     isometricView?.SetPlantVisual(i, PlantState.Mature,
                         slot.variant?.primaryColor ?? Color.green);
                     {
@@ -564,7 +443,7 @@ namespace Garden
         private void OnSlotStateChanged(int envIndex, int slotIndex, PlantState state)
         {
             if (envIndex != ActiveEnv) return;
-            if (slotIndex >= 0 && slotIndex < slotButtons.Count)
+            if (slotIndex >= 0 && slotIndex < _slotCount)
                 RefreshSlot(slotIndex);
         }
 
@@ -580,8 +459,7 @@ namespace Garden
         private void OnSlotGrowthUpdated(int envIndex, int slotIndex, float progress)
         {
             if (envIndex != ActiveEnv) return;
-            if (slotIndex >= 0 && slotIndex < progressFills.Count && progressFills[slotIndex] != null)
-                progressFills[slotIndex].style.width = new Length(progress * 100f, LengthUnit.Percent);
+            isometricView?.SetSlotProgress(slotIndex, progress, true);
         }
     }
 }
