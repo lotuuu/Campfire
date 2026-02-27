@@ -13,6 +13,7 @@
 
 .nav-tab {
     flex-grow: 1;
+    min-width: 0;
     background-color: transparent;
     border-width: 0;
     border-radius: 0;
@@ -21,17 +22,25 @@
     min-height: 140px;
     justify-content: center;
     align-items: center;
+    overflow: visible;
 }
 
 .nav-tab-bar {
     align-self: stretch;
     height: 3px;
-    background-color: rgba(140, 230, 240, 0.18);
+    flex-direction: row;
     justify-content: center;
     align-items: center;
     overflow: visible;
+    background-color: rgba(140, 230, 240, 0.18);
     transition-property: background-color;
-    transition-duration: 0.15s;
+    transition-duration: 0.25s;
+}
+
+/* Terrarium bar bg is transparent — BarMorphElement draws instead */
+#tab-terrarium .nav-tab-bar {
+    background-color: transparent;
+    overflow: visible;
 }
 
 .nav-icon {
@@ -86,32 +95,6 @@
 
 .nav-tab-disabled:hover .nav-label {
     color: rgba(140, 165, 185, 0.40);
-}
-
-/* Expand caret: morphs in from the bar position when terrarium is expandable */
-.nav-expand-caret {
-    -unity-text-align: middle-center;
-    font-size: 28px;
-    -unity-font-style: bold;
-    color: rgb(100, 230, 230);
-    align-self: stretch;
-    opacity: 0;
-    scale: 0.3 0.3;
-    translate: 0 8px;
-    transition-property: opacity, scale, translate;
-    transition-duration: 0.22s;
-    transition-timing-function: ease-out;
-}
-
-/* When expandable: bar fades out slightly ahead; caret scales+rises in */
-.nav-tab-expandable .nav-tab-bar {
-    background-color: transparent;
-}
-
-.nav-tab-expandable .nav-expand-caret {
-    opacity: 1;
-    scale: 1 1;
-    translate: 0 0;
 }
 
 /* Per-tab icon images */
