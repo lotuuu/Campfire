@@ -120,7 +120,7 @@ namespace Garden
                         if (result.isNewDiscovery)
                         {
                             _pendingDiscoveryResult = result;
-                            discoveryPopupUI?.Show(result.variant);
+                            discoveryPopupUI?.Show(result);
                         }
                         else
                             harvestResultUI?.Show(result);

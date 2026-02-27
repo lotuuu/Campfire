@@ -20,20 +20,24 @@ namespace Garden
             _template = Resources.Load<VisualTreeAsset>("UI/Templates/DiscoveryPopup");
         }
 
-        public void Show(VariantData variant)
+        public void Show(HarvestResult result)
         {
             _container.Clear();
             _dismissing = false;
             if (_template == null) { Debug.LogError("[DiscoveryPopupUI] Template not loaded — was Initialize() called?"); return; }
 
+            var variant = result.variant;
             var popup = _template.CloneTree();
             popup.style.flexGrow = 1;
             _container.Add(popup);
             _container.style.display = DisplayStyle.Flex;
 
-            // Variant sprite
+            // Use fully-grown sprite from seed growth stages
             var spriteContainer = popup.Q<VisualElement>("sprite-container");
-            if (variant.variantSprite != null)
+            var growthSprites = result.seed?.growthSprites;
+            if (growthSprites is { Length: > 0 })
+                spriteContainer.style.backgroundImage = new StyleBackground(growthSprites[^1]);
+            else if (variant.variantSprite != null)
                 spriteContainer.style.backgroundImage = new StyleBackground(variant.variantSprite);
 
             // Glow colors from variant primary color
