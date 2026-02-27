@@ -126,6 +126,20 @@ namespace Garden
             if (!isDragging) return;
             if (evt.pointerId != activePointerId) return;
 
+            // Pointer was released elsewhere (e.g. overlay stole PointerUp). Cancel stale drag.
+            if (evt.pressedButtons == 0)
+            {
+                if (pointerCaptured)
+                {
+                    this.ReleasePointer(evt.pointerId);
+                    pointerCaptured = false;
+                }
+                activePointerId = -1;
+                isDragging = false;
+                AnimateToCurrentPage(true);
+                return;
+            }
+
             float dx = evt.position.x - dragStartX;
             float dy = evt.position.y - dragStartY;
 
