@@ -1,10 +1,5 @@
 /* Greenhouse panel styles */
 
-/* --- Grid Scrollbar --- */
-#greenhouse-grid .unity-scroller--vertical {
-    display: none;
-}
-
 /* --- Header --- */
 #greenhouse-header {
     flex-direction: row;

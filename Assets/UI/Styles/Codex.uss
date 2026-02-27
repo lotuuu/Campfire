@@ -1,11 +1,5 @@
 /* Codex panel styles */
 
-/* --- Grid Scrollbar --- */
-#variant-grid .unity-scroller--vertical,
-#variant-grid .unity-scroller--horizontal {
-    display: none;
-}
-
 /* --- Variant Entry Card --- */
 #codex-page .variant-entry {
     width: 280px;
