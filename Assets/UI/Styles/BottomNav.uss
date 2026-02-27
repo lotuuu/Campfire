@@ -31,7 +31,7 @@
     align-items: center;
     overflow: visible;
     transition-property: background-color;
-    transition-duration: 0.2s;
+    transition-duration: 0.15s;
 }
 
 .nav-icon {
@@ -88,7 +88,7 @@
     color: rgba(140, 165, 185, 0.40);
 }
 
-/* Expand caret: fades in over the bar when terrarium is expandable */
+/* Expand caret: morphs in from the bar position when terrarium is expandable */
 .nav-expand-caret {
     -unity-text-align: middle-center;
     font-size: 28px;
@@ -96,17 +96,22 @@
     color: rgb(100, 230, 230);
     align-self: stretch;
     opacity: 0;
-    transition-property: opacity;
-    transition-duration: 0.2s;
+    scale: 0.3 0.3;
+    translate: 0 8px;
+    transition-property: opacity, scale, translate;
+    transition-duration: 0.22s;
+    transition-timing-function: ease-out;
 }
 
-/* When expandable: hide the flat bar, show the caret */
+/* When expandable: bar fades out slightly ahead; caret scales+rises in */
 .nav-tab-expandable .nav-tab-bar {
     background-color: transparent;
 }
 
 .nav-tab-expandable .nav-expand-caret {
     opacity: 1;
+    scale: 1 1;
+    translate: 0 0;
 }
 
 /* Per-tab icon images */
