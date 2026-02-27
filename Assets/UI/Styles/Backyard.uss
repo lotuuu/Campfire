@@ -40,8 +40,8 @@
 }
 
 .backyard-progress-bar {
-    width: 80%;
-    height: 6px;
+    width: 40%;
+    height: 8px;
     background-color: rgba(20, 35, 50, 0.50);
     border-radius: 4px;
     overflow: hidden;

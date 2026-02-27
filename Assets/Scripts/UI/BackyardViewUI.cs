@@ -45,6 +45,8 @@ namespace Garden
             pageActive = active;
             if (_slotContainer != null)
                 _slotContainer.style.display = active ? DisplayStyle.Flex : DisplayStyle.None;
+            if (active && initialized)
+                PositionAllSlots();
         }
 
         public void Initialize(VisualElement root)
@@ -118,6 +120,7 @@ namespace Garden
             BuildSlotsForEnv(envIndex);
             RestoreConsumableVisuals(envIndex);
             RefreshAllSlots();
+            PositionAllSlots();
             UpdateTitle();
             RefreshPickerIndicator();
         }
@@ -436,6 +439,13 @@ namespace Garden
                     isometricView.SetPlantScale(i, pulse);
                 }
             }
+        }
+
+        private void PositionAllSlots()
+        {
+            if (isometricView == null || terrariumPage?.panel == null) return;
+            for (int i = 0; i < slotButtons.Count; i++)
+                PositionButton(i);
         }
 
         private void PositionButton(int i)
