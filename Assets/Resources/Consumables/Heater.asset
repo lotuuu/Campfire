@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Garden::Garden.ConsumableData
   type: 4
   displayName: Heater
-  icon: {fileID: -6480787798767814650, guid: fbc62a3a66a4e47b990ada70722ab1fb, type: 3}
+  icon: {fileID: 21300000, guid: fbc62a3a66a4e47b990ada70722ab1fb, type: 3}
   buyPrice: 150
   magnitude: 10
   isEnvironmentScoped: 1
