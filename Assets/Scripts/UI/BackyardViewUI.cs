@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 
 namespace Garden
@@ -16,7 +17,10 @@ namespace Garden
         public event Action<int, int> OnMatureSlotTapped;
 
         private VisualElement terrariumPage;
-        private readonly List<Button> slotButtons = new();
+        // Root-level container for slot visual overlays (labels, progress bars).
+        // Position:absolute at (0,0) so panel coords map directly onto it.
+        private VisualElement _slotContainer;
+        private readonly List<VisualElement> slotButtons = new();
         private readonly List<Label> labels = new();
         private readonly List<VisualElement> progressFills = new();
         private readonly List<VisualElement> progressBars = new();
@@ -28,15 +32,42 @@ namespace Garden
         private ConsumableType? _pendingType; // only set for slot-scoped apply mode
         private ConsumableType? _pendingEnvConfirmType; // set while inline env-replace confirmation is showing
 
+        // Overlay elements — taps are suppressed while any of these are visible.
+        private VisualElement _satchelScrim;
+        private VisualElement _harvestPopup;
+        private VisualElement _discoveryPopup;
+
         private bool initialized;
         private bool pageActive;
 
-        public void SetPageActive(bool active) => pageActive = active;
+        public void SetPageActive(bool active)
+        {
+            pageActive = active;
+            if (_slotContainer != null)
+                _slotContainer.style.display = active ? DisplayStyle.Flex : DisplayStyle.None;
+        }
 
         public void Initialize(VisualElement root)
         {
             terrariumPage = root.Q<VisualElement>("terrarium-page");
             backyardTitle = root.Q<Label>("backyard-title");
+
+            _satchelScrim    = root.Q<VisualElement>("satchel-scrim");
+            _harvestPopup    = root.Q<VisualElement>("harvest-popup");
+            _discoveryPopup  = root.Q<VisualElement>("discovery-popup");
+
+            // Create a root-level overlay container for slot visuals so they are never
+            // clipped by SwipeablePageView / pageContainer overflow:hidden.
+            _slotContainer = new VisualElement();
+            _slotContainer.style.position = Position.Absolute;
+            _slotContainer.style.left = 0;
+            _slotContainer.style.top = 0;
+            _slotContainer.style.right = 0;
+            _slotContainer.style.bottom = 0;
+            _slotContainer.pickingMode = PickingMode.Ignore;
+            _slotContainer.style.display = DisplayStyle.None;
+            // Insert after app-shell (index 1) so it sits below the overlay panels.
+            root.Insert(1, _slotContainer);
 
             if (PlantManager.Instance != null)
             {
@@ -100,17 +131,10 @@ namespace Garden
             ReorderSlotButtonsByDepth();
         }
 
-        /// <summary>
-        /// Reorders slot buttons in the UI hierarchy so that front tiles (higher index,
-        /// higher sortingOrder) are the last DOM children. UI Toolkit hit-tests the last
-        /// child first, so front tiles win click events in overlapping regions.
-        /// </summary>
         private void ReorderSlotButtonsByDepth()
         {
-            // BringToFront in ascending index order leaves the highest index as the last child (topmost).
-            for (int i = 0; i < slotButtons.Count; i++)
-                slotButtons[i].BringToFront();
-            // Picker must always sit above slot buttons so its hit area isn't swallowed.
+            // Visual-only overlays have no pointer-event Z-order concern.
+            // Picker still needs to sit above slot overlays.
             _pickerContainer?.BringToFront();
         }
 
@@ -310,26 +334,24 @@ namespace Garden
 
         private void AddSlotButton(int slotIndex)
         {
-            var btn = new Button();
-            btn.AddToClassList("backyard-slot-overlay");
-            btn.style.position = Position.Absolute;
+            var overlay = new VisualElement();
+            overlay.AddToClassList("backyard-slot-overlay");
+            overlay.style.position = Position.Absolute;
+            overlay.pickingMode = PickingMode.Ignore;
 
             var label = new Label();
             label.AddToClassList("backyard-slot-label");
-            btn.Add(label);
+            overlay.Add(label);
 
             var progressBar = new VisualElement();
             progressBar.AddToClassList("backyard-progress-bar");
             var fill = new VisualElement();
             fill.AddToClassList("backyard-progress-fill");
             progressBar.Add(fill);
-            btn.Add(progressBar);
+            overlay.Add(progressBar);
 
-            int idx = slotIndex;
-            btn.RegisterCallback<ClickEvent>(_ => OnSlotClicked(idx));
-
-            terrariumPage.Add(btn);
-            slotButtons.Add(btn);
+            _slotContainer.Add(overlay);
+            slotButtons.Add(overlay);
             labels.Add(label);
             _lastLabelText.Add(null);
             progressFills.Add(fill);
@@ -350,6 +372,38 @@ namespace Garden
 
             for (int i = 0; i < slotButtons.Count; i++)
                 PositionButton(i);
+
+            // Direct screen-space hit test — bypasses UI Toolkit coordinate systems entirely.
+            // Pointer.current unifies mouse (editor) and primary touch (mobile).
+            bool tapped = false;
+            Vector2 tapScreenPos = default;
+            var pointer = Pointer.current;
+            if (pointer != null && pointer.press.wasReleasedThisFrame)
+            {
+                tapped = true;
+                tapScreenPos = pointer.position.ReadValue();
+            }
+
+            if (tapped)
+            {
+                bool overlayOpen =
+                    _satchelScrim?.resolvedStyle.display   == DisplayStyle.Flex ||
+                    _harvestPopup?.resolvedStyle.display   == DisplayStyle.Flex ||
+                    _discoveryPopup?.resolvedStyle.display == DisplayStyle.Flex;
+
+                if (!overlayOpen)
+                {
+                    // Test front tiles first (higher index = visually in front).
+                    for (int i = slotButtons.Count - 1; i >= 0; i--)
+                    {
+                        if (isometricView.GetTileScreenBounds(i).Contains(tapScreenPos))
+                        {
+                            OnSlotClicked(i);
+                            break;
+                        }
+                    }
+                }
+            }
 
             if (PlantManager.Instance == null) return;
 
@@ -391,12 +445,10 @@ namespace Garden
             float panelWidth  = Mathf.Abs(tr.x - bl.x);
             float panelHeight = Mathf.Abs(bl.y - tr.y);
 
-            var pageOrigin = terrariumPage.worldBound;
-            if (pageOrigin.width <= 0) return;
-            float contentX = pageOrigin.x + terrariumPage.resolvedStyle.paddingLeft;
-            float contentY = pageOrigin.y + terrariumPage.resolvedStyle.paddingTop;
-            slotButtons[i].style.left   = panelLeft   - contentX;
-            slotButtons[i].style.top    = panelTop    - contentY;
+            if (panelWidth <= 0) return;
+            // _slotContainer is at panel origin (0,0), so panel coords map directly.
+            slotButtons[i].style.left   = panelLeft;
+            slotButtons[i].style.top    = panelTop;
             slotButtons[i].style.width  = panelWidth;
             slotButtons[i].style.height = panelHeight;
         }
