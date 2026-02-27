@@ -43,7 +43,6 @@ namespace Garden
         {
             if (scrollView == null) return;
             scrollView.Clear();
-            scrollView.scrollOffset = Vector2.zero;
 
             var em = EnvironmentManager.Instance;
             for (int i = 0; i < em.Environments.Count; i++)
@@ -119,6 +118,8 @@ namespace Garden
             }
 
             AppendGreenhouseCard();
+
+            scrollView.schedule.Execute(() => scrollView.scrollOffset = Vector2.zero);
         }
 
         private void AppendGreenhouseCard()

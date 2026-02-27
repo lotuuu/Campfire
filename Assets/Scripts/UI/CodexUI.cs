@@ -37,6 +37,7 @@ namespace Garden
         private void RefreshCodex()
         {
             variantGrid.Clear();
+            variantGrid.schedule.Execute(() => variantGrid.scrollOffset = Vector2.zero);
 
             var discovered = SaveManager.Instance.Data.discoveredVariants;
 

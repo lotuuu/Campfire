@@ -53,7 +53,6 @@ namespace Garden
         public void RefreshDisplay()
         {
             plantGrid.Clear();
-            plantGrid.scrollOffset = Vector2.zero;
             filledSlotRoots.Clear();
             _decayWidgets.Clear();
             selectedIndex = -1;
@@ -129,6 +128,8 @@ namespace Garden
                 if (swatch != null) swatch.style.backgroundColor = new Color(0.3f, 0.3f, 0.3f, 0.3f);
                 plantGrid.Add(slot);
             }
+
+            plantGrid.schedule.Execute(() => plantGrid.scrollOffset = Vector2.zero);
         }
 
         private void OnSlotClicked(int index)

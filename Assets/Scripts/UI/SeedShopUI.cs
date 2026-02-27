@@ -36,7 +36,11 @@ namespace Garden
             shopGrid.Clear();
             AddSeedSection();
             AddConsumableSection();
-            shopGrid.schedule.Execute(() => shopGrid.scrollOffset = savedOffset);
+            shopGrid.schedule.Execute(() =>
+            {
+                float maxY = Mathf.Max(0, shopGrid.contentContainer.layout.height - shopGrid.contentViewport.layout.height);
+                shopGrid.scrollOffset = new Vector2(0, Mathf.Clamp(savedOffset.y, 0, maxY));
+            });
         }
 
         private VisualElement MakeSectionBanner(string title, string currencyLabel, string badgeClass)

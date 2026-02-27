@@ -65,6 +65,7 @@ namespace Garden
         private void RefreshList()
         {
             seedList.Clear();
+            seedList.schedule.Execute(() => seedList.scrollOffset = Vector2.zero);
             var seeds = SeedRegistry.Instance.GetOwnedSeeds();
 
             if (seeds.Count == 0)
