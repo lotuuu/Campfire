@@ -28,7 +28,10 @@
         </ui:VisualElement>
 
         <!-- Main campsite view -->
-        <ui:VisualElement name="campsite-view">
+        <ui:ScrollView name="campsite-view">
+
+            <!-- Plots above the flame -->
+            <ui:VisualElement name="plots-container" />
 
             <!-- Flame at center -->
             <ui:VisualElement name="flame-container">
@@ -37,12 +40,13 @@
                 </ui:VisualElement>
             </ui:VisualElement>
 
-            <!-- Camp object containers (populated by code) -->
-            <ui:VisualElement name="plots-container" />
+            <!-- Vases below flame -->
             <ui:VisualElement name="vases-container" />
+
+            <!-- Gardens at bottom -->
             <ui:VisualElement name="gardens-container" />
 
-        </ui:VisualElement>
+        </ui:ScrollView>
 
         <!-- Bottom navigation -->
         <ui:VisualElement name="bottom-nav">

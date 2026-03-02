@@ -1,40 +1,33 @@
 :root {
-    /* Colors - Glassmorphism teal-glass theme */
-    --color-bg-dark: rgb(8, 15, 22);
-    --color-bg-panel: rgba(15, 25, 35, 0.55);
-    --color-bg-slot: rgba(20, 35, 50, 0.40);
-    --color-bg-slot-hover: rgba(30, 50, 65, 0.55);
-    --color-border: rgba(120, 200, 220, 0.15);
-    --color-border-accent: rgba(140, 230, 240, 0.35);
+    /* Colors - Camp Fire warm palette */
+    --color-bg-dark: rgb(18, 12, 8);
+    --color-bg-panel: rgba(30, 18, 10, 0.85);
+    --color-bg-slot: rgba(60, 40, 20, 0.5);
+    --color-bg-slot-hover: rgba(80, 55, 30, 0.6);
+    --color-border: rgba(140, 100, 50, 0.2);
+    --color-border-accent: rgba(220, 150, 50, 0.4);
 
-    --color-text: rgb(200, 220, 230);
-    --color-text-dim: rgb(170, 195, 210);
-    --color-text-bright: rgb(230, 245, 255);
-    --color-text-accent: rgb(100, 220, 220);
+    --color-text: rgb(230, 210, 180);
+    --color-text-dim: rgb(170, 145, 110);
+    --color-text-bright: rgb(255, 240, 200);
+    --color-text-accent: rgb(255, 180, 60);
 
-    --color-button-bg: rgba(20, 40, 55, 0.50);
-    --color-button-bg-hover: rgba(30, 55, 70, 0.65);
-    --color-button-bg-active: rgba(40, 70, 85, 0.75);
-    --color-button-bg-disabled: rgba(15, 25, 35, 0.35);
+    --color-button-bg: rgba(120, 70, 20, 0.4);
+    --color-button-bg-hover: rgba(160, 95, 30, 0.55);
+    --color-button-bg-active: rgba(200, 120, 40, 0.65);
+    --color-button-bg-disabled: rgba(40, 25, 12, 0.35);
 
-    --color-rarity-common:    rgb(160, 175, 185);
-    --color-rarity-uncommon:  rgb(80,  200, 120);
-    --color-rarity-rare:      rgb(80,  160, 255);
-    --color-rarity-epic:      rgb(190,  80, 255);
-    --color-rarity-legendary: rgb(255, 185,  50);
+    /* Resource colors */
+    --color-mana: rgb(255, 170, 60);
+    --color-water: rgb(100, 180, 240);
 
-    /* Currency */
-    --color-pollen: rgb(80, 200, 160);
-    --color-sun-shards: rgb(255, 145, 30);
+    --color-highlight: rgb(255, 200, 60);
+    --color-dim: rgb(120, 90, 60);
+    --color-empty: rgba(40, 25, 12, 0.3);
 
-    --color-highlight: rgb(255, 220, 80);
-    --color-dim: rgb(100, 130, 150);
-    --color-empty: rgba(30, 45, 60, 0.25);
-    --color-unknown: rgba(15, 25, 35, 0.60);
-
-    --color-bg-gate: rgba(8, 15, 22, 0.95);
-    --color-bg-sheet: rgba(15, 25, 35, 0.95);
-    --color-bg-popup: rgba(12, 22, 32, 0.97);
+    --color-bg-gate: rgba(18, 12, 8, 0.95);
+    --color-bg-sheet: rgba(25, 16, 8, 0.95);
+    --color-bg-popup: rgba(20, 14, 8, 0.97);
 
     /* Spacing - mobile scale at 1080 ref width */
     --spacing-xxs: 4px;
