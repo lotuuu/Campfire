@@ -1,7 +1,5 @@
 namespace Garden
 {
-    public enum Rarity { Common, Uncommon, Rare, Epic, Legendary }
-
     public enum WeatherCondition { Clear, Cloudy, Rain, Storm, Snow }
 
     public enum MoonPhase
@@ -14,9 +12,9 @@ namespace Garden
 
     public enum CalendarEvent { None, SpringEquinox, FallEquinox, LunarEclipse }
 
-    public enum CurrencyType { Gold, SunShards, Pollen }
+    public enum CurrencyType { Mana, Water }
 
-    public enum PlantState { Empty, Growing, Mature }
+    public enum PlotState { Empty, Planted, Watered, Growing, Mature }
 
-    public enum QualityTier { D, C, B, A, S }
+    public enum VaseState { Empty, Filling, Full }
 }
