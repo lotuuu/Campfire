@@ -165,8 +165,8 @@ namespace Garden
                 _detailDescription.text = variant.description;
                 _detailRarity.text = variant.rarity.ToString().ToUpper();
 
-                if (_detailSprite != null && seed.icon != null)
-                    _detailSprite.style.backgroundImage = new StyleBackground(seed.icon);
+                if (_detailSprite != null && seed.growthSprites is { Length: > 0 })
+                    _detailSprite.style.backgroundImage = new StyleBackground(seed.growthSprites[^1]);
                 else if (_detailSprite != null)
                     _detailSprite.style.backgroundImage = new StyleBackground();
 
