@@ -25,3 +25,9 @@ MonoBehaviour:
   - 150
   - 400
   - 1000
+  gridSizePerLevel:
+  - 2
+  - 2
+  - 3
+  - 3
+  - 4

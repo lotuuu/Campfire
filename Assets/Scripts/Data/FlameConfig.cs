@@ -15,6 +15,9 @@ namespace Garden
         [Header("Upgrade Costs (Mana)")]
         [SerializeField] private float[] upgradeCosts = { 50f, 150f, 400f, 1000f };
 
+        [Header("Grid")]
+        [SerializeField] private int[] gridSizePerLevel = { 5, 5, 7, 7, 9 };
+
         public float GetManaPerSecond(int flameLevel)
         {
             return baseManaPerSecond + (flameLevel - 1) * manaPerLevel;
@@ -33,5 +36,11 @@ namespace Garden
         }
 
         public int MaxLevel => upgradeCosts.Length + 1;
+
+        public int GetGridSize(int flameLevel)
+        {
+            int index = Mathf.Clamp(flameLevel - 1, 0, gridSizePerLevel.Length - 1);
+            return gridSizePerLevel[index];
+        }
     }
 }

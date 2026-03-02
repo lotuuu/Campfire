@@ -1,0 +1,182 @@
+/* CampsiteGrid.uss — Grid cell styles for campsite hex grid */
+
+/* ── Grid cell base ── */
+/* Hex shape drawn via Painter2D; --hex-fill/--hex-border drive the colors */
+.grid-cell {
+    width: 380px;
+    height: 380px;
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: var(--spacing-xxs);
+    --hex-fill: rgba(40, 25, 12, 0.3);
+    --hex-border: rgba(140, 100, 50, 0.15);
+}
+
+/* ── Empty cell ── */
+.grid-cell--empty {
+    --hex-fill: rgba(40, 25, 12, 0.15);
+    --hex-border: rgba(100, 70, 35, 0.1);
+}
+
+/* ── Placement mode highlights ── */
+.grid-cell--placeable {
+    --hex-fill: rgba(120, 180, 60, 0.15);
+    --hex-border: rgba(120, 180, 60, 0.4);
+}
+
+.grid-cell--placeable:hover {
+    --hex-fill: rgba(120, 180, 60, 0.3);
+    --hex-border: rgba(160, 220, 80, 0.6);
+}
+
+/* ── Watering mode highlights ── */
+.grid-cell--water-target {
+    --hex-fill: rgba(60, 140, 220, 0.2);
+    --hex-border: rgba(80, 160, 240, 0.5);
+}
+
+.grid-cell--water-target:hover {
+    --hex-fill: rgba(60, 140, 220, 0.35);
+    --hex-border: rgba(100, 180, 255, 0.7);
+}
+
+/* ── Flame cell ── */
+.grid-cell--flame {
+    --hex-fill: rgba(220, 100, 20, 0.3);
+    --hex-border: rgba(255, 180, 60, 0.5);
+}
+
+.grid-cell--flame:hover {
+    --hex-fill: rgba(240, 120, 30, 0.4);
+    --hex-border: rgba(255, 200, 80, 0.7);
+}
+
+.grid-cell--flame .cell-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 36px;
+    background-color: rgb(220, 100, 20);
+    border-width: 3px;
+    border-color: rgba(255, 180, 60, 0.6);
+}
+
+/* ── Plot cell ── */
+.grid-cell--plot {
+    --hex-fill: rgba(60, 40, 20, 0.6);
+    --hex-border: rgba(140, 100, 50, 0.3);
+}
+
+.grid-cell--plot:hover {
+    --hex-fill: rgba(70, 48, 25, 0.7);
+    --hex-border: rgba(255, 180, 60, 0.5);
+}
+
+.grid-cell--plot .cell-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 8px;
+    background-color: rgba(100, 80, 40, 0.4);
+}
+
+.grid-cell--plot-mature {
+    --hex-border: rgba(120, 180, 60, 0.5);
+}
+
+/* ── Vase cell ── */
+.grid-cell--vase {
+    --hex-fill: rgba(50, 35, 25, 0.6);
+    --hex-border: rgba(120, 90, 50, 0.3);
+}
+
+.grid-cell--vase:hover {
+    --hex-fill: rgba(55, 40, 28, 0.7);
+    --hex-border: rgba(100, 180, 240, 0.5);
+}
+
+.grid-cell--vase .cell-icon {
+    width: 48px;
+    height: 56px;
+    border-radius: 8px;
+    background-color: rgba(80, 120, 180, 0.3);
+}
+
+/* ── Garden cell ── */
+.grid-cell--garden {
+    --hex-fill: rgba(25, 50, 20, 0.6);
+    --hex-border: rgba(60, 120, 40, 0.3);
+}
+
+.grid-cell--garden:hover {
+    --hex-fill: rgba(30, 58, 24, 0.7);
+    --hex-border: rgba(100, 200, 60, 0.5);
+}
+
+.grid-cell--garden .cell-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 28px;
+    background-color: rgba(60, 120, 40, 0.4);
+}
+
+/* ── Cell inner elements ── */
+.cell-icon {
+    margin-bottom: var(--spacing-xxs);
+}
+
+.cell-label {
+    font-size: 22px;
+    color: var(--color-text);
+    -unity-font-style: bold;
+    -unity-text-align: upper-center;
+}
+
+.cell-status {
+    font-size: 18px;
+    color: var(--color-text-dim);
+    -unity-text-align: upper-center;
+}
+
+/* ── Progress bar ── */
+.cell-progress {
+    width: 80%;
+    height: 6px;
+    background-color: rgba(40, 30, 15, 0.6);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: var(--spacing-xxs);
+    display: none;
+}
+
+.cell-progress--visible {
+    display: flex;
+}
+
+.cell-progress-fill {
+    height: 100%;
+    width: 0%;
+    background-color: rgb(120, 180, 60);
+    border-radius: 3px;
+}
+
+/* ── Placement cancel button ── */
+#placement-cancel {
+    position: absolute;
+    bottom: var(--spacing-md);
+    left: 50%;
+    translate: -50% 0;
+    padding: var(--spacing-xs) var(--spacing-lg);
+    background-color: rgba(140, 40, 30, 0.7);
+    border-width: 1px;
+    border-color: rgba(200, 80, 60, 0.4);
+    border-radius: var(--radius-sm);
+    color: rgb(255, 220, 200);
+    font-size: var(--font-sm);
+}
+
+#placement-cancel:hover {
+    background-color: rgba(160, 50, 35, 0.85);
+}

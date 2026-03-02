@@ -58,6 +58,20 @@ namespace Garden
             }
         }
 
+        public bool InstantFinish(int vaseIndex)
+        {
+            var data = SaveManager.Instance.Data;
+            if (vaseIndex < 0 || vaseIndex >= data.vases.Count) return false;
+            var vase = data.vases[vaseIndex];
+            if (vase.state != VaseState.Filling) return false;
+            vase.currentWater = vase.capacity;
+            vase.state = VaseState.Full;
+            vase.fillStartTimeUtc = null;
+            SaveManager.Instance.Save();
+            OnVasesChanged?.Invoke();
+            return true;
+        }
+
         public bool SendToCollect(int vaseIndex)
         {
             var data = SaveManager.Instance.Data;
@@ -72,14 +86,29 @@ namespace Garden
             return true;
         }
 
-        public bool CraftVase()
+        public bool CraftVase(int gridX, int gridY)
         {
             if (!CurrencyManager.Instance.SpendMana(config.CraftCostMana)) return false;
             var data = SaveManager.Instance.Data;
-            data.vases.Add(new VaseSave { capacity = config.BaseCapacity, state = VaseState.Empty });
+            data.vases.Add(new VaseSave { capacity = config.BaseCapacity, state = VaseState.Empty, gridX = gridX, gridY = gridY });
             SaveManager.Instance.Save();
             OnVasesChanged?.Invoke();
             return true;
+        }
+
+        public float GetRemainingSeconds(int vaseIndex)
+        {
+            var data = SaveManager.Instance.Data;
+            if (vaseIndex < 0 || vaseIndex >= data.vases.Count) return 0f;
+            var vase = data.vases[vaseIndex];
+            if (vase.state != VaseState.Filling || string.IsNullOrEmpty(vase.fillStartTimeUtc))
+                return 0f;
+
+            var startTime = DateTime.Parse(vase.fillStartTimeUtc, null,
+                System.Globalization.DateTimeStyles.RoundtripKind);
+            float elapsedSeconds = (float)(GameTime.UtcNow - startTime).TotalSeconds;
+            float totalSeconds = config.FillDurationMinutes * 60f;
+            return Mathf.Max(0f, totalSeconds - elapsedSeconds);
         }
 
         public float GetFillProgress(int vaseIndex)

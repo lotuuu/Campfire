@@ -17,6 +17,26 @@ namespace Garden
             Instance = this;
         }
 
+        private void OnEnable()
+        {
+            if (WeatherService.Instance != null)
+                WeatherService.Instance.OnWeatherUpdated += OnWeatherUpdated;
+        }
+
+        private void OnDisable()
+        {
+            if (WeatherService.Instance != null)
+                WeatherService.Instance.OnWeatherUpdated -= OnWeatherUpdated;
+        }
+
+        private void Start()
+        {
+            if (WeatherService.Instance != null)
+                WeatherService.Instance.OnWeatherUpdated -= OnWeatherUpdated;
+            if (WeatherService.Instance != null)
+                WeatherService.Instance.OnWeatherUpdated += OnWeatherUpdated;
+        }
+
         private void Update()
         {
             CheckGrowthCompletion();
@@ -24,10 +44,10 @@ namespace Garden
 
         public List<PlotSave> Plots => SaveManager.Instance.Data.plots;
 
-        public bool CraftPlot()
+        public bool CraftPlot(int gridX, int gridY)
         {
             if (Plots.Count >= FlameManager.Instance.MaxPlots) return false;
-            SaveManager.Instance.Data.plots.Add(new PlotSave { state = PlotState.Empty });
+            SaveManager.Instance.Data.plots.Add(new PlotSave { state = PlotState.Empty, gridX = gridX, gridY = gridY });
             SaveManager.Instance.Save();
             return true;
         }
@@ -46,9 +66,10 @@ namespace Garden
             if (seedEntry.count <= 0) data.seedInventory.Remove(seedEntry);
 
             plot.seedName = seedName;
-            plot.state = PlotState.Planted;
-            plot.watered = false;
-            plot.plantTimeUtc = null;
+            plot.state = PlotState.Growing;
+            plot.plantTimeUtc = GameTime.UtcNow.ToString("o");
+            plot.waterCount = 0;
+            plot.snapshots = new GrowthSnapshots();
 
             SaveManager.Instance.Save();
             OnPlotChanged?.Invoke(plotIndex);
@@ -60,16 +81,11 @@ namespace Garden
             var data = SaveManager.Instance.Data;
             if (plotIndex < 0 || plotIndex >= data.plots.Count) return false;
             var plot = data.plots[plotIndex];
-            if (plot.state != PlotState.Planted) return false;
+            if (plot.state != PlotState.Growing) return false;
 
-            var seed = LoadSeed(plot.seedName);
-            if (seed == null) return false;
+            if (!CurrencyManager.Instance.SpendWater(1)) return false;
 
-            if (!CurrencyManager.Instance.SpendWater(seed.waterRequired)) return false;
-
-            plot.watered = true;
-            plot.state = PlotState.Growing;
-            plot.plantTimeUtc = GameTime.UtcNow.ToString("o");
+            plot.waterCount++;
 
             SaveManager.Instance.Save();
             OnPlotChanged?.Invoke(plotIndex);
@@ -90,8 +106,25 @@ namespace Garden
             var plantTime = DateTime.Parse(plot.plantTimeUtc, null,
                 System.Globalization.DateTimeStyles.RoundtripKind);
             float elapsed = (float)(GameTime.UtcNow - plantTime).TotalHours;
-            float effectiveHours = GetEffectiveGrowthHours(seed);
-            return Mathf.Clamp01(elapsed / effectiveHours);
+            return Mathf.Clamp01(elapsed / seed.growthDurationHours);
+        }
+
+        public float GetRemainingSeconds(int plotIndex)
+        {
+            var data = SaveManager.Instance.Data;
+            if (plotIndex < 0 || plotIndex >= data.plots.Count) return 0f;
+            var plot = data.plots[plotIndex];
+            if (plot.state != PlotState.Growing || string.IsNullOrEmpty(plot.plantTimeUtc))
+                return 0f;
+
+            var seed = LoadSeed(plot.seedName);
+            if (seed == null) return 0f;
+
+            var plantTime = DateTime.Parse(plot.plantTimeUtc, null,
+                System.Globalization.DateTimeStyles.RoundtripKind);
+            float elapsedSeconds = (float)(GameTime.UtcNow - plantTime).TotalSeconds;
+            float totalSeconds = seed.growthDurationHours * 3600f;
+            return Mathf.Max(0f, totalSeconds - elapsedSeconds);
         }
 
         public HarvestResult Harvest(int plotIndex)
@@ -104,33 +137,59 @@ namespace Garden
             var seed = LoadSeed(plot.seedName);
             if (seed == null) return null;
 
-            bool weatherMatch = seed.preferredWeather != null &&
-                                WeatherService.Instance != null &&
-                                seed.preferredWeather.Evaluate(WeatherService.Instance.CurrentWeather);
+            float score = 1f;
+            if (seed.recipe != null)
+                score = seed.recipe.Evaluate(plot.snapshots ?? new GrowthSnapshots(), plot.waterCount);
 
-            float quality = CalculateQuality(weatherMatch);
-            int yield = Mathf.RoundToInt(seed.baseYield * quality);
+            int drops = Mathf.Max(1, Mathf.RoundToInt(seed.baseDrops * score));
 
-            AddItem(data, seed.seedName + "_harvest", yield);
-
-            plot.seedName = null;
-            plot.plantTimeUtc = null;
-            plot.watered = false;
-            plot.state = PlotState.Empty;
-
-            SaveManager.Instance.Save();
+            AddItem(data, seed.seedName + "_harvest", drops);
 
             var result = new HarvestResult
             {
                 seedName = seed.seedName,
-                yield = yield,
-                qualityMultiplier = quality,
-                weatherMatched = weatherMatch
+                drops = drops,
+                recipeScore = score
             };
+
+            plot.seedName = null;
+            plot.plantTimeUtc = null;
+            plot.waterCount = 0;
+            plot.snapshots = new GrowthSnapshots();
+            plot.state = PlotState.Empty;
+
+            SaveManager.Instance.Save();
 
             OnPlotChanged?.Invoke(plotIndex);
             OnHarvested?.Invoke(plotIndex, result);
             return result;
+        }
+
+        public bool InstantFinish(int plotIndex)
+        {
+            var data = SaveManager.Instance.Data;
+            if (plotIndex < 0 || plotIndex >= data.plots.Count) return false;
+            var plot = data.plots[plotIndex];
+            if (plot.state != PlotState.Growing) return false;
+            plot.state = PlotState.Mature;
+            SaveManager.Instance.Save();
+            OnPlotChanged?.Invoke(plotIndex);
+            return true;
+        }
+
+        private void OnWeatherUpdated(WeatherData weather)
+        {
+            var data = SaveManager.Instance.Data;
+            bool changed = false;
+            for (int i = 0; i < data.plots.Count; i++)
+            {
+                var plot = data.plots[i];
+                if (plot.state != PlotState.Growing) continue;
+                if (plot.snapshots == null) plot.snapshots = new GrowthSnapshots();
+                plot.snapshots.RecordSnapshot(weather);
+                changed = true;
+            }
+            if (changed) SaveManager.Instance.Save();
         }
 
         private void CheckGrowthCompletion()
@@ -149,26 +208,6 @@ namespace Garden
                 }
             }
             if (changed) SaveManager.Instance.Save();
-        }
-
-        private float GetEffectiveGrowthHours(SeedData seed)
-        {
-            float hours = seed.growthDurationHours;
-            if (WeatherService.Instance != null &&
-                seed.preferredWeather != null &&
-                seed.preferredWeather.Evaluate(WeatherService.Instance.CurrentWeather))
-            {
-                hours /= (1f + SeedData.WeatherMatchBonus);
-            }
-            return hours;
-        }
-
-        private static float CalculateQuality(bool weatherMatch)
-        {
-            float base_ = 1.0f;
-            float roll = UnityEngine.Random.Range(-0.2f, 0.2f);
-            if (weatherMatch) roll += 0.5f;
-            return Mathf.Clamp(base_ + roll, SeedData.MinQualityMultiplier, SeedData.MaxQualityMultiplier);
         }
 
         private static void AddItem(SaveData data, string itemName, int count)
@@ -192,8 +231,7 @@ namespace Garden
     public class HarvestResult
     {
         public string seedName;
-        public int yield;
-        public float qualityMultiplier;
-        public bool weatherMatched;
+        public int drops;
+        public float recipeScore;
     }
 }

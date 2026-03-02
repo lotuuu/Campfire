@@ -1,0 +1,10 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement class="grid-cell">
+        <ui:VisualElement class="cell-icon" />
+        <ui:Label class="cell-label" text="" />
+        <ui:VisualElement class="cell-progress">
+            <ui:VisualElement class="cell-progress-fill" />
+        </ui:VisualElement>
+        <ui:Label class="cell-status" text="" />
+    </ui:VisualElement>
+</ui:UXML>

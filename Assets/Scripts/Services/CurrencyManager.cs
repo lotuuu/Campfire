@@ -8,6 +8,7 @@ namespace Garden
         public static CurrencyManager Instance { get; private set; }
 
         public float Mana => SaveManager.Instance.Data.mana;
+        public int Gems => SaveManager.Instance.Data.gems;
 
         public int TotalWater
         {
@@ -69,6 +70,33 @@ namespace Garden
         public bool CanAffordWater(int amount)
         {
             return TotalWater >= amount;
+        }
+
+        public void AddGems(int amount)
+        {
+            var data = SaveManager.Instance.Data;
+            float old = data.gems;
+            data.gems = Mathf.Max(0, data.gems + amount);
+            OnCurrencyChanged?.Invoke(CurrencyType.Gems, old, data.gems);
+            SaveManager.Instance.Save();
+        }
+
+        public bool SpendGems(int amount)
+        {
+            if (amount <= 0 || SaveManager.Instance.Data.gems < amount) return false;
+            AddGems(-amount);
+            return true;
+        }
+
+        public bool CanAffordGems(int amount) => SaveManager.Instance.Data.gems >= amount;
+
+        public void GrantInfiniteGems()
+        {
+            var data = SaveManager.Instance.Data;
+            float old = data.gems;
+            data.gems = 999999;
+            OnCurrencyChanged?.Invoke(CurrencyType.Gems, old, data.gems);
+            SaveManager.Instance.Save();
         }
     }
 }

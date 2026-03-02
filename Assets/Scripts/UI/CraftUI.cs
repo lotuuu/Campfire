@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -7,6 +8,8 @@ namespace Garden
     {
         private VisualElement craftList;
         private VisualTreeAsset craftTemplate;
+
+        public event Action<CampBuildingType> OnRequestPlacement;
 
         public void Initialize(VisualElement root)
         {
@@ -20,24 +23,30 @@ namespace Garden
             if (craftList == null) return;
             craftList.Clear();
 
-            // Craft Plot
-            AddCraftItem("New Plot", $"{0} Mana", () =>
+            // Craft Plot — fires placement event
+            if (PlotManager.Instance != null && FlameManager.Instance != null)
             {
-                PlotManager.Instance?.CraftPlot();
-                Refresh();
-            });
-
-            // Craft Vase
-            if (VaseManager.Instance != null)
-            {
-                AddCraftItem("New Vase", $"{VaseManager.Instance.Config.CraftCostMana:F0} Mana", () =>
+                bool canAfford = PlotManager.Instance.Plots.Count < FlameManager.Instance.MaxPlots;
+                AddCraftItem("New Plot", canAfford ? "Place on grid" : "Max plots reached", () =>
                 {
-                    VaseManager.Instance.CraftVase();
-                    Refresh();
+                    if (canAfford)
+                        OnRequestPlacement?.Invoke(CampBuildingType.Plot);
                 });
             }
 
-            // Upgrade Flame
+            // Craft Vase — fires placement event
+            if (VaseManager.Instance != null)
+            {
+                float cost = VaseManager.Instance.Config.CraftCostMana;
+                bool canAfford = CurrencyManager.Instance.CanAffordMana(cost);
+                AddCraftItem("New Vase", $"{cost:F0} Mana", () =>
+                {
+                    if (canAfford)
+                        OnRequestPlacement?.Invoke(CampBuildingType.Vase);
+                });
+            }
+
+            // Upgrade Flame — stays direct, not placed on grid
             if (FlameManager.Instance != null && FlameManager.Instance.CanUpgrade())
             {
                 var cost = FlameManager.Instance.Config.GetUpgradeCost(FlameManager.Instance.Level);
@@ -49,7 +58,7 @@ namespace Garden
             }
         }
 
-        private void AddCraftItem(string name, string cost, System.Action onClick)
+        private void AddCraftItem(string name, string cost, Action onClick)
         {
             var el = craftTemplate.CloneTree();
             var nameLabel = el.Q<Label>(className: "craft-name");

@@ -13,7 +13,6 @@ namespace Garden.Tests
             {
                 seedName = "Fern",
                 plantTimeUtc = DateTime.UtcNow.AddHours(-2).ToString("o"),
-                watered = true,
                 state = PlotState.Growing
             };
 
@@ -27,29 +26,71 @@ namespace Garden.Tests
         }
 
         [Test]
-        public void WeatherMatch_BoostsGrowthSpeed()
-        {
-            float baseHours = 4f;
-            float boostedHours = baseHours / (1f + SeedData.WeatherMatchBonus);
-            Assert.AreEqual(3.2f, boostedHours, 0.01f);
-        }
-
-        [Test]
         public void Harvest_ClearsPlot()
         {
             var plot = new PlotSave
             {
                 seedName = "Fern",
                 state = PlotState.Mature,
-                watered = true
+                waterCount = 2
             };
             plot.seedName = null;
             plot.plantTimeUtc = null;
-            plot.watered = false;
+            plot.waterCount = 0;
             plot.state = PlotState.Empty;
 
             Assert.AreEqual(PlotState.Empty, plot.state);
             Assert.IsNull(plot.seedName);
+            Assert.AreEqual(0, plot.waterCount);
+        }
+
+        [Test]
+        public void HarvestDrops_PerfectRecipe_ReturnsBaseDrops()
+        {
+            var recipe = new GrowthRecipe
+            {
+                useHeat = true,
+                idealTempMin = 20f, idealTempMax = 30f,
+                heatTolerance = 10f, heatWeight = 1f
+            };
+            int baseDrops = 5;
+
+            var snapshots = new GrowthSnapshots { snapshotCount = 10, sumTemp = 250f };
+            float score = recipe.Evaluate(snapshots, 0);
+            int drops = Mathf.Max(1, Mathf.RoundToInt(baseDrops * score));
+
+            Assert.AreEqual(5, drops);
+        }
+
+        [Test]
+        public void HarvestDrops_PoorRecipe_ReturnsAtLeast1()
+        {
+            var recipe = new GrowthRecipe
+            {
+                useHeat = true,
+                idealTempMin = 20f, idealTempMax = 30f,
+                heatTolerance = 10f, heatWeight = 1f
+            };
+            int baseDrops = 5;
+
+            var snapshots = new GrowthSnapshots { snapshotCount = 10, sumTemp = 0f };
+            float score = recipe.Evaluate(snapshots, 0);
+            int drops = Mathf.Max(1, Mathf.RoundToInt(baseDrops * score));
+
+            Assert.AreEqual(1, drops);
+        }
+
+        [Test]
+        public void Water_IncrementsWaterCount()
+        {
+            var plot = new PlotSave
+            {
+                seedName = "Fern",
+                state = PlotState.Growing,
+                waterCount = 0
+            };
+            plot.waterCount++;
+            Assert.AreEqual(1, plot.waterCount);
         }
     }
 }

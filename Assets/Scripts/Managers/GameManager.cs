@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Garden
 {
@@ -21,12 +22,27 @@ namespace Garden
             }
         }
 
+        private void Update()
+        {
+#if UNITY_EDITOR
+            if (Keyboard.current != null &&
+                Keyboard.current.gKey.wasPressedThisFrame &&
+                Keyboard.current.leftShiftKey.isPressed)
+                CurrencyManager.Instance?.GrantInfiniteGems();
+#endif
+        }
+
         private void InitializeNewPlayer()
         {
             var data = SaveManager.Instance.Data;
             data.mana = 50f;
+            data.gems = 5;
             VaseManager.InitializeNewPlayer(data, VaseManager.Instance.Config.BaseCapacity);
-            data.plots.Add(new PlotSave { state = PlotState.Empty });
+            data.vases[0].gridX = 1;
+            data.vases[0].gridY = 0;
+            data.vases[1].gridX = 0;
+            data.vases[1].gridY = 1;
+            data.plots.Add(new PlotSave { state = PlotState.Empty, gridX = -1, gridY = 0 });
             ApothekeManager.Instance.AddSeed("Fern", 3);
             SaveManager.Instance.Save();
         }
