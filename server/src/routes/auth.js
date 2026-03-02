@@ -1,8 +1,12 @@
 const { Router } = require('express');
 const crypto = require('crypto');
 const pool = require('../db/pool');
+const authMiddleware = require('../middleware/auth');
 
 const router = Router();
+
+const DISPLAY_NAME_MAX = 20;
+const DISPLAY_NAME_REGEX = /^[a-zA-Z0-9 ]+$/;
 
 const PREFIXES = ['SPARK', 'BLAZE', 'EMBER', 'FLAME', 'TORCH', 'FLARE'];
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -46,6 +50,32 @@ router.post('/register', async (req, res) => {
   }
 
   res.status(500).json({ error: 'Could not generate unique friend code' });
+});
+
+router.put('/display-name', authMiddleware, async (req, res) => {
+  const { displayName } = req.body;
+
+  if (!displayName || typeof displayName !== 'string') {
+    return res.status(400).json({ error: 'displayName is required' });
+  }
+
+  const trimmed = displayName.trim();
+  if (trimmed.length === 0 || trimmed.length > DISPLAY_NAME_MAX) {
+    return res.status(400).json({ error: `Name must be 1-${DISPLAY_NAME_MAX} characters` });
+  }
+  if (!DISPLAY_NAME_REGEX.test(trimmed)) {
+    return res.status(400).json({ error: 'Name can only contain letters, numbers, and spaces' });
+  }
+
+  try {
+    await pool.query(
+      'UPDATE players SET display_name = $1 WHERE uid = $2',
+      [trimmed, req.user.uid]
+    );
+    res.json({ displayName: trimmed });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update display name' });
+  }
 });
 
 module.exports = router;
