@@ -17,6 +17,11 @@ MonoBehaviour:
   rareGold: 50
   epicGold: 100
   legendaryGold: 250
+  commonDiscoveryReward: 20
+  uncommonDiscoveryReward: 50
+  rareDiscoveryReward: 100
+  epicDiscoveryReward: 200
+  legendaryDiscoveryReward: 500
   commonPollenPerSecond: 0.5
   uncommonPollenPerSecond: 1.5
   rarePollenPerSecond: 4

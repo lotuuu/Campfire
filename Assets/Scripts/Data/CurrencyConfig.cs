@@ -12,6 +12,13 @@ namespace Garden
         public int epicGold = 100;
         public int legendaryGold = 250;
 
+        [Header("Discovery Reward (by rarity)")]
+        public int commonDiscoveryReward = 20;
+        public int uncommonDiscoveryReward = 50;
+        public int rareDiscoveryReward = 100;
+        public int epicDiscoveryReward = 200;
+        public int legendaryDiscoveryReward = 500;
+
         [Header("Pollen per Second (by rarity)")]
         public float commonPollenPerSecond = 0.5f;
         public float uncommonPollenPerSecond = 1.5f;
@@ -31,6 +38,16 @@ namespace Garden
             Rarity.Epic => epicGold,
             Rarity.Legendary => legendaryGold,
             _ => commonGold
+        };
+
+        public int GetDiscoveryReward(Rarity r) => r switch
+        {
+            Rarity.Common => commonDiscoveryReward,
+            Rarity.Uncommon => uncommonDiscoveryReward,
+            Rarity.Rare => rareDiscoveryReward,
+            Rarity.Epic => epicDiscoveryReward,
+            Rarity.Legendary => legendaryDiscoveryReward,
+            _ => commonDiscoveryReward
         };
 
         public float GetPollenPerSecondForRarity(Rarity r) => r switch
