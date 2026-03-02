@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -16,6 +17,9 @@ namespace Garden
 
         private VisualTreeAsset cellTemplate;
         private CampsitePanController panController;
+
+        // Curtain transition
+        private VisualElement visitTransition;
 
         private const float HexSize = 220f;     // hex outer radius (pixel spacing)
         private const float CellWidth = 380f;   // cell element width
@@ -44,6 +48,7 @@ namespace Garden
 
         // Current grid state
         private int currentGridSize;
+        private bool suppressRebuild;
 
         public void Initialize(VisualElement root)
         {
@@ -55,6 +60,7 @@ namespace Garden
             interactionActions = root.Q("interaction-actions");
 
             cellTemplate = Resources.Load<VisualTreeAsset>("UI/Templates/GridCell");
+            visitTransition = root.Q("visit-transition");
 
             panController = new CampsitePanController(viewport, canvas);
 
@@ -108,6 +114,7 @@ namespace Garden
 
         public void RebuildGrid()
         {
+            if (suppressRebuild) return;
             if (canvas == null || FlameManager.Instance == null) return;
 
             canvas.Clear();
@@ -330,21 +337,75 @@ namespace Garden
 
         private void OnEmptyCellTapped(int gridX, int gridY)
         {
-            if (mode != CampsiteMode.Placing) return;
-
-            bool success = false;
-            switch (pendingBuildingType)
+            if (mode == CampsiteMode.Placing)
             {
-                case CampBuildingType.Plot:
-                    success = PlotManager.Instance.CraftPlot(gridX, gridY);
-                    break;
-                case CampBuildingType.Vase:
-                    success = VaseManager.Instance.CraftVase(gridX, gridY);
-                    break;
+                bool success = false;
+                switch (pendingBuildingType)
+                {
+                    case CampBuildingType.Plot:
+                        success = PlotManager.Instance.CraftPlot(gridX, gridY);
+                        break;
+                    case CampBuildingType.Vase:
+                        success = VaseManager.Instance.CraftVase(gridX, gridY);
+                        break;
+                }
+                if (success) ExitMode();
+                return;
             }
 
-            if (success)
-                ExitMode();
+            if (mode != CampsiteMode.Normal) return;
+            ShowBuildMenu(gridX, gridY);
+        }
+
+        private void ShowBuildMenu(int gridX, int gridY)
+        {
+            if (interactionPanel == null) return;
+
+            interactionBody.Clear();
+            interactionActions.Clear();
+
+            bool canPlace = FlameManager.Instance.CanPlaceEntity;
+            int current = FlameManager.Instance.CurrentEntityCount;
+            int max = FlameManager.Instance.MaxEntities;
+            interactionTitle.text = $"Build ({current}/{max})";
+
+            // Plot option
+            if (PlotManager.Instance != null)
+            {
+                var plotBtn = new Button(() =>
+                {
+                    if (PlotManager.Instance.CraftPlot(gridX, gridY))
+                        CloseInteractionPanel();
+                }) { text = "New Plot" };
+                plotBtn.AddToClassList("interaction-btn-primary");
+                plotBtn.SetEnabled(canPlace);
+                interactionActions.Add(plotBtn);
+            }
+
+            // Vase option
+            if (VaseManager.Instance != null)
+            {
+                float cost = VaseManager.Instance.Config.CraftCostMana;
+                bool canAfford = canPlace && CurrencyManager.Instance.CanAffordMana(cost);
+                var vaseBtn = new Button(() =>
+                {
+                    if (VaseManager.Instance.CraftVase(gridX, gridY))
+                        CloseInteractionPanel();
+                }) { text = $"New Vase ({cost:F0} Mana)" };
+                vaseBtn.AddToClassList("interaction-btn-primary");
+                vaseBtn.SetEnabled(canAfford);
+                interactionActions.Add(vaseBtn);
+            }
+
+            if (!canPlace)
+            {
+                var hint = new Label("Upgrade flame for more slots");
+                hint.AddToClassList("interaction-info");
+                interactionBody.Add(hint);
+            }
+
+            AddCloseButton();
+            interactionPanel.style.display = DisplayStyle.Flex;
         }
 
         // ── Modes ──
@@ -380,24 +441,84 @@ namespace Garden
 
         // ── Visit Mode ──
 
-        public void EnterVisitMode(VillageSnapshot snapshot)
+        private const float CurtainDurationMs = 400f;
+
+        public void EnterVisitMode(VillageSnapshot snapshot, string friendName = null)
         {
-            mode = CampsiteMode.Visiting;
             visitSnapshot = snapshot;
             CloseInteractionPanel();
-            RebuildGrid();
+
+            // Set curtain label
+            if (visitTransition != null)
+            {
+                var label = visitTransition.Q<Label>("curtain-label");
+                if (label != null)
+                    label.text = string.IsNullOrEmpty(friendName) ? "Visiting..." : $"Visiting {friendName}...";
+            }
+
+            StartCoroutine(VisitTransitionCoroutine(toVisit: true));
         }
 
         public void ExitVisitMode()
         {
-            mode = CampsiteMode.Normal;
-            visitSnapshot = null;
-            if (visitBackBtn != null)
+            if (visitTransition != null)
             {
-                visitBackBtn.RemoveFromHierarchy();
-                visitBackBtn = null;
+                var label = visitTransition.Q<Label>("curtain-label");
+                if (label != null) label.text = "Returning...";
             }
-            RebuildGrid();
+            StartCoroutine(VisitTransitionCoroutine(toVisit: false));
+        }
+
+        private IEnumerator VisitTransitionCoroutine(bool toVisit)
+        {
+            if (visitTransition == null)
+            {
+                // No transition element — just switch immediately
+                ApplyVisitState(toVisit);
+                yield break;
+            }
+
+            // Show container and close curtains
+            visitTransition.style.display = DisplayStyle.Flex;
+            // Force a frame so display:flex is applied before adding the class
+            yield return null;
+            visitTransition.AddToClassList("curtain-closed");
+
+            // Wait for curtains to fully close
+            yield return new WaitForSeconds(CurtainDurationMs / 1000f + 0.05f);
+
+            // Swap the content behind the curtains
+            ApplyVisitState(toVisit);
+
+            // Let one frame render the new grid
+            yield return null;
+
+            // Open curtains
+            visitTransition.RemoveFromClassList("curtain-closed");
+
+            // Wait for curtains to fully open, then hide
+            yield return new WaitForSeconds(CurtainDurationMs / 1000f + 0.05f);
+            visitTransition.style.display = DisplayStyle.None;
+        }
+
+        private void ApplyVisitState(bool toVisit)
+        {
+            if (toVisit)
+            {
+                mode = CampsiteMode.Visiting;
+                RebuildGrid();
+            }
+            else
+            {
+                mode = CampsiteMode.Normal;
+                visitSnapshot = null;
+                if (visitBackBtn != null)
+                {
+                    visitBackBtn.RemoveFromHierarchy();
+                    visitBackBtn = null;
+                }
+                RebuildGrid();
+            }
         }
 
         private void RebuildVisitGrid()
@@ -693,9 +814,14 @@ namespace Garden
                     interactionTitle.text = $"{plot.seedName} — Ready!";
                     var harvestBtn = new Button(() =>
                     {
+                        suppressRebuild = true;
                         var result = PlotManager.Instance.Harvest(index);
+                        suppressRebuild = false;
                         if (result != null)
+                        {
                             ShowHarvestResult(result);
+                            RebuildGrid();
+                        }
                         else
                             CloseInteractionPanel();
                     }) { text = "Harvest" };
