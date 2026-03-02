@@ -78,9 +78,9 @@ namespace Garden
             // Wire bottom nav
             if (bottomNav != null)
             {
-                bottomNav.OnApothekeClicked += () => OpenOverlay("Apotheke", apothekePanel);
-                bottomNav.OnLettersClicked += () => OpenOverlay("Letters", lettersPanel);
-                bottomNav.OnBuildClicked += () => OpenOverlay("Build", buildPanel);
+                bottomNav.OnApothekeClicked += () => OpenOverlay("Seeds", apothekePanel);
+                bottomNav.OnLettersClicked += () => OpenOverlay("Mail", lettersPanel);
+                bottomNav.OnBuildClicked += () => OpenOverlay("Craft", buildPanel);
             }
 
             // Wire debug button

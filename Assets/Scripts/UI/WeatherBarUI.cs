@@ -6,25 +6,30 @@ namespace Garden
     public class WeatherBarUI : MonoBehaviour
     {
         private Label weatherIcon;
+        private Label weatherConditionLabel;
+        private Label weatherHumidity;
         private Label weatherTemp;
-        private Label weatherCondition;
         private VisualElement weatherMoon;
+        private Label playerName;
+        private Label dateTime;
 
         private VisualElement weatherBar;
         private VisualElement forecastPanel;
         private VisualElement forecastDays;
         private VisualElement campRoot;
 
-        // Moon_Phase_1=FullMoon .. Moon_Phase_5=NewMoon etc.
         private static readonly int[] MoonPhaseToSpriteIndex = { 5, 6, 7, 8, 1, 2, 3, 4 };
         private Texture2D[] moonTextures;
 
         public void Initialize(VisualElement root)
         {
             weatherIcon = root.Q<Label>("weather-icon");
+            weatherConditionLabel = root.Q<Label>("weather-condition-label");
+            weatherHumidity = root.Q<Label>("weather-humidity");
             weatherTemp = root.Q<Label>("weather-temp");
-            weatherCondition = root.Q<Label>("weather-condition");
             weatherMoon = root.Q("weather-moon");
+            playerName = root.Q<Label>("player-name");
+            dateTime = root.Q<Label>("date-time");
 
             moonTextures = new Texture2D[8];
             for (int i = 0; i < 8; i++)
@@ -37,6 +42,10 @@ namespace Garden
 
             weatherBar?.RegisterCallback<ClickEvent>(OnWeatherBarClicked);
             campRoot?.RegisterCallback<ClickEvent>(OnRootClicked);
+
+            UpdatePlayerName();
+            if (SocialService.Instance != null)
+                SocialService.Instance.OnDisplayNameUpdated += OnDisplayNameUpdated;
 
             if (WeatherService.Instance != null)
             {
@@ -55,6 +64,30 @@ namespace Garden
                 WeatherService.Instance.OnWeatherUpdated -= UpdateWeather;
                 WeatherService.Instance.OnForecastUpdated -= PopulateForecast;
             }
+            if (SocialService.Instance != null)
+                SocialService.Instance.OnDisplayNameUpdated -= OnDisplayNameUpdated;
+        }
+
+        private void Update()
+        {
+            if (dateTime != null)
+            {
+                var now = GameTime.Now;
+                dateTime.text = now.ToString("dd MMM  h:mm tt").ToUpper();
+            }
+        }
+
+        private void UpdatePlayerName()
+        {
+            if (playerName == null) return;
+            var name = SocialSaveManager.Instance?.Data?.displayName;
+            playerName.text = string.IsNullOrEmpty(name) ? "Camper" : name;
+        }
+
+        private void OnDisplayNameUpdated(string newName)
+        {
+            if (playerName != null)
+                playerName.text = string.IsNullOrEmpty(newName) ? "Camper" : newName;
         }
 
         private void OnWeatherBarClicked(ClickEvent evt)
@@ -69,7 +102,6 @@ namespace Garden
             if (forecastPanel == null) return;
             if (!forecastPanel.ClassListContains("forecast-visible")) return;
 
-            // Don't close if clicking on the forecast panel itself
             var target = evt.target as VisualElement;
             while (target != null)
             {
@@ -112,8 +144,9 @@ namespace Garden
         private void UpdateWeather(WeatherData weather)
         {
             if (weatherIcon != null) weatherIcon.text = GetWeatherEmoji(weather.condition);
-            if (weatherTemp != null) weatherTemp.text = $"{weather.temperature:F0}\u00b0C";
-            if (weatherCondition != null) weatherCondition.text = weather.condition.ToString();
+            if (weatherConditionLabel != null) weatherConditionLabel.text = weather.condition.ToString().ToUpper();
+            if (weatherHumidity != null) weatherHumidity.text = $"{weather.humidity:F0}";
+            if (weatherTemp != null) weatherTemp.text = $"{weather.temperature:F0}\u00b0";
             if (weatherMoon != null)
             {
                 int spriteIdx = MoonPhaseToSpriteIndex[(int)weather.moonPhase] - 1;
@@ -132,6 +165,5 @@ namespace Garden
             WeatherCondition.Snow => "\u2744",
             _ => "?"
         };
-
     }
 }

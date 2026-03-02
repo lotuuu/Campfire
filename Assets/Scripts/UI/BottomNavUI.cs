@@ -12,13 +12,13 @@ namespace Garden
 
         public void Initialize(VisualElement root)
         {
-            var btnApotheke = root.Q<Button>("btn-apotheke");
-            var btnLetters = root.Q<Button>("btn-letters");
-            var btnBuild = root.Q<Button>("btn-build");
+            var btnSeeds = root.Q<Button>("btn-seeds");
+            var btnCraft = root.Q<Button>("btn-craft");
+            var btnMail = root.Q<Button>("btn-mail");
 
-            btnApotheke?.RegisterCallback<ClickEvent>(_ => OnApothekeClicked?.Invoke());
-            btnLetters?.RegisterCallback<ClickEvent>(_ => OnLettersClicked?.Invoke());
-            btnBuild?.RegisterCallback<ClickEvent>(_ => OnBuildClicked?.Invoke());
+            btnSeeds?.RegisterCallback<ClickEvent>(_ => OnApothekeClicked?.Invoke());
+            btnCraft?.RegisterCallback<ClickEvent>(_ => OnBuildClicked?.Invoke());
+            btnMail?.RegisterCallback<ClickEvent>(_ => OnLettersClicked?.Invoke());
         }
     }
 }

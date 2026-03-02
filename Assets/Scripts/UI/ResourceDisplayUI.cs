@@ -7,13 +7,11 @@ namespace Garden
     {
         private Label manaDisplay;
         private Label waterDisplay;
-        private Label gemsDisplay;
 
         public void Initialize(VisualElement root)
         {
             manaDisplay = root.Q<Label>("mana-display");
             waterDisplay = root.Q<Label>("water-display");
-            gemsDisplay = root.Q<Label>("gems-display");
 
             if (CurrencyManager.Instance != null)
                 CurrencyManager.Instance.OnCurrencyChanged += OnCurrencyChanged;
@@ -34,18 +32,15 @@ namespace Garden
 
         private void Update()
         {
-            // Mana updates every frame from FlameManager
             UpdateDisplay();
         }
 
         private void UpdateDisplay()
         {
             if (manaDisplay != null && SaveManager.Instance != null)
-                manaDisplay.text = $"{SaveManager.Instance.Data.mana:F0} Mana";
+                manaDisplay.text = $"\u2726 {SaveManager.Instance.Data.mana:F0}";
             if (waterDisplay != null && CurrencyManager.Instance != null)
-                waterDisplay.text = $"{CurrencyManager.Instance.TotalWater} Water";
-            if (gemsDisplay != null && SaveManager.Instance != null)
-                gemsDisplay.text = $"{SaveManager.Instance.Data.gems} Gems";
+                waterDisplay.text = $"\U0001F4A7 {CurrencyManager.Instance.TotalWater}";
         }
     }
 }
