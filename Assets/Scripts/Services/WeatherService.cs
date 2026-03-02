@@ -1,5 +1,7 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Globalization;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -19,7 +21,9 @@ namespace Garden
         [SerializeField] private WeatherData debugWeather;
 
         public WeatherData CurrentWeather { get; private set; }
+        public List<DailyForecast> Forecast { get; private set; } = new();
         public event Action<WeatherData> OnWeatherUpdated;
+        public event Action OnForecastUpdated;
         public event Action<bool> OnLocationResolved;
         public bool IsDebugMode => useDebugOverride;
         public bool IsLocationResolved { get; private set; }
@@ -110,7 +114,10 @@ namespace Garden
             while (true)
             {
                 if (!useDebugOverride && hasLocation)
+                {
                     yield return FetchWeather();
+                    yield return FetchForecast();
+                }
                 yield return new WaitForSeconds(pollIntervalMinutes * 60f);
             }
         }
@@ -184,6 +191,32 @@ namespace Garden
             // invalid coordinates would break weather polling on-device.
             CurrentWeather = debugWeather;
             OnWeatherUpdated?.Invoke(debugWeather);
+            GenerateDebugForecast();
+        }
+
+        private void GenerateDebugForecast()
+        {
+            var conditions = (WeatherCondition[])Enum.GetValues(typeof(WeatherCondition));
+            var forecast = new List<DailyForecast>();
+            var baseTemp = debugWeather.temperature;
+            var today = GameTime.UtcNow;
+
+            for (int i = 0; i < 5; i++)
+            {
+                var day = today.AddDays(i + 1);
+                float variation = UnityEngine.Random.Range(-3f, 3f);
+                forecast.Add(new DailyForecast
+                {
+                    dayLabel = day.ToString("ddd", CultureInfo.InvariantCulture),
+                    tempHigh = Mathf.Round(baseTemp + variation + 2f),
+                    tempLow = Mathf.Round(baseTemp + variation - 4f),
+                    condition = conditions[(int)(debugWeather.condition + i) % conditions.Length],
+                    moonPhase = MoonPhaseCalculator.Calculate(day)
+                });
+            }
+
+            Forecast = forecast;
+            OnForecastUpdated?.Invoke();
         }
 
         private static WeatherCondition MapCondition(int weatherId)
@@ -197,6 +230,90 @@ namespace Garden
                 _ => WeatherCondition.Clear
             };
         }
+
+        private IEnumerator FetchForecast()
+        {
+            string url = $"https://api.openweathermap.org/data/2.5/forecast?lat={latitude}&lon={longitude}&appid={apiKey}&units=metric&cnt=40";
+            using var request = UnityWebRequest.Get(url);
+            yield return request.SendWebRequest();
+
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError($"Forecast API error: {request.error}");
+                yield break;
+            }
+
+            var response = JsonUtility.FromJson<ForecastResponse>(request.downloadHandler.text);
+            Forecast = AggregateForecast(response);
+            OnForecastUpdated?.Invoke();
+        }
+
+        private List<DailyForecast> AggregateForecast(ForecastResponse response)
+        {
+            var dayMap = new Dictionary<string, (float min, float max, Dictionary<int, int> condCounts)>();
+            var dayOrder = new List<string>();
+
+            foreach (var entry in response.list)
+            {
+                var dt = DateTimeOffset.FromUnixTimeSeconds(entry.dt).UtcDateTime;
+                string key = dt.ToString("yyyy-MM-dd");
+
+                if (!dayMap.ContainsKey(key))
+                {
+                    dayMap[key] = (entry.main.temp_min, entry.main.temp_max, new Dictionary<int, int>());
+                    dayOrder.Add(key);
+                }
+
+                var (min, max, counts) = dayMap[key];
+                min = Mathf.Min(min, entry.main.temp_min);
+                max = Mathf.Max(max, entry.main.temp_max);
+
+                int wid = entry.weather[0].id;
+                counts[wid] = counts.GetValueOrDefault(wid) + 1;
+
+                dayMap[key] = (min, max, counts);
+            }
+
+            // Skip today, take next 5 days
+            var todayKey = GameTime.UtcNow.ToString("yyyy-MM-dd");
+            var forecast = new List<DailyForecast>();
+
+            foreach (string key in dayOrder)
+            {
+                if (key == todayKey) continue;
+                if (forecast.Count >= 5) break;
+
+                var (min, max, counts) = dayMap[key];
+                var dt = DateTime.ParseExact(key, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+                int mostFreqId = 800;
+                int mostFreqCount = 0;
+                foreach (var kv in counts)
+                {
+                    if (kv.Value > mostFreqCount) { mostFreqId = kv.Key; mostFreqCount = kv.Value; }
+                }
+
+                forecast.Add(new DailyForecast
+                {
+                    dayLabel = dt.ToString("ddd", CultureInfo.InvariantCulture),
+                    tempHigh = Mathf.Round(max),
+                    tempLow = Mathf.Round(min),
+                    condition = MapCondition(mostFreqId),
+                    moonPhase = MoonPhaseCalculator.Calculate(dt)
+                });
+            }
+
+            return forecast;
+        }
+
+        [Serializable] private class ForecastResponse { public ForecastEntry[] list; }
+        [Serializable] private class ForecastEntry
+        {
+            public long dt;
+            public ForecastMain main;
+            public WeatherInfo[] weather;
+        }
+        [Serializable] private class ForecastMain { public float temp_min; public float temp_max; }
 
         [Serializable] private class OpenWeatherResponse
         {

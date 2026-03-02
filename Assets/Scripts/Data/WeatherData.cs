@@ -14,4 +14,14 @@ namespace Garden
         public MoonPhase moonPhase;
         public CalendarEvent calendarEvent;
     }
+
+    [System.Serializable]
+    public struct DailyForecast
+    {
+        public string dayLabel;
+        public float tempHigh;
+        public float tempLow;
+        public WeatherCondition condition;
+        public MoonPhase moonPhase;
+    }
 }

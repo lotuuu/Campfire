@@ -9,6 +9,9 @@
     <Style src="project://database/Assets/UI/Styles/Letters.uss" />
     <Style src="project://database/Assets/UI/Styles/Craft.uss" />
     <Style src="project://database/Assets/UI/Styles/Interaction.uss" />
+    <Style src="project://database/Assets/UI/Styles/CampsiteGrid.uss" />
+    <Style src="project://database/Assets/UI/Styles/Debug.uss" />
+    <Style src="project://database/Assets/UI/Styles/Forecast.uss" />
 
     <!-- Root container -->
     <ui:VisualElement name="camp-root">
@@ -21,32 +24,22 @@
             <ui:Label name="weather-moon" text="--" />
         </ui:VisualElement>
 
+        <ui:VisualElement name="forecast-panel">
+            <ui:VisualElement name="forecast-days" />
+        </ui:VisualElement>
+
         <!-- Resource display -->
         <ui:VisualElement name="resource-bar">
             <ui:Label name="mana-display" text="0" />
             <ui:Label name="water-display" text="0" />
+            <ui:Label name="gems-display" text="0" />
+            <ui:Button name="btn-debug" text="[Debug]" />
         </ui:VisualElement>
 
-        <!-- Main campsite view -->
-        <ui:ScrollView name="campsite-view">
-
-            <!-- Plots above the flame -->
-            <ui:VisualElement name="plots-container" />
-
-            <!-- Flame at center -->
-            <ui:VisualElement name="flame-container">
-                <ui:VisualElement name="flame">
-                    <ui:Label name="flame-level" text="1" />
-                </ui:VisualElement>
-            </ui:VisualElement>
-
-            <!-- Vases below flame -->
-            <ui:VisualElement name="vases-container" />
-
-            <!-- Gardens at bottom -->
-            <ui:VisualElement name="gardens-container" />
-
-        </ui:ScrollView>
+        <!-- Main campsite grid view -->
+        <ui:VisualElement name="campsite-viewport">
+            <ui:VisualElement name="campsite-canvas" />
+        </ui:VisualElement>
 
         <!-- Bottom navigation -->
         <ui:VisualElement name="bottom-nav">
@@ -85,6 +78,72 @@
                     <!-- Craft panel -->
                     <ui:VisualElement name="craft-panel">
                         <ui:ScrollView name="craft-list" />
+                    </ui:VisualElement>
+
+                    <!-- Debug panel -->
+                    <ui:VisualElement name="debug-panel">
+
+                        <ui:Label text="Weather Override" class="debug-section-header" />
+
+                        <ui:VisualElement class="debug-row">
+                            <ui:Label text="Temp" class="debug-label" />
+                            <ui:Slider name="temp-slider" low-value="-20" high-value="50" value="22" />
+                            <ui:Label name="temp-value" text="22°C" class="debug-value" />
+                        </ui:VisualElement>
+
+                        <ui:VisualElement class="debug-row">
+                            <ui:Label text="Humidity" class="debug-label" />
+                            <ui:Slider name="humidity-slider" low-value="0" high-value="100" value="50" />
+                            <ui:Label name="humidity-value" text="50%" class="debug-value" />
+                        </ui:VisualElement>
+
+                        <ui:VisualElement class="debug-row">
+                            <ui:Label text="Wind" class="debug-label" />
+                            <ui:Slider name="wind-slider" low-value="0" high-value="50" value="3" />
+                            <ui:Label name="wind-value" text="3.0 m/s" class="debug-value" />
+                        </ui:VisualElement>
+
+                        <ui:DropdownField name="condition-dropdown" label="Condition"
+                            choices="Clear,Cloudy,Rain,Storm,Snow" />
+                        <ui:DropdownField name="moon-phase-dropdown" label="Moon Phase"
+                            choices="New Moon,Waxing Crescent,First Quarter,Waxing Gibbous,Full Moon,Waning Gibbous,Last Quarter,Waning Crescent" />
+                        <ui:DropdownField name="time-of-day-dropdown" label="Time of Day"
+                            choices="Day,Night,Golden Hour" />
+                        <ui:DropdownField name="calendar-event-dropdown" label="Calendar Event"
+                            choices="None,Spring Equinox,Fall Equinox,Lunar Eclipse" />
+
+                        <ui:VisualElement name="preset-buttons">
+                            <ui:Button name="blizzard-button" text="Blizzard" class="preset-btn" />
+                            <ui:Button name="thunderstorm-button" text="Thunderstorm" class="preset-btn" />
+                            <ui:Button name="clear-night-button" text="Clear Night" class="preset-btn" />
+                            <ui:Button name="golden-hour-button" text="Golden Hour" class="preset-btn" />
+                        </ui:VisualElement>
+
+                        <ui:Button name="apply-button" text="Apply Weather" />
+
+                        <ui:Label text="Time" class="debug-section-header" />
+
+                        <ui:VisualElement class="debug-row">
+                            <ui:Label text="Hours" class="debug-label" />
+                            <ui:IntegerField name="time-skip-field" value="1" />
+                            <ui:Button name="time-skip-button" text="Skip Time" class="preset-btn" />
+                        </ui:VisualElement>
+
+                        <ui:VisualElement class="debug-row">
+                            <ui:Label text="Time" class="debug-label" />
+                            <ui:TextField name="time-override-field" value="" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="debug-row">
+                            <ui:Button name="set-time-button" text="Set Time" class="preset-btn" />
+                            <ui:Button name="reset-time-button" text="Reset" class="preset-btn" />
+                        </ui:VisualElement>
+                        <ui:Label name="current-time-label" />
+
+                        <ui:Label text="Cheats" class="debug-section-header" />
+
+                        <ui:Button name="max-currency-button" text="Max Currency" />
+                        <ui:Button name="clear-save-button" text="Clear Save Data" class="btn-danger" />
+
                     </ui:VisualElement>
 
                 </ui:ScrollView>
