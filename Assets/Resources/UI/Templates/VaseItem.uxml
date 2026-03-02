@@ -1,0 +1,8 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement class="vase-item">
+        <ui:VisualElement class="vase-icon" />
+        <ui:Label class="vase-water" text="0/5" />
+        <ui:Label class="vase-state" text="Empty" />
+        <ui:Button class="vase-action" text="Collect" />
+    </ui:VisualElement>
+</ui:UXML>

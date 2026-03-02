@@ -1,0 +1,8 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement class="garden-item">
+        <ui:VisualElement class="garden-icon" />
+        <ui:Label class="garden-name" text="Garden" />
+        <ui:Label class="garden-state" text="Empty" />
+        <ui:Label class="garden-yield" text="" />
+    </ui:VisualElement>
+</ui:UXML>

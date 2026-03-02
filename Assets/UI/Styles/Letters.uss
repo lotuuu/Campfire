@@ -1,0 +1,14 @@
+/* Letters.uss — Letters overlay (placeholder) */
+
+#letters-panel {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+#letters-placeholder {
+    font-size: var(--font-lg);
+    color: rgb(150, 130, 100);
+    -unity-text-align: middle-center;
+    -unity-font-style: italic;
+}

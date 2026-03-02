@@ -1,0 +1,8 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement class="recipe-card">
+        <ui:Label class="recipe-name" text="Recipe" />
+        <ui:VisualElement class="recipe-ingredients" />
+        <ui:Label class="recipe-result" />
+        <ui:Button class="recipe-action" text="Mix" />
+    </ui:VisualElement>
+</ui:UXML>

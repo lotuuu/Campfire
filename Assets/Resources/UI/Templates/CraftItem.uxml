@@ -1,0 +1,7 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement class="craft-item">
+        <ui:Label class="craft-name" text="Item" />
+        <ui:Label class="craft-cost" text="50 Mana" />
+        <ui:Button class="craft-action" text="Craft" />
+    </ui:VisualElement>
+</ui:UXML>

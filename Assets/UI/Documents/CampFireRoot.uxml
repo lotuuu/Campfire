@@ -1,0 +1,99 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <Style src="project://database/Assets/UI/Styles/Variables.uss" />
+    <Style src="project://database/Assets/UI/Styles/Common.uss" />
+    <Style src="project://database/Assets/UI/Styles/CampSite.uss" />
+    <Style src="project://database/Assets/UI/Styles/WeatherBar.uss" />
+    <Style src="project://database/Assets/UI/Styles/BottomNav.uss" />
+    <Style src="project://database/Assets/UI/Styles/Overlay.uss" />
+    <Style src="project://database/Assets/UI/Styles/Apotheke.uss" />
+    <Style src="project://database/Assets/UI/Styles/Letters.uss" />
+    <Style src="project://database/Assets/UI/Styles/Craft.uss" />
+    <Style src="project://database/Assets/UI/Styles/Interaction.uss" />
+
+    <!-- Root container -->
+    <ui:VisualElement name="camp-root">
+
+        <!-- Weather bar at top -->
+        <ui:VisualElement name="weather-bar">
+            <ui:Label name="weather-icon" text="--" />
+            <ui:Label name="weather-temp" text="--" />
+            <ui:Label name="weather-condition" text="Loading..." />
+            <ui:Label name="weather-moon" text="--" />
+        </ui:VisualElement>
+
+        <!-- Resource display -->
+        <ui:VisualElement name="resource-bar">
+            <ui:Label name="mana-display" text="0" />
+            <ui:Label name="water-display" text="0" />
+        </ui:VisualElement>
+
+        <!-- Main campsite view -->
+        <ui:VisualElement name="campsite-view">
+
+            <!-- Flame at center -->
+            <ui:VisualElement name="flame-container">
+                <ui:VisualElement name="flame">
+                    <ui:Label name="flame-level" text="1" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Camp object containers (populated by code) -->
+            <ui:VisualElement name="plots-container" />
+            <ui:VisualElement name="vases-container" />
+            <ui:VisualElement name="gardens-container" />
+
+        </ui:VisualElement>
+
+        <!-- Bottom navigation -->
+        <ui:VisualElement name="bottom-nav">
+            <ui:Button name="btn-apotheke" class="nav-btn" text="Apotheke" />
+            <ui:Button name="btn-letters" class="nav-btn" text="Letters" />
+            <ui:Button name="btn-craft" class="nav-btn" text="Craft" />
+        </ui:VisualElement>
+
+        <!-- Overlay container (slide-up panels) -->
+        <ui:VisualElement name="overlay-container">
+            <ui:VisualElement name="overlay-backdrop" />
+            <ui:VisualElement name="overlay-content">
+
+                <!-- Header with title and close -->
+                <ui:VisualElement name="overlay-header">
+                    <ui:Label name="overlay-title" text="Panel" />
+                    <ui:Button name="overlay-close" text="&#x2715;" />
+                </ui:VisualElement>
+
+                <!-- Scrollable body -->
+                <ui:ScrollView name="overlay-body">
+
+                    <!-- Apotheke panel -->
+                    <ui:VisualElement name="apotheke-panel">
+                        <ui:ScrollView name="seed-list" />
+                        <ui:VisualElement name="recipe-section">
+                            <ui:ScrollView name="recipe-list" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <!-- Letters panel -->
+                    <ui:VisualElement name="letters-panel">
+                        <ui:Label name="letters-placeholder" text="Coming soon..." />
+                    </ui:VisualElement>
+
+                    <!-- Craft panel -->
+                    <ui:VisualElement name="craft-panel">
+                        <ui:ScrollView name="craft-list" />
+                    </ui:VisualElement>
+
+                </ui:ScrollView>
+
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Interaction panel (tap on camp objects) -->
+        <ui:VisualElement name="interaction-panel">
+            <ui:Label name="interaction-title" text="" />
+            <ui:VisualElement name="interaction-body" />
+            <ui:VisualElement name="interaction-actions" />
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

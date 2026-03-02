@@ -1,0 +1,42 @@
+/* BottomNav.uss — Bottom navigation bar */
+
+#bottom-nav {
+    flex-direction: row;
+    flex-shrink: 0;
+    background-color: rgba(25, 16, 8, 0.92);
+    border-top-width: 1px;
+    border-top-color: rgba(180, 120, 60, 0.2);
+    padding: var(--spacing-xs) 0;
+}
+
+.nav-btn {
+    flex-grow: 1;
+    flex-basis: 0;
+    min-height: 96px;
+    background-color: transparent;
+    border-width: 0;
+    border-radius: 0;
+    color: rgb(170, 145, 110);
+    font-size: var(--font-md);
+    -unity-text-align: middle-center;
+    -unity-font-style: bold;
+    margin: 0 var(--spacing-xxs);
+    transition-property: color, background-color;
+    transition-duration: 0.15s;
+}
+
+.nav-btn:hover {
+    color: rgb(230, 200, 150);
+    background-color: rgba(180, 120, 60, 0.12);
+}
+
+.nav-btn:active {
+    color: rgb(255, 200, 100);
+    background-color: rgba(180, 120, 60, 0.2);
+}
+
+.nav-btn--active {
+    color: rgb(255, 190, 80);
+    border-bottom-width: 3px;
+    border-bottom-color: rgb(255, 170, 50);
+}

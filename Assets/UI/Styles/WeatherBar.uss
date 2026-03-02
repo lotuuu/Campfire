@@ -1,0 +1,39 @@
+/* WeatherBar.uss — Top weather bar styling */
+
+#weather-bar {
+    flex-direction: row;
+    align-items: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background-color: rgba(20, 14, 8, 0.85);
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(180, 120, 60, 0.2);
+    flex-shrink: 0;
+}
+
+#weather-icon {
+    font-size: var(--font-lg);
+    color: rgb(255, 220, 120);
+    margin-right: var(--spacing-sm);
+    min-width: 48px;
+    -unity-text-align: middle-center;
+}
+
+#weather-temp {
+    font-size: var(--font-md);
+    color: rgb(230, 210, 180);
+    -unity-font-style: bold;
+    margin-right: var(--spacing-md);
+}
+
+#weather-condition {
+    font-size: var(--font-sm);
+    color: rgb(180, 160, 130);
+    flex-grow: 1;
+}
+
+#weather-moon {
+    font-size: var(--font-md);
+    color: rgb(200, 190, 160);
+    min-width: 48px;
+    -unity-text-align: middle-center;
+}

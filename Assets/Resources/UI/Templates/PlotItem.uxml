@@ -1,0 +1,10 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement class="plot-item">
+        <ui:VisualElement class="plot-icon" />
+        <ui:Label class="plot-state" text="Empty" />
+        <ui:VisualElement class="plot-progress">
+            <ui:VisualElement class="plot-progress-fill" />
+        </ui:VisualElement>
+        <ui:Button class="plot-action" text="Plant" />
+    </ui:VisualElement>
+</ui:UXML>

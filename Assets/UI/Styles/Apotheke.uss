@@ -1,0 +1,171 @@
+/* Apotheke.uss — Apotheke (seed inventory + recipes) overlay */
+
+#apotheke-panel {
+    flex-direction: column;
+}
+
+#seed-list {
+    flex-grow: 1;
+    margin-bottom: var(--spacing-md);
+}
+
+#seed-list .unity-scroll-view__content-container {
+    flex-direction: column;
+    padding: var(--spacing-xs);
+}
+
+/* ── Seed card ── */
+.seed-card {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(50, 35, 20, 0.6);
+    border-width: 1px;
+    border-color: rgba(140, 100, 50, 0.25);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
+    transition-property: background-color, border-color;
+    transition-duration: 0.15s;
+}
+
+.seed-card:hover {
+    background-color: rgba(65, 45, 25, 0.7);
+    border-color: rgba(180, 120, 60, 0.4);
+}
+
+.seed-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: var(--radius-sm);
+    background-color: rgba(40, 28, 15, 0.6);
+    margin-right: var(--spacing-sm);
+    flex-shrink: 0;
+}
+
+.seed-info {
+    flex-grow: 1;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.seed-name {
+    font-size: var(--font-md);
+    color: rgb(230, 210, 180);
+    -unity-font-style: bold;
+}
+
+.seed-count {
+    font-size: var(--font-sm);
+    color: rgb(170, 145, 110);
+    margin-top: var(--spacing-xxs);
+}
+
+.seed-action {
+    min-width: 120px;
+    min-height: 72px;
+    background-color: rgba(140, 80, 20, 0.5);
+    border-width: 1px;
+    border-color: rgba(200, 140, 50, 0.4);
+    border-radius: var(--radius-sm);
+    color: rgb(255, 220, 150);
+    font-size: var(--font-sm);
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+}
+
+.seed-action:hover {
+    background-color: rgba(160, 95, 25, 0.65);
+    border-color: rgba(220, 160, 60, 0.6);
+}
+
+.seed-action:disabled {
+    background-color: rgba(40, 30, 18, 0.4);
+    border-color: rgba(100, 70, 35, 0.2);
+    color: rgb(120, 100, 75);
+}
+
+/* ── Recipe section ── */
+#recipe-section {
+    flex-shrink: 0;
+    border-top-width: 1px;
+    border-top-color: rgba(140, 100, 50, 0.2);
+    padding-top: var(--spacing-md);
+}
+
+#recipe-list {
+    max-height: 300px;
+}
+
+#recipe-list .unity-scroll-view__content-container {
+    flex-direction: column;
+    padding: var(--spacing-xs);
+}
+
+.recipe-card {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(45, 35, 22, 0.6);
+    border-width: 1px;
+    border-color: rgba(120, 90, 45, 0.25);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
+}
+
+.recipe-card:hover {
+    background-color: rgba(55, 42, 26, 0.7);
+    border-color: rgba(160, 110, 50, 0.4);
+}
+
+.recipe-name {
+    font-size: var(--font-md);
+    color: rgb(220, 200, 165);
+    -unity-font-style: bold;
+    min-width: 120px;
+    flex-shrink: 0;
+}
+
+.recipe-ingredients {
+    flex-grow: 1;
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-left: var(--spacing-sm);
+    margin-right: var(--spacing-sm);
+}
+
+.recipe-ingredient {
+    font-size: var(--font-xs);
+    color: rgb(160, 140, 110);
+    margin-right: var(--spacing-xs);
+}
+
+.recipe-result {
+    font-size: var(--font-sm);
+    color: rgb(180, 220, 120);
+    flex-shrink: 0;
+    margin-right: var(--spacing-sm);
+}
+
+.recipe-action {
+    min-width: 100px;
+    min-height: 64px;
+    background-color: rgba(80, 120, 40, 0.5);
+    border-width: 1px;
+    border-color: rgba(120, 180, 60, 0.4);
+    border-radius: var(--radius-sm);
+    color: rgb(200, 240, 150);
+    font-size: var(--font-sm);
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+}
+
+.recipe-action:hover {
+    background-color: rgba(95, 140, 48, 0.65);
+    border-color: rgba(140, 200, 70, 0.6);
+}
+
+.recipe-action:disabled {
+    background-color: rgba(40, 50, 22, 0.4);
+    border-color: rgba(80, 100, 40, 0.2);
+    color: rgb(100, 120, 75);
+}

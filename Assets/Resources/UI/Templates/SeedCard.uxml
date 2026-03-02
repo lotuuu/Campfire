@@ -1,0 +1,10 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement class="seed-card">
+        <ui:VisualElement class="seed-icon" />
+        <ui:VisualElement class="seed-info">
+            <ui:Label class="seed-name" text="Seed" />
+            <ui:Label class="seed-count" text="x1" />
+        </ui:VisualElement>
+        <ui:Button class="seed-action" text="Plant" />
+    </ui:VisualElement>
+</ui:UXML>

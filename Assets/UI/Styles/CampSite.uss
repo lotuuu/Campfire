@@ -1,0 +1,138 @@
+/* CampSite.uss — Main campsite view styling */
+
+/* ── Root container ── */
+#camp-root {
+    flex-grow: 1;
+    flex-direction: column;
+    background-color: rgb(18, 12, 8);
+}
+
+/* ── Resource bar ── */
+#resource-bar {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: var(--spacing-xs) var(--spacing-md);
+    background-color: rgba(30, 18, 10, 0.7);
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(180, 120, 60, 0.15);
+}
+
+#mana-display,
+#water-display {
+    font-size: var(--font-sm);
+    color: rgb(230, 210, 180);
+    margin-left: var(--spacing-md);
+    margin-right: var(--spacing-md);
+}
+
+#mana-display {
+    color: rgb(255, 170, 60);
+}
+
+#water-display {
+    color: rgb(100, 180, 240);
+}
+
+/* ── Campsite main view ── */
+#campsite-view {
+    flex-grow: 1;
+    position: relative;
+}
+
+/* ── Flame ── */
+#flame-container {
+    position: absolute;
+    left: 50%;
+    top: 40%;
+    translate: -50% -50%;
+    align-items: center;
+    justify-content: center;
+}
+
+#flame {
+    width: 160px;
+    height: 160px;
+    border-radius: 80px;
+    background-color: rgb(220, 100, 20);
+    border-width: 4px;
+    border-color: rgba(255, 180, 60, 0.6);
+    align-items: center;
+    justify-content: center;
+}
+
+#flame-level {
+    font-size: var(--font-lg);
+    color: rgb(255, 240, 200);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+/* ── Camp object containers (positioned by code) ── */
+#plots-container,
+#vases-container,
+#gardens-container {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+}
+
+/* ── Individual camp objects ── */
+.plot-item {
+    position: absolute;
+    width: 120px;
+    height: 140px;
+    background-color: rgba(60, 40, 20, 0.7);
+    border-width: 2px;
+    border-color: rgba(140, 100, 50, 0.3);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-xs);
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.plot-item:hover {
+    border-color: rgba(255, 180, 60, 0.5);
+    background-color: rgba(70, 48, 25, 0.8);
+}
+
+.vase-item {
+    position: absolute;
+    width: 100px;
+    height: 120px;
+    background-color: rgba(50, 35, 25, 0.7);
+    border-width: 2px;
+    border-color: rgba(120, 90, 50, 0.3);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-xs);
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.vase-item:hover {
+    border-color: rgba(100, 180, 240, 0.5);
+    background-color: rgba(55, 40, 28, 0.8);
+}
+
+.garden-item {
+    position: absolute;
+    width: 140px;
+    height: 140px;
+    background-color: rgba(25, 50, 20, 0.7);
+    border-width: 2px;
+    border-color: rgba(60, 120, 40, 0.3);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-xs);
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.garden-item:hover {
+    border-color: rgba(100, 200, 60, 0.5);
+    background-color: rgba(30, 58, 24, 0.8);
+}
