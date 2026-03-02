@@ -163,3 +163,34 @@
 #detail-rarity.rarity-rare      { color: var(--color-rarity-rare); }
 #detail-rarity.rarity-epic      { color: var(--color-rarity-epic); }
 #detail-rarity.rarity-legendary { color: var(--color-rarity-legendary); }
+
+/* --- Unclaimed Discovery Pulse --- */
+.variant-entry-unclaimed {
+    border-width: 2px;
+    border-color: rgba(255, 220, 80, 0.6);
+}
+
+/* --- Claim Reward Button --- */
+.claim-reward-btn {
+    margin-top: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
+    padding: 12px 24px;
+    border-radius: var(--radius-sm);
+    background-color: rgba(255, 200, 50, 0.25);
+    border-width: 1px;
+    border-color: rgba(255, 220, 80, 0.45);
+    color: var(--color-highlight);
+    font-size: var(--font-sm);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    align-self: flex-start;
+}
+
+.claim-reward-btn:hover {
+    background-color: rgba(255, 200, 50, 0.35);
+    border-color: rgba(255, 220, 80, 0.65);
+}
+
+.claim-reward-btn:active {
+    background-color: rgba(255, 200, 50, 0.45);
+}

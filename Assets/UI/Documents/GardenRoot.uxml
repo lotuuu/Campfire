@@ -96,6 +96,7 @@
                     <ui:Label name="detail-rarity" text="" />
                 </ui:VisualElement>
                 <ui:Label name="detail-description" text="" />
+                <ui:Button name="detail-claim-btn" class="btn claim-reward-btn" text="Claim Reward" style="display: none;" />
                 <ui:Label name="detail-seed-name" text="" />
             </ui:VisualElement>
         </ui:VisualElement>
@@ -221,6 +222,7 @@
 
             <ui:VisualElement class="separator" />
             <ui:Button name="max-currency-button" text="Max Currency" class="btn" />
+            <ui:Button name="discover-all-button" text="Discover All Plants" class="btn" />
             <ui:Button name="clear-save-button" text="Clear Save Data" class="btn" />
         </ui:ScrollView>
     </ui:VisualElement>
