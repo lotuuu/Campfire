@@ -1,14 +1,431 @@
-/* Letters.uss — Letters overlay (placeholder) */
+/* Letters.uss — Letters overlay (social hub: inbox, friends, add) */
 
 #letters-panel {
     flex-direction: column;
+    flex-grow: 1;
+}
+
+/* ── Tab bar ── */
+#letters-tabs {
+    flex-direction: row;
+    margin-bottom: var(--spacing-md);
+    flex-shrink: 0;
+}
+
+.letters-tab {
+    flex-grow: 1;
+    min-height: 72px;
+    background-color: rgba(50, 35, 20, 0.5);
+    border-width: 1px;
+    border-color: rgba(140, 100, 50, 0.2);
+    border-radius: var(--radius-sm);
+    color: var(--color-text-dim);
+    font-size: var(--font-sm);
+    -unity-text-align: middle-center;
+    margin-right: var(--spacing-xs);
+    transition-property: background-color, border-color, color;
+    transition-duration: 0.15s;
+}
+
+.letters-tab:hover {
+    background-color: rgba(65, 45, 25, 0.6);
+    border-color: rgba(180, 120, 60, 0.35);
+}
+
+.letters-tab--active {
+    background-color: rgba(140, 80, 20, 0.5);
+    border-color: rgba(220, 150, 50, 0.4);
+    color: var(--color-text-bright);
+    -unity-font-style: bold;
+}
+
+/* ── Shared view containers ── */
+#letters-inbox,
+#letters-friends,
+#letters-add {
+    flex-grow: 1;
+    flex-direction: column;
+}
+
+/* ── Empty state text ── */
+.letters-empty-text {
+    font-size: var(--font-md);
+    color: var(--color-text-dim);
+    -unity-text-align: middle-center;
+    -unity-font-style: italic;
+    padding: var(--spacing-xl) var(--spacing-md);
+}
+
+/* ── Section title ── */
+.letters-section-title {
+    font-size: var(--font-lg);
+    color: var(--color-text);
+    -unity-font-style: bold;
+    margin-bottom: var(--spacing-sm);
+}
+
+/* ── Primary action button ── */
+.letters-btn-primary {
+    min-height: 72px;
+    background-color: rgba(140, 80, 20, 0.5);
+    border-width: 1px;
+    border-color: rgba(200, 140, 50, 0.4);
+    border-radius: var(--radius-sm);
+    color: rgb(255, 220, 150);
+    font-size: var(--font-sm);
+    -unity-text-align: middle-center;
+    margin-top: var(--spacing-sm);
+    transition-property: background-color, border-color;
+    transition-duration: 0.15s;
+}
+
+.letters-btn-primary:hover {
+    background-color: rgba(160, 95, 25, 0.65);
+    border-color: rgba(220, 160, 60, 0.6);
+}
+
+.letters-btn-primary:disabled {
+    background-color: rgba(40, 30, 18, 0.4);
+    border-color: rgba(100, 70, 35, 0.2);
+    color: rgb(120, 100, 75);
+}
+
+/* ── Status / error text ── */
+.letters-status-text {
+    font-size: var(--font-xs);
+    color: var(--color-text-dim);
+    -unity-text-align: middle-center;
+    margin-top: var(--spacing-xs);
+    min-height: 32px;
+}
+
+/* ── Add friend view ── */
+.friend-code-display {
+    font-size: var(--font-lg);
+    color: var(--color-text-accent);
+    -unity-text-align: middle-center;
+    -unity-font-style: bold;
+    padding: var(--spacing-md) var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+    background-color: rgba(50, 35, 20, 0.4);
+    border-width: 1px;
+    border-color: rgba(140, 100, 50, 0.2);
+    border-radius: var(--radius-md);
+}
+
+#friend-code-input {
+    margin-bottom: var(--spacing-sm);
+}
+
+#friend-code-input .unity-text-field__input {
+    background-color: rgba(40, 28, 15, 0.6);
+    border-width: 1px;
+    border-color: rgba(140, 100, 50, 0.3);
+    border-radius: var(--radius-sm);
+    color: var(--color-text);
+    font-size: var(--font-sm);
+    padding: var(--spacing-sm);
+    min-height: 64px;
+}
+
+#friend-code-input .unity-label {
+    color: var(--color-text-dim);
+    font-size: var(--font-xs);
+    min-width: 0;
+    margin-bottom: var(--spacing-xxs);
+}
+
+/* ── Friend item (friends list) ── */
+.friend-item {
+    flex-direction: row;
     align-items: center;
+    background-color: rgba(50, 35, 20, 0.6);
+    border-width: 1px;
+    border-color: rgba(140, 100, 50, 0.25);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
+    transition-property: background-color, border-color;
+    transition-duration: 0.15s;
+}
+
+.friend-item:hover {
+    background-color: rgba(65, 45, 25, 0.7);
+    border-color: rgba(180, 120, 60, 0.4);
+}
+
+.friend-info {
+    flex-grow: 1;
+    flex-direction: column;
     justify-content: center;
 }
 
-#letters-placeholder {
-    font-size: var(--font-lg);
-    color: rgb(150, 130, 100);
+.friend-name {
+    font-size: var(--font-md);
+    color: var(--color-text);
+    -unity-font-style: bold;
+}
+
+.friend-code-small {
+    font-size: var(--font-xs);
+    color: var(--color-text-dim);
+    margin-top: var(--spacing-xxs);
+}
+
+.friend-actions {
+    flex-direction: row;
+    flex-shrink: 0;
+}
+
+.friend-actions Button {
+    min-width: 100px;
+    min-height: 64px;
+    background-color: rgba(120, 70, 20, 0.4);
+    border-width: 1px;
+    border-color: rgba(200, 140, 50, 0.3);
+    border-radius: var(--radius-sm);
+    color: rgb(255, 220, 150);
+    font-size: var(--font-xs);
     -unity-text-align: middle-center;
-    -unity-font-style: italic;
+    margin-left: var(--spacing-xs);
+}
+
+.friend-actions Button:hover {
+    background-color: rgba(160, 95, 25, 0.55);
+    border-color: rgba(220, 160, 60, 0.5);
+}
+
+/* ── Gift item (inbox) ── */
+.gift-item {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(45, 35, 22, 0.6);
+    border-width: 1px;
+    border-color: rgba(120, 90, 45, 0.25);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
+    transition-property: background-color, border-color;
+    transition-duration: 0.15s;
+}
+
+.gift-item:hover {
+    background-color: rgba(55, 42, 26, 0.7);
+    border-color: rgba(160, 110, 50, 0.4);
+}
+
+.gift-info {
+    flex-grow: 1;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.gift-from {
+    font-size: var(--font-md);
+    color: var(--color-text);
+    -unity-font-style: bold;
+}
+
+.gift-contents {
+    font-size: var(--font-xs);
+    color: var(--color-text-dim);
+    margin-top: var(--spacing-xxs);
+}
+
+.btn-claim-gift {
+    min-width: 100px;
+    min-height: 64px;
+    background-color: rgba(80, 120, 40, 0.5);
+    border-width: 1px;
+    border-color: rgba(120, 180, 60, 0.4);
+    border-radius: var(--radius-sm);
+    color: rgb(200, 240, 150);
+    font-size: var(--font-sm);
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+}
+
+.btn-claim-gift:hover {
+    background-color: rgba(95, 140, 48, 0.65);
+    border-color: rgba(140, 200, 70, 0.6);
+}
+
+/* ── Friend request item (inbox) ── */
+.request-item {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(50, 35, 20, 0.6);
+    border-width: 1px;
+    border-color: rgba(140, 100, 50, 0.25);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
+    transition-property: background-color, border-color;
+    transition-duration: 0.15s;
+}
+
+.request-item:hover {
+    background-color: rgba(65, 45, 25, 0.7);
+    border-color: rgba(180, 120, 60, 0.4);
+}
+
+.request-from {
+    flex-grow: 1;
+    font-size: var(--font-sm);
+    color: var(--color-text);
+}
+
+.request-actions {
+    flex-direction: row;
+    flex-shrink: 0;
+}
+
+.request-actions Button {
+    min-width: 100px;
+    min-height: 64px;
+    border-width: 1px;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-xs);
+    -unity-text-align: middle-center;
+    margin-left: var(--spacing-xs);
+}
+
+.btn-accept {
+    background-color: rgba(80, 120, 40, 0.5);
+    border-color: rgba(120, 180, 60, 0.4);
+    color: rgb(200, 240, 150);
+}
+
+.btn-accept:hover {
+    background-color: rgba(95, 140, 48, 0.65);
+    border-color: rgba(140, 200, 70, 0.6);
+}
+
+.btn-decline {
+    background-color: rgba(120, 50, 30, 0.4);
+    border-color: rgba(180, 80, 50, 0.3);
+    color: rgb(220, 160, 140);
+}
+
+.btn-decline:hover {
+    background-color: rgba(150, 60, 35, 0.55);
+    border-color: rgba(200, 100, 60, 0.5);
+}
+
+/* ── Gift picker ── */
+#letters-gift-picker {
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+#gift-picker-to {
+    font-size: var(--font-sm);
+    color: var(--color-text-dim);
+    margin-bottom: var(--spacing-sm);
+}
+
+#gift-picker-inventory {
+    flex-grow: 1;
+    margin-bottom: var(--spacing-sm);
+}
+
+#gift-picker-selected {
+    background-color: rgba(50, 35, 20, 0.4);
+    border-width: 1px;
+    border-color: rgba(140, 100, 50, 0.2);
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+}
+
+#gift-selected-label {
+    font-size: var(--font-sm);
+    color: var(--color-text);
+}
+
+#gift-picker-actions {
+    flex-direction: row;
+    justify-content: flex-end;
+    flex-shrink: 0;
+}
+
+#gift-picker-actions Button {
+    min-width: 120px;
+    min-height: 64px;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-sm);
+    -unity-text-align: middle-center;
+    margin-left: var(--spacing-sm);
+}
+
+#btn-cancel-gift {
+    background-color: rgba(60, 40, 20, 0.5);
+    border-width: 1px;
+    border-color: rgba(140, 100, 50, 0.25);
+    color: var(--color-text-dim);
+}
+
+#btn-cancel-gift:hover {
+    background-color: rgba(80, 55, 30, 0.6);
+    border-color: rgba(180, 120, 60, 0.4);
+}
+
+/* ── Gift picker item ── */
+.gift-picker-item {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(50, 38, 22, 0.6);
+    border-width: 1px;
+    border-color: rgba(140, 100, 50, 0.25);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
+    transition-property: background-color, border-color;
+    transition-duration: 0.15s;
+}
+
+.gift-picker-item:hover {
+    background-color: rgba(65, 48, 28, 0.7);
+    border-color: rgba(180, 120, 60, 0.4);
+}
+
+.picker-item-name {
+    font-size: var(--font-md);
+    color: var(--color-text);
+    -unity-font-style: bold;
+    flex-grow: 1;
+}
+
+.picker-item-count {
+    font-size: var(--font-sm);
+    color: var(--color-text-dim);
+    margin-right: var(--spacing-md);
+    flex-shrink: 0;
+}
+
+.btn-add-to-gift {
+    width: 64px;
+    height: 64px;
+    background-color: rgba(140, 80, 20, 0.5);
+    border-width: 1px;
+    border-color: rgba(200, 140, 50, 0.4);
+    border-radius: var(--radius-sm);
+    color: rgb(255, 220, 150);
+    font-size: var(--font-lg);
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+    padding: 0;
+}
+
+.btn-add-to-gift:hover {
+    background-color: rgba(160, 95, 25, 0.65);
+    border-color: rgba(220, 160, 60, 0.6);
+}
+
+/* ── Scroll view content ── */
+#inbox-list .unity-scroll-view__content-container,
+#friends-list .unity-scroll-view__content-container,
+#gift-picker-inventory .unity-scroll-view__content-container {
+    flex-direction: column;
+    padding: var(--spacing-xs);
 }

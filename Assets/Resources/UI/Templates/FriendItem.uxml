@@ -1,0 +1,12 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement class="friend-item">
+        <ui:VisualElement class="friend-info">
+            <ui:Label class="friend-name" />
+            <ui:Label class="friend-code-small" />
+        </ui:VisualElement>
+        <ui:VisualElement class="friend-actions">
+            <ui:Button class="btn-visit" text="Visit" />
+            <ui:Button class="btn-send-gift" text="Gift" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,0 +1,7 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement class="gift-picker-item">
+        <ui:Label class="picker-item-name" />
+        <ui:Label class="picker-item-count" />
+        <ui:Button class="btn-add-to-gift" text="+" />
+    </ui:VisualElement>
+</ui:UXML>

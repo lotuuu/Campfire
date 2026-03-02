@@ -70,9 +70,48 @@
                         </ui:VisualElement>
                     </ui:VisualElement>
 
-                    <!-- Letters panel -->
+                    <!-- Letters panel (social hub) -->
                     <ui:VisualElement name="letters-panel">
-                        <ui:Label name="letters-placeholder" text="Coming soon..." />
+                        <!-- Tab bar -->
+                        <ui:VisualElement name="letters-tabs">
+                            <ui:Button name="tab-inbox" class="letters-tab letters-tab--active" text="Inbox" />
+                            <ui:Button name="tab-friends" class="letters-tab" text="Friends" />
+                            <ui:Button name="tab-add" class="letters-tab" text="Add" />
+                        </ui:VisualElement>
+
+                        <!-- Inbox view -->
+                        <ui:VisualElement name="letters-inbox">
+                            <ui:Label name="inbox-empty" text="No new letters" class="letters-empty-text" />
+                            <ui:ScrollView name="inbox-list" />
+                        </ui:VisualElement>
+
+                        <!-- Friends list view -->
+                        <ui:VisualElement name="letters-friends">
+                            <ui:Label name="friends-empty" text="No friends yet" class="letters-empty-text" />
+                            <ui:ScrollView name="friends-list" />
+                        </ui:VisualElement>
+
+                        <!-- Add friend view -->
+                        <ui:VisualElement name="letters-add">
+                            <ui:Label name="my-friend-code" text="Your code: ---" class="friend-code-display" />
+                            <ui:TextField name="friend-code-input" label="Enter friend code" />
+                            <ui:Button name="btn-send-request" text="Send Request" class="letters-btn-primary" />
+                            <ui:Label name="add-friend-status" class="letters-status-text" />
+                        </ui:VisualElement>
+
+                        <!-- Gift picker (shown when sending a gift) -->
+                        <ui:VisualElement name="letters-gift-picker" style="display: none;">
+                            <ui:Label name="gift-picker-title" text="Send Gift" class="letters-section-title" />
+                            <ui:Label name="gift-picker-to" text="To: ---" />
+                            <ui:ScrollView name="gift-picker-inventory" />
+                            <ui:VisualElement name="gift-picker-selected">
+                                <ui:Label name="gift-selected-label" text="Selected: none" />
+                            </ui:VisualElement>
+                            <ui:VisualElement name="gift-picker-actions">
+                                <ui:Button name="btn-confirm-gift" text="Send" class="letters-btn-primary" />
+                                <ui:Button name="btn-cancel-gift" text="Cancel" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
                     </ui:VisualElement>
 
                     <!-- Craft panel -->

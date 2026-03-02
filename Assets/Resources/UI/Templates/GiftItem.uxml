@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement class="gift-item">
+        <ui:VisualElement class="gift-info">
+            <ui:Label class="gift-from" />
+            <ui:Label class="gift-contents" />
+        </ui:VisualElement>
+        <ui:Button class="btn-claim-gift" text="Open" />
+    </ui:VisualElement>
+</ui:UXML>

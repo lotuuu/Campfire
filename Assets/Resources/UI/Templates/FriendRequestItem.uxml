@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement class="request-item">
+        <ui:Label class="request-from" />
+        <ui:VisualElement class="request-actions">
+            <ui:Button class="btn-accept" text="Accept" />
+            <ui:Button class="btn-decline" text="Decline" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
