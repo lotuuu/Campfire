@@ -20,6 +20,8 @@ namespace Garden
         private Label inboxEmpty;
         private Label friendsEmpty;
 
+        private TextField displayNameInput;
+        private Label displayNameStatus;
         private Label myFriendCode;
         private TextField friendCodeInput;
         private Button sendRequestBtn;
@@ -62,6 +64,10 @@ namespace Garden
             friendsList = root.Q<ScrollView>("friends-list");
             friendsEmpty = root.Q<Label>("friends-empty");
 
+            // Display name
+            displayNameInput = root.Q<TextField>("display-name-input");
+            displayNameStatus = root.Q<Label>("display-name-status");
+
             // Add friend
             myFriendCode = root.Q<Label>("my-friend-code");
             friendCodeInput = root.Q<TextField>("friend-code-input");
@@ -85,6 +91,14 @@ namespace Garden
             tabInbox?.RegisterCallback<ClickEvent>(_ => ShowTab("inbox"));
             tabFriends?.RegisterCallback<ClickEvent>(_ => ShowTab("friends"));
             tabAdd?.RegisterCallback<ClickEvent>(_ => ShowTab("add"));
+
+            // Wire display name (submit on Enter / focus out)
+            displayNameInput?.RegisterCallback<FocusOutEvent>(_ => OnDisplayNameSubmit());
+            displayNameInput?.Q("unity-text-input")?.RegisterCallback<KeyDownEvent>(evt =>
+            {
+                if (evt.keyCode == KeyCode.Return || evt.keyCode == KeyCode.KeypadEnter)
+                    OnDisplayNameSubmit();
+            });
 
             // Wire add friend button
             sendRequestBtn?.RegisterCallback<ClickEvent>(_ => OnSendFriendRequest());
@@ -232,7 +246,7 @@ namespace Garden
                 string friendUid = friend.uid;
                 string friendName = friend.displayName;
 
-                visitBtn?.RegisterCallback<ClickEvent>(_ => OnVisitFriend(friendUid));
+                visitBtn?.RegisterCallback<ClickEvent>(_ => OnVisitFriend(friendUid, friendName));
                 giftBtn?.RegisterCallback<ClickEvent>(_ => OnOpenGiftPicker(friendUid, friendName));
 
                 friendsList?.Add(el);
@@ -248,12 +262,52 @@ namespace Garden
 
         private void RefreshAddView()
         {
+            if (displayNameInput != null)
+            {
+                var currentName = SocialSaveManager.Instance?.Data?.displayName ?? "Camper";
+                displayNameInput.SetValueWithoutNotify(currentName);
+            }
+            if (displayNameStatus != null) displayNameStatus.text = "";
+
             if (myFriendCode != null)
             {
                 var code = SocialService.Instance?.FriendCode;
                 myFriendCode.text = string.IsNullOrEmpty(code) ? "Your code: loading..." : $"Your code: {code}";
             }
             if (addFriendStatus != null) addFriendStatus.text = "";
+        }
+
+        private async void OnDisplayNameSubmit()
+        {
+            if (displayNameInput == null || SocialService.Instance == null) return;
+
+            var newName = displayNameInput.value?.Trim();
+            var currentName = SocialSaveManager.Instance?.Data?.displayName ?? "";
+
+            // No change — skip
+            if (newName == currentName) return;
+
+            if (!SocialService.Instance.IsSignedIn)
+            {
+                if (displayNameStatus != null) displayNameStatus.text = "Not signed in";
+                return;
+            }
+
+            if (!SocialService.IsValidDisplayName(newName))
+            {
+                if (displayNameStatus != null) displayNameStatus.text = "Letters, numbers, spaces only (1-20 chars)";
+                displayNameInput.SetValueWithoutNotify(currentName);
+                return;
+            }
+
+            if (displayNameStatus != null) displayNameStatus.text = "Saving...";
+
+            bool success = await SocialService.Instance.UpdateDisplayName(newName);
+            if (displayNameStatus != null)
+                displayNameStatus.text = success ? "Name saved!" : "Failed to save name";
+
+            if (!success)
+                displayNameInput.SetValueWithoutNotify(currentName);
         }
 
         private async void OnSendFriendRequest()
@@ -277,7 +331,7 @@ namespace Garden
 
         // ── Visit ──
 
-        private async void OnVisitFriend(string friendUid)
+        private async void OnVisitFriend(string friendUid, string friendName)
         {
             var snapshot = await SocialService.Instance.FetchVillageSnapshot(friendUid);
             if (snapshot == null)
@@ -288,7 +342,7 @@ namespace Garden
 
             CampFireUI.Instance?.CloseOverlay();
             var campsiteView = GetComponent<CampsiteViewUI>();
-            campsiteView?.EnterVisitMode(snapshot);
+            campsiteView?.EnterVisitMode(snapshot, friendName);
         }
 
         // ── Gift Picker ──

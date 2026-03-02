@@ -11,12 +11,19 @@ namespace Garden
     {
         public static SocialService Instance { get; private set; }
 
-        private static readonly string ServerBaseUrl = "http://localhost:3000";
+        // Set via build script or DevServerConfig resource at runtime
+        private static readonly string ServerBaseUrl =
+#if UNITY_EDITOR
+            "http://localhost:3000";
+#else
+            DevServerConfig.BaseUrl;
+#endif
 
         public event Action OnSignedIn;
         public event Action<List<FriendRequest>> OnFriendRequestsUpdated;
         public event Action<List<GiftMessage>> OnGiftsUpdated;
         public event Action<List<CachedFriend>> OnFriendListUpdated;
+        public event Action<string> OnDisplayNameUpdated;
 
         public bool IsSignedIn { get; private set; }
         public string Uid => SocialSaveManager.Instance?.Data?.uid;
@@ -75,6 +82,48 @@ namespace Garden
             catch (Exception e)
             {
                 Debug.LogError($"SocialService: Initialize failed: {e.Message}");
+            }
+        }
+
+        // ── Display Name ──
+
+        private static readonly System.Text.RegularExpressions.Regex DisplayNameRegex =
+            new(@"^[a-zA-Z0-9 ]+$");
+
+        public static bool IsValidDisplayName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return false;
+            var trimmed = name.Trim();
+            return trimmed.Length >= 1 && trimmed.Length <= 20 && DisplayNameRegex.IsMatch(trimmed);
+        }
+
+        public async Task<bool> UpdateDisplayName(string newName)
+        {
+            if (!IsSignedIn || !IsValidDisplayName(newName)) return false;
+
+            var trimmed = newName.Trim();
+            try
+            {
+                var body = JsonUtility.ToJson(new UpdateDisplayNameRequest { displayName = trimmed });
+                using var request = PutJson("/auth/display-name", body);
+                await SendAsync(request);
+
+                if (request.result != UnityWebRequest.Result.Success)
+                {
+                    Debug.LogError($"SocialService: UpdateDisplayName failed: {request.error} — {request.downloadHandler.text}");
+                    return false;
+                }
+
+                var response = JsonUtility.FromJson<UpdateDisplayNameResponse>(request.downloadHandler.text);
+                SocialSaveManager.Instance.Data.displayName = response.displayName;
+                SocialSaveManager.Instance.Save();
+                OnDisplayNameUpdated?.Invoke(response.displayName);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"SocialService: UpdateDisplayName failed: {e.Message}");
+                return false;
             }
         }
 
@@ -521,6 +570,18 @@ namespace Garden
             public string uid;
             public string authToken;
             public string friendCode;
+            public string displayName;
+        }
+
+        [Serializable]
+        private class UpdateDisplayNameRequest
+        {
+            public string displayName;
+        }
+
+        [Serializable]
+        private class UpdateDisplayNameResponse
+        {
             public string displayName;
         }
 
