@@ -22,7 +22,7 @@ namespace Garden
         public event Action<List<CachedFriend>> OnFriendListUpdated;
 
         public bool IsSignedIn { get; private set; }
-        public string Uid => SocialSaveManager.Instance?.Data?.firebaseUid;
+        public string Uid => SocialSaveManager.Instance?.Data?.uid;
         public string FriendCode => SocialSaveManager.Instance?.Data?.friendCode;
 
 #if FIREBASE_AVAILABLE
@@ -67,7 +67,7 @@ namespace Garden
 
             if (auth.CurrentUser != null)
             {
-                social.firebaseUid = auth.CurrentUser.UserId;
+                social.uid = auth.CurrentUser.UserId;
                 IsSignedIn = true;
                 SocialSaveManager.Instance.Save();
                 OnSignedIn?.Invoke();
@@ -77,7 +77,7 @@ namespace Garden
             try
             {
                 var result = await auth.SignInAnonymouslyAsync();
-                social.firebaseUid = result.User.UserId;
+                social.uid = result.User.UserId;
                 IsSignedIn = true;
                 SocialSaveManager.Instance.Save();
                 OnSignedIn?.Invoke();

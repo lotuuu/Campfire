@@ -9,7 +9,8 @@ namespace Garden.Tests
         public void NewSocialData_HasEmptyDefaults()
         {
             var data = new SocialData();
-            Assert.IsNull(data.firebaseUid);
+            Assert.IsNull(data.uid);
+            Assert.IsNull(data.authToken);
             Assert.IsNull(data.friendCode);
             Assert.AreEqual("Camper", data.displayName);
             Assert.IsNotNull(data.cachedFriends);
@@ -21,7 +22,8 @@ namespace Garden.Tests
         {
             var data = new SocialData
             {
-                firebaseUid = "uid123",
+                uid = "uid123",
+                authToken = "token456",
                 friendCode = "SPARK-7X2K",
                 displayName = "My Camp"
             };
@@ -35,7 +37,8 @@ namespace Garden.Tests
             string json = UnityEngine.JsonUtility.ToJson(data);
             var loaded = UnityEngine.JsonUtility.FromJson<SocialData>(json);
 
-            Assert.AreEqual("uid123", loaded.firebaseUid);
+            Assert.AreEqual("uid123", loaded.uid);
+            Assert.AreEqual("token456", loaded.authToken);
             Assert.AreEqual("SPARK-7X2K", loaded.friendCode);
             Assert.AreEqual("My Camp", loaded.displayName);
             Assert.AreEqual(1, loaded.cachedFriends.Count);
@@ -45,7 +48,7 @@ namespace Garden.Tests
         [Test]
         public void SocialData_EmptyFriendList_SerializesCleanly()
         {
-            var data = new SocialData { firebaseUid = "test" };
+            var data = new SocialData { uid = "test" };
             string json = UnityEngine.JsonUtility.ToJson(data);
             var loaded = UnityEngine.JsonUtility.FromJson<SocialData>(json);
             Assert.IsNotNull(loaded.cachedFriends);

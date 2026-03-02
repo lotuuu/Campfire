@@ -6,7 +6,8 @@ namespace Garden
     [Serializable]
     public class SocialData
     {
-        public string firebaseUid;
+        public string uid;
+        public string authToken;
         public string friendCode;
         public string displayName = "Camper";
         public List<CachedFriend> cachedFriends = new();
