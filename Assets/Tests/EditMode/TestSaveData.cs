@@ -31,7 +31,7 @@ namespace Garden.Tests
             };
             data.seedInventory.Add(new SeedInventoryEntry { seedName = "Fern", count = 5 });
             data.vases.Add(new VaseSave { capacity = 10, currentWater = 7 });
-            data.plots.Add(new PlotSave { seedName = "Fern", watered = true });
+            data.plots.Add(new PlotSave { seedName = "Fern", waterCount = 2, state = PlotState.Growing });
             data.gardens.Add(new GardenSave { plantName = "Oak", mature = true });
             data.items.Add(new InventoryItem { itemName = "Acorn", count = 3 });
 
@@ -45,7 +45,8 @@ namespace Garden.Tests
             Assert.AreEqual(1, restored.vases.Count);
             Assert.AreEqual(7, restored.vases[0].currentWater);
             Assert.AreEqual(1, restored.plots.Count);
-            Assert.IsTrue(restored.plots[0].watered);
+            Assert.AreEqual(2, restored.plots[0].waterCount);
+            Assert.AreEqual(PlotState.Growing, restored.plots[0].state);
             Assert.AreEqual(1, restored.gardens.Count);
             Assert.IsTrue(restored.gardens[0].mature);
             Assert.AreEqual(1, restored.items.Count);
