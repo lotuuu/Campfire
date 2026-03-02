@@ -33,6 +33,10 @@ namespace Garden
         {
             var json = JsonUtility.ToJson(Data, true);
             File.WriteAllText(SavePath, json);
+
+            // Push village snapshot to Firebase (fire-and-forget)
+            if (SocialService.Instance != null && SocialService.Instance.IsSignedIn)
+                _ = SocialService.Instance.PushVillageSnapshot();
         }
 
         public void Load()
