@@ -12,9 +12,11 @@ namespace Garden
 
     public enum CalendarEvent { None, SpringEquinox, FallEquinox, LunarEclipse }
 
-    public enum CurrencyType { Mana, Water }
+    public enum CurrencyType { Mana, Water, Gems }
 
-    public enum PlotState { Empty, Planted, Watered, Growing, Mature }
+    public enum PlotState { Empty, Growing, Mature }
 
     public enum VaseState { Empty, Filling, Full }
+
+    public enum CampBuildingType { None, Flame, Plot, Vase, Garden }
 }

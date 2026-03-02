@@ -8,6 +8,7 @@ namespace Garden
     {
         public int version = 1;
         public float mana;
+        public int gems;
         public int flameLevel = 1;
         public List<VaseSave> vases = new();
         public List<PlotSave> plots = new();
@@ -25,6 +26,8 @@ namespace Garden
         public int currentWater;
         public string fillStartTimeUtc;
         public VaseState state = VaseState.Empty;
+        public int gridX;
+        public int gridY;
     }
 
     [Serializable]
@@ -32,8 +35,11 @@ namespace Garden
     {
         public string seedName;
         public string plantTimeUtc;
-        public bool watered;
+        public int waterCount;
         public PlotState state = PlotState.Empty;
+        public int gridX;
+        public int gridY;
+        public GrowthSnapshots snapshots = new();
     }
 
     [Serializable]
@@ -43,6 +49,8 @@ namespace Garden
         public string plantTimeUtc;
         public string lastYieldTimeUtc;
         public bool mature;
+        public int gridX;
+        public int gridY;
     }
 
     [Serializable]
