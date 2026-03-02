@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Garden.Tests
 {
@@ -48,6 +49,66 @@ namespace Garden.Tests
 
             Assert.AreEqual(2, save.discoveredVariants.Count);
             Assert.IsTrue(save.discoveredVariants.Contains("Storm"));
+        }
+
+        [Test]
+        public void TryClaimDiscoveryReward_ReturnsTrueForUnclaimed()
+        {
+            var save = new SaveData();
+            save.discoveredVariants.Add("Celestial");
+            // Not in claimedDiscoveryRewards → should succeed
+            bool result = CodexUI.TryClaimDiscoveryReward("Celestial", save);
+            Assert.IsTrue(result);
+            Assert.IsTrue(save.claimedDiscoveryRewards.Contains("Celestial"));
+        }
+
+        [Test]
+        public void TryClaimDiscoveryReward_ReturnsFalseForAlreadyClaimed()
+        {
+            var save = new SaveData();
+            save.discoveredVariants.Add("Celestial");
+            save.claimedDiscoveryRewards.Add("Celestial");
+
+            bool result = CodexUI.TryClaimDiscoveryReward("Celestial", save);
+            Assert.IsFalse(result);
+            Assert.AreEqual(1, save.claimedDiscoveryRewards.Count);
+        }
+
+        [Test]
+        public void TryClaimDiscoveryReward_ReturnsFalseForUndiscovered()
+        {
+            var save = new SaveData();
+            // Not in discoveredVariants → should fail
+            bool result = CodexUI.TryClaimDiscoveryReward("Celestial", save);
+            Assert.IsFalse(result);
+            Assert.AreEqual(0, save.claimedDiscoveryRewards.Count);
+        }
+
+        [Test]
+        public void IsDiscoveryRewardUnclaimed_TrueWhenDiscoveredButNotClaimed()
+        {
+            var save = new SaveData();
+            save.discoveredVariants.Add("Storm");
+
+            Assert.IsTrue(CodexUI.IsDiscoveryRewardUnclaimed("Storm", save));
+        }
+
+        [Test]
+        public void IsDiscoveryRewardUnclaimed_FalseWhenClaimed()
+        {
+            var save = new SaveData();
+            save.discoveredVariants.Add("Storm");
+            save.claimedDiscoveryRewards.Add("Storm");
+
+            Assert.IsFalse(CodexUI.IsDiscoveryRewardUnclaimed("Storm", save));
+        }
+
+        [Test]
+        public void IsDiscoveryRewardUnclaimed_FalseWhenNotDiscovered()
+        {
+            var save = new SaveData();
+
+            Assert.IsFalse(CodexUI.IsDiscoveryRewardUnclaimed("Storm", save));
         }
     }
 }
