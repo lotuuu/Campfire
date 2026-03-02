@@ -15,6 +15,7 @@ namespace Garden
         public List<PlantSlotSave> activeSlots = new();
         public List<GreenhousePlantSave> greenhousePlants = new();
         public List<string> discoveredVariants = new();
+        public List<string> claimedDiscoveryRewards = new();
         public List<SeedInventoryEntry> seedInventory = new();
         public List<ConsumableInventoryEntry> consumableInventory = new();
         public List<EnvironmentConsumableSave> environmentConsumables = new();
