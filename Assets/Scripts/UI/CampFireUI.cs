@@ -18,6 +18,7 @@ namespace Garden
         private LettersUI letters;
         private CraftUI craft;
         private ResourceDisplayUI resourceDisplay;
+        private DebugWeatherPanel debugPanel;
 
         private VisualElement overlayContainer;
         private VisualElement overlayBackdrop;
@@ -26,6 +27,7 @@ namespace Garden
         private VisualElement apothekePanel;
         private VisualElement lettersPanel;
         private VisualElement craftPanel;
+        private VisualElement debugPanelElement;
 
         private void Awake()
         {
@@ -46,6 +48,7 @@ namespace Garden
             letters = GetComponent<LettersUI>();
             craft = GetComponent<CraftUI>();
             resourceDisplay = GetComponent<ResourceDisplayUI>();
+            debugPanel = GetComponent<DebugWeatherPanel>();
 
             weatherBar?.Initialize(root);
             bottomNav?.Initialize(root);
@@ -54,6 +57,7 @@ namespace Garden
             letters?.Initialize(root);
             craft?.Initialize(root);
             resourceDisplay?.Initialize(root);
+            debugPanel?.Initialize(root);
 
             // Overlay setup
             overlayContainer = root.Q("overlay-container");
@@ -63,6 +67,7 @@ namespace Garden
             apothekePanel = root.Q("apotheke-panel");
             lettersPanel = root.Q("letters-panel");
             craftPanel = root.Q("craft-panel");
+            debugPanelElement = root.Q("debug-panel");
 
             var closeBtn = root.Q<Button>("overlay-close");
             closeBtn?.RegisterCallback<ClickEvent>(_ => CloseOverlay());
@@ -76,6 +81,27 @@ namespace Garden
                 bottomNav.OnApothekeClicked += () => OpenOverlay("Apotheke", apothekePanel);
                 bottomNav.OnLettersClicked += () => OpenOverlay("Letters", lettersPanel);
                 bottomNav.OnCraftClicked += () => OpenOverlay("Craft", craftPanel);
+            }
+
+            // Wire debug button
+            var debugBtn = root.Q<Button>("btn-debug");
+            if (debugBtn != null)
+            {
+#if UNITY_EDITOR
+                debugBtn.clicked += () => OpenOverlay("Debug", debugPanelElement);
+#else
+                debugBtn.style.display = DisplayStyle.None;
+#endif
+            }
+
+            // Wire craft placement mode
+            if (craft != null && campsiteView != null)
+            {
+                craft.OnRequestPlacement += type =>
+                {
+                    CloseOverlay();
+                    campsiteView.EnterPlacementMode(type);
+                };
             }
 
             // Location gate
@@ -109,6 +135,7 @@ namespace Garden
             if (apothekePanel != null) apothekePanel.style.display = DisplayStyle.None;
             if (lettersPanel != null) lettersPanel.style.display = DisplayStyle.None;
             if (craftPanel != null) craftPanel.style.display = DisplayStyle.None;
+            if (debugPanelElement != null) debugPanelElement.style.display = DisplayStyle.None;
         }
     }
 }
