@@ -18,6 +18,7 @@ namespace Garden
         private VisualElement _detailRarityBadge;
         private Label _detailSeedName;
         private Button _selectedEntry;
+        private Button _detailClaimBtn;
 
         public void Initialize(VisualElement root)
         {
@@ -32,6 +33,7 @@ namespace Garden
             _detailRarity = root.Q<Label>("detail-rarity");
             _detailRarityBadge = root.Q<VisualElement>("detail-rarity-badge");
             _detailSeedName = root.Q<Label>("detail-seed-name");
+            _detailClaimBtn = root.Q<Button>("detail-claim-btn");
         }
 
         public void Show()
@@ -86,6 +88,20 @@ namespace Garden
 
                         if (nameLabel != null)
                             nameLabel.text = variant.variantName;
+
+                        // Unclaimed discovery reward highlight
+                        if (IsDiscoveryRewardUnclaimed(variant.variantName, SaveManager.Instance.Data))
+                        {
+                            Color rc = GetRarityColor(variant.rarity);
+                            button?.AddToClassList("variant-entry-unclaimed");
+                            if (button != null)
+                            {
+                                button.style.borderTopColor = new StyleColor(WithAlpha(rc, 0.6f));
+                                button.style.borderBottomColor = new StyleColor(WithAlpha(rc, 0.6f));
+                                button.style.borderLeftColor = new StyleColor(WithAlpha(rc, 0.6f));
+                                button.style.borderRightColor = new StyleColor(WithAlpha(rc, 0.6f));
+                            }
+                        }
                     }
                     else
                     {
@@ -149,8 +165,8 @@ namespace Garden
                 _detailDescription.text = variant.description;
                 _detailRarity.text = variant.rarity.ToString().ToUpper();
 
-                if (_detailSprite != null && seed.growthSprites is { Length: > 0 })
-                    _detailSprite.style.backgroundImage = new StyleBackground(seed.growthSprites[^1]);
+                if (_detailSprite != null && seed.icon != null)
+                    _detailSprite.style.backgroundImage = new StyleBackground(seed.icon);
                 else if (_detailSprite != null)
                     _detailSprite.style.backgroundImage = new StyleBackground();
 
@@ -158,6 +174,39 @@ namespace Garden
                 {
                     _detailSpriteGlow.style.backgroundColor = new StyleColor(variant.primaryColor);
                     _detailSpriteGlow.style.opacity = 0.10f;
+                }
+
+                // Claim reward button
+                if (_detailClaimBtn != null)
+                {
+                    var save = SaveManager.Instance.Data;
+                    if (IsDiscoveryRewardUnclaimed(variant.variantName, save))
+                    {
+                        int reward = CurrencyManager.Instance.Config.GetDiscoveryReward(variant.rarity);
+                        _detailClaimBtn.text = $"Claim {reward} Gold";
+                        _detailClaimBtn.style.display = DisplayStyle.Flex;
+                        _detailClaimBtn.clickable = new Clickable(() =>
+                        {
+                            if (TryClaimDiscoveryReward(variant.variantName, SaveManager.Instance.Data))
+                            {
+                                CurrencyManager.Instance.Add(CurrencyType.Gold, reward);
+                                _detailClaimBtn.style.display = DisplayStyle.None;
+                                // Remove pulse from the selected grid entry
+                                _selectedEntry?.RemoveFromClassList("variant-entry-unclaimed");
+                                if (_selectedEntry != null)
+                                {
+                                    _selectedEntry.style.borderTopColor = StyleKeyword.Null;
+                                    _selectedEntry.style.borderBottomColor = StyleKeyword.Null;
+                                    _selectedEntry.style.borderLeftColor = StyleKeyword.Null;
+                                    _selectedEntry.style.borderRightColor = StyleKeyword.Null;
+                                }
+                            }
+                        });
+                    }
+                    else
+                    {
+                        _detailClaimBtn.style.display = DisplayStyle.None;
+                    }
                 }
             }
             else
@@ -171,10 +220,27 @@ namespace Garden
 
                 if (_detailSpriteGlow != null)
                     _detailSpriteGlow.style.opacity = 0f;
+
+                if (_detailClaimBtn != null)
+                    _detailClaimBtn.style.display = DisplayStyle.None;
             }
 
             if (_detailSeedName != null)
                 _detailSeedName.text = seed.seedName;
+        }
+
+        public static bool IsDiscoveryRewardUnclaimed(string variantName, SaveData save)
+        {
+            return save.discoveredVariants.Contains(variantName)
+                && !save.claimedDiscoveryRewards.Contains(variantName);
+        }
+
+        public static bool TryClaimDiscoveryReward(string variantName, SaveData save)
+        {
+            if (!save.discoveredVariants.Contains(variantName)) return false;
+            if (save.claimedDiscoveryRewards.Contains(variantName)) return false;
+            save.claimedDiscoveryRewards.Add(variantName);
+            return true;
         }
 
         private static readonly string[] RarityClasses =
