@@ -1,38 +1,67 @@
-/* WeatherBar.uss — Top weather bar styling */
+/* WeatherBar.uss — 4-cell weather bar */
 
 #weather-bar {
     flex-direction: row;
-    align-items: center;
-    padding: var(--spacing-sm) var(--spacing-md);
-    background-color: rgba(20, 14, 8, 0.85);
-    border-bottom-width: 1px;
-    border-bottom-color: rgba(180, 120, 60, 0.2);
     flex-shrink: 0;
+    margin-top: var(--spacing-xs);
+}
+
+.weather-cell {
+    flex-grow: 1;
+    flex-basis: 0;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-xs) var(--spacing-xxs);
+    background-color: rgba(50, 35, 18, 0.6);
+    border-width: 2px;
+    border-color: rgba(140, 100, 50, 0.4);
+    border-radius: var(--radius-sm);
+    margin-right: var(--spacing-xxs);
+}
+
+#weather-condition-label {
+    font-size: var(--font-xs);
+    color: var(--color-text);
+    -unity-font-style: bold;
+    margin-right: var(--spacing-xxs);
 }
 
 #weather-icon {
-    font-size: var(--font-lg);
+    font-size: var(--font-md);
     color: rgb(255, 220, 120);
-    margin-right: var(--spacing-sm);
-    min-width: 48px;
-    -unity-text-align: middle-center;
+}
+
+#weather-humidity-icon {
+    font-size: var(--font-sm);
+    color: var(--color-water);
+    margin-right: 2px;
+}
+
+#weather-humidity {
+    font-size: var(--font-xs);
+    color: var(--color-text);
+    -unity-font-style: bold;
+}
+
+#weather-temp-icon {
+    font-size: var(--font-sm);
+    margin-right: 2px;
 }
 
 #weather-temp {
-    font-size: var(--font-md);
-    color: rgb(230, 210, 180);
+    font-size: var(--font-xs);
+    color: var(--color-text);
     -unity-font-style: bold;
-    margin-right: var(--spacing-md);
 }
 
-#weather-condition {
-    font-size: var(--font-sm);
-    color: rgb(180, 160, 130);
-    flex-grow: 1;
+#weather-cell-moon {
+    justify-content: center;
+    align-items: center;
 }
 
 #weather-moon {
-    width: 28px;
-    height: 28px;
+    width: 36px;
+    height: 36px;
     -unity-background-scale-mode: scale-to-fit;
 }

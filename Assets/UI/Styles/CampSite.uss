@@ -7,49 +7,64 @@
     background-color: rgb(18, 12, 8);
 }
 
-/* ── Resource bar ── */
-#resource-bar {
+/* ── Top bar frame ── */
+#top-bar {
+    flex-shrink: 0;
+    padding: var(--spacing-sm);
+    margin: var(--spacing-xs);
+    background-color: rgba(30, 20, 10, 0.85);
+    border-width: 3px;
+    border-color: rgba(140, 100, 50, 0.5);
+    border-radius: var(--radius-md);
+}
+
+/* ── Header row ── */
+#top-header {
     flex-direction: row;
-    justify-content: center;
     align-items: center;
-    padding: var(--spacing-xs) var(--spacing-md);
-    background-color: rgba(30, 18, 10, 0.7);
-    border-bottom-width: 1px;
-    border-bottom-color: rgba(180, 120, 60, 0.15);
+    margin-bottom: var(--spacing-xs);
 }
 
-#mana-display,
-#water-display {
-    font-size: var(--font-sm);
-    color: rgb(230, 210, 180);
-    margin-left: var(--spacing-md);
-    margin-right: var(--spacing-md);
-}
-
-#mana-display {
-    color: rgb(255, 170, 60);
-}
-
-#water-display {
-    color: rgb(100, 180, 240);
-}
-
-#gems-display {
-    font-size: var(--font-sm);
-    color: rgb(160, 220, 100);
-    margin-left: var(--spacing-md);
-    margin-right: var(--spacing-md);
+#player-name {
+    font-size: var(--font-lg);
+    color: var(--color-text-bright);
+    -unity-font-style: bold;
 }
 
 #btn-debug {
-    font-size: var(--font-xs);
-    color: rgb(255, 100, 100);
-    background-color: rgba(255, 50, 50, 0.15);
-    border-width: 1px;
-    border-color: rgba(255, 100, 100, 0.3);
-    border-radius: 6px;
+    font-size: var(--font-sm);
+    color: var(--color-text-dim);
+    background-color: transparent;
+    border-width: 0;
     padding: 4px 8px;
-    margin-left: var(--spacing-sm);
+    margin-left: var(--spacing-xs);
+}
+
+#top-header-spacer {
+    flex-grow: 1;
+}
+
+#date-time {
+    font-size: var(--font-sm);
+    color: var(--color-text-dim);
+}
+
+/* ── Resource bar (inside top-bar, lower-right) ── */
+#resource-bar {
+    flex-direction: row;
+    justify-content: flex-end;
+    padding-top: var(--spacing-xxs);
+}
+
+#mana-display {
+    font-size: var(--font-xs);
+    color: var(--color-mana);
+    margin-right: var(--spacing-md);
+}
+
+#water-display {
+    font-size: var(--font-xs);
+    color: var(--color-water);
 }
 
 /* ── Campsite grid viewport ── */
