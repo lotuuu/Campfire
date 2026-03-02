@@ -61,3 +61,61 @@
 #campsite-canvas {
     position: absolute;
 }
+
+/* ── Visit transition curtains ── */
+#visit-transition {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    flex-direction: row;
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+#curtain-left,
+#curtain-right {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 50%;
+    background-color: rgb(18, 12, 8);
+    transition-property: translate;
+    transition-duration: 400ms;
+    transition-timing-function: ease-in-out;
+}
+
+#curtain-left {
+    left: 0;
+    translate: -100% 0;
+}
+
+#curtain-right {
+    right: 0;
+    translate: 100% 0;
+}
+
+#visit-transition.curtain-closed #curtain-left {
+    translate: 0 0;
+}
+
+#visit-transition.curtain-closed #curtain-right {
+    translate: 0 0;
+}
+
+#curtain-label {
+    position: absolute;
+    align-self: center;
+    font-size: var(--font-lg);
+    color: rgb(230, 210, 180);
+    opacity: 0;
+    transition-property: opacity;
+    transition-duration: 200ms;
+    transition-delay: 200ms;
+}
+
+#visit-transition.curtain-closed #curtain-label {
+    opacity: 1;
+}
