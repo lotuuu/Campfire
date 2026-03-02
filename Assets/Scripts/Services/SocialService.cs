@@ -1,20 +1,17 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
-#if FIREBASE_AVAILABLE
-using Firebase.Auth;
-using Firebase.Firestore;
-using Firebase.Extensions;
-#endif
-
-#pragma warning disable CS1998 // Async method lacks 'await' — expected when FIREBASE_AVAILABLE is not defined
+using UnityEngine.Networking;
 
 namespace Garden
 {
     public class SocialService : MonoBehaviour
     {
         public static SocialService Instance { get; private set; }
+
+        private static readonly string ServerBaseUrl = "http://localhost:3000";
 
         public event Action OnSignedIn;
         public event Action<List<FriendRequest>> OnFriendRequestsUpdated;
@@ -25,10 +22,7 @@ namespace Garden
         public string Uid => SocialSaveManager.Instance?.Data?.uid;
         public string FriendCode => SocialSaveManager.Instance?.Data?.friendCode;
 
-#if FIREBASE_AVAILABLE
-        private FirebaseAuth auth;
-        private FirebaseFirestore db;
-#endif
+        private string AuthToken => SocialSaveManager.Instance?.Data?.authToken;
 
         private void Awake()
         {
@@ -38,101 +32,69 @@ namespace Garden
 
         private void Start()
         {
-            InitializeFirebase();
+            Initialize();
         }
 
-        private async void InitializeFirebase()
+        private async void Initialize()
         {
-#if FIREBASE_AVAILABLE
-            var dependencyStatus = await Firebase.FirebaseApp.CheckAndFixDependenciesAsync();
-            if (dependencyStatus != Firebase.DependencyStatus.Available)
-            {
-                Debug.LogError($"SocialService: Firebase dependencies not available: {dependencyStatus}");
-                return;
-            }
-
-            auth = FirebaseAuth.DefaultInstance;
-            db = FirebaseFirestore.DefaultInstance;
-
-            await SignIn();
-#else
-            Debug.Log("SocialService: Firebase not available — social features disabled.");
-#endif
-        }
-
-        private async Task SignIn()
-        {
-#if FIREBASE_AVAILABLE
             var social = SocialSaveManager.Instance.Data;
 
-            if (auth.CurrentUser != null)
+            if (!string.IsNullOrEmpty(social.uid) && !string.IsNullOrEmpty(social.authToken))
             {
-                social.uid = auth.CurrentUser.UserId;
                 IsSignedIn = true;
-                SocialSaveManager.Instance.Save();
                 OnSignedIn?.Invoke();
                 return;
             }
 
             try
             {
-                var result = await auth.SignInAnonymouslyAsync();
-                social.uid = result.User.UserId;
-                IsSignedIn = true;
+                var body = JsonUtility.ToJson(new RegisterRequest
+                {
+                    displayName = social.displayName
+                });
+
+                using var request = PostJson("/auth/register", body, authenticated: false);
+                await SendAsync(request);
+
+                if (request.result != UnityWebRequest.Result.Success)
+                {
+                    Debug.LogError($"SocialService: Registration failed: {request.error} — {request.downloadHandler.text}");
+                    return;
+                }
+
+                var response = JsonUtility.FromJson<RegisterResponse>(request.downloadHandler.text);
+                social.uid = response.uid;
+                social.authToken = response.authToken;
+                social.friendCode = response.friendCode;
+                social.displayName = response.displayName;
                 SocialSaveManager.Instance.Save();
+
+                IsSignedIn = true;
                 OnSignedIn?.Invoke();
-                await FetchPlayerProfile();
             }
             catch (Exception e)
             {
-                Debug.LogError($"SocialService: Sign-in failed: {e.Message}");
+                Debug.LogError($"SocialService: Initialize failed: {e.Message}");
             }
-#endif
-        }
-
-        private async Task FetchPlayerProfile()
-        {
-#if FIREBASE_AVAILABLE
-            var doc = await db.Collection("players").Document(Uid).GetSnapshotAsync();
-            if (doc.Exists)
-            {
-                var social = SocialSaveManager.Instance.Data;
-                social.friendCode = doc.GetValue<string>("friendCode");
-                social.displayName = doc.GetValue<string>("displayName");
-                SocialSaveManager.Instance.Save();
-            }
-#endif
         }
 
         // ── Friend Requests ──
 
         public async Task<bool> SendFriendRequest(string targetFriendCode)
         {
-#if FIREBASE_AVAILABLE
             if (!IsSignedIn || string.IsNullOrEmpty(targetFriendCode)) return false;
 
             try
             {
-                var query = await db.Collection("players")
-                    .WhereEqualTo("friendCode", targetFriendCode)
-                    .Limit(1)
-                    .GetSnapshotAsync();
+                var body = JsonUtility.ToJson(new SendFriendRequestBody { friendCode = targetFriendCode });
+                using var request = PostJson("/friends/request", body);
+                await SendAsync(request);
 
-                if (query.Count == 0) return false;
-
-                var targetDoc = query[0];
-                string targetUid = targetDoc.Id;
-
-                if (targetUid == Uid) return false;
-
-                await db.Collection("friendRequests").AddAsync(new Dictionary<string, object>
+                if (request.result != UnityWebRequest.Result.Success)
                 {
-                    { "fromUid", Uid },
-                    { "toUid", targetUid },
-                    { "fromName", SocialSaveManager.Instance.Data.displayName },
-                    { "status", "pending" },
-                    { "createdAt", FieldValue.ServerTimestamp }
-                });
+                    Debug.LogError($"SocialService: SendFriendRequest failed: {request.error} — {request.downloadHandler.text}");
+                    return false;
+                }
 
                 return true;
             }
@@ -141,51 +103,64 @@ namespace Garden
                 Debug.LogError($"SocialService: SendFriendRequest failed: {e.Message}");
                 return false;
             }
-#else
-            return false;
-#endif
         }
 
         public async Task<List<FriendRequest>> GetPendingRequests()
         {
             var requests = new List<FriendRequest>();
-#if FIREBASE_AVAILABLE
             if (!IsSignedIn) return requests;
 
             try
             {
-                var query = await db.Collection("friendRequests")
-                    .WhereEqualTo("toUid", Uid)
-                    .WhereEqualTo("status", "pending")
-                    .GetSnapshotAsync();
+                using var request = GetAuth("/friends/requests");
+                await SendAsync(request);
 
-                foreach (var doc in query)
+                if (request.result != UnityWebRequest.Result.Success)
                 {
-                    requests.Add(new FriendRequest
-                    {
-                        id = doc.Id,
-                        fromUid = doc.GetValue<string>("fromUid"),
-                        fromName = doc.GetValue<string>("fromName"),
-                        status = doc.GetValue<string>("status")
-                    });
+                    Debug.LogError($"SocialService: GetPendingRequests failed: {request.error}");
+                    return requests;
                 }
+
+                var response = JsonUtility.FromJson<FriendRequestsResponse>(request.downloadHandler.text);
+                if (response?.requests != null)
+                {
+                    foreach (var r in response.requests)
+                    {
+                        requests.Add(new FriendRequest
+                        {
+                            id = r.id,
+                            fromUid = r.from_uid,
+                            fromName = r.from_name,
+                            status = r.status
+                        });
+                    }
+                }
+
+                OnFriendRequestsUpdated?.Invoke(requests);
             }
             catch (Exception e)
             {
                 Debug.LogError($"SocialService: GetPendingRequests failed: {e.Message}");
             }
-#endif
+
             return requests;
         }
 
         public async Task<bool> AcceptFriendRequest(string requestId)
         {
-#if FIREBASE_AVAILABLE
             if (!IsSignedIn) return false;
+
             try
             {
-                await db.Collection("friendRequests").Document(requestId)
-                    .UpdateAsync("status", "accepted");
+                using var request = PostJson($"/friends/accept/{requestId}", "{}");
+                await SendAsync(request);
+
+                if (request.result != UnityWebRequest.Result.Success)
+                {
+                    Debug.LogError($"SocialService: AcceptFriendRequest failed: {request.error}");
+                    return false;
+                }
+
                 await RefreshFriendList();
                 return true;
             }
@@ -194,19 +169,23 @@ namespace Garden
                 Debug.LogError($"SocialService: AcceptFriendRequest failed: {e.Message}");
                 return false;
             }
-#else
-            return false;
-#endif
         }
 
         public async Task<bool> DeclineFriendRequest(string requestId)
         {
-#if FIREBASE_AVAILABLE
             if (!IsSignedIn) return false;
+
             try
             {
-                await db.Collection("friendRequests").Document(requestId)
-                    .UpdateAsync("status", "declined");
+                using var request = PostJson($"/friends/decline/{requestId}", "{}");
+                await SendAsync(request);
+
+                if (request.result != UnityWebRequest.Result.Success)
+                {
+                    Debug.LogError($"SocialService: DeclineFriendRequest failed: {request.error}");
+                    return false;
+                }
+
                 return true;
             }
             catch (Exception e)
@@ -214,31 +193,38 @@ namespace Garden
                 Debug.LogError($"SocialService: DeclineFriendRequest failed: {e.Message}");
                 return false;
             }
-#else
-            return false;
-#endif
         }
 
         // ── Friend List ──
 
         public async Task RefreshFriendList()
         {
-#if FIREBASE_AVAILABLE
             if (!IsSignedIn) return;
+
             try
             {
-                var query = await db.Collection("friends").Document(Uid)
-                    .Collection("list").GetSnapshotAsync();
+                using var request = GetAuth("/friends");
+                await SendAsync(request);
 
-                var friends = new List<CachedFriend>();
-                foreach (var doc in query)
+                if (request.result != UnityWebRequest.Result.Success)
                 {
-                    friends.Add(new CachedFriend
+                    Debug.LogError($"SocialService: RefreshFriendList failed: {request.error}");
+                    return;
+                }
+
+                var response = JsonUtility.FromJson<FriendsResponse>(request.downloadHandler.text);
+                var friends = new List<CachedFriend>();
+                if (response?.friends != null)
+                {
+                    foreach (var f in response.friends)
                     {
-                        uid = doc.Id,
-                        displayName = doc.GetValue<string>("displayName"),
-                        friendCode = doc.GetValue<string>("friendCode")
-                    });
+                        friends.Add(new CachedFriend
+                        {
+                            uid = f.uid,
+                            displayName = f.display_name,
+                            friendCode = f.friend_code
+                        });
+                    }
                 }
 
                 SocialSaveManager.Instance.Data.cachedFriends = friends;
@@ -249,19 +235,23 @@ namespace Garden
             {
                 Debug.LogError($"SocialService: RefreshFriendList failed: {e.Message}");
             }
-#endif
         }
 
         public async Task<bool> RemoveFriend(string friendUid)
         {
-#if FIREBASE_AVAILABLE
             if (!IsSignedIn) return false;
+
             try
             {
-                await db.Collection("friends").Document(Uid)
-                    .Collection("list").Document(friendUid).DeleteAsync();
-                await db.Collection("friends").Document(friendUid)
-                    .Collection("list").Document(Uid).DeleteAsync();
+                using var request = DeleteAuth($"/friends/{friendUid}");
+                await SendAsync(request);
+
+                if (request.result != UnityWebRequest.Result.Success)
+                {
+                    Debug.LogError($"SocialService: RemoveFriend failed: {request.error}");
+                    return false;
+                }
+
                 await RefreshFriendList();
                 return true;
             }
@@ -270,80 +260,76 @@ namespace Garden
                 Debug.LogError($"SocialService: RemoveFriend failed: {e.Message}");
                 return false;
             }
-#else
-            return false;
-#endif
         }
 
         // ── Village Snapshots ──
 
         public async Task PushVillageSnapshot()
         {
-#if FIREBASE_AVAILABLE
             if (!IsSignedIn) return;
+
             try
             {
                 var data = SaveManager.Instance.Data;
                 var snapshot = VillageSnapshot.FromSaveData(data, FlameManager.Instance.Level);
-                await db.Collection("villages").Document(Uid)
-                    .SetAsync(snapshot.ToDictionary());
+                var body = JsonUtility.ToJson(new VillageSnapshotRequest { snapshot = snapshot });
+
+                using var request = PutJson("/village", body);
+                await SendAsync(request);
+
+                if (request.result != UnityWebRequest.Result.Success)
+                {
+                    Debug.LogError($"SocialService: PushVillageSnapshot failed: {request.error}");
+                }
             }
             catch (Exception e)
             {
                 Debug.LogError($"SocialService: PushVillageSnapshot failed: {e.Message}");
             }
-#endif
         }
 
         public async Task<VillageSnapshot> FetchVillageSnapshot(string friendUid)
         {
-#if FIREBASE_AVAILABLE
             if (!IsSignedIn) return null;
+
             try
             {
-                var doc = await db.Collection("villages").Document(friendUid).GetSnapshotAsync();
-                if (!doc.Exists) return null;
-                return VillageSnapshot.FromDictionary(doc.ToDictionary());
+                using var request = GetAuth($"/village/{friendUid}");
+                await SendAsync(request);
+
+                if (request.result != UnityWebRequest.Result.Success)
+                {
+                    Debug.LogError($"SocialService: FetchVillageSnapshot failed: {request.error}");
+                    return null;
+                }
+
+                var response = JsonUtility.FromJson<VillageSnapshotResponse>(request.downloadHandler.text);
+                return response?.snapshot;
             }
             catch (Exception e)
             {
                 Debug.LogError($"SocialService: FetchVillageSnapshot failed: {e.Message}");
                 return null;
             }
-#else
-            return null;
-#endif
         }
 
         // ── Gifts ──
 
         public async Task<bool> SendGift(string toUid, List<GiftItem> items)
         {
-#if FIREBASE_AVAILABLE
             if (!IsSignedIn || items == null || items.Count == 0 || items.Count > 3) return false;
 
             try
             {
-                var itemDicts = new List<Dictionary<string, object>>();
-                foreach (var item in items)
-                {
-                    itemDicts.Add(new Dictionary<string, object>
-                    {
-                        { "type", item.type },
-                        { "name", item.name },
-                        { "count", item.count }
-                    });
-                }
+                var body = JsonUtility.ToJson(new SendGiftRequest { toUid = toUid, items = items });
+                using var request = PostJson("/gifts/send", body);
+                await SendAsync(request);
 
-                await db.Collection("gifts").AddAsync(new Dictionary<string, object>
+                if (request.result != UnityWebRequest.Result.Success)
                 {
-                    { "fromUid", Uid },
-                    { "toUid", toUid },
-                    { "fromName", SocialSaveManager.Instance.Data.displayName },
-                    { "items", itemDicts },
-                    { "status", "pending" },
-                    { "createdAt", FieldValue.ServerTimestamp }
-                });
+                    Debug.LogError($"SocialService: SendGift failed: {request.error} — {request.downloadHandler.text}");
+                    return false;
+                }
 
                 DeductItemsLocally(items);
                 return true;
@@ -353,67 +339,64 @@ namespace Garden
                 Debug.LogError($"SocialService: SendGift failed: {e.Message}");
                 return false;
             }
-#else
-            return false;
-#endif
         }
 
         public async Task<List<GiftMessage>> GetPendingGifts()
         {
             var gifts = new List<GiftMessage>();
-#if FIREBASE_AVAILABLE
             if (!IsSignedIn) return gifts;
 
             try
             {
-                var query = await db.Collection("gifts")
-                    .WhereEqualTo("toUid", Uid)
-                    .WhereEqualTo("status", "pending")
-                    .GetSnapshotAsync();
+                using var request = GetAuth("/gifts");
+                await SendAsync(request);
 
-                foreach (var doc in query)
+                if (request.result != UnityWebRequest.Result.Success)
                 {
-                    var gift = new GiftMessage
-                    {
-                        id = doc.Id,
-                        fromUid = doc.GetValue<string>("fromUid"),
-                        fromName = doc.GetValue<string>("fromName"),
-                        items = new List<GiftItem>()
-                    };
+                    Debug.LogError($"SocialService: GetPendingGifts failed: {request.error}");
+                    return gifts;
+                }
 
-                    var itemsList = doc.GetValue<List<object>>("items");
-                    foreach (Dictionary<string, object> itemDict in itemsList)
+                var response = JsonUtility.FromJson<GiftsResponse>(request.downloadHandler.text);
+                if (response?.gifts != null)
+                {
+                    foreach (var g in response.gifts)
                     {
-                        gift.items.Add(new GiftItem
+                        gifts.Add(new GiftMessage
                         {
-                            type = itemDict["type"].ToString(),
-                            name = itemDict["name"].ToString(),
-                            count = Convert.ToInt32(itemDict["count"])
+                            id = g.id,
+                            fromUid = g.from_uid,
+                            fromName = g.from_name,
+                            items = g.items ?? new List<GiftItem>()
                         });
                     }
-
-                    gifts.Add(gift);
                 }
+
+                OnGiftsUpdated?.Invoke(gifts);
             }
             catch (Exception e)
             {
                 Debug.LogError($"SocialService: GetPendingGifts failed: {e.Message}");
             }
-#endif
+
             return gifts;
         }
 
         public async Task<bool> ClaimGift(string giftId, List<GiftItem> items)
         {
-#if FIREBASE_AVAILABLE
             if (!IsSignedIn) return false;
+
             try
             {
-                await db.Collection("gifts").Document(giftId).UpdateAsync(new Dictionary<string, object>
+                using var request = PostJson($"/gifts/claim/{giftId}", "{}");
+                await SendAsync(request);
+
+                if (request.result != UnityWebRequest.Result.Success)
                 {
-                    { "status", "claimed" },
-                    { "claimedAt", FieldValue.ServerTimestamp }
-                });
+                    Debug.LogError($"SocialService: ClaimGift failed: {request.error}");
+                    return false;
+                }
+
                 AddItemsLocally(items);
                 return true;
             }
@@ -422,9 +405,6 @@ namespace Garden
                 Debug.LogError($"SocialService: ClaimGift failed: {e.Message}");
                 return false;
             }
-#else
-            return false;
-#endif
         }
 
         // ── Local Inventory Helpers ──
@@ -473,6 +453,144 @@ namespace Garden
                     SaveManager.Instance.Save();
                 }
             }
+        }
+
+        // ── HTTP Helpers ──
+
+        private static Task<UnityWebRequest> SendAsync(UnityWebRequest request)
+        {
+            var tcs = new TaskCompletionSource<UnityWebRequest>();
+            var op = request.SendWebRequest();
+            op.completed += _ => tcs.SetResult(request);
+            return tcs.Task;
+        }
+
+        private UnityWebRequest GetAuth(string path)
+        {
+            var request = UnityWebRequest.Get(ServerBaseUrl + path);
+            request.downloadHandler = new DownloadHandlerBuffer();
+            SetAuthHeader(request);
+            return request;
+        }
+
+        private UnityWebRequest PostJson(string path, string json, bool authenticated = true)
+        {
+            var request = new UnityWebRequest(ServerBaseUrl + path, "POST");
+            request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(json));
+            request.downloadHandler = new DownloadHandlerBuffer();
+            request.SetRequestHeader("Content-Type", "application/json");
+            if (authenticated) SetAuthHeader(request);
+            return request;
+        }
+
+        private UnityWebRequest PutJson(string path, string json)
+        {
+            var request = new UnityWebRequest(ServerBaseUrl + path, "PUT");
+            request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(json));
+            request.downloadHandler = new DownloadHandlerBuffer();
+            request.SetRequestHeader("Content-Type", "application/json");
+            SetAuthHeader(request);
+            return request;
+        }
+
+        private UnityWebRequest DeleteAuth(string path)
+        {
+            var request = UnityWebRequest.Delete(ServerBaseUrl + path);
+            request.downloadHandler = new DownloadHandlerBuffer();
+            SetAuthHeader(request);
+            return request;
+        }
+
+        private void SetAuthHeader(UnityWebRequest request)
+        {
+            if (!string.IsNullOrEmpty(AuthToken))
+                request.SetRequestHeader("Authorization", $"Bearer {AuthToken}");
+        }
+
+        // ── JSON Serialization Types (snake_case to match server responses) ──
+
+        [Serializable]
+        private class RegisterRequest
+        {
+            public string displayName;
+        }
+
+        [Serializable]
+        private class RegisterResponse
+        {
+            public string uid;
+            public string authToken;
+            public string friendCode;
+            public string displayName;
+        }
+
+        [Serializable]
+        private class SendFriendRequestBody
+        {
+            public string friendCode;
+        }
+
+        [Serializable]
+        private class FriendRequestEntry
+        {
+            public string id;
+            public string from_uid;
+            public string from_name;
+            public string status;
+        }
+
+        [Serializable]
+        private class FriendRequestsResponse
+        {
+            public List<FriendRequestEntry> requests;
+        }
+
+        [Serializable]
+        private class FriendEntry
+        {
+            public string uid;
+            public string display_name;
+            public string friend_code;
+        }
+
+        [Serializable]
+        private class FriendsResponse
+        {
+            public List<FriendEntry> friends;
+        }
+
+        [Serializable]
+        private class VillageSnapshotRequest
+        {
+            public VillageSnapshot snapshot;
+        }
+
+        [Serializable]
+        private class VillageSnapshotResponse
+        {
+            public VillageSnapshot snapshot;
+        }
+
+        [Serializable]
+        private class SendGiftRequest
+        {
+            public string toUid;
+            public List<GiftItem> items;
+        }
+
+        [Serializable]
+        private class GiftEntry
+        {
+            public string id;
+            public string from_uid;
+            public string from_name;
+            public List<GiftItem> items;
+        }
+
+        [Serializable]
+        private class GiftsResponse
+        {
+            public List<GiftEntry> gifts;
         }
     }
 }
