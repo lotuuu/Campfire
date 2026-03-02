@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   baseManaPerSecond: 0.5
   manaPerLevel: 0.3
-  plotsPerLevel:
-  - 1
-  - 2
+  maxEntitiesPerLevel:
   - 3
   - 5
   - 8
+  - 12
+  - 18
   upgradeCosts:
   - 50
   - 150

@@ -14,17 +14,17 @@ namespace Garden.Tests
         }
 
         [Test]
-        public void GetMaxPlots_ReturnsCorrectForLevel()
+        public void GetMaxEntities_ReturnsCorrectForLevel()
         {
-            Assert.AreEqual(1, config.GetMaxPlots(1));
-            Assert.AreEqual(2, config.GetMaxPlots(2));
-            Assert.AreEqual(5, config.GetMaxPlots(4));
+            Assert.AreEqual(3, config.GetMaxEntities(1));
+            Assert.AreEqual(5, config.GetMaxEntities(2));
+            Assert.AreEqual(12, config.GetMaxEntities(4));
         }
 
         [Test]
-        public void GetMaxPlots_ClampsToLastEntry()
+        public void GetMaxEntities_ClampsToLastEntry()
         {
-            Assert.AreEqual(8, config.GetMaxPlots(99));
+            Assert.AreEqual(18, config.GetMaxEntities(99));
         }
 
         [Test]

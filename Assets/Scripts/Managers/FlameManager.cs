@@ -12,7 +12,18 @@ namespace Garden
         public FlameConfig Config => config;
         public int Level => SaveManager.Instance.Data.flameLevel;
         public float ManaPerSecond => config.GetManaPerSecond(Level);
-        public int MaxPlots => config.GetMaxPlots(Level);
+        public int MaxEntities => config.GetMaxEntities(Level);
+
+        public int CurrentEntityCount
+        {
+            get
+            {
+                var data = SaveManager.Instance.Data;
+                return data.plots.Count + data.vases.Count + data.gardens.Count;
+            }
+        }
+
+        public bool CanPlaceEntity => CurrentEntityCount < MaxEntities;
 
         public event Action OnFlameUpgraded;
 

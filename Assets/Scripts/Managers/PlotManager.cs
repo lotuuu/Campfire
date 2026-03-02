@@ -46,7 +46,7 @@ namespace Garden
 
         public bool CraftPlot(int gridX, int gridY)
         {
-            if (Plots.Count >= FlameManager.Instance.MaxPlots) return false;
+            if (!FlameManager.Instance.CanPlaceEntity) return false;
             SaveManager.Instance.Data.plots.Add(new PlotSave { state = PlotState.Empty, gridX = gridX, gridY = gridY });
             SaveManager.Instance.Save();
             return true;

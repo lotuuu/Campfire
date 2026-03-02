@@ -9,8 +9,8 @@ namespace Garden
         [SerializeField] private float baseManaPerSecond = 0.5f;
         [SerializeField] private float manaPerLevel = 0.3f;
 
-        [Header("Plot Capacity")]
-        [SerializeField] private int[] plotsPerLevel = { 1, 2, 3, 5, 8 };
+        [Header("Entity Capacity (plots + vases + gardens)")]
+        [SerializeField] private int[] maxEntitiesPerLevel = { 3, 5, 8, 12, 18 };
 
         [Header("Upgrade Costs (Mana)")]
         [SerializeField] private float[] upgradeCosts = { 50f, 150f, 400f, 1000f };
@@ -23,10 +23,10 @@ namespace Garden
             return baseManaPerSecond + (flameLevel - 1) * manaPerLevel;
         }
 
-        public int GetMaxPlots(int flameLevel)
+        public int GetMaxEntities(int flameLevel)
         {
-            int index = Mathf.Clamp(flameLevel - 1, 0, plotsPerLevel.Length - 1);
-            return plotsPerLevel[index];
+            int index = Mathf.Clamp(flameLevel - 1, 0, maxEntitiesPerLevel.Length - 1);
+            return maxEntitiesPerLevel[index];
         }
 
         public float GetUpgradeCost(int currentLevel)

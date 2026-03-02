@@ -88,6 +88,7 @@ namespace Garden
 
         public bool CraftVase(int gridX, int gridY)
         {
+            if (!FlameManager.Instance.CanPlaceEntity) return false;
             if (!CurrencyManager.Instance.SpendMana(config.CraftCostMana)) return false;
             var data = SaveManager.Instance.Data;
             data.vases.Add(new VaseSave { capacity = config.BaseCapacity, state = VaseState.Empty, gridX = gridX, gridY = gridY });
