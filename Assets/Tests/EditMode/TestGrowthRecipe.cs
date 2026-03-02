@@ -1,0 +1,132 @@
+using NUnit.Framework;
+
+namespace Garden.Tests
+{
+    public class TestGrowthRecipe
+    {
+        [Test]
+        public void ScoreRange_PerfectMatch_Returns1()
+        {
+            float score = GrowthRecipe.ScoreRange(25f, 20f, 30f, 10f);
+            Assert.AreEqual(1f, score, 0.001f);
+        }
+
+        [Test]
+        public void ScoreRange_AtEdge_Returns1()
+        {
+            float score = GrowthRecipe.ScoreRange(20f, 20f, 30f, 10f);
+            Assert.AreEqual(1f, score, 0.001f);
+        }
+
+        [Test]
+        public void ScoreRange_OutsideTolerance_Returns0()
+        {
+            float score = GrowthRecipe.ScoreRange(5f, 20f, 30f, 10f);
+            Assert.AreEqual(0f, score, 0.001f);
+        }
+
+        [Test]
+        public void ScoreRange_HalfwayOutside_Returns0Point5()
+        {
+            float score = GrowthRecipe.ScoreRange(15f, 20f, 30f, 10f);
+            Assert.AreEqual(0.5f, score, 0.001f);
+        }
+
+        [Test]
+        public void ScoreWaterings_ExactMatch_Returns1()
+        {
+            float score = GrowthRecipe.ScoreWaterings(3, 3);
+            Assert.AreEqual(1f, score, 0.001f);
+        }
+
+        [Test]
+        public void ScoreWaterings_Off2_Returns0Point5()
+        {
+            float score = GrowthRecipe.ScoreWaterings(5, 3);
+            Assert.AreEqual(0.5f, score, 0.001f);
+        }
+
+        [Test]
+        public void ScoreWaterings_Off4OrMore_Returns0()
+        {
+            float score = GrowthRecipe.ScoreWaterings(7, 3);
+            Assert.AreEqual(0f, score, 0.001f);
+        }
+
+        [Test]
+        public void Evaluate_NoActiveDimensions_Returns1()
+        {
+            var recipe = new GrowthRecipe();
+            var snapshots = new GrowthSnapshots { snapshotCount = 5 };
+            float score = recipe.Evaluate(snapshots, 0);
+            Assert.AreEqual(1f, score, 0.001f);
+        }
+
+        [Test]
+        public void Evaluate_HeatOnly_PerfectMatch()
+        {
+            var recipe = new GrowthRecipe
+            {
+                useHeat = true,
+                idealTempMin = 20f, idealTempMax = 30f,
+                heatTolerance = 10f, heatWeight = 1f
+            };
+            var snapshots = new GrowthSnapshots
+            {
+                snapshotCount = 4,
+                sumTemp = 100f
+            };
+            float score = recipe.Evaluate(snapshots, 0);
+            Assert.AreEqual(1f, score, 0.001f);
+        }
+
+        [Test]
+        public void Evaluate_TwoDimensions_WeightedAverage()
+        {
+            var recipe = new GrowthRecipe
+            {
+                useHeat = true,
+                idealTempMin = 20f, idealTempMax = 30f,
+                heatTolerance = 10f, heatWeight = 2f,
+                useWaterings = true,
+                idealWaterings = 3, wateringsWeight = 1f
+            };
+            var snapshots = new GrowthSnapshots
+            {
+                snapshotCount = 4,
+                sumTemp = 100f
+            };
+            int waterCount = 3;
+            float score = recipe.Evaluate(snapshots, waterCount);
+            Assert.AreEqual(1f, score, 0.001f);
+        }
+
+        [Test]
+        public void Evaluate_MoonPhase_FractionScoring()
+        {
+            var recipe = new GrowthRecipe
+            {
+                useMoon = true,
+                requiredMoonPhase = MoonPhase.FullMoon,
+                moonWeight = 1f
+            };
+            var snapshots = new GrowthSnapshots
+            {
+                snapshotCount = 10,
+                moonPhaseSnapshots = new int[8]
+            };
+            snapshots.moonPhaseSnapshots[(int)MoonPhase.FullMoon] = 7;
+            float score = recipe.Evaluate(snapshots, 0);
+            Assert.AreEqual(0.7f, score, 0.001f);
+        }
+
+        [Test]
+        public void Evaluate_ZeroSnapshots_Returns1()
+        {
+            var recipe = new GrowthRecipe { useHeat = true };
+            var snapshots = new GrowthSnapshots { snapshotCount = 0 };
+            float score = recipe.Evaluate(snapshots, 0);
+            Assert.AreEqual(1f, score, 0.001f);
+        }
+    }
+}
