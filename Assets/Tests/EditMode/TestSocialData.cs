@@ -41,5 +41,15 @@ namespace Garden.Tests
             Assert.AreEqual(1, loaded.cachedFriends.Count);
             Assert.AreEqual("friend1", loaded.cachedFriends[0].uid);
         }
+
+        [Test]
+        public void SocialData_EmptyFriendList_SerializesCleanly()
+        {
+            var data = new SocialData { firebaseUid = "test" };
+            string json = UnityEngine.JsonUtility.ToJson(data);
+            var loaded = UnityEngine.JsonUtility.FromJson<SocialData>(json);
+            Assert.IsNotNull(loaded.cachedFriends);
+            Assert.AreEqual(0, loaded.cachedFriends.Count);
+        }
     }
 }

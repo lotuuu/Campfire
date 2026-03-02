@@ -61,5 +61,25 @@ namespace Garden.Tests
             Assert.AreEqual("Moonvine", item.name);
             Assert.AreEqual(2, item.count);
         }
+
+        [Test]
+        public void VillageSnapshot_EmptySaveData_ProducesEmptySnapshot()
+        {
+            var saveData = new SaveData();
+            var snapshot = VillageSnapshot.FromSaveData(saveData, 1);
+            Assert.AreEqual(1, snapshot.flameLevel);
+            Assert.AreEqual(0, snapshot.plots.Count);
+            Assert.AreEqual(0, snapshot.vases.Count);
+            Assert.AreEqual(0, snapshot.gardens.Count);
+        }
+
+        [Test]
+        public void GiftItem_SeedAndItemTypes()
+        {
+            var seed = new GiftItem { type = "seed", name = "Fern", count = 3 };
+            var item = new GiftItem { type = "item", name = "Fertilizer", count = 1 };
+            Assert.AreEqual("seed", seed.type);
+            Assert.AreEqual("item", item.type);
+        }
     }
 }
