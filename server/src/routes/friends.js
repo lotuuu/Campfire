@@ -80,7 +80,7 @@ router.post('/request', async (req, res) => {
 router.get('/requests', async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT fr.id, fr.from_uid, p.display_name, p.friend_code, fr.created_at
+      `SELECT fr.id, fr.from_uid, p.display_name AS from_name, fr.status, fr.created_at
        FROM friend_requests fr
        JOIN players p ON p.uid = fr.from_uid
        WHERE fr.to_uid = $1 AND fr.status = 'pending'
