@@ -22,7 +22,9 @@
             <!-- Header row: player name + date/time -->
             <ui:VisualElement name="top-header">
                 <ui:Label name="player-name" text="Camper" />
-                <ui:Button name="btn-debug" text="&#x2699;" />
+                <ui:Button name="btn-debug" class="icon-btn">
+                    <ui:VisualElement name="btn-debug-icon" class="header-icon" />
+                </ui:Button>
                 <ui:VisualElement name="top-header-spacer" />
                 <ui:Label name="date-time" text="--" />
             </ui:VisualElement>
@@ -31,14 +33,14 @@
             <ui:VisualElement name="weather-bar">
                 <ui:VisualElement name="weather-cell-condition" class="weather-cell">
                     <ui:Label name="weather-condition-label" text="--" />
-                    <ui:Label name="weather-icon" text="--" />
+                    <ui:VisualElement name="weather-icon" class="weather-cell-icon" />
                 </ui:VisualElement>
                 <ui:VisualElement name="weather-cell-humidity" class="weather-cell">
-                    <ui:Label name="weather-humidity-icon" text="&#x1F4A7;" />
+                    <ui:VisualElement name="weather-humidity-icon" class="weather-cell-icon" />
                     <ui:Label name="weather-humidity" text="--" />
                 </ui:VisualElement>
                 <ui:VisualElement name="weather-cell-temp" class="weather-cell">
-                    <ui:Label name="weather-temp-icon" text="&#x1F321;" />
+                    <ui:VisualElement name="weather-temp-icon" class="weather-cell-icon" />
                     <ui:Label name="weather-temp" text="--" />
                 </ui:VisualElement>
                 <ui:VisualElement name="weather-cell-moon" class="weather-cell">
@@ -48,8 +50,14 @@
 
             <!-- Resources (lower-right corner) -->
             <ui:VisualElement name="resource-bar">
-                <ui:Label name="mana-display" text="0" />
-                <ui:Label name="water-display" text="0" />
+                <ui:VisualElement class="resource-item">
+                    <ui:VisualElement name="mana-icon" class="resource-icon" />
+                    <ui:Label name="mana-display" text="0" />
+                </ui:VisualElement>
+                <ui:VisualElement class="resource-item">
+                    <ui:VisualElement name="water-icon" class="resource-icon" />
+                    <ui:Label name="water-display" text="0" />
+                </ui:VisualElement>
             </ui:VisualElement>
 
         </ui:VisualElement>
@@ -67,15 +75,15 @@
         <ui:VisualElement name="bottom-nav">
             <ui:Button name="btn-seeds" class="nav-btn">
                 <ui:Label text="SEEDS" class="nav-btn-label" />
-                <ui:Label text="&#x1F331;" class="nav-btn-icon" />
+                <ui:VisualElement name="nav-icon-seeds" class="nav-btn-icon" />
             </ui:Button>
             <ui:Button name="btn-craft" class="nav-btn">
                 <ui:Label text="CRAFT" class="nav-btn-label" />
-                <ui:Label text="&#x1F525;" class="nav-btn-icon" />
+                <ui:VisualElement name="nav-icon-craft" class="nav-btn-icon" />
             </ui:Button>
             <ui:Button name="btn-mail" class="nav-btn">
                 <ui:Label text="MAIL" class="nav-btn-label" />
-                <ui:Label text="&#x2709;" class="nav-btn-icon" />
+                <ui:VisualElement name="nav-icon-mail" class="nav-btn-icon" />
             </ui:Button>
         </ui:VisualElement>
 

@@ -20,6 +20,13 @@
     margin-right: var(--spacing-xxs);
 }
 
+.weather-cell-icon {
+    width: 28px;
+    height: 28px;
+    -unity-background-scale-mode: scale-to-fit;
+    margin-right: var(--spacing-xxs);
+}
+
 #weather-condition-label {
     font-size: var(--font-xs);
     color: var(--color-text);
@@ -28,25 +35,15 @@
 }
 
 #weather-icon {
-    font-size: var(--font-md);
-    color: rgb(255, 220, 120);
-}
-
-#weather-humidity-icon {
-    font-size: var(--font-sm);
-    color: var(--color-water);
-    margin-right: 2px;
+    width: 32px;
+    height: 32px;
+    -unity-background-scale-mode: scale-to-fit;
 }
 
 #weather-humidity {
     font-size: var(--font-xs);
     color: var(--color-text);
     -unity-font-style: bold;
-}
-
-#weather-temp-icon {
-    font-size: var(--font-sm);
-    margin-right: 2px;
 }
 
 #weather-temp {

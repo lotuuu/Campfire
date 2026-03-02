@@ -31,13 +31,18 @@
     -unity-font-style: bold;
 }
 
-#btn-debug {
-    font-size: var(--font-sm);
-    color: var(--color-text-dim);
+.icon-btn {
     background-color: transparent;
     border-width: 0;
-    padding: 4px 8px;
+    padding: 4px;
     margin-left: var(--spacing-xs);
+}
+
+.header-icon {
+    width: 28px;
+    height: 28px;
+    -unity-background-scale-mode: scale-to-fit;
+    -unity-background-image-tint-color: var(--color-text-dim);
 }
 
 #top-header-spacer {
@@ -53,13 +58,26 @@
 #resource-bar {
     flex-direction: row;
     justify-content: flex-end;
+    align-items: center;
     padding-top: var(--spacing-xxs);
+}
+
+.resource-item {
+    flex-direction: row;
+    align-items: center;
+    margin-left: var(--spacing-md);
+}
+
+.resource-icon {
+    width: 20px;
+    height: 20px;
+    -unity-background-scale-mode: scale-to-fit;
+    margin-right: var(--spacing-xxs);
 }
 
 #mana-display {
     font-size: var(--font-xs);
     color: var(--color-mana);
-    margin-right: var(--spacing-md);
 }
 
 #water-display {

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -5,7 +6,7 @@ namespace Garden
 {
     public class WeatherBarUI : MonoBehaviour
     {
-        private Label weatherIcon;
+        private VisualElement weatherIcon;
         private Label weatherConditionLabel;
         private Label weatherHumidity;
         private Label weatherTemp;
@@ -20,10 +21,11 @@ namespace Garden
 
         private static readonly int[] MoonPhaseToSpriteIndex = { 5, 6, 7, 8, 1, 2, 3, 4 };
         private Texture2D[] moonTextures;
+        private Dictionary<WeatherCondition, Texture2D> weatherIcons;
 
         public void Initialize(VisualElement root)
         {
-            weatherIcon = root.Q<Label>("weather-icon");
+            weatherIcon = root.Q("weather-icon");
             weatherConditionLabel = root.Q<Label>("weather-condition-label");
             weatherHumidity = root.Q<Label>("weather-humidity");
             weatherTemp = root.Q<Label>("weather-temp");
@@ -31,9 +33,30 @@ namespace Garden
             playerName = root.Q<Label>("player-name");
             dateTime = root.Q<Label>("date-time");
 
+            // Load moon textures
             moonTextures = new Texture2D[8];
             for (int i = 0; i < 8; i++)
                 moonTextures[i] = Resources.Load<Texture2D>($"MoonPhases/Moon_Phase_{i + 1}");
+
+            // Load weather condition icons
+            weatherIcons = new Dictionary<WeatherCondition, Texture2D>
+            {
+                { WeatherCondition.Clear, Resources.Load<Texture2D>("UI/Icons/weather-clear") },
+                { WeatherCondition.Cloudy, Resources.Load<Texture2D>("UI/Icons/weather-cloudy") },
+                { WeatherCondition.Rain, Resources.Load<Texture2D>("UI/Icons/weather-rain") },
+                { WeatherCondition.Storm, Resources.Load<Texture2D>("UI/Icons/weather-storm") },
+                { WeatherCondition.Snow, Resources.Load<Texture2D>("UI/Icons/weather-snow") },
+            };
+
+            // Load static icons
+            var humidityIcon = root.Q("weather-humidity-icon");
+            SetIcon(humidityIcon, "UI/Icons/weather-humidity");
+
+            var tempIcon = root.Q("weather-temp-icon");
+            SetIcon(tempIcon, "UI/Icons/weather-temp");
+
+            var debugIcon = root.Q("btn-debug-icon");
+            SetIcon(debugIcon, "UI/Icons/gear");
 
             weatherBar = root.Q("weather-bar");
             forecastPanel = root.Q("forecast-panel");
@@ -129,8 +152,10 @@ namespace Garden
                 label.AddToClassList("forecast-day-label");
                 col.Add(label);
 
-                var icon = new Label(GetWeatherEmoji(day.condition));
+                var icon = new VisualElement();
                 icon.AddToClassList("forecast-day-icon");
+                if (weatherIcons.TryGetValue(day.condition, out var tex) && tex != null)
+                    icon.style.backgroundImage = tex;
                 col.Add(icon);
 
                 var temp = new Label($"{day.tempHigh:F0}/{day.tempLow:F0}");
@@ -143,27 +168,26 @@ namespace Garden
 
         private void UpdateWeather(WeatherData weather)
         {
-            if (weatherIcon != null) weatherIcon.text = GetWeatherEmoji(weather.condition);
+            if (weatherIcon != null && weatherIcons.TryGetValue(weather.condition, out var tex) && tex != null)
+                weatherIcon.style.backgroundImage = tex;
             if (weatherConditionLabel != null) weatherConditionLabel.text = weather.condition.ToString().ToUpper();
             if (weatherHumidity != null) weatherHumidity.text = $"{weather.humidity:F0}";
             if (weatherTemp != null) weatherTemp.text = $"{weather.temperature:F0}\u00b0";
             if (weatherMoon != null)
             {
                 int spriteIdx = MoonPhaseToSpriteIndex[(int)weather.moonPhase] - 1;
-                var tex = moonTextures[spriteIdx];
-                if (tex != null)
-                    weatherMoon.style.backgroundImage = tex;
+                var moonTex = moonTextures[spriteIdx];
+                if (moonTex != null)
+                    weatherMoon.style.backgroundImage = moonTex;
             }
         }
 
-        private static string GetWeatherEmoji(WeatherCondition c) => c switch
+        private static void SetIcon(VisualElement el, string resourcePath)
         {
-            WeatherCondition.Clear => "\u2600",
-            WeatherCondition.Cloudy => "\u2601",
-            WeatherCondition.Rain => "\ud83c\udf27",
-            WeatherCondition.Storm => "\u26c8",
-            WeatherCondition.Snow => "\u2744",
-            _ => "?"
-        };
+            if (el == null) return;
+            var tex = Resources.Load<Texture2D>(resourcePath);
+            if (tex != null)
+                el.style.backgroundImage = tex;
+        }
     }
 }

@@ -46,7 +46,9 @@
 }
 
 .nav-btn-icon {
-    font-size: var(--font-lg);
-    -unity-text-align: middle-center;
+    width: 40px;
+    height: 40px;
+    -unity-background-scale-mode: scale-to-fit;
     margin-top: var(--spacing-xxs);
+    align-self: center;
 }

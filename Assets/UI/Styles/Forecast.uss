@@ -32,9 +32,11 @@
 }
 
 .forecast-day-icon {
-    font-size: var(--font-lg);
-    color: rgb(255, 220, 120);
+    width: 32px;
+    height: 32px;
+    -unity-background-scale-mode: scale-to-fit;
     margin-bottom: var(--spacing-xxs);
+    align-self: center;
 }
 
 .forecast-day-temp {
