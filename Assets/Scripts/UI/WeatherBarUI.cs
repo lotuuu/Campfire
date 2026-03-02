@@ -8,19 +8,27 @@ namespace Garden
         private Label weatherIcon;
         private Label weatherTemp;
         private Label weatherCondition;
-        private Label weatherMoon;
+        private VisualElement weatherMoon;
 
         private VisualElement weatherBar;
         private VisualElement forecastPanel;
         private VisualElement forecastDays;
         private VisualElement campRoot;
 
+        // Moon_Phase_1=FullMoon .. Moon_Phase_5=NewMoon etc.
+        private static readonly int[] MoonPhaseToSpriteIndex = { 5, 6, 7, 8, 1, 2, 3, 4 };
+        private Texture2D[] moonTextures;
+
         public void Initialize(VisualElement root)
         {
             weatherIcon = root.Q<Label>("weather-icon");
             weatherTemp = root.Q<Label>("weather-temp");
             weatherCondition = root.Q<Label>("weather-condition");
-            weatherMoon = root.Q<Label>("weather-moon");
+            weatherMoon = root.Q("weather-moon");
+
+            moonTextures = new Texture2D[8];
+            for (int i = 0; i < 8; i++)
+                moonTextures[i] = Resources.Load<Texture2D>($"MoonPhases/Moon_Phase_{i + 1}");
 
             weatherBar = root.Q("weather-bar");
             forecastPanel = root.Q("forecast-panel");
@@ -106,7 +114,13 @@ namespace Garden
             if (weatherIcon != null) weatherIcon.text = GetWeatherEmoji(weather.condition);
             if (weatherTemp != null) weatherTemp.text = $"{weather.temperature:F0}\u00b0C";
             if (weatherCondition != null) weatherCondition.text = weather.condition.ToString();
-            if (weatherMoon != null) weatherMoon.text = GetMoonEmoji(weather.moonPhase);
+            if (weatherMoon != null)
+            {
+                int spriteIdx = MoonPhaseToSpriteIndex[(int)weather.moonPhase] - 1;
+                var tex = moonTextures[spriteIdx];
+                if (tex != null)
+                    weatherMoon.style.backgroundImage = tex;
+            }
         }
 
         private static string GetWeatherEmoji(WeatherCondition c) => c switch
@@ -119,17 +133,5 @@ namespace Garden
             _ => "?"
         };
 
-        private static string GetMoonEmoji(MoonPhase m) => m switch
-        {
-            MoonPhase.NewMoon => "\ud83c\udf11",
-            MoonPhase.WaxingCrescent => "\ud83c\udf12",
-            MoonPhase.FirstQuarter => "\ud83c\udf13",
-            MoonPhase.WaxingGibbous => "\ud83c\udf14",
-            MoonPhase.FullMoon => "\ud83c\udf15",
-            MoonPhase.WaningGibbous => "\ud83c\udf16",
-            MoonPhase.LastQuarter => "\ud83c\udf17",
-            MoonPhase.WaningCrescent => "\ud83c\udf18",
-            _ => "?"
-        };
     }
 }
