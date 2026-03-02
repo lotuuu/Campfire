@@ -28,11 +28,15 @@ namespace Garden
         private static readonly CustomStyleProperty<Color> s_HexBorder = new("--hex-border");
 
         // Mode state machine
-        private enum CampsiteMode { Normal, Placing, Watering }
+        private enum CampsiteMode { Normal, Placing, Watering, Visiting }
         private CampsiteMode mode;
         private CampBuildingType pendingBuildingType;
         private int wateringVaseIndex = -1;
         private Button modeCancelBtn;
+
+        // Visit mode
+        private VillageSnapshot visitSnapshot;
+        private Button visitBackBtn;
 
         // Grid cell tracking for Update loop
         private readonly List<(VisualElement fill, int plotIndex)> growingPlots = new();
@@ -116,6 +120,12 @@ namespace Garden
             {
                 modeCancelBtn.RemoveFromHierarchy();
                 modeCancelBtn = null;
+            }
+
+            if (mode == CampsiteMode.Visiting && visitSnapshot != null)
+            {
+                RebuildVisitGrid();
+                return;
             }
 
             int radius = FlameManager.Instance.Config.GetGridSize(FlameManager.Instance.Level);
@@ -366,6 +376,156 @@ namespace Garden
                 modeCancelBtn = null;
             }
             RebuildGrid();
+        }
+
+        // ── Visit Mode ──
+
+        public void EnterVisitMode(VillageSnapshot snapshot)
+        {
+            mode = CampsiteMode.Visiting;
+            visitSnapshot = snapshot;
+            CloseInteractionPanel();
+            RebuildGrid();
+        }
+
+        public void ExitVisitMode()
+        {
+            mode = CampsiteMode.Normal;
+            visitSnapshot = null;
+            if (visitBackBtn != null)
+            {
+                visitBackBtn.RemoveFromHierarchy();
+                visitBackBtn = null;
+            }
+            RebuildGrid();
+        }
+
+        private void RebuildVisitGrid()
+        {
+            // Determine grid radius from the visitor's flame level using the same config
+            int radius = FlameManager.Instance != null
+                ? FlameManager.Instance.Config.GetGridSize(visitSnapshot.flameLevel)
+                : visitSnapshot.flameLevel + 1;
+            currentGridSize = radius;
+
+            int rExtent = radius + ExtraRows;
+            float minX = float.MaxValue, maxX = float.MinValue;
+            float minY = float.MaxValue, maxY = float.MinValue;
+            for (int q = -radius; q <= radius; q++)
+            {
+                int rMin = Mathf.Max(-rExtent, -q - rExtent);
+                int rMax = Mathf.Min(rExtent, -q + rExtent);
+                for (int r = rMin; r <= rMax; r++)
+                {
+                    var center = HexGridUtil.HexToPixel(q, r, HexSize);
+                    if (center.x < minX) minX = center.x;
+                    if (center.x > maxX) maxX = center.x;
+                    if (center.y < minY) minY = center.y;
+                    if (center.y > maxY) maxY = center.y;
+                }
+            }
+
+            float canvasWidth = (maxX - minX) + CellWidth + GridPadding * 2;
+            float canvasHeight = (maxY - minY) + CellHeight + GridPadding * 2;
+            canvas.style.width = canvasWidth;
+            canvas.style.height = canvasHeight;
+
+            float offsetX = -minX + GridPadding + CellWidth / 2f;
+            float offsetY = -minY + GridPadding + CellHeight / 2f;
+
+            // Build occupied lookup from snapshot data
+            var occupied = new Dictionary<(int, int), (CampBuildingType type, int index)>();
+            occupied[(0, 0)] = (CampBuildingType.Flame, 0);
+
+            for (int i = 0; i < visitSnapshot.plots.Count; i++)
+                occupied[(visitSnapshot.plots[i].gridX, visitSnapshot.plots[i].gridY)] = (CampBuildingType.Plot, i);
+            for (int i = 0; i < visitSnapshot.vases.Count; i++)
+                occupied[(visitSnapshot.vases[i].gridX, visitSnapshot.vases[i].gridY)] = (CampBuildingType.Vase, i);
+            for (int i = 0; i < visitSnapshot.gardens.Count; i++)
+                occupied[(visitSnapshot.gardens[i].gridX, visitSnapshot.gardens[i].gridY)] = (CampBuildingType.Garden, i);
+
+            // Create hex cells — read-only, no interaction handlers
+            for (int q = -radius; q <= radius; q++)
+            {
+                int rMin = Mathf.Max(-rExtent, -q - rExtent);
+                int rMax = Mathf.Min(rExtent, -q + rExtent);
+                for (int r = rMin; r <= rMax; r++)
+                {
+                    var el = cellTemplate.CloneTree();
+                    var cell = el.Q(className: "grid-cell");
+                    if (cell == null) continue;
+
+                    var center = HexGridUtil.HexToPixel(q, r, HexSize);
+                    float x = center.x + offsetX - CellWidth / 2f;
+                    float y = center.y + offsetY - CellHeight / 2f;
+                    cell.style.left = x;
+                    cell.style.top = y;
+
+                    var label = cell.Q<Label>(className: "cell-label");
+                    var status = cell.Q<Label>(className: "cell-status");
+
+                    if (occupied.TryGetValue((q, r), out var info))
+                    {
+                        PopulateVisitCell(cell, label, status, info.type, info.index);
+                    }
+                    else
+                    {
+                        cell.AddToClassList("grid-cell--empty");
+                        if (label != null) label.text = "";
+                        if (status != null) status.text = "";
+                    }
+
+                    cell.generateVisualContent += DrawHexCell;
+                    cell.RegisterCallback<CustomStyleResolvedEvent>(_ => cell.MarkDirtyRepaint());
+                    canvas.Add(cell);
+                }
+            }
+
+            // "Back to My Camp" button
+            visitBackBtn = new Button(ExitVisitMode) { text = "Back to My Camp" };
+            visitBackBtn.name = "visit-back-btn";
+            visitBackBtn.AddToClassList("interaction-btn-primary");
+            visitBackBtn.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());
+            viewport.Add(visitBackBtn);
+
+            var flameCenter = HexGridUtil.HexToPixel(0, 0, HexSize);
+            float flameCenterX = flameCenter.x + offsetX;
+            float flameCenterY = flameCenter.y + offsetY;
+            panController.CenterOnPoint(flameCenterX, flameCenterY, canvasWidth, canvasHeight);
+        }
+
+        private void PopulateVisitCell(VisualElement cell, Label label, Label status,
+            CampBuildingType type, int index)
+        {
+            switch (type)
+            {
+                case CampBuildingType.Flame:
+                    cell.AddToClassList("grid-cell--flame");
+                    if (label != null) label.text = $"Lv.{visitSnapshot.flameLevel}";
+                    if (status != null) status.text = "Spark of Ara";
+                    break;
+
+                case CampBuildingType.Plot:
+                    cell.AddToClassList("grid-cell--plot");
+                    var plot = visitSnapshot.plots[index];
+                    if (label != null) label.text = string.IsNullOrEmpty(plot.seedName) ? "Plot" : plot.seedName;
+                    if (status != null) status.text = plot.state ?? "";
+                    break;
+
+                case CampBuildingType.Vase:
+                    cell.AddToClassList("grid-cell--vase");
+                    var vase = visitSnapshot.vases[index];
+                    if (label != null) label.text = $"{vase.currentWater}/{vase.capacity}";
+                    if (status != null) status.text = vase.state ?? "";
+                    break;
+
+                case CampBuildingType.Garden:
+                    cell.AddToClassList("grid-cell--garden");
+                    var garden = visitSnapshot.gardens[index];
+                    if (label != null) label.text = garden.plantName ?? "Garden";
+                    if (status != null) status.text = garden.mature ? "Mature" : "Growing";
+                    break;
+            }
         }
 
         // ── Hex Cell Drawing ──
