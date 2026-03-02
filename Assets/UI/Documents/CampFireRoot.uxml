@@ -21,7 +21,7 @@
             <ui:Label name="weather-icon" text="--" />
             <ui:Label name="weather-temp" text="--" />
             <ui:Label name="weather-condition" text="Loading..." />
-            <ui:Label name="weather-moon" text="--" />
+            <ui:VisualElement name="weather-moon" />
         </ui:VisualElement>
 
         <ui:VisualElement name="forecast-panel">
