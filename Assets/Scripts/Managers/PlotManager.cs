@@ -49,6 +49,7 @@ namespace Garden
             if (!FlameManager.Instance.CanPlaceEntity) return false;
             SaveManager.Instance.Data.plots.Add(new PlotSave { state = PlotState.Empty, gridX = gridX, gridY = gridY });
             SaveManager.Instance.Save();
+            OnPlotChanged?.Invoke(SaveManager.Instance.Data.plots.Count - 1);
             return true;
         }
 
