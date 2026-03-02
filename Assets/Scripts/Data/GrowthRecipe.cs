@@ -143,7 +143,9 @@ namespace Garden
                 rainSnapshots++;
             if (moonPhaseSnapshots == null || moonPhaseSnapshots.Length < 8)
                 moonPhaseSnapshots = new int[8];
-            moonPhaseSnapshots[(int)weather.moonPhase]++;
+            int phaseIndex = (int)weather.moonPhase;
+            if (phaseIndex >= 0 && phaseIndex < moonPhaseSnapshots.Length)
+                moonPhaseSnapshots[phaseIndex]++;
         }
     }
 }
