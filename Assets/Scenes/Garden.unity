@@ -624,6 +624,7 @@ GameObject:
   - component: {fileID: 1564428244}
   - component: {fileID: 1564428243}
   - component: {fileID: 1564428242}
+  - component: {fileID: 1564428249}
   m_Layer: 0
   m_Name: --- UI ---
   m_TagString: Untagged
@@ -777,6 +778,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ecf70f54f2ccd498689fd90529df62bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Garden::Garden.CampFireUI
+--- !u!114 &1564428249
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1564428222}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ddf3f5a9756b470388e625ad145c84e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Garden::Garden.DebugWeatherPanel
 --- !u!1 &1877059791
 GameObject:
   m_ObjectHideFlags: 0
