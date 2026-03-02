@@ -193,7 +193,7 @@ namespace Garden
                         if (mode == CampsiteMode.Watering && info.type == CampBuildingType.Plot)
                         {
                             var plot = data.plots[info.index];
-                            if (plot.state == PlotState.Planted)
+                            if (plot.state == PlotState.Growing)
                                 cell.AddToClassList("grid-cell--water-target");
                         }
 
@@ -304,7 +304,7 @@ namespace Garden
                 if (type == CampBuildingType.Plot)
                 {
                     var plot = SaveManager.Instance.Data.plots[index];
-                    if (plot.state == PlotState.Planted)
+                    if (plot.state == PlotState.Growing)
                     {
                         PlotManager.Instance.Water(index);
                         ExitMode();
@@ -506,19 +506,16 @@ namespace Garden
                     }
                     break;
 
-                case PlotState.Planted:
-                    interactionTitle.text = plot.seedName;
-                    var needsWater = new Label("Needs water from a vase");
-                    needsWater.AddToClassList("interaction-info");
-                    interactionBody.Add(needsWater);
-                    break;
-
                 case PlotState.Growing:
                     interactionTitle.text = plot.seedName;
                     float remaining = PlotManager.Instance.GetRemainingSeconds(index);
                     var progressLabel = new Label($"Growing... {FormatTimeRemaining(remaining)} left");
                     progressLabel.AddToClassList("interaction-info");
                     interactionBody.Add(progressLabel);
+
+                    var wateringsLabel = new Label($"Waterings: {plot.waterCount}");
+                    wateringsLabel.AddToClassList("interaction-info");
+                    interactionBody.Add(wateringsLabel);
 
                     var finishBtn = new Button(() =>
                     {
@@ -557,23 +554,17 @@ namespace Garden
 
             interactionTitle.text = "Harvested!";
 
-            var yieldLabel = new Label($"{result.seedName} x{result.yield}");
+            var yieldLabel = new Label($"{result.seedName} x{result.drops}");
             yieldLabel.AddToClassList("interaction-info");
             interactionBody.Add(yieldLabel);
 
-            string qualityText = result.qualityMultiplier >= 1.5f ? "Excellent"
-                : result.qualityMultiplier >= 1.0f ? "Good"
+            string qualityText = result.recipeScore >= 0.8f ? "Excellent"
+                : result.recipeScore >= 0.5f ? "Good"
                 : "Poor";
-            var qualityLabel = new Label($"Quality: {qualityText} ({result.qualityMultiplier:F1}x)");
+            int pct = Mathf.RoundToInt(result.recipeScore * 100f);
+            var qualityLabel = new Label($"Recipe match: {qualityText} ({pct}%)");
             qualityLabel.AddToClassList("interaction-info");
             interactionBody.Add(qualityLabel);
-
-            if (result.weatherMatched)
-            {
-                var weatherLabel = new Label("Weather bonus!");
-                weatherLabel.AddToClassList("interaction-info-highlight");
-                interactionBody.Add(weatherLabel);
-            }
 
             AddCloseButton();
         }
