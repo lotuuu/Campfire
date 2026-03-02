@@ -14,25 +14,39 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   seedName: Sunflower
   growthDurationHours: 4
-  waterRequired: 2
-  preferredWeather:
-    useTemperature: 1
-    minTemp: 25
-    maxTemp: 60
-    useWeatherCondition: 1
-    requiredConditions:
-    - 0
-    useWindSpeed: 0
-    minWindSpeed: 0
+  baseDrops: 3
+  recipe:
+    useHeat: 1
+    idealTempMin: 25
+    idealTempMax: 40
+    heatTolerance: 10
+    heatWeight: 2
+    useWind: 0
+    idealWindMin: 0
+    idealWindMax: 10
+    windTolerance: 5
+    windWeight: 1
     useHumidity: 0
-    minHumidity: 0
-    useTimeOfDay: 0
-    requiredTimeOfDay: 0
-    useMoonPhase: 0
+    idealHumidityMin: 0
+    idealHumidityMax: 80
+    humidityTolerance: 20
+    humidityWeight: 1
+    useSunlight: 1
+    idealSunlightMin: 60
+    idealSunlightMax: 100
+    sunlightTolerance: 20
+    sunlightWeight: 2
+    useRain: 1
+    idealRainMin: 0
+    idealRainMax: 0.2
+    rainTolerance: 0.3
+    rainWeight: 1
+    useMoon: 0
     requiredMoonPhase: 0
-    useCalendarEvent: 0
-    requiredCalendarEvent: 0
-  baseYield: 3
+    moonWeight: 1
+    useWaterings: 1
+    idealWaterings: 3
+    wateringsWeight: 1
   icon: {fileID: 0}
   growthSprites: []
   manaCost: 25

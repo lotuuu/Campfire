@@ -14,25 +14,39 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   seedName: Fern
   growthDurationHours: 2
-  waterRequired: 1
-  preferredWeather:
-    useTemperature: 0
-    minTemp: -50
-    maxTemp: 60
-    useWeatherCondition: 1
-    requiredConditions:
-    - 2
-    useWindSpeed: 0
-    minWindSpeed: 0
-    useHumidity: 0
-    minHumidity: 0
-    useTimeOfDay: 0
-    requiredTimeOfDay: 0
-    useMoonPhase: 0
+  baseDrops: 2
+  recipe:
+    useHeat: 1
+    idealTempMin: 15
+    idealTempMax: 25
+    heatTolerance: 10
+    heatWeight: 1
+    useWind: 0
+    idealWindMin: 0
+    idealWindMax: 10
+    windTolerance: 5
+    windWeight: 1
+    useHumidity: 1
+    idealHumidityMin: 60
+    idealHumidityMax: 90
+    humidityTolerance: 20
+    humidityWeight: 1
+    useSunlight: 0
+    idealSunlightMin: 0
+    idealSunlightMax: 100
+    sunlightTolerance: 20
+    sunlightWeight: 1
+    useRain: 1
+    idealRainMin: 0.3
+    idealRainMax: 0.8
+    rainTolerance: 0.3
+    rainWeight: 1.5
+    useMoon: 0
     requiredMoonPhase: 0
-    useCalendarEvent: 0
-    requiredCalendarEvent: 0
-  baseYield: 2
+    moonWeight: 1
+    useWaterings: 1
+    idealWaterings: 2
+    wateringsWeight: 0.5
   icon: {fileID: 0}
   growthSprites: []
   manaCost: 0

@@ -14,24 +14,39 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   seedName: Moonvine
   growthDurationHours: 8
-  waterRequired: 2
-  preferredWeather:
-    useTemperature: 0
-    minTemp: -50
-    maxTemp: 60
-    useWeatherCondition: 0
-    requiredConditions: []
-    useWindSpeed: 0
-    minWindSpeed: 0
-    useHumidity: 0
-    minHumidity: 0
-    useTimeOfDay: 1
-    requiredTimeOfDay: 1
-    useMoonPhase: 0
-    requiredMoonPhase: 0
-    useCalendarEvent: 0
-    requiredCalendarEvent: 0
-  baseYield: 5
+  baseDrops: 5
+  recipe:
+    useHeat: 0
+    idealTempMin: 0
+    idealTempMax: 30
+    heatTolerance: 10
+    heatWeight: 1
+    useWind: 0
+    idealWindMin: 0
+    idealWindMax: 10
+    windTolerance: 5
+    windWeight: 1
+    useHumidity: 1
+    idealHumidityMin: 50
+    idealHumidityMax: 90
+    humidityTolerance: 20
+    humidityWeight: 1
+    useSunlight: 0
+    idealSunlightMin: 0
+    idealSunlightMax: 100
+    sunlightTolerance: 20
+    sunlightWeight: 1
+    useRain: 0
+    idealRainMin: 0
+    idealRainMax: 1
+    rainTolerance: 0.3
+    rainWeight: 1
+    useMoon: 1
+    requiredMoonPhase: 4
+    moonWeight: 3
+    useWaterings: 1
+    idealWaterings: 2
+    wateringsWeight: 0.5
   icon: {fileID: 0}
   growthSprites: []
   manaCost: 50
