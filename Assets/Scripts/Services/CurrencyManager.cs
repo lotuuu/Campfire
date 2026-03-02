@@ -7,14 +7,20 @@ namespace Garden
     {
         public static CurrencyManager Instance { get; private set; }
 
-        [SerializeField] private CurrencyConfig config;
+        public float Mana => SaveManager.Instance.Data.mana;
 
-        public CurrencyConfig Config => config;
-        public int Gold => SaveManager.Instance.Data.gold;
-        public int SunShards => SaveManager.Instance.Data.sunShards;
-        public int Pollen => SaveManager.Instance.Data.pollen;
+        public int TotalWater
+        {
+            get
+            {
+                int total = 0;
+                foreach (var v in SaveManager.Instance.Data.vases)
+                    total += v.currentWater;
+                return total;
+            }
+        }
 
-        public event Action<CurrencyType, int, int> OnCurrencyChanged;
+        public event Action<CurrencyType, float, float> OnCurrencyChanged;
 
         private void Awake()
         {
@@ -22,41 +28,47 @@ namespace Garden
             Instance = this;
         }
 
-        public void Add(CurrencyType type, int amount)
+        public void AddMana(float amount)
         {
             var data = SaveManager.Instance.Data;
-            int old;
-            switch (type)
-            {
-                case CurrencyType.Gold:
-                    old = data.gold; data.gold = (int)System.Math.Clamp((long)data.gold + amount, 0L, (long)int.MaxValue);
-                    OnCurrencyChanged?.Invoke(type, old, data.gold); break;
-                case CurrencyType.SunShards:
-                    old = data.sunShards; data.sunShards = (int)System.Math.Clamp((long)data.sunShards + amount, 0L, (long)int.MaxValue);
-                    OnCurrencyChanged?.Invoke(type, old, data.sunShards); break;
-                case CurrencyType.Pollen:
-                    old = data.pollen; data.pollen = (int)System.Math.Clamp((long)data.pollen + amount, 0L, (long)int.MaxValue);
-                    OnCurrencyChanged?.Invoke(type, old, data.pollen); break;
-            }
+            float old = data.mana;
+            data.mana = Mathf.Max(0f, data.mana + amount);
+            OnCurrencyChanged?.Invoke(CurrencyType.Mana, old, data.mana);
             SaveManager.Instance.Save();
         }
 
-        public bool Spend(CurrencyType type, int amount)
+        public bool SpendMana(float amount)
         {
-            if (!CanAfford(type, amount)) return false;
-            Add(type, -amount);
+            if (!CanAffordMana(amount)) return false;
+            AddMana(-amount);
             return true;
         }
 
-        public bool CanAfford(CurrencyType type, int amount)
+        public bool CanAffordMana(float amount)
         {
-            return type switch
+            return SaveManager.Instance.Data.mana >= amount;
+        }
+
+        public bool SpendWater(int amount)
+        {
+            if (TotalWater < amount) return false;
+            var data = SaveManager.Instance.Data;
+            float oldTotal = TotalWater;
+            int remaining = amount;
+            for (int i = 0; i < data.vases.Count && remaining > 0; i++)
             {
-                CurrencyType.Gold => Gold >= amount,
-                CurrencyType.SunShards => SunShards >= amount,
-                CurrencyType.Pollen => Pollen >= amount,
-                _ => false
-            };
+                int take = Math.Min(data.vases[i].currentWater, remaining);
+                data.vases[i].currentWater -= take;
+                remaining -= take;
+            }
+            OnCurrencyChanged?.Invoke(CurrencyType.Water, oldTotal, TotalWater);
+            SaveManager.Instance.Save();
+            return true;
+        }
+
+        public bool CanAffordWater(int amount)
+        {
+            return TotalWater >= amount;
         }
     }
 }

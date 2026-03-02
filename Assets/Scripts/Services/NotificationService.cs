@@ -11,8 +11,8 @@ namespace Garden
     {
         public static NotificationService Instance { get; private set; }
 
-        private const string AndroidChannelId = "garden_plants";
-        private const string AndroidWeatherChannelId = "garden_weather";
+        private const string AndroidChannelId = "campfire_plants";
+        private const string AndroidWeatherChannelId = "campfire_weather";
 
         private void Awake()
         {
@@ -36,7 +36,7 @@ namespace Garden
             {
                 Id = AndroidWeatherChannelId,
                 Name = "Weather Updates",
-                Description = "Notifications when the weather over your garden changes",
+                Description = "Notifications about weather changes at your camp",
                 Importance = Importance.Default
             };
             AndroidNotificationCenter.RegisterNotificationChannel(weatherChannel);
@@ -46,14 +46,9 @@ namespace Garden
 #endif
         }
 
-        /// <summary>
-        /// Persists API key, GPS coords, and current condition so native background
-        /// fetch code can poll weather independently while the app is backgrounded.
-        /// </summary>
         public void SaveWeatherData(string apiKey, float lat, float lon, WeatherCondition condition)
         {
 #if UNITY_IOS
-            // PlayerPrefs maps directly to NSUserDefaults on iOS — readable by native Obj-C.
             PlayerPrefs.SetString("weather_api_key", apiKey);
             PlayerPrefs.SetFloat("weather_lat", lat);
             PlayerPrefs.SetFloat("weather_lon", lon);
@@ -67,13 +62,12 @@ namespace Garden
 #endif
         }
 
-        public void SchedulePlantNotification(int envIndex, int slotIndex, string seedName, double remainingSeconds)
+        public void SchedulePlantNotification(int plotIndex, string seedName, double remainingSeconds)
         {
             if (remainingSeconds <= 0) return;
 
-            int notificationId = envIndex * 100 + slotIndex;
-            string title = $"\ud83c\udf31 {seedName} is ready!";
-            string body = $"Your {seedName} has finished growing. Come harvest it!";
+            string title = $"Your {seedName} is ready!";
+            string body = $"Come harvest your {seedName} at the camp!";
 
 #if UNITY_ANDROID
             var notification = new AndroidNotification
@@ -84,7 +78,7 @@ namespace Garden
                 SmallIcon = "icon_0",
                 LargeIcon = "icon_1"
             };
-            AndroidNotificationCenter.SendNotificationWithExplicitID(notification, AndroidChannelId, notificationId);
+            AndroidNotificationCenter.SendNotificationWithExplicitID(notification, AndroidChannelId, plotIndex);
 #elif UNITY_IOS
             var timeTrigger = new iOSNotificationTimeIntervalTrigger
             {
@@ -93,25 +87,13 @@ namespace Garden
             };
             var notification = new iOSNotification
             {
-                Identifier = notificationId.ToString(),
+                Identifier = plotIndex.ToString(),
                 Title = title,
                 Body = body,
                 ShowInForeground = false,
                 Trigger = timeTrigger
             };
             iOSNotificationCenter.ScheduleNotification(notification);
-#endif
-            Debug.Log($"[NotificationService] Scheduled notification for {seedName} in {remainingSeconds:F0}s (id={notificationId})");
-        }
-
-        public void CancelPlantNotification(int envIndex, int slotIndex)
-        {
-            int notificationId = envIndex * 100 + slotIndex;
-
-#if UNITY_ANDROID
-            AndroidNotificationCenter.CancelNotification(notificationId);
-#elif UNITY_IOS
-            iOSNotificationCenter.RemoveScheduledNotification(notificationId.ToString());
 #endif
         }
 
@@ -122,30 +104,6 @@ namespace Garden
 #elif UNITY_IOS
             iOSNotificationCenter.RemoveAllScheduledNotifications();
 #endif
-        }
-
-        public void RescheduleAll()
-        {
-            CancelAll();
-
-            if (PlantManager.Instance == null) return;
-
-            foreach (var slot in PlantManager.Instance.Slots)
-            {
-                if (slot.state == PlantState.Growing)
-                {
-                    float remainingHours = PlantManager.Instance.GetRemainingHours(
-                        slot.environmentIndex, slot.slotIndex);
-                    double remainingSeconds = remainingHours * 3600.0;
-
-                    if (remainingSeconds > 0)
-                    {
-                        SchedulePlantNotification(
-                            slot.environmentIndex, slot.slotIndex,
-                            slot.seed.seedName, remainingSeconds);
-                    }
-                }
-            }
         }
     }
 }
