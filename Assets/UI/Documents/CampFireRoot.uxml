@@ -7,7 +7,7 @@
     <Style src="project://database/Assets/UI/Styles/Overlay.uss" />
     <Style src="project://database/Assets/UI/Styles/Apotheke.uss" />
     <Style src="project://database/Assets/UI/Styles/Letters.uss" />
-    <Style src="project://database/Assets/UI/Styles/Craft.uss" />
+    <Style src="project://database/Assets/UI/Styles/Build.uss" />
     <Style src="project://database/Assets/UI/Styles/Interaction.uss" />
     <Style src="project://database/Assets/UI/Styles/CampsiteGrid.uss" />
     <Style src="project://database/Assets/UI/Styles/Debug.uss" />
@@ -45,7 +45,7 @@
         <ui:VisualElement name="bottom-nav">
             <ui:Button name="btn-apotheke" class="nav-btn" text="Apotheke" />
             <ui:Button name="btn-letters" class="nav-btn" text="Letters" />
-            <ui:Button name="btn-craft" class="nav-btn" text="Craft" />
+            <ui:Button name="btn-build" class="nav-btn" text="Build" />
         </ui:VisualElement>
 
         <!-- Overlay container (slide-up panels) -->
@@ -64,8 +64,20 @@
 
                     <!-- Apotheke panel -->
                     <ui:VisualElement name="apotheke-panel">
-                        <ui:ScrollView name="seed-list" />
-                        <ui:VisualElement name="recipe-section">
+                        <!-- Tab bar -->
+                        <ui:VisualElement name="apotheke-tabs">
+                            <ui:Button name="tab-inventory" class="letters-tab letters-tab--active" text="Inventory" />
+                            <ui:Button name="tab-craft" class="letters-tab" text="Craft" />
+                        </ui:VisualElement>
+
+                        <!-- Inventory view -->
+                        <ui:VisualElement name="apotheke-inventory">
+                            <ui:Label name="inventory-empty" text="No seeds yet" class="letters-empty-text" />
+                            <ui:ScrollView name="seed-list" />
+                        </ui:VisualElement>
+
+                        <!-- Craft view (mixing recipes) -->
+                        <ui:VisualElement name="apotheke-craft">
                             <ui:ScrollView name="recipe-list" />
                         </ui:VisualElement>
                     </ui:VisualElement>
@@ -93,6 +105,8 @@
 
                         <!-- Add friend view -->
                         <ui:VisualElement name="letters-add">
+                            <ui:TextField name="display-name-input" label="Your name" max-length="20" />
+                            <ui:Label name="display-name-status" class="letters-status-text" />
                             <ui:Label name="my-friend-code" text="Your code: ---" class="friend-code-display" />
                             <ui:TextField name="friend-code-input" label="Enter friend code" />
                             <ui:Button name="btn-send-request" text="Send Request" class="letters-btn-primary" />
@@ -114,9 +128,9 @@
                         </ui:VisualElement>
                     </ui:VisualElement>
 
-                    <!-- Craft panel -->
-                    <ui:VisualElement name="craft-panel">
-                        <ui:ScrollView name="craft-list" />
+                    <!-- Build panel -->
+                    <ui:VisualElement name="build-panel">
+                        <ui:ScrollView name="build-list" />
                     </ui:VisualElement>
 
                     <!-- Debug panel -->
@@ -195,6 +209,13 @@
             <ui:Label name="interaction-title" text="" />
             <ui:VisualElement name="interaction-body" />
             <ui:VisualElement name="interaction-actions" />
+        </ui:VisualElement>
+
+        <!-- Visit transition curtains -->
+        <ui:VisualElement name="visit-transition" picking-mode="Ignore">
+            <ui:VisualElement name="curtain-left" picking-mode="Ignore" />
+            <ui:VisualElement name="curtain-right" picking-mode="Ignore" />
+            <ui:Label name="curtain-label" picking-mode="Ignore" text="Visiting..." />
         </ui:VisualElement>
 
     </ui:VisualElement>
