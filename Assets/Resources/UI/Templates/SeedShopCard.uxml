@@ -1,9 +1,0 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements">
-    <ui:VisualElement class="grid-item shop-card">
-        <ui:VisualElement class="shop-icon" />
-        <ui:Label class="shop-seed-name" />
-        <ui:Label class="shop-price" />
-        <ui:Label class="shop-condition" />
-        <ui:Button text="Buy" class="btn shop-buy-btn" />
-    </ui:VisualElement>
-</ui:UXML>
