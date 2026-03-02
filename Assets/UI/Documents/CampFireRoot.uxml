@@ -16,24 +16,46 @@
     <!-- Root container -->
     <ui:VisualElement name="camp-root">
 
-        <!-- Weather bar at top -->
-        <ui:VisualElement name="weather-bar">
-            <ui:Label name="weather-icon" text="--" />
-            <ui:Label name="weather-temp" text="--" />
-            <ui:Label name="weather-condition" text="Loading..." />
-            <ui:VisualElement name="weather-moon" />
+        <!-- Top bar frame -->
+        <ui:VisualElement name="top-bar">
+
+            <!-- Header row: player name + date/time -->
+            <ui:VisualElement name="top-header">
+                <ui:Label name="player-name" text="Camper" />
+                <ui:Button name="btn-debug" text="&#x2699;" />
+                <ui:VisualElement name="top-header-spacer" />
+                <ui:Label name="date-time" text="--" />
+            </ui:VisualElement>
+
+            <!-- Weather row: 4 cells -->
+            <ui:VisualElement name="weather-bar">
+                <ui:VisualElement name="weather-cell-condition" class="weather-cell">
+                    <ui:Label name="weather-condition-label" text="--" />
+                    <ui:Label name="weather-icon" text="--" />
+                </ui:VisualElement>
+                <ui:VisualElement name="weather-cell-humidity" class="weather-cell">
+                    <ui:Label name="weather-humidity-icon" text="&#x1F4A7;" />
+                    <ui:Label name="weather-humidity" text="--" />
+                </ui:VisualElement>
+                <ui:VisualElement name="weather-cell-temp" class="weather-cell">
+                    <ui:Label name="weather-temp-icon" text="&#x1F321;" />
+                    <ui:Label name="weather-temp" text="--" />
+                </ui:VisualElement>
+                <ui:VisualElement name="weather-cell-moon" class="weather-cell">
+                    <ui:VisualElement name="weather-moon" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Resources (lower-right corner) -->
+            <ui:VisualElement name="resource-bar">
+                <ui:Label name="mana-display" text="0" />
+                <ui:Label name="water-display" text="0" />
+            </ui:VisualElement>
+
         </ui:VisualElement>
 
         <ui:VisualElement name="forecast-panel">
             <ui:VisualElement name="forecast-days" />
-        </ui:VisualElement>
-
-        <!-- Resource display -->
-        <ui:VisualElement name="resource-bar">
-            <ui:Label name="mana-display" text="0" />
-            <ui:Label name="water-display" text="0" />
-            <ui:Label name="gems-display" text="0" />
-            <ui:Button name="btn-debug" text="[Debug]" />
         </ui:VisualElement>
 
         <!-- Main campsite grid view -->
@@ -43,9 +65,18 @@
 
         <!-- Bottom navigation -->
         <ui:VisualElement name="bottom-nav">
-            <ui:Button name="btn-apotheke" class="nav-btn" text="Apotheke" />
-            <ui:Button name="btn-letters" class="nav-btn" text="Letters" />
-            <ui:Button name="btn-build" class="nav-btn" text="Build" />
+            <ui:Button name="btn-seeds" class="nav-btn">
+                <ui:Label text="SEEDS" class="nav-btn-label" />
+                <ui:Label text="&#x1F331;" class="nav-btn-icon" />
+            </ui:Button>
+            <ui:Button name="btn-craft" class="nav-btn">
+                <ui:Label text="CRAFT" class="nav-btn-label" />
+                <ui:Label text="&#x1F525;" class="nav-btn-icon" />
+            </ui:Button>
+            <ui:Button name="btn-mail" class="nav-btn">
+                <ui:Label text="MAIL" class="nav-btn-label" />
+                <ui:Label text="&#x2709;" class="nav-btn-icon" />
+            </ui:Button>
         </ui:VisualElement>
 
         <!-- Overlay container (slide-up panels) -->
