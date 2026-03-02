@@ -8,17 +8,17 @@ namespace Garden
     {
         public event Action OnApothekeClicked;
         public event Action OnLettersClicked;
-        public event Action OnCraftClicked;
+        public event Action OnBuildClicked;
 
         public void Initialize(VisualElement root)
         {
             var btnApotheke = root.Q<Button>("btn-apotheke");
             var btnLetters = root.Q<Button>("btn-letters");
-            var btnCraft = root.Q<Button>("btn-craft");
+            var btnBuild = root.Q<Button>("btn-build");
 
             btnApotheke?.RegisterCallback<ClickEvent>(_ => OnApothekeClicked?.Invoke());
             btnLetters?.RegisterCallback<ClickEvent>(_ => OnLettersClicked?.Invoke());
-            btnCraft?.RegisterCallback<ClickEvent>(_ => OnCraftClicked?.Invoke());
+            btnBuild?.RegisterCallback<ClickEvent>(_ => OnBuildClicked?.Invoke());
         }
     }
 }

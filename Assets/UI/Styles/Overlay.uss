@@ -79,7 +79,7 @@
 /* Hide overlay panels by default */
 #apotheke-panel,
 #letters-panel,
-#craft-panel {
+#build-panel {
     display: none;
     flex-grow: 1;
 }

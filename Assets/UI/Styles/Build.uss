@@ -1,14 +1,14 @@
-/* Craft.uss — Craft overlay styling */
+/* Build.uss — Build overlay styling */
 
-#craft-panel {
+#build-panel {
     flex-direction: column;
 }
 
-#craft-list {
+#build-list {
     flex-grow: 1;
 }
 
-#craft-list .unity-scroll-view__content-container {
+#build-list .unity-scroll-view__content-container {
     flex-direction: column;
     padding: var(--spacing-xs);
 }

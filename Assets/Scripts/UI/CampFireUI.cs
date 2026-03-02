@@ -16,7 +16,7 @@ namespace Garden
         private CampsiteViewUI campsiteView;
         private ApothekeUI apotheke;
         private LettersUI letters;
-        private CraftUI craft;
+        private BuildUI build;
         private ResourceDisplayUI resourceDisplay;
         private DebugWeatherPanel debugPanel;
 
@@ -26,7 +26,7 @@ namespace Garden
         private VisualElement overlayBody;
         private VisualElement apothekePanel;
         private VisualElement lettersPanel;
-        private VisualElement craftPanel;
+        private VisualElement buildPanel;
         private VisualElement debugPanelElement;
 
         private void Awake()
@@ -46,7 +46,7 @@ namespace Garden
             campsiteView = GetComponent<CampsiteViewUI>();
             apotheke = GetComponent<ApothekeUI>();
             letters = GetComponent<LettersUI>();
-            craft = GetComponent<CraftUI>();
+            build = GetComponent<BuildUI>();
             resourceDisplay = GetComponent<ResourceDisplayUI>();
             debugPanel = GetComponent<DebugWeatherPanel>();
 
@@ -55,7 +55,7 @@ namespace Garden
             campsiteView?.Initialize(root);
             apotheke?.Initialize(root);
             letters?.Initialize(root);
-            craft?.Initialize(root);
+            build?.Initialize(root);
             resourceDisplay?.Initialize(root);
             debugPanel?.Initialize(root);
 
@@ -66,7 +66,7 @@ namespace Garden
             overlayBody = root.Q("overlay-body");
             apothekePanel = root.Q("apotheke-panel");
             lettersPanel = root.Q("letters-panel");
-            craftPanel = root.Q("craft-panel");
+            buildPanel = root.Q("build-panel");
             debugPanelElement = root.Q("debug-panel");
 
             var closeBtn = root.Q<Button>("overlay-close");
@@ -80,7 +80,7 @@ namespace Garden
             {
                 bottomNav.OnApothekeClicked += () => OpenOverlay("Apotheke", apothekePanel);
                 bottomNav.OnLettersClicked += () => OpenOverlay("Letters", lettersPanel);
-                bottomNav.OnCraftClicked += () => OpenOverlay("Craft", craftPanel);
+                bottomNav.OnBuildClicked += () => OpenOverlay("Build", buildPanel);
             }
 
             // Wire debug button
@@ -94,10 +94,10 @@ namespace Garden
 #endif
             }
 
-            // Wire craft placement mode
-            if (craft != null && campsiteView != null)
+            // Wire build placement mode
+            if (build != null && campsiteView != null)
             {
-                craft.OnRequestPlacement += type =>
+                build.OnRequestPlacement += type =>
                 {
                     CloseOverlay();
                     campsiteView.EnterPlacementMode(type);
@@ -134,7 +134,7 @@ namespace Garden
         {
             if (apothekePanel != null) apothekePanel.style.display = DisplayStyle.None;
             if (lettersPanel != null) lettersPanel.style.display = DisplayStyle.None;
-            if (craftPanel != null) craftPanel.style.display = DisplayStyle.None;
+            if (buildPanel != null) buildPanel.style.display = DisplayStyle.None;
             if (debugPanelElement != null) debugPanelElement.style.display = DisplayStyle.None;
         }
     }

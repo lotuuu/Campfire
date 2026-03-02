@@ -4,53 +4,55 @@ using UnityEngine.UIElements;
 
 namespace Garden
 {
-    public class CraftUI : MonoBehaviour
+    public class BuildUI : MonoBehaviour
     {
-        private VisualElement craftList;
-        private VisualTreeAsset craftTemplate;
+        private VisualElement buildList;
+        private VisualTreeAsset buildTemplate;
 
         public event Action<CampBuildingType> OnRequestPlacement;
 
         public void Initialize(VisualElement root)
         {
-            craftList = root.Q("craft-list");
-            craftTemplate = Resources.Load<VisualTreeAsset>("UI/Templates/CraftItem");
+            buildList = root.Q("build-list");
+            buildTemplate = Resources.Load<VisualTreeAsset>("UI/Templates/CraftItem");
             Refresh();
         }
 
         public void Refresh()
         {
-            if (craftList == null) return;
-            craftList.Clear();
+            if (buildList == null) return;
+            buildList.Clear();
 
-            // Craft Plot — fires placement event
             if (PlotManager.Instance != null && FlameManager.Instance != null)
             {
-                bool canAfford = PlotManager.Instance.Plots.Count < FlameManager.Instance.MaxPlots;
-                AddCraftItem("New Plot", canAfford ? "Place on grid" : "Max plots reached", () =>
+                bool canPlace = FlameManager.Instance.CanPlaceEntity;
+                string capText = $"{FlameManager.Instance.CurrentEntityCount}/{FlameManager.Instance.MaxEntities}";
+                AddBuildItem("New Plot", canPlace ? $"Place on grid ({capText})" : $"Cap reached ({capText})", () =>
                 {
-                    if (canAfford)
+                    if (canPlace)
                         OnRequestPlacement?.Invoke(CampBuildingType.Plot);
                 });
             }
 
-            // Craft Vase — fires placement event
             if (VaseManager.Instance != null)
             {
+                bool canPlace = FlameManager.Instance != null && FlameManager.Instance.CanPlaceEntity;
+                string capText = FlameManager.Instance != null
+                    ? $"{FlameManager.Instance.CurrentEntityCount}/{FlameManager.Instance.MaxEntities}"
+                    : "";
                 float cost = VaseManager.Instance.Config.CraftCostMana;
-                bool canAfford = CurrencyManager.Instance.CanAffordMana(cost);
-                AddCraftItem("New Vase", $"{cost:F0} Mana", () =>
+                bool canAfford = canPlace && CurrencyManager.Instance.CanAffordMana(cost);
+                AddBuildItem("New Vase", canPlace ? $"{cost:F0} Mana ({capText})" : $"Cap reached ({capText})", () =>
                 {
                     if (canAfford)
                         OnRequestPlacement?.Invoke(CampBuildingType.Vase);
                 });
             }
 
-            // Upgrade Flame — stays direct, not placed on grid
             if (FlameManager.Instance != null && FlameManager.Instance.CanUpgrade())
             {
                 var cost = FlameManager.Instance.Config.GetUpgradeCost(FlameManager.Instance.Level);
-                AddCraftItem("Upgrade Flame", $"{cost:F0} Mana", () =>
+                AddBuildItem("Upgrade Flame", $"{cost:F0} Mana", () =>
                 {
                     FlameManager.Instance.UpgradeFlame();
                     Refresh();
@@ -58,9 +60,9 @@ namespace Garden
             }
         }
 
-        private void AddCraftItem(string name, string cost, Action onClick)
+        private void AddBuildItem(string name, string cost, Action onClick)
         {
-            var el = craftTemplate.CloneTree();
+            var el = buildTemplate.CloneTree();
             var nameLabel = el.Q<Label>(className: "craft-name");
             var costLabel = el.Q<Label>(className: "craft-cost");
             var actionBtn = el.Q<Button>(className: "craft-action");
@@ -69,7 +71,7 @@ namespace Garden
             if (costLabel != null) costLabel.text = cost;
             if (actionBtn != null) actionBtn.clicked += onClick;
 
-            craftList.Add(el);
+            buildList.Add(el);
         }
     }
 }
