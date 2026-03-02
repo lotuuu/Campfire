@@ -6,7 +6,7 @@ namespace Garden
     [Serializable]
     public class SaveData
     {
-        public int gold;
+        public int gold; // Initial gold is granted in GameManager.Start(), not here
         public int sunShards;
         public int pollen;
 

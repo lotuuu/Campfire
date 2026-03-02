@@ -19,7 +19,7 @@ namespace Garden
             {
                 SeedRegistry.Instance.AddSeed("Quicksprout", 5);
                 CurrencyManager.Instance.Add(CurrencyType.SunShards, 10);
-                CurrencyManager.Instance.Add(CurrencyType.Gold, 200);
+                CurrencyManager.Instance.Add(CurrencyType.Gold, 75);
             }
         }
     }
