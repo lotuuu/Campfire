@@ -11,30 +11,26 @@ namespace Garden.Tests
             var seed = ScriptableObject.CreateInstance<SeedData>();
             seed.seedName = "TestSeed";
             seed.growthDurationHours = 4f;
-            seed.waterRequired = 2;
-            seed.baseYield = 3;
+            seed.baseDrops = 3;
 
             Assert.AreEqual("TestSeed", seed.seedName);
             Assert.AreEqual(4f, seed.growthDurationHours);
-            Assert.AreEqual(2, seed.waterRequired);
-            Assert.AreEqual(3, seed.baseYield);
+            Assert.AreEqual(3, seed.baseDrops);
         }
 
         [Test]
-        public void SeedData_WeatherMatch_UsesTrigerCondition()
+        public void SeedData_RecipeField_IsAssignable()
         {
             var seed = ScriptableObject.CreateInstance<SeedData>();
-            seed.preferredWeather = new TriggerCondition
+            seed.recipe = new GrowthRecipe
             {
-                useWeatherCondition = true,
-                requiredConditions = new[] { WeatherCondition.Rain }
+                useHeat = true,
+                idealTempMin = 20f,
+                idealTempMax = 30f
             };
 
-            var rainyWeather = new WeatherData { condition = WeatherCondition.Rain };
-            var clearWeather = new WeatherData { condition = WeatherCondition.Clear };
-
-            Assert.IsTrue(seed.preferredWeather.Evaluate(rainyWeather));
-            Assert.IsFalse(seed.preferredWeather.Evaluate(clearWeather));
+            Assert.IsNotNull(seed.recipe);
+            Assert.IsTrue(seed.recipe.useHeat);
         }
     }
 }

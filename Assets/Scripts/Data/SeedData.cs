@@ -7,9 +7,8 @@ namespace Garden
     {
         public string seedName;
         public float growthDurationHours = 4f;
-        public int waterRequired = 1;
-        public TriggerCondition preferredWeather;
-        public int baseYield = 1;
+        public int baseDrops = 1;
+        public GrowthRecipe recipe;
 
         [Header("Visuals")]
         public Sprite icon;
@@ -17,9 +16,5 @@ namespace Garden
 
         [Header("Shop")]
         public float manaCost;
-
-        public static readonly float WeatherMatchBonus = 0.25f;
-        public static readonly float MinQualityMultiplier = 0.8f;
-        public static readonly float MaxQualityMultiplier = 2.0f;
     }
 }
