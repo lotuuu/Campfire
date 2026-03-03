@@ -68,6 +68,7 @@ namespace Garden
 
         // Events
         public event Action OnApothekeTapped;
+        public event Action<int> OnMerchantTapped;
 
         public void Initialize(VisualElement root)
         {
@@ -222,6 +223,8 @@ namespace Garden
                 occupied[(data.mallumHouses[i].gridX, data.mallumHouses[i].gridY)] = (CampBuildingType.MallumHouse, i);
             for (int i = 0; i < data.birds.Count; i++)
                 occupied[(data.birds[i].gridX, data.birds[i].gridY)] = (CampBuildingType.Bird, i);
+            for (int i = 0; i < data.merchants.Count; i++)
+                occupied[(data.merchants[i].gridX, data.merchants[i].gridY)] = (CampBuildingType.NightMerchant, i);
 
             // Fixed buildings always take priority
             occupied[(data.apothekeGridX, data.apothekeGridY)] = (CampBuildingType.Apotheke, 0);
@@ -269,7 +272,7 @@ namespace Garden
                         CampBuildingType cellType = info.type;
 
                         // Long-press detection on movable buildings
-                        bool isMovable = cellType != CampBuildingType.Flame && cellType != CampBuildingType.Bird;
+                        bool isMovable = cellType != CampBuildingType.Flame && cellType != CampBuildingType.Bird && cellType != CampBuildingType.NightMerchant;
                         if (isMovable && mode == CampsiteMode.Normal)
                         {
                             int cq = q, cr = r;
@@ -400,6 +403,13 @@ namespace Garden
                     if (label != null) label.text = "Bird";
                     if (status != null) status.text = $"{bird.seedCount}x {bird.seedName}";
                     break;
+
+                case CampBuildingType.NightMerchant:
+                    cell.AddToClassList("grid-cell--merchant");
+                    var merchant = SaveManager.Instance.Data.merchants[index];
+                    if (label != null) label.text = "Merchant";
+                    if (status != null) status.text = $"{merchant.offers.Count} trades";
+                    break;
             }
         }
 
@@ -427,6 +437,12 @@ namespace Garden
             if (type == CampBuildingType.Apotheke)
             {
                 OnApothekeTapped?.Invoke();
+                return;
+            }
+
+            if (type == CampBuildingType.NightMerchant)
+            {
+                OnMerchantTapped?.Invoke(index);
                 return;
             }
 
