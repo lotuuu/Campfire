@@ -72,6 +72,14 @@
     flex-grow: 1;
 }
 
+#overlay-body > .unity-scroller--vertical {
+    display: none;
+}
+
+#overlay-body > .unity-scroller--horizontal {
+    display: none;
+}
+
 #overlay-body .unity-scroll-view__content-container {
     padding-bottom: var(--spacing-lg);
 }

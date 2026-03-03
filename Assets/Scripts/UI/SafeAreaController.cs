@@ -15,23 +15,31 @@ namespace Garden
 
             var safeArea = Screen.safeArea;
             var screenHeight = Screen.height;
+            float pixelsPerPoint = root.panel?.scaledPixelsPerPoint ?? 1f;
 
-            float topInset = (screenHeight - safeArea.yMax) / screenHeight * 100f;
-            float bottomInset = safeArea.y / screenHeight * 100f;
+            float topBleed = (screenHeight - safeArea.yMax) / pixelsPerPoint;
+            float bottomBleed = safeArea.y / pixelsPerPoint;
 
-            // Keep original safe area padding on camp-root so layout is unchanged
-            campRoot.style.paddingTop = new Length(topInset, LengthUnit.Percent);
-            campRoot.style.paddingBottom = new Length(bottomInset, LengthUnit.Percent);
+            // Use absolute point values — percentage padding resolves relative to
+            // element width (CSS spec), which is wrong for vertical insets.
+            campRoot.style.paddingTop = topBleed;
+            campRoot.style.paddingBottom = bottomBleed;
 
             // Pull top-bar background up into the safe area with negative margin,
             // then add matching internal padding so content stays below the notch
             var topBar = root.Q("top-bar");
             if (topBar != null)
             {
-                float pixelsPerPoint = root.panel?.scaledPixelsPerPoint ?? 1f;
-                float bleed = (screenHeight - safeArea.yMax) / pixelsPerPoint;
-                topBar.style.marginTop = -bleed;
-                topBar.style.paddingTop = bleed;
+                topBar.style.marginTop = -topBleed;
+                topBar.style.paddingTop = topBleed;
+            }
+
+            // Pull bottom-nav background down into the bottom bleed area
+            var bottomNav = root.Q("bottom-nav");
+            if (bottomNav != null)
+            {
+                bottomNav.style.marginBottom = -bottomBleed;
+                bottomNav.style.paddingBottom = bottomBleed;
             }
         }
     }
