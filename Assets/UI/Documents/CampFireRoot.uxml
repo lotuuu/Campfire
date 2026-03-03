@@ -24,9 +24,6 @@
             <!-- Header row: player name + date/time -->
             <ui:VisualElement name="top-header">
                 <ui:Label name="player-name" text="Camper" />
-                <ui:Button name="btn-debug" class="icon-btn">
-                    <ui:VisualElement name="btn-debug-icon" class="header-icon" />
-                </ui:Button>
                 <ui:VisualElement name="top-header-spacer" />
                 <ui:Label name="date-time" text="--" />
             </ui:VisualElement>
@@ -50,8 +47,12 @@
                 </ui:VisualElement>
             </ui:VisualElement>
 
-            <!-- Resources (lower-right corner) -->
+            <!-- Resources row with debug button -->
             <ui:VisualElement name="resource-bar">
+                <ui:Button name="btn-debug" class="icon-btn">
+                    <ui:VisualElement name="btn-debug-icon" class="header-icon" />
+                </ui:Button>
+                <ui:VisualElement style="flex-grow: 1;" />
                 <ui:VisualElement class="resource-item">
                     <ui:VisualElement name="mana-icon" class="resource-icon" />
                     <ui:Label name="mana-display" text="0" />
