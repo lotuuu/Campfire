@@ -37,7 +37,13 @@ namespace Garden
 
         private void Update()
         {
-            SaveManager.Instance.Data.mana += ManaPerSecond * Time.deltaTime;
+            SaveManager.Instance.Data.mana = AccumulateMana(
+                SaveManager.Instance.Data.mana, ManaPerSecond, Time.deltaTime);
+        }
+
+        public static float AccumulateMana(float currentMana, float manaPerSecond, float deltaTime)
+        {
+            return currentMana + manaPerSecond * deltaTime;
         }
 
         public bool CanUpgrade()
