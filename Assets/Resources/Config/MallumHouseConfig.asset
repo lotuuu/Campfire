@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Garden::Garden.MallumHouseConfig
   mallumsPerHouse: 2
   houseCosts:
-  - manaCost: 0
+  - manaCost: 15
     seedCosts: []
   - manaCost: 30
     seedCosts:
