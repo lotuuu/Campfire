@@ -111,7 +111,7 @@ namespace Garden
             var debugBtn = root.Q<Button>("btn-debug");
             if (debugBtn != null)
             {
-                if (UnityEngine.Debug.isDebugBuild)
+                if (Application.isEditor || UnityEngine.Debug.isDebugBuild)
                     debugBtn.clicked += () => OpenOverlay("Debug", debugPanelElement);
                 else
                     debugBtn.style.display = DisplayStyle.None;
