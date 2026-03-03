@@ -13,13 +13,26 @@ namespace Garden
         private string SavePath => Path.Combine(Application.persistentDataPath, "save.json");
         private string TmpPath => SavePath + ".tmp";
         private string BakPath => SavePath + ".bak";
+        private const float AutoSaveIntervalSeconds = 30f;
         private bool _isDirty;
+        private float _autoSaveTimer;
 
         private void Awake()
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
             Load();
+        }
+
+        private void Update()
+        {
+            _autoSaveTimer += Time.unscaledDeltaTime;
+            if (_autoSaveTimer >= AutoSaveIntervalSeconds)
+            {
+                _autoSaveTimer = 0f;
+                _isDirty = false;
+                Flush();
+            }
         }
 
         private void LateUpdate()
@@ -30,6 +43,24 @@ namespace Garden
         }
 
         public void Save() => _isDirty = true;
+
+        private void OnApplicationPause(bool paused)
+        {
+            if (paused)
+            {
+                _isDirty = false;
+                Flush();
+            }
+        }
+
+        private void OnApplicationFocus(bool hasFocus)
+        {
+            if (!hasFocus)
+            {
+                _isDirty = false;
+                Flush();
+            }
+        }
 
         private void Flush()
         {
