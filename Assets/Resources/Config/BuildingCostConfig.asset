@@ -14,21 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Garden::Garden.BuildingCostConfig
   plotCosts:
   - manaCost: 150
-    seedCosts:
-    - seedName: Sprouts
-      count: 1
+    seedCosts: []
   - manaCost: 200
-    seedCosts:
-    - seedName: Basil
-      count: 1
+    seedCosts: []
   - manaCost: 260
     seedCosts:
     - seedName: Basil
-      count: 2
+      count: 1
   - manaCost: 330
     seedCosts:
-    - seedName: Chamomile
-      count: 1
+    - seedName: Basil
+      count: 2
   - manaCost: 420
     seedCosts:
     - seedName: Chamomile
@@ -63,17 +59,15 @@ MonoBehaviour:
       count: 1
   vaseCosts:
   - manaCost: 100
-    seedCosts:
-    - seedName: Cress
-      count: 1
+    seedCosts: []
   - manaCost: 120
     seedCosts:
     - seedName: Basil
-      count: 2
+      count: 1
   - manaCost: 150
     seedCosts:
-    - seedName: Chamomile
-      count: 1
+    - seedName: Basil
+      count: 2
   - manaCost: 180
     seedCosts:
     - seedName: Chamomile

@@ -16,8 +16,6 @@ MonoBehaviour:
   manaPerLevel: 0.3
   maxEntitiesPerLevel:
   - 6
-  - 6
-  - 8
   - 8
   - 12
   - 15
@@ -30,8 +28,6 @@ MonoBehaviour:
   gridSizePerLevel:
   - 2
   - 2
-  - 2
-  - 2
   - 3
   - 3
   - 3
@@ -41,14 +37,6 @@ MonoBehaviour:
   - 5
   - 5
   upgradeRecipes:
-  - ingredients:
-    - itemName: Sprouts_harvest
-      count: 1
-  - ingredients:
-    - itemName: Sprouts_harvest
-      count: 5
-    - itemName: Cress_harvest
-      count: 2
   - ingredients:
     - itemName: Basil_harvest
       count: 3
