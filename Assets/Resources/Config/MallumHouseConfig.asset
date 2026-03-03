@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1ddb3cefe5166487eae46f8648f2ddc5, type: 3}
+  m_Name: MallumHouseConfig
+  m_EditorClassIdentifier:
+  mallumsPerHouse: 2
+  houseCosts:
+  - manaCost: 0
+    seedCosts: []
+  - manaCost: 30
+    seedCosts:
+    - seedName: Basil
+      count: 2
+  - manaCost: 60
+    seedCosts:
+    - seedName: Lavender
+      count: 3
+  - manaCost: 100
+    seedCosts:
+    - seedName: Chamomile
+      count: 2
+    - seedName: Mint
+      count: 2

@@ -387,6 +387,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Garden::Garden.MallumManager
   config: {fileID: 11400000, guid: f07a65c7159784083b46f325640980b9, type: 2}
+  houseConfig: {fileID: 11400000, guid: 1ddb3cefe5166487eae46f8648f2ddc5, type: 2}
 --- !u!1 &619394800
 GameObject:
   m_ObjectHideFlags: 0
