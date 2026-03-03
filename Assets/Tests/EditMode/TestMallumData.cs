@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using UnityEngine;
 
 namespace Garden.Tests
 {
@@ -25,6 +26,13 @@ namespace Garden.Tests
             var data = new SaveData();
             Assert.IsNotNull(data.mallums);
             Assert.AreEqual(0, data.mallums.Count);
+        }
+
+        [Test]
+        public void MallumConfig_GetMaxMallums_Level1_Returns1()
+        {
+            var config = ScriptableObject.CreateInstance<MallumConfig>();
+            Assert.AreEqual(1, config.GetMaxMallums(1));
         }
     }
 }
