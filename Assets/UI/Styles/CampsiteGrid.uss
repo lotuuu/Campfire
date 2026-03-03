@@ -122,6 +122,24 @@
     background-color: rgba(60, 120, 40, 0.4);
 }
 
+/* ── Mallum House cell ── */
+.grid-cell--mallum-house {
+    --hex-fill: rgba(139, 90, 43, 0.6);
+    --hex-border: rgba(180, 130, 70, 0.3);
+}
+
+.grid-cell--mallum-house:hover {
+    --hex-fill: rgba(155, 100, 50, 0.7);
+    --hex-border: rgba(200, 150, 90, 0.5);
+}
+
+.grid-cell--mallum-house .cell-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    background-color: rgba(139, 90, 43, 0.4);
+}
+
 /* ── Apotheke cell ── */
 .grid-cell--apotheke {
     --hex-fill: rgba(100, 50, 140, 0.4);
