@@ -229,10 +229,9 @@ namespace Garden
 
         private async void RefreshFriends()
         {
-            friendsList?.Clear();
-
             if (SocialService.Instance == null || !SocialService.Instance.IsSignedIn)
             {
+                friendsList?.Clear();
                 if (friendsEmpty != null)
                 {
                     friendsEmpty.text = "Could not connect to server";
@@ -243,8 +242,18 @@ namespace Garden
 
             // Fetch latest from server so we see newly accepted friends
             await SocialService.Instance.RefreshFriendList();
+            // UI is rebuilt by OnFriendListUpdated event handler
+        }
 
-            var friends = SocialSaveManager.Instance?.Data?.cachedFriends;
+        private void OnFriendListUpdated(List<CachedFriend> friends)
+        {
+            RebuildFriendsList(friends);
+        }
+
+        private void RebuildFriendsList(List<CachedFriend> friends)
+        {
+            friendsList?.Clear();
+
             if (friends == null || friends.Count == 0)
             {
                 if (friendsEmpty != null)
@@ -277,11 +286,6 @@ namespace Garden
 
                 friendsList?.Add(el);
             }
-        }
-
-        private void OnFriendListUpdated(List<CachedFriend> friends)
-        {
-            RefreshFriends();
         }
 
         // ── Add Friend ──
