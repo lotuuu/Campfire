@@ -91,9 +91,17 @@ namespace Garden
             // Wire bottom nav
             if (bottomNav != null)
             {
-                bottomNav.OnApothekeClicked += () => OpenOverlay("Seeds", apothekePanel);
+                bottomNav.OnApothekeClicked += () =>
+                {
+                    apotheke?.Refresh();
+                    OpenOverlay("Seeds", apothekePanel);
+                };
                 bottomNav.OnLettersClicked += () => OpenOverlay("Mail", lettersPanel);
-                bottomNav.OnBuildClicked += () => OpenOverlay("Craft", buildPanel);
+                bottomNav.OnBuildClicked += () =>
+                {
+                    build?.Refresh();
+                    OpenOverlay("Craft", buildPanel);
+                };
             }
 
             // Wire quest float button
@@ -135,7 +143,11 @@ namespace Garden
             // Wire Apotheke building tap
             if (campsiteView != null)
             {
-                campsiteView.OnApothekeTapped += () => OpenOverlay("Seeds", apothekePanel);
+                campsiteView.OnApothekeTapped += () =>
+                {
+                    apotheke?.Refresh();
+                    OpenOverlay("Seeds", apothekePanel);
+                };
             }
 
             // Wire Merchant tile tap
