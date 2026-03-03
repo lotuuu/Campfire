@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2e677276f9604759bb0a82495f41439, type: 3}
+  m_Name: MeadowExpedition
+  m_EditorClassIdentifier:
+  questName: Meadow Expedition
+  description: A longer journey through flowering meadows. Sunflowers grow wild here.
+  durationMinutes: 120
+  requiredFlameLevel: 2
+  rewardRolls: 3
+  rewardPool:
+  - seed: {fileID: 11400000, guid: e54bbc52a7aa545db81e5db5cb6e7207, type: 2}
+    weight: 3
+    minCount: 1
+    maxCount: 2
+  - seed: {fileID: 11400000, guid: 4819dfb6b70d748eb857e371f0438e68, type: 2}
+    weight: 2
+    minCount: 1
+    maxCount: 1
