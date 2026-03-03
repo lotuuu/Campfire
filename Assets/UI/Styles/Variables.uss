@@ -12,9 +12,9 @@
     --color-text-bright: rgb(245, 210, 110);
     --color-text-accent: rgb(255, 195, 60);
 
-    --color-button-bg: rgb(95, 62, 22);
-    --color-button-bg-hover: rgb(115, 78, 30);
-    --color-button-bg-active: rgb(135, 92, 35);
+    --color-button-bg: rgb(107, 77, 22);
+    --color-button-bg-hover: rgb(127, 93, 30);
+    --color-button-bg-active: rgb(147, 107, 35);
     --color-button-bg-disabled: rgb(60, 40, 18);
 
     /* Resource colors */
