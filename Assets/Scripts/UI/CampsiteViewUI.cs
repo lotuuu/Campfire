@@ -938,11 +938,21 @@ namespace Garden
                     emptyLabel.AddToClassList("interaction-info");
                     interactionBody.Add(emptyLabel);
 
+                    int available = MallumManager.Instance != null ? MallumManager.Instance.GetAvailableMallumCount() : 1;
+                    int total = MallumManager.Instance != null ? MallumManager.Instance.GetTotalMallumCount() : 1;
                     var collectBtn = new Button(() =>
                     {
-                        VaseManager.Instance.SendToCollect(index);
+                        if (MallumManager.Instance != null)
+                        {
+                            MallumManager.Instance.SendToFetchWater(index);
+                        }
+                        else
+                        {
+                            VaseManager.Instance.SendToCollect(index);
+                        }
                         CloseInteractionPanel();
-                    }) { text = "Send Mallum" };
+                    }) { text = $"Send Mallum ({available}/{total})" };
+                    collectBtn.SetEnabled(available > 0);
                     collectBtn.AddToClassList("interaction-btn-primary");
                     interactionActions.Add(collectBtn);
                     break;
