@@ -34,5 +34,52 @@ namespace Garden.Tests
             var config = ScriptableObject.CreateInstance<MallumHouseConfig>();
             Assert.IsFalse(config.CanBuildNextHouse(0));
         }
+
+        [Test]
+        public void CanAffordSeeds_ReturnsTrueWhenEnough()
+        {
+            var inventory = new List<SeedInventoryEntry>
+            {
+                new() { seedName = "Basil", count = 5 }
+            };
+            var costs = new List<SeedCost>
+            {
+                new() { seedName = "Basil", count = 3 }
+            };
+            Assert.IsTrue(MallumManager.CanAffordSeeds(inventory, costs));
+        }
+
+        [Test]
+        public void CanAffordSeeds_ReturnsFalseWhenNotEnough()
+        {
+            var inventory = new List<SeedInventoryEntry>
+            {
+                new() { seedName = "Basil", count = 1 }
+            };
+            var costs = new List<SeedCost>
+            {
+                new() { seedName = "Basil", count = 3 }
+            };
+            Assert.IsFalse(MallumManager.CanAffordSeeds(inventory, costs));
+        }
+
+        [Test]
+        public void CanAffordSeeds_ReturnsFalseWhenSeedMissing()
+        {
+            var inventory = new List<SeedInventoryEntry>();
+            var costs = new List<SeedCost>
+            {
+                new() { seedName = "Lavender", count = 1 }
+            };
+            Assert.IsFalse(MallumManager.CanAffordSeeds(inventory, costs));
+        }
+
+        [Test]
+        public void CanAffordSeeds_ReturnsTrueWhenNoCosts()
+        {
+            var inventory = new List<SeedInventoryEntry>();
+            var costs = new List<SeedCost>();
+            Assert.IsTrue(MallumManager.CanAffordSeeds(inventory, costs));
+        }
     }
 }
