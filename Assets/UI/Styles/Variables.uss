@@ -1,33 +1,33 @@
 :root {
     /* Colors - Camp Fire warm palette */
-    --color-bg-dark: rgb(18, 12, 8);
-    --color-bg-panel: rgba(30, 18, 10, 0.85);
-    --color-bg-slot: rgba(60, 40, 20, 0.5);
-    --color-bg-slot-hover: rgba(80, 55, 30, 0.6);
-    --color-border: rgba(140, 100, 50, 0.2);
-    --color-border-accent: rgba(220, 150, 50, 0.4);
+    --color-bg-dark: rgb(30, 20, 8);
+    --color-bg-panel: rgb(85, 55, 20);
+    --color-bg-slot: rgb(105, 72, 28);
+    --color-bg-slot-hover: rgb(120, 85, 35);
+    --color-border: rgb(155, 115, 45);
+    --color-border-accent: rgb(200, 150, 50);
 
-    --color-text: rgb(230, 210, 180);
-    --color-text-dim: rgb(170, 145, 110);
-    --color-text-bright: rgb(255, 240, 200);
-    --color-text-accent: rgb(255, 180, 60);
+    --color-text: rgb(230, 195, 100);
+    --color-text-dim: rgb(185, 150, 75);
+    --color-text-bright: rgb(245, 210, 110);
+    --color-text-accent: rgb(255, 195, 60);
 
-    --color-button-bg: rgba(120, 70, 20, 0.4);
-    --color-button-bg-hover: rgba(160, 95, 30, 0.55);
-    --color-button-bg-active: rgba(200, 120, 40, 0.65);
-    --color-button-bg-disabled: rgba(40, 25, 12, 0.35);
+    --color-button-bg: rgb(95, 62, 22);
+    --color-button-bg-hover: rgb(115, 78, 30);
+    --color-button-bg-active: rgb(135, 92, 35);
+    --color-button-bg-disabled: rgb(60, 40, 18);
 
     /* Resource colors */
-    --color-mana: rgb(255, 170, 60);
+    --color-mana: rgb(255, 180, 60);
     --color-water: rgb(100, 180, 240);
 
-    --color-highlight: rgb(255, 200, 60);
-    --color-dim: rgb(120, 90, 60);
-    --color-empty: rgba(40, 25, 12, 0.3);
+    --color-highlight: rgb(255, 210, 70);
+    --color-dim: rgb(130, 95, 45);
+    --color-empty: rgb(55, 38, 15);
 
-    --color-bg-gate: rgba(18, 12, 8, 0.95);
-    --color-bg-sheet: rgba(25, 16, 8, 0.95);
-    --color-bg-popup: rgba(20, 14, 8, 0.97);
+    --color-bg-gate: rgb(30, 20, 8);
+    --color-bg-sheet: rgb(70, 46, 16);
+    --color-bg-popup: rgb(65, 42, 15);
 
     /* Spacing - mobile scale at 1080 ref width */
     --spacing-xxs: 4px;

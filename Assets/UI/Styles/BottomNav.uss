@@ -3,9 +3,9 @@
 #bottom-nav {
     flex-direction: row;
     flex-shrink: 0;
-    background-color: rgba(25, 16, 8, 0.95);
-    border-top-width: 2px;
-    border-top-color: rgba(140, 100, 50, 0.4);
+    background-color: var(--color-bg-panel);
+    border-top-width: 3px;
+    border-top-color: var(--color-border);
     padding: var(--spacing-xs);
 }
 
@@ -16,9 +16,9 @@
     align-items: center;
     justify-content: center;
     min-height: 100px;
-    background-color: rgba(60, 40, 20, 0.6);
+    background-color: var(--color-button-bg);
     border-width: 2px;
-    border-color: rgba(140, 100, 50, 0.4);
+    border-color: var(--color-border);
     border-radius: var(--radius-sm);
     margin: 0 var(--spacing-xxs);
     padding: var(--spacing-xs);
@@ -27,15 +27,15 @@
 }
 
 .nav-btn:hover {
-    background-color: rgba(80, 55, 30, 0.7);
+    background-color: var(--color-button-bg-hover);
 }
 
 .nav-btn:active {
-    background-color: rgba(100, 70, 35, 0.8);
+    background-color: var(--color-button-bg-active);
 }
 
 .nav-btn--active {
-    border-color: rgb(255, 170, 50);
+    border-color: var(--color-border-accent);
 }
 
 .nav-btn-label {

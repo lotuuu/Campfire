@@ -13,9 +13,9 @@
     align-items: center;
     justify-content: center;
     padding: var(--spacing-xs) var(--spacing-xxs);
-    background-color: rgba(50, 35, 18, 0.6);
+    background-color: var(--color-bg-slot);
     border-width: 2px;
-    border-color: rgba(140, 100, 50, 0.4);
+    border-color: var(--color-border);
     border-radius: var(--radius-sm);
     margin-right: var(--spacing-xxs);
 }
@@ -29,7 +29,7 @@
 
 #weather-condition-label {
     font-size: var(--font-xs);
-    color: var(--color-text);
+    color: rgb(50, 35, 15);
     -unity-font-style: bold;
     margin-right: var(--spacing-xxs);
 }
@@ -42,13 +42,13 @@
 
 #weather-humidity {
     font-size: var(--font-xs);
-    color: var(--color-text);
+    color: rgb(50, 35, 15);
     -unity-font-style: bold;
 }
 
 #weather-temp {
     font-size: var(--font-xs);
-    color: var(--color-text);
+    color: rgb(50, 35, 15);
     -unity-font-style: bold;
 }
 
