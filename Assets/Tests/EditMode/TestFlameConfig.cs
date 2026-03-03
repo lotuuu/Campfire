@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -47,6 +48,75 @@ namespace Garden.Tests
             var recipe = new FlameUpgradeRecipe();
             Assert.IsNotNull(recipe.ingredients);
             Assert.AreEqual(0, recipe.ingredients.Count);
+        }
+
+        [Test]
+        public void CanAffordUpgrade_ReturnsTrueWhenItemsSufficient()
+        {
+            var recipe = new FlameUpgradeRecipe
+            {
+                ingredients = new List<FlameIngredient>
+                {
+                    new() { itemName = "Basil_harvest", count = 3 }
+                }
+            };
+            var items = new List<InventoryItem>
+            {
+                new() { itemName = "Basil_harvest", count = 5 }
+            };
+            Assert.IsTrue(FlameConfig.CanAffordUpgrade(recipe, items));
+        }
+
+        [Test]
+        public void CanAffordUpgrade_ReturnsFalseWhenItemsInsufficient()
+        {
+            var recipe = new FlameUpgradeRecipe
+            {
+                ingredients = new List<FlameIngredient>
+                {
+                    new() { itemName = "Basil_harvest", count = 3 }
+                }
+            };
+            var items = new List<InventoryItem>
+            {
+                new() { itemName = "Basil_harvest", count = 2 }
+            };
+            Assert.IsFalse(FlameConfig.CanAffordUpgrade(recipe, items));
+        }
+
+        [Test]
+        public void CanAffordUpgrade_ReturnsFalseWhenItemMissing()
+        {
+            var recipe = new FlameUpgradeRecipe
+            {
+                ingredients = new List<FlameIngredient>
+                {
+                    new() { itemName = "Basil_harvest", count = 3 }
+                }
+            };
+            var items = new List<InventoryItem>();
+            Assert.IsFalse(FlameConfig.CanAffordUpgrade(recipe, items));
+        }
+
+        [Test]
+        public void ConsumeIngredients_SubtractsFromInventory()
+        {
+            var recipe = new FlameUpgradeRecipe
+            {
+                ingredients = new List<FlameIngredient>
+                {
+                    new() { itemName = "Basil_harvest", count = 3 },
+                    new() { itemName = "Chamomile_harvest", count = 2 }
+                }
+            };
+            var items = new List<InventoryItem>
+            {
+                new() { itemName = "Basil_harvest", count = 5 },
+                new() { itemName = "Chamomile_harvest", count = 4 }
+            };
+            FlameConfig.ConsumeIngredients(recipe, items);
+            Assert.AreEqual(2, items.Find(i => i.itemName == "Basil_harvest").count);
+            Assert.AreEqual(2, items.Find(i => i.itemName == "Chamomile_harvest").count);
         }
     }
 }

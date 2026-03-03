@@ -57,5 +57,25 @@ namespace Garden
             int index = Mathf.Clamp(flameLevel - 1, 0, gridSizePerLevel.Length - 1);
             return gridSizePerLevel[index];
         }
+
+        public static bool CanAffordUpgrade(FlameUpgradeRecipe recipe, List<InventoryItem> items)
+        {
+            foreach (var ingredient in recipe.ingredients)
+            {
+                var item = items.Find(i => i.itemName == ingredient.itemName);
+                if (item == null || item.count < ingredient.count)
+                    return false;
+            }
+            return true;
+        }
+
+        public static void ConsumeIngredients(FlameUpgradeRecipe recipe, List<InventoryItem> items)
+        {
+            foreach (var ingredient in recipe.ingredients)
+            {
+                var item = items.Find(i => i.itemName == ingredient.itemName);
+                item.count -= ingredient.count;
+            }
+        }
     }
 }
