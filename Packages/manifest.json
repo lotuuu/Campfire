@@ -1,7 +1,7 @@
 {
   "dependencies": {
-    "com.coplaydev.unity-mcp": "https://github.com/CoplayDev/unity-mcp.git?path=/MCPForUnity#main",
-    "com.yasirkula.nativeshare": "https://github.com/yasirkula/UnityNativeShare.git",
+    "com.coplaydev.unity-mcp": "https://github.com/CoplayDev/unity-mcp.git?path=/MCPForUnity#d76a8df311c48263872be0cd3e6a8ef1a0fa8e59",
+    "com.yasirkula.nativeshare": "https://github.com/yasirkula/UnityNativeShare.git#87dacbfa1d2123fe63706871ac56f161c3ba2f9d",
     "com.unity.2d.animation": "13.0.2",
     "com.unity.2d.aseprite": "3.0.1",
     "com.unity.2d.psdimporter": "12.0.1",
