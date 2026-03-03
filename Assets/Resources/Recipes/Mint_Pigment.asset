@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7df30f7d51a844f298b44c1b8850329, type: 3}
+  m_Name: Mint_Pigment
+  m_EditorClassIdentifier:
+  recipeName: Mint Pigment
+  ingredients:
+  - itemName: Mint_harvest
+    quantity: 2
+  result: Mint_pigment
+  resultQuantity: 1
+  icon: {fileID: 0}
