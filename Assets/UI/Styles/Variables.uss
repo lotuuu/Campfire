@@ -4,7 +4,7 @@
 
 :root {
     /* Colors - Camp Fire warm palette */
-    --color-bg-dark: rgb(18, 30, 12);
+    --color-bg-dark: rgb(99, 102, 52);
     --color-bg-panel: rgb(85, 55, 20);
     --color-bg-slot: rgb(105, 72, 28);
     --color-bg-slot-hover: rgb(120, 85, 35);
