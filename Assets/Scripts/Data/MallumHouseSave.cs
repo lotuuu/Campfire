@@ -7,5 +7,6 @@ namespace Garden
     {
         public int gridX;
         public int gridY;
+        public string skinName;
     }
 }

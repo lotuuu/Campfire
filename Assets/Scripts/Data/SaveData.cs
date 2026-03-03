@@ -38,6 +38,7 @@ namespace Garden
         public VaseState state = VaseState.Empty;
         public int gridX;
         public int gridY;
+        public string skinName;
     }
 
     [Serializable]
@@ -52,6 +53,7 @@ namespace Garden
         public GrowthSnapshots snapshots = new();
         public string lastWateredUtc;
         public bool subscribeWater;
+        public string skinName;
     }
 
     [Serializable]
