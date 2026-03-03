@@ -59,6 +59,10 @@
                     <ui:VisualElement name="water-icon" class="resource-icon" />
                     <ui:Label name="water-display" text="0" />
                 </ui:VisualElement>
+                <ui:VisualElement class="resource-item">
+                    <ui:Label name="mallum-label" text="Mallums" class="resource-label" />
+                    <ui:Label name="mallum-display" text="0/0" />
+                </ui:VisualElement>
             </ui:VisualElement>
 
         </ui:VisualElement>
