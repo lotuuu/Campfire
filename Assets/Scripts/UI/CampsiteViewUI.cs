@@ -33,11 +33,25 @@ namespace Garden
         private static readonly CustomStyleProperty<Color> s_HexBorder = new("--hex-border");
 
         // Mode state machine
-        private enum CampsiteMode { Normal, Placing, Watering, Visiting }
+        private enum CampsiteMode { Normal, Placing, Watering, Visiting, Moving }
         private CampsiteMode mode;
         private CampBuildingType pendingBuildingType;
         private int wateringVaseIndex = -1;
         private Button modeCancelBtn;
+
+        // Drag-move state
+        private IVisualElementScheduledItem longPressTimer;
+        private Vector2 longPressStart;
+        private bool longPressPending;
+        private CampBuildingType dragBuildingType;
+        private int dragBuildingIndex;
+        private int dragOriginQ, dragOriginR;
+        private VisualElement dragGhost;
+        private float gridOffsetX, gridOffsetY;
+        private readonly Dictionary<(int, int), VisualElement> cellLookup = new();
+        private int dragPointerId = -1;
+        private const float LongPressMs = 400f;
+        private const float LongPressMoveThreshold = 10f;
 
         // Visit mode
         private VillageSnapshot visitSnapshot;
@@ -71,6 +85,10 @@ namespace Garden
             visitTransition = root.Q("visit-transition");
 
             panController = new CampsitePanController(viewport, canvas);
+
+            // Viewport pointer handlers for drag-move
+            viewport.RegisterCallback<PointerMoveEvent>(OnViewportPointerMove);
+            viewport.RegisterCallback<PointerUpEvent>(OnViewportPointerUp);
 
             // Subscribe to manager events
             if (FlameManager.Instance != null)
@@ -130,11 +148,13 @@ namespace Garden
         public void RebuildGrid()
         {
             if (suppressRebuild) return;
+            if (mode == CampsiteMode.Moving) return;
             if (canvas == null || FlameManager.Instance == null) return;
 
             canvas.Clear();
             growingPlots.Clear();
             fillingVases.Clear();
+            cellLookup.Clear();
             CloseInteractionPanel();
 
             // Remove previous cancel button if it exists
@@ -179,6 +199,8 @@ namespace Garden
             // Offset so that top-left hex center maps to (GridPadding + CellWidth/2, GridPadding + CellHeight/2)
             float offsetX = -minX + GridPadding + CellWidth / 2f;
             float offsetY = -minY + GridPadding + CellHeight / 2f;
+            gridOffsetX = offsetX;
+            gridOffsetY = offsetY;
 
             // Build lookup from save data
             var occupied = new Dictionary<(int, int), (CampBuildingType type, int index)>();
@@ -220,6 +242,8 @@ namespace Garden
                     int gx = q;
                     int gy = r;
 
+                    cellLookup[(q, r)] = cell;
+
                     if (occupied.TryGetValue((q, r), out var info))
                     {
                         PopulateOccupiedCell(cell, label, status, progress, progressFill, info.type, info.index);
@@ -234,6 +258,19 @@ namespace Garden
 
                         int idx = info.index;
                         CampBuildingType cellType = info.type;
+
+                        // Long-press detection on movable buildings
+                        bool isMovable = cellType != CampBuildingType.Flame
+                            && cellType != CampBuildingType.Apotheke;
+                        if (isMovable && mode == CampsiteMode.Normal)
+                        {
+                            int cq = q, cr = r;
+                            cell.RegisterCallback<PointerDownEvent>(evt =>
+                            {
+                                BeginLongPressDetection(evt, cellType, idx, cq, cr);
+                            });
+                        }
+
                         cell.RegisterCallback<ClickEvent>(evt =>
                         {
                             if (panController.WasDragged) return;
@@ -1028,6 +1065,187 @@ namespace Garden
                 interactionBackdrop.style.display = DisplayStyle.None;
             if (interactionPanel != null)
                 interactionPanel.style.display = DisplayStyle.None;
+        }
+
+        // ── Drag-Move ──
+
+        private void BeginLongPressDetection(PointerDownEvent evt, CampBuildingType type, int index, int q, int r)
+        {
+            if (mode != CampsiteMode.Normal) return;
+
+            longPressStart = evt.position;
+            longPressPending = true;
+            dragBuildingType = type;
+            dragBuildingIndex = index;
+            dragOriginQ = q;
+            dragOriginR = r;
+            dragPointerId = evt.pointerId;
+            panController.SuppressMove = true;
+
+            longPressTimer = viewport.schedule.Execute(() =>
+            {
+                if (longPressPending)
+                    EnterDragMoveMode(longPressStart);
+            }).StartingIn((long)LongPressMs);
+        }
+
+        private void CancelLongPress()
+        {
+            if (!longPressPending) return;
+            longPressPending = false;
+            longPressTimer?.Pause();
+            longPressTimer = null;
+            panController.SuppressMove = false;
+            dragPointerId = -1;
+        }
+
+        private void EnterDragMoveMode(Vector2 startPos)
+        {
+            longPressPending = false;
+            longPressTimer = null;
+            mode = CampsiteMode.Moving;
+
+            // Capture pointer on viewport so all move/up events come here
+            viewport.CapturePointer(dragPointerId);
+
+            // Dim the origin cell
+            if (cellLookup.TryGetValue((dragOriginQ, dragOriginR), out var originCell))
+                originCell.AddToClassList("grid-cell--drag-origin");
+
+            // Highlight empty cells as drop targets
+            foreach (var kvp in cellLookup)
+            {
+                if (kvp.Value.ClassListContains("grid-cell--empty"))
+                    kvp.Value.AddToClassList("grid-cell--drop-target");
+            }
+
+            // Create drag ghost
+            dragGhost = new VisualElement();
+            dragGhost.AddToClassList("grid-cell");
+            dragGhost.AddToClassList("grid-cell--drop-hover");
+            dragGhost.style.width = CellWidth;
+            dragGhost.style.height = CellHeight;
+            dragGhost.style.position = Position.Absolute;
+            dragGhost.pickingMode = PickingMode.Ignore;
+            dragGhost.generateVisualContent += DrawHexCell;
+            dragGhost.RegisterCallback<CustomStyleResolvedEvent>(_ => dragGhost.MarkDirtyRepaint());
+            viewport.Add(dragGhost);
+            PositionGhost(startPos);
+        }
+
+        private void PositionGhost(Vector2 panelPos)
+        {
+            if (dragGhost == null) return;
+            var local = viewport.WorldToLocal(panelPos);
+            dragGhost.style.left = local.x - CellWidth / 2f;
+            dragGhost.style.top = local.y - CellHeight / 2f;
+        }
+
+        private (int q, int r) PointerToHex(Vector2 panelPos)
+        {
+            var viewportLocal = viewport.WorldToLocal(panelPos);
+            var translate = canvas.resolvedStyle.translate;
+            float canvasX = viewportLocal.x - translate.x;
+            float canvasY = viewportLocal.y - translate.y;
+            float hexX = canvasX - gridOffsetX;
+            float hexY = canvasY - gridOffsetY;
+            return HexGridUtil.PixelToHex(hexX, hexY, HexSize);
+        }
+
+        private (int q, int r) lastHoverHex = (int.MinValue, int.MinValue);
+
+        private void OnViewportPointerMove(PointerMoveEvent evt)
+        {
+            // During long-press detection: check movement threshold
+            if (longPressPending)
+            {
+                float dist = Vector2.Distance(evt.position, longPressStart);
+                if (dist > LongPressMoveThreshold)
+                    CancelLongPress();
+                return;
+            }
+
+            if (mode != CampsiteMode.Moving) return;
+
+            PositionGhost(evt.position);
+
+            // Update drop hover highlight
+            var hex = PointerToHex(evt.position);
+            if (hex != lastHoverHex)
+            {
+                // Remove previous hover
+                if (cellLookup.TryGetValue(lastHoverHex, out var prevCell))
+                    prevCell.RemoveFromClassList("grid-cell--drop-hover");
+
+                // Add hover on valid empty targets
+                if (cellLookup.TryGetValue(hex, out var hoverCell)
+                    && hoverCell.ClassListContains("grid-cell--drop-target"))
+                {
+                    hoverCell.AddToClassList("grid-cell--drop-hover");
+                }
+
+                lastHoverHex = hex;
+            }
+        }
+
+        private void OnViewportPointerUp(PointerUpEvent evt)
+        {
+            if (longPressPending)
+            {
+                CancelLongPress();
+                return;
+            }
+
+            if (mode != CampsiteMode.Moving) return;
+
+            var hex = PointerToHex(evt.position);
+            bool validDrop = cellLookup.TryGetValue(hex, out var dropCell)
+                && dropCell.ClassListContains("grid-cell--drop-target");
+
+            if (validDrop)
+                MoveBuilding(dragBuildingType, dragBuildingIndex, hex.q, hex.r);
+
+            ExitDragMoveMode(evt.pointerId);
+        }
+
+        private void MoveBuilding(CampBuildingType type, int index, int newQ, int newR)
+        {
+            var data = SaveManager.Instance.Data;
+            switch (type)
+            {
+                case CampBuildingType.Plot:
+                    data.plots[index].gridX = newQ;
+                    data.plots[index].gridY = newR;
+                    break;
+                case CampBuildingType.Vase:
+                    data.vases[index].gridX = newQ;
+                    data.vases[index].gridY = newR;
+                    break;
+                case CampBuildingType.Garden:
+                    data.gardens[index].gridX = newQ;
+                    data.gardens[index].gridY = newR;
+                    break;
+            }
+            SaveManager.Instance.Save();
+        }
+
+        private void ExitDragMoveMode(int pointerId)
+        {
+            mode = CampsiteMode.Normal;
+            panController.SuppressMove = false;
+            dragPointerId = -1;
+            lastHoverHex = (int.MinValue, int.MinValue);
+
+            if (viewport.HasPointerCapture(pointerId))
+                viewport.ReleasePointer(pointerId);
+
+            if (dragGhost != null)
+            {
+                dragGhost.RemoveFromHierarchy();
+                dragGhost = null;
+            }
+
+            RebuildGrid();
         }
     }
 }

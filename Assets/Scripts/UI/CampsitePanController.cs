@@ -18,6 +18,7 @@ namespace Garden
         private float dragDistance;
 
         public bool WasDragged { get; private set; }
+        public bool SuppressMove { get; set; }
 
         public CampsitePanController(VisualElement viewport, VisualElement canvas)
         {
@@ -72,6 +73,7 @@ namespace Garden
 
         private void OnPointerMove(PointerMoveEvent evt)
         {
+            if (SuppressMove) return;
             if (!isDragging || evt.pointerId != activePointerId) return;
 
             Vector2 delta = (Vector2)evt.position - dragStart;

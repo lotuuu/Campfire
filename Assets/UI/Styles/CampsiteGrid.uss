@@ -180,6 +180,21 @@
     border-radius: 3px;
 }
 
+/* ── Drag-move highlights ── */
+.grid-cell--drag-origin {
+    opacity: 0.3;
+}
+
+.grid-cell--drop-target {
+    --hex-fill: rgba(120, 180, 60, 0.1);
+    --hex-border: rgba(120, 180, 60, 0.3);
+}
+
+.grid-cell--drop-hover {
+    --hex-fill: rgba(120, 180, 60, 0.35);
+    --hex-border: rgba(160, 220, 80, 0.7);
+}
+
 /* ── Placement cancel button ── */
 #placement-cancel {
     position: absolute;
