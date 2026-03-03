@@ -19,3 +19,4 @@ MonoBehaviour:
   result: Lavender_pigment
   resultQuantity: 1
   icon: {fileID: 0}
+  category: 0

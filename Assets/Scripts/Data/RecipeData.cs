@@ -4,6 +4,13 @@ using UnityEngine;
 
 namespace Garden
 {
+    public enum RecipeCategory
+    {
+        Pigment = 0,
+        Potion = 1,
+        Material = 2
+    }
+
     [CreateAssetMenu(fileName = "NewRecipe", menuName = "CampFire/Recipe Data")]
     public class RecipeData : ScriptableObject
     {
@@ -12,8 +19,17 @@ namespace Garden
         public string result;
         public int resultQuantity = 1;
 
+        [Header("Category")]
+        public RecipeCategory category;
+
         [Header("Visuals")]
         public Sprite icon;
+
+        public static string FormatItemName(string internalName)
+        {
+            if (string.IsNullOrEmpty(internalName)) return "";
+            return internalName.Replace('_', ' ');
+        }
     }
 
     [Serializable]

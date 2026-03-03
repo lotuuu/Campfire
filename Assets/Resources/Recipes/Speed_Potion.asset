@@ -21,3 +21,4 @@ MonoBehaviour:
   result: Speed_Potion
   resultQuantity: 1
   icon: {fileID: 0}
+  category: 1
