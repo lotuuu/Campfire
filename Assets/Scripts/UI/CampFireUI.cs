@@ -21,6 +21,7 @@ namespace Garden
         private DebugWeatherPanel debugPanel;
         private QuestUI questUI;
         private QuestButtonUI questButton;
+        private MerchantUI merchantUI;
 
         private VisualElement overlayContainer;
         private VisualElement overlayBackdrop;
@@ -31,6 +32,7 @@ namespace Garden
         private VisualElement buildPanel;
         private VisualElement debugPanelElement;
         private VisualElement questsPanel;
+        private VisualElement merchantPanel;
 
         private void Awake()
         {
@@ -65,6 +67,8 @@ namespace Garden
             debugPanel?.Initialize(root);
             questUI?.Initialize(root);
             questButton?.Initialize(root);
+            merchantUI = GetComponent<MerchantUI>();
+            merchantUI?.Initialize(root);
 
             // Overlay setup
             overlayContainer = root.Q("overlay-container");
@@ -76,6 +80,7 @@ namespace Garden
             buildPanel = root.Q("build-panel");
             debugPanelElement = root.Q("debug-panel");
             questsPanel = root.Q("quests-panel");
+            merchantPanel = root.Q("merchant-panel");
 
             var closeBtn = root.Q<Button>("overlay-close");
             closeBtn?.RegisterCallback<ClickEvent>(_ => CloseOverlay());
@@ -133,6 +138,14 @@ namespace Garden
                 campsiteView.OnApothekeTapped += () => OpenOverlay("Seeds", apothekePanel);
             }
 
+            // Wire Merchant tile tap
+            if (campsiteView != null)
+                campsiteView.OnMerchantTapped += index =>
+                {
+                    merchantUI?.ShowMerchant(index);
+                    OpenOverlay("Night Merchant", merchantPanel);
+                };
+
             // Location gate
             if (WeatherService.Instance != null && !WeatherService.Instance.IsLocationResolved)
             {
@@ -166,6 +179,7 @@ namespace Garden
             if (buildPanel != null) buildPanel.style.display = DisplayStyle.None;
             if (debugPanelElement != null) debugPanelElement.style.display = DisplayStyle.None;
             if (questsPanel != null) questsPanel.style.display = DisplayStyle.None;
+            if (merchantPanel != null) merchantPanel.style.display = DisplayStyle.None;
         }
     }
 }

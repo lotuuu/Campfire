@@ -1,0 +1,73 @@
+/* Merchant.uss — Night Merchant overlay panel styles */
+
+.merchant-flavor {
+    font-size: var(--font-sm);
+    color: var(--color-text-dim);
+    -unity-font-style: italic;
+    margin-bottom: var(--spacing-md);
+    padding: 0 var(--spacing-sm);
+}
+
+.merchant-offer-row {
+    flex-direction: row;
+    align-items: center;
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
+    background-color: var(--color-bg-slot);
+    border-radius: var(--radius-sm);
+    border-width: 1px;
+    border-color: var(--color-border);
+}
+
+.merchant-offer-costs {
+    flex: 1;
+    flex-direction: column;
+}
+
+.merchant-cost-item {
+    font-size: var(--font-sm);
+    color: var(--color-text);
+    margin-bottom: var(--spacing-xxs);
+}
+
+.merchant-cost-item--insufficient {
+    color: rgb(200, 80, 60);
+}
+
+.merchant-offer-arrow {
+    font-size: var(--font-lg);
+    color: var(--color-text-accent);
+    margin: 0 var(--spacing-sm);
+}
+
+.merchant-offer-reward {
+    flex-direction: column;
+    align-items: center;
+    margin-right: var(--spacing-sm);
+}
+
+.merchant-reward-text {
+    font-size: var(--font-sm);
+    color: var(--color-text-bright);
+    -unity-font-style: bold;
+}
+
+.merchant-trade-btn {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background-color: var(--color-button-bg);
+    border-radius: var(--radius-sm);
+    border-width: 1px;
+    border-color: var(--color-border-accent);
+    color: var(--color-text-bright);
+    font-size: var(--font-sm);
+}
+
+.merchant-trade-btn:hover {
+    background-color: var(--color-button-bg-hover);
+}
+
+.merchant-trade-btn:disabled {
+    background-color: var(--color-button-bg-disabled);
+    color: var(--color-text-dim);
+    border-color: var(--color-border);
+}

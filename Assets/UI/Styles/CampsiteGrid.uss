@@ -176,6 +176,24 @@
     background-color: rgba(100, 160, 220, 0.4);
 }
 
+/* ── Merchant cell ── */
+.grid-cell--merchant {
+    --hex-fill: rgba(180, 140, 60, 0.45);
+    --hex-border: rgba(220, 180, 80, 0.5);
+}
+
+.grid-cell--merchant:hover {
+    --hex-fill: rgba(200, 160, 70, 0.6);
+    --hex-border: rgba(240, 200, 100, 0.7);
+}
+
+.grid-cell--merchant .cell-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    background-color: rgba(180, 140, 60, 0.4);
+}
+
 /* ── Cell inner elements ── */
 .cell-icon {
     margin-bottom: var(--spacing-xxs);

@@ -13,6 +13,7 @@
     <Style src="project://database/Assets/UI/Styles/Debug.uss" />
     <Style src="project://database/Assets/UI/Styles/Forecast.uss" />
     <Style src="project://database/Assets/UI/Styles/Quest.uss" />
+    <Style src="project://database/Assets/UI/Styles/Merchant.uss" />
 
     <!-- Root container -->
     <ui:VisualElement name="camp-root">
@@ -189,6 +190,12 @@
                         <ui:VisualElement name="quest-active-section" />
                         <ui:VisualElement name="quest-available-section" />
                         <ui:VisualElement name="quest-locked-section" />
+                    </ui:VisualElement>
+
+                    <!-- merchant-panel -->
+                    <ui:VisualElement name="merchant-panel">
+                        <ui:Label name="merchant-flavor" class="merchant-flavor" />
+                        <ui:VisualElement name="merchant-list" />
                     </ui:VisualElement>
 
                     <!-- Debug panel -->

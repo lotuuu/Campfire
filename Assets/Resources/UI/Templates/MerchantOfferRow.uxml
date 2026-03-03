@@ -1,0 +1,10 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement class="merchant-offer-row">
+        <ui:VisualElement class="merchant-offer-costs" name="offer-costs" />
+        <ui:Label class="merchant-offer-arrow" text="&#x2192;" />
+        <ui:VisualElement class="merchant-offer-reward">
+            <ui:Label class="merchant-reward-text" name="reward-text" />
+        </ui:VisualElement>
+        <ui:Button class="merchant-trade-btn" name="trade-btn" text="Trade" />
+    </ui:VisualElement>
+</ui:UXML>
