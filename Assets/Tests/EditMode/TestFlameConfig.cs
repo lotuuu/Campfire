@@ -40,5 +40,13 @@ namespace Garden.Tests
             float rate2 = config.GetManaPerSecond(2);
             Assert.Greater(rate2, rate1);
         }
+
+        [Test]
+        public void FlameUpgradeRecipe_IngredientsDefaultEmpty()
+        {
+            var recipe = new FlameUpgradeRecipe();
+            Assert.IsNotNull(recipe.ingredients);
+            Assert.AreEqual(0, recipe.ingredients.Count);
+        }
     }
 }

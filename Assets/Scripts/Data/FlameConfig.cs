@@ -1,7 +1,22 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Garden
 {
+    [Serializable]
+    public class FlameIngredient
+    {
+        public string itemName;
+        public int count;
+    }
+
+    [Serializable]
+    public class FlameUpgradeRecipe
+    {
+        public List<FlameIngredient> ingredients = new();
+    }
+
     [CreateAssetMenu(fileName = "FlameConfig", menuName = "CampFire/Flame Config")]
     public class FlameConfig : ScriptableObject
     {
