@@ -51,6 +51,7 @@ namespace Garden
         public int gridY;
         public GrowthSnapshots snapshots = new();
         public string lastWateredUtc;
+        public bool subscribeWater;
     }
 
     [Serializable]

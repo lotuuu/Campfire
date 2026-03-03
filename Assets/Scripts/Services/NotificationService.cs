@@ -97,6 +97,63 @@ namespace Garden
 #endif
         }
 
+        private const int WaterNotificationIdOffset = 10000;
+
+        public void ScheduleWaterNotification(int plotIndex, string seedName, double remainingSeconds)
+        {
+            if (remainingSeconds <= 0) return;
+
+            string title = $"Your {seedName} is ready to water!";
+            string body = $"The watering cooldown has ended — give your {seedName} a drink!";
+            int id = plotIndex + WaterNotificationIdOffset;
+
+#if UNITY_ANDROID
+            var notification = new AndroidNotification
+            {
+                Title = title,
+                Text = body,
+                FireTime = System.DateTime.Now.AddSeconds(remainingSeconds),
+                SmallIcon = "icon_0",
+                LargeIcon = "icon_1"
+            };
+            AndroidNotificationCenter.SendNotificationWithExplicitID(notification, AndroidChannelId, id);
+#elif UNITY_IOS
+            var timeTrigger = new iOSNotificationTimeIntervalTrigger
+            {
+                TimeInterval = new System.TimeSpan(0, 0, (int)remainingSeconds),
+                Repeats = false
+            };
+            var notification = new iOSNotification
+            {
+                Identifier = id.ToString(),
+                Title = title,
+                Body = body,
+                ShowInForeground = false,
+                Trigger = timeTrigger
+            };
+            iOSNotificationCenter.ScheduleNotification(notification);
+#endif
+        }
+
+        public void CancelWaterNotification(int plotIndex)
+        {
+            int id = plotIndex + WaterNotificationIdOffset;
+#if UNITY_ANDROID
+            AndroidNotificationCenter.CancelNotification(id);
+#elif UNITY_IOS
+            iOSNotificationCenter.RemoveScheduledNotification(id.ToString());
+#endif
+        }
+
+        public void CancelPlantNotification(int plotIndex)
+        {
+#if UNITY_ANDROID
+            AndroidNotificationCenter.CancelNotification(plotIndex);
+#elif UNITY_IOS
+            iOSNotificationCenter.RemoveScheduledNotification(plotIndex.ToString());
+#endif
+        }
+
         public void CancelAll()
         {
 #if UNITY_ANDROID

@@ -202,6 +202,12 @@ namespace Garden
 
             ApplyWatering(plot, GameTime.UtcNow.ToString("o"));
 
+            if (plot.subscribeWater)
+            {
+                double cooldownSeconds = ManualWaterCooldownHours * 3600.0;
+                NotificationService.Instance?.ScheduleWaterNotification(plotIndex, plot.seedName, cooldownSeconds);
+            }
+
             SaveManager.Instance.Save();
             OnPlotChanged?.Invoke(plotIndex);
             return true;
@@ -280,6 +286,7 @@ namespace Garden
             OnHarvested?.Invoke(plotIndex, result);
 
             NotificationService.Instance?.CancelPlantNotification(plotIndex);
+            NotificationService.Instance?.CancelWaterNotification(plotIndex);
 
             return result;
         }
@@ -348,7 +355,44 @@ namespace Garden
                 if (plot.state != PlotState.Growing) continue;
                 var remaining = GetRemainingSeconds(i);
                 ns.SchedulePlantNotification(i, plot.seedName, remaining);
+
+                if (plot.subscribeWater)
+                {
+                    double waterRemaining = GetWaterCooldownRemaining(plot);
+                    ns.ScheduleWaterNotification(i, plot.seedName, waterRemaining);
+                }
             }
+        }
+
+        public void SetWaterSubscription(int plotIndex, bool subscribe)
+        {
+            var data = SaveManager.Instance.Data;
+            if (plotIndex < 0 || plotIndex >= data.plots.Count) return;
+            var plot = data.plots[plotIndex];
+            plot.subscribeWater = subscribe;
+
+            if (subscribe && plot.state == PlotState.Growing)
+            {
+                double remaining = GetWaterCooldownRemaining(plot);
+                NotificationService.Instance?.ScheduleWaterNotification(plotIndex, plot.seedName, remaining);
+            }
+            else
+            {
+                NotificationService.Instance?.CancelWaterNotification(plotIndex);
+            }
+
+            SaveManager.Instance.Save();
+        }
+
+        public static double GetWaterCooldownRemaining(PlotSave plot)
+        {
+            if (plot.state != PlotState.Growing) return 0;
+            if (string.IsNullOrEmpty(plot.lastWateredUtc)) return 0;
+            var lastWatered = DateTime.Parse(plot.lastWateredUtc, null,
+                System.Globalization.DateTimeStyles.RoundtripKind);
+            double elapsed = (GameTime.UtcNow - lastWatered).TotalSeconds;
+            double total = ManualWaterCooldownHours * 3600.0;
+            return Math.Max(0, total - elapsed);
         }
 
         private void CheckGrowthCompletion()

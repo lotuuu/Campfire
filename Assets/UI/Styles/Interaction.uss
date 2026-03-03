@@ -278,3 +278,29 @@
     border-color: rgba(100, 70, 35, 0.2);
     color: rgb(120, 100, 75);
 }
+
+/* ── Water Subscribe Toggle ── */
+
+.water-subscribe-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 12px;
+    margin-top: var(--spacing-xs);
+    margin-bottom: var(--spacing-xs);
+    background-color: rgba(50, 35, 18, 0.5);
+    border-radius: 6px;
+}
+
+.water-subscribe-icon {
+    width: 32px;
+    height: 32px;
+    margin-right: 8px;
+    -unity-background-image-tint-color: rgb(180, 160, 130);
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.water-subscribe-label {
+    font-size: 24px;
+    color: rgb(180, 160, 130);
+}

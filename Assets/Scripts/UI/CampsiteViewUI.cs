@@ -1008,6 +1008,8 @@ namespace Garden
                     wateringsLabel.AddToClassList("interaction-info");
                     interactionBody.Add(wateringsLabel);
 
+                    AddWaterSubscribeToggle(index, plot);
+
                     AddGrowthRecipeSection(plot.seedName);
 
                     var finishBtn = new Button(() =>
@@ -1183,6 +1185,39 @@ namespace Garden
             tag.AddToClassList("seed-card--tag");
             tag.Add(new Label(text));
             container.Add(tag);
+        }
+
+        private void AddWaterSubscribeToggle(int plotIndex, PlotSave plot)
+        {
+            var row = new VisualElement();
+            row.AddToClassList("water-subscribe-row");
+
+            var bellIcon = new VisualElement();
+            bellIcon.AddToClassList("water-subscribe-icon");
+            UpdateBellIcon(bellIcon, plot.subscribeWater);
+            row.Add(bellIcon);
+
+            var label = new Label(plot.subscribeWater ? "Water reminder on" : "Water reminder off");
+            label.AddToClassList("water-subscribe-label");
+            row.Add(label);
+
+            row.RegisterCallback<ClickEvent>(_ =>
+            {
+                bool newValue = !plot.subscribeWater;
+                PlotManager.Instance.SetWaterSubscription(plotIndex, newValue);
+                UpdateBellIcon(bellIcon, newValue);
+                label.text = newValue ? "Water reminder on" : "Water reminder off";
+            });
+
+            interactionBody.Add(row);
+        }
+
+        private static void UpdateBellIcon(VisualElement icon, bool active)
+        {
+            string path = active ? "UI/Icons/bell-on" : "UI/Icons/bell-off";
+            var vi = Resources.Load<VectorImage>(path);
+            if (vi != null)
+                icon.style.backgroundImage = new StyleBackground(Background.FromVectorImage(vi));
         }
 
         private void AddGrowthRecipeSection(string seedName)
