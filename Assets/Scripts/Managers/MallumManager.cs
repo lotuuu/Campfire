@@ -9,10 +9,12 @@ namespace Garden
         public static MallumManager Instance { get; private set; }
 
         [SerializeField] private MallumConfig config;
+        [SerializeField] private MallumHouseConfig houseConfig;
 
         private QuestData[] allQuests;
 
         public MallumConfig Config => config;
+        public MallumHouseConfig HouseConfig => houseConfig;
         public event Action OnMallumsChanged;
 
         public void NotifyChanged() => OnMallumsChanged?.Invoke();
@@ -27,7 +29,7 @@ namespace Garden
         private void Start()
         {
             var data = SaveManager.Instance.Data;
-            int max = config.GetMaxMallums(data.flameLevel);
+            int max = houseConfig.GetMaxMallums(data.mallumHouses.Count);
             EnsureMallumCount(data.mallums, max);
 
             if (FlameManager.Instance != null)
@@ -42,15 +44,7 @@ namespace Garden
 
         private void OnFlameUpgraded()
         {
-            var data = SaveManager.Instance.Data;
-            int max = config.GetMaxMallums(data.flameLevel);
-            int before = data.mallums.Count;
-            EnsureMallumCount(data.mallums, max);
-            if (data.mallums.Count != before)
-            {
-                SaveManager.Instance.Save();
-                OnMallumsChanged?.Invoke();
-            }
+            // Mallum count now determined by houses, not flame level
         }
 
         private void Update()
@@ -93,6 +87,11 @@ namespace Garden
         public int GetTotalMallumCount()
         {
             return SaveManager.Instance.Data.mallums.Count;
+        }
+
+        public int GetMaxMallumCount()
+        {
+            return houseConfig.GetMaxMallums(SaveManager.Instance.Data.mallumHouses.Count);
         }
 
         public int GetAvailableMallumCount()
@@ -138,6 +137,43 @@ namespace Garden
             SaveManager.Instance.Save();
             OnMallumsChanged?.Invoke();
             return rewards;
+        }
+
+        public bool CraftMallumHouse(int gridX, int gridY)
+        {
+            if (!FlameManager.Instance.CanPlaceEntity) return false;
+
+            var data = SaveManager.Instance.Data;
+            var cost = houseConfig.GetNextHouseCost(data.mallumHouses.Count);
+            if (cost == null) return false;
+
+            // Check mana
+            if (!CurrencyManager.Instance.CanAffordMana(cost.manaCost)) return false;
+
+            // Check seeds
+            if (!CanAffordSeeds(data.seedInventory, cost.seedCosts)) return false;
+
+            // Spend mana
+            if (!CurrencyManager.Instance.SpendMana(cost.manaCost)) return false;
+
+            // Spend seeds
+            foreach (var seedCost in cost.seedCosts)
+            {
+                var entry = data.seedInventory.Find(s => s.seedName == seedCost.seedName);
+                entry.count -= seedCost.count;
+                if (entry.count <= 0) data.seedInventory.Remove(entry);
+            }
+
+            // Place house
+            data.mallumHouses.Add(new MallumHouseSave { gridX = gridX, gridY = gridY });
+
+            // Add new mallums
+            int max = houseConfig.GetMaxMallums(data.mallumHouses.Count);
+            EnsureMallumCount(data.mallums, max);
+
+            SaveManager.Instance.Save();
+            OnMallumsChanged?.Invoke();
+            return true;
         }
 
         public QuestData[] GetAllQuests() => allQuests;
@@ -209,6 +245,16 @@ namespace Garden
         }
 
         // --- Static helpers (testable without MonoBehaviour) ---
+
+        public static bool CanAffordSeeds(List<SeedInventoryEntry> inventory, List<SeedCost> seedCosts)
+        {
+            foreach (var seedCost in seedCosts)
+            {
+                var entry = inventory.Find(s => s.seedName == seedCost.seedName);
+                if (entry == null || entry.count < seedCost.count) return false;
+            }
+            return true;
+        }
 
         public static void EnsureMallumCount(List<MallumSave> mallums, int targetCount)
         {
