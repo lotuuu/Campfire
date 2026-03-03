@@ -106,7 +106,7 @@ namespace Garden
                         {
                             var chip = new VisualElement();
                             chip.AddToClassList("quest-reward-chip");
-                            var chipLabel = new Label($"{reward.seedName} x{reward.count}");
+                            var chipLabel = new Label($"{PlotManager.GetSeedDisplayName(reward.seedName)} x{reward.count}");
                             chipLabel.AddToClassList("quest-reward-name");
                             chip.Add(chipLabel);
                             rewardsContainer.Add(chip);

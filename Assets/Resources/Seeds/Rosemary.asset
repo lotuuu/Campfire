@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b1ea091be0f647ae96e7e3f22d8a36c, type: 3}
   m_Name: Rosemary
   m_EditorClassIdentifier:
-  seedName: Rosemary
+  seedName: Rosemary Seed
   growthDurationHours: 18
   baseDrops: 5
   recipe:

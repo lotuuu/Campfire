@@ -122,15 +122,15 @@ namespace Garden
             if (cost == null) return false;
 
             if (!CurrencyManager.Instance.CanAffordMana(cost.manaCost)) return false;
-            if (!MallumManager.CanAffordSeeds(data.seedInventory, cost.seedCosts)) return false;
+            if (!MallumManager.CanAffordHarvests(data.items, cost.harvestCosts)) return false;
 
             CurrencyManager.Instance.SpendMana(cost.manaCost);
 
-            foreach (var seedCost in cost.seedCosts)
+            foreach (var hc in cost.harvestCosts)
             {
-                var entry = data.seedInventory.Find(s => s.seedName == seedCost.seedName);
-                entry.count -= seedCost.count;
-                if (entry.count <= 0) data.seedInventory.Remove(entry);
+                var entry = data.items.Find(i => i.itemName == hc.itemName);
+                entry.count -= hc.count;
+                if (entry.count <= 0) data.items.Remove(entry);
             }
 
             data.vases.Add(new VaseSave { capacity = config.BaseCapacity, state = VaseState.Empty, gridX = gridX, gridY = gridY });

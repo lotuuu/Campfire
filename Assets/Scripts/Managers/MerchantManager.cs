@@ -177,7 +177,7 @@ namespace Garden
                         var offer = eligible[j];
                         var save = new MerchantOfferSave
                         {
-                            rewardSeedName = offer.rewardSeed.seedName,
+                            rewardSeedName = offer.rewardSeed.name,
                             rewardCount = offer.rewardCount,
                             costs = new List<TradeCost>(offer.costs)
                         };

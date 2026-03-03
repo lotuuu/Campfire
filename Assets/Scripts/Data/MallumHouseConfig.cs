@@ -34,13 +34,13 @@ namespace Garden
     public class HouseCost
     {
         public float manaCost;
-        public List<SeedCost> seedCosts = new();
+        public List<HarvestCost> harvestCosts = new();
     }
 
     [Serializable]
-    public class SeedCost
+    public class HarvestCost
     {
-        public string seedName;
+        public string itemName;
         public int count;
     }
 }

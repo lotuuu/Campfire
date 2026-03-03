@@ -99,7 +99,7 @@ namespace Garden
 
             var info = new VisualElement();
             info.AddToClassList("seed-info");
-            var nameLabel = new Label(entry.seedName);
+            var nameLabel = new Label(seedData != null ? seedData.seedName : entry.seedName);
             nameLabel.AddToClassList("seed-name");
             info.Add(nameLabel);
             var countLabel = new Label($"x{entry.count}");
@@ -250,7 +250,7 @@ namespace Garden
         {
             if (allSeeds == null || string.IsNullOrEmpty(seedName)) return null;
             foreach (var s in allSeeds)
-                if (s.seedName == seedName) return s;
+                if (s.name == seedName) return s;
             return null;
         }
     }

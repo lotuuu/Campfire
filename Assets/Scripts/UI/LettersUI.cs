@@ -404,7 +404,7 @@ namespace Garden
             foreach (var seed in data.seedInventory)
             {
                 if (seed.count <= 0) continue;
-                AddGiftPickerRow("seed", seed.seedName, seed.count);
+                AddGiftPickerRow("seed", seed.seedName, seed.count, PlotManager.GetSeedDisplayName(seed.seedName));
             }
 
             // Items
@@ -415,13 +415,13 @@ namespace Garden
             }
         }
 
-        private void AddGiftPickerRow(string type, string name, int available)
+        private void AddGiftPickerRow(string type, string name, int available, string displayName = null)
         {
             if (giftPickerItemTemplate == null) return;
             var el = giftPickerItemTemplate.CloneTree();
 
             var nameLabel = el.Q<Label>(className: "picker-item-name");
-            if (nameLabel != null) nameLabel.text = name;
+            if (nameLabel != null) nameLabel.text = displayName ?? name;
 
             var countLabel = el.Q<Label>(className: "picker-item-count");
             if (countLabel != null) countLabel.text = $"x{available}";

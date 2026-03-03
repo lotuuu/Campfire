@@ -66,8 +66,9 @@ namespace Garden
         {
             if (remainingSeconds <= 0) return;
 
-            string title = $"Your {seedName} is ready!";
-            string body = $"Come harvest your {seedName} at the camp!";
+            string displayName = PlotManager.GetSeedDisplayName(seedName);
+            string title = $"Your {displayName} is ready!";
+            string body = $"Come harvest your {displayName} at the camp!";
 
 #if UNITY_ANDROID
             var notification = new AndroidNotification
@@ -103,8 +104,9 @@ namespace Garden
         {
             if (remainingSeconds <= 0) return;
 
-            string title = $"Your {seedName} is ready to water!";
-            string body = $"The watering cooldown has ended — give your {seedName} a drink!";
+            string displayName = PlotManager.GetSeedDisplayName(seedName);
+            string title = $"Your {displayName} is ready to water!";
+            string body = $"The watering cooldown has ended — give your {displayName} a drink!";
             int id = plotIndex + WaterNotificationIdOffset;
 
 #if UNITY_ANDROID

@@ -72,7 +72,7 @@ namespace Garden
 
                 // Reward
                 if (rewardText != null)
-                    rewardText.text = $"{offer.rewardCount}x {offer.rewardSeedName}";
+                    rewardText.text = $"{offer.rewardCount}x {PlotManager.GetSeedDisplayName(offer.rewardSeedName)}";
 
                 // Trade button
                 if (tradeBtn != null)

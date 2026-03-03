@@ -134,18 +134,18 @@ namespace Garden
             // Check mana
             if (!CurrencyManager.Instance.CanAffordMana(cost.manaCost)) return false;
 
-            // Check seeds
-            if (!CanAffordSeeds(data.seedInventory, cost.seedCosts)) return false;
+            // Check harvests
+            if (!CanAffordHarvests(data.items, cost.harvestCosts)) return false;
 
             // Spend mana
             if (!CurrencyManager.Instance.SpendMana(cost.manaCost)) return false;
 
-            // Spend seeds
-            foreach (var seedCost in cost.seedCosts)
+            // Spend harvests
+            foreach (var hc in cost.harvestCosts)
             {
-                var entry = data.seedInventory.Find(s => s.seedName == seedCost.seedName);
-                entry.count -= seedCost.count;
-                if (entry.count <= 0) data.seedInventory.Remove(entry);
+                var entry = data.items.Find(i => i.itemName == hc.itemName);
+                entry.count -= hc.count;
+                if (entry.count <= 0) data.items.Remove(entry);
             }
 
             // Place house
@@ -232,12 +232,12 @@ namespace Garden
 
         // --- Static helpers (testable without MonoBehaviour) ---
 
-        public static bool CanAffordSeeds(List<SeedInventoryEntry> inventory, List<SeedCost> seedCosts)
+        public static bool CanAffordHarvests(List<InventoryItem> items, List<HarvestCost> harvestCosts)
         {
-            foreach (var seedCost in seedCosts)
+            foreach (var hc in harvestCosts)
             {
-                var entry = inventory.Find(s => s.seedName == seedCost.seedName);
-                if (entry == null || entry.count < seedCost.count) return false;
+                var entry = items.Find(i => i.itemName == hc.itemName);
+                if (entry == null || entry.count < hc.count) return false;
             }
             return true;
         }
@@ -306,7 +306,7 @@ namespace Garden
                         int count = UnityEngine.Random.Range(r.minCount, r.maxCount + 1);
                         rewards.Add(new RewardEntry
                         {
-                            seedName = r.seed.seedName,
+                            seedName = r.seed.name,
                             count = count
                         });
                         break;

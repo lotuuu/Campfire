@@ -358,7 +358,7 @@ namespace Garden
                 case CampBuildingType.Plot:
                     cell.AddToClassList("grid-cell--plot");
                     var plot = SaveManager.Instance.Data.plots[index];
-                    if (label != null) label.text = string.IsNullOrEmpty(plot.seedName) ? "Plot" : plot.seedName;
+                    if (label != null) label.text = string.IsNullOrEmpty(plot.seedName) ? "Plot" : PlotManager.GetSeedDisplayName(plot.seedName);
                     if (status != null) status.text = plot.state.ToString();
                     if (plot.state == PlotState.Mature)
                         cell.AddToClassList("grid-cell--plot-mature");
@@ -410,7 +410,7 @@ namespace Garden
                     cell.AddToClassList("grid-cell--bird");
                     var bird = SaveManager.Instance.Data.birds[index];
                     if (label != null) label.text = "Bird";
-                    if (status != null) status.text = $"{bird.seedCount}x {bird.seedName}";
+                    if (status != null) status.text = $"{bird.seedCount}x {PlotManager.GetSeedDisplayName(bird.seedName)}";
                     break;
 
                 case CampBuildingType.NightMerchant:
@@ -504,7 +504,7 @@ namespace Garden
                     string plotCostText = FormatBuildingCost(plotCost);
                     bool canAffordPlot = canPlace
                         && CurrencyManager.Instance.CanAffordMana(plotCost.manaCost)
-                        && MallumManager.CanAffordSeeds(SaveManager.Instance.Data.seedInventory, plotCost.seedCosts);
+                        && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, plotCost.harvestCosts);
                     var plotBtn = new Button(() =>
                     {
                         if (PlotManager.Instance.CraftPlot(gridX, gridY))
@@ -525,7 +525,7 @@ namespace Garden
                     string vaseCostText = FormatBuildingCost(vaseCost);
                     bool canAffordVase = canPlace
                         && CurrencyManager.Instance.CanAffordMana(vaseCost.manaCost)
-                        && MallumManager.CanAffordSeeds(SaveManager.Instance.Data.seedInventory, vaseCost.seedCosts);
+                        && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, vaseCost.harvestCosts);
                     var vaseBtn = new Button(() =>
                     {
                         if (VaseManager.Instance.CraftVase(gridX, gridY))
@@ -545,11 +545,11 @@ namespace Garden
                 if (cost != null)
                 {
                     string costText = $"{cost.manaCost:F0} Mana";
-                    foreach (var sc in cost.seedCosts)
-                        costText += $" + {sc.count} {sc.seedName}";
+                    foreach (var hc in cost.harvestCosts)
+                        costText += $" + {hc.count} {hc.itemName}";
                     bool canAffordHouse = canPlace
                         && CurrencyManager.Instance.CanAffordMana(cost.manaCost)
-                        && MallumManager.CanAffordSeeds(SaveManager.Instance.Data.seedInventory, cost.seedCosts);
+                        && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, cost.harvestCosts);
                     var houseBtn = new Button(() =>
                     {
                         if (MallumManager.Instance.CraftMallumHouse(gridX, gridY))
@@ -803,7 +803,7 @@ namespace Garden
                 case CampBuildingType.Plot:
                     cell.AddToClassList("grid-cell--plot");
                     var plot = visitSnapshot.plots[index];
-                    if (label != null) label.text = string.IsNullOrEmpty(plot.seedName) ? "Plot" : plot.seedName;
+                    if (label != null) label.text = string.IsNullOrEmpty(plot.seedName) ? "Plot" : PlotManager.GetSeedDisplayName(plot.seedName);
                     if (status != null) status.text = plot.state ?? "";
                     break;
 
@@ -1002,7 +1002,7 @@ namespace Garden
                     break;
 
                 case PlotState.Growing:
-                    interactionTitle.text = plot.seedName;
+                    interactionTitle.text = PlotManager.GetSeedDisplayName(plot.seedName);
                     float remaining = PlotManager.Instance.GetRemainingSeconds(index);
                     var progressLabel = new Label($"Growing... {FormatTimeRemaining(remaining)} left");
                     progressLabel.AddToClassList("interaction-info");
@@ -1029,7 +1029,7 @@ namespace Garden
                     break;
 
                 case PlotState.Mature:
-                    interactionTitle.text = $"{plot.seedName} — Ready!";
+                    interactionTitle.text = $"{PlotManager.GetSeedDisplayName(plot.seedName)} — Ready!";
                     AddGrowthRecipeSection(plot.seedName);
                     var harvestBtn = new Button(() =>
                     {
@@ -1091,7 +1091,7 @@ namespace Garden
 
                 SeedData seedData = null;
                 foreach (var s in allSeeds)
-                    if (s.seedName == entry.seedName) { seedData = s; break; }
+                    if (s.name == entry.seedName) { seedData = s; break; }
 
                 var card = new VisualElement();
                 card.AddToClassList("seed-card");
@@ -1099,7 +1099,7 @@ namespace Garden
                 // Header row: name + count
                 var header = new VisualElement();
                 header.AddToClassList("seed-card--header");
-                var nameLabel = new Label(entry.seedName);
+                var nameLabel = new Label(seedData != null ? seedData.seedName : entry.seedName);
                 nameLabel.AddToClassList("seed-card--name");
                 header.Add(nameLabel);
                 var countLabel = new Label($"x{entry.count}");
@@ -1230,7 +1230,7 @@ namespace Garden
             SeedData seed = null;
             foreach (var s in allSeeds)
             {
-                if (s.seedName == seedName) { seed = s; break; }
+                if (s.name == seedName) { seed = s; break; }
             }
             if (seed == null || seed.recipe == null) return;
 
@@ -1347,7 +1347,7 @@ namespace Garden
             var bird = data.birds[index];
             interactionTitle.text = "Bird";
 
-            var info = new Label($"A bird has brought you {bird.seedCount}x {bird.seedName}!");
+            var info = new Label($"A bird has brought you {bird.seedCount}x {PlotManager.GetSeedDisplayName(bird.seedName)}!");
             info.AddToClassList("interaction-info");
             interactionBody.Add(info);
 
@@ -1387,8 +1387,8 @@ namespace Garden
         private static string FormatBuildingCost(BuildingCost cost)
         {
             string text = $"{cost.manaCost:F0} Mana";
-            foreach (var sc in cost.seedCosts)
-                text += $" + {sc.count} {sc.seedName}";
+            foreach (var hc in cost.harvestCosts)
+                text += $" + {hc.count} {hc.itemName}";
             return text;
         }
 

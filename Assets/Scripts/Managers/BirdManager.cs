@@ -122,7 +122,7 @@ namespace Garden
 
             return new BirdSave
             {
-                seedName = seed.seedName,
+                seedName = seed.name,
                 seedCount = quantity
             };
         }

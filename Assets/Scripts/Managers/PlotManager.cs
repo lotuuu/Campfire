@@ -89,7 +89,7 @@ namespace Garden
             {
                 _seedCache = new Dictionary<string, SeedData>();
                 foreach (var seed in Resources.LoadAll<SeedData>("Seeds"))
-                    _seedCache[seed.seedName] = seed;
+                    _seedCache[seed.name] = seed;
             }
         }
 
@@ -145,15 +145,15 @@ namespace Garden
             if (cost == null) return false;
 
             if (!CurrencyManager.Instance.CanAffordMana(cost.manaCost)) return false;
-            if (!MallumManager.CanAffordSeeds(data.seedInventory, cost.seedCosts)) return false;
+            if (!MallumManager.CanAffordHarvests(data.items, cost.harvestCosts)) return false;
 
             CurrencyManager.Instance.SpendMana(cost.manaCost);
 
-            foreach (var seedCost in cost.seedCosts)
+            foreach (var hc in cost.harvestCosts)
             {
-                var entry = data.seedInventory.Find(s => s.seedName == seedCost.seedName);
-                entry.count -= seedCost.count;
-                if (entry.count <= 0) data.seedInventory.Remove(entry);
+                var entry = data.items.Find(i => i.itemName == hc.itemName);
+                entry.count -= hc.count;
+                if (entry.count <= 0) data.items.Remove(entry);
             }
 
             data.plots.Add(new PlotSave { state = PlotState.Empty, gridX = gridX, gridY = gridY });
@@ -264,11 +264,11 @@ namespace Garden
 
             int drops = Mathf.Max(1, Mathf.RoundToInt(seed.baseDrops * score));
 
-            AddItem(data, seed.seedName + "_harvest", drops);
+            AddItem(data, seed.name + "_harvest", drops);
 
             var result = new HarvestResult
             {
-                seedName = seed.seedName,
+                seedName = seed.name,
                 drops = drops,
                 recipeScore = score
             };
@@ -426,6 +426,16 @@ namespace Garden
             if (_seedCache != null && _seedCache.TryGetValue(seedName, out var seed))
                 return seed;
             return null;
+        }
+
+        /// <summary>
+        /// Returns the display name for a seed given its asset name.
+        /// Falls back to the asset name if SeedData is not found.
+        /// </summary>
+        public static string GetSeedDisplayName(string assetName)
+        {
+            var seed = LoadSeed(assetName);
+            return seed != null ? seed.seedName : assetName;
         }
     }
 

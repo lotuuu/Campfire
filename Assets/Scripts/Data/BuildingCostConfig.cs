@@ -8,7 +8,7 @@ namespace Garden
     public class BuildingCost
     {
         public float manaCost;
-        public List<SeedCost> seedCosts = new();
+        public List<HarvestCost> harvestCosts = new();
     }
 
     [CreateAssetMenu(fileName = "BuildingCostConfig", menuName = "CampFire/Building Cost Config")]

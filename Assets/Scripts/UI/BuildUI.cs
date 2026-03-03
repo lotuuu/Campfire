@@ -30,7 +30,7 @@ namespace Garden
                 var plotCost = PlotManager.Instance.GetNextPlotCost();
                 bool canAfford = canPlace && plotCost != null
                     && CurrencyManager.Instance.CanAffordMana(plotCost.manaCost)
-                    && MallumManager.CanAffordSeeds(SaveManager.Instance.Data.seedInventory, plotCost.seedCosts);
+                    && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, plotCost.harvestCosts);
                 string plotCostText = plotCost != null ? FormatBuildingCost(plotCost) : "???";
                 AddBuildItem("New Plot", canPlace ? $"{plotCostText} ({capText})" : $"Cap reached ({capText})", () =>
                 {
@@ -48,7 +48,7 @@ namespace Garden
                 var vaseCost = VaseManager.Instance.GetNextVaseCost();
                 bool canAfford = canPlace && vaseCost != null
                     && CurrencyManager.Instance.CanAffordMana(vaseCost.manaCost)
-                    && MallumManager.CanAffordSeeds(SaveManager.Instance.Data.seedInventory, vaseCost.seedCosts);
+                    && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, vaseCost.harvestCosts);
                 string vaseCostText = vaseCost != null ? FormatBuildingCost(vaseCost) : "???";
                 AddBuildItem("New Vase", canPlace ? $"{vaseCostText} ({capText})" : $"Cap reached ({capText})", () =>
                 {
@@ -68,11 +68,11 @@ namespace Garden
                         ? $"{FlameManager.Instance.CurrentEntityCount}/{FlameManager.Instance.MaxEntities}"
                         : "";
                     string costText = $"{nextCost.manaCost:F0} Mana";
-                    foreach (var sc in nextCost.seedCosts)
-                        costText += $" + {sc.count} {sc.seedName}";
+                    foreach (var hc in nextCost.harvestCosts)
+                        costText += $" + {hc.count} {hc.itemName}";
                     bool canAfford = canPlace
                         && CurrencyManager.Instance.CanAffordMana(nextCost.manaCost)
-                        && MallumManager.CanAffordSeeds(SaveManager.Instance.Data.seedInventory, nextCost.seedCosts);
+                        && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, nextCost.harvestCosts);
                     AddBuildItem("Mallum House", canPlace ? $"{costText} ({capText})" : $"Cap reached ({capText})", () =>
                     {
                         if (canAfford)
@@ -96,8 +96,8 @@ namespace Garden
         private static string FormatBuildingCost(BuildingCost cost)
         {
             string text = $"{cost.manaCost:F0} Mana";
-            foreach (var sc in cost.seedCosts)
-                text += $" + {sc.count} {sc.seedName}";
+            foreach (var hc in cost.harvestCosts)
+                text += $" + {hc.count} {hc.itemName}";
             return text;
         }
 
