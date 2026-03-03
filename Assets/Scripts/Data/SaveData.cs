@@ -23,6 +23,8 @@ namespace Garden
         public string lastRainEffectTimeUtc;
         public int apothekeGridX = 1;
         public int apothekeGridY = 0;
+        public List<BirdSave> birds = new();
+        public string lastBirdCheckHourUtc;
     }
 
     [Serializable]
