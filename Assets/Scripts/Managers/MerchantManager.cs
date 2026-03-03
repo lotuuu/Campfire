@@ -20,6 +20,20 @@ namespace Garden
             allMerchants = new List<MerchantData>(Resources.LoadAll<MerchantData>("Merchants"));
         }
 
+        private void Start()
+        {
+            var data = SaveManager.Instance?.Data;
+            if (data == null) return;
+
+            int before = data.merchants.Count;
+            CleanStaleMerchants(data, GameTime.UtcNow);
+            if (data.merchants.Count < before)
+            {
+                SaveManager.Instance.Save();
+                OnMerchantDeparted?.Invoke();
+            }
+        }
+
         private void Update()
         {
             var data = SaveManager.Instance?.Data;
