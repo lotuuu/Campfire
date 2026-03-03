@@ -25,6 +25,8 @@ namespace Garden
         public int apothekeGridY = 0;
         public List<BirdSave> birds = new();
         public string lastBirdCheckHourUtc;
+        public List<MerchantSave> merchants = new();
+        public string lastMerchantDateUtc;
     }
 
     [Serializable]
