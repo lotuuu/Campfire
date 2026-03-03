@@ -145,25 +145,100 @@ namespace Garden
 
             foreach (var day in forecast)
             {
-                var col = new VisualElement();
-                col.AddToClassList("forecast-day");
+                var card = new VisualElement();
+                card.AddToClassList("forecast-day");
 
-                var label = new Label(day.dayLabel);
-                label.AddToClassList("forecast-day-label");
-                col.Add(label);
+                // Header: day name + icon + condition + moon icon (right-aligned)
+                var header = new VisualElement();
+                header.AddToClassList("forecast-day-header");
+
+                var dayLabel = new Label(day.dayLabel.ToUpper());
+                dayLabel.AddToClassList("forecast-day-name");
+                header.Add(dayLabel);
 
                 var icon = new VisualElement();
                 icon.AddToClassList("forecast-day-icon");
                 if (weatherIcons.TryGetValue(day.condition, out var tex) && tex != null)
                     icon.style.backgroundImage = tex;
-                col.Add(icon);
+                header.Add(icon);
 
-                var temp = new Label($"{day.tempHigh:F0}/{day.tempLow:F0}");
-                temp.AddToClassList("forecast-day-temp");
-                col.Add(temp);
+                var condLabel = new Label(day.condition.ToString());
+                condLabel.AddToClassList("forecast-day-condition");
+                header.Add(condLabel);
 
-                forecastDays.Add(col);
+                int spriteIdx = MoonPhaseToSpriteIndex[(int)day.moonPhase] - 1;
+                var moonTex = moonTextures[spriteIdx];
+                if (moonTex != null)
+                {
+                    var moonIcon = new VisualElement();
+                    moonIcon.AddToClassList("forecast-day-moon");
+                    moonIcon.style.backgroundImage = moonTex;
+                    header.Add(moonIcon);
+                }
+
+                card.Add(header);
+
+                // Stats: two rows of cells filling the full width
+                var statsRow1 = new VisualElement();
+                statsRow1.AddToClassList("forecast-stats-row");
+                AddStatCell(statsRow1, $"{day.tempHigh:F0}\u00b0/{day.tempLow:F0}\u00b0", "Temp");
+                AddStatCell(statsRow1, $"{day.humidity:F0}%", "Humidity");
+                AddStatCell(statsRow1, $"{day.windSpeed:F1} m/s", "Wind");
+                card.Add(statsRow1);
+
+                var statsRow2 = new VisualElement();
+                statsRow2.AddToClassList("forecast-stats-row");
+                AddStatCell(statsRow2, $"{day.cloudCover:F0}%", "Cloud");
+                AddStatCell(statsRow2, FormatMoonPhase(day.moonPhase), "Moon Phase");
+                AddStatCell(statsRow2, ConditionHint(day.condition), "For Plants");
+                card.Add(statsRow2);
+
+                forecastDays.Add(card);
             }
+        }
+
+        private static void AddStatCell(VisualElement parent, string value, string label)
+        {
+            var cell = new VisualElement();
+            cell.AddToClassList("forecast-stat-cell");
+
+            var val = new Label(value);
+            val.AddToClassList("forecast-stat-value");
+            cell.Add(val);
+
+            var lbl = new Label(label);
+            lbl.AddToClassList("forecast-stat-label");
+            cell.Add(lbl);
+
+            parent.Add(cell);
+        }
+
+        private static string FormatMoonPhase(MoonPhase phase)
+        {
+            return phase switch
+            {
+                MoonPhase.NewMoon => "New Moon",
+                MoonPhase.WaxingCrescent => "Wax. Crescent",
+                MoonPhase.FirstQuarter => "First Quarter",
+                MoonPhase.WaxingGibbous => "Wax. Gibbous",
+                MoonPhase.FullMoon => "Full Moon",
+                MoonPhase.WaningGibbous => "Wan. Gibbous",
+                MoonPhase.LastQuarter => "Last Quarter",
+                MoonPhase.WaningCrescent => "Wan. Crescent",
+                _ => phase.ToString()
+            };
+        }
+
+        private static string ConditionHint(WeatherCondition cond)
+        {
+            return cond switch
+            {
+                WeatherCondition.Rain => "Rain bonus",
+                WeatherCondition.Storm => "Storm bonus",
+                WeatherCondition.Clear => "Sun bonus",
+                WeatherCondition.Snow => "Cold snap",
+                _ => "Neutral"
+            };
         }
 
         private void UpdateWeather(WeatherData weather)

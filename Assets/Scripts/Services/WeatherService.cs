@@ -205,13 +205,17 @@ namespace Garden
             {
                 var day = today.AddDays(i + 1);
                 float variation = UnityEngine.Random.Range(-3f, 3f);
+                var cond = conditions[(int)(debugWeather.condition + i) % conditions.Length];
                 forecast.Add(new DailyForecast
                 {
                     dayLabel = day.ToString("ddd", CultureInfo.InvariantCulture),
                     tempHigh = Mathf.Round(baseTemp + variation + 2f),
                     tempLow = Mathf.Round(baseTemp + variation - 4f),
-                    condition = conditions[(int)(debugWeather.condition + i) % conditions.Length],
-                    moonPhase = MoonPhaseCalculator.Calculate(day)
+                    condition = cond,
+                    moonPhase = MoonPhaseCalculator.Calculate(day),
+                    humidity = Mathf.Round(debugWeather.humidity + UnityEngine.Random.Range(-15f, 15f)),
+                    windSpeed = Mathf.Round(debugWeather.windSpeed + UnityEngine.Random.Range(-2f, 3f)),
+                    cloudCover = Mathf.Round(Mathf.Clamp(debugWeather.cloudCover + UnityEngine.Random.Range(-20f, 20f), 0f, 100f))
                 });
             }
 
@@ -250,7 +254,7 @@ namespace Garden
 
         private List<DailyForecast> AggregateForecast(ForecastResponse response)
         {
-            var dayMap = new Dictionary<string, (float min, float max, Dictionary<int, int> condCounts)>();
+            var dayMap = new Dictionary<string, (float min, float max, float humSum, float windSum, float cloudSum, int count, Dictionary<int, int> condCounts)>();
             var dayOrder = new List<string>();
 
             foreach (var entry in response.list)
@@ -258,20 +262,26 @@ namespace Garden
                 var dt = DateTimeOffset.FromUnixTimeSeconds(entry.dt).UtcDateTime;
                 string key = dt.ToString("yyyy-MM-dd");
 
+                float hum = entry.main.humidity;
+                float wind = entry.wind != null ? entry.wind.speed : 0f;
+                float cloud = entry.clouds != null ? entry.clouds.all : 0f;
+
                 if (!dayMap.ContainsKey(key))
                 {
-                    dayMap[key] = (entry.main.temp_min, entry.main.temp_max, new Dictionary<int, int>());
+                    dayMap[key] = (entry.main.temp_min, entry.main.temp_max, hum, wind, cloud, 1, new Dictionary<int, int>());
                     dayOrder.Add(key);
                 }
-
-                var (min, max, counts) = dayMap[key];
-                min = Mathf.Min(min, entry.main.temp_min);
-                max = Mathf.Max(max, entry.main.temp_max);
+                else
+                {
+                    var (min, max, humS, windS, cloudS, cnt, counts) = dayMap[key];
+                    min = Mathf.Min(min, entry.main.temp_min);
+                    max = Mathf.Max(max, entry.main.temp_max);
+                    dayMap[key] = (min, max, humS + hum, windS + wind, cloudS + cloud, cnt + 1, counts);
+                }
 
                 int wid = entry.weather[0].id;
-                counts[wid] = counts.GetValueOrDefault(wid) + 1;
-
-                dayMap[key] = (min, max, counts);
+                var d = dayMap[key];
+                d.condCounts[wid] = d.condCounts.GetValueOrDefault(wid) + 1;
             }
 
             // Skip today, take next 5 days
@@ -283,7 +293,7 @@ namespace Garden
                 if (key == todayKey) continue;
                 if (forecast.Count >= 5) break;
 
-                var (min, max, counts) = dayMap[key];
+                var (min, max, humSum, windSum, cloudSum, count, counts) = dayMap[key];
                 var dt = DateTime.ParseExact(key, "yyyy-MM-dd", CultureInfo.InvariantCulture);
 
                 int mostFreqId = 800;
@@ -299,7 +309,10 @@ namespace Garden
                     tempHigh = Mathf.Round(max),
                     tempLow = Mathf.Round(min),
                     condition = MapCondition(mostFreqId),
-                    moonPhase = MoonPhaseCalculator.Calculate(dt)
+                    moonPhase = MoonPhaseCalculator.Calculate(dt),
+                    humidity = Mathf.Round(humSum / count),
+                    windSpeed = Mathf.Round(windSum / count * 10f) / 10f,
+                    cloudCover = Mathf.Round(cloudSum / count)
                 });
             }
 
@@ -312,8 +325,10 @@ namespace Garden
             public long dt;
             public ForecastMain main;
             public WeatherInfo[] weather;
+            public WindData wind;
+            public CloudData clouds;
         }
-        [Serializable] private class ForecastMain { public float temp_min; public float temp_max; }
+        [Serializable] private class ForecastMain { public float temp_min; public float temp_max; public float humidity; }
 
         [Serializable] private class OpenWeatherResponse
         {

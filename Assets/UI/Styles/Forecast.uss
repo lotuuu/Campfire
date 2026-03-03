@@ -1,45 +1,100 @@
-/* Forecast.uss — 5-day forecast dropdown styling */
+/* Forecast.uss — Almanac-style forecast panel extending below header */
 
+/* Panel: in-flow, pushes viewport down, solid opaque background */
 #forecast-panel {
     display: none;
-    background-color: rgba(20, 14, 8, 0.9);
-    border-bottom-width: 1px;
-    border-bottom-color: rgba(180, 120, 60, 0.2);
-    padding: var(--spacing-xs) var(--spacing-sm);
+    flex-grow: 4;
     flex-shrink: 0;
+    background-color: rgb(22, 15, 9);
+    border-bottom-width: 2px;
+    border-bottom-color: rgba(180, 120, 50, 0.35);
+    padding: var(--spacing-sm) var(--spacing-sm) var(--spacing-xs);
+    flex-direction: column;
 }
 
 #forecast-panel.forecast-visible {
     display: flex;
 }
 
+/* Day list: vertical stack filling the panel */
 #forecast-days {
-    flex-direction: row;
-    justify-content: space-around;
+    flex-direction: column;
+    flex-grow: 1;
+    justify-content: space-between;
 }
 
+/* ── Day card ── */
 .forecast-day {
     flex-direction: column;
-    align-items: center;
-    width: 20%;
-    padding: var(--spacing-xxs) 0;
+    background-color: rgba(45, 28, 14, 0.85);
+    border-width: 1px;
+    border-color: rgba(160, 110, 50, 0.25);
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    flex-grow: 1;
 }
 
-.forecast-day-label {
-    font-size: var(--font-xs);
-    color: var(--color-text-dim);
+/* ── Header row: DAY [icon] Condition ... [moon] ── */
+.forecast-day-header {
+    flex-direction: row;
+    align-items: center;
     margin-bottom: var(--spacing-xxs);
+    padding-bottom: var(--spacing-xxs);
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(140, 100, 50, 0.15);
+}
+
+.forecast-day-name {
+    font-size: var(--font-md);
+    color: var(--color-text-accent);
+    -unity-font-style: bold;
+    min-width: 110px;
+    margin-right: var(--spacing-xxs);
 }
 
 .forecast-day-icon {
-    width: 32px;
-    height: 32px;
+    width: 44px;
+    height: 44px;
     -unity-background-scale-mode: scale-to-fit;
-    margin-bottom: var(--spacing-xxs);
-    align-self: center;
+    margin-right: var(--spacing-xxs);
 }
 
-.forecast-day-temp {
-    font-size: var(--font-xs);
+.forecast-day-condition {
+    font-size: var(--font-sm);
     color: var(--color-text);
+    flex-grow: 1;
+}
+
+.forecast-day-moon {
+    width: 38px;
+    height: 38px;
+    -unity-background-scale-mode: scale-to-fit;
+    margin-left: auto;
+}
+
+/* ── Stats rows: 3 cells per row, filling full width ── */
+.forecast-stats-row {
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.forecast-stat-cell {
+    flex-grow: 1;
+    flex-basis: 0;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--spacing-xxs) 0;
+}
+
+.forecast-stat-value {
+    font-size: var(--font-sm);
+    color: var(--color-text-bright);
+    -unity-font-style: bold;
+    -unity-text-align: upper-center;
+}
+
+.forecast-stat-label {
+    font-size: 20px;
+    color: var(--color-text-dim);
+    -unity-text-align: upper-center;
 }

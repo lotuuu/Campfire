@@ -23,5 +23,8 @@ namespace Garden
         public float tempLow;
         public WeatherCondition condition;
         public MoonPhase moonPhase;
+        public float humidity;
+        public float windSpeed;
+        public float cloudCover;
     }
 }
