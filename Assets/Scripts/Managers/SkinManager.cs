@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace Garden
@@ -10,6 +9,7 @@ namespace Garden
 
         private SkinData[] allSkins;
         private Dictionary<string, SkinData> skinLookup;
+        private Dictionary<CampBuildingType, List<SkinData>> skinsByType;
 
         private void Awake()
         {
@@ -17,8 +17,17 @@ namespace Garden
             Instance = this;
             allSkins = Resources.LoadAll<SkinData>("Skins");
             skinLookup = new Dictionary<string, SkinData>();
+            skinsByType = new Dictionary<CampBuildingType, List<SkinData>>();
             foreach (var skin in allSkins)
+            {
                 skinLookup[skin.skinName] = skin;
+                if (!skinsByType.TryGetValue(skin.buildingType, out var list))
+                {
+                    list = new List<SkinData>();
+                    skinsByType[skin.buildingType] = list;
+                }
+                list.Add(skin);
+            }
         }
 
         public SkinData GetSkin(string skinName)
@@ -30,7 +39,7 @@ namespace Garden
 
         public List<SkinData> GetSkinsForBuilding(CampBuildingType type)
         {
-            return allSkins.Where(s => s.buildingType == type).ToList();
+            return skinsByType.TryGetValue(type, out var list) ? list : new List<SkinData>();
         }
 
         public bool CanAffordSkin(SkinData skin)
@@ -43,8 +52,25 @@ namespace Garden
         public bool ApplySkin(CampBuildingType type, int index, SkinData skin)
         {
             if (!CanAffordSkin(skin)) return false;
+            if (skin.buildingType != type) return false;
 
             var data = SaveManager.Instance.Data;
+
+            // Validate index before deducting cost
+            switch (type)
+            {
+                case CampBuildingType.Plot:
+                    if (index < 0 || index >= data.plots.Count) return false;
+                    break;
+                case CampBuildingType.Vase:
+                    if (index < 0 || index >= data.vases.Count) return false;
+                    break;
+                case CampBuildingType.MallumHouse:
+                    if (index < 0 || index >= data.mallumHouses.Count) return false;
+                    break;
+                default: return false;
+            }
+
             var item = data.items.Find(i => i.itemName == skin.costItemName);
             item.count -= skin.costQuantity;
             if (item.count <= 0) data.items.Remove(item);
@@ -72,12 +98,15 @@ namespace Garden
             switch (type)
             {
                 case CampBuildingType.Plot:
+                    if (index < 0 || index >= data.plots.Count) return;
                     data.plots[index].skinName = null;
                     break;
                 case CampBuildingType.Vase:
+                    if (index < 0 || index >= data.vases.Count) return;
                     data.vases[index].skinName = null;
                     break;
                 case CampBuildingType.MallumHouse:
+                    if (index < 0 || index >= data.mallumHouses.Count) return;
                     data.mallumHouses[index].skinName = null;
                     break;
             }

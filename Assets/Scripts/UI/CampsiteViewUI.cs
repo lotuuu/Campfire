@@ -843,7 +843,11 @@ namespace Garden
 
             Color fillColor = new Color(0.16f, 0.1f, 0.05f, 0.3f);
             Color borderColor = new Color(0.55f, 0.39f, 0.2f, 0.15f);
-            if (el.userData is (Color skinFill, Color skinBorder))
+            bool hasStateOverride = el.ClassListContains("grid-cell--water-target")
+                || el.ClassListContains("grid-cell--drop-target")
+                || el.ClassListContains("grid-cell--drop-hover")
+                || el.ClassListContains("grid-cell--placeable");
+            if (!hasStateOverride && el.userData is (Color skinFill, Color skinBorder))
             {
                 fillColor = skinFill;
                 borderColor = skinBorder;
