@@ -49,6 +49,30 @@ namespace Garden
                 });
             }
 
+            if (MallumManager.Instance != null)
+            {
+                var hConfig = MallumManager.Instance.HouseConfig;
+                var nextCost = hConfig.GetNextHouseCost(SaveManager.Instance.Data.mallumHouses.Count);
+                if (nextCost != null)
+                {
+                    bool canPlace = FlameManager.Instance != null && FlameManager.Instance.CanPlaceEntity;
+                    string capText = FlameManager.Instance != null
+                        ? $"{FlameManager.Instance.CurrentEntityCount}/{FlameManager.Instance.MaxEntities}"
+                        : "";
+                    string costText = $"{nextCost.manaCost:F0} Mana";
+                    foreach (var sc in nextCost.seedCosts)
+                        costText += $" + {sc.count} {sc.seedName}";
+                    bool canAfford = canPlace
+                        && CurrencyManager.Instance.CanAffordMana(nextCost.manaCost)
+                        && MallumManager.CanAffordSeeds(SaveManager.Instance.Data.seedInventory, nextCost.seedCosts);
+                    AddBuildItem("Mallum House", canPlace ? $"{costText} ({capText})" : $"Cap reached ({capText})", () =>
+                    {
+                        if (canAfford)
+                            OnRequestPlacement?.Invoke(CampBuildingType.MallumHouse);
+                    });
+                }
+            }
+
             if (FlameManager.Instance != null && FlameManager.Instance.CanUpgrade())
             {
                 var recipe = FlameManager.Instance.Config.GetUpgradeRecipe(FlameManager.Instance.Level);
