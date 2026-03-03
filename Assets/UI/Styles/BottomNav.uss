@@ -2,6 +2,7 @@
 
 #bottom-nav {
     flex-direction: row;
+    align-items: flex-start;
     flex-shrink: 0;
     background-color: rgb(36, 61, 28);
     border-top-width: 3px;
