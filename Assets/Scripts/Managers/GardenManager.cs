@@ -60,52 +60,64 @@ namespace Garden
             var data = SaveManager.Instance.Data;
             if (gardenIndex < 0 || gardenIndex >= data.gardens.Count) return 0f;
             var garden = data.gardens[gardenIndex];
+
+            var plantData = LoadPlantData(garden.plantName);
+            if (plantData == null && !garden.mature) return 0f;
+
+            float durationHours = plantData != null ? plantData.growthDurationHours : 1f;
+            return GetGrowthProgress(garden, durationHours, GameTime.UtcNow);
+        }
+
+        public static float GetGrowthProgress(GardenSave garden, float growthDurationHours, DateTime utcNow)
+        {
             if (garden.mature) return 1f;
             if (string.IsNullOrEmpty(garden.plantTimeUtc)) return 0f;
 
-            var plantData = LoadPlantData(garden.plantName);
-            if (plantData == null) return 0f;
-
             var plantTime = DateTime.Parse(garden.plantTimeUtc, null,
                 System.Globalization.DateTimeStyles.RoundtripKind);
-            float elapsed = (float)(GameTime.UtcNow - plantTime).TotalHours;
-            return Mathf.Clamp01(elapsed / plantData.growthDurationHours);
+            float elapsed = (float)(utcNow - plantTime).TotalHours;
+            return Mathf.Clamp01(elapsed / growthDurationHours);
+        }
+
+        public static bool CheckYieldReady(GardenSave garden, float yieldIntervalHours, DateTime utcNow)
+        {
+            if (!garden.mature) return false;
+            if (string.IsNullOrEmpty(garden.lastYieldTimeUtc)) return false;
+
+            var lastYield = DateTime.Parse(garden.lastYieldTimeUtc, null,
+                System.Globalization.DateTimeStyles.RoundtripKind);
+            float elapsed = (float)(utcNow - lastYield).TotalHours;
+            return elapsed >= yieldIntervalHours;
         }
 
         private void CheckGrowthAndYields()
         {
             var data = SaveManager.Instance.Data;
             bool changed = false;
+            var now = GameTime.UtcNow;
 
             for (int i = 0; i < data.gardens.Count; i++)
             {
                 var garden = data.gardens[i];
                 if (string.IsNullOrEmpty(garden.plantName)) continue;
 
-                if (!garden.mature && GetGrowthProgress(i) >= 1f)
+                var plantData = LoadPlantData(garden.plantName);
+                if (plantData == null) continue;
+
+                if (!garden.mature && GetGrowthProgress(garden, plantData.growthDurationHours, now) >= 1f)
                 {
                     garden.mature = true;
-                    garden.lastYieldTimeUtc = GameTime.UtcNow.ToString("o");
+                    garden.lastYieldTimeUtc = now.ToString("o");
                     changed = true;
                     OnGardenChanged?.Invoke(i);
                 }
 
-                if (garden.mature && !string.IsNullOrEmpty(garden.lastYieldTimeUtc))
+                if (CheckYieldReady(garden, plantData.yieldIntervalHours, now))
                 {
-                    var plantData = LoadPlantData(garden.plantName);
-                    if (plantData == null) continue;
-
-                    var lastYield = DateTime.Parse(garden.lastYieldTimeUtc, null,
-                        System.Globalization.DateTimeStyles.RoundtripKind);
-                    float elapsed = (float)(GameTime.UtcNow - lastYield).TotalHours;
-
-                    if (elapsed >= plantData.yieldIntervalHours)
-                    {
-                        AddItem(data, plantData.yieldItem, plantData.yieldAmount);
-                        garden.lastYieldTimeUtc = GameTime.UtcNow.ToString("o");
-                        changed = true;
-                        OnYieldCollected?.Invoke(i, plantData.yieldItem, plantData.yieldAmount);
-                    }
+                    AddItem(data, plantData.yieldItem, plantData.yieldAmount);
+                    garden.lastYieldTimeUtc = now.ToString("o");
+                    changed = true;
+                    OnYieldCollected?.Invoke(i, plantData.yieldItem, plantData.yieldAmount);
                 }
             }
 

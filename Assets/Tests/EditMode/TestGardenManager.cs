@@ -6,40 +6,64 @@ namespace Garden.Tests
     public class TestGardenManager
     {
         [Test]
-        public void GardenGrowth_CalculatesProgress()
+        public void GetGrowthProgress_HalfwayThrough_Returns05()
         {
             var garden = new GardenSave
             {
-                plantName = "Oak",
                 plantTimeUtc = DateTime.UtcNow.AddHours(-12).ToString("o"),
                 mature = false
             };
-
-            float growthHours = 24f;
-            var plantTime = DateTime.Parse(garden.plantTimeUtc, null,
-                System.Globalization.DateTimeStyles.RoundtripKind);
-            float elapsed = (float)(DateTime.UtcNow - plantTime).TotalHours;
-            float progress = UnityEngine.Mathf.Clamp01(elapsed / growthHours);
-
+            float progress = GardenManager.GetGrowthProgress(garden, 24f, DateTime.UtcNow);
             Assert.AreEqual(0.5f, progress, 0.05f);
         }
 
         [Test]
-        public void MatureGarden_YieldsOnInterval()
+        public void GetGrowthProgress_Mature_Returns1()
+        {
+            var garden = new GardenSave { mature = true };
+            float progress = GardenManager.GetGrowthProgress(garden, 24f, DateTime.UtcNow);
+            Assert.AreEqual(1f, progress);
+        }
+
+        [Test]
+        public void GetGrowthProgress_NoPlantTime_Returns0()
+        {
+            var garden = new GardenSave { mature = false, plantTimeUtc = null };
+            float progress = GardenManager.GetGrowthProgress(garden, 24f, DateTime.UtcNow);
+            Assert.AreEqual(0f, progress);
+        }
+
+        [Test]
+        public void CheckYieldReady_PastInterval_ReturnsTrue()
         {
             var garden = new GardenSave
             {
-                plantName = "Oak",
                 mature = true,
                 lastYieldTimeUtc = DateTime.UtcNow.AddHours(-13).ToString("o")
             };
+            Assert.IsTrue(GardenManager.CheckYieldReady(garden, 12f, DateTime.UtcNow));
+        }
 
-            float intervalHours = 12f;
-            var lastYield = DateTime.Parse(garden.lastYieldTimeUtc, null,
-                System.Globalization.DateTimeStyles.RoundtripKind);
-            float elapsed = (float)(DateTime.UtcNow - lastYield).TotalHours;
+        [Test]
+        public void CheckYieldReady_BeforeInterval_ReturnsFalse()
+        {
+            var garden = new GardenSave
+            {
+                mature = true,
+                lastYieldTimeUtc = DateTime.UtcNow.AddHours(-6).ToString("o")
+            };
+            Assert.IsFalse(GardenManager.CheckYieldReady(garden, 12f, DateTime.UtcNow));
+        }
 
-            Assert.IsTrue(elapsed >= intervalHours);
+        [Test]
+        public void CheckYieldReady_NotMature_ReturnsFalse()
+        {
+            var garden = new GardenSave
+            {
+                mature = false,
+                lastYieldTimeUtc = DateTime.UtcNow.AddHours(-100).ToString("o")
+            };
+            Assert.IsFalse(GardenManager.CheckYieldReady(garden, 12f, DateTime.UtcNow));
         }
     }
 }
