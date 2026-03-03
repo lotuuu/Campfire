@@ -18,6 +18,7 @@ namespace Garden
         public float lastManaCollectTime;
         public string lastVisitorDateUtc;
         public List<MallumSave> mallums = new();
+        public List<MallumHouseSave> mallumHouses = new();
         public string rainStartTimeUtc;
         public string lastRainEffectTimeUtc;
     }
