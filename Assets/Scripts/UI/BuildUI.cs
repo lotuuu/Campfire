@@ -69,7 +69,7 @@ namespace Garden
                         : "";
                     string costText = $"{nextCost.manaCost:F0} Mana";
                     foreach (var hc in nextCost.harvestCosts)
-                        costText += $" + {hc.count} {hc.itemName}";
+                        costText += $" + {hc.count} {hc.itemName.Replace("_harvest", "")}";
                     bool canAfford = canPlace
                         && CurrencyManager.Instance.CanAffordMana(nextCost.manaCost)
                         && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, nextCost.harvestCosts);
@@ -97,7 +97,7 @@ namespace Garden
         {
             string text = $"{cost.manaCost:F0} Mana";
             foreach (var hc in cost.harvestCosts)
-                text += $" + {hc.count} {hc.itemName}";
+                text += $" + {hc.count} {hc.itemName.Replace("_harvest", "")}";
             return text;
         }
 

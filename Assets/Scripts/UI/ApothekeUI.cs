@@ -109,8 +109,7 @@ namespace Garden
 
             var outcome = new VisualElement();
             outcome.AddToClassList("seed-outcome");
-            string harvestName = entry.seedName + " Harvest";
-            var outcomeName = new Label(harvestName);
+            var outcomeName = new Label(entry.seedName);
             outcomeName.AddToClassList("seed-outcome-name");
             outcome.Add(outcomeName);
             header.Add(outcome);

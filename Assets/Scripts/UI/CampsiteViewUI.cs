@@ -549,7 +549,7 @@ namespace Garden
                 {
                     string costText = $"{cost.manaCost:F0} Mana";
                     foreach (var hc in cost.harvestCosts)
-                        costText += $" + {hc.count} {hc.itemName}";
+                        costText += $" + {hc.count} {hc.itemName.Replace("_harvest", "")}";
                     bool canAffordHouse = canPlace
                         && CurrencyManager.Instance.CanAffordMana(cost.manaCost)
                         && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, cost.harvestCosts);
@@ -1000,17 +1000,108 @@ namespace Garden
                 }
 
                 bool canAfford = FlameManager.Instance.CanUpgrade();
-                var btn = new Button(() =>
+                var upgradeBtn = new Button(() =>
                 {
                     FlameManager.Instance.UpgradeFlame();
                     CloseInteractionPanel();
                 }) { text = "Level Up" };
-                btn.SetEnabled(canAfford);
-                btn.AddToClassList("upgrade-btn");
-                interactionActions.Add(btn);
+                upgradeBtn.SetEnabled(canAfford);
+                upgradeBtn.AddToClassList("upgrade-btn");
+                interactionActions.Add(upgradeBtn);
             }
 
+            // ── Craft / Build section ──
+            AddFlameCraftItems();
+
             AddCloseButton();
+        }
+
+        private void AddFlameCraftItems()
+        {
+            var buildHeader = new Label("BUILD");
+            buildHeader.AddToClassList("upgrade-cost-header");
+            buildHeader.style.marginTop = 16;
+            interactionBody.Add(buildHeader);
+
+            bool canPlaceEntity = FlameManager.Instance != null && FlameManager.Instance.CanPlaceEntity;
+            string capText = FlameManager.Instance != null
+                ? $"{FlameManager.Instance.CurrentEntityCount}/{FlameManager.Instance.MaxEntities}"
+                : "";
+
+            // New Plot
+            if (PlotManager.Instance != null && FlameManager.Instance != null)
+            {
+                var plotCost = PlotManager.Instance.GetNextPlotCost();
+                bool canAfford = canPlaceEntity && plotCost != null
+                    && CurrencyManager.Instance.CanAffordMana(plotCost.manaCost)
+                    && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, plotCost.harvestCosts);
+                string costText = plotCost != null ? FormatBuildingCost(plotCost) : "???";
+                string label = canPlaceEntity ? $"New Plot  —  {costText}" : $"New Plot  —  Cap reached ({capText})";
+
+                var btn = new Button(() =>
+                {
+                    if (canAfford)
+                    {
+                        CloseInteractionPanel();
+                        EnterPlacementMode(CampBuildingType.Plot);
+                    }
+                }) { text = label };
+                btn.SetEnabled(canAfford);
+                btn.AddToClassList("flame-craft-btn");
+                interactionBody.Add(btn);
+            }
+
+            // New Vase
+            if (VaseManager.Instance != null)
+            {
+                var vaseCost = VaseManager.Instance.GetNextVaseCost();
+                bool canAfford = canPlaceEntity && vaseCost != null
+                    && CurrencyManager.Instance.CanAffordMana(vaseCost.manaCost)
+                    && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, vaseCost.harvestCosts);
+                string costText = vaseCost != null ? FormatBuildingCost(vaseCost) : "???";
+                string label = canPlaceEntity ? $"New Vase  —  {costText}" : $"New Vase  —  Cap reached ({capText})";
+
+                var btn = new Button(() =>
+                {
+                    if (canAfford)
+                    {
+                        CloseInteractionPanel();
+                        EnterPlacementMode(CampBuildingType.Vase);
+                    }
+                }) { text = label };
+                btn.SetEnabled(canAfford);
+                btn.AddToClassList("flame-craft-btn");
+                interactionBody.Add(btn);
+            }
+
+            // Mallum House
+            if (MallumManager.Instance != null)
+            {
+                var hConfig = MallumManager.Instance.HouseConfig;
+                var nextCost = hConfig.GetNextHouseCost(SaveManager.Instance.Data.mallumHouses.Count);
+                if (nextCost != null)
+                {
+                    string costText = $"{nextCost.manaCost:F0} Mana";
+                    foreach (var hc in nextCost.harvestCosts)
+                        costText += $" + {hc.count} {hc.itemName.Replace("_harvest", "")}";
+                    bool canAfford = canPlaceEntity
+                        && CurrencyManager.Instance.CanAffordMana(nextCost.manaCost)
+                        && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, nextCost.harvestCosts);
+                    string label = canPlaceEntity ? $"Mallum House  —  {costText}" : $"Mallum House  —  Cap reached ({capText})";
+
+                    var btn = new Button(() =>
+                    {
+                        if (canAfford)
+                        {
+                            CloseInteractionPanel();
+                            EnterPlacementMode(CampBuildingType.MallumHouse);
+                        }
+                    }) { text = label };
+                    btn.SetEnabled(canAfford);
+                    btn.AddToClassList("flame-craft-btn");
+                    interactionBody.Add(btn);
+                }
+            }
         }
 
         private void ShowPlotInteraction(int index)
@@ -1578,7 +1669,7 @@ namespace Garden
         {
             string text = $"{cost.manaCost:F0} Mana";
             foreach (var hc in cost.harvestCosts)
-                text += $" + {hc.count} {hc.itemName}";
+                text += $" + {hc.count} {hc.itemName.Replace("_harvest", "")}";
             return text;
         }
 
