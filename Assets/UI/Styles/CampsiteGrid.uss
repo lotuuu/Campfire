@@ -122,6 +122,24 @@
     background-color: rgba(60, 120, 40, 0.4);
 }
 
+/* ── Apotheke cell ── */
+.grid-cell--apotheke {
+    --hex-fill: rgba(100, 50, 140, 0.4);
+    --hex-border: rgba(160, 100, 200, 0.45);
+}
+
+.grid-cell--apotheke:hover {
+    --hex-fill: rgba(120, 60, 160, 0.55);
+    --hex-border: rgba(180, 120, 220, 0.65);
+}
+
+.grid-cell--apotheke .cell-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    background-color: rgba(120, 60, 160, 0.4);
+}
+
 /* ── Cell inner elements ── */
 .cell-icon {
     margin-bottom: var(--spacing-xxs);
@@ -179,4 +197,18 @@
 
 #placement-cancel:hover {
     background-color: rgba(160, 50, 35, 0.85);
+}
+
+/* ── Visit back button ── */
+#visit-back-btn {
+    position: absolute;
+    top: var(--spacing-lg);
+    left: var(--spacing-lg);
+    padding: var(--spacing-sm) var(--spacing-xl);
+    font-size: var(--font-lg);
+    border-radius: var(--radius-md);
+}
+
+#visit-back-btn:hover {
+    background-color: rgba(180, 115, 35, 0.85);
 }

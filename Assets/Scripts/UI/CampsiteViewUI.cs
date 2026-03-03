@@ -50,6 +50,12 @@ namespace Garden
         private int currentGridSize;
         private bool suppressRebuild;
 
+        // Fixed building positions (always present, not saved)
+        private static readonly (int q, int r) ApothekeHex = (1, 0);
+
+        // Events
+        public event Action OnApothekeTapped;
+
         public void Initialize(VisualElement root)
         {
             viewport = root.Q("campsite-viewport");
@@ -176,6 +182,9 @@ namespace Garden
                 occupied[(data.vases[i].gridX, data.vases[i].gridY)] = (CampBuildingType.Vase, i);
             for (int i = 0; i < data.gardens.Count; i++)
                 occupied[(data.gardens[i].gridX, data.gardens[i].gridY)] = (CampBuildingType.Garden, i);
+
+            // Fixed buildings always take priority
+            occupied[ApothekeHex] = (CampBuildingType.Apotheke, 0);
 
             // Create hex cells (extended vertically by ExtraRows)
             for (int q = -radius; q <= radius; q++)
@@ -308,6 +317,12 @@ namespace Garden
                     if (label != null) label.text = garden.plantName ?? "Garden";
                     if (status != null) status.text = garden.mature ? "Mature" : "Growing";
                     break;
+
+                case CampBuildingType.Apotheke:
+                    cell.AddToClassList("grid-cell--apotheke");
+                    if (label != null) label.text = "Apotheke";
+                    if (status != null) status.text = "Mixing";
+                    break;
             }
         }
 
@@ -331,6 +346,12 @@ namespace Garden
             }
 
             if (mode == CampsiteMode.Placing) return;
+
+            if (type == CampBuildingType.Apotheke)
+            {
+                OnApothekeTapped?.Invoke();
+                return;
+            }
 
             ShowInteraction(type, index);
         }
@@ -565,6 +586,9 @@ namespace Garden
             for (int i = 0; i < visitSnapshot.gardens.Count; i++)
                 occupied[(visitSnapshot.gardens[i].gridX, visitSnapshot.gardens[i].gridY)] = (CampBuildingType.Garden, i);
 
+            // Fixed buildings always take priority
+            occupied[ApothekeHex] = (CampBuildingType.Apotheke, 0);
+
             // Create hex cells — read-only, no interaction handlers
             for (int q = -radius; q <= radius; q++)
             {
@@ -645,6 +669,12 @@ namespace Garden
                     var garden = visitSnapshot.gardens[index];
                     if (label != null) label.text = garden.plantName ?? "Garden";
                     if (status != null) status.text = garden.mature ? "Mature" : "Growing";
+                    break;
+
+                case CampBuildingType.Apotheke:
+                    cell.AddToClassList("grid-cell--apotheke");
+                    if (label != null) label.text = "Apotheke";
+                    if (status != null) status.text = "Mixing";
                     break;
             }
         }

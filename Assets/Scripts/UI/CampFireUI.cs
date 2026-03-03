@@ -104,6 +104,12 @@ namespace Garden
                 };
             }
 
+            // Wire Apotheke building tap
+            if (campsiteView != null)
+            {
+                campsiteView.OnApothekeTapped += () => OpenOverlay("Seeds", apothekePanel);
+            }
+
             // Location gate
             if (WeatherService.Instance != null && !WeatherService.Instance.IsLocationResolved)
             {
