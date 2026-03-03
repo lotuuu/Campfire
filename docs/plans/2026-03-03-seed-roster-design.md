@@ -9,13 +9,15 @@ Replace the 3 placeholder seeds (Fern, Sunflower, Moonvine) with 10 real-world f
 | 1 | Basil | Herb | 1h | 1 | 0 | Basil Leaves | Heat 20-30°C, Waterings 1 |
 | 2 | Chamomile | Herb | 1.5h | 2 | 0 | Chamomile Flowers | Heat 15-25°C, Sunlight 50-90% |
 | 3 | Marigold | Flower | 2h | 2 | 10 | Marigold Petals | Heat 20-35°C, Sunlight 60-100%, Waterings 2 |
-| 4 | Mint | Herb | 3h | 3 | 15 | Mint Leaves | Humidity 50-80%, Rain 20-60%, Waterings 2 |
-| 5 | Lavender | Flower | 5h | 3 | 25 | Lavender Flowers | Heat 25-35°C, Sunlight 70-100%, Wind 5-15 m/s |
-| 6 | Poppy | Flower | 8h | 4 | 40 | Poppy Petals | Heat 15-25°C, Rain 30-70%, Humidity 40-75% |
-| 7 | Jasmine | Flower | 12h | 4 | 60 | Jasmine Flowers | Heat 20-30°C, Humidity 60-90%, Waterings 3 |
-| 8 | Rosemary | Herb | 18h | 5 | 80 | Rosemary Sprigs | Heat 20-35°C, Sunlight 60-100%, Wind 5-20 m/s |
-| 9 | Dahlia | Flower | 30h | 6 | 120 | Dahlia Blooms | Heat 18-28°C, Humidity 50-80%, Sunlight 50-90%, Waterings 4 |
-| 10 | Moonflower | Flower | 48h | 8 | 200 | Moonflower Blossoms | Humidity 60-90%, Moon: Full Moon (x3), Waterings 3 |
+| 4 | Snowdrop | Flower | 2.5h | 2 | 10 | Snowdrop Bells | Heat 0-10°C, Humidity 50-80%, Waterings 1 |
+| 5 | Mint | Herb | 3h | 3 | 15 | Mint Leaves | Humidity 50-80%, Rain 20-60%, Waterings 2 |
+| 6 | Lavender | Flower | 5h | 3 | 25 | Lavender Flowers | Heat 25-35°C, Sunlight 70-100%, Wind 5-15 m/s |
+| 7 | Pansy | Flower | 6h | 3 | 30 | Pansy Petals | Heat 5-15°C, Rain 20-60%, Sunlight 40-80% |
+| 8 | Poppy | Flower | 8h | 4 | 40 | Poppy Petals | Heat 15-25°C, Rain 30-70%, Humidity 40-75% |
+| 9 | Jasmine | Flower | 12h | 4 | 60 | Jasmine Flowers | Heat 20-30°C, Humidity 60-90%, Waterings 3 |
+| 10 | Rosemary | Herb | 18h | 5 | 80 | Rosemary Sprigs | Heat 20-35°C, Sunlight 60-100%, Wind 5-20 m/s |
+| 11 | Dahlia | Flower | 30h | 6 | 120 | Dahlia Blooms | Heat 18-28°C, Humidity 50-80%, Sunlight 50-90%, Waterings 4 |
+| 12 | Moonflower | Flower | 48h | 8 | 200 | Moonflower Blossoms | Humidity 60-90%, Moon: Full Moon (x3), Waterings 3 |
 
 ## Design Rationale
 
