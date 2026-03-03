@@ -357,6 +357,7 @@ namespace Garden
 
                 case CampBuildingType.Plot:
                     cell.AddToClassList("grid-cell--plot");
+                    ApplySkinColors(cell, SaveManager.Instance.Data.plots[index].skinName);
                     var plot = SaveManager.Instance.Data.plots[index];
                     if (label != null) label.text = string.IsNullOrEmpty(plot.seedName) ? "Plot" : PlotManager.GetSeedDisplayName(plot.seedName);
                     if (status != null) status.text = plot.state.ToString();
@@ -371,6 +372,7 @@ namespace Garden
 
                 case CampBuildingType.Vase:
                     cell.AddToClassList("grid-cell--vase");
+                    ApplySkinColors(cell, SaveManager.Instance.Data.vases[index].skinName);
                     var vase = SaveManager.Instance.Data.vases[index];
                     if (label != null) label.text = $"{vase.currentWater}/{vase.capacity}";
                     if (status != null) status.text = vase.state.ToString();
@@ -396,6 +398,7 @@ namespace Garden
 
                 case CampBuildingType.MallumHouse:
                     cell.AddToClassList("grid-cell--mallum-house");
+                    ApplySkinColors(cell, SaveManager.Instance.Data.mallumHouses[index].skinName);
                     if (label != null) label.text = "Mallum House";
                     if (status != null)
                     {
@@ -840,8 +843,16 @@ namespace Garden
 
             Color fillColor = new Color(0.16f, 0.1f, 0.05f, 0.3f);
             Color borderColor = new Color(0.55f, 0.39f, 0.2f, 0.15f);
-            el.customStyle.TryGetValue(s_HexFill, out fillColor);
-            el.customStyle.TryGetValue(s_HexBorder, out borderColor);
+            if (el.userData is (Color skinFill, Color skinBorder))
+            {
+                fillColor = skinFill;
+                borderColor = skinBorder;
+            }
+            else
+            {
+                el.customStyle.TryGetValue(s_HexFill, out fillColor);
+                el.customStyle.TryGetValue(s_HexBorder, out borderColor);
+            }
 
             float cx = w / 2f;
             float cy = h / 2f;
@@ -878,6 +889,14 @@ namespace Garden
             painter.strokeColor = borderColor;
             painter.lineWidth = el.ClassListContains("grid-cell--flame") ? 3f : 2f;
             painter.Stroke();
+        }
+
+        private static void ApplySkinColors(VisualElement cell, string skinName)
+        {
+            if (string.IsNullOrEmpty(skinName) || SkinManager.Instance == null) return;
+            var skin = SkinManager.Instance.GetSkin(skinName);
+            if (skin != null)
+                cell.userData = (skin.hexFillColor, skin.hexBorderColor);
         }
 
         // ── Interaction Panel ──
