@@ -103,6 +103,11 @@ namespace Garden
                 BirdManager.Instance.OnBirdPlaced += RebuildGrid;
                 BirdManager.Instance.OnBirdCollected += _ => RebuildGrid();
             }
+            if (MerchantManager.Instance != null)
+            {
+                MerchantManager.Instance.OnMerchantArrived += RebuildGrid;
+                MerchantManager.Instance.OnMerchantDeparted += RebuildGrid;
+            }
 
             // Tap backdrop to close interaction panel (consumes the tap)
             interactionBackdrop?.RegisterCallback<ClickEvent>(evt =>
@@ -1116,7 +1121,12 @@ namespace Garden
                         if (seedData.recipe.useMoon)
                             AddRecipeTag(tags, seedData.recipe.requiredMoonPhase.ToString());
                         if (seedData.recipe.useWaterings)
-                            AddRecipeTag(tags, $"Water x{seedData.recipe.idealWaterings}");
+                        {
+                            string waterTag = seedData.recipe.idealWateringsMin == seedData.recipe.idealWateringsMax
+                                ? $"Water x{seedData.recipe.idealWateringsMin}"
+                                : $"Water x{seedData.recipe.idealWateringsMin}-{seedData.recipe.idealWateringsMax}";
+                            AddRecipeTag(tags, waterTag);
+                        }
 
                         if (tags.childCount > 0)
                             card.Add(tags);

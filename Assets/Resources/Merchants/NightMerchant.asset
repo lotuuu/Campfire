@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 79a4ce88f51974357b9b620062accc65, type: 3}
+  m_Name: NightMerchant
+  m_EditorClassIdentifier:
+  merchantName: Night Merchant
+  flavorText: Rare seeds, if you have the harvest to trade...
+  offerCount: 3
+  offerPool:
+  - requiredFlameLevel: 1
+    costs:
+    - itemName: Basil_harvest
+      count: 5
+    rewardSeed: {fileID: 11400000, guid: b2c3d4e5f6071829a3b4c5d6e7f80912, type: 2}
+    rewardCount: 1
+    weight: 1
+  - requiredFlameLevel: 1
+    costs:
+    - itemName: Mint_harvest
+      count: 3
+    rewardSeed: {fileID: 11400000, guid: e5f607182930415bc6d7e8f901234567, type: 2}
+    rewardCount: 1
+    weight: 1
+  - requiredFlameLevel: 2
+    costs:
+    - itemName: Chamomile_harvest
+      count: 5
+    rewardSeed: {fileID: 11400000, guid: 2930415b6c7d8e9f0123456789abcdef, type: 2}
+    rewardCount: 1
+    weight: 1
+  - requiredFlameLevel: 2
+    costs:
+    - itemName: Lavender_harvest
+      count: 3
+    - itemName: Rosemary_harvest
+      count: 2
+    rewardSeed: {fileID: 11400000, guid: 30415b6c7d8e9f01234567890abcdef1, type: 2}
+    rewardCount: 1
+    weight: 1
+  - requiredFlameLevel: 3
+    costs:
+    - itemName: Dahlia_harvest
+      count: 8
+    rewardSeed: {fileID: 11400000, guid: 07182930415b6c7de8f9012345678abc, type: 2}
+    rewardCount: 2
+    weight: 1
+  - requiredFlameLevel: 3
+    costs:
+    - itemName: Moonflower_harvest
+      count: 5
+    rewardSeed: {fileID: 11400000, guid: f607182930415b6cd7e8f90123456789, type: 2}
+    rewardCount: 1
+    weight: 1

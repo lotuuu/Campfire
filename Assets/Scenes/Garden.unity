@@ -161,8 +161,53 @@ Transform:
   - {fileID: 922804826}
   - {fileID: 559763770}
   - {fileID: 966843384}
+  - {fileID: 45717527}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &45717526
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 45717527}
+  - component: {fileID: 45717528}
+  m_Layer: 0
+  m_Name: MerchantManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &45717527
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 45717526}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 12194301}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &45717528
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 45717526}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc1230addac754a0a9df6081092ce490, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Garden::Garden.MerchantManager
 --- !u!1 &134425024
 GameObject:
   m_ObjectHideFlags: 0
@@ -776,6 +821,7 @@ GameObject:
   - component: {fileID: 1564428249}
   - component: {fileID: 1564428251}
   - component: {fileID: 1564428250}
+  - component: {fileID: 1564428252}
   m_Layer: 0
   m_Name: --- UI ---
   m_TagString: Untagged
@@ -965,6 +1011,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 56e49b5494d2f4dfabd7f4ba52dd38f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Garden::Garden.QuestUI
+--- !u!114 &1564428252
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1564428222}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df2d0abe6b88e4ae2ab9bd15867c3d48, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Garden::Garden.MerchantUI
 --- !u!1 &1877059791
 GameObject:
   m_ObjectHideFlags: 0
