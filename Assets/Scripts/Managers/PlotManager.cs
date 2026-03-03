@@ -251,6 +251,7 @@ namespace Garden
         {
             var data = SaveManager.Instance.Data;
             bool changed = false;
+
             for (int i = 0; i < data.plots.Count; i++)
             {
                 var plot = data.plots[i];
@@ -259,6 +260,24 @@ namespace Garden
                 plot.snapshots.RecordSnapshot(weather);
                 changed = true;
             }
+
+            if (CheckRainEvent(data, weather.condition, GameTime.UtcNow))
+            {
+                VaseManager.RainFillAllVases(data.vases);
+
+                foreach (var mallum in data.mallums)
+                {
+                    if (mallum.state == MallumState.FetchingWater)
+                        MallumManager.FreeMallumFromWater(mallum);
+                }
+
+                RainWaterAllPlots(data.plots, GameTime.UtcNow);
+                changed = true;
+
+                VaseManager.Instance?.NotifyChanged();
+                MallumManager.Instance?.NotifyChanged();
+            }
+
             if (changed) SaveManager.Instance.Save();
         }
 

@@ -15,6 +15,8 @@ namespace Garden
         public MallumConfig Config => config;
         public event Action OnMallumsChanged;
 
+        public void NotifyChanged() => OnMallumsChanged?.Invoke();
+
         private void Awake()
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }

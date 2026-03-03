@@ -14,6 +14,8 @@ namespace Garden
 
         public event Action OnVasesChanged;
 
+        public void NotifyChanged() => OnVasesChanged?.Invoke();
+
         private void Awake()
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
