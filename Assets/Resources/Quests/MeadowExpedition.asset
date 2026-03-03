@@ -18,11 +18,11 @@ MonoBehaviour:
   requiredFlameLevel: 2
   rewardRolls: 3
   rewardPool:
-  - seed: {fileID: 11400000, guid: e54bbc52a7aa545db81e5db5cb6e7207, type: 2}
+  - seed: {fileID: 11400000, guid: c3d4e5f607182930b4c5d6e7f8091234, type: 2}
     weight: 3
     minCount: 1
     maxCount: 2
-  - seed: {fileID: 11400000, guid: 4819dfb6b70d748eb857e371f0438e68, type: 2}
+  - seed: {fileID: 11400000, guid: 4a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d, type: 2}
     weight: 2
     minCount: 1
-    maxCount: 1
+    maxCount: 2
