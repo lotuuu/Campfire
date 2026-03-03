@@ -33,23 +33,26 @@ namespace Garden.Tests
         }
 
         [Test]
-        public void ScoreWaterings_ExactMatch_Returns1()
+        public void Waterings_InRange_Returns1()
         {
-            float score = GrowthRecipe.ScoreWaterings(3, 3);
+            // ScoreRange(3, 2, 4, 2) — 3 is within [2,4]
+            float score = GrowthRecipe.ScoreRange(3, 2, 4, 2);
             Assert.AreEqual(1f, score, 0.001f);
         }
 
         [Test]
-        public void ScoreWaterings_Off2_Returns0Point5()
+        public void Waterings_OneOutside_ReturnsHalf()
         {
-            float score = GrowthRecipe.ScoreWaterings(5, 3);
+            // ScoreRange(5, 2, 4, 2) — 1 past max, tol 2 → 0.5
+            float score = GrowthRecipe.ScoreRange(5, 2, 4, 2);
             Assert.AreEqual(0.5f, score, 0.001f);
         }
 
         [Test]
-        public void ScoreWaterings_Off4OrMore_Returns0()
+        public void Waterings_BeyondTolerance_Returns0()
         {
-            float score = GrowthRecipe.ScoreWaterings(7, 3);
+            // ScoreRange(7, 2, 4, 2) — 3 past max, tol 2 → 0
+            float score = GrowthRecipe.ScoreRange(7, 2, 4, 2);
             Assert.AreEqual(0f, score, 0.001f);
         }
 
@@ -89,7 +92,8 @@ namespace Garden.Tests
                 idealTempMin = 20f, idealTempMax = 30f,
                 heatTolerance = 10f, heatWeight = 2f,
                 useWaterings = true,
-                idealWaterings = 3, wateringsWeight = 1f
+                idealWateringsMin = 2, idealWateringsMax = 4,
+                wateringsTolerance = 2f, wateringsWeight = 1f
             };
             var snapshots = new GrowthSnapshots
             {

@@ -48,7 +48,9 @@ namespace Garden
 
         [Header("Waterings")]
         public bool useWaterings;
-        public int idealWaterings;
+        public int idealWateringsMin;
+        public int idealWateringsMax;
+        public float wateringsTolerance = 2f;
         public float wateringsWeight = 1f;
 
         public float Evaluate(GrowthSnapshots snapshots, int waterCount)
@@ -98,7 +100,7 @@ namespace Garden
             }
             if (useWaterings)
             {
-                scoreSum += ScoreWaterings(waterCount, idealWaterings) * wateringsWeight;
+                scoreSum += ScoreRange(waterCount, idealWateringsMin, idealWateringsMax, wateringsTolerance) * wateringsWeight;
                 weightSum += wateringsWeight;
             }
 
@@ -114,11 +116,6 @@ namespace Garden
             return Mathf.Clamp01(1f - distance / tolerance);
         }
 
-        public static float ScoreWaterings(int actual, int ideal)
-        {
-            int diff = Mathf.Abs(actual - ideal);
-            return Mathf.Clamp01(1f - diff * 0.25f);
-        }
     }
 
     [Serializable]

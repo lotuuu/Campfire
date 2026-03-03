@@ -187,7 +187,12 @@ namespace Garden
             if (recipe.useMoon)
                 AddDimensionRow(container, "Moon", recipe.requiredMoonPhase.ToString(), recipe.moonWeight);
             if (recipe.useWaterings)
-                AddDimensionRow(container, "Waterings", $"{recipe.idealWaterings}", recipe.wateringsWeight);
+            {
+                string waterStr = recipe.idealWateringsMin == recipe.idealWateringsMax
+                    ? $"{recipe.idealWateringsMin}"
+                    : $"{recipe.idealWateringsMin}-{recipe.idealWateringsMax}";
+                AddDimensionRow(container, "Waterings", waterStr, recipe.wateringsWeight);
+            }
         }
 
         internal static void AddDimensionRow(VisualElement container, string label, string value, float weight)

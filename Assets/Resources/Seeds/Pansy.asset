@@ -45,7 +45,9 @@ MonoBehaviour:
     requiredMoonPhase: 0
     moonWeight: 1
     useWaterings: 0
-    idealWaterings: 0
+    idealWateringsMin: 0
+    idealWateringsMax: 0
+    wateringsTolerance: 2
     wateringsWeight: 1
   icon: {fileID: 0}
   growthSprites: []
