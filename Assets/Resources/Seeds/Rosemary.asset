@@ -10,43 +10,43 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4b1ea091be0f647ae96e7e3f22d8a36c, type: 3}
-  m_Name: Moonvine
+  m_Name: Rosemary
   m_EditorClassIdentifier:
-  seedName: Moonvine
-  growthDurationHours: 8
+  seedName: Rosemary
+  growthDurationHours: 18
   baseDrops: 5
   recipe:
-    useHeat: 0
-    idealTempMin: 0
-    idealTempMax: 30
+    useHeat: 1
+    idealTempMin: 20
+    idealTempMax: 35
     heatTolerance: 10
     heatWeight: 1
-    useWind: 0
-    idealWindMin: 0
-    idealWindMax: 10
+    useWind: 1
+    idealWindMin: 5
+    idealWindMax: 20
     windTolerance: 5
     windWeight: 1
-    useHumidity: 1
-    idealHumidityMin: 50
-    idealHumidityMax: 90
+    useHumidity: 0
+    idealHumidityMin: 0
+    idealHumidityMax: 80
     humidityTolerance: 20
     humidityWeight: 1
-    useSunlight: 0
-    idealSunlightMin: 0
+    useSunlight: 1
+    idealSunlightMin: 60
     idealSunlightMax: 100
     sunlightTolerance: 20
-    sunlightWeight: 1
+    sunlightWeight: 1.5
     useRain: 0
     idealRainMin: 0
     idealRainMax: 1
     rainTolerance: 0.3
     rainWeight: 1
-    useMoon: 1
-    requiredMoonPhase: 4
-    moonWeight: 3
-    useWaterings: 1
-    idealWaterings: 2
-    wateringsWeight: 0.5
+    useMoon: 0
+    requiredMoonPhase: 0
+    moonWeight: 1
+    useWaterings: 0
+    idealWaterings: 0
+    wateringsWeight: 1
   icon: {fileID: 0}
   growthSprites: []
-  manaCost: 50
+  manaCost: 80

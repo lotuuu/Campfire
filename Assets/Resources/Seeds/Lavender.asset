@@ -10,20 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4b1ea091be0f647ae96e7e3f22d8a36c, type: 3}
-  m_Name: Sunflower
+  m_Name: Lavender
   m_EditorClassIdentifier:
-  seedName: Sunflower
-  growthDurationHours: 4
+  seedName: Lavender
+  growthDurationHours: 5
   baseDrops: 3
   recipe:
     useHeat: 1
     idealTempMin: 25
-    idealTempMax: 40
+    idealTempMax: 35
     heatTolerance: 10
-    heatWeight: 2
-    useWind: 0
-    idealWindMin: 0
-    idealWindMax: 10
+    heatWeight: 1.5
+    useWind: 1
+    idealWindMin: 5
+    idealWindMax: 15
     windTolerance: 5
     windWeight: 1
     useHumidity: 0
@@ -32,20 +32,20 @@ MonoBehaviour:
     humidityTolerance: 20
     humidityWeight: 1
     useSunlight: 1
-    idealSunlightMin: 60
+    idealSunlightMin: 70
     idealSunlightMax: 100
     sunlightTolerance: 20
-    sunlightWeight: 2
-    useRain: 1
+    sunlightWeight: 1.5
+    useRain: 0
     idealRainMin: 0
-    idealRainMax: 0.2
+    idealRainMax: 1
     rainTolerance: 0.3
     rainWeight: 1
     useMoon: 0
     requiredMoonPhase: 0
     moonWeight: 1
-    useWaterings: 1
-    idealWaterings: 3
+    useWaterings: 0
+    idealWaterings: 0
     wateringsWeight: 1
   icon: {fileID: 0}
   growthSprites: []

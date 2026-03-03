@@ -47,7 +47,7 @@ namespace Garden
             {
                 return new VisitorGift { type = VisitorGiftType.Water, amount = 3 };
             }
-            return new VisitorGift { type = VisitorGiftType.Seed, seedName = "Fern", amount = 1 };
+            return new VisitorGift { type = VisitorGiftType.Seed, seedName = "Chamomile", amount = 1 };
         }
 
         private void ApplyGift(SaveData data, VisitorGift gift)

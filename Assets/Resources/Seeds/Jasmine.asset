@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4b1ea091be0f647ae96e7e3f22d8a36c, type: 3}
-  m_Name: Fern
+  m_Name: Jasmine
   m_EditorClassIdentifier:
-  seedName: Fern
-  growthDurationHours: 2
-  baseDrops: 2
+  seedName: Jasmine
+  growthDurationHours: 12
+  baseDrops: 4
   recipe:
     useHeat: 1
-    idealTempMin: 15
-    idealTempMax: 25
+    idealTempMin: 20
+    idealTempMax: 30
     heatTolerance: 10
     heatWeight: 1
     useWind: 0
@@ -30,23 +30,23 @@ MonoBehaviour:
     idealHumidityMin: 60
     idealHumidityMax: 90
     humidityTolerance: 20
-    humidityWeight: 1
+    humidityWeight: 1.5
     useSunlight: 0
     idealSunlightMin: 0
     idealSunlightMax: 100
     sunlightTolerance: 20
     sunlightWeight: 1
-    useRain: 1
-    idealRainMin: 0.3
-    idealRainMax: 0.8
+    useRain: 0
+    idealRainMin: 0
+    idealRainMax: 1
     rainTolerance: 0.3
-    rainWeight: 1.5
+    rainWeight: 1
     useMoon: 0
     requiredMoonPhase: 0
     moonWeight: 1
     useWaterings: 1
-    idealWaterings: 2
-    wateringsWeight: 0.5
+    idealWaterings: 3
+    wateringsWeight: 1
   icon: {fileID: 0}
   growthSprites: []
-  manaCost: 0
+  manaCost: 60

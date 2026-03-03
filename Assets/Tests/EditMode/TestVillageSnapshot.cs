@@ -12,7 +12,7 @@ namespace Garden.Tests
             var saveData = new SaveData { flameLevel = 3 };
             saveData.plots.Add(new PlotSave
             {
-                seedName = "Fern", state = PlotState.Growing, gridX = 1, gridY = 0
+                seedName = "Basil", state = PlotState.Growing, gridX = 1, gridY = 0
             });
             saveData.vases.Add(new VaseSave
             {
@@ -27,7 +27,7 @@ namespace Garden.Tests
 
             Assert.AreEqual(3, snapshot.flameLevel);
             Assert.AreEqual(1, snapshot.plots.Count);
-            Assert.AreEqual("Fern", snapshot.plots[0].seedName);
+            Assert.AreEqual("Basil", snapshot.plots[0].seedName);
             Assert.AreEqual("Growing", snapshot.plots[0].state);
             Assert.AreEqual(1, snapshot.vases.Count);
             Assert.AreEqual(3, snapshot.vases[0].currentWater);
@@ -42,7 +42,7 @@ namespace Garden.Tests
             var snapshot = new VillageSnapshot { flameLevel = 2 };
             snapshot.plots.Add(new SnapshotPlot
             {
-                seedName = "Sunflower", state = "Mature", gridX = 1, gridY = 0
+                seedName = "Lavender", state = "Mature", gridX = 1, gridY = 0
             });
 
             var dict = snapshot.ToDictionary();
@@ -50,15 +50,15 @@ namespace Garden.Tests
 
             Assert.AreEqual(2, loaded.flameLevel);
             Assert.AreEqual(1, loaded.plots.Count);
-            Assert.AreEqual("Sunflower", loaded.plots[0].seedName);
+            Assert.AreEqual("Lavender", loaded.plots[0].seedName);
         }
 
         [Test]
         public void GiftItem_StoresTypeNameCount()
         {
-            var item = new GiftItem { type = "seed", name = "Moonvine", count = 2 };
+            var item = new GiftItem { type = "seed", name = "Moonflower", count = 2 };
             Assert.AreEqual("seed", item.type);
-            Assert.AreEqual("Moonvine", item.name);
+            Assert.AreEqual("Moonflower", item.name);
             Assert.AreEqual(2, item.count);
         }
 
@@ -76,7 +76,7 @@ namespace Garden.Tests
         [Test]
         public void GiftItem_SeedAndItemTypes()
         {
-            var seed = new GiftItem { type = "seed", name = "Fern", count = 3 };
+            var seed = new GiftItem { type = "seed", name = "Basil", count = 3 };
             var item = new GiftItem { type = "item", name = "Fertilizer", count = 1 };
             Assert.AreEqual("seed", seed.type);
             Assert.AreEqual("item", item.type);

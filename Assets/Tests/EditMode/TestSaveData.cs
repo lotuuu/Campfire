@@ -29,9 +29,9 @@ namespace Garden.Tests
                 flameLevel = 3,
                 lastManaCollectTime = 1000f,
             };
-            data.seedInventory.Add(new SeedInventoryEntry { seedName = "Fern", count = 5 });
+            data.seedInventory.Add(new SeedInventoryEntry { seedName = "Basil", count = 5 });
             data.vases.Add(new VaseSave { capacity = 10, currentWater = 7 });
-            data.plots.Add(new PlotSave { seedName = "Fern", waterCount = 2, state = PlotState.Growing });
+            data.plots.Add(new PlotSave { seedName = "Basil", waterCount = 2, state = PlotState.Growing });
             data.gardens.Add(new GardenSave { plantName = "Oak", mature = true });
             data.items.Add(new InventoryItem { itemName = "Acorn", count = 3 });
 
@@ -41,7 +41,7 @@ namespace Garden.Tests
             Assert.AreEqual(3, restored.flameLevel);
             Assert.AreEqual(123.5f, restored.mana);
             Assert.AreEqual(1, restored.seedInventory.Count);
-            Assert.AreEqual("Fern", restored.seedInventory[0].seedName);
+            Assert.AreEqual("Basil", restored.seedInventory[0].seedName);
             Assert.AreEqual(1, restored.vases.Count);
             Assert.AreEqual(7, restored.vases[0].currentWater);
             Assert.AreEqual(1, restored.plots.Count);

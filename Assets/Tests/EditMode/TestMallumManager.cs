@@ -86,11 +86,11 @@ namespace Garden.Tests
             {
                 new() { seed = ScriptableObject.CreateInstance<SeedData>(), weight = 1f, minCount = 1, maxCount = 1 }
             };
-            pool[0].seed.seedName = "Fern";
+            pool[0].seed.seedName = "Basil";
 
             var rewards = MallumManager.RollRewards(pool, 3);
             Assert.AreEqual(3, rewards.Count);
-            Assert.AreEqual("Fern", rewards[0].seedName);
+            Assert.AreEqual("Basil", rewards[0].seedName);
         }
 
         [Test]
@@ -102,7 +102,7 @@ namespace Garden.Tests
                 assignedQuestName = "Swamp Forage",
                 pendingRewards = new List<RewardEntry>
                 {
-                    new() { seedName = "Fern", count = 2 }
+                    new() { seedName = "Basil", count = 2 }
                 }
             };
             var rewards = MallumManager.CollectRewards(mallum);

@@ -11,7 +11,7 @@ namespace Garden.Tests
         {
             var plot = new PlotSave
             {
-                seedName = "Fern",
+                seedName = "Basil",
                 plantTimeUtc = DateTime.UtcNow.AddHours(-2).ToString("o"),
                 state = PlotState.Growing
             };
@@ -30,7 +30,7 @@ namespace Garden.Tests
         {
             var plot = new PlotSave
             {
-                seedName = "Fern",
+                seedName = "Basil",
                 state = PlotState.Mature,
                 waterCount = 2
             };
@@ -85,7 +85,7 @@ namespace Garden.Tests
         {
             var plot = new PlotSave
             {
-                seedName = "Fern",
+                seedName = "Basil",
                 state = PlotState.Growing,
                 waterCount = 0
             };
