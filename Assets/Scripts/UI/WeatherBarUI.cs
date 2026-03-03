@@ -56,8 +56,6 @@ namespace Garden
             var tempIcon = root.Q("weather-temp-icon");
             SetIcon(tempIcon, "UI/Icons/weather-temp");
 
-            var debugIcon = root.Q("btn-debug-icon");
-            SetIcon(debugIcon, "UI/Icons/gear");
 
             weatherBar = root.Q("weather-bar");
             forecastPanel = root.Q("forecast-panel");

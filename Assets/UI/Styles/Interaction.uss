@@ -11,15 +11,15 @@
 
 #interaction-panel {
     position: absolute;
-    left: 10%;
-    right: 10%;
+    left: 4%;
+    right: 4%;
     top: 50%;
     translate: 0 -50%;
     background-color: rgba(30, 20, 12, 0.95);
     border-width: 2px;
     border-color: rgba(180, 120, 60, 0.4);
     border-radius: var(--radius-lg);
-    padding: var(--spacing-lg) var(--spacing-xl);
+    padding: var(--spacing-md) var(--spacing-md);
     flex-direction: column;
     align-items: center;
     display: none;
@@ -30,12 +30,13 @@
     color: rgb(230, 210, 180);
     -unity-font-style: bold;
     -unity-text-align: upper-center;
-    margin-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
 }
 
 #interaction-body {
-    margin-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
     align-items: center;
+    align-self: stretch;
 }
 
 .interaction-info {
@@ -57,7 +58,8 @@
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
-    margin-top: var(--spacing-sm);
+    align-self: stretch;
+    margin-top: var(--spacing-xs);
 }
 
 #interaction-actions Button {
@@ -104,7 +106,7 @@
 /* ── Seed Card (plot seed picker) ── */
 
 .seed-picker-scroll {
-    max-height: 600px;
+    max-height: 900px;
     flex-grow: 1;
     align-self: stretch;
 }

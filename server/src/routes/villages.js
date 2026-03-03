@@ -10,13 +10,22 @@ router.put('/', async (req, res) => {
     return res.status(400).json({ error: 'snapshot is required' });
   }
 
+  if (typeof snapshot !== 'object' || snapshot === null || Array.isArray(snapshot)) {
+    return res.status(400).json({ error: 'snapshot must be a JSON object' });
+  }
+
+  const snapshotStr = JSON.stringify(snapshot);
+  if (snapshotStr.length > 102400) {
+    return res.status(413).json({ error: 'Village snapshot too large (max 100KB)' });
+  }
+
   try {
     await pool.query(
       `INSERT INTO villages (player_uid, snapshot, updated_at)
        VALUES ($1, $2, NOW())
        ON CONFLICT (player_uid)
        DO UPDATE SET snapshot = $2, updated_at = NOW()`,
-      [req.user.uid, JSON.stringify(snapshot)]
+      [req.user.uid, snapshotStr]
     );
     res.json({ message: 'Village updated' });
   } catch (err) {

@@ -4,18 +4,18 @@
 #camp-root {
     flex-grow: 1;
     flex-direction: column;
-    background-color: rgb(18, 12, 8);
+    background-color: var(--color-bg-dark);
 }
 
 /* ── Top bar frame ── */
 #top-bar {
     flex-shrink: 0;
     padding: var(--spacing-sm);
-    margin: var(--spacing-xs);
-    background-color: rgba(30, 20, 10, 0.85);
-    border-width: 3px;
-    border-color: rgba(140, 100, 50, 0.5);
-    border-radius: var(--radius-md);
+    margin: 0;
+    background-color: var(--color-bg-panel);
+    border-bottom-width: 3px;
+    border-color: var(--color-border);
+    border-radius: 0;
 }
 
 /* ── Header row ── */
@@ -36,6 +36,15 @@
     border-width: 0;
     padding: 4px;
     margin-left: var(--spacing-xs);
+}
+
+.debug-btn {
+    background-color: transparent;
+    border-width: 0;
+    padding: 2px 6px;
+    margin-left: var(--spacing-xs);
+    font-size: var(--font-xs);
+    color: var(--color-text-dim);
 }
 
 .header-icon {
@@ -114,7 +123,7 @@
     top: 0;
     bottom: 0;
     width: 50%;
-    background-color: rgb(18, 12, 8);
+    background-color: var(--color-bg-dark);
     transition-property: translate;
     transition-duration: 400ms;
     transition-timing-function: ease-in-out;
@@ -142,7 +151,7 @@
     position: absolute;
     align-self: center;
     font-size: var(--font-lg);
-    color: rgb(230, 210, 180);
+    color: var(--color-text);
     opacity: 0;
     transition-property: opacity;
     transition-duration: 200ms;
