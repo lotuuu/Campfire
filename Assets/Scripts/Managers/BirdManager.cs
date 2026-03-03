@@ -77,6 +77,10 @@ namespace Garden
             foreach (var bird in data.birds)
                 occupied.Add((bird.gridX, bird.gridY));
 
+            // Merchants
+            foreach (var merchant in data.merchants)
+                occupied.Add((merchant.gridX, merchant.gridY));
+
             var freeTiles = new List<(int q, int r)>();
             for (int q = -gridRadius; q <= gridRadius; q++)
             {
