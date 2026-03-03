@@ -554,9 +554,12 @@ namespace Garden
 
         private const float CurtainDurationMs = 400f;
 
+        private string visitFriendName;
+
         public void EnterVisitMode(VillageSnapshot snapshot, string friendName = null)
         {
             visitSnapshot = snapshot;
+            visitFriendName = friendName;
             CloseInteractionPanel();
 
             // Set curtain label
@@ -614,15 +617,19 @@ namespace Garden
 
         private void ApplyVisitState(bool toVisit)
         {
+            var weatherBar = GetComponent<WeatherBarUI>();
             if (toVisit)
             {
                 mode = CampsiteMode.Visiting;
+                weatherBar?.SetVisitingName(visitFriendName);
                 RebuildGrid();
             }
             else
             {
                 mode = CampsiteMode.Normal;
                 visitSnapshot = null;
+                visitFriendName = null;
+                weatherBar?.SetVisitingName(null);
                 if (visitBackBtn != null)
                 {
                     visitBackBtn.RemoveFromHierarchy();

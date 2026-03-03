@@ -106,13 +106,22 @@ namespace Garden
         {
             if (playerName == null) return;
             var name = SocialSaveManager.Instance?.Data?.displayName;
-            playerName.text = string.IsNullOrEmpty(name) ? "Camper" : name;
+            playerName.text = (string.IsNullOrEmpty(name) ? "Camper" : name) + "'s Campfire";
         }
 
         private void OnDisplayNameUpdated(string newName)
         {
             if (playerName != null)
-                playerName.text = string.IsNullOrEmpty(newName) ? "Camper" : newName;
+                playerName.text = (string.IsNullOrEmpty(newName) ? "Camper" : newName) + "'s Campfire";
+        }
+
+        public void SetVisitingName(string friendName)
+        {
+            if (playerName == null) return;
+            if (friendName != null)
+                playerName.text = friendName + "'s Campfire";
+            else
+                UpdatePlayerName();
         }
 
         private void OnWeatherBarClicked(ClickEvent evt)
