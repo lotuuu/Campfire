@@ -96,6 +96,8 @@ namespace Garden
                 PlotManager.Instance.OnPlotChanged += _ => RebuildGrid();
             if (VaseManager.Instance != null)
                 VaseManager.Instance.OnVasesChanged += RebuildGrid;
+            if (MallumManager.Instance != null)
+                MallumManager.Instance.OnMallumsChanged += RebuildGrid;
             if (GardenManager.Instance != null)
                 GardenManager.Instance.OnGardenChanged += _ => RebuildGrid();
             if (BirdManager.Instance != null)
@@ -129,6 +131,8 @@ namespace Garden
                 FlameManager.Instance.OnFlameUpgraded -= RebuildGrid;
             if (VaseManager.Instance != null)
                 VaseManager.Instance.OnVasesChanged -= RebuildGrid;
+            if (MallumManager.Instance != null)
+                MallumManager.Instance.OnMallumsChanged -= RebuildGrid;
         }
 
         private void Update()
