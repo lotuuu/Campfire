@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Garden
@@ -28,6 +29,16 @@ namespace Garden
         {
             data.vases.Add(new VaseSave { capacity = baseCapacity, state = VaseState.Empty });
             data.vases.Add(new VaseSave { capacity = baseCapacity, state = VaseState.Empty });
+        }
+
+        public static void RainFillAllVases(List<VaseSave> vases)
+        {
+            foreach (var vase in vases)
+            {
+                vase.currentWater = vase.capacity;
+                vase.state = VaseState.Full;
+                vase.fillStartTimeUtc = null;
+            }
         }
 
         private void CheckFillCompletion()

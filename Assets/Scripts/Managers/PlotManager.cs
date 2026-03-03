@@ -11,6 +11,73 @@ namespace Garden
         public event Action<int> OnPlotChanged;
         public event Action<int, HarvestResult> OnHarvested;
 
+        public static readonly float ManualWaterCooldownHours = 2f;
+        public static readonly float RainWaterCooldownHours = 6f;
+        public static readonly float RainTriggerMinutes = 15f;
+
+        public static bool CanWaterPlot(PlotSave plot, DateTime utcNow, float cooldownHours)
+        {
+            if (plot.state != PlotState.Growing) return false;
+            if (string.IsNullOrEmpty(plot.lastWateredUtc)) return true;
+            var lastWatered = DateTime.Parse(plot.lastWateredUtc, null,
+                System.Globalization.DateTimeStyles.RoundtripKind);
+            return (utcNow - lastWatered).TotalHours >= cooldownHours;
+        }
+
+        public static void ApplyWatering(PlotSave plot, string utcNow)
+        {
+            plot.waterCount++;
+            plot.lastWateredUtc = utcNow;
+        }
+
+        public static int RainWaterAllPlots(List<PlotSave> plots, DateTime utcNow)
+        {
+            int count = 0;
+            string nowStr = utcNow.ToString("o");
+            foreach (var plot in plots)
+            {
+                if (CanWaterPlot(plot, utcNow, RainWaterCooldownHours))
+                {
+                    ApplyWatering(plot, nowStr);
+                    count++;
+                }
+            }
+            return count;
+        }
+
+        public static bool CheckRainEvent(SaveData data, WeatherCondition condition, DateTime utcNow)
+        {
+            bool isRaining = condition == WeatherCondition.Rain || condition == WeatherCondition.Storm;
+
+            if (!isRaining)
+            {
+                data.rainStartTimeUtc = null;
+                return false;
+            }
+
+            if (string.IsNullOrEmpty(data.rainStartTimeUtc))
+            {
+                data.rainStartTimeUtc = utcNow.ToString("o");
+                return false;
+            }
+
+            var rainStart = DateTime.Parse(data.rainStartTimeUtc, null,
+                System.Globalization.DateTimeStyles.RoundtripKind);
+            if ((utcNow - rainStart).TotalMinutes < RainTriggerMinutes)
+                return false;
+
+            if (!string.IsNullOrEmpty(data.lastRainEffectTimeUtc))
+            {
+                var lastEffect = DateTime.Parse(data.lastRainEffectTimeUtc, null,
+                    System.Globalization.DateTimeStyles.RoundtripKind);
+                if (lastEffect >= rainStart)
+                    return false;
+            }
+
+            data.lastRainEffectTimeUtc = utcNow.ToString("o");
+            return true;
+        }
+
         private void Awake()
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
@@ -71,6 +138,7 @@ namespace Garden
             plot.plantTimeUtc = GameTime.UtcNow.ToString("o");
             plot.waterCount = 0;
             plot.snapshots = new GrowthSnapshots();
+            plot.lastWateredUtc = null;
 
             SaveManager.Instance.Save();
             OnPlotChanged?.Invoke(plotIndex);
@@ -82,11 +150,11 @@ namespace Garden
             var data = SaveManager.Instance.Data;
             if (plotIndex < 0 || plotIndex >= data.plots.Count) return false;
             var plot = data.plots[plotIndex];
-            if (plot.state != PlotState.Growing) return false;
+            if (!CanWaterPlot(plot, GameTime.UtcNow, ManualWaterCooldownHours)) return false;
 
             if (!CurrencyManager.Instance.SpendWater(1)) return false;
 
-            plot.waterCount++;
+            ApplyWatering(plot, GameTime.UtcNow.ToString("o"));
 
             SaveManager.Instance.Save();
             OnPlotChanged?.Invoke(plotIndex);
@@ -157,6 +225,7 @@ namespace Garden
             plot.plantTimeUtc = null;
             plot.waterCount = 0;
             plot.snapshots = new GrowthSnapshots();
+            plot.lastWateredUtc = null;
             plot.state = PlotState.Empty;
 
             SaveManager.Instance.Save();
