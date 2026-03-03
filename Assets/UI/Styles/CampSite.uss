@@ -12,9 +12,9 @@
     flex-shrink: 0;
     padding: var(--spacing-sm);
     margin: 0;
-    background-color: var(--color-bg-panel);
+    background-color: rgb(58, 82, 32);
     border-bottom-width: 3px;
-    border-color: var(--color-border);
+    border-color: rgb(90, 120, 50);
     border-radius: 0;
 }
 
