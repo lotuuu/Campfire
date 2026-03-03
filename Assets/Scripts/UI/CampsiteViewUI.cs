@@ -64,9 +64,7 @@ namespace Garden
         // Current grid state
         private int currentGridSize;
         private bool suppressRebuild;
-
-        // Fixed building positions (always present, not saved)
-        private static readonly (int q, int r) ApothekeHex = (1, 0);
+        private bool needsRecenter = true;
 
         // Events
         public event Action OnApothekeTapped;
@@ -171,6 +169,8 @@ namespace Garden
             }
 
             int radius = FlameManager.Instance.Config.GetGridSize(FlameManager.Instance.Level);
+            if (radius != currentGridSize)
+                needsRecenter = true;
             currentGridSize = radius;
 
             // Compute bounding box of all hex cell centers (extended vertically)
@@ -215,7 +215,7 @@ namespace Garden
                 occupied[(data.gardens[i].gridX, data.gardens[i].gridY)] = (CampBuildingType.Garden, i);
 
             // Fixed buildings always take priority
-            occupied[ApothekeHex] = (CampBuildingType.Apotheke, 0);
+            occupied[(data.apothekeGridX, data.apothekeGridY)] = (CampBuildingType.Apotheke, 0);
 
             // Create hex cells (extended vertically by ExtraRows)
             for (int q = -radius; q <= radius; q++)
@@ -260,8 +260,7 @@ namespace Garden
                         CampBuildingType cellType = info.type;
 
                         // Long-press detection on movable buildings
-                        bool isMovable = cellType != CampBuildingType.Flame
-                            && cellType != CampBuildingType.Apotheke;
+                        bool isMovable = cellType != CampBuildingType.Flame;
                         if (isMovable && mode == CampsiteMode.Normal)
                         {
                             int cq = q, cr = r;
@@ -313,10 +312,14 @@ namespace Garden
                 viewport.Add(modeCancelBtn);
             }
 
-            var flameCenter = HexGridUtil.HexToPixel(0, 0, HexSize);
-            float flameCenterX = flameCenter.x + offsetX;
-            float flameCenterY = flameCenter.y + offsetY;
-            panController.CenterOnPoint(flameCenterX, flameCenterY, canvasWidth, canvasHeight);
+            if (needsRecenter)
+            {
+                var flameCenter = HexGridUtil.HexToPixel(0, 0, HexSize);
+                float flameCenterX = flameCenter.x + offsetX;
+                float flameCenterY = flameCenter.y + offsetY;
+                panController.CenterOnPoint(flameCenterX, flameCenterY, canvasWidth, canvasHeight);
+                needsRecenter = false;
+            }
         }
 
         private void PopulateOccupiedCell(VisualElement cell, Label label, Label status,
@@ -632,8 +635,8 @@ namespace Garden
             for (int i = 0; i < visitSnapshot.gardens.Count; i++)
                 occupied[(visitSnapshot.gardens[i].gridX, visitSnapshot.gardens[i].gridY)] = (CampBuildingType.Garden, i);
 
-            // Fixed buildings always take priority
-            occupied[ApothekeHex] = (CampBuildingType.Apotheke, 0);
+            // Fixed buildings always take priority (visitor snapshot doesn't store apotheke pos)
+            occupied[(1, 0)] = (CampBuildingType.Apotheke, 0);
 
             // Create hex cells — read-only, no interaction handlers
             for (int q = -radius; q <= radius; q++)
@@ -1237,6 +1240,10 @@ namespace Garden
                 case CampBuildingType.Garden:
                     data.gardens[index].gridX = newQ;
                     data.gardens[index].gridY = newR;
+                    break;
+                case CampBuildingType.Apotheke:
+                    data.apothekeGridX = newQ;
+                    data.apothekeGridY = newR;
                     break;
             }
             SaveManager.Instance.Save();

@@ -21,6 +21,8 @@ namespace Garden
         public List<MallumHouseSave> mallumHouses = new();
         public string rainStartTimeUtc;
         public string lastRainEffectTimeUtc;
+        public int apothekeGridX = 1;
+        public int apothekeGridY = 0;
     }
 
     [Serializable]
