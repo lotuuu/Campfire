@@ -159,6 +159,7 @@ Transform:
   - {fileID: 1550783022}
   - {fileID: 259463269}
   - {fileID: 922804826}
+  - {fileID: 559763770}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &134425024
@@ -341,6 +342,51 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &559763769
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 559763770}
+  - component: {fileID: 559763771}
+  m_Layer: 0
+  m_Name: MallumManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &559763770
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 559763769}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 12194301}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &559763771
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 559763769}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ce377f4fbee043ceae6aa1ce2338abf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Garden::Garden.MallumManager
+  config: {fileID: 11400000, guid: f07a65c7159784083b46f325640980b9, type: 2}
 --- !u!1 &619394800
 GameObject:
   m_ObjectHideFlags: 0
@@ -682,6 +728,8 @@ GameObject:
   - component: {fileID: 1564428243}
   - component: {fileID: 1564428242}
   - component: {fileID: 1564428249}
+  - component: {fileID: 1564428251}
+  - component: {fileID: 1564428250}
   m_Layer: 0
   m_Name: --- UI ---
   m_TagString: Untagged
@@ -785,7 +833,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e2e9210a280604247a29e2c367cb9662, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Garden::Garden.BuildUI
 --- !u!114 &1564428245
 MonoBehaviour:
@@ -847,6 +895,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ddf3f5a9756b470388e625ad145c84e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Garden::Garden.DebugWeatherPanel
+--- !u!114 &1564428250
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1564428222}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 863adf483b54543d6aa9e2c0d91c17a2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Garden::Garden.QuestButtonUI
+--- !u!114 &1564428251
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1564428222}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 56e49b5494d2f4dfabd7f4ba52dd38f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Garden::Garden.QuestUI
 --- !u!1 &1877059791
 GameObject:
   m_ObjectHideFlags: 0

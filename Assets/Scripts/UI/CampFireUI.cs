@@ -19,6 +19,8 @@ namespace Garden
         private BuildUI build;
         private ResourceDisplayUI resourceDisplay;
         private DebugWeatherPanel debugPanel;
+        private QuestUI questUI;
+        private QuestButtonUI questButton;
 
         private VisualElement overlayContainer;
         private VisualElement overlayBackdrop;
@@ -28,6 +30,7 @@ namespace Garden
         private VisualElement lettersPanel;
         private VisualElement buildPanel;
         private VisualElement debugPanelElement;
+        private VisualElement questsPanel;
 
         private void Awake()
         {
@@ -49,6 +52,8 @@ namespace Garden
             build = GetComponent<BuildUI>();
             resourceDisplay = GetComponent<ResourceDisplayUI>();
             debugPanel = GetComponent<DebugWeatherPanel>();
+            questUI = GetComponent<QuestUI>();
+            questButton = GetComponent<QuestButtonUI>();
 
             weatherBar?.Initialize(root);
             bottomNav?.Initialize(root);
@@ -58,6 +63,8 @@ namespace Garden
             build?.Initialize(root);
             resourceDisplay?.Initialize(root);
             debugPanel?.Initialize(root);
+            questUI?.Initialize(root);
+            questButton?.Initialize(root);
 
             // Overlay setup
             overlayContainer = root.Q("overlay-container");
@@ -68,6 +75,7 @@ namespace Garden
             lettersPanel = root.Q("letters-panel");
             buildPanel = root.Q("build-panel");
             debugPanelElement = root.Q("debug-panel");
+            questsPanel = root.Q("quests-panel");
 
             var closeBtn = root.Q<Button>("overlay-close");
             closeBtn?.RegisterCallback<ClickEvent>(_ => CloseOverlay());
@@ -81,6 +89,22 @@ namespace Garden
                 bottomNav.OnApothekeClicked += () => OpenOverlay("Seeds", apothekePanel);
                 bottomNav.OnLettersClicked += () => OpenOverlay("Mail", lettersPanel);
                 bottomNav.OnBuildClicked += () => OpenOverlay("Craft", buildPanel);
+            }
+
+            // Wire quest float button
+            var questFloatBtn = root.Q<Button>("quest-float-btn");
+            if (questFloatBtn != null)
+            {
+                questFloatBtn.clicked += () =>
+                {
+                    questUI?.Refresh();
+                    OpenOverlay("Quests", questsPanel);
+                };
+            }
+
+            if (MallumManager.Instance != null)
+            {
+                MallumManager.Instance.OnMallumsChanged += () => questButton?.UpdateBadge();
             }
 
             // Wire debug button
@@ -142,6 +166,7 @@ namespace Garden
             if (lettersPanel != null) lettersPanel.style.display = DisplayStyle.None;
             if (buildPanel != null) buildPanel.style.display = DisplayStyle.None;
             if (debugPanelElement != null) debugPanelElement.style.display = DisplayStyle.None;
+            if (questsPanel != null) questsPanel.style.display = DisplayStyle.None;
         }
     }
 }
