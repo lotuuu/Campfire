@@ -49,4 +49,4 @@ MonoBehaviour:
     wateringsWeight: 0.5
   icon: {fileID: 0}
   growthSprites: []
-  manaCost: 0
+  manaCost: 10
