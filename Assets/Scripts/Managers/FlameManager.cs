@@ -19,7 +19,7 @@ namespace Garden
             get
             {
                 var data = SaveManager.Instance.Data;
-                return data.plots.Count + data.vases.Count + data.gardens.Count;
+                return data.plots.Count + data.vases.Count + data.gardens.Count + data.mallumHouses.Count;
             }
         }
 
