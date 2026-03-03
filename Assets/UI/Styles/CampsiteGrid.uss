@@ -158,6 +158,24 @@
     background-color: rgba(120, 60, 160, 0.4);
 }
 
+/* ── Bird cell ── */
+.grid-cell--bird {
+    --hex-fill: rgba(180, 220, 255, 0.4);
+    --hex-border: rgba(100, 160, 220, 0.45);
+}
+
+.grid-cell--bird:hover {
+    --hex-fill: rgba(190, 230, 255, 0.55);
+    --hex-border: rgba(120, 180, 240, 0.65);
+}
+
+.grid-cell--bird .cell-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    background-color: rgba(100, 160, 220, 0.4);
+}
+
 /* ── Cell inner elements ── */
 .cell-icon {
     margin-bottom: var(--spacing-xxs);
