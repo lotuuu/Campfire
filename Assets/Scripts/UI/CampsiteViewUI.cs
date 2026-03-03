@@ -494,29 +494,43 @@ namespace Garden
             // Plot option
             if (PlotManager.Instance != null)
             {
-                var plotBtn = new Button(() =>
+                var plotCost = PlotManager.Instance.GetNextPlotCost();
+                if (plotCost != null)
                 {
-                    if (PlotManager.Instance.CraftPlot(gridX, gridY))
-                        CloseInteractionPanel();
-                }) { text = "New Plot" };
-                plotBtn.AddToClassList("interaction-btn-primary");
-                plotBtn.SetEnabled(canPlace);
-                interactionActions.Add(plotBtn);
+                    string plotCostText = FormatBuildingCost(plotCost);
+                    bool canAffordPlot = canPlace
+                        && CurrencyManager.Instance.CanAffordMana(plotCost.manaCost)
+                        && MallumManager.CanAffordSeeds(SaveManager.Instance.Data.seedInventory, plotCost.seedCosts);
+                    var plotBtn = new Button(() =>
+                    {
+                        if (PlotManager.Instance.CraftPlot(gridX, gridY))
+                            CloseInteractionPanel();
+                    }) { text = $"New Plot ({plotCostText})" };
+                    plotBtn.AddToClassList("interaction-btn-primary");
+                    plotBtn.SetEnabled(canAffordPlot);
+                    interactionActions.Add(plotBtn);
+                }
             }
 
             // Vase option
             if (VaseManager.Instance != null)
             {
-                float cost = VaseManager.Instance.Config.CraftCostMana;
-                bool canAfford = canPlace && CurrencyManager.Instance.CanAffordMana(cost);
-                var vaseBtn = new Button(() =>
+                var vaseCost = VaseManager.Instance.GetNextVaseCost();
+                if (vaseCost != null)
                 {
-                    if (VaseManager.Instance.CraftVase(gridX, gridY))
-                        CloseInteractionPanel();
-                }) { text = $"New Vase ({cost:F0} Mana)" };
-                vaseBtn.AddToClassList("interaction-btn-primary");
-                vaseBtn.SetEnabled(canAfford);
-                interactionActions.Add(vaseBtn);
+                    string vaseCostText = FormatBuildingCost(vaseCost);
+                    bool canAffordVase = canPlace
+                        && CurrencyManager.Instance.CanAffordMana(vaseCost.manaCost)
+                        && MallumManager.CanAffordSeeds(SaveManager.Instance.Data.seedInventory, vaseCost.seedCosts);
+                    var vaseBtn = new Button(() =>
+                    {
+                        if (VaseManager.Instance.CraftVase(gridX, gridY))
+                            CloseInteractionPanel();
+                    }) { text = $"New Vase ({vaseCostText})" };
+                    vaseBtn.AddToClassList("interaction-btn-primary");
+                    vaseBtn.SetEnabled(canAffordVase);
+                    interactionActions.Add(vaseBtn);
+                }
             }
 
             // Mallum House option
@@ -1329,6 +1343,14 @@ namespace Garden
             int hours = totalMinutes / 60;
             int mins = totalMinutes % 60;
             return mins > 0 ? $"{hours}h {mins}m" : $"{hours}h";
+        }
+
+        private static string FormatBuildingCost(BuildingCost cost)
+        {
+            string text = $"{cost.manaCost:F0} Mana";
+            foreach (var sc in cost.seedCosts)
+                text += $" + {sc.count} {sc.seedName}";
+            return text;
         }
 
         private void CloseInteractionPanel()

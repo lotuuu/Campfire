@@ -27,9 +27,14 @@ namespace Garden
             {
                 bool canPlace = FlameManager.Instance.CanPlaceEntity;
                 string capText = $"{FlameManager.Instance.CurrentEntityCount}/{FlameManager.Instance.MaxEntities}";
-                AddBuildItem("New Plot", canPlace ? $"Place on grid ({capText})" : $"Cap reached ({capText})", () =>
+                var plotCost = PlotManager.Instance.GetNextPlotCost();
+                bool canAfford = canPlace && plotCost != null
+                    && CurrencyManager.Instance.CanAffordMana(plotCost.manaCost)
+                    && MallumManager.CanAffordSeeds(SaveManager.Instance.Data.seedInventory, plotCost.seedCosts);
+                string plotCostText = plotCost != null ? FormatBuildingCost(plotCost) : "???";
+                AddBuildItem("New Plot", canPlace ? $"{plotCostText} ({capText})" : $"Cap reached ({capText})", () =>
                 {
-                    if (canPlace)
+                    if (canAfford)
                         OnRequestPlacement?.Invoke(CampBuildingType.Plot);
                 });
             }
@@ -40,9 +45,12 @@ namespace Garden
                 string capText = FlameManager.Instance != null
                     ? $"{FlameManager.Instance.CurrentEntityCount}/{FlameManager.Instance.MaxEntities}"
                     : "";
-                float cost = VaseManager.Instance.Config.CraftCostMana;
-                bool canAfford = canPlace && CurrencyManager.Instance.CanAffordMana(cost);
-                AddBuildItem("New Vase", canPlace ? $"{cost:F0} Mana ({capText})" : $"Cap reached ({capText})", () =>
+                var vaseCost = VaseManager.Instance.GetNextVaseCost();
+                bool canAfford = canPlace && vaseCost != null
+                    && CurrencyManager.Instance.CanAffordMana(vaseCost.manaCost)
+                    && MallumManager.CanAffordSeeds(SaveManager.Instance.Data.seedInventory, vaseCost.seedCosts);
+                string vaseCostText = vaseCost != null ? FormatBuildingCost(vaseCost) : "???";
+                AddBuildItem("New Vase", canPlace ? $"{vaseCostText} ({capText})" : $"Cap reached ({capText})", () =>
                 {
                     if (canAfford)
                         OnRequestPlacement?.Invoke(CampBuildingType.Vase);
@@ -83,6 +91,14 @@ namespace Garden
                     Refresh();
                 });
             }
+        }
+
+        private static string FormatBuildingCost(BuildingCost cost)
+        {
+            string text = $"{cost.manaCost:F0} Mana";
+            foreach (var sc in cost.seedCosts)
+                text += $" + {sc.count} {sc.seedName}";
+            return text;
         }
 
         private static string FormatRecipeCost(FlameUpgradeRecipe recipe)

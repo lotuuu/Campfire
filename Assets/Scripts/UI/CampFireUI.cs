@@ -22,6 +22,7 @@ namespace Garden
         private QuestUI questUI;
         private QuestButtonUI questButton;
         private MerchantUI merchantUI;
+        private DialogueUI dialogueUI;
 
         private VisualElement overlayContainer;
         private VisualElement overlayBackdrop;
@@ -69,6 +70,8 @@ namespace Garden
             questButton?.Initialize(root);
             merchantUI = GetComponent<MerchantUI>();
             merchantUI?.Initialize(root);
+            dialogueUI = GetComponent<DialogueUI>();
+            dialogueUI?.Initialize(root);
 
             // Overlay setup
             overlayContainer = root.Q("overlay-container");
@@ -154,8 +157,25 @@ namespace Garden
             if (campsiteView != null)
                 campsiteView.OnMerchantTapped += index =>
                 {
-                    merchantUI?.ShowMerchant(index);
-                    OpenOverlay("Night Merchant", merchantPanel);
+                    var data = SaveManager.Instance?.Data;
+                    if (data == null || index < 0 || index >= data.merchants.Count) return;
+                    var merchant = data.merchants[index];
+
+                    if (!merchant.dialogueSeen && merchant.dialogueLines.Count > 0 && dialogueUI != null)
+                    {
+                        dialogueUI.Show(merchant.merchantName, merchant.dialogueLines, () =>
+                        {
+                            merchant.dialogueSeen = true;
+                            SaveManager.Instance.Save();
+                            merchantUI?.ShowMerchant(index);
+                            OpenOverlay("Night Merchant", merchantPanel);
+                        });
+                    }
+                    else
+                    {
+                        merchantUI?.ShowMerchant(index);
+                        OpenOverlay("Night Merchant", merchantPanel);
+                    }
                 };
 
             // Location gate

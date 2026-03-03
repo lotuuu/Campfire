@@ -99,11 +99,40 @@ namespace Garden
             return true;
         }
 
+        private BuildingCostConfig buildingCostConfig;
+
+        private BuildingCostConfig LoadBuildingCostConfig()
+        {
+            if (buildingCostConfig == null)
+                buildingCostConfig = Resources.Load<BuildingCostConfig>("Config/BuildingCostConfig");
+            return buildingCostConfig;
+        }
+
+        public BuildingCost GetNextVaseCost()
+        {
+            return LoadBuildingCostConfig()?.GetVaseCost(SaveManager.Instance.Data.vases.Count);
+        }
+
         public bool CraftVase(int gridX, int gridY)
         {
             if (!FlameManager.Instance.CanPlaceEntity) return false;
-            if (!CurrencyManager.Instance.SpendMana(config.CraftCostMana)) return false;
+
             var data = SaveManager.Instance.Data;
+            var cost = GetNextVaseCost();
+            if (cost == null) return false;
+
+            if (!CurrencyManager.Instance.CanAffordMana(cost.manaCost)) return false;
+            if (!MallumManager.CanAffordSeeds(data.seedInventory, cost.seedCosts)) return false;
+
+            CurrencyManager.Instance.SpendMana(cost.manaCost);
+
+            foreach (var seedCost in cost.seedCosts)
+            {
+                var entry = data.seedInventory.Find(s => s.seedName == seedCost.seedName);
+                entry.count -= seedCost.count;
+                if (entry.count <= 0) data.seedInventory.Remove(entry);
+            }
+
             data.vases.Add(new VaseSave { capacity = config.BaseCapacity, state = VaseState.Empty, gridX = gridX, gridY = gridY });
             SaveManager.Instance.Save();
             OnVasesChanged?.Invoke();

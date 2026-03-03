@@ -432,7 +432,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ce377f4fbee043ceae6aa1ce2338abf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Garden::Garden.MallumManager
-  config: {fileID: 11400000, guid: f07a65c7159784083b46f325640980b9, type: 2}
   houseConfig: {fileID: 11400000, guid: a985b00bde9e444eba94de5a8389eadf, type: 2}
 --- !u!1 &619394800
 GameObject:
@@ -822,6 +821,7 @@ GameObject:
   - component: {fileID: 1564428251}
   - component: {fileID: 1564428250}
   - component: {fileID: 1564428252}
+  - component: {fileID: 1564428253}
   m_Layer: 0
   m_Name: --- UI ---
   m_TagString: Untagged
@@ -1023,6 +1023,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: df2d0abe6b88e4ae2ab9bd15867c3d48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Garden::Garden.MerchantUI
+--- !u!114 &1564428253
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1564428222}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e1628699612a44f3b257b9589a3b6c6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Garden::Garden.DialogueUI
 --- !u!1 &1877059791
 GameObject:
   m_ObjectHideFlags: 0

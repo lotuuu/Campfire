@@ -312,5 +312,83 @@ namespace Garden.Tests
             Assert.AreEqual(2, items[1].count);
             Assert.AreEqual("Dahlia", seeds[0].seedName);
         }
+
+        // --- Dialogue rolling tests ---
+
+        private MerchantData CreateMerchantWithDialogues()
+        {
+            var merchant = CreateTestMerchant();
+            merchant.dialoguePool = new List<MerchantDialogue>
+            {
+                new MerchantDialogue { lines = new List<string> { "Hello.", "Let's trade." } },
+                new MerchantDialogue { lines = new List<string> { "Good evening.", "What do you have?" } },
+                new MerchantDialogue { lines = new List<string> { "Nice night.", "See my wares." } }
+            };
+            return merchant;
+        }
+
+        [Test]
+        public void RollDialogue_ReturnsLinesFromPool()
+        {
+            var merchant = CreateMerchantWithDialogues();
+            var seen = new List<int>();
+
+            var lines = MerchantManager.RollDialogue(merchant, seen);
+
+            Assert.IsTrue(lines.Count > 0);
+            Assert.AreEqual(1, seen.Count);
+        }
+
+        [Test]
+        public void RollDialogue_PrefersUnseenDialogues()
+        {
+            var merchant = CreateMerchantWithDialogues();
+            var seen = new List<int> { 0, 1 };
+
+            var lines = MerchantManager.RollDialogue(merchant, seen);
+
+            // Only index 2 was unseen, so it must be picked
+            Assert.AreEqual(3, seen.Count);
+            Assert.AreEqual(2, seen[2]);
+            Assert.AreEqual("Nice night.", lines[0]);
+        }
+
+        [Test]
+        public void RollDialogue_ResetsWhenAllSeen()
+        {
+            var merchant = CreateMerchantWithDialogues();
+            var seen = new List<int> { 0, 1, 2 };
+
+            var lines = MerchantManager.RollDialogue(merchant, seen);
+
+            // seen should have been cleared then one added back
+            Assert.AreEqual(1, seen.Count);
+            Assert.IsTrue(lines.Count > 0);
+        }
+
+        [Test]
+        public void RollDialogue_EmptyPoolReturnsEmptyLines()
+        {
+            var merchant = CreateTestMerchant();
+            merchant.dialoguePool = new List<MerchantDialogue>();
+            var seen = new List<int>();
+
+            var lines = MerchantManager.RollDialogue(merchant, seen);
+
+            Assert.AreEqual(0, lines.Count);
+            Assert.AreEqual(0, seen.Count);
+        }
+
+        [Test]
+        public void RollDialogue_NullPoolReturnsEmptyLines()
+        {
+            var merchant = CreateTestMerchant();
+            merchant.dialoguePool = null;
+            var seen = new List<int>();
+
+            var lines = MerchantManager.RollDialogue(merchant, seen);
+
+            Assert.AreEqual(0, lines.Count);
+        }
     }
 }

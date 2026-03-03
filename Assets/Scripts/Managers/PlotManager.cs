@@ -111,6 +111,8 @@ namespace Garden
                 WeatherService.Instance.OnWeatherUpdated -= OnWeatherUpdated;
             if (WeatherService.Instance != null)
                 WeatherService.Instance.OnWeatherUpdated += OnWeatherUpdated;
+
+            ScheduleAllPlantNotifications();
         }
 
         private void Update()
@@ -182,6 +184,10 @@ namespace Garden
 
             SaveManager.Instance.Save();
             OnPlotChanged?.Invoke(plotIndex);
+
+            var remaining = GetRemainingSeconds(plotIndex);
+            NotificationService.Instance?.SchedulePlantNotification(plotIndex, seedName, remaining);
+
             return true;
         }
 
@@ -272,6 +278,9 @@ namespace Garden
 
             OnPlotChanged?.Invoke(plotIndex);
             OnHarvested?.Invoke(plotIndex, result);
+
+            NotificationService.Instance?.CancelPlantNotification(plotIndex);
+
             return result;
         }
 
@@ -319,6 +328,27 @@ namespace Garden
             }
 
             if (changed) SaveManager.Instance.Save();
+        }
+
+        private void OnApplicationPause(bool paused)
+        {
+            if (paused) ScheduleAllPlantNotifications();
+        }
+
+        private void ScheduleAllPlantNotifications()
+        {
+            var ns = NotificationService.Instance;
+            if (ns == null) return;
+
+            ns.CancelAll();
+            var data = SaveManager.Instance.Data;
+            for (int i = 0; i < data.plots.Count; i++)
+            {
+                var plot = data.plots[i];
+                if (plot.state != PlotState.Growing) continue;
+                var remaining = GetRemainingSeconds(i);
+                ns.SchedulePlantNotification(i, plot.seedName, remaining);
+            }
         }
 
         private void CheckGrowthCompletion()

@@ -15,6 +15,25 @@ MonoBehaviour:
   merchantName: Night Merchant
   flavorText: Rare seeds, if you have the harvest to trade...
   offerCount: 3
+  dialoguePool:
+  - lines:
+    - The night wind carries rare things. I have seeds you won't find by daylight.
+    - Show me what your garden has yielded, and perhaps we can make a trade.
+  - lines:
+    - Another evening by the flame. Your camp grows stronger, I see.
+    - I've traveled far tonight. Let me show you what I've gathered.
+  - lines:
+    - The moonlight suits this place well. A good night for trading.
+    - I have seeds from distant gardens. Interested?
+  - lines:
+    - Ah, the keeper of the flame. I was hoping you'd still be awake.
+    - I don't stay long. Let's see if anything catches your eye.
+  - lines:
+    - The stars told me your harvest has been plentiful.
+    - Perhaps you'd trade some of it for something... rarer?
+  - lines:
+    - Quiet night. Good for business.
+    - I carry seeds that bloom only under certain skies. Take a look.
   offerPool:
   - requiredFlameLevel: 1
     costs:
