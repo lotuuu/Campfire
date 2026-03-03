@@ -225,6 +225,8 @@ namespace Garden
                 timerLabel.style.display = DisplayStyle.None;
                 actionBtn.style.display = DisplayStyle.None;
                 lockedLabel.text = $"Requires Flame Level {quest.requiredFlameLevel}";
+
+                lockedSection.Add(card);
             }
         }
 

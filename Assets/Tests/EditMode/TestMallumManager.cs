@@ -126,5 +126,18 @@ namespace Garden.Tests
             Assert.AreEqual(-1, mallum.assignedVaseIndex);
             Assert.IsNull(mallum.startTimeUtc);
         }
+
+        [Test]
+        public void ClaimMallumForWater_DoesNotDoubleAssignSameVase()
+        {
+            var mallums = new List<MallumSave>
+            {
+                new() { state = MallumState.FetchingWater, assignedVaseIndex = 0 },
+                new() { state = MallumState.Idle }
+            };
+            bool result = MallumManager.ClaimMallumForWater(mallums, 0, "2026-01-01T00:00:00Z");
+            Assert.IsTrue(result);
+            Assert.AreEqual(MallumState.FetchingWater, mallums[1].state);
+        }
     }
 }

@@ -267,7 +267,7 @@ namespace Garden
                 foreach (var r in pool)
                 {
                     cumulative += r.weight;
-                    if (roll <= cumulative)
+                    if (roll < cumulative)
                     {
                         int count = UnityEngine.Random.Range(r.minCount, r.maxCount + 1);
                         rewards.Add(new RewardEntry
