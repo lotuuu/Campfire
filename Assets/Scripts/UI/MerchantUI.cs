@@ -10,12 +10,14 @@ namespace Garden
         private VisualTreeAsset offerTemplate;
 
         private int activeMerchantIndex = -1;
+        private MerchantData[] allMerchants;
 
         public void Initialize(VisualElement root)
         {
             merchantFlavor = root.Q<Label>("merchant-flavor");
             merchantList = root.Q("merchant-list");
             offerTemplate = Resources.Load<VisualTreeAsset>("UI/Templates/MerchantOfferRow");
+            allMerchants = Resources.LoadAll<MerchantData>("Merchants");
         }
 
         public void ShowMerchant(int index)
@@ -36,7 +38,6 @@ namespace Garden
             var merchant = data.merchants[activeMerchantIndex];
 
             // Load MerchantData for flavor text
-            var allMerchants = Resources.LoadAll<MerchantData>("Merchants");
             MerchantData merchantData = null;
             foreach (var md in allMerchants)
             {

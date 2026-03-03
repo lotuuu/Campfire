@@ -78,10 +78,19 @@ namespace Garden
             return true;
         }
 
+        private static Dictionary<string, SeedData> _seedCache;
+
         private void Awake()
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
+
+            if (_seedCache == null)
+            {
+                _seedCache = new Dictionary<string, SeedData>();
+                foreach (var seed in Resources.LoadAll<SeedData>("Seeds"))
+                    _seedCache[seed.seedName] = seed;
+            }
         }
 
         private void OnEnable()
@@ -111,12 +120,43 @@ namespace Garden
 
         public List<PlotSave> Plots => SaveManager.Instance.Data.plots;
 
+        private BuildingCostConfig buildingCostConfig;
+
+        private BuildingCostConfig LoadBuildingCostConfig()
+        {
+            if (buildingCostConfig == null)
+                buildingCostConfig = Resources.Load<BuildingCostConfig>("Config/BuildingCostConfig");
+            return buildingCostConfig;
+        }
+
+        public BuildingCost GetNextPlotCost()
+        {
+            return LoadBuildingCostConfig()?.GetPlotCost(SaveManager.Instance.Data.plots.Count);
+        }
+
         public bool CraftPlot(int gridX, int gridY)
         {
             if (!FlameManager.Instance.CanPlaceEntity) return false;
-            SaveManager.Instance.Data.plots.Add(new PlotSave { state = PlotState.Empty, gridX = gridX, gridY = gridY });
+
+            var data = SaveManager.Instance.Data;
+            var cost = GetNextPlotCost();
+            if (cost == null) return false;
+
+            if (!CurrencyManager.Instance.CanAffordMana(cost.manaCost)) return false;
+            if (!MallumManager.CanAffordSeeds(data.seedInventory, cost.seedCosts)) return false;
+
+            CurrencyManager.Instance.SpendMana(cost.manaCost);
+
+            foreach (var seedCost in cost.seedCosts)
+            {
+                var entry = data.seedInventory.Find(s => s.seedName == seedCost.seedName);
+                entry.count -= seedCost.count;
+                if (entry.count <= 0) data.seedInventory.Remove(entry);
+            }
+
+            data.plots.Add(new PlotSave { state = PlotState.Empty, gridX = gridX, gridY = gridY });
             SaveManager.Instance.Save();
-            OnPlotChanged?.Invoke(SaveManager.Instance.Data.plots.Count - 1);
+            OnPlotChanged?.Invoke(data.plots.Count - 1);
             return true;
         }
 
@@ -309,9 +349,8 @@ namespace Garden
         private static SeedData LoadSeed(string seedName)
         {
             if (string.IsNullOrEmpty(seedName)) return null;
-            var all = Resources.LoadAll<SeedData>("Seeds");
-            foreach (var s in all)
-                if (s.seedName == seedName) return s;
+            if (_seedCache != null && _seedCache.TryGetValue(seedName, out var seed))
+                return seed;
             return null;
         }
     }

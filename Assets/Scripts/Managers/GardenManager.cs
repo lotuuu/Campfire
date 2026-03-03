@@ -11,10 +11,19 @@ namespace Garden
         public event Action<int> OnGardenChanged;
         public event Action<int, string, int> OnYieldCollected;
 
+        private static Dictionary<string, GardenPlantData> _plantCache;
+
         private void Awake()
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
+
+            if (_plantCache == null)
+            {
+                _plantCache = new Dictionary<string, GardenPlantData>();
+                foreach (var plant in Resources.LoadAll<GardenPlantData>("GardenPlants"))
+                    _plantCache[plant.plantName] = plant;
+            }
         }
 
         private void Update()
@@ -113,9 +122,8 @@ namespace Garden
         private static GardenPlantData LoadPlantData(string plantName)
         {
             if (string.IsNullOrEmpty(plantName)) return null;
-            var all = Resources.LoadAll<GardenPlantData>("GardenPlants");
-            foreach (var p in all)
-                if (p.plantName == plantName) return p;
+            if (_plantCache != null && _plantCache.TryGetValue(plantName, out var plant))
+                return plant;
             return null;
         }
     }
