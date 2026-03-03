@@ -1,5 +1,14 @@
 /* Interaction.uss — Camp object interaction popup */
 
+#interaction-backdrop {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    display: none;
+}
+
 #interaction-panel {
     position: absolute;
     left: 10%;
@@ -80,4 +89,14 @@
 .interaction-btn-primary:hover {
     background-color: rgba(180, 115, 35, 0.75) !important;
     border-color: rgba(240, 180, 60, 0.7) !important;
+}
+
+/* Section header within interaction body */
+.interaction-section-header {
+    font-size: 24px;
+    color: rgb(200, 180, 140);
+    -unity-font-style: bold;
+    margin-top: var(--spacing-md);
+    margin-bottom: var(--spacing-xs);
+    -unity-text-align: upper-center;
 }

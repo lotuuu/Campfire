@@ -10,6 +10,7 @@ namespace Garden
     {
         private VisualElement viewport;
         private VisualElement canvas;
+        private VisualElement interactionBackdrop;
         private VisualElement interactionPanel;
         private Label interactionTitle;
         private VisualElement interactionBody;
@@ -60,6 +61,7 @@ namespace Garden
         {
             viewport = root.Q("campsite-viewport");
             canvas = root.Q("campsite-canvas");
+            interactionBackdrop = root.Q("interaction-backdrop");
             interactionPanel = root.Q("interaction-panel");
             interactionTitle = root.Q<Label>("interaction-title");
             interactionBody = root.Q("interaction-body");
@@ -79,6 +81,13 @@ namespace Garden
                 VaseManager.Instance.OnVasesChanged += RebuildGrid;
             if (GardenManager.Instance != null)
                 GardenManager.Instance.OnGardenChanged += _ => RebuildGrid();
+
+            // Tap backdrop to close interaction panel (consumes the tap)
+            interactionBackdrop?.RegisterCallback<ClickEvent>(evt =>
+            {
+                evt.StopPropagation();
+                CloseInteractionPanel();
+            });
 
             // Prevent clicks on interaction panel from falling through
             interactionPanel?.RegisterCallback<ClickEvent>(evt => evt.StopPropagation());
@@ -426,7 +435,7 @@ namespace Garden
             }
 
             AddCloseButton();
-            interactionPanel.style.display = DisplayStyle.Flex;
+            ShowInteractionPanel();
         }
 
         // ── Modes ──
@@ -755,6 +764,13 @@ namespace Garden
                     break;
             }
 
+            ShowInteractionPanel();
+        }
+
+        private void ShowInteractionPanel()
+        {
+            if (interactionBackdrop != null)
+                interactionBackdrop.style.display = DisplayStyle.Flex;
             interactionPanel.style.display = DisplayStyle.Flex;
         }
 
@@ -828,6 +844,8 @@ namespace Garden
                     wateringsLabel.AddToClassList("interaction-info");
                     interactionBody.Add(wateringsLabel);
 
+                    AddGrowthRecipeSection(plot.seedName);
+
                     var finishBtn = new Button(() =>
                     {
                         if (CurrencyManager.Instance != null && CurrencyManager.Instance.SpendGems(1))
@@ -842,6 +860,7 @@ namespace Garden
 
                 case PlotState.Mature:
                     interactionTitle.text = $"{plot.seedName} — Ready!";
+                    AddGrowthRecipeSection(plot.seedName);
                     var harvestBtn = new Button(() =>
                     {
                         suppressRebuild = true;
@@ -883,6 +902,28 @@ namespace Garden
             interactionBody.Add(qualityLabel);
 
             AddCloseButton();
+        }
+
+        private void AddGrowthRecipeSection(string seedName)
+        {
+            var allSeeds = Resources.LoadAll<SeedData>("Seeds");
+            SeedData seed = null;
+            foreach (var s in allSeeds)
+            {
+                if (s.seedName == seedName) { seed = s; break; }
+            }
+            if (seed == null || seed.recipe == null) return;
+
+            var recipe = seed.recipe;
+            bool hasAny = recipe.useHeat || recipe.useWind || recipe.useHumidity
+                || recipe.useSunlight || recipe.useRain || recipe.useMoon || recipe.useWaterings;
+            if (!hasAny) return;
+
+            var header = new Label("Growth Recipe");
+            header.AddToClassList("interaction-section-header");
+            interactionBody.Add(header);
+
+            ApothekeUI.AddRecipeDimensions(interactionBody, recipe);
         }
 
         private void ShowVaseInteraction(int index)
@@ -973,6 +1014,8 @@ namespace Garden
 
         private void CloseInteractionPanel()
         {
+            if (interactionBackdrop != null)
+                interactionBackdrop.style.display = DisplayStyle.None;
             if (interactionPanel != null)
                 interactionPanel.style.display = DisplayStyle.None;
         }

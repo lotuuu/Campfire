@@ -243,6 +243,9 @@
             </ui:VisualElement>
         </ui:VisualElement>
 
+        <!-- Interaction backdrop (captures taps outside the panel) -->
+        <ui:VisualElement name="interaction-backdrop" />
+
         <!-- Interaction panel (tap on camp objects) -->
         <ui:VisualElement name="interaction-panel">
             <ui:Label name="interaction-title" text="" />

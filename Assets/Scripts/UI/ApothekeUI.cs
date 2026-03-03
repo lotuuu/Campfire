@@ -168,7 +168,7 @@ namespace Garden
             return card;
         }
 
-        private static void AddRecipeDimensions(VisualElement container, GrowthRecipe recipe)
+        internal static void AddRecipeDimensions(VisualElement container, GrowthRecipe recipe)
         {
             if (recipe.useHeat)
                 AddDimensionRow(container, "Heat", $"{recipe.idealTempMin}-{recipe.idealTempMax}\u00b0C", recipe.heatWeight);
@@ -190,7 +190,7 @@ namespace Garden
                 AddDimensionRow(container, "Waterings", $"{recipe.idealWaterings}", recipe.wateringsWeight);
         }
 
-        private static void AddDimensionRow(VisualElement container, string label, string value, float weight)
+        internal static void AddDimensionRow(VisualElement container, string label, string value, float weight)
         {
             var row = new VisualElement();
             row.AddToClassList("seed-recipe-row");
