@@ -44,9 +44,11 @@ namespace Garden
             data.vases[1].gridY = 1;
             data.plots.Add(new PlotSave { state = PlotState.Empty, gridX = -1, gridY = 0 });
             ApothekeManager.Instance.AddSeed("Basil", 3);
+            // Start with 1 Mallum House
+            data.mallumHouses.Add(new MallumHouseSave { gridX = 1, gridY = -1 });
             if (MallumManager.Instance != null)
             {
-                int maxMallums = MallumManager.Instance.Config.GetMaxMallums(data.flameLevel);
+                int maxMallums = MallumManager.Instance.HouseConfig.GetMaxMallums(data.mallumHouses.Count);
                 MallumManager.EnsureMallumCount(data.mallums, maxMallums);
             }
             SaveManager.Instance.Save();
