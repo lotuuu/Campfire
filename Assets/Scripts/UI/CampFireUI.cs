@@ -107,15 +107,14 @@ namespace Garden
                 MallumManager.Instance.OnMallumsChanged += () => questButton?.UpdateBadge();
             }
 
-            // Wire debug button
+            // Wire debug button (editor + development builds)
             var debugBtn = root.Q<Button>("btn-debug");
             if (debugBtn != null)
             {
-#if UNITY_EDITOR
-                debugBtn.clicked += () => OpenOverlay("Debug", debugPanelElement);
-#else
-                debugBtn.style.display = DisplayStyle.None;
-#endif
+                if (UnityEngine.Debug.isDebugBuild)
+                    debugBtn.clicked += () => OpenOverlay("Debug", debugPanelElement);
+                else
+                    debugBtn.style.display = DisplayStyle.None;
             }
 
             // Wire build placement mode
