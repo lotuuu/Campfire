@@ -65,7 +65,10 @@ namespace Garden
         {
             var parts = new System.Collections.Generic.List<string>();
             foreach (var ing in recipe.ingredients)
-                parts.Add($"{ing.count}x {ing.itemName}");
+            {
+                string displayName = ing.itemName.Replace("_harvest", "");
+                parts.Add($"{ing.count}x {displayName}");
+            }
             return string.Join(", ", parts);
         }
 

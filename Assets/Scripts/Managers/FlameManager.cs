@@ -27,6 +27,8 @@ namespace Garden
 
         public event Action OnFlameUpgraded;
 
+        public FlameUpgradeRecipe GetUpgradeRecipe() => config.GetUpgradeRecipe(Level);
+
         private void Awake()
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
