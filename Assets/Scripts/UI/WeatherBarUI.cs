@@ -18,6 +18,7 @@ namespace Garden
         private VisualElement forecastPanel;
         private VisualElement forecastDays;
         private VisualElement campRoot;
+        private VisualElement questFloatBtn;
 
         private static readonly int[] MoonPhaseToSpriteIndex = { 5, 6, 7, 8, 1, 2, 3, 4 };
         private Texture2D[] moonTextures;
@@ -62,6 +63,7 @@ namespace Garden
             forecastPanel = root.Q("forecast-panel");
             forecastDays = root.Q("forecast-days");
             campRoot = root.Q("camp-root");
+            questFloatBtn = root.Q("quest-float-btn");
 
             weatherBar?.RegisterCallback<ClickEvent>(OnWeatherBarClicked);
             campRoot?.RegisterCallback<ClickEvent>(OnRootClicked);
@@ -117,6 +119,9 @@ namespace Garden
         {
             if (forecastPanel == null) return;
             forecastPanel.ToggleInClassList("forecast-visible");
+            bool visible = forecastPanel.ClassListContains("forecast-visible");
+            if (questFloatBtn != null)
+                questFloatBtn.style.display = visible ? DisplayStyle.None : DisplayStyle.Flex;
             evt.StopPropagation();
         }
 
@@ -133,6 +138,8 @@ namespace Garden
             }
 
             forecastPanel.RemoveFromClassList("forecast-visible");
+            if (questFloatBtn != null)
+                questFloatBtn.style.display = DisplayStyle.Flex;
         }
 
         private void PopulateForecast()
