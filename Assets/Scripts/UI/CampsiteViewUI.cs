@@ -97,6 +97,11 @@ namespace Garden
                 VaseManager.Instance.OnVasesChanged += RebuildGrid;
             if (GardenManager.Instance != null)
                 GardenManager.Instance.OnGardenChanged += _ => RebuildGrid();
+            if (BirdManager.Instance != null)
+            {
+                BirdManager.Instance.OnBirdPlaced += RebuildGrid;
+                BirdManager.Instance.OnBirdCollected += _ => RebuildGrid();
+            }
 
             // Tap backdrop to close interaction panel (consumes the tap)
             interactionBackdrop?.RegisterCallback<ClickEvent>(evt =>
@@ -215,6 +220,8 @@ namespace Garden
                 occupied[(data.gardens[i].gridX, data.gardens[i].gridY)] = (CampBuildingType.Garden, i);
             for (int i = 0; i < data.mallumHouses.Count; i++)
                 occupied[(data.mallumHouses[i].gridX, data.mallumHouses[i].gridY)] = (CampBuildingType.MallumHouse, i);
+            for (int i = 0; i < data.birds.Count; i++)
+                occupied[(data.birds[i].gridX, data.birds[i].gridY)] = (CampBuildingType.Bird, i);
 
             // Fixed buildings always take priority
             occupied[(data.apothekeGridX, data.apothekeGridY)] = (CampBuildingType.Apotheke, 0);
@@ -262,7 +269,7 @@ namespace Garden
                         CampBuildingType cellType = info.type;
 
                         // Long-press detection on movable buildings
-                        bool isMovable = cellType != CampBuildingType.Flame;
+                        bool isMovable = cellType != CampBuildingType.Flame && cellType != CampBuildingType.Bird;
                         if (isMovable && mode == CampsiteMode.Normal)
                         {
                             int cq = q, cr = r;
@@ -385,6 +392,13 @@ namespace Garden
                             : 2;
                         status.text = $"+{mallumCount} Mallums";
                     }
+                    break;
+
+                case CampBuildingType.Bird:
+                    cell.AddToClassList("grid-cell--bird");
+                    var bird = SaveManager.Instance.Data.birds[index];
+                    if (label != null) label.text = "Bird";
+                    if (status != null) status.text = $"{bird.seedCount}x {bird.seedName}";
                     break;
             }
         }
@@ -853,6 +867,9 @@ namespace Garden
                 case CampBuildingType.MallumHouse:
                     ShowMallumHouseInteraction(index);
                     break;
+                case CampBuildingType.Bird:
+                    ShowBirdInteraction(index);
+                    break;
             }
 
             ShowInteractionPanel();
@@ -1239,6 +1256,35 @@ namespace Garden
             var infoLabel = new Label($"Houses {config.MallumsPerHouse} Mallums");
             infoLabel.AddToClassList("interaction-info");
             interactionBody.Add(infoLabel);
+
+            AddCloseButton();
+        }
+
+        private void ShowBirdInteraction(int index)
+        {
+            var data = SaveManager.Instance.Data;
+            if (index < 0 || index >= data.birds.Count) return;
+
+            var bird = data.birds[index];
+            interactionTitle.text = "Bird";
+
+            var info = new Label($"A bird has brought you {bird.seedCount}x {bird.seedName}!");
+            info.AddToClassList("interaction-info");
+            interactionBody.Add(info);
+
+            var collectBtn = new Button(() =>
+            {
+                var drop = BirdManager.CollectBird(data, index);
+                if (drop != null)
+                {
+                    ApothekeManager.Instance?.AddSeed(drop.seedName, drop.seedCount);
+                    SaveManager.Instance.Save();
+                    BirdManager.Instance?.NotifyBirdCollected(drop);
+                }
+                CloseInteractionPanel();
+            }) { text = "Collect Seeds" };
+            collectBtn.AddToClassList("interaction-btn-primary");
+            interactionActions.Add(collectBtn);
 
             AddCloseButton();
         }
