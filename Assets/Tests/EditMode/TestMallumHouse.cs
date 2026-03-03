@@ -36,50 +36,50 @@ namespace Garden.Tests
         }
 
         [Test]
-        public void CanAffordSeeds_ReturnsTrueWhenEnough()
+        public void CanAffordHarvests_ReturnsTrueWhenEnough()
         {
-            var inventory = new List<SeedInventoryEntry>
+            var items = new List<InventoryItem>
             {
-                new() { seedName = "Basil", count = 5 }
+                new() { itemName = "Basil_harvest", count = 5 }
             };
-            var costs = new List<SeedCost>
+            var costs = new List<HarvestCost>
             {
-                new() { seedName = "Basil", count = 3 }
+                new() { itemName = "Basil_harvest", count = 3 }
             };
-            Assert.IsTrue(MallumManager.CanAffordSeeds(inventory, costs));
+            Assert.IsTrue(MallumManager.CanAffordHarvests(items, costs));
         }
 
         [Test]
-        public void CanAffordSeeds_ReturnsFalseWhenNotEnough()
+        public void CanAffordHarvests_ReturnsFalseWhenNotEnough()
         {
-            var inventory = new List<SeedInventoryEntry>
+            var items = new List<InventoryItem>
             {
-                new() { seedName = "Basil", count = 1 }
+                new() { itemName = "Basil_harvest", count = 1 }
             };
-            var costs = new List<SeedCost>
+            var costs = new List<HarvestCost>
             {
-                new() { seedName = "Basil", count = 3 }
+                new() { itemName = "Basil_harvest", count = 3 }
             };
-            Assert.IsFalse(MallumManager.CanAffordSeeds(inventory, costs));
+            Assert.IsFalse(MallumManager.CanAffordHarvests(items, costs));
         }
 
         [Test]
-        public void CanAffordSeeds_ReturnsFalseWhenSeedMissing()
+        public void CanAffordHarvests_ReturnsFalseWhenItemMissing()
         {
-            var inventory = new List<SeedInventoryEntry>();
-            var costs = new List<SeedCost>
+            var items = new List<InventoryItem>();
+            var costs = new List<HarvestCost>
             {
-                new() { seedName = "Lavender", count = 1 }
+                new() { itemName = "Lavender_harvest", count = 1 }
             };
-            Assert.IsFalse(MallumManager.CanAffordSeeds(inventory, costs));
+            Assert.IsFalse(MallumManager.CanAffordHarvests(items, costs));
         }
 
         [Test]
-        public void CanAffordSeeds_ReturnsTrueWhenNoCosts()
+        public void CanAffordHarvests_ReturnsTrueWhenNoCosts()
         {
-            var inventory = new List<SeedInventoryEntry>();
-            var costs = new List<SeedCost>();
-            Assert.IsTrue(MallumManager.CanAffordSeeds(inventory, costs));
+            var items = new List<InventoryItem>();
+            var costs = new List<HarvestCost>();
+            Assert.IsTrue(MallumManager.CanAffordHarvests(items, costs));
         }
     }
 }

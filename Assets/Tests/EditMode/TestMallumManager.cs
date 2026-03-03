@@ -86,7 +86,8 @@ namespace Garden.Tests
             {
                 new() { seed = ScriptableObject.CreateInstance<SeedData>(), weight = 1f, minCount = 1, maxCount = 1 }
             };
-            pool[0].seed.seedName = "Basil";
+            pool[0].seed.name = "Basil";
+            pool[0].seed.seedName = "Basil Seed";
 
             var rewards = MallumManager.RollRewards(pool, 3);
             Assert.AreEqual(3, rewards.Count);

@@ -10,11 +10,13 @@ namespace Garden.Tests
         private MerchantData CreateTestMerchant()
         {
             var seed1 = ScriptableObject.CreateInstance<SeedData>();
-            seed1.seedName = "Moonflower";
+            seed1.name = "Moonflower";
+            seed1.seedName = "Moonflower Seed";
             seed1.tier = 2;
 
             var seed2 = ScriptableObject.CreateInstance<SeedData>();
-            seed2.seedName = "Dahlia";
+            seed2.name = "Dahlia";
+            seed2.seedName = "Dahlia Seed";
             seed2.tier = 3;
 
             var merchant = ScriptableObject.CreateInstance<MerchantData>();

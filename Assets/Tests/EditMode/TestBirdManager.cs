@@ -144,7 +144,7 @@ namespace Garden.Tests
             var seeds = CreateTestSeeds();
             var eligible = BirdManager.GetEligibleSeeds(seeds, 1);
             Assert.AreEqual(1, eligible.Count);
-            Assert.AreEqual("Basil", eligible[0].seedName);
+            Assert.AreEqual("Basil", eligible[0].name);
         }
 
         // --- RollSeedDrop tests ---
@@ -184,7 +184,8 @@ namespace Garden.Tests
             // baseCount = Max(1, 1 - 1 + 1) = 1
             // quantity range = [Max(1,0), 3) = [1, 3)
             var seed = ScriptableObject.CreateInstance<SeedData>();
-            seed.seedName = "Basil";
+            seed.name = "Basil";
+            seed.seedName = "Basil Seed";
             seed.tier = 1;
             var seeds = new List<SeedData> { seed };
 
@@ -207,7 +208,8 @@ namespace Garden.Tests
         public void RollSeedDrop_SeedCountIsAlwaysAtLeast1()
         {
             var seed = ScriptableObject.CreateInstance<SeedData>();
-            seed.seedName = "Basil";
+            seed.name = "Basil";
+            seed.seedName = "Basil Seed";
             seed.tier = 1;
             var seeds = new List<SeedData> { seed };
 
@@ -498,17 +500,20 @@ namespace Garden.Tests
             var seeds = new List<SeedData>();
 
             var basil = ScriptableObject.CreateInstance<SeedData>();
-            basil.seedName = "Basil";
+            basil.name = "Basil";
+            basil.seedName = "Basil Seed";
             basil.tier = 1;
             seeds.Add(basil);
 
             var chamomile = ScriptableObject.CreateInstance<SeedData>();
-            chamomile.seedName = "Chamomile";
+            chamomile.name = "Chamomile";
+            chamomile.seedName = "Chamomile Seed";
             chamomile.tier = 2;
             seeds.Add(chamomile);
 
             var dahlia = ScriptableObject.CreateInstance<SeedData>();
-            dahlia.seedName = "Dahlia";
+            dahlia.name = "Dahlia";
+            dahlia.seedName = "Dahlia Seed";
             dahlia.tier = 3;
             seeds.Add(dahlia);
 
