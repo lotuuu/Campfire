@@ -51,13 +51,22 @@ namespace Garden
 
             if (FlameManager.Instance != null && FlameManager.Instance.CanUpgrade())
             {
-                var cost = FlameManager.Instance.Config.GetUpgradeCost(FlameManager.Instance.Level);
-                AddBuildItem("Upgrade Flame", $"{cost:F0} Mana", () =>
+                var recipe = FlameManager.Instance.Config.GetUpgradeRecipe(FlameManager.Instance.Level);
+                string costText = recipe != null ? FormatRecipeCost(recipe) : "???";
+                AddBuildItem("Upgrade Flame", costText, () =>
                 {
                     FlameManager.Instance.UpgradeFlame();
                     Refresh();
                 });
             }
+        }
+
+        private static string FormatRecipeCost(FlameUpgradeRecipe recipe)
+        {
+            var parts = new System.Collections.Generic.List<string>();
+            foreach (var ing in recipe.ingredients)
+                parts.Add($"{ing.count}x {ing.itemName}");
+            return string.Join(", ", parts);
         }
 
         private void AddBuildItem(string name, string cost, Action onClick)

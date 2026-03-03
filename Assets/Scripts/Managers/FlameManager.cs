@@ -40,14 +40,17 @@ namespace Garden
 
         public bool CanUpgrade()
         {
-            return Level < config.MaxLevel &&
-                   CurrencyManager.Instance.CanAffordMana(config.GetUpgradeCost(Level));
+            var recipe = config.GetUpgradeRecipe(Level);
+            if (recipe == null) return false;
+            return FlameConfig.CanAffordUpgrade(recipe, SaveManager.Instance.Data.items);
         }
 
         public bool UpgradeFlame()
         {
-            if (!CanUpgrade()) return false;
-            if (!CurrencyManager.Instance.SpendMana(config.GetUpgradeCost(Level))) return false;
+            var recipe = config.GetUpgradeRecipe(Level);
+            if (recipe == null) return false;
+            if (!FlameConfig.CanAffordUpgrade(recipe, SaveManager.Instance.Data.items)) return false;
+            FlameConfig.ConsumeIngredients(recipe, SaveManager.Instance.Data.items);
             SaveManager.Instance.Data.flameLevel++;
             SaveManager.Instance.Save();
             OnFlameUpgraded?.Invoke();

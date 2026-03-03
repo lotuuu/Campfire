@@ -831,12 +831,22 @@ namespace Garden
             }
             else
             {
-                var cost = FlameManager.Instance.Config.GetUpgradeCost(FlameManager.Instance.Level);
+                var recipe = FlameManager.Instance.Config.GetUpgradeRecipe(FlameManager.Instance.Level);
+                string costText = "Level Up";
+                if (recipe != null)
+                {
+                    var parts = new System.Collections.Generic.List<string>();
+                    foreach (var ing in recipe.ingredients)
+                        parts.Add($"{ing.count}x {ing.itemName}");
+                    costText = $"Level Up ({string.Join(", ", parts)})";
+                }
+                bool canAfford = FlameManager.Instance.CanUpgrade();
                 var btn = new Button(() =>
                 {
                     FlameManager.Instance.UpgradeFlame();
                     CloseInteractionPanel();
-                }) { text = $"Level Up ({cost:F0} Mana)" };
+                }) { text = costText };
+                btn.SetEnabled(canAfford);
                 btn.AddToClassList("interaction-btn-primary");
                 interactionActions.Add(btn);
             }

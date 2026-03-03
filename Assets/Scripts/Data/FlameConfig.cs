@@ -25,13 +25,13 @@ namespace Garden
         [SerializeField] private float manaPerLevel = 0.3f;
 
         [Header("Entity Capacity (plots + vases + gardens)")]
-        [SerializeField] private int[] maxEntitiesPerLevel = { 3, 5, 8, 12, 18 };
+        [SerializeField] private int[] maxEntitiesPerLevel = { 3, 5, 8, 12, 15, 18, 22, 26, 30, 35 };
 
-        [Header("Upgrade Costs (Mana)")]
-        [SerializeField] private float[] upgradeCosts = { 50f, 150f, 400f, 1000f };
+        [Header("Upgrade Recipes")]
+        [SerializeField] private List<FlameUpgradeRecipe> upgradeRecipes = new();
 
         [Header("Grid")]
-        [SerializeField] private int[] gridSizePerLevel = { 5, 5, 7, 7, 9 };
+        [SerializeField] private int[] gridSizePerLevel = { 2, 2, 3, 3, 3, 4, 4, 4, 5, 5 };
 
         public float GetManaPerSecond(int flameLevel)
         {
@@ -44,13 +44,14 @@ namespace Garden
             return maxEntitiesPerLevel[index];
         }
 
-        public float GetUpgradeCost(int currentLevel)
-        {
-            int index = Mathf.Clamp(currentLevel - 1, 0, upgradeCosts.Length - 1);
-            return upgradeCosts[index];
-        }
+        public int MaxLevel => upgradeRecipes.Count + 1;
 
-        public int MaxLevel => upgradeCosts.Length + 1;
+        public FlameUpgradeRecipe GetUpgradeRecipe(int currentLevel)
+        {
+            int index = currentLevel - 1;
+            if (index < 0 || index >= upgradeRecipes.Count) return null;
+            return upgradeRecipes[index];
+        }
 
         public int GetGridSize(int flameLevel)
         {

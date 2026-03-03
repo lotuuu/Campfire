@@ -25,13 +25,20 @@ namespace Garden.Tests
         [Test]
         public void GetMaxEntities_ClampsToLastEntry()
         {
-            Assert.AreEqual(18, config.GetMaxEntities(99));
+            Assert.AreEqual(35, config.GetMaxEntities(99));
         }
 
         [Test]
-        public void GetUpgradeCost_ReturnsCorrectForLevel()
+        public void GetUpgradeRecipe_ReturnsNullAtMaxLevel()
         {
-            Assert.Greater(config.GetUpgradeCost(1), 0f);
+            // Default config has empty upgradeRecipes list, so MaxLevel = 1
+            Assert.IsNull(config.GetUpgradeRecipe(1));
+        }
+
+        [Test]
+        public void MaxLevel_EqualsRecipeCountPlusOne()
+        {
+            Assert.AreEqual(1, config.MaxLevel);
         }
 
         [Test]
