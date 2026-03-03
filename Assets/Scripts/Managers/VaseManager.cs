@@ -27,10 +27,10 @@ namespace Garden
             CheckFillCompletion();
         }
 
-        public static void InitializeNewPlayer(SaveData data, int baseCapacity)
+        public static void InitializeNewPlayer(SaveData data, int baseCapacity, int count = 1)
         {
-            data.vases.Add(new VaseSave { capacity = baseCapacity, state = VaseState.Empty });
-            data.vases.Add(new VaseSave { capacity = baseCapacity, state = VaseState.Empty });
+            for (int i = 0; i < count; i++)
+                data.vases.Add(new VaseSave { capacity = baseCapacity, state = VaseState.Empty });
         }
 
         public static void RainFillAllVases(List<VaseSave> vases)

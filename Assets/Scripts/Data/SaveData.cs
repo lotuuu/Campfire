@@ -39,6 +39,7 @@ namespace Garden
         public int gridX;
         public int gridY;
         public string skinName;
+        public List<string> unlockedSkins = new();
     }
 
     [Serializable]
@@ -54,6 +55,7 @@ namespace Garden
         public string lastWateredUtc;
         public bool subscribeWater;
         public string skinName;
+        public List<string> unlockedSkins = new();
     }
 
     [Serializable]

@@ -1587,14 +1587,24 @@ namespace Garden
             nameLabel.AddToClassList("skin-detail-name");
             detailArea.Add(nameLabel);
 
-            var items = SaveManager.Instance.Data.items;
-            var pigmentItem = items.Find(i => i.itemName == skin.costItemName);
-            int have = pigmentItem?.count ?? 0;
             string costName = skin.costItemName.Replace("_", " ");
+            bool isUnlocked = SkinManager.Instance.IsSkinUnlocked(type, index, skin.skinName);
 
-            var costLabel = new Label($"Cost: {skin.costQuantity}x {costName} (have: {have})");
-            costLabel.AddToClassList("skin-detail-cost");
-            detailArea.Add(costLabel);
+            if (isUnlocked)
+            {
+                var costLabel = new Label("Unlocked");
+                costLabel.AddToClassList("skin-detail-equipped");
+                detailArea.Add(costLabel);
+            }
+            else
+            {
+                var items = SaveManager.Instance.Data.items;
+                var pigmentItem = items.Find(i => i.itemName == skin.costItemName);
+                int have = pigmentItem?.count ?? 0;
+                var costLabel = new Label($"Cost: {skin.costQuantity}x {costName} (have: {have})");
+                costLabel.AddToClassList("skin-detail-cost");
+                detailArea.Add(costLabel);
+            }
 
             bool isEquipped = skin.skinName == currentSkin;
             if (isEquipped)
@@ -1605,7 +1615,8 @@ namespace Garden
             }
             else
             {
-                bool canAfford = SkinManager.Instance.CanAffordSkin(skin);
+                bool unlocked = SkinManager.Instance.IsSkinUnlocked(type, index, skin.skinName);
+                bool canApply = unlocked || SkinManager.Instance.CanAffordSkin(skin);
                 var paintBtn = new Button(() =>
                 {
                     if (SkinManager.Instance.ApplySkin(type, index, skin))
@@ -1613,9 +1624,9 @@ namespace Garden
                         CloseInteractionPanel();
                         RebuildGrid();
                     }
-                }) { text = $"Paint ({skin.costQuantity}x {costName})" };
+                }) { text = unlocked ? "Paint" : $"Paint ({skin.costQuantity}x {costName})" };
                 paintBtn.AddToClassList("interaction-btn-primary");
-                paintBtn.SetEnabled(canAfford);
+                paintBtn.SetEnabled(canApply);
                 detailArea.Add(paintBtn);
             }
         }

@@ -49,14 +49,25 @@ namespace Garden
             return item != null && item.count >= skin.costQuantity;
         }
 
+        public bool IsSkinUnlocked(CampBuildingType type, int index, string skinName)
+        {
+            var data = SaveManager.Instance.Data;
+            return type switch
+            {
+                CampBuildingType.Plot => index >= 0 && index < data.plots.Count && data.plots[index].unlockedSkins.Contains(skinName),
+                CampBuildingType.Vase => index >= 0 && index < data.vases.Count && data.vases[index].unlockedSkins.Contains(skinName),
+                CampBuildingType.MallumHouse => index >= 0 && index < data.mallumHouses.Count && data.mallumHouses[index].unlockedSkins.Contains(skinName),
+                _ => false
+            };
+        }
+
         public bool ApplySkin(CampBuildingType type, int index, SkinData skin)
         {
-            if (!CanAffordSkin(skin)) return false;
             if (skin.buildingType != type) return false;
 
             var data = SaveManager.Instance.Data;
 
-            // Validate index before deducting cost
+            // Validate index
             switch (type)
             {
                 case CampBuildingType.Plot:
@@ -71,20 +82,30 @@ namespace Garden
                 default: return false;
             }
 
-            var item = data.items.Find(i => i.itemName == skin.costItemName);
-            item.count -= skin.costQuantity;
-            if (item.count <= 0) data.items.Remove(item);
+            bool alreadyUnlocked = IsSkinUnlocked(type, index, skin.skinName);
+
+            // Only charge if not already unlocked on this building
+            if (!alreadyUnlocked)
+            {
+                if (!CanAffordSkin(skin)) return false;
+                var item = data.items.Find(i => i.itemName == skin.costItemName);
+                item.count -= skin.costQuantity;
+                if (item.count <= 0) data.items.Remove(item);
+            }
 
             switch (type)
             {
                 case CampBuildingType.Plot:
                     data.plots[index].skinName = skin.skinName;
+                    if (!alreadyUnlocked) data.plots[index].unlockedSkins.Add(skin.skinName);
                     break;
                 case CampBuildingType.Vase:
                     data.vases[index].skinName = skin.skinName;
+                    if (!alreadyUnlocked) data.vases[index].unlockedSkins.Add(skin.skinName);
                     break;
                 case CampBuildingType.MallumHouse:
                     data.mallumHouses[index].skinName = skin.skinName;
+                    if (!alreadyUnlocked) data.mallumHouses[index].unlockedSkins.Add(skin.skinName);
                     break;
             }
 
