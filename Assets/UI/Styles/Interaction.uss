@@ -100,3 +100,179 @@
     margin-bottom: var(--spacing-xs);
     -unity-text-align: upper-center;
 }
+
+/* ── Seed Card (plot seed picker) ── */
+
+.seed-picker-scroll {
+    max-height: 600px;
+    flex-grow: 1;
+    align-self: stretch;
+}
+
+.seed-picker-list {
+    flex-direction: column;
+    padding: var(--spacing-xs) 0;
+}
+
+.seed-card {
+    flex-direction: column;
+    background-color: rgba(50, 35, 18, 0.7);
+    border-width: 1px;
+    border-color: rgba(140, 100, 50, 0.3);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
+    transition-property: background-color, border-color;
+    transition-duration: 0.15s;
+}
+
+.seed-card:hover {
+    background-color: rgba(70, 48, 24, 0.8);
+    border-color: rgba(200, 140, 50, 0.5);
+}
+
+.seed-card--header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-xs);
+}
+
+.seed-card--name {
+    font-size: var(--font-md);
+    color: rgb(240, 220, 180);
+    -unity-font-style: bold;
+}
+
+.seed-card--count {
+    font-size: var(--font-sm);
+    color: rgb(180, 160, 120);
+}
+
+.seed-card--stats {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-bottom: var(--spacing-xs);
+}
+
+.seed-card--stat {
+    flex-direction: row;
+    align-items: center;
+    margin-right: var(--spacing-md);
+    margin-bottom: var(--spacing-xxs);
+}
+
+.seed-card--stat-label {
+    font-size: 22px;
+    color: rgb(140, 120, 90);
+    margin-right: var(--spacing-xxs);
+}
+
+.seed-card--stat-value {
+    font-size: 22px;
+    color: rgb(200, 180, 140);
+    -unity-font-style: bold;
+}
+
+.seed-card--recipe-tags {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-bottom: var(--spacing-sm);
+}
+
+.seed-card--tag {
+    background-color: rgba(100, 75, 35, 0.5);
+    border-radius: 6px;
+    padding: 4px 10px;
+    margin-right: 6px;
+    margin-bottom: 4px;
+}
+
+.seed-card--tag Label {
+    font-size: 20px;
+    color: rgb(200, 170, 110);
+}
+
+.seed-card--plant-btn {
+    align-self: stretch;
+    min-height: 64px;
+    background-color: rgba(80, 120, 40, 0.5);
+    border-width: 1px;
+    border-color: rgba(120, 180, 60, 0.4);
+    border-radius: var(--radius-sm);
+    color: rgb(200, 240, 150);
+    font-size: var(--font-sm);
+    -unity-text-align: middle-center;
+}
+
+.seed-card--plant-btn:hover {
+    background-color: rgba(95, 140, 48, 0.65);
+    border-color: rgba(140, 200, 70, 0.6);
+}
+
+/* ── Upgrade Cost List (flame) ── */
+
+.upgrade-cost-list {
+    align-self: stretch;
+    margin-bottom: var(--spacing-sm);
+}
+
+.upgrade-cost-header {
+    font-size: var(--font-xs);
+    color: rgb(160, 140, 100);
+    -unity-text-align: upper-center;
+    margin-bottom: var(--spacing-xs);
+    letter-spacing: 2px;
+}
+
+.upgrade-cost-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px var(--spacing-sm);
+    margin-bottom: 4px;
+    background-color: rgba(50, 35, 18, 0.5);
+    border-radius: 6px;
+}
+
+.upgrade-cost-name {
+    font-size: var(--font-sm);
+    color: rgb(210, 190, 150);
+}
+
+.upgrade-cost-amount {
+    font-size: var(--font-sm);
+    -unity-font-style: bold;
+}
+
+.upgrade-cost-amount--have {
+    color: rgb(120, 200, 80);
+}
+
+.upgrade-cost-amount--need {
+    color: rgb(220, 90, 70);
+}
+
+.upgrade-btn {
+    align-self: stretch;
+    min-height: 80px;
+    background-color: rgba(160, 100, 30, 0.6);
+    border-width: 2px;
+    border-color: rgba(220, 160, 50, 0.5);
+    border-radius: var(--radius-sm);
+    color: rgb(255, 220, 150);
+    font-size: var(--font-md);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.upgrade-btn:hover {
+    background-color: rgba(180, 115, 35, 0.75);
+    border-color: rgba(240, 180, 60, 0.7);
+}
+
+.upgrade-btn:disabled {
+    background-color: rgba(40, 30, 18, 0.4);
+    border-color: rgba(100, 70, 35, 0.2);
+    color: rgb(120, 100, 75);
+}

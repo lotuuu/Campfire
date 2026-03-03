@@ -879,25 +879,48 @@ namespace Garden
             else
             {
                 var recipe = FlameManager.Instance.Config.GetUpgradeRecipe(FlameManager.Instance.Level);
-                string costText = "Level Up";
-                if (recipe != null)
+                if (recipe != null && recipe.ingredients.Count > 0)
                 {
-                    var parts = new System.Collections.Generic.List<string>();
+                    var costList = new VisualElement();
+                    costList.AddToClassList("upgrade-cost-list");
+
+                    var costHeader = new Label("REQUIRED");
+                    costHeader.AddToClassList("upgrade-cost-header");
+                    costList.Add(costHeader);
+
+                    var items = SaveManager.Instance.Data.items;
                     foreach (var ing in recipe.ingredients)
                     {
                         string displayName = ing.itemName.Replace("_harvest", "");
-                        parts.Add($"{ing.count}x {displayName}");
+                        var item = items.Find(i => i.itemName == ing.itemName);
+                        int have = item != null ? item.count : 0;
+                        bool enough = have >= ing.count;
+
+                        var row = new VisualElement();
+                        row.AddToClassList("upgrade-cost-row");
+
+                        var nameLabel = new Label(displayName);
+                        nameLabel.AddToClassList("upgrade-cost-name");
+                        row.Add(nameLabel);
+
+                        var amountLabel = new Label($"{have}/{ing.count}");
+                        amountLabel.AddToClassList("upgrade-cost-amount");
+                        amountLabel.AddToClassList(enough ? "upgrade-cost-amount--have" : "upgrade-cost-amount--need");
+                        row.Add(amountLabel);
+
+                        costList.Add(row);
                     }
-                    costText = $"Level Up ({string.Join(", ", parts)})";
+                    interactionBody.Add(costList);
                 }
+
                 bool canAfford = FlameManager.Instance.CanUpgrade();
                 var btn = new Button(() =>
                 {
                     FlameManager.Instance.UpgradeFlame();
                     CloseInteractionPanel();
-                }) { text = costText };
+                }) { text = "Level Up" };
                 btn.SetEnabled(canAfford);
-                btn.AddToClassList("interaction-btn-primary");
+                btn.AddToClassList("upgrade-btn");
                 interactionActions.Add(btn);
             }
 
@@ -911,23 +934,8 @@ namespace Garden
             switch (plot.state)
             {
                 case PlotState.Empty:
-                    interactionTitle.text = "Empty Plot";
-                    var hint = new Label("Choose a seed to plant");
-                    hint.AddToClassList("interaction-info");
-                    interactionBody.Add(hint);
-
-                    var seeds = SaveManager.Instance.Data.seedInventory;
-                    foreach (var seed in seeds)
-                    {
-                        if (seed.count <= 0) continue;
-                        string seedName = seed.seedName;
-                        var btn = new Button(() =>
-                        {
-                            PlotManager.Instance.Plant(index, seedName);
-                            CloseInteractionPanel();
-                        }) { text = $"{seedName} ({seed.count})" };
-                        interactionActions.Add(btn);
-                    }
+                    interactionTitle.text = "Choose a Seed";
+                    BuildSeedPicker(index);
                     break;
 
                 case PlotState.Growing:
@@ -999,6 +1007,118 @@ namespace Garden
             interactionBody.Add(qualityLabel);
 
             AddCloseButton();
+        }
+
+        private void BuildSeedPicker(int plotIndex)
+        {
+            var allSeeds = Resources.LoadAll<SeedData>("Seeds");
+            var inventory = SaveManager.Instance.Data.seedInventory;
+
+            var scroll = new ScrollView(ScrollViewMode.Vertical);
+            scroll.AddToClassList("seed-picker-scroll");
+
+            var list = new VisualElement();
+            list.AddToClassList("seed-picker-list");
+
+            foreach (var entry in inventory)
+            {
+                if (entry.count <= 0) continue;
+
+                SeedData seedData = null;
+                foreach (var s in allSeeds)
+                    if (s.seedName == entry.seedName) { seedData = s; break; }
+
+                var card = new VisualElement();
+                card.AddToClassList("seed-card");
+
+                // Header row: name + count
+                var header = new VisualElement();
+                header.AddToClassList("seed-card--header");
+                var nameLabel = new Label(entry.seedName);
+                nameLabel.AddToClassList("seed-card--name");
+                header.Add(nameLabel);
+                var countLabel = new Label($"x{entry.count}");
+                countLabel.AddToClassList("seed-card--count");
+                header.Add(countLabel);
+                card.Add(header);
+
+                // Stats row: growth time + drops
+                if (seedData != null)
+                {
+                    var stats = new VisualElement();
+                    stats.AddToClassList("seed-card--stats");
+
+                    AddSeedStat(stats, "Growth", $"{seedData.growthDurationHours}h");
+                    AddSeedStat(stats, "Drops", $"{seedData.baseDrops}");
+
+                    card.Add(stats);
+
+                    // Recipe tags (compact weather preferences)
+                    if (seedData.recipe != null)
+                    {
+                        var tags = new VisualElement();
+                        tags.AddToClassList("seed-card--recipe-tags");
+
+                        if (seedData.recipe.useHeat)
+                            AddRecipeTag(tags, $"Heat {seedData.recipe.idealTempMin}-{seedData.recipe.idealTempMax}\u00b0C");
+                        if (seedData.recipe.useWind)
+                            AddRecipeTag(tags, $"Wind {seedData.recipe.idealWindMin}-{seedData.recipe.idealWindMax}m/s");
+                        if (seedData.recipe.useHumidity)
+                            AddRecipeTag(tags, $"Humid {seedData.recipe.idealHumidityMin}-{seedData.recipe.idealHumidityMax}%");
+                        if (seedData.recipe.useSunlight)
+                            AddRecipeTag(tags, $"Sun {seedData.recipe.idealSunlightMin}-{seedData.recipe.idealSunlightMax}%");
+                        if (seedData.recipe.useRain)
+                        {
+                            int minPct = Mathf.RoundToInt(seedData.recipe.idealRainMin * 100f);
+                            int maxPct = Mathf.RoundToInt(seedData.recipe.idealRainMax * 100f);
+                            AddRecipeTag(tags, $"Rain {minPct}-{maxPct}%");
+                        }
+                        if (seedData.recipe.useMoon)
+                            AddRecipeTag(tags, seedData.recipe.requiredMoonPhase.ToString());
+                        if (seedData.recipe.useWaterings)
+                            AddRecipeTag(tags, $"Water x{seedData.recipe.idealWaterings}");
+
+                        if (tags.childCount > 0)
+                            card.Add(tags);
+                    }
+                }
+
+                // Plant button
+                string sName = entry.seedName;
+                var plantBtn = new Button(() =>
+                {
+                    PlotManager.Instance.Plant(plotIndex, sName);
+                    CloseInteractionPanel();
+                }) { text = "Plant" };
+                plantBtn.AddToClassList("seed-card--plant-btn");
+                card.Add(plantBtn);
+
+                list.Add(card);
+            }
+
+            scroll.Add(list);
+            interactionBody.Add(scroll);
+        }
+
+        private static void AddSeedStat(VisualElement container, string label, string value)
+        {
+            var stat = new VisualElement();
+            stat.AddToClassList("seed-card--stat");
+            var l = new Label(label);
+            l.AddToClassList("seed-card--stat-label");
+            stat.Add(l);
+            var v = new Label(value);
+            v.AddToClassList("seed-card--stat-value");
+            stat.Add(v);
+            container.Add(stat);
+        }
+
+        private static void AddRecipeTag(VisualElement container, string text)
+        {
+            var tag = new VisualElement();
+            tag.AddToClassList("seed-card--tag");
+            tag.Add(new Label(text));
+            container.Add(tag);
         }
 
         private void AddGrowthRecipeSection(string seedName)
