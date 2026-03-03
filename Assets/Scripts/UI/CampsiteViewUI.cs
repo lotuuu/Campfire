@@ -1068,6 +1068,12 @@ namespace Garden
                     break;
             }
 
+            if (SkinManager.Instance != null)
+            {
+                var paintBtn = new Button(() => ShowSkinSelector(CampBuildingType.Plot, index)) { text = "Paint" };
+                interactionActions.Add(paintBtn);
+            }
+
             AddCloseButton();
         }
 
@@ -1330,6 +1336,12 @@ namespace Garden
                     break;
             }
 
+            if (SkinManager.Instance != null)
+            {
+                var paintBtn = new Button(() => ShowSkinSelector(CampBuildingType.Vase, index)) { text = "Paint" };
+                interactionActions.Add(paintBtn);
+            }
+
             AddCloseButton();
         }
 
@@ -1355,7 +1367,162 @@ namespace Garden
             infoLabel.AddToClassList("interaction-info");
             interactionBody.Add(infoLabel);
 
+            if (SkinManager.Instance != null)
+            {
+                var paintBtn = new Button(() => ShowSkinSelector(CampBuildingType.MallumHouse, index)) { text = "Paint" };
+                interactionActions.Add(paintBtn);
+            }
+
             AddCloseButton();
+        }
+
+        private void ShowSkinSelector(CampBuildingType type, int index)
+        {
+            if (SkinManager.Instance == null) return;
+            interactionBody.Clear();
+            interactionActions.Clear();
+
+            string typeName = type switch
+            {
+                CampBuildingType.Plot => "Plot",
+                CampBuildingType.Vase => "Vase",
+                CampBuildingType.MallumHouse => "Mallum House",
+                _ => "Building"
+            };
+            interactionTitle.text = $"Paint {typeName}";
+
+            var skins = SkinManager.Instance.GetSkinsForBuilding(type);
+            if (skins.Count == 0)
+            {
+                var noSkins = new Label("No skins available");
+                noSkins.AddToClassList("interaction-info");
+                interactionBody.Add(noSkins);
+                AddCloseButton();
+                return;
+            }
+
+            string currentSkin = type switch
+            {
+                CampBuildingType.Plot => SaveManager.Instance.Data.plots[index].skinName,
+                CampBuildingType.Vase => SaveManager.Instance.Data.vases[index].skinName,
+                CampBuildingType.MallumHouse => SaveManager.Instance.Data.mallumHouses[index].skinName,
+                _ => null
+            };
+
+            var carousel = new ScrollView(ScrollViewMode.Horizontal);
+            carousel.AddToClassList("skin-carousel");
+            var carouselContent = carousel.contentContainer;
+            carouselContent.style.flexDirection = FlexDirection.Row;
+
+            var detailArea = new VisualElement();
+            detailArea.AddToClassList("skin-detail");
+
+            SkinData selectedSkin = null;
+            VisualElement selectedSwatch = null;
+
+            foreach (var skin in skins)
+            {
+                var swatch = new VisualElement();
+                swatch.AddToClassList("skin-swatch");
+
+                var preview = new VisualElement();
+                preview.AddToClassList("skin-swatch-preview");
+                preview.style.backgroundColor = skin.hexFillColor;
+                preview.style.borderTopColor = skin.hexBorderColor;
+                preview.style.borderBottomColor = skin.hexBorderColor;
+                preview.style.borderLeftColor = skin.hexBorderColor;
+                preview.style.borderRightColor = skin.hexBorderColor;
+                swatch.Add(preview);
+
+                var swatchLabel = new Label(skin.skinName.Replace("_", " "));
+                swatchLabel.AddToClassList("skin-swatch-label");
+                swatch.Add(swatchLabel);
+
+                bool isEquipped = skin.skinName == currentSkin;
+                if (isEquipped)
+                    swatch.AddToClassList("skin-swatch--equipped");
+
+                var capturedSkin = skin;
+                var capturedSwatch = swatch;
+                swatch.RegisterCallback<ClickEvent>(evt =>
+                {
+                    evt.StopPropagation();
+                    selectedSwatch?.RemoveFromClassList("skin-swatch--selected");
+                    capturedSwatch.AddToClassList("skin-swatch--selected");
+                    selectedSwatch = capturedSwatch;
+                    selectedSkin = capturedSkin;
+                    UpdateSkinDetail(detailArea, capturedSkin, type, index, currentSkin);
+                });
+
+                carouselContent.Add(swatch);
+            }
+
+            interactionBody.Add(carousel);
+            interactionBody.Add(detailArea);
+
+            if (skins.Count > 0)
+            {
+                selectedSkin = skins[0];
+                selectedSwatch = carouselContent[0];
+                selectedSwatch.AddToClassList("skin-swatch--selected");
+                UpdateSkinDetail(detailArea, skins[0], type, index, currentSkin);
+            }
+
+            if (!string.IsNullOrEmpty(currentSkin))
+            {
+                var removeBtn = new Button(() =>
+                {
+                    SkinManager.Instance.RemoveSkin(type, index);
+                    CloseInteractionPanel();
+                    RebuildGrid();
+                }) { text = "Remove Skin" };
+                interactionActions.Add(removeBtn);
+            }
+
+            var backBtn = new Button(() => ShowInteraction(type, index)) { text = "Back" };
+            interactionActions.Add(backBtn);
+        }
+
+        private void UpdateSkinDetail(VisualElement detailArea, SkinData skin,
+            CampBuildingType type, int index, string currentSkin)
+        {
+            detailArea.Clear();
+
+            var nameLabel = new Label(skin.skinName.Replace("_", " "));
+            nameLabel.AddToClassList("skin-detail-name");
+            detailArea.Add(nameLabel);
+
+            var items = SaveManager.Instance.Data.items;
+            var pigmentItem = items.Find(i => i.itemName == skin.costItemName);
+            int have = pigmentItem?.count ?? 0;
+            string costName = skin.costItemName.Replace("_", " ");
+
+            var costLabel = new Label($"Cost: {skin.costQuantity}x {costName} (have: {have})");
+            costLabel.AddToClassList("skin-detail-cost");
+            detailArea.Add(costLabel);
+
+            bool isEquipped = skin.skinName == currentSkin;
+            if (isEquipped)
+            {
+                var equippedLabel = new Label("Currently applied");
+                equippedLabel.AddToClassList("skin-detail-equipped");
+                detailArea.Add(equippedLabel);
+            }
+            else
+            {
+                bool canAfford = SkinManager.Instance.CanAffordSkin(skin);
+                var paintBtn = new Button(() =>
+                {
+                    if (SkinManager.Instance.ApplySkin(type, index, skin))
+                    {
+                        CloseInteractionPanel();
+                        RebuildGrid();
+                    }
+                }) { text = $"Paint ({skin.costQuantity}x {costName})" };
+                paintBtn.AddToClassList("interaction-btn-primary");
+                paintBtn.SetEnabled(canAfford);
+                detailArea.Add(paintBtn);
+            }
         }
 
         private void ShowBirdInteraction(int index)

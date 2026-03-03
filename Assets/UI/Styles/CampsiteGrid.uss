@@ -281,3 +281,74 @@
 #visit-back-btn:hover {
     background-color: rgba(180, 115, 35, 0.85);
 }
+
+/* ── Skin Selector ── */
+.skin-carousel {
+    max-height: 120px;
+    margin-bottom: var(--spacing-sm);
+}
+
+.skin-swatch {
+    width: 80px;
+    min-width: 80px;
+    height: 100px;
+    margin-right: var(--spacing-xs);
+    padding: var(--spacing-xxs);
+    border-radius: var(--radius-sm);
+    border-width: 2px;
+    border-color: rgba(140, 100, 50, 0.2);
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(40, 25, 12, 0.3);
+}
+
+.skin-swatch--selected {
+    border-color: rgba(255, 200, 80, 0.8);
+    background-color: rgba(60, 40, 20, 0.5);
+}
+
+.skin-swatch--equipped {
+    border-color: rgba(120, 180, 60, 0.6);
+}
+
+.skin-swatch-preview {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    border-width: 2px;
+    margin-bottom: var(--spacing-xxs);
+}
+
+.skin-swatch-label {
+    font-size: 16px;
+    color: var(--color-text-dim);
+    -unity-text-align: upper-center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 76px;
+}
+
+.skin-detail {
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+}
+
+.skin-detail-name {
+    font-size: var(--font-md);
+    color: var(--color-text);
+    -unity-font-style: bold;
+    margin-bottom: var(--spacing-xxs);
+}
+
+.skin-detail-cost {
+    font-size: var(--font-sm);
+    color: var(--color-text-dim);
+    margin-bottom: var(--spacing-xs);
+}
+
+.skin-detail-equipped {
+    font-size: var(--font-sm);
+    color: rgba(120, 180, 60, 0.9);
+    -unity-font-style: italic;
+}
