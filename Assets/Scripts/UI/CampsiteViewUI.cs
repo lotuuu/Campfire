@@ -213,6 +213,8 @@ namespace Garden
                 occupied[(data.vases[i].gridX, data.vases[i].gridY)] = (CampBuildingType.Vase, i);
             for (int i = 0; i < data.gardens.Count; i++)
                 occupied[(data.gardens[i].gridX, data.gardens[i].gridY)] = (CampBuildingType.Garden, i);
+            for (int i = 0; i < data.mallumHouses.Count; i++)
+                occupied[(data.mallumHouses[i].gridX, data.mallumHouses[i].gridY)] = (CampBuildingType.MallumHouse, i);
 
             // Fixed buildings always take priority
             occupied[(data.apothekeGridX, data.apothekeGridY)] = (CampBuildingType.Apotheke, 0);
@@ -372,6 +374,18 @@ namespace Garden
                     if (label != null) label.text = "Apotheke";
                     if (status != null) status.text = "Mixing";
                     break;
+
+                case CampBuildingType.MallumHouse:
+                    cell.AddToClassList("grid-cell--mallum-house");
+                    if (label != null) label.text = "Mallum House";
+                    if (status != null)
+                    {
+                        int mallumCount = MallumManager.Instance != null
+                            ? MallumManager.Instance.HouseConfig.MallumsPerHouse
+                            : 2;
+                        status.text = $"+{mallumCount} Mallums";
+                    }
+                    break;
             }
         }
 
@@ -417,6 +431,9 @@ namespace Garden
                         break;
                     case CampBuildingType.Vase:
                         success = VaseManager.Instance.CraftVase(gridX, gridY);
+                        break;
+                    case CampBuildingType.MallumHouse:
+                        success = MallumManager.Instance.CraftMallumHouse(gridX, gridY);
                         break;
                 }
                 if (success) ExitMode();
@@ -465,6 +482,30 @@ namespace Garden
                 vaseBtn.AddToClassList("interaction-btn-primary");
                 vaseBtn.SetEnabled(canAfford);
                 interactionActions.Add(vaseBtn);
+            }
+
+            // Mallum House option
+            if (MallumManager.Instance != null)
+            {
+                var hConfig = MallumManager.Instance.HouseConfig;
+                var cost = hConfig.GetNextHouseCost(SaveManager.Instance.Data.mallumHouses.Count);
+                if (cost != null)
+                {
+                    string costText = $"{cost.manaCost:F0} Mana";
+                    foreach (var sc in cost.seedCosts)
+                        costText += $" + {sc.count} {sc.seedName}";
+                    bool canAffordHouse = canPlace
+                        && CurrencyManager.Instance.CanAffordMana(cost.manaCost)
+                        && MallumManager.CanAffordSeeds(SaveManager.Instance.Data.seedInventory, cost.seedCosts);
+                    var houseBtn = new Button(() =>
+                    {
+                        if (MallumManager.Instance.CraftMallumHouse(gridX, gridY))
+                            CloseInteractionPanel();
+                    }) { text = $"Mallum House ({costText})" };
+                    houseBtn.AddToClassList("interaction-btn-primary");
+                    houseBtn.SetEnabled(canAffordHouse);
+                    interactionActions.Add(houseBtn);
+                }
             }
 
             if (!canPlace)
@@ -802,6 +843,9 @@ namespace Garden
                 case CampBuildingType.Garden:
                     ShowGardenInteraction(index);
                     break;
+                case CampBuildingType.MallumHouse:
+                    ShowMallumHouseInteraction(index);
+                    break;
             }
 
             ShowInteractionPanel();
@@ -1055,6 +1099,19 @@ namespace Garden
             var stateLabel = new Label(garden.mature ? "Mature — yielding fruit" : "Growing...");
             stateLabel.AddToClassList("interaction-info");
             interactionBody.Add(stateLabel);
+
+            AddCloseButton();
+        }
+
+        private void ShowMallumHouseInteraction(int index)
+        {
+            if (MallumManager.Instance == null) return;
+            var config = MallumManager.Instance.HouseConfig;
+            interactionTitle.text = "Mallum House";
+
+            var infoLabel = new Label($"Houses {config.MallumsPerHouse} Mallums");
+            infoLabel.AddToClassList("interaction-info");
+            interactionBody.Add(infoLabel);
 
             AddCloseButton();
         }
