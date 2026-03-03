@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5576186012a54b3983628580d729abb6, type: 3}
+  m_Name: Mint_house
+  m_EditorClassIdentifier:
+  skinName: Mint_house
+  buildingType: 6
+  hexFillColor: {r: 0.235, g: 0.667, b: 0.51, a: 0.6}
+  hexBorderColor: {r: 0.392, g: 0.824, b: 0.667, a: 0.3}
+  costItemName: Mint_pigment
+  costQuantity: 1
