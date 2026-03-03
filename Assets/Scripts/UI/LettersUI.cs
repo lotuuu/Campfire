@@ -150,7 +150,12 @@ namespace Garden
         {
             if (SocialService.Instance == null || !SocialService.Instance.IsSignedIn)
             {
-                if (inboxEmpty != null) inboxEmpty.style.display = DisplayStyle.Flex;
+                inboxList?.Clear();
+                if (inboxEmpty != null)
+                {
+                    inboxEmpty.text = "Could not connect to server";
+                    inboxEmpty.style.display = DisplayStyle.Flex;
+                }
                 return;
             }
 
@@ -213,7 +218,11 @@ namespace Garden
             }
 
             bool isEmpty = requests.Count == 0 && gifts.Count == 0;
-            if (inboxEmpty != null) inboxEmpty.style.display = isEmpty ? DisplayStyle.Flex : DisplayStyle.None;
+            if (inboxEmpty != null)
+            {
+                inboxEmpty.text = "No new letters";
+                inboxEmpty.style.display = isEmpty ? DisplayStyle.Flex : DisplayStyle.None;
+            }
         }
 
         // ── Friends ──
@@ -222,10 +231,24 @@ namespace Garden
         {
             friendsList?.Clear();
 
+            if (SocialService.Instance == null || !SocialService.Instance.IsSignedIn)
+            {
+                if (friendsEmpty != null)
+                {
+                    friendsEmpty.text = "Could not connect to server";
+                    friendsEmpty.style.display = DisplayStyle.Flex;
+                }
+                return;
+            }
+
             var friends = SocialSaveManager.Instance?.Data?.cachedFriends;
             if (friends == null || friends.Count == 0)
             {
-                if (friendsEmpty != null) friendsEmpty.style.display = DisplayStyle.Flex;
+                if (friendsEmpty != null)
+                {
+                    friendsEmpty.text = "No friends yet";
+                    friendsEmpty.style.display = DisplayStyle.Flex;
+                }
                 return;
             }
             if (friendsEmpty != null) friendsEmpty.style.display = DisplayStyle.None;
@@ -262,6 +285,14 @@ namespace Garden
 
         private void RefreshAddView()
         {
+            if (SocialService.Instance == null || !SocialService.Instance.IsSignedIn)
+            {
+                if (displayNameStatus != null) displayNameStatus.text = "Could not connect to server";
+                if (myFriendCode != null) myFriendCode.text = "";
+                if (addFriendStatus != null) addFriendStatus.text = "";
+                return;
+            }
+
             if (displayNameInput != null)
             {
                 var currentName = SocialSaveManager.Instance?.Data?.displayName ?? "Camper";
