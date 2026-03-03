@@ -217,12 +217,32 @@ namespace Garden
             return count;
         }
 
+        private const string SpeedPotionItem = "Speed_Potion";
+
+        public bool CanSpeedUpQuest()
+        {
+            var item = SaveManager.Instance.Data.items.Find(i => i.itemName == SpeedPotionItem);
+            return item != null && item.count > 0;
+        }
+
+        public int GetSpeedPotionCount()
+        {
+            var item = SaveManager.Instance.Data.items.Find(i => i.itemName == SpeedPotionItem);
+            return item?.count ?? 0;
+        }
+
         public bool SpeedUpQuest(int mallumIndex)
         {
             var data = SaveManager.Instance.Data;
             if (mallumIndex < 0 || mallumIndex >= data.mallums.Count) return false;
             var mallum = data.mallums[mallumIndex];
             if (mallum.state != MallumState.OnQuest) return false;
+
+            // Consume Speed Potion
+            var potion = data.items.Find(i => i.itemName == SpeedPotionItem);
+            if (potion == null || potion.count <= 0) return false;
+            potion.count--;
+            if (potion.count <= 0) data.items.Remove(potion);
 
             CompleteQuest(mallum);
             NotificationService.Instance?.CancelQuestNotification(mallumIndex);

@@ -45,6 +45,7 @@ namespace Garden
             data.plots.Add(new PlotSave { state = PlotState.Empty, gridX = -1, gridY = 0 });
             ApothekeManager.Instance.AddSeed("Sprouts", 5);
             ApothekeManager.Instance.AddSeed("Cress", 3);
+            data.items.Add(new InventoryItem { itemName = "Speed_Potion", count = 3 });
             // Start with 1 Mallum House
             data.mallumHouses.Add(new MallumHouseSave { gridX = 1, gridY = -1 });
             if (MallumManager.Instance != null)
