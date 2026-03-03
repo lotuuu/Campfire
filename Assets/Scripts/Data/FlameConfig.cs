@@ -24,8 +24,8 @@ namespace Garden
         [SerializeField] private float baseManaPerSecond = 0.5f;
         [SerializeField] private float manaPerLevel = 0.3f;
 
-        [Header("Entity Capacity (plots + vases + gardens)")]
-        [SerializeField] private int[] maxEntitiesPerLevel = { 3, 5, 8, 12, 15, 18, 22, 26, 30, 35 };
+        [Header("Entity Capacity (apotheke + plots + vases + gardens + houses)")]
+        [SerializeField] private int[] maxEntitiesPerLevel = { 6, 8, 12, 15, 18, 22, 26, 30, 35, 40 };
 
         [Header("Upgrade Recipes")]
         [SerializeField] private List<FlameUpgradeRecipe> upgradeRecipes = new();

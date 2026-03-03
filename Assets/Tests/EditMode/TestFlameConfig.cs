@@ -17,15 +17,15 @@ namespace Garden.Tests
         [Test]
         public void GetMaxEntities_ReturnsCorrectForLevel()
         {
-            Assert.AreEqual(3, config.GetMaxEntities(1));
-            Assert.AreEqual(5, config.GetMaxEntities(2));
-            Assert.AreEqual(12, config.GetMaxEntities(4));
+            Assert.AreEqual(6, config.GetMaxEntities(1));
+            Assert.AreEqual(8, config.GetMaxEntities(2));
+            Assert.AreEqual(15, config.GetMaxEntities(4));
         }
 
         [Test]
         public void GetMaxEntities_ClampsToLastEntry()
         {
-            Assert.AreEqual(35, config.GetMaxEntities(99));
+            Assert.AreEqual(40, config.GetMaxEntities(99));
         }
 
         [Test]
