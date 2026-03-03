@@ -38,6 +38,8 @@ namespace Garden
             data.mana = 50f;
             data.gems = 5;
             VaseManager.InitializeNewPlayer(data, VaseManager.Instance.Config.BaseCapacity);
+            data.vases[0].currentWater = data.vases[0].capacity;
+            data.vases[0].state = VaseState.Full;
             data.vases[0].gridX = 1;
             data.vases[0].gridY = 0;
             data.vases[1].gridX = 0;
