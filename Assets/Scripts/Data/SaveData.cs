@@ -18,6 +18,8 @@ namespace Garden
         public float lastManaCollectTime;
         public string lastVisitorDateUtc;
         public List<MallumSave> mallums = new();
+        public string rainStartTimeUtc;
+        public string lastRainEffectTimeUtc;
     }
 
     [Serializable]
@@ -41,6 +43,7 @@ namespace Garden
         public int gridX;
         public int gridY;
         public GrowthSnapshots snapshots = new();
+        public string lastWateredUtc;
     }
 
     [Serializable]
