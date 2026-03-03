@@ -11,6 +11,9 @@ namespace Garden
         public event Action OnBirdPlaced;
         public event Action<BirdSave> OnBirdCollected;
 
+        private static readonly float BaseChance = 0.33f;
+        private static readonly float HalvingFactor = 0.5f;
+
         private List<SeedData> allSeeds;
 
         private void Awake()
@@ -22,8 +25,13 @@ namespace Garden
 
         private void Update()
         {
-            var data = SaveManager.Instance.Data;
-            int gridRadius = FlameManager.Instance.Config.GetGridSize(data.flameLevel);
+            var data = SaveManager.Instance?.Data;
+            if (data == null) return;
+
+            int gridRadius = FlameManager.Instance != null
+                ? FlameManager.Instance.Config.GetGridSize(data.flameLevel)
+                : 2;
+
             bool changed = ProcessHourlyChecks(data, allSeeds, gridRadius, GameTime.UtcNow);
             if (changed)
             {
@@ -130,14 +138,20 @@ namespace Garden
             var lastCheck = DateTime.Parse(data.lastBirdCheckHourUtc, null,
                 System.Globalization.DateTimeStyles.RoundtripKind);
 
-            bool anyPlaced = false;
             var eligible = GetEligibleSeeds(allSeeds, data.flameLevel);
+            if (eligible.Count == 0)
+            {
+                data.lastBirdCheckHourUtc = currentHour.ToString("o");
+                return false;
+            }
+
+            bool anyPlaced = false;
 
             // Walk from (lastCheck + 1h) to currentHour
             var checkHour = lastCheck.AddHours(1);
             while (checkHour <= currentHour)
             {
-                float effectiveChance = 0.33f * Mathf.Pow(0.5f, data.birds.Count);
+                float effectiveChance = BaseChance * Mathf.Pow(HalvingFactor, data.birds.Count);
 
                 if (UnityEngine.Random.value < effectiveChance)
                 {
