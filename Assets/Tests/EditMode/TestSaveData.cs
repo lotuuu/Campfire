@@ -17,7 +17,6 @@ namespace Garden.Tests
             Assert.AreEqual(0, data.gardens.Count);
             Assert.AreEqual(0, data.seedInventory.Count);
             Assert.AreEqual(0, data.items.Count);
-            Assert.AreEqual(0f, data.lastManaCollectTime);
         }
 
         [Test]
@@ -27,7 +26,6 @@ namespace Garden.Tests
             {
                 mana = 123.5f,
                 flameLevel = 3,
-                lastManaCollectTime = 1000f,
             };
             data.seedInventory.Add(new SeedInventoryEntry { seedName = "Basil", count = 5 });
             data.vases.Add(new VaseSave { capacity = 10, currentWater = 7 });

@@ -8,12 +8,10 @@ namespace Garden
     {
         public static MallumManager Instance { get; private set; }
 
-        [SerializeField] private MallumConfig config;
         [SerializeField] private MallumHouseConfig houseConfig;
 
         private QuestData[] allQuests;
 
-        public MallumConfig Config => config;
         public MallumHouseConfig HouseConfig => houseConfig;
         public event Action OnMallumsChanged;
 
@@ -31,20 +29,6 @@ namespace Garden
             var data = SaveManager.Instance.Data;
             int max = houseConfig.GetMaxMallums(data.mallumHouses.Count);
             EnsureMallumCount(data.mallums, max);
-
-            if (FlameManager.Instance != null)
-                FlameManager.Instance.OnFlameUpgraded += OnFlameUpgraded;
-        }
-
-        private void OnDestroy()
-        {
-            if (FlameManager.Instance != null)
-                FlameManager.Instance.OnFlameUpgraded -= OnFlameUpgraded;
-        }
-
-        private void OnFlameUpgraded()
-        {
-            // Mallum count now determined by houses, not flame level
         }
 
         private void Update()

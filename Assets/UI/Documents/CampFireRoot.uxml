@@ -14,6 +14,7 @@
     <Style src="project://database/Assets/UI/Styles/Forecast.uss" />
     <Style src="project://database/Assets/UI/Styles/Quest.uss" />
     <Style src="project://database/Assets/UI/Styles/Merchant.uss" />
+    <Style src="project://database/Assets/UI/Styles/Dialogue.uss" />
 
     <!-- Root container -->
     <ui:VisualElement name="camp-root">
@@ -49,9 +50,7 @@
 
             <!-- Resources row with debug button -->
             <ui:VisualElement name="resource-bar">
-                <ui:Button name="btn-debug" class="icon-btn">
-                    <ui:VisualElement name="btn-debug-icon" class="header-icon" />
-                </ui:Button>
+                <ui:Button name="btn-debug" text="DEBUG" class="debug-btn" />
                 <ui:VisualElement style="flex-grow: 1;" />
                 <ui:VisualElement class="resource-item">
                     <ui:VisualElement name="mana-icon" class="resource-icon" />
@@ -278,6 +277,15 @@
             <ui:Label name="interaction-title" text="" />
             <ui:VisualElement name="interaction-body" />
             <ui:VisualElement name="interaction-actions" />
+        </ui:VisualElement>
+
+        <!-- Dialogue overlay (VN-style) -->
+        <ui:VisualElement name="dialogue-overlay">
+            <ui:VisualElement name="dialogue-box">
+                <ui:Label name="dialogue-speaker" text="" />
+                <ui:Label name="dialogue-text" text="" />
+                <ui:Label name="dialogue-tap-hint" text="Tap to continue" />
+            </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- Visit transition curtains -->

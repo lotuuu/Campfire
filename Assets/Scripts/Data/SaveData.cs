@@ -15,7 +15,6 @@ namespace Garden
         public List<GardenSave> gardens = new();
         public List<SeedInventoryEntry> seedInventory = new();
         public List<InventoryItem> items = new();
-        public float lastManaCollectTime;
         public string lastVisitorDateUtc;
         public List<MallumSave> mallums = new();
         public List<MallumHouseSave> mallumHouses = new();
