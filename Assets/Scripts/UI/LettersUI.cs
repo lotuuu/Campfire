@@ -227,7 +227,7 @@ namespace Garden
 
         // ── Friends ──
 
-        private void RefreshFriends()
+        private async void RefreshFriends()
         {
             friendsList?.Clear();
 
@@ -240,6 +240,9 @@ namespace Garden
                 }
                 return;
             }
+
+            // Fetch latest from server so we see newly accepted friends
+            await SocialService.Instance.RefreshFriendList();
 
             var friends = SocialSaveManager.Instance?.Data?.cachedFriends;
             if (friends == null || friends.Count == 0)

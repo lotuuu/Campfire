@@ -100,24 +100,30 @@ namespace Garden
             }
         }
 
+        private static string TruncateName(string name, int max = 10)
+        {
+            if (string.IsNullOrEmpty(name)) return "Camper";
+            return name.Length > max ? name[..max] : name;
+        }
+
         private void UpdatePlayerName()
         {
             if (playerName == null) return;
             var name = SocialSaveManager.Instance?.Data?.displayName;
-            playerName.text = (string.IsNullOrEmpty(name) ? "Camper" : name) + "'s Campfire";
+            playerName.text = TruncateName(name) + "'s Campfire";
         }
 
         private void OnDisplayNameUpdated(string newName)
         {
             if (playerName != null)
-                playerName.text = (string.IsNullOrEmpty(newName) ? "Camper" : newName) + "'s Campfire";
+                playerName.text = TruncateName(newName) + "'s Campfire";
         }
 
         public void SetVisitingName(string friendName)
         {
             if (playerName == null) return;
             if (friendName != null)
-                playerName.text = friendName + "'s Campfire";
+                playerName.text = TruncateName(friendName) + "'s Campfire";
             else
                 UpdatePlayerName();
         }
