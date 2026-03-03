@@ -17,6 +17,7 @@ namespace Garden
         public List<InventoryItem> items = new();
         public float lastManaCollectTime;
         public string lastVisitorDateUtc;
+        public List<MallumSave> mallums = new();
     }
 
     [Serializable]
