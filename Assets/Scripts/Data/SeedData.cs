@@ -14,6 +14,9 @@ namespace Garden
         public Sprite icon;
         public Sprite[] growthSprites;
 
+        [Header("Progression")]
+        public int tier = 1;
+
         [Header("Shop")]
         public float manaCost;
     }

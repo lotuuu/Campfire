@@ -49,4 +49,5 @@ MonoBehaviour:
     wateringsWeight: 1
   icon: {fileID: 0}
   growthSprites: []
+  tier: 8
   manaCost: 0
