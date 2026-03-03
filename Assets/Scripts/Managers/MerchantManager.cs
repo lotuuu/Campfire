@@ -114,8 +114,36 @@ namespace Garden
                 offers = offers,
                 appearedAtUtc = utcNow.ToString("o")
             };
+            save.dialogueLines = RollDialogue(merchantData, data.seenMerchantDialogues);
             data.merchants.Add(save);
             return true;
+        }
+
+        public static List<string> RollDialogue(MerchantData merchantData, List<int> seenDialogues)
+        {
+            if (merchantData.dialoguePool == null || merchantData.dialoguePool.Count == 0)
+                return new List<string>();
+
+            // Build unseen indices
+            var unseen = new List<int>();
+            for (int i = 0; i < merchantData.dialoguePool.Count; i++)
+            {
+                if (!seenDialogues.Contains(i))
+                    unseen.Add(i);
+            }
+
+            // If all seen, clear and use full pool
+            if (unseen.Count == 0)
+            {
+                seenDialogues.Clear();
+                for (int i = 0; i < merchantData.dialoguePool.Count; i++)
+                    unseen.Add(i);
+            }
+
+            int pickedIndex = unseen[UnityEngine.Random.Range(0, unseen.Count)];
+            seenDialogues.Add(pickedIndex);
+
+            return new List<string>(merchantData.dialoguePool[pickedIndex].lines);
         }
 
         public static List<MerchantOfferSave> RollOffers(MerchantData merchantData, int flameLevel)

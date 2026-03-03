@@ -27,6 +27,7 @@ namespace Garden
         public string lastBirdCheckHourUtc;
         public List<MerchantSave> merchants = new();
         public string lastMerchantDateUtc;
+        public List<int> seenMerchantDialogues = new();
     }
 
     [Serializable]

@@ -11,6 +11,8 @@ namespace Garden
         public string merchantName;
         public List<MerchantOfferSave> offers = new();
         public string appearedAtUtc;
+        public List<string> dialogueLines = new();
+        public bool dialogueSeen;
     }
 
     [Serializable]

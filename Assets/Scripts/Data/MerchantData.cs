@@ -11,6 +11,13 @@ namespace Garden
         [TextArea] public string flavorText;
         public int offerCount = 3;
         public List<MerchantOffer> offerPool = new();
+        public List<MerchantDialogue> dialoguePool = new();
+    }
+
+    [Serializable]
+    public class MerchantDialogue
+    {
+        [TextArea] public List<string> lines = new();
     }
 
     [Serializable]
