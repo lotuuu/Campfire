@@ -167,5 +167,45 @@ namespace Garden.Tests
             bool triggered = PlotManager.CheckRainEvent(data, WeatherCondition.Rain, DateTime.UtcNow);
             Assert.IsTrue(triggered);
         }
+
+        // Integration test
+        [Test]
+        public void FullRainEvent_FillsVasesFreeMallumsWatersPlots()
+        {
+            var data = new SaveData();
+            data.rainStartTimeUtc = DateTime.UtcNow.AddMinutes(-20).ToString("o");
+
+            data.vases.Add(new VaseSave { capacity = 5, currentWater = 0, state = VaseState.Empty });
+            data.vases.Add(new VaseSave { capacity = 5, currentWater = 0, state = VaseState.Filling,
+                fillStartTimeUtc = DateTime.UtcNow.ToString("o") });
+
+            data.mallums.Add(new MallumSave { state = MallumState.FetchingWater, assignedVaseIndex = 1 });
+            data.mallums.Add(new MallumSave { state = MallumState.Idle });
+
+            data.plots.Add(new PlotSave { state = PlotState.Growing, waterCount = 0 });
+            data.plots.Add(new PlotSave { state = PlotState.Growing, waterCount = 1,
+                lastWateredUtc = DateTime.UtcNow.AddHours(-1).ToString("o") });
+
+            var now = DateTime.UtcNow;
+            bool triggered = PlotManager.CheckRainEvent(data, WeatherCondition.Rain, now);
+            Assert.IsTrue(triggered);
+
+            VaseManager.RainFillAllVases(data.vases);
+            foreach (var m in data.mallums)
+                if (m.state == MallumState.FetchingWater)
+                    MallumManager.FreeMallumFromWater(m);
+            int watered = PlotManager.RainWaterAllPlots(data.plots, now);
+
+            Assert.AreEqual(VaseState.Full, data.vases[0].state);
+            Assert.AreEqual(5, data.vases[0].currentWater);
+            Assert.AreEqual(VaseState.Full, data.vases[1].state);
+
+            Assert.AreEqual(MallumState.Idle, data.mallums[0].state);
+            Assert.AreEqual(-1, data.mallums[0].assignedVaseIndex);
+
+            Assert.AreEqual(1, watered);
+            Assert.AreEqual(1, data.plots[0].waterCount);
+            Assert.AreEqual(1, data.plots[1].waterCount);
+        }
     }
 }
