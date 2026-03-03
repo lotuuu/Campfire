@@ -1,0 +1,16 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement class="quest-card">
+        <ui:VisualElement class="quest-card-header">
+            <ui:Label name="quest-name" class="quest-card-name" />
+            <ui:Label name="quest-duration" class="quest-card-duration" />
+        </ui:VisualElement>
+        <ui:Label name="quest-description" class="quest-card-description" />
+        <ui:VisualElement name="quest-rewards" class="quest-card-rewards" />
+        <ui:VisualElement name="quest-progress-container" class="quest-card-progress">
+            <ui:VisualElement name="quest-progress-fill" class="quest-card-progress-fill" />
+        </ui:VisualElement>
+        <ui:Label name="quest-timer" class="quest-card-timer" />
+        <ui:Button name="quest-action" class="quest-card-action" />
+        <ui:Label name="quest-locked" class="quest-locked-label" />
+    </ui:VisualElement>
+</ui:UXML>

@@ -12,6 +12,7 @@
     <Style src="project://database/Assets/UI/Styles/CampsiteGrid.uss" />
     <Style src="project://database/Assets/UI/Styles/Debug.uss" />
     <Style src="project://database/Assets/UI/Styles/Forecast.uss" />
+    <Style src="project://database/Assets/UI/Styles/Quest.uss" />
 
     <!-- Root container -->
     <ui:VisualElement name="camp-root">
@@ -86,6 +87,12 @@
                 <ui:VisualElement name="nav-icon-mail" class="nav-btn-icon" />
             </ui:Button>
         </ui:VisualElement>
+
+        <!-- Floating quest button -->
+        <ui:Button name="quest-float-btn">
+            <ui:VisualElement name="quest-float-icon" />
+            <ui:Label name="quest-badge" text="0" />
+        </ui:Button>
 
         <!-- Overlay container (slide-up panels) -->
         <ui:VisualElement name="overlay-container">
@@ -170,6 +177,14 @@
                     <!-- Build panel -->
                     <ui:VisualElement name="build-panel">
                         <ui:ScrollView name="build-list" />
+                    </ui:VisualElement>
+
+                    <!-- Quest panel -->
+                    <ui:VisualElement name="quests-panel">
+                        <ui:Label name="quest-mallum-status" class="quest-mallum-status" />
+                        <ui:VisualElement name="quest-active-section" />
+                        <ui:VisualElement name="quest-available-section" />
+                        <ui:VisualElement name="quest-locked-section" />
                     </ui:VisualElement>
 
                     <!-- Debug panel -->
