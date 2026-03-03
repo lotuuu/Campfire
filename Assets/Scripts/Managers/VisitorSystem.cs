@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Garden
@@ -32,17 +33,17 @@ namespace Garden
 
             data.lastVisitorDateUtc = today;
 
-            var gift = DetermineGift(data);
-            ApplyGift(data, gift);
+            var gift = DetermineGift(data.vases);
+            ApplyGift(data.vases, gift);
 
             SaveManager.Instance.Save();
             OnVisitorArrived?.Invoke(gift);
         }
 
-        private VisitorGift DetermineGift(SaveData data)
+        public static VisitorGift DetermineGift(List<VaseSave> vases)
         {
             int totalWater = 0;
-            foreach (var v in data.vases) totalWater += v.currentWater;
+            foreach (var v in vases) totalWater += v.currentWater;
             if (totalWater <= 2)
             {
                 return new VisitorGift { type = VisitorGiftType.Water, amount = 3 };
@@ -50,12 +51,12 @@ namespace Garden
             return new VisitorGift { type = VisitorGiftType.Seed, seedName = "Chamomile", amount = 1 };
         }
 
-        private void ApplyGift(SaveData data, VisitorGift gift)
+        public static void ApplyGift(List<VaseSave> vases, VisitorGift gift)
         {
             switch (gift.type)
             {
                 case VisitorGiftType.Water:
-                    foreach (var vase in data.vases)
+                    foreach (var vase in vases)
                     {
                         int space = vase.capacity - vase.currentWater;
                         if (space > 0)
