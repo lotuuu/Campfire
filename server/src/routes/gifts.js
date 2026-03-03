@@ -65,7 +65,7 @@ router.post('/send', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT g.id, g.from_uid, p.display_name AS from_display_name, g.items, g.created_at
+      `SELECT g.id, g.from_uid, p.display_name AS from_name, g.items, g.created_at
        FROM gifts g
        JOIN players p ON p.uid = g.from_uid
        WHERE g.to_uid = $1
