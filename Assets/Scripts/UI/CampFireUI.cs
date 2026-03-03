@@ -20,7 +20,6 @@ namespace Garden
         private ResourceDisplayUI resourceDisplay;
         private DebugWeatherPanel debugPanel;
         private QuestUI questUI;
-        private QuestButtonUI questButton;
         private MerchantUI merchantUI;
         private DialogueUI dialogueUI;
 
@@ -56,7 +55,6 @@ namespace Garden
             resourceDisplay = GetComponent<ResourceDisplayUI>();
             debugPanel = GetComponent<DebugWeatherPanel>();
             questUI = GetComponent<QuestUI>();
-            questButton = GetComponent<QuestButtonUI>();
 
             weatherBar?.Initialize(root);
             bottomNav?.Initialize(root);
@@ -67,7 +65,6 @@ namespace Garden
             resourceDisplay?.Initialize(root);
             debugPanel?.Initialize(root);
             questUI?.Initialize(root);
-            questButton?.Initialize(root);
             merchantUI = GetComponent<MerchantUI>();
             merchantUI?.Initialize(root);
             dialogueUI = GetComponent<DialogueUI>();
@@ -100,27 +97,18 @@ namespace Garden
                     OpenOverlay("Seeds", apothekePanel);
                 };
                 bottomNav.OnLettersClicked += () => OpenOverlay("Mail", lettersPanel);
-                bottomNav.OnBuildClicked += () =>
-                {
-                    build?.Refresh();
-                    OpenOverlay("Craft", buildPanel);
-                };
-            }
-
-            // Wire quest float button
-            var questFloatBtn = root.Q<Button>("quest-float-btn");
-            if (questFloatBtn != null)
-            {
-                questFloatBtn.clicked += () =>
+                bottomNav.OnQuestClicked += () =>
                 {
                     questUI?.Refresh();
                     OpenOverlay("Quests", questsPanel);
                 };
             }
 
+            // Update quest badge on mallum changes
             if (MallumManager.Instance != null)
             {
-                MallumManager.Instance.OnMallumsChanged += () => questButton?.UpdateBadge();
+                MallumManager.Instance.OnMallumsChanged += UpdateQuestBadge;
+                UpdateQuestBadge();
             }
 
             // Wire debug button (editor + development builds)
@@ -133,7 +121,7 @@ namespace Garden
                     debugBtn.style.display = DisplayStyle.None;
             }
 
-            // Wire build placement mode
+            // Wire build placement mode (from flame popup craft items)
             if (build != null && campsiteView != null)
             {
                 build.OnRequestPlacement += type =>
@@ -183,6 +171,13 @@ namespace Garden
             {
                 WeatherService.Instance.OnLocationResolved += OnLocationResolved;
             }
+        }
+
+        private void UpdateQuestBadge()
+        {
+            if (bottomNav == null || MallumManager.Instance == null) return;
+            int completed = MallumManager.Instance.GetCompletedQuestCount();
+            bottomNav.UpdateQuestBadge(completed);
         }
 
         private void OnLocationResolved(bool success)

@@ -18,6 +18,7 @@ namespace Garden
             // Load resource icons
             SetIcon(root.Q("mana-icon"), "UI/Icons/resource-mana");
             SetIcon(root.Q("water-icon"), "UI/Icons/resource-water");
+            SetIcon(root.Q("mallum-icon"), "UI/Icons/resource-mallum");
 
             if (CurrencyManager.Instance != null)
                 CurrencyManager.Instance.OnCurrencyChanged += OnCurrencyChanged;

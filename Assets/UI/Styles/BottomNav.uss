@@ -6,7 +6,7 @@
     background-color: rgb(36, 61, 28);
     border-top-width: 3px;
     border-top-color: rgb(214, 154, 53);
-    padding: var(--spacing-xs);
+    padding: var(--spacing-md);
 }
 
 .nav-btn {
@@ -15,13 +15,13 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 100px;
+    min-height: 200px;
     background-color: var(--color-button-bg);
     border-width: 2px;
     border-color: var(--color-border);
     border-radius: var(--radius-sm);
-    margin: 0 var(--spacing-xxs);
-    padding: var(--spacing-xs);
+    margin: 0 var(--spacing-sm);
+    padding: var(--spacing-md);
     transition-property: background-color;
     transition-duration: 0.15s;
 }
@@ -39,16 +39,34 @@
 }
 
 .nav-btn-label {
-    font-size: var(--font-sm);
+    font-size: var(--font-lg);
     color: var(--color-text);
     -unity-font-style: bold;
     -unity-text-align: middle-center;
 }
 
 .nav-btn-icon {
-    width: 40px;
-    height: 40px;
+    width: 130px;
+    height: 130px;
     -unity-background-scale-mode: scale-to-fit;
-    margin-top: var(--spacing-xxs);
+    margin-top: var(--spacing-xs);
     align-self: center;
+}
+
+/* Quest badge on nav button */
+.nav-btn-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 32px;
+    height: 32px;
+    border-radius: 16px;
+    background-color: #e74c3c;
+    color: white;
+    font-size: 20px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    padding-left: 6px;
+    padding-right: 6px;
+    display: none;
 }

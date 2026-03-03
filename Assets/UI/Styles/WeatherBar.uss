@@ -12,42 +12,42 @@
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    padding: var(--spacing-xs) var(--spacing-xxs);
+    padding: var(--spacing-sm) var(--spacing-xs);
     background-color: var(--color-bg-slot);
     border-width: 2px;
     border-color: var(--color-border);
     border-radius: var(--radius-sm);
-    margin-right: var(--spacing-xxs);
+    margin-right: var(--spacing-xs);
 }
 
 .weather-cell-icon {
-    width: 28px;
-    height: 28px;
+    width: 36px;
+    height: 36px;
     -unity-background-scale-mode: scale-to-fit;
-    margin-right: var(--spacing-xxs);
+    margin-right: var(--spacing-xs);
 }
 
 #weather-condition-label {
-    font-size: var(--font-xs);
+    font-size: var(--font-sm);
     color: rgb(50, 35, 15);
     -unity-font-style: bold;
     margin-right: var(--spacing-xxs);
 }
 
 #weather-icon {
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
     -unity-background-scale-mode: scale-to-fit;
 }
 
 #weather-humidity {
-    font-size: var(--font-xs);
+    font-size: var(--font-sm);
     color: rgb(50, 35, 15);
     -unity-font-style: bold;
 }
 
 #weather-temp {
-    font-size: var(--font-xs);
+    font-size: var(--font-sm);
     color: rgb(50, 35, 15);
     -unity-font-style: bold;
 }
@@ -58,7 +58,7 @@
 }
 
 #weather-moon {
-    width: 36px;
-    height: 36px;
+    width: 44px;
+    height: 44px;
     -unity-background-scale-mode: scale-to-fit;
 }

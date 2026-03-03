@@ -61,7 +61,7 @@
                     <ui:Label name="water-display" text="0" />
                 </ui:VisualElement>
                 <ui:VisualElement class="resource-item">
-                    <ui:Label name="mallum-label" text="Mallums" class="resource-label" />
+                    <ui:VisualElement name="mallum-icon" class="resource-icon" />
                     <ui:Label name="mallum-display" text="0/0" />
                 </ui:VisualElement>
             </ui:VisualElement>
@@ -83,9 +83,10 @@
                 <ui:Label text="SEEDS" class="nav-btn-label" />
                 <ui:VisualElement name="nav-icon-seeds" class="nav-btn-icon" />
             </ui:Button>
-            <ui:Button name="btn-craft" class="nav-btn">
-                <ui:Label text="CRAFT" class="nav-btn-label" />
-                <ui:VisualElement name="nav-icon-craft" class="nav-btn-icon" />
+            <ui:Button name="btn-quest" class="nav-btn">
+                <ui:Label text="QUESTS" class="nav-btn-label" />
+                <ui:VisualElement name="nav-icon-quest" class="nav-btn-icon" />
+                <ui:Label name="nav-quest-badge" class="nav-btn-badge" text="0" />
             </ui:Button>
             <ui:Button name="btn-mail" class="nav-btn">
                 <ui:Label text="MAIL" class="nav-btn-label" />
@@ -93,11 +94,7 @@
             </ui:Button>
         </ui:VisualElement>
 
-        <!-- Floating quest button -->
-        <ui:Button name="quest-float-btn">
-            <ui:VisualElement name="quest-float-icon" />
-            <ui:Label name="quest-badge" text="0" />
-        </ui:Button>
+        <!-- (Quest button moved to bottom nav) -->
 
         <!-- Overlay container (slide-up panels) -->
         <ui:VisualElement name="overlay-container">

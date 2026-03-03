@@ -12,14 +12,14 @@
     justify-content: center;
     flex-direction: column;
     padding: var(--spacing-xxs);
-    --hex-fill: rgba(40, 25, 12, 0.3);
-    --hex-border: rgba(140, 100, 50, 0.15);
+    --hex-fill: rgba(30, 55, 20, 0.3);
+    --hex-border: rgba(70, 120, 45, 0.15);
 }
 
 /* ── Empty cell ── */
 .grid-cell--empty {
-    --hex-fill: rgba(40, 25, 12, 0.15);
-    --hex-border: rgba(100, 70, 35, 0.1);
+    --hex-fill: rgba(30, 55, 20, 0.15);
+    --hex-border: rgba(55, 95, 35, 0.1);
 }
 
 /* ── Placement mode highlights ── */
@@ -66,42 +66,42 @@
 
 /* ── Plot cell ── */
 .grid-cell--plot {
-    --hex-fill: rgba(60, 40, 20, 0.6);
-    --hex-border: rgba(140, 100, 50, 0.3);
+    --hex-fill: rgba(60, 160, 40, 0.5);
+    --hex-border: rgba(80, 200, 50, 0.4);
 }
 
 .grid-cell--plot:hover {
-    --hex-fill: rgba(70, 48, 25, 0.7);
-    --hex-border: rgba(255, 180, 60, 0.5);
+    --hex-fill: rgba(70, 180, 50, 0.6);
+    --hex-border: rgba(100, 220, 70, 0.6);
 }
 
 .grid-cell--plot .cell-icon {
     width: 56px;
     height: 56px;
     border-radius: 8px;
-    background-color: rgba(100, 80, 40, 0.4);
+    background-color: rgba(60, 160, 40, 0.4);
 }
 
 .grid-cell--plot-mature {
-    --hex-border: rgba(120, 180, 60, 0.5);
+    --hex-border: rgba(100, 220, 70, 0.6);
 }
 
 /* ── Vase cell ── */
 .grid-cell--vase {
-    --hex-fill: rgba(50, 35, 25, 0.6);
-    --hex-border: rgba(120, 90, 50, 0.3);
+    --hex-fill: rgba(50, 100, 180, 0.5);
+    --hex-border: rgba(70, 130, 210, 0.4);
 }
 
 .grid-cell--vase:hover {
-    --hex-fill: rgba(55, 40, 28, 0.7);
-    --hex-border: rgba(100, 180, 240, 0.5);
+    --hex-fill: rgba(60, 120, 200, 0.6);
+    --hex-border: rgba(90, 150, 230, 0.6);
 }
 
 .grid-cell--vase .cell-icon {
     width: 48px;
     height: 56px;
     border-radius: 8px;
-    background-color: rgba(80, 120, 180, 0.3);
+    background-color: rgba(50, 100, 180, 0.4);
 }
 
 /* ── Garden cell ── */
@@ -216,7 +216,7 @@
 .cell-progress {
     width: 80%;
     height: 6px;
-    background-color: rgba(40, 30, 15, 0.6);
+    background-color: rgba(20, 35, 15, 0.6);
     border-radius: 3px;
     overflow: hidden;
     margin-top: var(--spacing-xxs);

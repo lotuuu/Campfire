@@ -10,7 +10,7 @@
 /* ── Top bar frame ── */
 #top-bar {
     flex-shrink: 0;
-    padding: var(--spacing-sm);
+    padding: var(--spacing-md);
     margin: 0;
     background-color: rgb(36, 61, 28);
     border-bottom-width: 3px;
@@ -22,11 +22,11 @@
 #top-header {
     flex-direction: row;
     align-items: center;
-    margin-bottom: var(--spacing-xs);
+    margin-bottom: var(--spacing-sm);
 }
 
 #player-name {
-    font-size: var(--font-lg);
+    font-size: var(--font-xl);
     color: var(--color-text-bright);
     -unity-font-style: bold;
 }
@@ -59,7 +59,7 @@
 }
 
 #date-time {
-    font-size: var(--font-sm);
+    font-size: var(--font-md);
     color: var(--color-text-dim);
 }
 
@@ -68,30 +68,35 @@
     flex-direction: row;
     justify-content: flex-end;
     align-items: center;
-    padding-top: var(--spacing-xxs);
+    padding-top: var(--spacing-xs);
 }
 
 .resource-item {
     flex-direction: row;
     align-items: center;
-    margin-left: var(--spacing-md);
+    margin-left: var(--spacing-lg);
 }
 
 .resource-icon {
-    width: 20px;
-    height: 20px;
+    width: 32px;
+    height: 32px;
     -unity-background-scale-mode: scale-to-fit;
-    margin-right: var(--spacing-xxs);
+    margin-right: var(--spacing-xs);
 }
 
 #mana-display {
-    font-size: var(--font-xs);
+    font-size: var(--font-md);
     color: var(--color-mana);
 }
 
 #water-display {
-    font-size: var(--font-xs);
+    font-size: var(--font-md);
     color: var(--color-water);
+}
+
+#mallum-display {
+    font-size: var(--font-md);
+    color: var(--color-text);
 }
 
 /* ── Campsite grid viewport ── */
