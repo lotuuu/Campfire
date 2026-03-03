@@ -99,6 +99,8 @@ namespace Garden
         }
 
         private const int WaterNotificationIdOffset = 10000;
+        private const int QuestNotificationIdOffset = 20000;
+        private const int WaterFetchNotificationIdOffset = 30000;
 
         public void ScheduleWaterNotification(int plotIndex, string seedName, double remainingSeconds)
         {
@@ -153,6 +155,99 @@ namespace Garden
             AndroidNotificationCenter.CancelNotification(plotIndex);
 #elif UNITY_IOS
             iOSNotificationCenter.RemoveScheduledNotification(plotIndex.ToString());
+#endif
+        }
+
+        public void ScheduleQuestNotification(int mallumIndex, string questName, double remainingSeconds)
+        {
+            if (remainingSeconds <= 0) return;
+
+            string displayName = questName.Replace("_", " ");
+            string title = "Mallum has returned!";
+            string body = $"Your Mallum is back from {displayName} with rewards to collect!";
+            int id = mallumIndex + QuestNotificationIdOffset;
+
+#if UNITY_ANDROID
+            var notification = new AndroidNotification
+            {
+                Title = title,
+                Text = body,
+                FireTime = System.DateTime.Now.AddSeconds(remainingSeconds),
+                SmallIcon = "icon_0",
+                LargeIcon = "icon_1"
+            };
+            AndroidNotificationCenter.SendNotificationWithExplicitID(notification, AndroidChannelId, id);
+#elif UNITY_IOS
+            var timeTrigger = new iOSNotificationTimeIntervalTrigger
+            {
+                TimeInterval = new System.TimeSpan(0, 0, (int)remainingSeconds),
+                Repeats = false
+            };
+            var iosNotification = new iOSNotification
+            {
+                Identifier = id.ToString(),
+                Title = title,
+                Body = body,
+                ShowInForeground = false,
+                Trigger = timeTrigger
+            };
+            iOSNotificationCenter.ScheduleNotification(iosNotification);
+#endif
+        }
+
+        public void CancelQuestNotification(int mallumIndex)
+        {
+            int id = mallumIndex + QuestNotificationIdOffset;
+#if UNITY_ANDROID
+            AndroidNotificationCenter.CancelNotification(id);
+#elif UNITY_IOS
+            iOSNotificationCenter.RemoveScheduledNotification(id.ToString());
+#endif
+        }
+
+        public void ScheduleWaterFetchNotification(int mallumIndex, double remainingSeconds)
+        {
+            if (remainingSeconds <= 0) return;
+
+            string title = "Water is ready!";
+            string body = "Your Mallum has finished fetching water for your vase!";
+            int id = mallumIndex + WaterFetchNotificationIdOffset;
+
+#if UNITY_ANDROID
+            var notification = new AndroidNotification
+            {
+                Title = title,
+                Text = body,
+                FireTime = System.DateTime.Now.AddSeconds(remainingSeconds),
+                SmallIcon = "icon_0",
+                LargeIcon = "icon_1"
+            };
+            AndroidNotificationCenter.SendNotificationWithExplicitID(notification, AndroidChannelId, id);
+#elif UNITY_IOS
+            var timeTrigger = new iOSNotificationTimeIntervalTrigger
+            {
+                TimeInterval = new System.TimeSpan(0, 0, (int)remainingSeconds),
+                Repeats = false
+            };
+            var iosNotification = new iOSNotification
+            {
+                Identifier = id.ToString(),
+                Title = title,
+                Body = body,
+                ShowInForeground = false,
+                Trigger = timeTrigger
+            };
+            iOSNotificationCenter.ScheduleNotification(iosNotification);
+#endif
+        }
+
+        public void CancelWaterFetchNotification(int mallumIndex)
+        {
+            int id = mallumIndex + WaterFetchNotificationIdOffset;
+#if UNITY_ANDROID
+            AndroidNotificationCenter.CancelNotification(id);
+#elif UNITY_IOS
+            iOSNotificationCenter.RemoveScheduledNotification(id.ToString());
 #endif
         }
 

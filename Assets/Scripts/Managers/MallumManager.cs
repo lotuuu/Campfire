@@ -36,8 +36,9 @@ namespace Garden
             var data = SaveManager.Instance.Data;
             bool changed = false;
 
-            foreach (var mallum in data.mallums)
+            for (int i = 0; i < data.mallums.Count; i++)
             {
+                var mallum = data.mallums[i];
                 if (mallum.state == MallumState.FetchingWater)
                 {
                     if (mallum.assignedVaseIndex >= 0 &&
@@ -47,6 +48,7 @@ namespace Garden
                         if (vase.state != VaseState.Filling)
                         {
                             FreeMallumFromWater(mallum);
+                            NotificationService.Instance?.CancelWaterFetchNotification(i);
                             changed = true;
                         }
                     }
@@ -56,6 +58,7 @@ namespace Garden
                     if (IsQuestTimerComplete(mallum))
                     {
                         CompleteQuest(mallum);
+                        NotificationService.Instance?.CancelQuestNotification(i);
                         changed = true;
                     }
                 }
@@ -90,6 +93,17 @@ namespace Garden
                 return false;
 
             VaseManager.Instance.SendToCollect(vaseIndex);
+
+            if (NotificationService.Instance != null)
+            {
+                int mallumIndex = data.mallums.FindIndex(m => m.state == MallumState.FetchingWater && m.assignedVaseIndex == vaseIndex);
+                if (mallumIndex >= 0)
+                {
+                    double seconds = VaseManager.Instance.Config.FillDurationMinutes * 60.0;
+                    NotificationService.Instance.ScheduleWaterFetchNotification(mallumIndex, seconds);
+                }
+            }
+
             SaveManager.Instance.Save();
             OnMallumsChanged?.Invoke();
             return true;
@@ -100,6 +114,16 @@ namespace Garden
             var data = SaveManager.Instance.Data;
             if (!ClaimMallumForQuest(data.mallums, quest.questName, GameTime.UtcNow.ToString("o")))
                 return false;
+
+            if (NotificationService.Instance != null)
+            {
+                int mallumIndex = data.mallums.FindIndex(m => m.state == MallumState.OnQuest && m.assignedQuestName == quest.questName);
+                if (mallumIndex >= 0)
+                {
+                    double seconds = quest.durationMinutes * 60.0;
+                    NotificationService.Instance.ScheduleQuestNotification(mallumIndex, quest.questName, seconds);
+                }
+            }
 
             SaveManager.Instance.Save();
             OnMallumsChanged?.Invoke();
@@ -191,6 +215,20 @@ namespace Garden
                 if (m.state == MallumState.QuestComplete)
                     count++;
             return count;
+        }
+
+        public bool SpeedUpQuest(int mallumIndex)
+        {
+            var data = SaveManager.Instance.Data;
+            if (mallumIndex < 0 || mallumIndex >= data.mallums.Count) return false;
+            var mallum = data.mallums[mallumIndex];
+            if (mallum.state != MallumState.OnQuest) return false;
+
+            CompleteQuest(mallum);
+            NotificationService.Instance?.CancelQuestNotification(mallumIndex);
+            SaveManager.Instance.Save();
+            OnMallumsChanged?.Invoke();
+            return true;
         }
 
         public float GetQuestRemainingSeconds(MallumSave mallum)

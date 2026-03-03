@@ -91,7 +91,12 @@ namespace Garden
                         durationLabel.text = FormatTime(remaining);
                         progressFill.style.width = new StyleLength(new Length(progress * 100f, LengthUnit.Percent));
                         timerLabel.style.display = DisplayStyle.None;
-                        actionBtn.style.display = DisplayStyle.None;
+                        actionBtn.text = "Speed Up";
+                        actionBtn.clicked += () =>
+                        {
+                            MallumManager.Instance.SpeedUpQuest(mallumIndex);
+                            Refresh();
+                        };
                         break;
 
                     case MallumState.QuestComplete:
