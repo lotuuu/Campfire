@@ -12,6 +12,12 @@ namespace Garden
         {
             floatBtn = root.Q<Button>("quest-float-btn");
             badge = root.Q<Label>("quest-badge");
+
+            var icon = root.Q("quest-float-icon");
+            var tex = Resources.Load<Texture2D>("UI/Icons/quest-compass");
+            if (icon != null && tex != null)
+                icon.style.backgroundImage = tex;
+
             UpdateBadge();
         }
 

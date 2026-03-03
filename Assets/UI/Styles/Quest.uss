@@ -6,12 +6,13 @@
     width: 100px;
     height: 100px;
     border-radius: 50px;
-    background-color: var(--color-accent);
+    background-color: var(--color-text-accent);
+    background-image: none;
     align-items: center;
     justify-content: center;
     -unity-font-style: bold;
     font-size: var(--font-md);
-    color: var(--color-text-light);
+    color: var(--color-text-bright);
     border-width: 0;
     transition-property: scale;
     transition-duration: 150ms;
@@ -24,6 +25,8 @@
 #quest-float-icon {
     width: 48px;
     height: 48px;
+    -unity-background-scale-mode: scale-to-fit;
+    -unity-background-image-tint-color: var(--color-text-bright);
 }
 
 #quest-badge {
@@ -40,6 +43,7 @@
     -unity-text-align: middle-center;
     padding-left: 8px;
     padding-right: 8px;
+    display: none;
 }
 
 /* Quest panel */
@@ -51,7 +55,7 @@
 .quest-section-title {
     font-size: var(--font-sm);
     -unity-font-style: bold;
-    color: var(--color-text-secondary);
+    color: var(--color-text-dim);
     margin-bottom: 12px;
     margin-top: 24px;
     padding-left: 8px;
@@ -64,7 +68,7 @@
 /* Quest card */
 .quest-card {
     flex-direction: column;
-    background-color: var(--color-surface);
+    background-color: var(--color-bg-panel);
     border-radius: var(--radius-md);
     padding: 20px;
     margin-bottom: 12px;
@@ -79,7 +83,7 @@
 }
 
 .quest-card--active {
-    border-color: var(--color-accent);
+    border-color: var(--color-text-accent);
 }
 
 .quest-card--complete {
@@ -100,20 +104,20 @@
 .quest-card-name {
     font-size: var(--font-md);
     -unity-font-style: bold;
-    color: var(--color-text-primary);
+    color: var(--color-text);
     flex-shrink: 1;
 }
 
 .quest-card-duration {
     font-size: var(--font-sm);
-    color: var(--color-text-secondary);
+    color: var(--color-text-dim);
     flex-shrink: 0;
     margin-left: 12px;
 }
 
 .quest-card-description {
     font-size: var(--font-sm);
-    color: var(--color-text-secondary);
+    color: var(--color-text-dim);
     margin-bottom: 12px;
     white-space: normal;
 }
@@ -127,7 +131,7 @@
 .quest-reward-chip {
     flex-direction: row;
     align-items: center;
-    background-color: var(--color-background);
+    background-color: var(--color-bg-dark);
     border-radius: 12px;
     padding: 4px 12px;
     margin-right: 8px;
@@ -136,25 +140,25 @@
 
 .quest-reward-name {
     font-size: var(--font-xs);
-    color: var(--color-text-primary);
+    color: var(--color-text);
 }
 
 .quest-card-progress {
     height: 8px;
-    background-color: var(--color-background);
+    background-color: var(--color-bg-dark);
     border-radius: 4px;
     margin-bottom: 12px;
 }
 
 .quest-card-progress-fill {
     height: 100%;
-    background-color: var(--color-accent);
+    background-color: var(--color-text-accent);
     border-radius: 4px;
 }
 
 .quest-card-timer {
     font-size: var(--font-sm);
-    color: var(--color-accent);
+    color: var(--color-text-accent);
     -unity-text-align: middle-center;
     margin-bottom: 8px;
 }
@@ -163,8 +167,8 @@
     align-self: stretch;
     height: 64px;
     border-radius: var(--radius-sm);
-    background-color: var(--color-accent);
-    color: var(--color-text-light);
+    background-color: var(--color-text-accent);
+    color: var(--color-text-bright);
     font-size: var(--font-sm);
     -unity-font-style: bold;
     border-width: 0;
@@ -184,24 +188,24 @@
 
 .quest-locked-label {
     font-size: var(--font-xs);
-    color: var(--color-text-secondary);
+    color: var(--color-text-dim);
     -unity-font-style: italic;
     -unity-text-align: middle-center;
 }
 
 .quest-mallum-status {
     font-size: var(--font-sm);
-    color: var(--color-text-secondary);
+    color: var(--color-text-dim);
     -unity-text-align: middle-center;
     margin-bottom: 16px;
     padding: 12px;
-    background-color: var(--color-surface);
+    background-color: var(--color-bg-panel);
     border-radius: var(--radius-sm);
 }
 
 .quest-empty-text {
     font-size: var(--font-sm);
-    color: var(--color-text-secondary);
+    color: var(--color-text-dim);
     -unity-font-style: italic;
     -unity-text-align: middle-center;
     padding: 24px;
