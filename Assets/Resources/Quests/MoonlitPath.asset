@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   questName: Moonlit Path
   description: Follow the silver moonlit forest path.
-  durationMinutes: 960
+  durationMinutes: 480
   requiredFlameLevel: 7
   rewardRolls: 4
   rewardPool:

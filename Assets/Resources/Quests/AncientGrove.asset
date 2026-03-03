@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   questName: Ancient Grove
   description: Explore the ancient sacred grove.
-  durationMinutes: 1200
+  durationMinutes: 720
   requiredFlameLevel: 8
   rewardRolls: 5
   rewardPool:

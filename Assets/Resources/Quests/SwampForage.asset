@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   questName: Swamp Forage
   description: Send your Mallum to forage in the nearby swamp. Short and safe.
-  durationMinutes: 30
+  durationMinutes: 5
   requiredFlameLevel: 1
   rewardRolls: 2
   rewardPool:

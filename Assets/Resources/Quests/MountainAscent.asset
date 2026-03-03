@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   questName: Mountain Ascent
   description: Scale the misty mountain peaks.
-  durationMinutes: 720
+  durationMinutes: 360
   requiredFlameLevel: 6
   rewardRolls: 4
   rewardPool:

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   questName: Deep Marsh
   description: Navigate treacherous deep marshland.
-  durationMinutes: 480
+  durationMinutes: 240
   requiredFlameLevel: 5
   rewardRolls: 4
   rewardPool:

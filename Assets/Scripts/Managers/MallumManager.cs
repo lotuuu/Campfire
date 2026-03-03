@@ -185,6 +185,7 @@ namespace Garden
             foreach (var q in allQuests)
                 if (q.requiredFlameLevel <= level)
                     available.Add(q);
+            available.Sort((a, b) => a.requiredFlameLevel.CompareTo(b.requiredFlameLevel));
             return available;
         }
 
@@ -195,6 +196,7 @@ namespace Garden
             foreach (var q in allQuests)
                 if (q.requiredFlameLevel > level)
                     locked.Add(q);
+            locked.Sort((a, b) => a.requiredFlameLevel.CompareTo(b.requiredFlameLevel));
             return locked;
         }
 

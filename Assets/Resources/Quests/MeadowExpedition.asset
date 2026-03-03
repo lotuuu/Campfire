@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   questName: Meadow Expedition
   description: A longer journey through flowering meadows. Sunflowers grow wild here.
-  durationMinutes: 120
+  durationMinutes: 15
   requiredFlameLevel: 2
   rewardRolls: 3
   rewardPool:

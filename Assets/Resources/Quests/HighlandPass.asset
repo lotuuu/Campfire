@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   questName: Highland Pass
   description: Climb through windswept highland trails.
-  durationMinutes: 360
+  durationMinutes: 120
   requiredFlameLevel: 4
   rewardRolls: 3
   rewardPool:

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   questName: Forest Trail
   description: Venture along the forest trails.
-  durationMinutes: 240
+  durationMinutes: 60
   requiredFlameLevel: 3
   rewardRolls: 3
   rewardPool:
