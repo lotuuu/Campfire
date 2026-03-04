@@ -10,8 +10,8 @@ namespace Garden.Tests
         public void GetMaxMallums_ReturnsHouseCountTimesPerHouse()
         {
             var config = ScriptableObject.CreateInstance<MallumHouseConfig>();
-            Assert.AreEqual(4, config.GetMaxMallums(2));
-            Assert.AreEqual(6, config.GetMaxMallums(3));
+            Assert.AreEqual(2, config.GetMaxMallums(2));
+            Assert.AreEqual(3, config.GetMaxMallums(3));
         }
 
         [Test]

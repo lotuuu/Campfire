@@ -404,7 +404,7 @@ namespace Garden
                     {
                         int mallumCount = MallumManager.Instance != null
                             ? MallumManager.Instance.HouseConfig.MallumsPerHouse
-                            : 2;
+                            : 1;
                         status.text = $"+{mallumCount} Mallums";
                     }
                     break;

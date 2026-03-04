@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ddb3cefe5166487eae46f8648f2ddc5, type: 3}
   m_Name: MallumHouseConfig
   m_EditorClassIdentifier: Garden::Garden.MallumHouseConfig
-  mallumsPerHouse: 2
+  mallumsPerHouse: 1
   houseCosts:
   - manaCost: 15
     seedCosts: []

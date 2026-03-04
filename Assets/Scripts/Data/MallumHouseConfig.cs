@@ -7,7 +7,7 @@ namespace Garden
     [CreateAssetMenu(fileName = "MallumHouseConfig", menuName = "CampFire/Mallum House Config")]
     public class MallumHouseConfig : ScriptableObject
     {
-        [SerializeField] private int mallumsPerHouse = 2;
+        [SerializeField] private int mallumsPerHouse = 1;
         [SerializeField] private List<HouseCost> houseCosts = new();
 
         public int MallumsPerHouse => mallumsPerHouse;
