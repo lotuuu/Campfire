@@ -578,7 +578,7 @@ namespace Garden
             if (MallumManager.Instance != null)
             {
                 var hConfig = MallumManager.Instance.HouseConfig;
-                var cost = hConfig.GetNextHouseCost(SaveManager.Instance.Data.mallumHouses.Count);
+                var cost = hConfig.GetNextHouseCost(SaveManager.Instance.Data.mallumHouses.Count - 1);
                 if (cost != null)
                 {
                     string costText = $"{cost.manaCost:F0} Mana";
@@ -1122,7 +1122,7 @@ namespace Garden
             if (MallumManager.Instance != null)
             {
                 var hConfig = MallumManager.Instance.HouseConfig;
-                var nextCost = hConfig.GetNextHouseCost(SaveManager.Instance.Data.mallumHouses.Count);
+                var nextCost = hConfig.GetNextHouseCost(SaveManager.Instance.Data.mallumHouses.Count - 1);
                 if (nextCost != null)
                 {
                     string costText = $"{nextCost.manaCost:F0} Mana";

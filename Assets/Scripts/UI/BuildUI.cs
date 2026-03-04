@@ -60,7 +60,7 @@ namespace Garden
             if (MallumManager.Instance != null)
             {
                 var hConfig = MallumManager.Instance.HouseConfig;
-                var nextCost = hConfig.GetNextHouseCost(SaveManager.Instance.Data.mallumHouses.Count);
+                var nextCost = hConfig.GetNextHouseCost(SaveManager.Instance.Data.mallumHouses.Count - 1);
                 if (nextCost != null)
                 {
                     bool canPlace = FlameManager.Instance != null && FlameManager.Instance.CanPlaceEntity;

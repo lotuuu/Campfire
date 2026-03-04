@@ -110,7 +110,7 @@ namespace Garden
 
         public BuildingCost GetNextVaseCost()
         {
-            return LoadBuildingCostConfig()?.GetVaseCost(SaveManager.Instance.Data.vases.Count);
+            return LoadBuildingCostConfig()?.GetVaseCost(SaveManager.Instance.Data.vases.Count - 1);
         }
 
         public bool CraftVase(int gridX, int gridY)

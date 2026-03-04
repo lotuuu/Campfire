@@ -152,7 +152,7 @@ namespace Garden
             if (!FlameManager.Instance.CanPlaceEntity) return false;
 
             var data = SaveManager.Instance.Data;
-            var cost = houseConfig.GetNextHouseCost(data.mallumHouses.Count);
+            var cost = houseConfig.GetNextHouseCost(data.mallumHouses.Count - 1);
             if (cost == null) return false;
 
             // Check mana

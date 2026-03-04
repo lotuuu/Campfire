@@ -133,7 +133,7 @@ namespace Garden
 
         public BuildingCost GetNextPlotCost()
         {
-            return LoadBuildingCostConfig()?.GetPlotCost(SaveManager.Instance.Data.plots.Count);
+            return LoadBuildingCostConfig()?.GetPlotCost(SaveManager.Instance.Data.plots.Count - 1);
         }
 
         public bool CraftPlot(int gridX, int gridY)
