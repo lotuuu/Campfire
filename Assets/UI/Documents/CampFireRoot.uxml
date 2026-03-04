@@ -104,7 +104,7 @@
                 <!-- Header with title and close -->
                 <ui:VisualElement name="overlay-header">
                     <ui:Label name="overlay-title" text="Panel" />
-                    <ui:Button name="overlay-close" text="&#x2715;" />
+                    <ui:Button name="overlay-close" />
                 </ui:VisualElement>
 
                 <!-- Scrollable body -->
