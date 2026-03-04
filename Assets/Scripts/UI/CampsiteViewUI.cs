@@ -952,7 +952,8 @@ namespace Garden
 
             interactionBody.Clear();
             interactionActions.Clear();
-            interactionTitle.RemoveFromClassList("skin-title");
+            interactionTitle.style.display = DisplayStyle.Flex;
+            interactionPanel.RemoveFromClassList("skin-panel");
             ClearBellIcon();
 
             switch (type)
@@ -1622,8 +1623,25 @@ namespace Garden
                 CampBuildingType.MallumHouse => "House",
                 _ => "Building"
             };
-            interactionTitle.text = $"Paint {typeName}";
-            interactionTitle.AddToClassList("skin-title");
+
+            // Pin panel to top for consistent positioning
+            interactionPanel.AddToClassList("skin-panel");
+
+            // Back arrow in top-left, replacing title area
+            var headerRow = new VisualElement();
+            headerRow.AddToClassList("skin-header");
+
+            var backArrow = new Button(() => ShowInteraction(type, index)) { text = "<" };
+            backArrow.AddToClassList("skin-back-arrow");
+            headerRow.Add(backArrow);
+
+            var titleLabel = new Label($"Paint {typeName}");
+            titleLabel.AddToClassList("skin-title");
+            headerRow.Add(titleLabel);
+
+            // Hide default title, use our custom header
+            interactionTitle.style.display = DisplayStyle.None;
+            interactionBody.Add(headerRow);
 
             var skins = SkinManager.Instance.GetSkinsForBuilding(type);
             if (skins.Count == 0)
@@ -1631,7 +1649,6 @@ namespace Garden
                 var noSkins = new Label("No skins available");
                 noSkins.AddToClassList("interaction-info");
                 interactionBody.Add(noSkins);
-                AddCloseButton();
                 return;
             }
 
@@ -1661,7 +1678,6 @@ namespace Garden
             skinNameLabel.AddToClassList("skin-carousel-name");
 
             // Carousel: [ghost-left] [center-swatch] [ghost-right]
-            // Ghosts are tappable to navigate
             var carouselRow = new VisualElement();
             carouselRow.AddToClassList("skin-carousel-row");
 
@@ -1745,8 +1761,6 @@ namespace Garden
             interactionBody.Add(separator);
             interactionBody.Add(detailArea);
 
-            ShowCarouselItem(currentIndex);
-
             if (!string.IsNullOrEmpty(currentSkin))
             {
                 var removeBtn = new Button(() =>
@@ -1758,8 +1772,7 @@ namespace Garden
                 interactionActions.Add(removeBtn);
             }
 
-            var backBtn = new Button(() => ShowInteraction(type, index)) { text = "Back" };
-            interactionActions.Add(backBtn);
+            ShowCarouselItem(currentIndex);
         }
 
         private void UpdateSkinDetail(VisualElement detailArea, SkinData skin,
@@ -1786,7 +1799,7 @@ namespace Garden
                         RebuildGrid();
                     }
                 }) { text = "Paint" };
-                paintBtn.AddToClassList("interaction-btn-primary");
+                paintBtn.AddToClassList("skin-action-btn");
                 detailArea.Add(paintBtn);
             }
             else
@@ -1814,17 +1827,17 @@ namespace Garden
 
                 detailArea.Add(costRow);
 
-                var paintBtn = new Button(() =>
+                var unlockBtn = new Button(() =>
                 {
                     if (SkinManager.Instance.ApplySkin(type, index, skin))
                     {
                         CloseInteractionPanel();
                         RebuildGrid();
                     }
-                }) { text = "Paint" };
-                paintBtn.AddToClassList("interaction-btn-primary");
-                paintBtn.SetEnabled(canAfford);
-                detailArea.Add(paintBtn);
+                }) { text = "Unlock" };
+                unlockBtn.AddToClassList("skin-action-btn");
+                unlockBtn.SetEnabled(canAfford);
+                detailArea.Add(unlockBtn);
             }
         }
 
@@ -1886,7 +1899,12 @@ namespace Garden
             if (interactionBackdrop != null)
                 interactionBackdrop.style.display = DisplayStyle.None;
             if (interactionPanel != null)
+            {
                 interactionPanel.style.display = DisplayStyle.None;
+                interactionPanel.RemoveFromClassList("skin-panel");
+            }
+            if (interactionTitle != null)
+                interactionTitle.style.display = DisplayStyle.Flex;
         }
 
         // ── Drag-Move ──
@@ -2050,6 +2068,10 @@ namespace Garden
                 case CampBuildingType.Apotheke:
                     data.apothekeGridX = newQ;
                     data.apothekeGridY = newR;
+                    break;
+                case CampBuildingType.MallumHouse:
+                    data.mallumHouses[index].gridX = newQ;
+                    data.mallumHouses[index].gridY = newR;
                     break;
             }
             SaveManager.Instance.Save();

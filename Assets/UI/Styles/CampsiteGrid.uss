@@ -293,10 +293,44 @@
 
 /* ── Skin Selector ── */
 
+/* Panel override: pin to top instead of center */
+.skin-panel {
+    top: 5%;
+    translate: 0 0;
+}
+
+/* Header row with back arrow + title */
+.skin-header {
+    flex-direction: row;
+    align-items: center;
+    align-self: stretch;
+    margin-bottom: var(--spacing-sm);
+}
+
+.skin-back-arrow {
+    width: 64px;
+    height: 64px;
+    min-width: 64px;
+    font-size: var(--font-lg);
+    -unity-text-align: middle-center;
+    background-color: rgba(80, 55, 25, 0.4);
+    border-radius: 32px;
+    border-width: 1px;
+    border-color: rgba(180, 130, 50, 0.25);
+    color: rgb(220, 180, 100);
+    padding: 0;
+    margin-right: var(--spacing-sm);
+}
+
+.skin-back-arrow:hover {
+    background-color: rgba(120, 80, 30, 0.6);
+    border-color: rgba(220, 160, 60, 0.5);
+}
+
 .skin-title {
     font-size: var(--font-xxl);
     color: rgb(245, 215, 130);
-    margin-bottom: var(--spacing-sm);
+    -unity-font-style: bold;
 }
 
 /* ── Skin Carousel ── */
@@ -345,9 +379,9 @@
 
 /* Center (active) swatch — big hero for mobile */
 .skin-swatch--center {
-    width: 260px;
-    min-width: 260px;
-    height: 260px;
+    width: 280px;
+    min-width: 280px;
+    height: 280px;
     border-width: 4px;
     border-color: rgba(220, 165, 55, 0.6);
     border-radius: var(--radius-lg);
@@ -356,9 +390,9 @@
 
 /* Ghost (neighbor peek) swatch */
 .skin-swatch--ghost {
-    width: 120px;
-    min-width: 120px;
-    height: 120px;
+    width: 130px;
+    min-width: 130px;
+    height: 130px;
     border-width: 2px;
     border-color: rgba(140, 100, 50, 0.12);
     border-radius: var(--radius-md);
@@ -379,16 +413,16 @@
 }
 
 .skin-swatch--center .skin-swatch-preview {
-    width: 200px;
-    height: 200px;
-    border-radius: 24px;
+    width: 220px;
+    height: 220px;
+    border-radius: 28px;
     border-width: 5px;
 }
 
 .skin-swatch--ghost .skin-swatch-preview {
-    width: 80px;
-    height: 80px;
-    border-radius: 14px;
+    width: 90px;
+    height: 90px;
+    border-radius: 16px;
     border-width: 2px;
 }
 
@@ -402,13 +436,13 @@
 }
 
 .skin-swatch--center .skin-swatch-lock {
-    width: 80px;
-    height: 80px;
+    width: 96px;
+    height: 96px;
 }
 
 .skin-swatch--ghost .skin-swatch-lock {
-    width: 40px;
-    height: 40px;
+    width: 48px;
+    height: 48px;
     -unity-background-image-tint-color: rgba(200, 180, 140, 0.5);
 }
 
@@ -466,11 +500,37 @@
 }
 
 .skin-detail-equipped {
-    font-size: var(--font-md);
+    font-size: var(--font-lg);
     color: rgba(120, 190, 60, 0.9);
     -unity-font-style: italic;
     -unity-text-align: upper-center;
     margin-bottom: var(--spacing-sm);
+}
+
+/* Big action button (Paint / Unlock) */
+.skin-action-btn {
+    align-self: stretch;
+    min-height: 100px;
+    background-color: rgba(160, 100, 30, 0.6);
+    border-width: 2px;
+    border-color: rgba(220, 160, 50, 0.5);
+    border-radius: var(--radius-md);
+    color: rgb(255, 220, 150);
+    font-size: var(--font-lg);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    margin-top: var(--spacing-xs);
+}
+
+.skin-action-btn:hover {
+    background-color: rgba(180, 115, 35, 0.75);
+    border-color: rgba(240, 180, 60, 0.7);
+}
+
+.skin-action-btn:disabled {
+    background-color: rgba(40, 30, 18, 0.4);
+    border-color: rgba(100, 70, 35, 0.2);
+    color: rgb(120, 100, 75);
 }
 
 /* Cost row with pigment icon + count */
@@ -482,14 +542,14 @@
 }
 
 .skin-cost-icon {
-    width: 64px;
-    height: 64px;
+    width: 80px;
+    height: 80px;
     -unity-background-scale-mode: scale-to-fit;
     margin-right: var(--spacing-sm);
 }
 
 .skin-cost-text {
-    font-size: var(--font-lg);
+    font-size: var(--font-xl);
     -unity-font-style: bold;
 }
 
