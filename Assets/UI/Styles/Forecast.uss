@@ -67,8 +67,8 @@
 }
 
 .forecast-day-moon {
-    width: 38px;
-    height: 38px;
+    width: 52px;
+    height: 52px;
     -unity-background-scale-mode: scale-to-fit;
     margin-left: auto;
 }

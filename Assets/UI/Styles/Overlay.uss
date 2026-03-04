@@ -55,7 +55,7 @@
     height: 110px;
     background-color: rgba(60, 40, 20, 0.6);
     background-image: url("project://database/Assets/ThirdParty/icons/lorc-cross-mark.png");
-    -unity-background-image-tint-color: rgb(180, 150, 110);
+    -unity-background-image-tint-color: rgb(200, 120, 100);
     -unity-background-scale-mode: scale-to-fit;
     border-width: 1px;
     border-color: rgba(140, 100, 50, 0.3);

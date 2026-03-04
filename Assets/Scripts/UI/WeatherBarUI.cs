@@ -160,12 +160,16 @@ namespace Garden
             if (forecastDays == null) return;
             forecastDays.Clear();
 
-            // Today card with sunrise/sunset
+            // Today card
             var weather = WeatherService.Instance?.CurrentWeather ?? default;
             AddTodayCard(weather);
 
             var forecast = WeatherService.Instance?.Forecast;
             if (forecast == null) return;
+
+            // Reuse today's sunrise/sunset for future days (changes ~1 min/day)
+            float sunriseHour = weather.sunriseHour;
+            float sunsetHour = weather.sunsetHour;
 
             foreach (var day in forecast)
             {
@@ -202,21 +206,23 @@ namespace Garden
 
                 card.Add(header);
 
-                // Stats: two rows of cells filling the full width
+                // Row 1: sunrise, sunset, temp
                 var statsRow1 = new VisualElement();
                 statsRow1.AddToClassList("forecast-stats-row");
+                AddStatCell(statsRow1, FormatHour(sunriseHour), "Sunrise");
+                AddStatCell(statsRow1, FormatHour(sunsetHour), "Sunset");
                 AddStatCell(statsRow1, $"{day.tempHigh:F0}\u00b0/{day.tempLow:F0}\u00b0", "Temp",
                     TempClass(day.tempHigh));
-                AddStatCell(statsRow1, $"{day.humidity:F0}%", "Humidity",
-                    HumidityClass(day.humidity));
-                AddStatCell(statsRow1, $"{day.windSpeed:F1} m/s", "Wind",
-                    WindClass(day.windSpeed));
                 card.Add(statsRow1);
 
+                // Row 2: humidity, wind, cloud
                 var statsRow2 = new VisualElement();
                 statsRow2.AddToClassList("forecast-stats-row");
+                AddStatCell(statsRow2, $"{day.humidity:F0}%", "Humidity",
+                    HumidityClass(day.humidity));
+                AddStatCell(statsRow2, $"{day.windSpeed:F1} m/s", "Wind",
+                    WindClass(day.windSpeed));
                 AddStatCell(statsRow2, $"{day.cloudCover:F0}%", "Cloud");
-                AddStatCell(statsRow2, FormatMoonPhase(day.moonPhase), "Moon Phase");
                 card.Add(statsRow2);
 
                 forecastDays.Add(card);
@@ -327,22 +333,6 @@ namespace Garden
             cell.Add(lbl);
 
             parent.Add(cell);
-        }
-
-        private static string FormatMoonPhase(MoonPhase phase)
-        {
-            return phase switch
-            {
-                MoonPhase.NewMoon => "New Moon",
-                MoonPhase.WaxingCrescent => "Wax. Crescent",
-                MoonPhase.FirstQuarter => "First Quarter",
-                MoonPhase.WaxingGibbous => "Wax. Gibbous",
-                MoonPhase.FullMoon => "Full Moon",
-                MoonPhase.WaningGibbous => "Wan. Gibbous",
-                MoonPhase.LastQuarter => "Last Quarter",
-                MoonPhase.WaningCrescent => "Wan. Crescent",
-                _ => phase.ToString()
-            };
         }
 
         private void UpdateWeather(WeatherData weather)
