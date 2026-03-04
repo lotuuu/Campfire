@@ -28,12 +28,20 @@ namespace Garden
             // Clean stale visitor from a previous day
             if (data.currentVisitor != null)
             {
-                var appearedUtc = DateTime.Parse(data.currentVisitor.appearedAtUtc, null,
-                    System.Globalization.DateTimeStyles.RoundtripKind);
-                if (appearedUtc.Date != GameTime.UtcNow.Date)
+                if (string.IsNullOrEmpty(data.currentVisitor.appearedAtUtc))
                 {
                     DismissVisitor(data);
                     SaveManager.Instance.Save();
+                }
+                else
+                {
+                    var appearedUtc = DateTime.Parse(data.currentVisitor.appearedAtUtc, null,
+                        System.Globalization.DateTimeStyles.RoundtripKind);
+                    if (appearedUtc.Date != GameTime.UtcNow.Date)
+                    {
+                        DismissVisitor(data);
+                        SaveManager.Instance.Save();
+                    }
                 }
             }
 
