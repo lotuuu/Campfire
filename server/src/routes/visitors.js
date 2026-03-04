@@ -162,4 +162,64 @@ router.get('/tonight', async (req, res) => {
   }
 });
 
+// POST /visitors/quest/accept
+router.post('/quest/accept', async (req, res) => {
+  const uid = req.user.uid;
+  const { visitor_id, request_item, request_count, return_days, reward, return_dialogue } = req.body;
+
+  if (!visitor_id || !request_item || !request_count || !return_days) {
+    return res.status(400).json({ error: 'visitor_id, request_item, request_count, and return_days are required' });
+  }
+
+  try {
+    const returnDate = new Date();
+    returnDate.setUTCDate(returnDate.getUTCDate() + return_days);
+    const returnDateStr = returnDate.toISOString().slice(0, 10);
+
+    const result = await pool.query(
+      `INSERT INTO visitor_quests (player_uid, visitor_id, request_item, request_count, return_date_utc, reward, return_dialogue)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
+       RETURNING id`,
+      [uid, visitor_id, request_item, request_count, returnDateStr,
+       JSON.stringify(reward || {}), JSON.stringify(return_dialogue || [])]
+    );
+
+    res.status(201).json({
+      quest_id: result.rows[0].id,
+      return_date: returnDateStr
+    });
+  } catch (err) {
+    console.error('Error in POST /visitors/quest/accept:', err);
+    res.status(500).json({ error: 'Failed to accept quest' });
+  }
+});
+
+// POST /visitors/quest/complete
+router.post('/quest/complete', async (req, res) => {
+  const uid = req.user.uid;
+  const { quest_id } = req.body;
+
+  if (!quest_id) {
+    return res.status(400).json({ error: 'quest_id is required' });
+  }
+
+  try {
+    const result = await pool.query(
+      `DELETE FROM visitor_quests
+       WHERE id = $1 AND player_uid = $2
+       RETURNING reward`,
+      [quest_id, uid]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Quest not found' });
+    }
+
+    res.json({ reward: result.rows[0].reward });
+  } catch (err) {
+    console.error('Error in POST /visitors/quest/complete:', err);
+    res.status(500).json({ error: 'Failed to complete quest' });
+  }
+});
+
 module.exports = router;
