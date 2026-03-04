@@ -35,6 +35,7 @@ app.use('/auth', registerLimiter, authRoutes);
 app.use('/friends', authMiddleware, friendRoutes);
 app.use('/village', authMiddleware, villageRoutes);
 app.use('/gifts', authMiddleware, giftRoutes);
+app.use('/visitors', authMiddleware, require('./routes/visitors'));
 
 // Health check
 app.get('/health', (req, res) => {
