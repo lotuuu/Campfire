@@ -9,6 +9,7 @@ namespace Garden
     {
         public string merchantName;
         [TextArea] public string flavorText;
+        public Texture2D portrait;
         public int offerCount = 3;
         public List<MerchantOffer> offerPool = new();
         public List<MerchantDialogue> dialoguePool = new();

@@ -6,8 +6,18 @@
     top: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(0, 0, 0, 0.85);
     justify-content: flex-end;
+}
+
+#dialogue-speaker-portrait {
+    position: absolute;
+    bottom: 0;
+    right: -5%;
+    width: 65%;
+    height: 60%;
+    -unity-background-scale-mode: scale-to-fit;
+    scale: -1 1;
 }
 
 #dialogue-box {
@@ -16,7 +26,7 @@
     border-color: rgba(220, 180, 80, 0.5);
     padding: var(--spacing-md) var(--spacing-lg);
     padding-bottom: var(--spacing-xl);
-    min-height: 200px;
+    min-height: 340px;
 }
 
 #dialogue-speaker {

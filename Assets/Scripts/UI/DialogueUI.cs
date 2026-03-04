@@ -8,6 +8,7 @@ namespace Garden
     public class DialogueUI : MonoBehaviour
     {
         private VisualElement overlay;
+        private VisualElement portraitElement;
         private Label speakerLabel;
         private Label textLabel;
         private Label tapHint;
@@ -20,6 +21,7 @@ namespace Garden
         public void Initialize(VisualElement root)
         {
             overlay = root.Q("dialogue-overlay");
+            portraitElement = root.Q("dialogue-speaker-portrait");
             speakerLabel = root.Q<Label>("dialogue-speaker");
             textLabel = root.Q<Label>("dialogue-text");
             tapHint = root.Q<Label>("dialogue-tap-hint");
@@ -33,7 +35,7 @@ namespace Garden
             Hide();
         }
 
-        public void Show(string speakerName, List<string> dialogueLines, Action onDialogueComplete)
+        public void Show(string speakerName, List<string> dialogueLines, Action onDialogueComplete, Texture2D portrait = null)
         {
             if (dialogueLines == null || dialogueLines.Count == 0)
             {
@@ -47,6 +49,18 @@ namespace Garden
             onComplete = onDialogueComplete;
 
             if (speakerLabel != null) speakerLabel.text = speaker;
+            if (portraitElement != null)
+            {
+                if (portrait != null)
+                {
+                    portraitElement.style.backgroundImage = new StyleBackground(portrait);
+                    portraitElement.style.display = DisplayStyle.Flex;
+                }
+                else
+                {
+                    portraitElement.style.display = DisplayStyle.None;
+                }
+            }
             ShowCurrentLine();
 
             if (overlay != null) overlay.style.display = DisplayStyle.Flex;

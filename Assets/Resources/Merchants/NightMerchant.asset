@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   merchantName: Night Merchant
   flavorText: Rare seeds, if you have the harvest to trade...
+  portrait: {fileID: 2800000, guid: c7fdd56e5e5c345e2828d4217b9d28d4, type: 3}
   offerCount: 3
   dialoguePool:
   - lines:

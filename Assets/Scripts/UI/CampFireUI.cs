@@ -151,13 +151,21 @@ namespace Garden
 
                     if (!merchant.dialogueSeen && merchant.dialogueLines.Count > 0 && dialogueUI != null)
                     {
+                        // Find MerchantData for portrait
+                        Texture2D portrait = null;
+                        var allMerchants = Resources.LoadAll<MerchantData>("Merchants");
+                        foreach (var md in allMerchants)
+                        {
+                            if (md.merchantName == merchant.merchantName) { portrait = md.portrait; break; }
+                        }
+
                         dialogueUI.Show(merchant.merchantName, merchant.dialogueLines, () =>
                         {
                             merchant.dialogueSeen = true;
                             SaveManager.Instance.Save();
                             merchantUI?.ShowMerchant(index);
                             OpenOverlay("Night Merchant", merchantPanel);
-                        });
+                        }, portrait);
                     }
                     else
                     {
