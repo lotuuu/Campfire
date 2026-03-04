@@ -205,12 +205,6 @@ namespace Garden
             valueEl.AddToClassList("seed-recipe-value");
             row.Add(valueEl);
 
-            if (!Mathf.Approximately(weight, 1f))
-            {
-                var weightEl = new Label($"x{weight:G3}");
-                weightEl.AddToClassList("seed-recipe-weight");
-                row.Add(weightEl);
-            }
 
             container.Add(row);
         }
