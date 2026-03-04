@@ -49,7 +49,7 @@ MonoBehaviour:
     idealWateringsMax: 0
     wateringsTolerance: 2
     wateringsWeight: 1
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 91873b2b192604870b92591ca9d4c4c6, type: 3}
   growthSprites: []
   tier: 5
   manaCost: 0

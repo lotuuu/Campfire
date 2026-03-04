@@ -18,5 +18,5 @@ MonoBehaviour:
     quantity: 2
   result: Pansy_pigment
   resultQuantity: 1
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 212418430b35463f8e75bb3566f92d15, type: 3}
   category: 0

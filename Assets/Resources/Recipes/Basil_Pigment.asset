@@ -18,5 +18,5 @@ MonoBehaviour:
     quantity: 2
   result: Basil_pigment
   resultQuantity: 1
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 3e5b69ef638049278e30eab85393aad6, type: 3}
   category: 0

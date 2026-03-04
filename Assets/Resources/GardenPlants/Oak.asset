@@ -18,6 +18,6 @@ MonoBehaviour:
   yieldAmount: 2
   yieldIntervalHours: 24
   waterRequired: 5
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: bf985fe368f8b4335805ff35ca71dc0c, type: 3}
   growthSprites: []
   matureSprite: {fileID: 0}

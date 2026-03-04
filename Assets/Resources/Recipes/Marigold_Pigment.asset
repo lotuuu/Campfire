@@ -18,5 +18,5 @@ MonoBehaviour:
     quantity: 2
   result: Marigold_pigment
   resultQuantity: 1
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 200e8218b78a4c4ab34bbff3d29bdfda, type: 3}
   category: 0

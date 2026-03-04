@@ -18,5 +18,5 @@ MonoBehaviour:
     quantity: 2
   result: Chamomile_pigment
   resultQuantity: 1
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 2612f5621ed04861b620cff724d8c37e, type: 3}
   category: 0

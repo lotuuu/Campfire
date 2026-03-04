@@ -18,5 +18,5 @@ MonoBehaviour:
     quantity: 2
   result: Lavender_pigment
   resultQuantity: 1
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: c4131c9fda114b0fa5d3ac00fcc8be85, type: 3}
   category: 0

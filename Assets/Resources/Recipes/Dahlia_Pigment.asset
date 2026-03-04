@@ -18,5 +18,5 @@ MonoBehaviour:
     quantity: 2
   result: Dahlia_pigment
   resultQuantity: 1
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 69e9b45da86140d1833678c06c94cf3f, type: 3}
   category: 0

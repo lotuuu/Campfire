@@ -18,5 +18,5 @@ MonoBehaviour:
     quantity: 2
   result: Jasmine_pigment
   resultQuantity: 1
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 089625d7b35541d39d83f229ef8e575c, type: 3}
   category: 0
