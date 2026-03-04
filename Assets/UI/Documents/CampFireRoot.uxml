@@ -88,8 +88,9 @@
                 <ui:Label name="nav-quest-badge" class="nav-btn-badge" text="0" />
             </ui:Button>
             <ui:Button name="btn-mail" class="nav-btn">
-                <ui:Label text="MAIL" class="nav-btn-label" />
+                <ui:Label text="SOCIAL" class="nav-btn-label" />
                 <ui:VisualElement name="nav-icon-mail" class="nav-btn-icon" />
+                <ui:Label name="nav-social-badge" class="nav-btn-badge" text="0" />
             </ui:Button>
         </ui:VisualElement>
 
@@ -133,9 +134,18 @@
                     <ui:VisualElement name="letters-panel">
                         <!-- Tab bar -->
                         <ui:VisualElement name="letters-tabs">
-                            <ui:Button name="tab-inbox" class="letters-tab letters-tab--active" text="Inbox" />
-                            <ui:Button name="tab-friends" class="letters-tab" text="Friends" />
-                            <ui:Button name="tab-add" class="letters-tab" text="Add" />
+                            <ui:Button name="tab-inbox" class="letters-tab letters-tab--active">
+                                <ui:Label text="Inbox" />
+                                <ui:Label name="badge-inbox" class="tab-badge" text="0" />
+                            </ui:Button>
+                            <ui:Button name="tab-friends" class="letters-tab">
+                                <ui:Label text="Friends" />
+                                <ui:Label name="badge-friends" class="tab-badge" text="0" />
+                            </ui:Button>
+                            <ui:Button name="tab-add" class="letters-tab">
+                                <ui:Label text="Add" />
+                                <ui:Label name="badge-add" class="tab-badge" text="0" />
+                            </ui:Button>
                         </ui:VisualElement>
 
                         <!-- Inbox view -->

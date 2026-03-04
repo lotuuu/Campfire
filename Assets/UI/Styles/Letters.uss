@@ -39,6 +39,24 @@
     -unity-font-style: bold;
 }
 
+/* Tab badges */
+.tab-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 32px;
+    height: 32px;
+    border-radius: 16px;
+    background-color: #e74c3c;
+    color: white;
+    font-size: 20px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    padding-left: 6px;
+    padding-right: 6px;
+    display: none;
+}
+
 /* ── Shared view containers ── */
 #letters-inbox,
 #letters-friends,
@@ -222,6 +240,17 @@
 .friend-actions Button:hover {
     background-color: rgba(160, 95, 25, 0.55);
     border-color: rgba(220, 160, 60, 0.5);
+}
+
+.btn-delete-friend {
+    background-color: rgba(120, 50, 30, 0.4);
+    border-color: rgba(180, 80, 50, 0.3);
+    color: rgb(220, 160, 140);
+}
+
+.btn-delete-friend:hover {
+    background-color: rgba(150, 60, 35, 0.55);
+    border-color: rgba(200, 100, 60, 0.5);
 }
 
 /* ── Gift item (inbox) ── */

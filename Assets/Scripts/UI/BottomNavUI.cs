@@ -11,6 +11,7 @@ namespace Garden
         public event Action OnQuestClicked;
 
         private Label questBadge;
+        private Label socialBadge;
 
         public void Initialize(VisualElement root)
         {
@@ -28,19 +29,30 @@ namespace Garden
             SetIcon(root.Q("nav-icon-mail"), "UI/Icons/nav-mail");
 
             questBadge = root.Q<Label>("nav-quest-badge");
+            socialBadge = root.Q<Label>("nav-social-badge");
         }
 
         public void UpdateQuestBadge(int count)
         {
-            if (questBadge == null) return;
+            UpdateBadge(questBadge, count);
+        }
+
+        public void UpdateSocialBadge(int count)
+        {
+            UpdateBadge(socialBadge, count);
+        }
+
+        private static void UpdateBadge(Label badge, int count)
+        {
+            if (badge == null) return;
             if (count > 0)
             {
-                questBadge.text = count.ToString();
-                questBadge.style.display = DisplayStyle.Flex;
+                badge.text = count.ToString();
+                badge.style.display = DisplayStyle.Flex;
             }
             else
             {
-                questBadge.style.display = DisplayStyle.None;
+                badge.style.display = DisplayStyle.None;
             }
         }
 

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -6,6 +7,8 @@ namespace Garden
 {
     public class LettersUI : MonoBehaviour
     {
+        public event Action<int> OnBadgeCountChanged;
+
         private VisualElement inboxView;
         private VisualElement friendsView;
         private VisualElement addView;
@@ -26,6 +29,14 @@ namespace Garden
         private TextField friendCodeInput;
         private Button sendRequestBtn;
         private Label addFriendStatus;
+
+        // Badges
+        private Label badgeInbox;
+        private Label badgeFriends;
+        private Label badgeAdd;
+        private int inboxCount;
+        private int friendsCount;
+        private int pendingRequestCount;
 
         // Mobile keyboard handling
         private TouchScreenKeyboard activeKeyboard;
@@ -84,6 +95,11 @@ namespace Garden
             giftSelectedLabel = root.Q<Label>("gift-selected-label");
             confirmGiftBtn = root.Q<Button>("btn-confirm-gift");
             cancelGiftBtn = root.Q<Button>("btn-cancel-gift");
+
+            // Badges
+            badgeInbox = root.Q<Label>("badge-inbox");
+            badgeFriends = root.Q<Label>("badge-friends");
+            badgeAdd = root.Q<Label>("badge-add");
 
             // Templates
             friendTemplate = Resources.Load<VisualTreeAsset>("UI/Templates/FriendItem");
@@ -157,6 +173,26 @@ namespace Garden
             RefreshAddView();
             RefreshInbox();
             RefreshFriends();
+        }
+
+        private static void UpdateTabBadge(Label badge, int count)
+        {
+            if (badge == null) return;
+            if (count > 0)
+            {
+                badge.text = count.ToString();
+                badge.style.display = DisplayStyle.Flex;
+            }
+            else
+            {
+                badge.style.display = DisplayStyle.None;
+            }
+        }
+
+        private void EmitBadgeCount()
+        {
+            int total = inboxCount + pendingRequestCount;
+            OnBadgeCountChanged?.Invoke(total);
         }
 
         // ── Inbox ──
@@ -238,6 +274,11 @@ namespace Garden
                 inboxEmpty.text = "No new letters";
                 inboxEmpty.style.display = isEmpty ? DisplayStyle.Flex : DisplayStyle.None;
             }
+
+            inboxCount = gifts.Count;
+            pendingRequestCount = requests.Count;
+            UpdateTabBadge(badgeInbox, gifts.Count + requests.Count);
+            EmitBadgeCount();
         }
 
         // ── Friends ──
@@ -269,6 +310,9 @@ namespace Garden
         {
             friendsList?.Clear();
 
+            friendsCount = friends?.Count ?? 0;
+            UpdateTabBadge(badgeFriends, friendsCount);
+
             if (friends == null || friends.Count == 0)
             {
                 if (friendsEmpty != null)
@@ -296,8 +340,11 @@ namespace Garden
                 string friendUid = friend.uid;
                 string friendName = friend.displayName;
 
+                var deleteBtn = el.Q<Button>(className: "btn-delete-friend");
+
                 visitBtn?.RegisterCallback<ClickEvent>(_ => OnVisitFriend(friendUid, friendName));
                 giftBtn?.RegisterCallback<ClickEvent>(_ => OnOpenGiftPicker(friendUid, friendName));
+                deleteBtn?.RegisterCallback<ClickEvent>(_ => OnDeleteFriend(friendUid, friendName));
 
                 friendsList?.Add(el);
             }
@@ -396,6 +443,20 @@ namespace Garden
             CampFireUI.Instance?.CloseOverlay();
             var campsiteView = GetComponent<CampsiteViewUI>();
             campsiteView?.EnterVisitMode(snapshot, friendName);
+        }
+
+        private async void OnDeleteFriend(string friendUid, string friendName)
+        {
+            bool success = await SocialService.Instance.RemoveFriend(friendUid);
+            if (success)
+            {
+                Debug.Log($"LettersUI: Removed friend {friendName}");
+                RefreshFriends();
+            }
+            else
+            {
+                Debug.LogWarning($"LettersUI: Failed to remove friend {friendName}");
+            }
         }
 
         // ── Gift Picker ──

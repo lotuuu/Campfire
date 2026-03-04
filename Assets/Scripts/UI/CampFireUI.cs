@@ -96,7 +96,7 @@ namespace Garden
                     apotheke?.Refresh();
                     OpenOverlay("Seeds", apothekePanel);
                 };
-                bottomNav.OnLettersClicked += () => OpenOverlay("Mail", lettersPanel);
+                bottomNav.OnLettersClicked += () => OpenOverlay("Social", lettersPanel);
                 bottomNav.OnQuestClicked += () =>
                 {
                     questUI?.Refresh();
@@ -109,6 +109,12 @@ namespace Garden
             {
                 MallumManager.Instance.OnMallumsChanged += UpdateQuestBadge;
                 UpdateQuestBadge();
+            }
+
+            // Update social badge from letters
+            if (letters != null)
+            {
+                letters.OnBadgeCountChanged += count => bottomNav?.UpdateSocialBadge(count);
             }
 
             // Wire debug button (editor + development builds)

@@ -7,6 +7,7 @@
         <ui:VisualElement class="friend-actions">
             <ui:Button class="btn-visit" text="Visit" />
             <ui:Button class="btn-send-gift" text="Gift" />
+            <ui:Button class="btn-delete-friend" text="Delete" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>
