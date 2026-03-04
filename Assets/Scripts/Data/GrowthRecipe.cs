@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Garden
@@ -108,6 +109,107 @@ namespace Garden
             return scoreSum / weightSum;
         }
 
+        public List<AxisResult> EvaluatePerAxis(GrowthSnapshots snapshots, int waterCount)
+        {
+            var results = new List<AxisResult>();
+            if (snapshots.snapshotCount <= 0) return results;
+
+            if (useHeat)
+            {
+                float avg = snapshots.sumTemp / snapshots.snapshotCount;
+                results.Add(new AxisResult
+                {
+                    axisName = "Heat",
+                    actual = avg,
+                    idealMin = idealTempMin,
+                    idealMax = idealTempMax,
+                    unit = "\u00b0C",
+                    score = ScoreRange(avg, idealTempMin, idealTempMax, heatTolerance)
+                });
+            }
+            if (useWind)
+            {
+                float avg = snapshots.sumWind / snapshots.snapshotCount;
+                results.Add(new AxisResult
+                {
+                    axisName = "Wind",
+                    actual = avg,
+                    idealMin = idealWindMin,
+                    idealMax = idealWindMax,
+                    unit = "m/s",
+                    score = ScoreRange(avg, idealWindMin, idealWindMax, windTolerance)
+                });
+            }
+            if (useHumidity)
+            {
+                float avg = snapshots.sumHumidity / snapshots.snapshotCount;
+                results.Add(new AxisResult
+                {
+                    axisName = "Humidity",
+                    actual = avg,
+                    idealMin = idealHumidityMin,
+                    idealMax = idealHumidityMax,
+                    unit = "%",
+                    score = ScoreRange(avg, idealHumidityMin, idealHumidityMax, humidityTolerance)
+                });
+            }
+            if (useSunlight)
+            {
+                float avg = snapshots.sumSunlight / snapshots.snapshotCount;
+                results.Add(new AxisResult
+                {
+                    axisName = "Sunlight",
+                    actual = avg,
+                    idealMin = idealSunlightMin,
+                    idealMax = idealSunlightMax,
+                    unit = "%",
+                    score = ScoreRange(avg, idealSunlightMin, idealSunlightMax, sunlightTolerance)
+                });
+            }
+            if (useRain)
+            {
+                float fraction = (float)snapshots.rainSnapshots / snapshots.snapshotCount;
+                results.Add(new AxisResult
+                {
+                    axisName = "Rain",
+                    actual = fraction * 100f,
+                    idealMin = idealRainMin * 100f,
+                    idealMax = idealRainMax * 100f,
+                    unit = "%",
+                    score = ScoreRange(fraction, idealRainMin, idealRainMax, rainTolerance)
+                });
+            }
+            if (useMoon)
+            {
+                float fraction = 0f;
+                if (snapshots.moonPhaseSnapshots != null && snapshots.moonPhaseSnapshots.Length > (int)requiredMoonPhase)
+                    fraction = (float)snapshots.moonPhaseSnapshots[(int)requiredMoonPhase] / snapshots.snapshotCount;
+                results.Add(new AxisResult
+                {
+                    axisName = "Moon",
+                    actual = fraction * 100f,
+                    idealMin = -1f,
+                    idealMax = -1f,
+                    unit = "% " + requiredMoonPhase,
+                    score = fraction
+                });
+            }
+            if (useWaterings)
+            {
+                results.Add(new AxisResult
+                {
+                    axisName = "Waterings",
+                    actual = waterCount,
+                    idealMin = idealWateringsMin,
+                    idealMax = idealWateringsMax,
+                    unit = "x",
+                    score = ScoreRange(waterCount, idealWateringsMin, idealWateringsMax, wateringsTolerance)
+                });
+            }
+
+            return results;
+        }
+
         public static float ScoreRange(float actual, float min, float max, float tolerance)
         {
             if (actual >= min && actual <= max) return 1f;
@@ -144,5 +246,15 @@ namespace Garden
             if (phaseIndex >= 0 && phaseIndex < moonPhaseSnapshots.Length)
                 moonPhaseSnapshots[phaseIndex]++;
         }
+    }
+
+    public class AxisResult
+    {
+        public string axisName;
+        public float actual;
+        public float idealMin;
+        public float idealMax;
+        public string unit;
+        public float score;
     }
 }

@@ -132,5 +132,56 @@ namespace Garden.Tests
             float score = recipe.Evaluate(snapshots, 0);
             Assert.AreEqual(1f, score, 0.001f);
         }
+
+        [Test]
+        public void EvaluatePerAxis_HeatOnly_ReturnsOneResult()
+        {
+            var recipe = new GrowthRecipe
+            {
+                useHeat = true,
+                idealTempMin = 20f, idealTempMax = 30f,
+                heatTolerance = 10f, heatWeight = 1f
+            };
+            var snapshots = new GrowthSnapshots
+            {
+                snapshotCount = 4,
+                sumTemp = 100f // avg 25
+            };
+            var results = recipe.EvaluatePerAxis(snapshots, 0);
+            Assert.AreEqual(1, results.Count);
+            Assert.AreEqual("Heat", results[0].axisName);
+            Assert.AreEqual(25f, results[0].actual, 0.1f);
+            Assert.AreEqual(1f, results[0].score, 0.001f);
+        }
+
+        [Test]
+        public void EvaluatePerAxis_TwoAxes_ReturnsBoth()
+        {
+            var recipe = new GrowthRecipe
+            {
+                useHeat = true,
+                idealTempMin = 20f, idealTempMax = 30f,
+                heatTolerance = 10f, heatWeight = 1f,
+                useWaterings = true,
+                idealWateringsMin = 2, idealWateringsMax = 4,
+                wateringsTolerance = 2f, wateringsWeight = 1f
+            };
+            var snapshots = new GrowthSnapshots { snapshotCount = 4, sumTemp = 100f };
+            var results = recipe.EvaluatePerAxis(snapshots, 5);
+            Assert.AreEqual(2, results.Count);
+            Assert.AreEqual("Heat", results[0].axisName);
+            Assert.AreEqual(1f, results[0].score, 0.001f);
+            Assert.AreEqual("Waterings", results[1].axisName);
+            Assert.AreEqual(0.5f, results[1].score, 0.001f);
+        }
+
+        [Test]
+        public void EvaluatePerAxis_NoAxesEnabled_ReturnsEmpty()
+        {
+            var recipe = new GrowthRecipe();
+            var snapshots = new GrowthSnapshots { snapshotCount = 5 };
+            var results = recipe.EvaluatePerAxis(snapshots, 0);
+            Assert.AreEqual(0, results.Count);
+        }
     }
 }
