@@ -1,13 +1,14 @@
 /* Forecast.uss — Almanac-style forecast panel extending below header */
 
-/* Panel: in-flow, pushes viewport down, solid opaque background */
+/* Panel: overlays campsite viewport, does not push bottom nav */
 #forecast-panel {
     display: none;
-    flex-grow: 4;
-    flex-shrink: 0;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
     background-color: rgb(22, 15, 9);
-    border-bottom-width: 2px;
-    border-bottom-color: rgba(180, 120, 50, 0.35);
     padding: var(--spacing-sm) var(--spacing-sm) var(--spacing-xs);
     flex-direction: column;
 }

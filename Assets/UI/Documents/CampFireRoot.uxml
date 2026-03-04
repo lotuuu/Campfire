@@ -68,13 +68,12 @@
 
         </ui:VisualElement>
 
-        <ui:VisualElement name="forecast-panel">
-            <ui:VisualElement name="forecast-days" />
-        </ui:VisualElement>
-
         <!-- Main campsite grid view -->
         <ui:VisualElement name="campsite-viewport">
             <ui:VisualElement name="campsite-canvas" />
+            <ui:VisualElement name="forecast-panel">
+                <ui:VisualElement name="forecast-days" />
+            </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- Bottom navigation -->
