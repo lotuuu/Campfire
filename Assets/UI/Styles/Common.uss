@@ -162,6 +162,24 @@
     -unity-text-align: middle-center;
 }
 
+/* Weather loading gate */
+#weather-gate {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: rgb(12, 18, 24);
+    justify-content: center;
+    align-items: center;
+}
+
+#weather-gate-label {
+    font-size: var(--font-lg);
+    color: var(--color-text-dim);
+    -unity-text-align: middle-center;
+}
+
 /* Page content (inside SwipeablePageView) */
 .page-content {
     flex-grow: 1;

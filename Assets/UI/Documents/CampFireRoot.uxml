@@ -302,6 +302,10 @@
             <ui:VisualElement name="curtain-right" picking-mode="Ignore" />
         </ui:VisualElement>
 
+        <!-- Weather loading gate -->
+        <ui:VisualElement name="weather-gate">
+            <ui:Label name="weather-gate-label" text="Reading the skies..." />
+        </ui:VisualElement>
 
     </ui:VisualElement>
 </ui:UXML>

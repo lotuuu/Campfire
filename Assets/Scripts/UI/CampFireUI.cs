@@ -33,6 +33,7 @@ namespace Garden
         private VisualElement debugPanelElement;
         private VisualElement questsPanel;
         private VisualElement merchantPanel;
+        private VisualElement weatherGate;
 
         private void Awake()
         {
@@ -180,8 +181,14 @@ namespace Garden
                     }
                 };
 
-            // Location gate
-            if (WeatherService.Instance != null && !WeatherService.Instance.IsLocationResolved)
+            // Weather gate — block UI until weather is available
+            weatherGate = root.Q("weather-gate");
+            if (WeatherService.Instance != null && WeatherService.Instance.IsLocationResolved)
+            {
+                weatherGate?.RemoveFromHierarchy();
+                weatherGate = null;
+            }
+            else if (WeatherService.Instance != null)
             {
                 WeatherService.Instance.OnLocationResolved += OnLocationResolved;
             }
@@ -197,6 +204,11 @@ namespace Garden
         private void OnLocationResolved(bool success)
         {
             WeatherService.Instance.OnLocationResolved -= OnLocationResolved;
+            if (weatherGate != null)
+            {
+                weatherGate.RemoveFromHierarchy();
+                weatherGate = null;
+            }
         }
 
         public void OpenOverlay(string title, VisualElement panel)

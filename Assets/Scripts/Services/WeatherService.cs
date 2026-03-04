@@ -102,9 +102,10 @@ namespace Garden
             }
             else
             {
-                IsLocationResolved = true;
-                Debug.LogWarning($"Location failed (status: {Input.location.status}).");
-                OnLocationResolved?.Invoke(false);
+                Debug.LogWarning($"Location failed (status: {Input.location.status}). Retrying in 5s...");
+                Input.location.Stop();
+                yield return new WaitForSeconds(5);
+                yield return InitializeLocation();
             }
 #endif
         }
