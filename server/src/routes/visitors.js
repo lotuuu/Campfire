@@ -115,7 +115,17 @@ router.get('/tonight', async (req, res) => {
       return res.json(buildVisitorPayload(milestoneVisitor.rows[0]));
     }
 
-    // Priority 3: Quest returns
+    // Priority 3: Weather-triggered visitors
+    const weatherVisitor = await pool.query(
+      `SELECT vt.* FROM visitor_schedule vs
+       JOIN visitor_templates vt ON vt.visitor_id = vs.visitor_id
+       WHERE vs.weather_condition IS NOT NULL
+       ORDER BY vs.priority DESC`
+    );
+    // TODO: Check actual weather conditions when weather data is available on the server.
+    // For now, weather triggers are a no-op placeholder until we pipe weather into the server.
+
+    // Priority 4: Quest returns
     const questReturn = await pool.query(
       `SELECT * FROM visitor_quests
        WHERE player_uid = $1 AND return_date_utc <= $2
@@ -145,7 +155,7 @@ router.get('/tonight', async (req, res) => {
       }));
     }
 
-    // Priority 4: Random pool (weighted, gated by flame level)
+    // Priority 5: Random pool (weighted, gated by flame level)
     const randomPool = await pool.query(
       `SELECT * FROM visitor_templates WHERE flame_level_min <= $1`,
       [flameLevel]
@@ -204,11 +214,12 @@ router.post('/quest/complete', async (req, res) => {
   }
 
   try {
+    const today = new Date().toISOString().slice(0, 10);
     const result = await pool.query(
       `DELETE FROM visitor_quests
-       WHERE id = $1 AND player_uid = $2
+       WHERE id = $1 AND player_uid = $2 AND return_date_utc <= $3
        RETURNING reward`,
-      [quest_id, uid]
+      [quest_id, uid, today]
     );
 
     if (result.rows.length === 0) {

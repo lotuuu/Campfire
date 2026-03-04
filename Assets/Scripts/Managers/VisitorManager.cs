@@ -256,6 +256,7 @@ namespace Garden
             {
                 save.requestItem = response.quest.request_item;
                 save.requestCount = response.quest.request_count;
+                save.returnDays = response.quest.return_days;
                 save.rewardJson = JsonUtility.ToJson(response.quest.reward);
                 save.isReturnVisit = response.quest.is_return;
                 if (response.quest.return_dialogue != null)
@@ -314,7 +315,7 @@ namespace Garden
                 visitor_id = visitor.visitorId,
                 request_item = visitor.requestItem,
                 request_count = visitor.requestCount,
-                return_days = 1,
+                return_days = visitor.returnDays > 0 ? visitor.returnDays : 7,
                 reward = questReward,
                 return_dialogue = visitor.returnDialogue
             };
@@ -381,11 +382,19 @@ namespace Garden
                 return false;
             }
 
+            // Consume requested items from player inventory
+            var data = SaveManager.Instance.Data;
+            var requestedItem = data.items.Find(i => i.itemName == quest.requestItem);
+            if (requestedItem != null)
+            {
+                requestedItem.count -= quest.requestCount;
+                if (requestedItem.count <= 0) data.items.Remove(requestedItem);
+            }
+
             // Apply reward
             var reward = JsonUtility.FromJson<QuestReward>(quest.rewardJson);
             if (reward != null)
             {
-                var data = SaveManager.Instance.Data;
                 switch (reward.type)
                 {
                     case "seed":
@@ -402,7 +411,7 @@ namespace Garden
             }
 
             // Remove from active quests
-            SaveManager.Instance.Data.activeQuests.Remove(quest);
+            data.activeQuests.Remove(quest);
             SaveManager.Instance.Save();
             return true;
         }

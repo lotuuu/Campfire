@@ -32,6 +32,7 @@ namespace Garden
         public int serverQuestId;
         public string requestItem;
         public int requestCount;
+        public int returnDays;
         public string returnDateUtc;
         public string rewardJson;
         public List<string> returnDialogue = new();

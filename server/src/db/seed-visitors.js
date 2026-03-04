@@ -24,10 +24,10 @@ const templates = [
       ]
     ],
     offer_pool: [
-      { give: { name: 'Basil Leaf', count: 2 }, receive: { type: 'seed', name: 'Lavender', count: 1 } },
-      { give: { name: 'Chamomile Petal', count: 3 }, receive: { type: 'seed', name: 'Mint', count: 1 } },
-      { give: { name: 'Mint Leaf', count: 2 }, receive: { type: 'seed', name: 'Rosemary', count: 1 } },
-      { give: { name: 'Lavender Petal', count: 2 }, receive: { type: 'seed', name: 'Dahlia', count: 1 } }
+      { costs: [{ itemName: 'Basil Leaf', count: 2 }], rewardSeedName: 'Lavender', rewardCount: 1 },
+      { costs: [{ itemName: 'Chamomile Petal', count: 3 }], rewardSeedName: 'Mint', rewardCount: 1 },
+      { costs: [{ itemName: 'Mint Leaf', count: 2 }], rewardSeedName: 'Rosemary', rewardCount: 1 },
+      { costs: [{ itemName: 'Lavender Petal', count: 2 }], rewardSeedName: 'Dahlia', rewardCount: 1 }
     ],
     gift_pool: [],
     quest_pool: [],
