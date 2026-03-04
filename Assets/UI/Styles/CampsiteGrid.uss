@@ -186,17 +186,17 @@
 }
 
 /* ── Merchant cell ── */
-.grid-cell--merchant {
+.grid-cell--visitor {
     --hex-fill: rgba(180, 140, 60, 0.45);
     --hex-border: rgba(220, 180, 80, 0.5);
 }
 
-.grid-cell--merchant:hover {
+.grid-cell--visitor:hover {
     --hex-fill: rgba(200, 160, 70, 0.6);
     --hex-border: rgba(240, 200, 100, 0.7);
 }
 
-.grid-cell--merchant .cell-icon {
+.grid-cell--visitor .cell-icon {
     width: 56px;
     height: 56px;
     border-radius: 12px;

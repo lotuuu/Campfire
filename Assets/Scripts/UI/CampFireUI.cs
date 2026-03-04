@@ -20,7 +20,7 @@ namespace Garden
         private ResourceDisplayUI resourceDisplay;
         private DebugWeatherPanel debugPanel;
         private QuestUI questUI;
-        private MerchantUI merchantUI;
+        private VisitorUI visitorUI;
         private DialogueUI dialogueUI;
 
         private VisualElement overlayContainer;
@@ -32,7 +32,7 @@ namespace Garden
         private VisualElement buildPanel;
         private VisualElement debugPanelElement;
         private VisualElement questsPanel;
-        private VisualElement merchantPanel;
+        private VisualElement visitorPanel;
         private VisualElement weatherGate;
 
         private void Awake()
@@ -66,8 +66,8 @@ namespace Garden
             resourceDisplay?.Initialize(root);
             debugPanel?.Initialize(root);
             questUI?.Initialize(root);
-            merchantUI = GetComponent<MerchantUI>();
-            merchantUI?.Initialize(root);
+            visitorUI = GetComponent<VisitorUI>();
+            visitorUI?.Initialize(root);
             dialogueUI = GetComponent<DialogueUI>();
             dialogueUI?.Initialize(root);
 
@@ -81,7 +81,7 @@ namespace Garden
             buildPanel = root.Q("build-panel");
             debugPanelElement = root.Q("debug-panel");
             questsPanel = root.Q("quests-panel");
-            merchantPanel = root.Q("merchant-panel");
+            visitorPanel = root.Q("visitor-panel");
 
             var closeBtn = root.Q<Button>("overlay-close");
             closeBtn?.RegisterCallback<ClickEvent>(_ => CloseOverlay());
@@ -148,36 +148,30 @@ namespace Garden
                 };
             }
 
-            // Wire Merchant tile tap
+            // Wire Visitor tile tap
             if (campsiteView != null)
-                campsiteView.OnMerchantTapped += index =>
+                campsiteView.OnVisitorTapped += () =>
                 {
                     var data = SaveManager.Instance?.Data;
-                    if (data == null || index < 0 || index >= data.merchants.Count) return;
-                    var merchant = data.merchants[index];
+                    if (data?.currentVisitor == null) return;
+                    var visitor = data.currentVisitor;
 
-                    if (!merchant.dialogueSeen && merchant.dialogueLines.Count > 0 && dialogueUI != null)
+                    if (!visitor.dialogueSeen && visitor.dialogueLines != null && visitor.dialogueLines.Count > 0 && dialogueUI != null)
                     {
-                        // Find MerchantData for portrait
-                        Texture2D portrait = null;
-                        var allMerchants = Resources.LoadAll<MerchantData>("Merchants");
-                        foreach (var md in allMerchants)
-                        {
-                            if (md.merchantName == merchant.merchantName) { portrait = md.portrait; break; }
-                        }
+                        Texture2D portrait = Resources.Load<Texture2D>($"Portraits/{visitor.portraitId}");
 
-                        dialogueUI.Show(merchant.merchantName, merchant.dialogueLines, () =>
+                        dialogueUI.Show(visitor.visitorName, visitor.dialogueLines, () =>
                         {
-                            merchant.dialogueSeen = true;
+                            visitor.dialogueSeen = true;
                             SaveManager.Instance.Save();
-                            merchantUI?.ShowMerchant(index);
-                            OpenOverlay("Night Merchant", merchantPanel);
+                            visitorUI?.ShowVisitor();
+                            OpenOverlay(visitor.visitorName, visitorPanel);
                         }, portrait);
                     }
                     else
                     {
-                        merchantUI?.ShowMerchant(index);
-                        OpenOverlay("Night Merchant", merchantPanel);
+                        visitorUI?.ShowVisitor();
+                        OpenOverlay(visitor.visitorName, visitorPanel);
                     }
                 };
 
@@ -232,7 +226,7 @@ namespace Garden
             if (buildPanel != null) buildPanel.style.display = DisplayStyle.None;
             if (debugPanelElement != null) debugPanelElement.style.display = DisplayStyle.None;
             if (questsPanel != null) questsPanel.style.display = DisplayStyle.None;
-            if (merchantPanel != null) merchantPanel.style.display = DisplayStyle.None;
+            if (visitorPanel != null) visitorPanel.style.display = DisplayStyle.None;
         }
     }
 }

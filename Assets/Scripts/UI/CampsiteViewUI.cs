@@ -69,7 +69,7 @@ namespace Garden
 
         // Events
         public event Action OnApothekeTapped;
-        public event Action<int> OnMerchantTapped;
+        public event Action OnVisitorTapped;
 
         public void Initialize(VisualElement root)
         {
@@ -106,10 +106,10 @@ namespace Garden
                 BirdManager.Instance.OnBirdPlaced += RebuildGrid;
                 BirdManager.Instance.OnBirdCollected += _ => RebuildGrid();
             }
-            if (MerchantManager.Instance != null)
+            if (VisitorManager.Instance != null)
             {
-                MerchantManager.Instance.OnMerchantArrived += RebuildGrid;
-                MerchantManager.Instance.OnMerchantDeparted += RebuildGrid;
+                VisitorManager.Instance.OnVisitorArrived += RebuildGrid;
+                VisitorManager.Instance.OnVisitorDeparted += RebuildGrid;
             }
 
             // Tap backdrop to close interaction panel (consumes the tap)
@@ -249,8 +249,8 @@ namespace Garden
                 occupied[(data.mallumHouses[i].gridX, data.mallumHouses[i].gridY)] = (CampBuildingType.MallumHouse, i);
             for (int i = 0; i < data.birds.Count; i++)
                 occupied[(data.birds[i].gridX, data.birds[i].gridY)] = (CampBuildingType.Bird, i);
-            for (int i = 0; i < data.merchants.Count; i++)
-                occupied[(data.merchants[i].gridX, data.merchants[i].gridY)] = (CampBuildingType.NightMerchant, i);
+            if (data.currentVisitor != null)
+                occupied[(data.currentVisitor.gridX, data.currentVisitor.gridY)] = (CampBuildingType.Visitor, 0);
 
             // Fixed buildings always take priority
             occupied[(data.apothekeGridX, data.apothekeGridY)] = (CampBuildingType.Apotheke, 0);
@@ -314,7 +314,7 @@ namespace Garden
                         CampBuildingType cellType = info.type;
 
                         // Long-press detection on movable buildings
-                        bool isMovable = cellType != CampBuildingType.Flame && cellType != CampBuildingType.Bird && cellType != CampBuildingType.NightMerchant;
+                        bool isMovable = cellType != CampBuildingType.Flame && cellType != CampBuildingType.Bird && cellType != CampBuildingType.Visitor;
                         if (isMovable && mode == CampsiteMode.Normal)
                         {
                             int cq = q, cr = r;
@@ -449,11 +449,20 @@ namespace Garden
                     if (status != null) status.text = $"{bird.seedCount}x {PlotManager.GetSeedDisplayName(bird.seedName)}";
                     break;
 
-                case CampBuildingType.NightMerchant:
-                    cell.AddToClassList("grid-cell--merchant");
-                    var merchant = SaveManager.Instance.Data.merchants[index];
-                    if (label != null) label.text = "Merchant";
-                    if (status != null) status.text = $"{merchant.offers.Count} trades";
+                case CampBuildingType.Visitor:
+                    cell.AddToClassList("grid-cell--visitor");
+                    var visitor = SaveManager.Instance.Data.currentVisitor;
+                    if (label != null) label.text = visitor?.visitorName ?? "Visitor";
+                    if (status != null)
+                    {
+                        status.text = visitor?.type switch
+                        {
+                            VisitorType.Merchant => $"{visitor.offers?.Count ?? 0} trades",
+                            VisitorType.Gifter => "Has a gift",
+                            VisitorType.Quester => "Has a quest",
+                            _ => ""
+                        };
+                    }
                     break;
             }
         }
@@ -485,9 +494,9 @@ namespace Garden
                 return;
             }
 
-            if (type == CampBuildingType.NightMerchant)
+            if (type == CampBuildingType.Visitor)
             {
-                OnMerchantTapped?.Invoke(index);
+                OnVisitorTapped?.Invoke();
                 return;
             }
 

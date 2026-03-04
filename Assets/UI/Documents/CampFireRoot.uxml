@@ -200,10 +200,21 @@
                         <ui:VisualElement name="quest-locked-section" />
                     </ui:VisualElement>
 
-                    <!-- merchant-panel -->
-                    <ui:VisualElement name="merchant-panel">
-                        <ui:Label name="merchant-flavor" class="merchant-flavor" />
-                        <ui:VisualElement name="merchant-list" />
+                    <!-- visitor-panel -->
+                    <ui:VisualElement name="visitor-panel">
+                        <ui:Label name="visitor-flavor" class="merchant-flavor" />
+                        <ui:VisualElement name="visitor-merchant-section">
+                            <ui:VisualElement name="visitor-offer-list" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="visitor-gifter-section">
+                            <ui:Label name="visitor-gift-text" class="gift-text" />
+                            <ui:Button name="visitor-claim-gift-btn" text="Accept Gift" class="action-button" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="visitor-quester-section">
+                            <ui:Label name="visitor-quest-text" class="quest-text" />
+                            <ui:Button name="visitor-accept-quest-btn" text="Accept Quest" class="action-button" />
+                            <ui:Button name="visitor-turnin-quest-btn" text="Turn In" class="action-button" />
+                        </ui:VisualElement>
                     </ui:VisualElement>
 
                     <!-- Debug panel -->
