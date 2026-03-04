@@ -165,6 +165,8 @@
                             <ui:TextField name="display-name-input" label="Your name" max-length="20" />
                             <ui:Label name="display-name-status" class="letters-status-text" />
                             <ui:Label name="my-friend-code" text="Your code: ---" class="friend-code-display" />
+                            <ui:Button name="btn-share-code" text="Share invite link" class="letters-btn-primary" />
+                            <ui:Label name="share-status" class="letters-status-text" />
                             <ui:TextField name="friend-code-input" label="Enter friend code" />
                             <ui:Button name="btn-send-request" text="Send Request" class="letters-btn-primary" />
                             <ui:Label name="add-friend-status" class="letters-status-text" />

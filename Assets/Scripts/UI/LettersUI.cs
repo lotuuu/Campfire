@@ -28,6 +28,8 @@ namespace Garden
         private Label myFriendCode;
         private TextField friendCodeInput;
         private Button sendRequestBtn;
+        private Button shareCodeBtn;
+        private Label shareStatus;
         private Label addFriendStatus;
 
         // Badges
@@ -87,6 +89,8 @@ namespace Garden
             myFriendCode = root.Q<Label>("my-friend-code");
             friendCodeInput = root.Q<TextField>("friend-code-input");
             sendRequestBtn = root.Q<Button>("btn-send-request");
+            shareCodeBtn = root.Q<Button>("btn-share-code");
+            shareStatus = root.Q<Label>("share-status");
             addFriendStatus = root.Q<Label>("add-friend-status");
 
             // Gift picker
@@ -133,6 +137,7 @@ namespace Garden
 
             // Wire add friend button
             sendRequestBtn?.RegisterCallback<ClickEvent>(_ => OnSendFriendRequest());
+            shareCodeBtn?.RegisterCallback<ClickEvent>(_ => OnShareCode());
 
             // Wire gift picker
             confirmGiftBtn?.RegisterCallback<ClickEvent>(_ => OnConfirmGift());
@@ -375,6 +380,22 @@ namespace Garden
                 myFriendCode.text = string.IsNullOrEmpty(code) ? "Your code: loading..." : $"Your code: {code}";
             }
             if (addFriendStatus != null) addFriendStatus.text = "";
+        }
+
+        private void OnShareCode()
+        {
+            var code = SocialService.Instance?.FriendCode;
+            if (string.IsNullOrEmpty(code))
+            {
+                if (shareStatus != null) shareStatus.text = "Code not available yet";
+                return;
+            }
+
+            var name = SocialSaveManager.Instance?.Data?.displayName ?? "A friend";
+            string message = $"{name} wants to be your friend in Camp Fire! Add them with friend code: {code}";
+
+            GUIUtility.systemCopyBuffer = message;
+            if (shareStatus != null) shareStatus.text = "Copied to clipboard!";
         }
 
         private async void OnDisplayNameSubmit()
