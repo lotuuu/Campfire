@@ -56,45 +56,45 @@ namespace Garden
 
         public float Evaluate(GrowthSnapshots snapshots, int waterCount)
         {
-            if (snapshots.snapshotCount <= 0) return 1f;
-
             float weightSum = 0f;
             float scoreSum = 0f;
+            bool hasSnapshots = snapshots.snapshotCount > 0;
 
+            // Weather axes: score normally when snapshots exist, score 0 when missing
             if (useHeat)
             {
-                float avg = snapshots.sumTemp / snapshots.snapshotCount;
-                scoreSum += ScoreRange(avg, idealTempMin, idealTempMax, heatTolerance) * heatWeight;
+                float score = hasSnapshots ? ScoreRange(snapshots.sumTemp / snapshots.snapshotCount, idealTempMin, idealTempMax, heatTolerance) : 0f;
+                scoreSum += score * heatWeight;
                 weightSum += heatWeight;
             }
             if (useWind)
             {
-                float avg = snapshots.sumWind / snapshots.snapshotCount;
-                scoreSum += ScoreRange(avg, idealWindMin, idealWindMax, windTolerance) * windWeight;
+                float score = hasSnapshots ? ScoreRange(snapshots.sumWind / snapshots.snapshotCount, idealWindMin, idealWindMax, windTolerance) : 0f;
+                scoreSum += score * windWeight;
                 weightSum += windWeight;
             }
             if (useHumidity)
             {
-                float avg = snapshots.sumHumidity / snapshots.snapshotCount;
-                scoreSum += ScoreRange(avg, idealHumidityMin, idealHumidityMax, humidityTolerance) * humidityWeight;
+                float score = hasSnapshots ? ScoreRange(snapshots.sumHumidity / snapshots.snapshotCount, idealHumidityMin, idealHumidityMax, humidityTolerance) : 0f;
+                scoreSum += score * humidityWeight;
                 weightSum += humidityWeight;
             }
             if (useSunlight)
             {
-                float avg = snapshots.sumSunlight / snapshots.snapshotCount;
-                scoreSum += ScoreRange(avg, idealSunlightMin, idealSunlightMax, sunlightTolerance) * sunlightWeight;
+                float score = hasSnapshots ? ScoreRange(snapshots.sumSunlight / snapshots.snapshotCount, idealSunlightMin, idealSunlightMax, sunlightTolerance) : 0f;
+                scoreSum += score * sunlightWeight;
                 weightSum += sunlightWeight;
             }
             if (useRain)
             {
-                float fraction = (float)snapshots.rainSnapshots / snapshots.snapshotCount;
-                scoreSum += ScoreRange(fraction, idealRainMin, idealRainMax, rainTolerance) * rainWeight;
+                float score = hasSnapshots ? ScoreRange((float)snapshots.rainSnapshots / snapshots.snapshotCount, idealRainMin, idealRainMax, rainTolerance) : 0f;
+                scoreSum += score * rainWeight;
                 weightSum += rainWeight;
             }
             if (useMoon)
             {
                 float fraction = 0f;
-                if (snapshots.moonPhaseSnapshots != null && snapshots.moonPhaseSnapshots.Length > (int)requiredMoonPhase)
+                if (hasSnapshots && snapshots.moonPhaseSnapshots != null && snapshots.moonPhaseSnapshots.Length > (int)requiredMoonPhase)
                     fraction = (float)snapshots.moonPhaseSnapshots[(int)requiredMoonPhase] / snapshots.snapshotCount;
                 scoreSum += fraction * moonWeight;
                 weightSum += moonWeight;
@@ -112,11 +112,12 @@ namespace Garden
         public List<AxisResult> EvaluatePerAxis(GrowthSnapshots snapshots, int waterCount)
         {
             var results = new List<AxisResult>();
-            if (snapshots.snapshotCount <= 0) return results;
+            bool hasSnapshots = snapshots.snapshotCount > 0;
 
+            // Weather axes: show actual values when snapshots exist, show 0 when missing
             if (useHeat)
             {
-                float avg = snapshots.sumTemp / snapshots.snapshotCount;
+                float avg = hasSnapshots ? snapshots.sumTemp / snapshots.snapshotCount : 0f;
                 results.Add(new AxisResult
                 {
                     axisName = "Heat",
@@ -124,12 +125,12 @@ namespace Garden
                     idealMin = idealTempMin,
                     idealMax = idealTempMax,
                     unit = "\u00b0C",
-                    score = ScoreRange(avg, idealTempMin, idealTempMax, heatTolerance)
+                    score = hasSnapshots ? ScoreRange(avg, idealTempMin, idealTempMax, heatTolerance) : 0f
                 });
             }
             if (useWind)
             {
-                float avg = snapshots.sumWind / snapshots.snapshotCount;
+                float avg = hasSnapshots ? snapshots.sumWind / snapshots.snapshotCount : 0f;
                 results.Add(new AxisResult
                 {
                     axisName = "Wind",
@@ -137,12 +138,12 @@ namespace Garden
                     idealMin = idealWindMin,
                     idealMax = idealWindMax,
                     unit = "m/s",
-                    score = ScoreRange(avg, idealWindMin, idealWindMax, windTolerance)
+                    score = hasSnapshots ? ScoreRange(avg, idealWindMin, idealWindMax, windTolerance) : 0f
                 });
             }
             if (useHumidity)
             {
-                float avg = snapshots.sumHumidity / snapshots.snapshotCount;
+                float avg = hasSnapshots ? snapshots.sumHumidity / snapshots.snapshotCount : 0f;
                 results.Add(new AxisResult
                 {
                     axisName = "Humidity",
@@ -150,12 +151,12 @@ namespace Garden
                     idealMin = idealHumidityMin,
                     idealMax = idealHumidityMax,
                     unit = "%",
-                    score = ScoreRange(avg, idealHumidityMin, idealHumidityMax, humidityTolerance)
+                    score = hasSnapshots ? ScoreRange(avg, idealHumidityMin, idealHumidityMax, humidityTolerance) : 0f
                 });
             }
             if (useSunlight)
             {
-                float avg = snapshots.sumSunlight / snapshots.snapshotCount;
+                float avg = hasSnapshots ? snapshots.sumSunlight / snapshots.snapshotCount : 0f;
                 results.Add(new AxisResult
                 {
                     axisName = "Sunlight",
@@ -163,12 +164,12 @@ namespace Garden
                     idealMin = idealSunlightMin,
                     idealMax = idealSunlightMax,
                     unit = "%",
-                    score = ScoreRange(avg, idealSunlightMin, idealSunlightMax, sunlightTolerance)
+                    score = hasSnapshots ? ScoreRange(avg, idealSunlightMin, idealSunlightMax, sunlightTolerance) : 0f
                 });
             }
             if (useRain)
             {
-                float fraction = (float)snapshots.rainSnapshots / snapshots.snapshotCount;
+                float fraction = hasSnapshots ? (float)snapshots.rainSnapshots / snapshots.snapshotCount : 0f;
                 results.Add(new AxisResult
                 {
                     axisName = "Rain",
@@ -176,13 +177,13 @@ namespace Garden
                     idealMin = idealRainMin * 100f,
                     idealMax = idealRainMax * 100f,
                     unit = "%",
-                    score = ScoreRange(fraction, idealRainMin, idealRainMax, rainTolerance)
+                    score = hasSnapshots ? ScoreRange(fraction, idealRainMin, idealRainMax, rainTolerance) : 0f
                 });
             }
             if (useMoon)
             {
                 float fraction = 0f;
-                if (snapshots.moonPhaseSnapshots != null && snapshots.moonPhaseSnapshots.Length > (int)requiredMoonPhase)
+                if (hasSnapshots && snapshots.moonPhaseSnapshots != null && snapshots.moonPhaseSnapshots.Length > (int)requiredMoonPhase)
                     fraction = (float)snapshots.moonPhaseSnapshots[(int)requiredMoonPhase] / snapshots.snapshotCount;
                 results.Add(new AxisResult
                 {

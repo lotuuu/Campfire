@@ -44,6 +44,15 @@
     --hex-border: rgba(100, 180, 255, 0.7);
 }
 
+.grid-cell--water-cooldown {
+    --hex-fill: rgba(80, 80, 80, 0.15);
+    --hex-border: rgba(120, 120, 120, 0.4);
+}
+
+.cell-progress-fill--cooldown {
+    background-color: rgba(80, 160, 240, 0.6);
+}
+
 /* ── Flame cell ── */
 .grid-cell--flame {
     --hex-fill: rgba(220, 100, 20, 0.3);

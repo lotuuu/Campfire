@@ -60,6 +60,7 @@ namespace Garden
         // Grid cell tracking for Update loop
         private readonly List<(VisualElement fill, int plotIndex)> growingPlots = new();
         private readonly List<(VisualElement fill, int vaseIndex)> fillingVases = new();
+        private readonly List<(VisualElement fill, int plotIndex)> cooldownPlots = new();
 
         // Current grid state
         private int currentGridSize;
@@ -154,6 +155,21 @@ namespace Garden
                     fill.style.width = new Length(progress * 100f, LengthUnit.Percent);
                 }
             }
+
+            if (cooldownPlots.Count > 0)
+            {
+                var data = SaveManager.Instance?.Data;
+                if (data != null)
+                {
+                    double totalSeconds = PlotManager.ManualWaterCooldownHours * 3600.0;
+                    foreach (var (fill, plotIndex) in cooldownPlots)
+                    {
+                        double remaining = PlotManager.GetWaterCooldownRemaining(data.plots[plotIndex]);
+                        float progress = (float)(1.0 - remaining / totalSeconds);
+                        fill.style.width = new Length(progress * 100f, LengthUnit.Percent);
+                    }
+                }
+            }
         }
 
         // ── Grid Building ──
@@ -167,6 +183,7 @@ namespace Garden
             canvas.Clear();
             growingPlots.Clear();
             fillingVases.Clear();
+            cooldownPlots.Clear();
             cellLookup.Clear();
             CloseInteractionPanel();
 
@@ -269,12 +286,28 @@ namespace Garden
                     {
                         PopulateOccupiedCell(cell, label, status, progress, progressFill, info.type, info.index);
 
-                        // In watering mode, highlight planted plots as targets
+                        // In watering mode, highlight planted plots as targets or show cooldown
                         if (mode == CampsiteMode.Watering && info.type == CampBuildingType.Plot)
                         {
                             var plot = data.plots[info.index];
                             if (plot.state == PlotState.Growing)
-                                cell.AddToClassList("grid-cell--water-target");
+                            {
+                                double cooldownRemaining = PlotManager.GetWaterCooldownRemaining(plot);
+                                if (cooldownRemaining <= 0)
+                                {
+                                    cell.AddToClassList("grid-cell--water-target");
+                                }
+                                else
+                                {
+                                    cell.AddToClassList("grid-cell--water-cooldown");
+                                    if (progress != null && progressFill != null)
+                                    {
+                                        progress.AddToClassList("cell-progress--visible");
+                                        progressFill.AddToClassList("cell-progress-fill--cooldown");
+                                        cooldownPlots.Add((progressFill, info.index));
+                                    }
+                                }
+                            }
                         }
 
                         int idx = info.index;
@@ -374,7 +407,7 @@ namespace Garden
                     cell.AddToClassList("grid-cell--vase");
                     ApplySkinColors(cell, SaveManager.Instance.Data.vases[index].skinName);
                     var vase = SaveManager.Instance.Data.vases[index];
-                    if (label != null) label.text = vase.currentWater >= vase.capacity ? "Full Vase" : "Empty Vase";
+                    if (label != null) label.text = vase.currentWater >= vase.capacity ? "Full Vase" : vase.currentWater > 0 ? "Vase" : "Empty Vase";
                     if (status != null) status.text = $"{vase.currentWater}/{vase.capacity}";
                     if (vase.state == VaseState.Filling && progress != null && progressFill != null)
                     {
@@ -845,6 +878,7 @@ namespace Garden
             Color fillColor = new Color(0.16f, 0.1f, 0.05f, 0.3f);
             Color borderColor = new Color(0.55f, 0.39f, 0.2f, 0.15f);
             bool hasStateOverride = el.ClassListContains("grid-cell--water-target")
+                || el.ClassListContains("grid-cell--water-cooldown")
                 || el.ClassListContains("grid-cell--drop-target")
                 || el.ClassListContains("grid-cell--drop-hover")
                 || el.ClassListContains("grid-cell--placeable");
