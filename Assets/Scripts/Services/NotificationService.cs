@@ -108,7 +108,7 @@ namespace Garden
 
             string displayName = PlotManager.GetSeedDisplayName(seedName);
             string title = $"Your {displayName} is ready to water!";
-            string body = $"The watering cooldown has ended — give your {displayName} a drink!";
+            string body = $"The watering cooldown has ended - give your {displayName} a drink!";
             int id = plotIndex + WaterNotificationIdOffset;
 
 #if UNITY_ANDROID

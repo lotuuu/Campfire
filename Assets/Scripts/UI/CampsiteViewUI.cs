@@ -374,8 +374,8 @@ namespace Garden
                     cell.AddToClassList("grid-cell--vase");
                     ApplySkinColors(cell, SaveManager.Instance.Data.vases[index].skinName);
                     var vase = SaveManager.Instance.Data.vases[index];
-                    if (label != null) label.text = $"{vase.currentWater}/{vase.capacity}";
-                    if (status != null) status.text = vase.state.ToString();
+                    if (label != null) label.text = vase.currentWater >= vase.capacity ? "Full Vase" : "Empty Vase";
+                    if (status != null) status.text = $"{vase.currentWater}/{vase.capacity}";
                     if (vase.state == VaseState.Filling && progress != null && progressFill != null)
                     {
                         progress.AddToClassList("cell-progress--visible");
@@ -1044,7 +1044,7 @@ namespace Garden
                     && CurrencyManager.Instance.CanAffordMana(plotCost.manaCost)
                     && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, plotCost.harvestCosts);
                 string costText = plotCost != null ? FormatBuildingCost(plotCost) : "???";
-                string label = canPlaceEntity ? $"New Plot  —  {costText}" : $"New Plot  —  Cap reached ({capText})";
+                string label = canPlaceEntity ? $"New Plot - {costText}" : $"New Plot - Cap reached ({capText})";
 
                 var btn = new Button(() =>
                 {
@@ -1067,7 +1067,7 @@ namespace Garden
                     && CurrencyManager.Instance.CanAffordMana(vaseCost.manaCost)
                     && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, vaseCost.harvestCosts);
                 string costText = vaseCost != null ? FormatBuildingCost(vaseCost) : "???";
-                string label = canPlaceEntity ? $"New Vase  —  {costText}" : $"New Vase  —  Cap reached ({capText})";
+                string label = canPlaceEntity ? $"New Vase - {costText}" : $"New Vase - Cap reached ({capText})";
 
                 var btn = new Button(() =>
                 {
@@ -1095,7 +1095,7 @@ namespace Garden
                     bool canAfford = canPlaceEntity
                         && CurrencyManager.Instance.CanAffordMana(nextCost.manaCost)
                         && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, nextCost.harvestCosts);
-                    string label = canPlaceEntity ? $"House  —  {costText}" : $"House  —  Cap reached ({capText})";
+                    string label = canPlaceEntity ? $"House - {costText}" : $"House - Cap reached ({capText})";
 
                     var btn = new Button(() =>
                     {
@@ -1151,7 +1151,7 @@ namespace Garden
                     break;
 
                 case PlotState.Mature:
-                    interactionTitle.text = $"{PlotManager.GetSeedDisplayName(plot.seedName)} — Ready!";
+                    interactionTitle.text = $"{PlotManager.GetSeedDisplayName(plot.seedName)} - Ready!";
                     AddGrowthRecipeSection(plot.seedName);
                     var harvestBtn = new Button(() =>
                     {
@@ -1449,7 +1449,7 @@ namespace Garden
             {
                 case VaseState.Empty:
                     interactionTitle.text = "Water Vase";
-                    var emptyLabel = new Label($"Empty — capacity {vase.capacity}");
+                    var emptyLabel = new Label($"Empty - capacity {vase.capacity}");
                     emptyLabel.AddToClassList("interaction-info");
                     interactionBody.Add(emptyLabel);
 
@@ -1520,7 +1520,7 @@ namespace Garden
             var garden = SaveManager.Instance.Data.gardens[index];
             interactionTitle.text = garden.plantName ?? "Garden";
 
-            var stateLabel = new Label(garden.mature ? "Mature — yielding fruit" : "Growing...");
+            var stateLabel = new Label(garden.mature ? "Mature - yielding fruit" : "Growing...");
             stateLabel.AddToClassList("interaction-info");
             interactionBody.Add(stateLabel);
 
