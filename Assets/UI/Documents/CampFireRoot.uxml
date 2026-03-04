@@ -108,7 +108,7 @@
                 </ui:VisualElement>
 
                 <!-- Scrollable body -->
-                <ui:ScrollView name="overlay-body">
+                <ui:ScrollView name="overlay-body" vertical-scroller-visibility="Hidden" horizontal-scroller-visibility="Hidden">
 
                     <!-- Apotheke panel -->
                     <ui:VisualElement name="apotheke-panel">
