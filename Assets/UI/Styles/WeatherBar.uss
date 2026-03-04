@@ -29,7 +29,7 @@
 
 #weather-condition-label {
     font-size: var(--font-sm);
-    color: rgb(50, 35, 15);
+    color: var(--color-text-bright);
     -unity-font-style: bold;
     margin-right: var(--spacing-xxs);
 }
@@ -42,13 +42,13 @@
 
 #weather-humidity {
     font-size: var(--font-sm);
-    color: rgb(50, 35, 15);
+    color: var(--color-text-bright);
     -unity-font-style: bold;
 }
 
 #weather-temp {
     font-size: var(--font-sm);
-    color: rgb(50, 35, 15);
+    color: var(--color-text-bright);
     -unity-font-style: bold;
 }
 

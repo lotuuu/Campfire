@@ -217,7 +217,6 @@ namespace Garden
                 statsRow2.AddToClassList("forecast-stats-row");
                 AddStatCell(statsRow2, $"{day.cloudCover:F0}%", "Cloud");
                 AddStatCell(statsRow2, FormatMoonPhase(day.moonPhase), "Moon Phase");
-                AddStatCell(statsRow2, ConditionHint(day.condition), "For Plants");
                 card.Add(statsRow2);
 
                 forecastDays.Add(card);
@@ -343,18 +342,6 @@ namespace Garden
                 MoonPhase.LastQuarter => "Last Quarter",
                 MoonPhase.WaningCrescent => "Wan. Crescent",
                 _ => phase.ToString()
-            };
-        }
-
-        private static string ConditionHint(WeatherCondition cond)
-        {
-            return cond switch
-            {
-                WeatherCondition.Rain => "Rain bonus",
-                WeatherCondition.Storm => "Storm bonus",
-                WeatherCondition.Clear => "Sun bonus",
-                WeatherCondition.Snow => "Cold snap",
-                _ => "Neutral"
             };
         }
 
