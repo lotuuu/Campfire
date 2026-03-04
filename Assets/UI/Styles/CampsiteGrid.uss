@@ -283,105 +283,211 @@
 }
 
 /* ── Skin Selector ── */
+
+.skin-title {
+    font-size: var(--font-xxl);
+    color: rgb(245, 215, 130);
+    margin-bottom: var(--spacing-sm);
+}
+
+/* ── Skin Carousel ── */
+
 .skin-carousel-row {
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    margin-bottom: var(--spacing-xxs);
+    padding: var(--spacing-md) 0;
+    margin-bottom: var(--spacing-sm);
 }
 
-.skin-carousel-arrow {
-    width: 44px;
-    height: 44px;
-    font-size: 24px;
-    -unity-text-align: middle-center;
-    background-color: rgba(60, 40, 20, 0.5);
-    border-radius: 22px;
-    border-width: 1px;
-    border-color: rgba(140, 100, 50, 0.3);
-    color: var(--color-text);
-    margin-left: var(--spacing-sm);
-    margin-right: var(--spacing-sm);
+/* Ghost neighbor swatches — tappable navigation targets */
+.skin-carousel-ghost {
+    width: 140px;
+    min-width: 140px;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.3;
 }
 
-.skin-carousel-arrow:hover {
-    background-color: rgba(80, 55, 30, 0.7);
-    border-color: rgba(200, 150, 60, 0.5);
+.skin-carousel-ghost--left {
+    margin-right: var(--spacing-lg);
 }
 
+.skin-carousel-ghost--right {
+    margin-left: var(--spacing-lg);
+}
+
+/* Center swatch container */
 .skin-carousel-center {
     align-items: center;
     justify-content: center;
 }
 
-.skin-carousel-counter {
-    font-size: var(--font-sm);
-    color: var(--color-text-dim);
-    -unity-text-align: upper-center;
-    margin-bottom: var(--spacing-sm);
-}
-
+/* Base swatch tile */
 .skin-swatch {
-    width: 80px;
-    min-width: 80px;
-    height: 100px;
-    margin-right: var(--spacing-xs);
-    padding: var(--spacing-xxs);
-    border-radius: var(--radius-sm);
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-md);
     border-width: 2px;
-    border-color: rgba(140, 100, 50, 0.2);
+    border-color: rgba(140, 100, 50, 0.15);
     align-items: center;
     justify-content: center;
-    background-color: rgba(40, 25, 12, 0.3);
+    background-color: rgba(40, 25, 12, 0.35);
 }
 
-.skin-swatch--selected {
-    border-color: rgba(255, 200, 80, 0.8);
-    background-color: rgba(60, 40, 20, 0.5);
+/* Center (active) swatch — big hero for mobile */
+.skin-swatch--center {
+    width: 260px;
+    min-width: 260px;
+    height: 260px;
+    border-width: 4px;
+    border-color: rgba(220, 165, 55, 0.6);
+    border-radius: var(--radius-lg);
+    background-color: rgba(55, 35, 15, 0.65);
 }
 
-.skin-swatch--equipped {
-    border-color: rgba(120, 180, 60, 0.6);
-}
-
-.skin-swatch-preview {
-    width: 48px;
-    height: 48px;
-    border-radius: 8px;
+/* Ghost (neighbor peek) swatch */
+.skin-swatch--ghost {
+    width: 120px;
+    min-width: 120px;
+    height: 120px;
     border-width: 2px;
-    margin-bottom: var(--spacing-xxs);
+    border-color: rgba(140, 100, 50, 0.12);
+    border-radius: var(--radius-md);
+    background-color: rgba(40, 25, 12, 0.2);
 }
 
-.skin-swatch-label {
-    font-size: 16px;
-    color: var(--color-text-dim);
+/* Equipped skin ring glow */
+.skin-swatch--equipped {
+    border-color: rgba(120, 190, 60, 0.55);
+}
+
+/* Color preview inside swatch */
+.skin-swatch-preview {
+    width: 64px;
+    height: 64px;
+    border-radius: 12px;
+    border-width: 2px;
+}
+
+.skin-swatch--center .skin-swatch-preview {
+    width: 200px;
+    height: 200px;
+    border-radius: 24px;
+    border-width: 5px;
+}
+
+.skin-swatch--ghost .skin-swatch-preview {
+    width: 80px;
+    height: 80px;
+    border-radius: 14px;
+    border-width: 2px;
+}
+
+/* Lock overlay on locked swatches */
+.skin-swatch-lock {
+    position: absolute;
+    width: 64px;
+    height: 64px;
+    -unity-background-scale-mode: scale-to-fit;
+    -unity-background-image-tint-color: rgba(200, 180, 140, 0.7);
+}
+
+.skin-swatch--center .skin-swatch-lock {
+    width: 80px;
+    height: 80px;
+}
+
+.skin-swatch--ghost .skin-swatch-lock {
+    width: 40px;
+    height: 40px;
+    -unity-background-image-tint-color: rgba(200, 180, 140, 0.5);
+}
+
+/* Skin name above carousel */
+.skin-carousel-name {
+    font-size: var(--font-lg);
+    color: rgb(210, 180, 120);
     -unity-text-align: upper-center;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 76px;
-}
-
-.skin-detail {
-    padding: var(--spacing-sm);
-    margin-bottom: var(--spacing-sm);
-}
-
-.skin-detail-name {
-    font-size: var(--font-md);
-    color: var(--color-text);
-    -unity-font-style: bold;
-    margin-bottom: var(--spacing-xxs);
-}
-
-.skin-detail-cost {
-    font-size: var(--font-sm);
-    color: var(--color-text-dim);
     margin-bottom: var(--spacing-xs);
 }
 
+/* Pip dots row */
+.skin-carousel-pips {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.skin-carousel-pip {
+    width: 16px;
+    height: 16px;
+    border-radius: 8px;
+    background-color: rgba(140, 100, 50, 0.2);
+    margin: 0 6px;
+}
+
+.skin-carousel-pip--active {
+    width: 24px;
+    height: 24px;
+    border-radius: 12px;
+    background-color: rgba(230, 175, 60, 0.85);
+    margin: 0 5px;
+}
+
+.skin-carousel-pip--equipped {
+    background-color: rgba(120, 190, 60, 0.45);
+}
+
+/* Thin separator line */
+.skin-carousel-separator {
+    height: 1px;
+    align-self: stretch;
+    margin: 0 var(--spacing-lg);
+    margin-bottom: var(--spacing-md);
+    background-color: rgba(180, 130, 50, 0.18);
+}
+
+/* ── Skin Detail ── */
+
+.skin-detail {
+    padding: 0 var(--spacing-md);
+    margin-bottom: var(--spacing-xs);
+    align-items: center;
+}
+
 .skin-detail-equipped {
-    font-size: var(--font-sm);
-    color: rgba(120, 180, 60, 0.9);
+    font-size: var(--font-md);
+    color: rgba(120, 190, 60, 0.9);
     -unity-font-style: italic;
+    -unity-text-align: upper-center;
+    margin-bottom: var(--spacing-sm);
+}
+
+/* Cost row with pigment icon + count */
+.skin-cost-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--spacing-sm);
+}
+
+.skin-cost-icon {
+    width: 64px;
+    height: 64px;
+    -unity-background-scale-mode: scale-to-fit;
+    margin-right: var(--spacing-sm);
+}
+
+.skin-cost-text {
+    font-size: var(--font-lg);
+    -unity-font-style: bold;
+}
+
+.skin-cost-text--have {
+    color: rgb(120, 200, 80);
+}
+
+.skin-cost-text--need {
+    color: rgb(220, 100, 70);
 }

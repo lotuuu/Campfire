@@ -918,6 +918,7 @@ namespace Garden
 
             interactionBody.Clear();
             interactionActions.Clear();
+            interactionTitle.RemoveFromClassList("skin-title");
             ClearBellIcon();
 
             switch (type)
@@ -1546,6 +1547,34 @@ namespace Garden
             AddCloseButton();
         }
 
+        private VisualElement BuildSwatchPreview(SkinData skin, string extraClass = null, bool locked = false)
+        {
+            var swatch = new VisualElement();
+            swatch.AddToClassList("skin-swatch");
+            if (extraClass != null) swatch.AddToClassList(extraClass);
+
+            var preview = new VisualElement();
+            preview.AddToClassList("skin-swatch-preview");
+            preview.style.backgroundColor = skin.hexFillColor;
+            preview.style.borderTopColor = skin.hexBorderColor;
+            preview.style.borderBottomColor = skin.hexBorderColor;
+            preview.style.borderLeftColor = skin.hexBorderColor;
+            preview.style.borderRightColor = skin.hexBorderColor;
+            swatch.Add(preview);
+
+            if (locked)
+            {
+                var lockIcon = new VisualElement();
+                lockIcon.AddToClassList("skin-swatch-lock");
+                var lockTex = Resources.Load<Texture2D>("UI/Icons/lorc-padlock");
+                if (lockTex != null)
+                    lockIcon.style.backgroundImage = lockTex;
+                swatch.Add(lockIcon);
+            }
+
+            return swatch;
+        }
+
         private void ShowSkinSelector(CampBuildingType type, int index)
         {
             if (SkinManager.Instance == null) return;
@@ -1560,6 +1589,7 @@ namespace Garden
                 _ => "Building"
             };
             interactionTitle.text = $"Paint {typeName}";
+            interactionTitle.AddToClassList("skin-title");
 
             var skins = SkinManager.Instance.GetSkinsForBuilding(type);
             if (skins.Count == 0)
@@ -1592,64 +1622,93 @@ namespace Garden
             var detailArea = new VisualElement();
             detailArea.AddToClassList("skin-detail");
 
-            // Carousel container: [<] [swatch] [>]
+            // Skin name label ABOVE the carousel
+            var skinNameLabel = new Label();
+            skinNameLabel.AddToClassList("skin-carousel-name");
+
+            // Carousel: [ghost-left] [center-swatch] [ghost-right]
+            // Ghosts are tappable to navigate
             var carouselRow = new VisualElement();
             carouselRow.AddToClassList("skin-carousel-row");
 
-            var leftBtn = new Button { text = "<" };
-            leftBtn.AddToClassList("skin-carousel-arrow");
+            var ghostLeft = new VisualElement();
+            ghostLeft.AddToClassList("skin-carousel-ghost");
+            ghostLeft.AddToClassList("skin-carousel-ghost--left");
 
             var centerSwatch = new VisualElement();
             centerSwatch.AddToClassList("skin-carousel-center");
 
-            var rightBtn = new Button { text = ">" };
-            rightBtn.AddToClassList("skin-carousel-arrow");
+            var ghostRight = new VisualElement();
+            ghostRight.AddToClassList("skin-carousel-ghost");
+            ghostRight.AddToClassList("skin-carousel-ghost--right");
 
-            carouselRow.Add(leftBtn);
+            carouselRow.Add(ghostLeft);
             carouselRow.Add(centerSwatch);
-            carouselRow.Add(rightBtn);
+            carouselRow.Add(ghostRight);
 
-            // Counter label (e.g. "3 / 12")
-            var counterLabel = new Label();
-            counterLabel.AddToClassList("skin-carousel-counter");
+            // Pip dots for position
+            var pipRow = new VisualElement();
+            pipRow.AddToClassList("skin-carousel-pips");
+            var pips = new List<VisualElement>();
+            for (int i = 0; i < skins.Count; i++)
+            {
+                var pip = new VisualElement();
+                pip.AddToClassList("skin-carousel-pip");
+                pipRow.Add(pip);
+                pips.Add(pip);
+            }
+
+            // Separator
+            var separator = new VisualElement();
+            separator.AddToClassList("skin-carousel-separator");
 
             void ShowCarouselItem(int idx)
             {
                 currentIndex = ((idx % skins.Count) + skins.Count) % skins.Count;
                 var skin = skins[currentIndex];
+                bool centerLocked = !SkinManager.Instance.IsSkinUnlocked(type, index, skin.skinName);
 
+                // Center swatch
                 centerSwatch.Clear();
-
-                var swatch = new VisualElement();
-                swatch.AddToClassList("skin-swatch");
-                swatch.AddToClassList("skin-swatch--selected");
-
-                var preview = new VisualElement();
-                preview.AddToClassList("skin-swatch-preview");
-                preview.style.backgroundColor = skin.hexFillColor;
-                preview.style.borderTopColor = skin.hexBorderColor;
-                preview.style.borderBottomColor = skin.hexBorderColor;
-                preview.style.borderLeftColor = skin.hexBorderColor;
-                preview.style.borderRightColor = skin.hexBorderColor;
-                swatch.Add(preview);
-
-                var swatchLabel = new Label(skin.skinName.Replace("_", " "));
-                swatchLabel.AddToClassList("skin-swatch-label");
-                swatch.Add(swatchLabel);
-
+                var center = BuildSwatchPreview(skin, "skin-swatch--center", locked: centerLocked);
                 if (skin.skinName == currentSkin)
-                    swatch.AddToClassList("skin-swatch--equipped");
+                    center.AddToClassList("skin-swatch--equipped");
+                centerSwatch.Add(center);
 
-                centerSwatch.Add(swatch);
-                counterLabel.text = $"{currentIndex + 1} / {skins.Count}";
+                // Ghost left neighbor (tappable)
+                ghostLeft.Clear();
+                int leftIdx = ((currentIndex - 1) % skins.Count + skins.Count) % skins.Count;
+                bool leftLocked = !SkinManager.Instance.IsSkinUnlocked(type, index, skins[leftIdx].skinName);
+                ghostLeft.Add(BuildSwatchPreview(skins[leftIdx], "skin-swatch--ghost", locked: leftLocked));
+
+                // Ghost right neighbor (tappable)
+                ghostRight.Clear();
+                int rightIdx = (currentIndex + 1) % skins.Count;
+                bool rightLocked = !SkinManager.Instance.IsSkinUnlocked(type, index, skins[rightIdx].skinName);
+                ghostRight.Add(BuildSwatchPreview(skins[rightIdx], "skin-swatch--ghost", locked: rightLocked));
+
+                // Name
+                skinNameLabel.text = skin.skinName.Replace("_", " ");
+
+                // Pips
+                for (int i = 0; i < pips.Count; i++)
+                {
+                    pips[i].EnableInClassList("skin-carousel-pip--active", i == currentIndex);
+                    pips[i].EnableInClassList("skin-carousel-pip--equipped", i != currentIndex
+                        && skins[i].skinName == currentSkin);
+                }
+
                 UpdateSkinDetail(detailArea, skin, type, index, currentSkin);
             }
 
-            leftBtn.clicked += () => ShowCarouselItem(currentIndex - 1);
-            rightBtn.clicked += () => ShowCarouselItem(currentIndex + 1);
+            // Tap ghosts to navigate
+            ghostLeft.RegisterCallback<ClickEvent>(evt => { evt.StopPropagation(); ShowCarouselItem(currentIndex - 1); });
+            ghostRight.RegisterCallback<ClickEvent>(evt => { evt.StopPropagation(); ShowCarouselItem(currentIndex + 1); });
 
+            interactionBody.Add(skinNameLabel);
             interactionBody.Add(carouselRow);
-            interactionBody.Add(counterLabel);
+            interactionBody.Add(pipRow);
+            interactionBody.Add(separator);
             interactionBody.Add(detailArea);
 
             ShowCarouselItem(currentIndex);
@@ -1674,40 +1733,17 @@ namespace Garden
         {
             detailArea.Clear();
 
-            var nameLabel = new Label(skin.skinName.Replace("_", " "));
-            nameLabel.AddToClassList("skin-detail-name");
-            detailArea.Add(nameLabel);
-
-            string costName = skin.costItemName.Replace("_", " ");
             bool isUnlocked = SkinManager.Instance.IsSkinUnlocked(type, index, skin.skinName);
-
-            if (isUnlocked)
-            {
-                var costLabel = new Label("Unlocked");
-                costLabel.AddToClassList("skin-detail-equipped");
-                detailArea.Add(costLabel);
-            }
-            else
-            {
-                var items = SaveManager.Instance.Data.items;
-                var pigmentItem = items.Find(i => i.itemName == skin.costItemName);
-                int have = pigmentItem?.count ?? 0;
-                var costLabel = new Label($"Cost: {skin.costQuantity}x {costName} (have: {have})");
-                costLabel.AddToClassList("skin-detail-cost");
-                detailArea.Add(costLabel);
-            }
-
             bool isEquipped = skin.skinName == currentSkin;
+
             if (isEquipped)
             {
                 var equippedLabel = new Label("Currently applied");
                 equippedLabel.AddToClassList("skin-detail-equipped");
                 detailArea.Add(equippedLabel);
             }
-            else
+            else if (isUnlocked)
             {
-                bool unlocked = SkinManager.Instance.IsSkinUnlocked(type, index, skin.skinName);
-                bool canApply = unlocked || SkinManager.Instance.CanAffordSkin(skin);
                 var paintBtn = new Button(() =>
                 {
                     if (SkinManager.Instance.ApplySkin(type, index, skin))
@@ -1715,9 +1751,45 @@ namespace Garden
                         CloseInteractionPanel();
                         RebuildGrid();
                     }
-                }) { text = unlocked ? "Paint" : $"Paint ({skin.costQuantity}x {costName})" };
+                }) { text = "Paint" };
                 paintBtn.AddToClassList("interaction-btn-primary");
-                paintBtn.SetEnabled(canApply);
+                detailArea.Add(paintBtn);
+            }
+            else
+            {
+                // Cost row with pigment icon + count
+                var items = SaveManager.Instance.Data.items;
+                var pigmentItem = items.Find(i => i.itemName == skin.costItemName);
+                int have = pigmentItem?.count ?? 0;
+                bool canAfford = SkinManager.Instance.CanAffordSkin(skin);
+
+                var costRow = new VisualElement();
+                costRow.AddToClassList("skin-cost-row");
+
+                var pigmentIcon = new VisualElement();
+                pigmentIcon.AddToClassList("skin-cost-icon");
+                var iconTex = Resources.Load<Texture2D>($"UI/Icons/Items/{skin.costItemName}");
+                if (iconTex != null)
+                    pigmentIcon.style.backgroundImage = iconTex;
+                costRow.Add(pigmentIcon);
+
+                var costText = new Label($"{have} / {skin.costQuantity}");
+                costText.AddToClassList("skin-cost-text");
+                costText.AddToClassList(canAfford ? "skin-cost-text--have" : "skin-cost-text--need");
+                costRow.Add(costText);
+
+                detailArea.Add(costRow);
+
+                var paintBtn = new Button(() =>
+                {
+                    if (SkinManager.Instance.ApplySkin(type, index, skin))
+                    {
+                        CloseInteractionPanel();
+                        RebuildGrid();
+                    }
+                }) { text = "Paint" };
+                paintBtn.AddToClassList("interaction-btn-primary");
+                paintBtn.SetEnabled(canAfford);
                 detailArea.Add(paintBtn);
             }
         }
