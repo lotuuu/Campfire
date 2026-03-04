@@ -1532,7 +1532,7 @@ namespace Garden
             var config = MallumManager.Instance.HouseConfig;
             interactionTitle.text = "Mallum House";
 
-            var infoLabel = new Label($"Houses {config.MallumsPerHouse} Mallums");
+            var infoLabel = new Label($"Houses {config.MallumsPerHouse} {(config.MallumsPerHouse == 1 ? "Mallum" : "Mallums")}");
             infoLabel.AddToClassList("interaction-info");
             interactionBody.Add(infoLabel);
 
