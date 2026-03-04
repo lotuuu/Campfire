@@ -1579,21 +1579,50 @@ namespace Garden
                 _ => null
             };
 
-            var carousel = new ScrollView(ScrollViewMode.Horizontal);
-            carousel.AddToClassList("skin-carousel");
-            var carouselContent = carousel.contentContainer;
-            carouselContent.style.flexDirection = FlexDirection.Row;
+            // Find starting index: current equipped skin, or first skin
+            int currentIndex = 0;
+            if (!string.IsNullOrEmpty(currentSkin))
+            {
+                for (int i = 0; i < skins.Count; i++)
+                {
+                    if (skins[i].skinName == currentSkin) { currentIndex = i; break; }
+                }
+            }
 
             var detailArea = new VisualElement();
             detailArea.AddToClassList("skin-detail");
 
-            SkinData selectedSkin = null;
-            VisualElement selectedSwatch = null;
+            // Carousel container: [<] [swatch] [>]
+            var carouselRow = new VisualElement();
+            carouselRow.AddToClassList("skin-carousel-row");
 
-            foreach (var skin in skins)
+            var leftBtn = new Button { text = "<" };
+            leftBtn.AddToClassList("skin-carousel-arrow");
+
+            var centerSwatch = new VisualElement();
+            centerSwatch.AddToClassList("skin-carousel-center");
+
+            var rightBtn = new Button { text = ">" };
+            rightBtn.AddToClassList("skin-carousel-arrow");
+
+            carouselRow.Add(leftBtn);
+            carouselRow.Add(centerSwatch);
+            carouselRow.Add(rightBtn);
+
+            // Counter label (e.g. "3 / 12")
+            var counterLabel = new Label();
+            counterLabel.AddToClassList("skin-carousel-counter");
+
+            void ShowCarouselItem(int idx)
             {
+                currentIndex = ((idx % skins.Count) + skins.Count) % skins.Count;
+                var skin = skins[currentIndex];
+
+                centerSwatch.Clear();
+
                 var swatch = new VisualElement();
                 swatch.AddToClassList("skin-swatch");
+                swatch.AddToClassList("skin-swatch--selected");
 
                 var preview = new VisualElement();
                 preview.AddToClassList("skin-swatch-preview");
@@ -1608,35 +1637,22 @@ namespace Garden
                 swatchLabel.AddToClassList("skin-swatch-label");
                 swatch.Add(swatchLabel);
 
-                bool isEquipped = skin.skinName == currentSkin;
-                if (isEquipped)
+                if (skin.skinName == currentSkin)
                     swatch.AddToClassList("skin-swatch--equipped");
 
-                var capturedSkin = skin;
-                var capturedSwatch = swatch;
-                swatch.RegisterCallback<ClickEvent>(evt =>
-                {
-                    evt.StopPropagation();
-                    selectedSwatch?.RemoveFromClassList("skin-swatch--selected");
-                    capturedSwatch.AddToClassList("skin-swatch--selected");
-                    selectedSwatch = capturedSwatch;
-                    selectedSkin = capturedSkin;
-                    UpdateSkinDetail(detailArea, capturedSkin, type, index, currentSkin);
-                });
-
-                carouselContent.Add(swatch);
+                centerSwatch.Add(swatch);
+                counterLabel.text = $"{currentIndex + 1} / {skins.Count}";
+                UpdateSkinDetail(detailArea, skin, type, index, currentSkin);
             }
 
-            interactionBody.Add(carousel);
+            leftBtn.clicked += () => ShowCarouselItem(currentIndex - 1);
+            rightBtn.clicked += () => ShowCarouselItem(currentIndex + 1);
+
+            interactionBody.Add(carouselRow);
+            interactionBody.Add(counterLabel);
             interactionBody.Add(detailArea);
 
-            if (skins.Count > 0)
-            {
-                selectedSkin = skins[0];
-                selectedSwatch = carouselContent[0];
-                selectedSwatch.AddToClassList("skin-swatch--selected");
-                UpdateSkinDetail(detailArea, skins[0], type, index, currentSkin);
-            }
+            ShowCarouselItem(currentIndex);
 
             if (!string.IsNullOrEmpty(currentSkin))
             {
