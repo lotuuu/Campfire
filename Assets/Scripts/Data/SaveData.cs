@@ -15,7 +15,9 @@ namespace Garden
         public List<GardenSave> gardens = new();
         public List<SeedInventoryEntry> seedInventory = new();
         public List<InventoryItem> items = new();
-        public string lastVisitorDateUtc;
+        public VisitorSave currentVisitor;
+        public List<ActiveVisitorQuest> activeQuests = new();
+        public string lastVisitorFetchDateUtc;
         public List<MallumSave> mallums = new();
         public List<MallumHouseSave> mallumHouses = new();
         public string rainStartTimeUtc;
@@ -24,9 +26,6 @@ namespace Garden
         public int apothekeGridY = 0;
         public List<BirdSave> birds = new();
         public string lastBirdCheckHourUtc;
-        public List<MerchantSave> merchants = new();
-        public string lastMerchantDateUtc;
-        public List<int> seenMerchantDialogues = new();
     }
 
     [Serializable]

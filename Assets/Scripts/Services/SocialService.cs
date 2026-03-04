@@ -12,7 +12,7 @@ namespace Garden
         public static SocialService Instance { get; private set; }
 
         // Set via build script or DevServerConfig resource at runtime
-        private static readonly string ServerBaseUrl =
+        public static readonly string ServerBaseUrl =
 #if UNITY_EDITOR
             "http://localhost:3000";
 #else
@@ -29,7 +29,7 @@ namespace Garden
         public string Uid => SocialSaveManager.Instance?.Data?.uid;
         public string FriendCode => SocialSaveManager.Instance?.Data?.friendCode;
 
-        private string AuthToken => SocialSaveManager.Instance?.Data?.authToken;
+        public string AuthToken => SocialSaveManager.Instance?.Data?.authToken;
 
         private void Awake()
         {
