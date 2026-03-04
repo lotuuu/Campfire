@@ -1233,7 +1233,7 @@ namespace Garden
                     var stats = new VisualElement();
                     stats.AddToClassList("seed-card--stats");
 
-                    AddSeedStat(stats, "Growth", $"{seedData.growthDurationHours}h");
+                    AddSeedStat(stats, "Growth", TimeUtils.FormatDurationHours(seedData.growthDurationHours));
                     AddSeedStat(stats, "Drops", $"{seedData.baseDrops}");
 
                     card.Add(stats);

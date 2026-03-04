@@ -140,7 +140,7 @@ namespace Garden
                 var durLabel = new Label("Growth time");
                 durLabel.AddToClassList("seed-recipe-label");
                 durationRow.Add(durLabel);
-                var durValue = new Label($"{seedData.growthDurationHours}h");
+                var durValue = new Label(TimeUtils.FormatDurationHours(seedData.growthDurationHours));
                 durValue.AddToClassList("seed-recipe-value");
                 durationRow.Add(durValue);
                 details.Add(durationRow);
