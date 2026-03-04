@@ -98,3 +98,30 @@
     color: var(--color-text-dim);
     -unity-text-align: upper-center;
 }
+
+/* ── Today card highlight ── */
+.forecast-today {
+    border-color: rgba(200, 150, 50, 0.4);
+    border-width: 2px;
+}
+
+/* ── Outlier color classes for extreme values ── */
+.stat-hot {
+    color: rgb(255, 110, 60);
+}
+
+.stat-cold {
+    color: rgb(100, 175, 235);
+}
+
+.stat-dry {
+    color: rgb(230, 145, 55);
+}
+
+.stat-humid {
+    color: rgb(100, 175, 235);
+}
+
+.stat-windy {
+    color: rgb(200, 210, 220);
+}

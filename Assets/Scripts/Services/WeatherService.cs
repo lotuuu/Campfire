@@ -137,16 +137,28 @@ namespace Garden
             var json = JsonUtility.FromJson<OpenWeatherResponse>(request.downloadHandler.text);
             var now = GameTime.Now;
 
+            float sunriseHour = 6f;
+            float sunsetHour = 18f;
+            if (json.sys != null)
+            {
+                var sunriseLocal = DateTimeOffset.FromUnixTimeSeconds(json.sys.sunrise).LocalDateTime;
+                var sunsetLocal = DateTimeOffset.FromUnixTimeSeconds(json.sys.sunset).LocalDateTime;
+                sunriseHour = sunriseLocal.Hour + sunriseLocal.Minute / 60f;
+                sunsetHour = sunsetLocal.Hour + sunsetLocal.Minute / 60f;
+            }
+
             var weather = new WeatherData
             {
                 temperature = json.main.temp,
                 humidity = json.main.humidity,
                 windSpeed = json.wind.speed,
                 cloudCover = json.clouds.all,
+                sunriseHour = sunriseHour,
+                sunsetHour = sunsetHour,
                 condition = MapCondition(json.weather[0].id),
-                timeOfDay = TimeUtils.GetTimeOfDay(now),
-                isNight = TimeUtils.IsNight(now),
-                isGoldenHour = TimeUtils.IsGoldenHour(now),
+                timeOfDay = TimeUtils.GetTimeOfDay(now, sunriseHour, sunsetHour),
+                isNight = TimeUtils.IsNight(now, sunriseHour, sunsetHour),
+                isGoldenHour = TimeUtils.IsGoldenHour(now, sunsetHour),
                 moonPhase = MoonPhaseCalculator.Calculate(now),
                 calendarEvent = CalendarEvents.GetEvent(now)
             };
@@ -189,6 +201,11 @@ namespace Garden
             // SaveWeatherData is intentionally not called here: lat/lon are 0
             // in editor/debug mode and arming the native background fetch with
             // invalid coordinates would break weather polling on-device.
+            if (debugWeather.sunriseHour == 0f && debugWeather.sunsetHour == 0f)
+            {
+                debugWeather.sunriseHour = 6.5f;
+                debugWeather.sunsetHour = 18.5f;
+            }
             CurrentWeather = debugWeather;
             OnWeatherUpdated?.Invoke(debugWeather);
             GenerateDebugForecast();
@@ -336,10 +353,12 @@ namespace Garden
             public WindData wind;
             public CloudData clouds;
             public WeatherInfo[] weather;
+            public SysData sys;
         }
         [Serializable] private class MainData { public float temp; public float humidity; }
         [Serializable] private class WindData { public float speed; }
         [Serializable] private class CloudData { public float all; }
+        [Serializable] private class SysData { public long sunrise; public long sunset; }
         [Serializable] private class WeatherInfo { public int id; public string main; }
     }
 }

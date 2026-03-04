@@ -160,6 +160,10 @@ namespace Garden
             if (forecastDays == null) return;
             forecastDays.Clear();
 
+            // Today card with sunrise/sunset
+            var weather = WeatherService.Instance?.CurrentWeather ?? default;
+            AddTodayCard(weather);
+
             var forecast = WeatherService.Instance?.Forecast;
             if (forecast == null) return;
 
@@ -201,9 +205,12 @@ namespace Garden
                 // Stats: two rows of cells filling the full width
                 var statsRow1 = new VisualElement();
                 statsRow1.AddToClassList("forecast-stats-row");
-                AddStatCell(statsRow1, $"{day.tempHigh:F0}\u00b0/{day.tempLow:F0}\u00b0", "Temp");
-                AddStatCell(statsRow1, $"{day.humidity:F0}%", "Humidity");
-                AddStatCell(statsRow1, $"{day.windSpeed:F1} m/s", "Wind");
+                AddStatCell(statsRow1, $"{day.tempHigh:F0}\u00b0/{day.tempLow:F0}\u00b0", "Temp",
+                    TempClass(day.tempHigh));
+                AddStatCell(statsRow1, $"{day.humidity:F0}%", "Humidity",
+                    HumidityClass(day.humidity));
+                AddStatCell(statsRow1, $"{day.windSpeed:F1} m/s", "Wind",
+                    WindClass(day.windSpeed));
                 card.Add(statsRow1);
 
                 var statsRow2 = new VisualElement();
@@ -217,13 +224,103 @@ namespace Garden
             }
         }
 
-        private static void AddStatCell(VisualElement parent, string value, string label)
+        private void AddTodayCard(WeatherData weather)
+        {
+            var card = new VisualElement();
+            card.AddToClassList("forecast-day");
+            card.AddToClassList("forecast-today");
+
+            // Header
+            var header = new VisualElement();
+            header.AddToClassList("forecast-day-header");
+
+            var dayLabel = new Label("TODAY");
+            dayLabel.AddToClassList("forecast-day-name");
+            header.Add(dayLabel);
+
+            var icon = new VisualElement();
+            icon.AddToClassList("forecast-day-icon");
+            if (weatherIcons.TryGetValue(weather.condition, out var tex) && tex != null)
+                icon.style.backgroundImage = tex;
+            header.Add(icon);
+
+            var condLabel = new Label(weather.condition.ToString());
+            condLabel.AddToClassList("forecast-day-condition");
+            header.Add(condLabel);
+
+            int spriteIdx = MoonPhaseToSpriteIndex[(int)weather.moonPhase] - 1;
+            var moonTex = moonTextures[spriteIdx];
+            if (moonTex != null)
+            {
+                var moonIcon = new VisualElement();
+                moonIcon.AddToClassList("forecast-day-moon");
+                moonIcon.style.backgroundImage = moonTex;
+                header.Add(moonIcon);
+            }
+
+            card.Add(header);
+
+            // Row 1: sunrise, sunset, temp
+            var row1 = new VisualElement();
+            row1.AddToClassList("forecast-stats-row");
+            AddStatCell(row1, FormatHour(weather.sunriseHour), "Sunrise");
+            AddStatCell(row1, FormatHour(weather.sunsetHour), "Sunset");
+            AddStatCell(row1, $"{weather.temperature:F0}\u00b0", "Temp",
+                TempClass(weather.temperature));
+            card.Add(row1);
+
+            // Row 2: humidity, wind, cloud
+            var row2 = new VisualElement();
+            row2.AddToClassList("forecast-stats-row");
+            AddStatCell(row2, $"{weather.humidity:F0}%", "Humidity",
+                HumidityClass(weather.humidity));
+            AddStatCell(row2, $"{weather.windSpeed:F1} m/s", "Wind",
+                WindClass(weather.windSpeed));
+            AddStatCell(row2, $"{weather.cloudCover:F0}%", "Cloud");
+            card.Add(row2);
+
+            forecastDays.Add(card);
+        }
+
+        private static string FormatHour(float hour)
+        {
+            int h = Mathf.Clamp((int)hour, 0, 23);
+            int m = Mathf.Clamp((int)((hour - h) * 60f), 0, 59);
+            bool pm = h >= 12;
+            int display = h % 12;
+            if (display == 0) display = 12;
+            return $"{display}:{m:D2} {(pm ? "PM" : "AM")}";
+        }
+
+        private static string TempClass(float temp)
+        {
+            if (temp >= 35f) return "stat-hot";
+            if (temp <= 5f) return "stat-cold";
+            return null;
+        }
+
+        private static string HumidityClass(float humidity)
+        {
+            if (humidity <= 20f) return "stat-dry";
+            if (humidity >= 85f) return "stat-humid";
+            return null;
+        }
+
+        private static string WindClass(float windSpeed)
+        {
+            if (windSpeed >= 8f) return "stat-windy";
+            return null;
+        }
+
+        private static void AddStatCell(VisualElement parent, string value, string label,
+            string outlierClass = null)
         {
             var cell = new VisualElement();
             cell.AddToClassList("forecast-stat-cell");
 
             var val = new Label(value);
             val.AddToClassList("forecast-stat-value");
+            if (outlierClass != null) val.AddToClassList(outlierClass);
             cell.Add(val);
 
             var lbl = new Label(label);
