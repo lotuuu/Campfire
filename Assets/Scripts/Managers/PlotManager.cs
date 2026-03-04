@@ -182,6 +182,10 @@ namespace Garden
             plot.snapshots = new GrowthSnapshots();
             plot.lastWateredUtc = null;
 
+            // Record initial weather snapshot so even fast-growing plants get scored
+            if (WeatherService.Instance != null)
+                plot.snapshots.RecordSnapshot(WeatherService.Instance.CurrentWeather);
+
             SaveManager.Instance.Save();
             OnPlotChanged?.Invoke(plotIndex);
 
