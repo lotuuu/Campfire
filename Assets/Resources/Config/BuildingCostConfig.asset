@@ -14,89 +14,89 @@ MonoBehaviour:
   m_EditorClassIdentifier: Garden::Garden.BuildingCostConfig
   plotCosts:
   - manaCost: 150
-    seedCosts:
-    - seedName: Sprouts
+    harvestCosts:
+    - itemName: Sprouts_harvest
       count: 1
   - manaCost: 200
-    seedCosts:
-    - seedName: Basil
+    harvestCosts:
+    - itemName: Basil_harvest
       count: 1
   - manaCost: 260
-    seedCosts:
-    - seedName: Basil
+    harvestCosts:
+    - itemName: Basil_harvest
       count: 2
   - manaCost: 330
-    seedCosts:
-    - seedName: Chamomile
+    harvestCosts:
+    - itemName: Chamomile_harvest
       count: 1
   - manaCost: 420
-    seedCosts:
-    - seedName: Chamomile
+    harvestCosts:
+    - itemName: Chamomile_harvest
       count: 1
   - manaCost: 520
-    seedCosts:
-    - seedName: Chamomile
+    harvestCosts:
+    - itemName: Chamomile_harvest
       count: 1
-    - seedName: Basil
+    - itemName: Basil_harvest
       count: 1
   - manaCost: 640
-    seedCosts:
-    - seedName: Chamomile
+    harvestCosts:
+    - itemName: Chamomile_harvest
       count: 2
   - manaCost: 780
-    seedCosts:
-    - seedName: Lavender
+    harvestCosts:
+    - itemName: Lavender_harvest
       count: 1
-    - seedName: Chamomile
+    - itemName: Chamomile_harvest
       count: 1
   - manaCost: 940
-    seedCosts:
-    - seedName: Mint
+    harvestCosts:
+    - itemName: Mint_harvest
       count: 1
-    - seedName: Lavender
+    - itemName: Lavender_harvest
       count: 1
   - manaCost: 1120
-    seedCosts:
-    - seedName: Mint
+    harvestCosts:
+    - itemName: Mint_harvest
       count: 2
-    - seedName: Chamomile
+    - itemName: Chamomile_harvest
       count: 1
   vaseCosts:
   - manaCost: 100
-    seedCosts:
-    - seedName: Cress
+    harvestCosts:
+    - itemName: Cress_harvest
       count: 1
   - manaCost: 120
-    seedCosts:
-    - seedName: Basil
+    harvestCosts:
+    - itemName: Basil_harvest
       count: 2
   - manaCost: 150
-    seedCosts:
-    - seedName: Chamomile
+    harvestCosts:
+    - itemName: Chamomile_harvest
       count: 1
   - manaCost: 180
-    seedCosts:
-    - seedName: Chamomile
+    harvestCosts:
+    - itemName: Chamomile_harvest
       count: 1
   - manaCost: 220
-    seedCosts:
-    - seedName: Chamomile
+    harvestCosts:
+    - itemName: Chamomile_harvest
       count: 1
-    - seedName: Basil
+    - itemName: Basil_harvest
       count: 1
   - manaCost: 260
-    seedCosts:
-    - seedName: Chamomile
+    harvestCosts:
+    - itemName: Chamomile_harvest
       count: 2
   - manaCost: 310
-    seedCosts:
-    - seedName: Lavender
+    harvestCosts:
+    - itemName: Lavender_harvest
       count: 1
-    - seedName: Basil
+    - itemName: Basil_harvest
       count: 1
   - manaCost: 370
-    seedCosts:
-    - seedName: Lavender
+    harvestCosts:
+    - itemName: Lavender_harvest
       count: 1
-    - seedName: Chamomile
+    - itemName: Chamomile_harvest
       count: 1

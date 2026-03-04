@@ -15,18 +15,18 @@ MonoBehaviour:
   mallumsPerHouse: 1
   houseCosts:
   - manaCost: 15
-    seedCosts: []
+    harvestCosts: []
   - manaCost: 30
-    seedCosts:
-    - seedName: Basil
+    harvestCosts:
+    - itemName: Basil_harvest
       count: 2
   - manaCost: 60
-    seedCosts:
-    - seedName: Lavender
+    harvestCosts:
+    - itemName: Lavender_harvest
       count: 3
   - manaCost: 100
-    seedCosts:
-    - seedName: Chamomile
+    harvestCosts:
+    - itemName: Chamomile_harvest
       count: 2
-    - seedName: Mint
+    - itemName: Mint_harvest
       count: 2
