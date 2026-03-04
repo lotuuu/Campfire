@@ -270,7 +270,10 @@ namespace Garden
             {
                 seedName = seed.name,
                 drops = drops,
-                recipeScore = score
+                recipeScore = score,
+                snapshots = plot.snapshots ?? new GrowthSnapshots(),
+                waterCount = plot.waterCount,
+                recipe = seed.recipe
             };
 
             plot.seedName = null;
@@ -445,5 +448,8 @@ namespace Garden
         public string seedName;
         public int drops;
         public float recipeScore;
+        public GrowthSnapshots snapshots;
+        public int waterCount;
+        public GrowthRecipe recipe;
     }
 }
