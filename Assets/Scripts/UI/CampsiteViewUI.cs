@@ -609,7 +609,7 @@ namespace Garden
 
         // ── Visit Mode ──
 
-        private const float CurtainDurationMs = 400f;
+        private const float CurtainDurationMs = 480f;
 
         private string visitFriendName;
 

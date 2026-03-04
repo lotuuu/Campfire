@@ -131,7 +131,7 @@
     background-image: url("project://database/Assets/Resources/UI/Images/CloudWall.png");
     -unity-background-scale-mode: stretch-to-fill;
     transition-property: translate;
-    transition-duration: 400ms;
+    transition-duration: 480ms;
     transition-timing-function: ease-in-out;
 }
 
@@ -154,17 +154,3 @@
     translate: 37% 0;
 }
 
-#curtain-label {
-    position: absolute;
-    align-self: center;
-    font-size: var(--font-lg);
-    color: var(--color-text);
-    opacity: 0;
-    transition-property: opacity;
-    transition-duration: 200ms;
-    transition-delay: 200ms;
-}
-
-#visit-transition.curtain-closed #curtain-label {
-    opacity: 1;
-}

@@ -289,7 +289,6 @@
         <ui:VisualElement name="visit-transition" picking-mode="Ignore">
             <ui:VisualElement name="curtain-left" picking-mode="Ignore" />
             <ui:VisualElement name="curtain-right" picking-mode="Ignore" />
-            <ui:Label name="curtain-label" picking-mode="Ignore" text="Visiting..." />
         </ui:VisualElement>
 
 
