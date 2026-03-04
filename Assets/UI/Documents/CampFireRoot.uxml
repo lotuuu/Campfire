@@ -255,6 +255,7 @@
 
                         <ui:Label text="Cheats" class="debug-section-header" />
 
+                        <ui:Toggle name="free-mode-toggle" label="Free Mode" />
                         <ui:Button name="max-currency-button" text="Max Currency" />
                         <ui:Button name="clear-save-button" text="Clear Save Data" class="btn-danger" />
 

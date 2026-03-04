@@ -67,6 +67,16 @@ namespace Garden
             root.Q<Button>("time-skip-button")?.RegisterCallback<ClickEvent>(_ => SkipTime());
             root.Q<Button>("set-time-button")?.RegisterCallback<ClickEvent>(_ => SetTimeOverride());
             root.Q<Button>("reset-time-button")?.RegisterCallback<ClickEvent>(_ => ResetTimeOverride());
+            var freeModeToggle = root.Q<Toggle>("free-mode-toggle");
+            if (freeModeToggle != null)
+            {
+                freeModeToggle.value = CurrencyManager.FreeMode;
+                freeModeToggle.RegisterValueChangedCallback(evt =>
+                {
+                    CurrencyManager.FreeMode = evt.newValue;
+                    Debug.Log($"[Debug] Free Mode {(evt.newValue ? "ON" : "OFF")}");
+                });
+            }
             root.Q<Button>("max-currency-button")?.RegisterCallback<ClickEvent>(_ => MaxCurrency());
             root.Q<Button>("clear-save-button")?.RegisterCallback<ClickEvent>(_ => ClearSaveData());
 

@@ -44,6 +44,7 @@ namespace Garden
 
         public bool CanAffordSkin(SkinData skin)
         {
+            if (CurrencyManager.FreeMode) return true;
             var items = SaveManager.Instance.Data.items;
             var item = items.Find(i => i.itemName == skin.costItemName);
             return item != null && item.count >= skin.costQuantity;
@@ -88,9 +89,12 @@ namespace Garden
             if (!alreadyUnlocked)
             {
                 if (!CanAffordSkin(skin)) return false;
-                var item = data.items.Find(i => i.itemName == skin.costItemName);
-                item.count -= skin.costQuantity;
-                if (item.count <= 0) data.items.Remove(item);
+                if (!CurrencyManager.FreeMode)
+                {
+                    var item = data.items.Find(i => i.itemName == skin.costItemName);
+                    item.count -= skin.costQuantity;
+                    if (item.count <= 0) data.items.Remove(item);
+                }
             }
 
             switch (type)

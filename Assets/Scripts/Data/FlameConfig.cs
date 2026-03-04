@@ -61,6 +61,7 @@ namespace Garden
 
         public static bool CanAffordUpgrade(FlameUpgradeRecipe recipe, List<InventoryItem> items)
         {
+            if (CurrencyManager.FreeMode) return true;
             foreach (var ingredient in recipe.ingredients)
             {
                 var item = items.Find(i => i.itemName == ingredient.itemName);
@@ -72,6 +73,7 @@ namespace Garden
 
         public static void ConsumeIngredients(FlameUpgradeRecipe recipe, List<InventoryItem> items)
         {
+            if (CurrencyManager.FreeMode) return;
             foreach (var ingredient in recipe.ingredients)
             {
                 var item = items.Find(i => i.itemName == ingredient.itemName);

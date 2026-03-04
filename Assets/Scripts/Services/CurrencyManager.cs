@@ -6,6 +6,7 @@ namespace Garden
     public class CurrencyManager : MonoBehaviour
     {
         public static CurrencyManager Instance { get; private set; }
+        public static bool FreeMode { get; set; }
 
         public float Mana => SaveManager.Instance.Data.mana;
         public int Gems => SaveManager.Instance.Data.gems;
@@ -40,6 +41,7 @@ namespace Garden
 
         public bool SpendMana(float amount)
         {
+            if (FreeMode) return true;
             if (!CanAffordMana(amount)) return false;
             AddMana(-amount);
             return true;
@@ -47,11 +49,13 @@ namespace Garden
 
         public bool CanAffordMana(float amount)
         {
+            if (FreeMode) return true;
             return SaveManager.Instance.Data.mana >= amount;
         }
 
         public bool SpendWater(int amount)
         {
+            if (FreeMode) return true;
             if (TotalWater < amount) return false;
             var data = SaveManager.Instance.Data;
             float oldTotal = TotalWater;
@@ -71,6 +75,7 @@ namespace Garden
 
         public bool CanAffordWater(int amount)
         {
+            if (FreeMode) return true;
             return TotalWater >= amount;
         }
 
@@ -85,12 +90,13 @@ namespace Garden
 
         public bool SpendGems(int amount)
         {
+            if (FreeMode) return true;
             if (amount <= 0 || SaveManager.Instance.Data.gems < amount) return false;
             AddGems(-amount);
             return true;
         }
 
-        public bool CanAffordGems(int amount) => SaveManager.Instance.Data.gems >= amount;
+        public bool CanAffordGems(int amount) => FreeMode || SaveManager.Instance.Data.gems >= amount;
 
         public void GrantInfiniteGems()
         {

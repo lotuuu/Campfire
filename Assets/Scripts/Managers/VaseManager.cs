@@ -126,6 +126,7 @@ namespace Garden
 
             CurrencyManager.Instance.SpendMana(cost.manaCost);
 
+            if (!CurrencyManager.FreeMode)
             foreach (var hc in cost.harvestCosts)
             {
                 var entry = data.items.Find(i => i.itemName == hc.itemName);

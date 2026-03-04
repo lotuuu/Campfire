@@ -22,6 +22,7 @@ namespace Garden
 
         public bool CanMix(RecipeData recipe)
         {
+            if (CurrencyManager.FreeMode) return true;
             var data = SaveManager.Instance.Data;
             foreach (var ing in recipe.ingredients)
             {
@@ -36,6 +37,7 @@ namespace Garden
             if (!CanMix(recipe)) return false;
             var data = SaveManager.Instance.Data;
 
+            if (!CurrencyManager.FreeMode)
             foreach (var ing in recipe.ingredients)
             {
                 var item = data.items.Find(i => i.itemName == ing.itemName);

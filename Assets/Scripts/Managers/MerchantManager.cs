@@ -194,6 +194,7 @@ namespace Garden
 
         public static bool CanAffordOffer(MerchantOfferSave offer, List<InventoryItem> items)
         {
+            if (CurrencyManager.FreeMode) return true;
             foreach (var cost in offer.costs)
             {
                 var item = items.Find(i => i.itemName == cost.itemName);
@@ -206,6 +207,7 @@ namespace Garden
             List<SeedInventoryEntry> seedInventory)
         {
             // Consume items
+            if (!CurrencyManager.FreeMode)
             foreach (var cost in offer.costs)
             {
                 var item = items.Find(i => i.itemName == cost.itemName);

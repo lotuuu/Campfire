@@ -149,6 +149,7 @@ namespace Garden
 
             CurrencyManager.Instance.SpendMana(cost.manaCost);
 
+            if (!CurrencyManager.FreeMode)
             foreach (var hc in cost.harvestCosts)
             {
                 var entry = data.items.Find(i => i.itemName == hc.itemName);
@@ -170,10 +171,12 @@ namespace Garden
             if (plot.state != PlotState.Empty) return false;
 
             var seedEntry = data.seedInventory.Find(s => s.seedName == seedName);
-            if (seedEntry == null || seedEntry.count <= 0) return false;
-
-            seedEntry.count--;
-            if (seedEntry.count <= 0) data.seedInventory.Remove(seedEntry);
+            if (!CurrencyManager.FreeMode)
+            {
+                if (seedEntry == null || seedEntry.count <= 0) return false;
+                seedEntry.count--;
+                if (seedEntry.count <= 0) data.seedInventory.Remove(seedEntry);
+            }
 
             plot.seedName = seedName;
             plot.state = PlotState.Growing;

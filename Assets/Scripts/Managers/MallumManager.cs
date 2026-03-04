@@ -165,6 +165,7 @@ namespace Garden
             if (!CurrencyManager.Instance.SpendMana(cost.manaCost)) return false;
 
             // Spend harvests
+            if (!CurrencyManager.FreeMode)
             foreach (var hc in cost.harvestCosts)
             {
                 var entry = data.items.Find(i => i.itemName == hc.itemName);
@@ -221,6 +222,7 @@ namespace Garden
 
         public bool CanSpeedUpQuest()
         {
+            if (CurrencyManager.FreeMode) return true;
             var item = SaveManager.Instance.Data.items.Find(i => i.itemName == SpeedPotionItem);
             return item != null && item.count > 0;
         }
@@ -240,9 +242,12 @@ namespace Garden
 
             // Consume Speed Potion
             var potion = data.items.Find(i => i.itemName == SpeedPotionItem);
-            if (potion == null || potion.count <= 0) return false;
-            potion.count--;
-            if (potion.count <= 0) data.items.Remove(potion);
+            if (!CurrencyManager.FreeMode)
+            {
+                if (potion == null || potion.count <= 0) return false;
+                potion.count--;
+                if (potion.count <= 0) data.items.Remove(potion);
+            }
 
             CompleteQuest(mallum);
             NotificationService.Instance?.CancelQuestNotification(mallumIndex);
@@ -292,6 +297,7 @@ namespace Garden
 
         public static bool CanAffordHarvests(List<InventoryItem> items, List<HarvestCost> harvestCosts)
         {
+            if (CurrencyManager.FreeMode) return true;
             foreach (var hc in harvestCosts)
             {
                 var entry = items.Find(i => i.itemName == hc.itemName);
