@@ -1152,8 +1152,9 @@ namespace Garden
                         suppressRebuild = false;
                         if (result != null)
                         {
-                            ShowHarvestResult(result);
                             RebuildGrid();
+                            ShowHarvestResult(result);
+                            ShowInteractionPanel();
                         }
                         else
                             CloseInteractionPanel();
@@ -1179,17 +1180,90 @@ namespace Garden
 
             interactionTitle.text = "Harvested!";
 
-            var yieldLabel = new Label($"{result.seedName} x{result.drops}");
-            yieldLabel.AddToClassList("interaction-info");
-            interactionBody.Add(yieldLabel);
+            // Seed icon + yield row
+            var yieldRow = new VisualElement();
+            yieldRow.AddToClassList("harvest-yield-row");
+            var seed = Resources.Load<SeedData>("Seeds/" + result.seedName);
+            if (seed != null && seed.icon != null)
+            {
+                var iconEl = new VisualElement();
+                iconEl.AddToClassList("harvest-seed-icon");
+                iconEl.style.backgroundImage = new StyleBackground(seed.icon);
+                yieldRow.Add(iconEl);
+            }
+            var yieldLabel = new Label($"{PlotManager.GetSeedDisplayName(result.seedName)} x{result.drops}");
+            yieldLabel.AddToClassList("harvest-yield-label");
+            yieldRow.Add(yieldLabel);
+            interactionBody.Add(yieldRow);
 
-            string qualityText = result.recipeScore >= 0.8f ? "Excellent"
-                : result.recipeScore >= 0.5f ? "Good"
-                : "Poor";
+            // Recipe match tier
+            string matchText = result.recipeScore >= 0.8f ? "Perfect Match"
+                : result.recipeScore >= 0.5f ? "Good Match"
+                : "Weak Match";
+            string matchClass = result.recipeScore >= 0.8f ? "harvest-match--perfect"
+                : result.recipeScore >= 0.5f ? "harvest-match--good"
+                : "harvest-match--weak";
             int pct = Mathf.RoundToInt(result.recipeScore * 100f);
-            var qualityLabel = new Label($"Recipe match: {qualityText} ({pct}%)");
-            qualityLabel.AddToClassList("interaction-info");
-            interactionBody.Add(qualityLabel);
+            var matchLabel = new Label($"{matchText} ({pct}%)");
+            matchLabel.AddToClassList("harvest-match-badge");
+            matchLabel.AddToClassList(matchClass);
+            interactionBody.Add(matchLabel);
+
+            // Per-axis breakdown
+            if (result.recipe != null)
+            {
+                var axisResults = result.recipe.EvaluatePerAxis(result.snapshots, result.waterCount);
+                if (axisResults.Count > 0)
+                {
+                    var header = new Label("Recipe Breakdown");
+                    header.AddToClassList("interaction-section-header");
+                    interactionBody.Add(header);
+
+                    foreach (var axis in axisResults)
+                    {
+                        var row = new VisualElement();
+                        row.AddToClassList("harvest-axis-row");
+
+                        var nameEl = new Label(axis.axisName);
+                        nameEl.AddToClassList("harvest-axis-name");
+                        row.Add(nameEl);
+
+                        string actualStr;
+                        string idealStr;
+                        if (axis.axisName == "Moon")
+                        {
+                            actualStr = $"{Mathf.RoundToInt(axis.actual)}%";
+                            idealStr = axis.unit.Replace("% ", "");
+                        }
+                        else if (axis.axisName == "Waterings")
+                        {
+                            actualStr = $"{Mathf.RoundToInt(axis.actual)}{axis.unit}";
+                            idealStr = axis.idealMin == axis.idealMax
+                                ? $"{Mathf.RoundToInt(axis.idealMin)}{axis.unit}"
+                                : $"{Mathf.RoundToInt(axis.idealMin)}-{Mathf.RoundToInt(axis.idealMax)}{axis.unit}";
+                        }
+                        else
+                        {
+                            actualStr = $"{axis.actual:F0}{axis.unit}";
+                            idealStr = $"{axis.idealMin:F0}-{axis.idealMax:F0}{axis.unit}";
+                        }
+
+                        var actualEl = new Label(actualStr);
+                        actualEl.AddToClassList("harvest-axis-actual");
+                        row.Add(actualEl);
+
+                        var idealEl = new Label($"({idealStr})");
+                        idealEl.AddToClassList("harvest-axis-ideal");
+                        row.Add(idealEl);
+
+                        var statusEl = new Label(axis.score >= 0.5f ? "+" : "-");
+                        statusEl.AddToClassList(axis.score >= 0.5f ? "harvest-axis-pass" : "harvest-axis-fail");
+                        row.Add(statusEl);
+
+                        interactionBody.Add(row);
+                    }
+                }
+            }
 
             AddCloseButton();
         }

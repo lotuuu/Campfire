@@ -331,3 +331,96 @@
     font-size: 24px;
     color: rgb(180, 160, 130);
 }
+
+/* ── Harvest Result ── */
+
+.harvest-yield-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--spacing-sm);
+}
+
+.harvest-seed-icon {
+    width: 64px;
+    height: 64px;
+    margin-right: var(--spacing-sm);
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.harvest-yield-label {
+    font-size: 32px;
+    color: rgb(240, 220, 180);
+    -unity-font-style: bold;
+}
+
+.harvest-match-badge {
+    font-size: 28px;
+    -unity-font-style: bold;
+    -unity-text-align: upper-center;
+    margin-bottom: var(--spacing-sm);
+    padding: 4px 16px;
+    border-radius: 8px;
+}
+
+.harvest-match--perfect {
+    color: rgb(120, 200, 80);
+    background-color: rgba(120, 200, 80, 0.15);
+}
+
+.harvest-match--good {
+    color: rgb(220, 180, 60);
+    background-color: rgba(220, 180, 60, 0.15);
+}
+
+.harvest-match--weak {
+    color: rgb(220, 120, 70);
+    background-color: rgba(220, 120, 70, 0.15);
+}
+
+.harvest-axis-row {
+    flex-direction: row;
+    align-items: center;
+    padding: 4px var(--spacing-sm);
+    margin-bottom: 2px;
+    background-color: rgba(50, 35, 18, 0.4);
+    border-radius: 4px;
+    align-self: stretch;
+}
+
+.harvest-axis-name {
+    font-size: 22px;
+    color: rgb(180, 160, 130);
+    width: 25%;
+}
+
+.harvest-axis-actual {
+    font-size: 22px;
+    color: rgb(220, 200, 160);
+    -unity-font-style: bold;
+    width: 25%;
+    -unity-text-align: upper-center;
+}
+
+.harvest-axis-ideal {
+    font-size: 20px;
+    color: rgb(140, 120, 90);
+    width: 35%;
+    -unity-text-align: upper-center;
+}
+
+.harvest-axis-pass {
+    font-size: 24px;
+    color: rgb(120, 200, 80);
+    -unity-font-style: bold;
+    width: 15%;
+    -unity-text-align: upper-center;
+}
+
+.harvest-axis-fail {
+    font-size: 24px;
+    color: rgb(220, 90, 70);
+    -unity-font-style: bold;
+    width: 15%;
+    -unity-text-align: upper-center;
+}
