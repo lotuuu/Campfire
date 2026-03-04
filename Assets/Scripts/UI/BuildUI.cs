@@ -73,7 +73,7 @@ namespace Garden
                     bool canAfford = canPlace
                         && CurrencyManager.Instance.CanAffordMana(nextCost.manaCost)
                         && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, nextCost.harvestCosts);
-                    AddBuildItem("Mallum House", canPlace ? $"{costText} ({capText})" : $"Cap reached ({capText})", () =>
+                    AddBuildItem("House", canPlace ? $"{costText} ({capText})" : $"Cap reached ({capText})", () =>
                     {
                         if (canAfford)
                             OnRequestPlacement?.Invoke(CampBuildingType.MallumHouse);

@@ -399,7 +399,7 @@ namespace Garden
                 case CampBuildingType.MallumHouse:
                     cell.AddToClassList("grid-cell--mallum-house");
                     ApplySkinColors(cell, SaveManager.Instance.Data.mallumHouses[index].skinName);
-                    if (label != null) label.text = "Mallum House";
+                    if (label != null) label.text = "House";
                     if (status != null)
                     {
                         int mallumCount = MallumManager.Instance != null
@@ -541,7 +541,7 @@ namespace Garden
                 }
             }
 
-            // Mallum House option
+            // House option
             if (MallumManager.Instance != null)
             {
                 var hConfig = MallumManager.Instance.HouseConfig;
@@ -558,7 +558,7 @@ namespace Garden
                     {
                         if (MallumManager.Instance.CraftMallumHouse(gridX, gridY))
                             CloseInteractionPanel();
-                    }) { text = $"Mallum House ({costText})" };
+                    }) { text = $"House ({costText})" };
                     houseBtn.AddToClassList("interaction-btn-primary");
                     houseBtn.SetEnabled(canAffordHouse);
                     interactionActions.Add(houseBtn);
@@ -1082,7 +1082,7 @@ namespace Garden
                 interactionBody.Add(btn);
             }
 
-            // Mallum House
+            // House
             if (MallumManager.Instance != null)
             {
                 var hConfig = MallumManager.Instance.HouseConfig;
@@ -1095,7 +1095,7 @@ namespace Garden
                     bool canAfford = canPlaceEntity
                         && CurrencyManager.Instance.CanAffordMana(nextCost.manaCost)
                         && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, nextCost.harvestCosts);
-                    string label = canPlaceEntity ? $"Mallum House  —  {costText}" : $"Mallum House  —  Cap reached ({capText})";
+                    string label = canPlaceEntity ? $"House  —  {costText}" : $"House  —  Cap reached ({capText})";
 
                     var btn = new Button(() =>
                     {
@@ -1531,7 +1531,7 @@ namespace Garden
         {
             if (MallumManager.Instance == null) return;
             var config = MallumManager.Instance.HouseConfig;
-            interactionTitle.text = "Mallum House";
+            interactionTitle.text = "House";
 
             var infoLabel = new Label($"Houses {config.MallumsPerHouse} {(config.MallumsPerHouse == 1 ? "Mallum" : "Mallums")}");
             infoLabel.AddToClassList("interaction-info");
@@ -1556,7 +1556,7 @@ namespace Garden
             {
                 CampBuildingType.Plot => "Plot",
                 CampBuildingType.Vase => "Vase",
-                CampBuildingType.MallumHouse => "Mallum House",
+                CampBuildingType.MallumHouse => "House",
                 _ => "Building"
             };
             interactionTitle.text = $"Paint {typeName}";
