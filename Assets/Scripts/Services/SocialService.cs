@@ -141,7 +141,8 @@ namespace Garden
 
                 if (request.result != UnityWebRequest.Result.Success)
                 {
-                    Debug.LogError($"SocialService: SendFriendRequest failed: {request.error} — {request.downloadHandler.text}");
+                    if (request.responseCode >= 500)
+                        Debug.LogError($"SocialService: SendFriendRequest failed: {request.error} — {request.downloadHandler.text}");
                     return false;
                 }
 
