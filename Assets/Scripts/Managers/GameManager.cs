@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -7,11 +8,20 @@ namespace Garden
     {
         public static GameManager Instance { get; private set; }
 
+#if UNITY_IOS && !UNITY_EDITOR
+        [DllImport("__Internal")]
+        private static extern void _WarmUpKeyboard();
+#endif
+
         private void Awake()
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
             Application.targetFrameRate = 120;
+
+#if UNITY_IOS && !UNITY_EDITOR
+            _WarmUpKeyboard();
+#endif
         }
 
         private void Start()
