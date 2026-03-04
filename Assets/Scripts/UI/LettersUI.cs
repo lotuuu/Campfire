@@ -27,6 +27,10 @@ namespace Garden
         private Button sendRequestBtn;
         private Label addFriendStatus;
 
+        // Mobile keyboard handling
+        private TouchScreenKeyboard activeKeyboard;
+        private TextField activeKeyboardTarget;
+
         // Gift picker
         private Label giftPickerTo;
         private ScrollView giftPickerInventory;
@@ -92,13 +96,24 @@ namespace Garden
             tabFriends?.RegisterCallback<ClickEvent>(_ => ShowTab("friends"));
             tabAdd?.RegisterCallback<ClickEvent>(_ => ShowTab("add"));
 
-            // Wire display name (submit on Enter / focus out)
-            displayNameInput?.RegisterCallback<FocusOutEvent>(_ => OnDisplayNameSubmit());
-            displayNameInput?.Q("unity-text-input")?.RegisterCallback<KeyDownEvent>(evt =>
+            // Wire display name and friend code input
+            if (Application.isMobilePlatform)
             {
-                if (evt.keyCode == KeyCode.Return || evt.keyCode == KeyCode.KeypadEnter)
-                    OnDisplayNameSubmit();
-            });
+                // On mobile, make TextFields read-only and open TouchScreenKeyboard on tap
+                // This avoids UI Toolkit's buggy double-keyboard behavior on iOS
+                SetupMobileTextField(displayNameInput, TouchScreenKeyboardType.Default);
+                SetupMobileTextField(friendCodeInput, TouchScreenKeyboardType.Default);
+            }
+            else
+            {
+                // Desktop: use normal TextField behavior
+                displayNameInput?.RegisterCallback<FocusOutEvent>(_ => OnDisplayNameSubmit());
+                displayNameInput?.Q("unity-text-input")?.RegisterCallback<KeyDownEvent>(evt =>
+                {
+                    if (evt.keyCode == KeyCode.Return || evt.keyCode == KeyCode.KeypadEnter)
+                        OnDisplayNameSubmit();
+                });
+            }
 
             // Wire add friend button
             sendRequestBtn?.RegisterCallback<ClickEvent>(_ => OnSendFriendRequest());
@@ -485,6 +500,65 @@ namespace Garden
             selectedGiftItems.Clear();
             giftTargetUid = null;
             ShowTab("friends");
+        }
+
+        // ── Mobile Keyboard ──
+
+        private void SetupMobileTextField(TextField field, TouchScreenKeyboardType keyboardType)
+        {
+            if (field == null) return;
+            field.isReadOnly = true;
+            field.RegisterCallback<PointerDownEvent>(evt =>
+            {
+                evt.StopPropagation();
+                OpenMobileKeyboard(field, keyboardType);
+            });
+        }
+
+        private void OpenMobileKeyboard(TextField field, TouchScreenKeyboardType keyboardType)
+        {
+            if (activeKeyboard != null && activeKeyboard.status == TouchScreenKeyboard.Status.Visible)
+                return;
+
+            int maxLength = field == displayNameInput ? 20 : 0;
+            activeKeyboardTarget = field;
+            activeKeyboard = TouchScreenKeyboard.Open(
+                field.value ?? "",
+                keyboardType,
+                false, // autocorrection
+                false, // multiline
+                false, // secure
+                false, // alert
+                "",    // placeholder
+                maxLength
+            );
+        }
+
+        private void Update()
+        {
+            if (activeKeyboard == null || activeKeyboardTarget == null) return;
+
+            // Update text field live as user types
+            if (activeKeyboard.status == TouchScreenKeyboard.Status.Visible)
+            {
+                activeKeyboardTarget.SetValueWithoutNotify(activeKeyboard.text);
+            }
+
+            if (activeKeyboard.status != TouchScreenKeyboard.Status.Visible)
+            {
+                if (activeKeyboard.status == TouchScreenKeyboard.Status.Done)
+                {
+                    activeKeyboardTarget.SetValueWithoutNotify(activeKeyboard.text);
+
+                    if (activeKeyboardTarget == displayNameInput)
+                        OnDisplayNameSubmit();
+                    else if (activeKeyboardTarget == friendCodeInput)
+                        OnSendFriendRequest();
+                }
+
+                activeKeyboard = null;
+                activeKeyboardTarget = null;
+            }
         }
     }
 }
