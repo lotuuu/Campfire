@@ -127,8 +127,9 @@
     position: absolute;
     top: 0;
     bottom: 0;
-    width: 50%;
-    background-color: var(--color-bg-dark);
+    width: 100%;
+    background-image: url("project://database/Assets/Resources/UI/Images/CloudWall.png");
+    -unity-background-scale-mode: stretch-to-fill;
     transition-property: translate;
     transition-duration: 400ms;
     transition-timing-function: ease-in-out;
@@ -142,14 +143,15 @@
 #curtain-right {
     right: 0;
     translate: 100% 0;
+    scale: -1 1;
 }
 
 #visit-transition.curtain-closed #curtain-left {
-    translate: 0 0;
+    translate: -37% 0;
 }
 
 #visit-transition.curtain-closed #curtain-right {
-    translate: 0 0;
+    translate: 37% 0;
 }
 
 #curtain-label {
