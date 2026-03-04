@@ -60,6 +60,8 @@ namespace Garden
             {
                 int take = Math.Min(data.vases[i].currentWater, remaining);
                 data.vases[i].currentWater -= take;
+                if (data.vases[i].currentWater <= 0)
+                    data.vases[i].state = VaseState.Empty;
                 remaining -= take;
             }
             OnCurrencyChanged?.Invoke(CurrencyType.Water, oldTotal, TotalWater);
