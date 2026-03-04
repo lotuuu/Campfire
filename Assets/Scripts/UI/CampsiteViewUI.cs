@@ -492,6 +492,7 @@ namespace Garden
 
             interactionBody.Clear();
             interactionActions.Clear();
+            ClearBellIcon();
 
             bool canPlace = FlameManager.Instance.CanPlaceEntity;
             int current = FlameManager.Instance.CurrentEntityCount;
@@ -905,12 +906,19 @@ namespace Garden
 
         // ── Interaction Panel ──
 
+        private void ClearBellIcon()
+        {
+            var existing = interactionPanel?.Q(className: "water-subscribe-bell");
+            existing?.RemoveFromHierarchy();
+        }
+
         private void ShowInteraction(CampBuildingType type, int index)
         {
             if (interactionPanel == null) return;
 
             interactionBody.Clear();
             interactionActions.Clear();
+            ClearBellIcon();
 
             switch (type)
             {
@@ -1177,6 +1185,7 @@ namespace Garden
         {
             interactionBody.Clear();
             interactionActions.Clear();
+            ClearBellIcon();
 
             interactionTitle.text = "Harvested!";
 
@@ -1387,27 +1396,19 @@ namespace Garden
 
         private void AddWaterSubscribeToggle(int plotIndex, PlotSave plot)
         {
-            var row = new VisualElement();
-            row.AddToClassList("water-subscribe-row");
-
             var bellIcon = new VisualElement();
-            bellIcon.AddToClassList("water-subscribe-icon");
+            bellIcon.AddToClassList("water-subscribe-bell");
             UpdateBellIcon(bellIcon, plot.subscribeWater);
-            row.Add(bellIcon);
 
-            var label = new Label(plot.subscribeWater ? "Water reminder on" : "Water reminder off");
-            label.AddToClassList("water-subscribe-label");
-            row.Add(label);
-
-            row.RegisterCallback<ClickEvent>(_ =>
+            bellIcon.RegisterCallback<ClickEvent>(evt =>
             {
+                evt.StopPropagation();
                 bool newValue = !plot.subscribeWater;
                 PlotManager.Instance.SetWaterSubscription(plotIndex, newValue);
                 UpdateBellIcon(bellIcon, newValue);
-                label.text = newValue ? "Water reminder on" : "Water reminder off";
             });
 
-            interactionBody.Add(row);
+            interactionPanel.Add(bellIcon);
         }
 
         private static void UpdateBellIcon(VisualElement icon, bool active)
