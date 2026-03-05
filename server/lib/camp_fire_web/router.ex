@@ -1,6 +1,15 @@
 defmodule CampFireWeb.Router do
   use CampFireWeb, :router
 
+  pipeline :browser do
+    plug :accepts, ["html"]
+    plug :fetch_session
+    plug :fetch_live_flash
+    plug :put_root_layout, html: {CampFireWeb.Layouts, :root}
+    plug :protect_from_forgery
+    plug :put_secure_browser_headers
+  end
+
   pipeline :api do
     plug :accepts, ["json"]
     plug CampFireWeb.Plugs.RateLimit, max: 100, window_ms: 60_000
@@ -12,6 +21,29 @@ defmodule CampFireWeb.Router do
 
   pipeline :authenticated do
     plug CampFireWeb.Plugs.Authenticate
+  end
+
+  # Admin login (no auth required)
+  scope "/admin", CampFireWeb do
+    pipe_through :browser
+
+    live "/login", AdminLoginLive, :index
+    post "/login", AdminSessionController, :create
+  end
+
+  # Admin pages (auth required)
+  scope "/admin", CampFireWeb do
+    pipe_through [:browser, CampFireWeb.Plugs.AdminAuth]
+
+    live "/seeds", SeedsLive, :index
+    live "/seeds/:id/edit", SeedsLive, :edit
+    live "/economy", EconomyLive, :index
+    live "/visitors", VisitorsLive, :index
+    live "/visitors/:id/edit", VisitorsLive, :edit
+    live "/quests", QuestsLive, :index
+    live "/quests/:id/edit", QuestsLive, :edit
+    live "/players", PlayersLive, :index
+    live "/players/:uid", PlayersLive, :show
   end
 
   scope "/", CampFireWeb do
