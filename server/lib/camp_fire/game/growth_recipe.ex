@@ -72,46 +72,46 @@ defmodule CampFire.Game.GrowthRecipe do
   end
 
   # --- Private helpers ---
+  # Snapshots are stored column-oriented by Plots.record_snapshot:
+  # %{"temperatures" => [25.0, 26.0], "humidities" => [60, 65], "snapshot_count" => 2, ...}
 
   defp build_axes(recipe, snapshots, water_count) do
-    snapshot_list = normalize_snapshots(snapshots)
-    count = length(snapshot_list)
+    snapshots = snapshots || %{}
+    count = Map.get(snapshots, "snapshot_count", 0)
 
     axes = []
 
     axes = maybe_add_axis(axes, recipe, "heat", fn ->
-      if count == 0, do: 0.0, else: avg(snapshot_list, "temperature")
+      avg_from_list(snapshots, "temperatures", count)
     end)
 
     axes = maybe_add_axis(axes, recipe, "wind", fn ->
-      if count == 0, do: 0.0, else: avg(snapshot_list, "wind_speed")
+      avg_from_list(snapshots, "wind_speeds", count)
     end)
 
     axes = maybe_add_axis(axes, recipe, "humidity", fn ->
-      if count == 0, do: 0.0, else: avg(snapshot_list, "humidity")
+      avg_from_list(snapshots, "humidities", count)
     end)
 
     axes = maybe_add_axis(axes, recipe, "sunlight", fn ->
-      if count == 0, do: 0.0, else: 100.0 - avg(snapshot_list, "cloud_cover")
+      case avg_from_list(snapshots, "cloud_covers", count) do
+        0.0 when count == 0 -> 0.0
+        avg -> 100.0 - avg
+      end
     end)
 
     axes = maybe_add_axis(axes, recipe, "rain", fn ->
       if count == 0 do
         0.0
       else
-        rain_count = Enum.count(snapshot_list, fn s -> get_float(s, "is_raining") == 1.0 end)
+        rain_count = length(Map.get(snapshots, "rain_snapshots", []))
         rain_count / count
       end
     end)
 
     axes = maybe_add_axis(axes, recipe, "moon", fn ->
-      if count == 0 do
-        0.0
-      else
-        # Use the dominant (most common) moon phase value
-        phases = Enum.map(snapshot_list, fn s -> get_float(s, "moon_phase") end)
-        dominant_moon(phases)
-      end
+      phases = Map.get(snapshots, "moon_phase_snapshots", [])
+      if phases == [], do: 0.0, else: dominant_moon(phases)
     end)
 
     axes = maybe_add_axis(axes, recipe, "waterings", fn ->
@@ -125,10 +125,10 @@ defmodule CampFire.Game.GrowthRecipe do
     axis_config = Map.get(recipe, axis_name)
 
     if is_map(axis_config) and Map.get(axis_config, "enabled", false) do
-      ideal_min = get_float(axis_config, "ideal_min")
-      ideal_max = get_float(axis_config, "ideal_max")
-      tolerance = get_float(axis_config, "tolerance")
-      weight = get_float(axis_config, "weight", 1.0)
+      ideal_min = to_float(axis_config["ideal_min"])
+      ideal_max = to_float(axis_config["ideal_max"])
+      tolerance = to_float(axis_config["tolerance"])
+      weight = to_float(axis_config["weight"] || 1.0)
 
       actual = value_fn.()
       score = score_range(actual, ideal_min, ideal_max, tolerance)
@@ -138,37 +138,22 @@ defmodule CampFire.Game.GrowthRecipe do
     end
   end
 
-  defp normalize_snapshots(nil), do: []
-  defp normalize_snapshots(snapshots) when is_list(snapshots), do: snapshots
-
-  defp normalize_snapshots(snapshots) when is_map(snapshots) do
-    # Snapshots may be stored as a map with string keys like "0", "1", ...
-    snapshots
-    |> Enum.sort_by(fn {k, _v} -> to_string(k) end)
-    |> Enum.map(fn {_k, v} -> v end)
-  end
-
-  defp normalize_snapshots(_), do: []
-
-  defp avg([], _key), do: 0.0
-
-  defp avg(snapshots, key) do
-    sum = Enum.reduce(snapshots, 0.0, fn s, acc -> acc + get_float(s, key) end)
-    sum / length(snapshots)
-  end
-
-  defp get_float(map, key, default \\ 0.0) when is_map(map) do
-    case Map.get(map, key) do
-      nil -> default
-      val when is_number(val) -> val * 1.0
-      _ -> default
+  defp avg_from_list(snapshots, key, count) do
+    values = Map.get(snapshots, key, [])
+    if count > 0 and values != [] do
+      Enum.sum(values) / count
+    else
+      0.0
     end
   end
+
+  defp to_float(nil), do: 0.0
+  defp to_float(val) when is_number(val), do: val * 1.0
+  defp to_float(_), do: 0.0
 
   defp dominant_moon([]), do: 0.0
 
   defp dominant_moon(phases) do
-    # Round to nearest integer for grouping, return the most frequent value
     phases
     |> Enum.map(&round/1)
     |> Enum.frequencies()

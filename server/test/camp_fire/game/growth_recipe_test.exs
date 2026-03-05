@@ -41,7 +41,7 @@ defmodule CampFire.Game.GrowthRecipeTest do
   describe "evaluate/3" do
     test "returns 1.0 when no axes are enabled" do
       recipe = %{}
-      assert GrowthRecipe.evaluate(recipe, [], 0) == 1.0
+      assert GrowthRecipe.evaluate(recipe, %{"snapshot_count" => 0}, 0) == 1.0
     end
 
     test "returns 1.0 when recipe has disabled axes" do
@@ -49,7 +49,7 @@ defmodule CampFire.Game.GrowthRecipeTest do
         "heat" => %{"enabled" => false, "ideal_min" => 20, "ideal_max" => 30, "tolerance" => 5, "weight" => 1}
       }
 
-      assert GrowthRecipe.evaluate(recipe, [], 0) == 1.0
+      assert GrowthRecipe.evaluate(recipe, %{"snapshot_count" => 0}, 0) == 1.0
     end
 
     test "single axis with perfect score" do
@@ -63,10 +63,11 @@ defmodule CampFire.Game.GrowthRecipeTest do
         }
       }
 
-      snapshots = [
-        %{"temperature" => 25.0},
-        %{"temperature" => 25.0}
-      ]
+      # Column-oriented snapshots (as stored by Plots.record_snapshot)
+      snapshots = %{
+        "temperatures" => [25.0, 25.0],
+        "snapshot_count" => 2
+      }
 
       assert GrowthRecipe.evaluate(recipe, snapshots, 0) == 1.0
     end
@@ -83,13 +84,13 @@ defmodule CampFire.Game.GrowthRecipeTest do
       }
 
       # 3 waterings is within [2,5] -> 1.0
-      assert GrowthRecipe.evaluate(recipe, [], 3) == 1.0
+      assert GrowthRecipe.evaluate(recipe, %{"snapshot_count" => 0}, 3) == 1.0
 
       # 0 waterings: distance below ideal_min=2 is 2, tolerance=2 -> 1.0 - 2/2 = 0.0
-      assert GrowthRecipe.evaluate(recipe, [], 0) == 0.0
+      assert GrowthRecipe.evaluate(recipe, %{"snapshot_count" => 0}, 0) == 0.0
 
       # 1 watering: distance below ideal_min=2 is 1, tolerance=2 -> 1.0 - 1/2 = 0.5
-      assert GrowthRecipe.evaluate(recipe, [], 1) == 0.5
+      assert GrowthRecipe.evaluate(recipe, %{"snapshot_count" => 0}, 1) == 0.5
     end
 
     test "multi-axis weighted average" do
@@ -113,7 +114,7 @@ defmodule CampFire.Game.GrowthRecipeTest do
       # Heat: avg temp 25 -> score 1.0, weight 2.0
       # Waterings: 3 -> score 1.0, weight 1.0
       # Weighted avg: (1.0*2.0 + 1.0*1.0) / (2.0 + 1.0) = 1.0
-      snapshots = [%{"temperature" => 25.0}]
+      snapshots = %{"temperatures" => [25.0], "snapshot_count" => 1}
       assert GrowthRecipe.evaluate(recipe, snapshots, 3) == 1.0
 
       # Heat: avg temp 25 -> score 1.0, weight 2.0
@@ -136,7 +137,7 @@ defmodule CampFire.Game.GrowthRecipeTest do
 
       # With zero snapshots, heat actual = 0.0, ideal_min=20, tolerance=10
       # distance = 20, > tolerance -> 0.0
-      assert GrowthRecipe.evaluate(recipe, [], 0) == 0.0
+      assert GrowthRecipe.evaluate(recipe, %{"snapshot_count" => 0}, 0) == 0.0
       assert GrowthRecipe.evaluate(recipe, nil, 0) == 0.0
     end
 
@@ -152,7 +153,7 @@ defmodule CampFire.Game.GrowthRecipeTest do
       }
 
       # cloud_cover 30 -> sunlight = 70, within [50,80] -> 1.0
-      snapshots = [%{"cloud_cover" => 30.0}]
+      snapshots = %{"cloud_covers" => [30.0], "snapshot_count" => 1}
       assert GrowthRecipe.evaluate(recipe, snapshots, 0) == 1.0
     end
 
@@ -167,13 +168,11 @@ defmodule CampFire.Game.GrowthRecipeTest do
         }
       }
 
-      # 2 out of 4 raining -> ratio 0.5, within [0.4, 0.6] -> 1.0
-      snapshots = [
-        %{"is_raining" => 1.0},
-        %{"is_raining" => 0.0},
-        %{"is_raining" => 1.0},
-        %{"is_raining" => 0.0}
-      ]
+      # 2 rain snapshots out of 4 total -> ratio 0.5, within [0.4, 0.6] -> 1.0
+      snapshots = %{
+        "rain_snapshots" => [true, true],
+        "snapshot_count" => 4
+      }
 
       assert GrowthRecipe.evaluate(recipe, snapshots, 0) == 1.0
     end
