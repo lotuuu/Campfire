@@ -66,6 +66,12 @@ namespace Garden
         {
             var data = SaveManager.Instance.Data;
 
+            // Preserve local-only entities (serverId == 0, not yet synced to server)
+            // so that starter entities from InitializeNewPlayer() survive server sync.
+            var localPlots = data.plots.FindAll(p => p.serverId == 0);
+            var localVases = data.vases.FindAll(v => v.serverId == 0);
+            var localMallums = data.mallums.FindAll(m => m.serverId == 0);
+
             // Plots
             data.plots.Clear();
             if (state.plots != null)
@@ -86,6 +92,12 @@ namespace Garden
                         unlockedSkins = sp.unlockedSkins ?? new List<string>()
                     });
                 }
+            }
+            // Re-add local-only plots not covered by server data
+            foreach (var lp in localPlots)
+            {
+                bool onServer = data.plots.Exists(p => p.gridX == lp.gridX && p.gridY == lp.gridY);
+                if (!onServer) data.plots.Add(lp);
             }
 
             // Vases
@@ -108,6 +120,11 @@ namespace Garden
                     });
                 }
             }
+            foreach (var lv in localVases)
+            {
+                bool onServer = data.vases.Exists(v => v.gridX == lv.gridX && v.gridY == lv.gridY);
+                if (!onServer) data.vases.Add(lv);
+            }
 
             // Gardens
             data.gardens.Clear();
@@ -128,7 +145,7 @@ namespace Garden
                 }
             }
 
-            // Mallums
+            // Mallums — preserve local-only mallums up to house-based max
             data.mallums.Clear();
             if (state.mallums != null)
             {
@@ -151,6 +168,11 @@ namespace Garden
 
                     data.mallums.Add(mallum);
                 }
+            }
+            foreach (var lm in localMallums)
+            {
+                if (!data.mallums.Exists(m => m.serverId == lm.serverId))
+                    data.mallums.Add(lm);
             }
 
             SaveManager.Instance.Save();
