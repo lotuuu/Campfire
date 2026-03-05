@@ -2,15 +2,15 @@
 
 Elixir/Phoenix backend migration complete (March 2026). All existing endpoints ported 1:1. Features below are next — to be built on the new Elixir foundation.
 
-## Tier 1 — Economy & Core State
+## Tier 1 — Economy & Core State ✅
 
-1. **Server-side economy ledger** — Track mana, gems, water as server-authoritative values. All spend/earn operations go through server. Client displays but doesn't own the numbers.
+1. ~~**Server-side economy ledger**~~ ✅ — `player_economies` table tracks mana, gems, flame level. Client syncs on launch, enqueues mutations.
 
-2. **Resource spending validation** — All crafting (plots, vases, mallum houses), planting (seed costs), upgrades (flame ingredients) must be validated server-side before applying.
+2. ~~**Resource spending validation**~~ ✅ — All spend operations (mana, gems, seeds, items) validated server-side. Client optimistically applies, server rejects insufficient funds.
 
-3. **Flame level management** — Server owns flame level and entity cap. Upgrade requests validated against ingredient inventory server-side.
+3. ~~**Flame level management**~~ ✅ — `POST /economy/upgrade-flame` validates item ingredients and increments level. Capped at level 12.
 
-4. **Seed & item inventory** — Server tracks all inventory (seeds, harvest items). Client syncs on load and after each action. Prevents duplication.
+4. ~~**Seed & item inventory**~~ ✅ — `player_seeds` and `player_items` tables with upsert/spend operations. Client syncs full state on launch.
 
 ## Tier 2 — Game Systems
 
