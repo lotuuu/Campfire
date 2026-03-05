@@ -4,6 +4,14 @@ defmodule CampFireWeb.Plugs.RateLimit do
   def init(opts), do: opts
 
   def call(conn, opts) do
+    if Application.get_env(:camp_fire, :disable_rate_limit, false) do
+      conn
+    else
+      do_rate_limit(conn, opts)
+    end
+  end
+
+  defp do_rate_limit(conn, opts) do
     max = Keyword.fetch!(opts, :max)
     window_ms = Keyword.fetch!(opts, :window_ms)
     key = rate_limit_key(conn)
