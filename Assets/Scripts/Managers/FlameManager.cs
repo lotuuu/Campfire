@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Garden
@@ -27,6 +28,9 @@ namespace Garden
 
         public event Action OnFlameUpgraded;
 
+        private float _manaCollectTimer;
+        private const float ManaCollectIntervalSeconds = 60f;
+
         public FlameUpgradeRecipe GetUpgradeRecipe() => config.GetUpgradeRecipe(Level);
 
         private void Awake()
@@ -39,6 +43,13 @@ namespace Garden
         {
             SaveManager.Instance.Data.mana = AccumulateMana(
                 SaveManager.Instance.Data.mana, ManaPerSecond, Time.deltaTime);
+
+            _manaCollectTimer += Time.deltaTime;
+            if (_manaCollectTimer >= ManaCollectIntervalSeconds)
+            {
+                _manaCollectTimer = 0f;
+                _ = EconomyService.Instance?.CollectMana();
+            }
         }
 
         public static float AccumulateMana(float currentMana, float manaPerSecond, float deltaTime)
@@ -61,6 +72,14 @@ namespace Garden
             FlameConfig.ConsumeIngredients(recipe, SaveManager.Instance.Data.items);
             SaveManager.Instance.Data.flameLevel++;
             SaveManager.Instance.Save();
+            if (EconomyService.Instance != null)
+            {
+                var items = new List<SpendItemEntry>();
+                foreach (var ing in recipe.ingredients)
+                    items.Add(new SpendItemEntry { item_name = ing.itemName, count = ing.count });
+                EconomyService.Instance.Enqueue("upgrade-flame",
+                    JsonUtility.ToJson(new UpgradeFlameRequest { items = items }));
+            }
             OnFlameUpgraded?.Invoke();
             return true;
         }

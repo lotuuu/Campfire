@@ -30,6 +30,9 @@ namespace Garden
             {
                 InitializeNewPlayer();
             }
+
+            if (SocialService.Instance != null)
+                SocialService.Instance.OnSignedIn += () => EconomyService.Instance?.Initialize();
         }
 
         private void Update()

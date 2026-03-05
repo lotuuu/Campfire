@@ -52,6 +52,21 @@ namespace Garden
                 data.items.Add(new InventoryItem { itemName = recipe.result, count = recipe.resultQuantity });
 
             SaveManager.Instance.Save();
+            if (EconomyService.Instance != null && !CurrencyManager.FreeMode)
+            {
+                // Report consumed ingredients
+                foreach (var ing in recipe.ingredients)
+                {
+                    var spendItems = new SpendItemsRequest
+                    {
+                        items = new List<SpendItemEntry> { new SpendItemEntry { item_name = ing.itemName, count = ing.quantity } }
+                    };
+                    EconomyService.Instance.Enqueue("spend-items", JsonUtility.ToJson(spendItems));
+                }
+                // Report produced result
+                EconomyService.Instance.Enqueue("add-items",
+                    JsonUtility.ToJson(new AddItemRequest { item_name = recipe.result, count = recipe.resultQuantity }));
+            }
             return true;
         }
 
@@ -64,6 +79,8 @@ namespace Garden
             else
                 data.seedInventory.Add(new SeedInventoryEntry { seedName = seedName, count = count });
             SaveManager.Instance.Save();
+            EconomyService.Instance?.Enqueue("add-seeds",
+                JsonUtility.ToJson(new AddSeedRequest { seed_name = seedName, count = count }));
         }
     }
 }

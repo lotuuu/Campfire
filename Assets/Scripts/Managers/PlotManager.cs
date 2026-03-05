@@ -157,6 +157,18 @@ namespace Garden
                 if (entry.count <= 0) data.items.Remove(entry);
             }
 
+            if (EconomyService.Instance != null && !CurrencyManager.FreeMode)
+            {
+                foreach (var hc in cost.harvestCosts)
+                {
+                    var spendItems = new SpendItemsRequest
+                    {
+                        items = new List<SpendItemEntry> { new SpendItemEntry { item_name = hc.itemName, count = hc.count } }
+                    };
+                    EconomyService.Instance.Enqueue("spend-items", JsonUtility.ToJson(spendItems));
+                }
+            }
+
             data.plots.Add(new PlotSave { state = PlotState.Empty, gridX = gridX, gridY = gridY });
             SaveManager.Instance.Save();
             OnPlotChanged?.Invoke(data.plots.Count - 1);
@@ -176,6 +188,8 @@ namespace Garden
                 if (seedEntry == null || seedEntry.count <= 0) return false;
                 seedEntry.count--;
                 if (seedEntry.count <= 0) data.seedInventory.Remove(seedEntry);
+                EconomyService.Instance?.Enqueue("spend-seeds",
+                    JsonUtility.ToJson(new SpendSeedRequest { seed_name = seedName, count = 1 }));
             }
 
             plot.seedName = seedName;
@@ -272,6 +286,8 @@ namespace Garden
             int drops = Mathf.Max(1, Mathf.RoundToInt(seed.baseDrops * score));
 
             AddItem(data, seed.name + "_harvest", drops);
+            EconomyService.Instance?.Enqueue("add-items",
+                JsonUtility.ToJson(new AddItemRequest { item_name = seed.name + "_harvest", count = drops }));
 
             var result = new HarvestResult
             {
