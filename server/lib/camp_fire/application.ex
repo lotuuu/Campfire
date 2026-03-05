@@ -10,6 +10,7 @@ defmodule CampFire.Application do
     children = [
       CampFireWeb.Telemetry,
       CampFire.Repo,
+      CampFire.ConfigCache,
       {DNSCluster, query: Application.get_env(:camp_fire, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: CampFire.PubSub},
       # Start a worker by calling: CampFire.Worker.start_link(arg)
