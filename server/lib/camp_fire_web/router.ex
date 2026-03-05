@@ -60,4 +60,19 @@ defmodule CampFireWeb.Router do
     post "/quest/accept", VisitorController, :accept_quest
     post "/quest/complete", VisitorController, :complete_quest
   end
+
+  scope "/economy", CampFireWeb do
+    pipe_through [:api, :authenticated]
+    get "/state", EconomyController, :state
+    post "/init", EconomyController, :init
+    post "/collect-mana", EconomyController, :collect_mana
+    post "/spend-mana", EconomyController, :spend_mana
+    post "/spend-gems", EconomyController, :spend_gems
+    post "/add-gems", EconomyController, :add_gems
+    post "/upgrade-flame", EconomyController, :upgrade_flame
+    post "/add-seeds", EconomyController, :add_seeds
+    post "/spend-seeds", EconomyController, :spend_seeds
+    post "/add-items", EconomyController, :add_items
+    post "/spend-items", EconomyController, :spend_items
+  end
 end
