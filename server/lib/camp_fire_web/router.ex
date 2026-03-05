@@ -75,4 +75,34 @@ defmodule CampFireWeb.Router do
     post "/add-items", EconomyController, :add_items
     post "/spend-items", EconomyController, :spend_items
   end
+
+  scope "/game", CampFireWeb do
+    pipe_through [:api, :authenticated]
+    get "/state", GameController, :get_state
+    put "/state", GameController, :save_state
+    get "/plots", GameController, :list_plots
+    post "/plot/craft", GameController, :craft_plot
+    post "/plot/plant", GameController, :plant_seed
+    post "/plot/water", GameController, :water_plot
+    post "/plot/harvest", GameController, :harvest_plot
+    post "/plot/set-skin", GameController, :set_plot_skin
+    get "/vases", GameController, :list_vases
+    post "/vase/craft", GameController, :craft_vase
+    post "/vase/fill", GameController, :fill_vase
+    post "/vase/check", GameController, :check_vase
+    post "/vase/set-skin", GameController, :set_vase_skin
+    get "/gardens", GameController, :list_gardens
+    post "/garden/plant", GameController, :plant_garden
+    post "/garden/collect", GameController, :collect_garden
+    post "/quest/start", GameController, :start_quest
+    post "/quest/check", GameController, :check_quest
+    post "/quest/collect", GameController, :collect_quest
+    post "/quest/speed-up", GameController, :speed_up_quest
+  end
+
+  scope "/weather", CampFireWeb do
+    pipe_through [:api, :authenticated]
+    post "/location", GameController, :submit_location
+    get "/current", GameController, :current_weather
+  end
 end

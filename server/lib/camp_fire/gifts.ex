@@ -3,6 +3,7 @@ defmodule CampFire.Gifts do
   alias CampFire.Repo
   alias CampFire.Gifts.Gift
   alias CampFire.Accounts.Player
+  alias CampFire.Economy
 
   @max_items_per_gift 3
   @max_gifts_per_day 5
@@ -23,9 +24,26 @@ defmodule CampFire.Gifts do
         {:error, "Max #{@max_gifts_per_day} gifts per day to same player"}
 
       true ->
-        %Gift{}
-        |> Gift.changeset(%{from_uid: from_uid, to_uid: to_uid, items: items})
-        |> Repo.insert()
+        Repo.transaction(fn ->
+          # Deduct items from sender's inventory
+          Enum.each(items, fn item ->
+            item_name = item["item_name"] || item["itemName"]
+            count = item["count"] || 1
+
+            case Economy.spend_item(from_uid, item_name, count) do
+              {:ok, _} -> :ok
+              {:error, _} -> Repo.rollback({:insufficient_items, item_name})
+            end
+          end)
+
+          # Insert the gift record
+          case %Gift{}
+               |> Gift.changeset(%{from_uid: from_uid, to_uid: to_uid, items: items})
+               |> Repo.insert() do
+            {:ok, gift} -> gift
+            {:error, changeset} -> Repo.rollback(changeset)
+          end
+        end)
     end
   end
 
@@ -56,8 +74,18 @@ defmodule CampFire.Gifts do
         |> Gift.changeset(%{status: "claimed", claimed_at: DateTime.utc_now() |> DateTime.truncate(:second)})
         |> Repo.update()
         |> case do
-          {:ok, claimed} -> {:ok, claimed.items}
-          {:error, _} -> {:error, :update_failed}
+          {:ok, claimed} ->
+            # Add items to receiver's inventory
+            Enum.each(claimed.items, fn item ->
+              item_name = item["item_name"] || item["itemName"]
+              count = item["count"] || 1
+              Economy.upsert_item(to_uid, item_name, count)
+            end)
+
+            {:ok, claimed.items}
+
+          {:error, _} ->
+            {:error, :update_failed}
         end
     end
   end
