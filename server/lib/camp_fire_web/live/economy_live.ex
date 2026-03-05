@@ -32,6 +32,8 @@ defmodule CampFireWeb.EconomyLive do
       {:ok, value} ->
         case Admin.upsert_game_config(key, value) do
           {:ok, _} ->
+            CampFire.ConfigCache.refresh()
+
             {:noreply,
              socket
              |> put_flash(:info, "Config '#{key}' saved")
@@ -51,6 +53,8 @@ defmodule CampFireWeb.EconomyLive do
       {:ok, value} ->
         case Admin.upsert_game_config(key, value) do
           {:ok, _} ->
+            CampFire.ConfigCache.refresh()
+
             {:noreply,
              socket
              |> put_flash(:info, "Config '#{key}' created")

@@ -21,18 +21,57 @@ defmodule CampFire.Game.Gardens do
     }
   }
 
+  # --- Config Helpers ---
+
+  defp get_plant_config(plant_name) do
+    case CampFire.ConfigCache.get("garden_configs") do
+      nil ->
+        Map.get(@plant_configs, plant_name)
+
+      garden_map ->
+        case Map.get(garden_map, plant_name) do
+          nil -> Map.get(@plant_configs, plant_name)
+          cached -> normalize_plant_config(cached)
+        end
+    end
+  end
+
+  defp get_all_plant_configs do
+    case CampFire.ConfigCache.get("garden_configs") do
+      nil ->
+        @plant_configs
+
+      garden_map when map_size(garden_map) == 0 ->
+        @plant_configs
+
+      garden_map ->
+        Map.merge(@plant_configs, Map.new(garden_map, fn {k, v} -> {k, normalize_plant_config(v)} end))
+    end
+  end
+
+  # Translate cached GardenConfig fields to the format used by @plant_configs
+  defp normalize_plant_config(cached) do
+    %{
+      growth_hours: cached[:growth_duration_hours] || cached["growth_duration_hours"],
+      yield_item: cached[:yield_item] || cached["yield_item"],
+      yield_amount: cached[:yield_amount] || cached["yield_amount"],
+      yield_interval_hours: cached[:yield_interval_hours] || cached["yield_interval_hours"],
+      mana_cost: cached[:mana_cost] || cached["mana_cost"]
+    }
+  end
+
   # --- Queries ---
 
   def list_gardens(player_uid) do
     from(g in PlayerGarden, where: g.player_uid == ^player_uid) |> Repo.all()
   end
 
-  def get_plant_configs, do: @plant_configs
+  def get_plant_configs, do: get_all_plant_configs()
 
   # --- Plant ---
 
   def plant(player_uid, plant_name, grid_x, grid_y) do
-    case Map.get(@plant_configs, plant_name) do
+    case get_plant_config(plant_name) do
       nil ->
         {:error, :unknown_plant}
 
@@ -69,7 +108,7 @@ defmodule CampFire.Game.Gardens do
         {:error, :not_owned}
 
       true ->
-        config = Map.fetch!(@plant_configs, garden.plant_name)
+        config = get_plant_config(garden.plant_name)
         now = DateTime.utc_now() |> DateTime.truncate(:second)
 
         # Check maturity

@@ -102,18 +102,68 @@ defmodule CampFire.Game.Mallums do
     }
   }
 
+  # --- Config Helpers ---
+
+  defp get_quest_config(quest_name) do
+    case CampFire.ConfigCache.get("quest_configs") do
+      nil ->
+        Map.get(@quest_configs, quest_name)
+
+      quest_map ->
+        case Map.get(quest_map, quest_name) do
+          nil -> Map.get(@quest_configs, quest_name)
+          cached -> normalize_quest_config(cached)
+        end
+    end
+  end
+
+  defp get_all_quest_configs do
+    case CampFire.ConfigCache.get("quest_configs") do
+      nil ->
+        @quest_configs
+
+      quest_map when map_size(quest_map) == 0 ->
+        @quest_configs
+
+      quest_map ->
+        merged = Map.merge(@quest_configs, Map.new(quest_map, fn {k, v} -> {k, normalize_quest_config(v)} end))
+        merged
+    end
+  end
+
+  # Translate cached QuestConfig fields to the format used by @quest_configs
+  defp normalize_quest_config(cached) do
+    rewards =
+      (cached[:reward_pool] || cached["reward_pool"] || [])
+      |> Enum.map(fn entry ->
+        %{
+          seed: entry["seed"] || entry[:seed],
+          weight: entry["weight"] || entry[:weight],
+          min: entry["min"] || entry[:min],
+          max: entry["max"] || entry[:max]
+        }
+      end)
+
+    %{
+      duration_minutes: cached[:duration_minutes] || cached["duration_minutes"],
+      flame_level: cached[:required_flame_level] || cached["required_flame_level"],
+      reward_rolls: cached[:reward_rolls] || cached["reward_rolls"],
+      rewards: rewards
+    }
+  end
+
   # --- Queries ---
 
   def list_mallums(player_uid) do
     from(m in PlayerMallum, where: m.player_uid == ^player_uid) |> Repo.all()
   end
 
-  def get_quest_configs, do: @quest_configs
+  def get_quest_configs, do: get_all_quest_configs()
 
   # --- Quests ---
 
   def send_on_quest(player_uid, quest_name) do
-    case Map.get(@quest_configs, quest_name) do
+    case get_quest_config(quest_name) do
       nil ->
         {:error, :unknown_quest}
 
@@ -147,7 +197,7 @@ defmodule CampFire.Game.Mallums do
         {:error, :not_on_quest}
 
       true ->
-        config = Map.fetch!(@quest_configs, mallum.assigned_quest_name)
+        config = get_quest_config(mallum.assigned_quest_name)
         now = DateTime.utc_now() |> DateTime.truncate(:second)
         elapsed_minutes = DateTime.diff(now, mallum.start_time_utc, :second) / 60.0
 
@@ -217,7 +267,7 @@ defmodule CampFire.Game.Mallums do
             {:error, reason}
 
           _ ->
-            config = Map.fetch!(@quest_configs, mallum.assigned_quest_name)
+            config = get_quest_config(mallum.assigned_quest_name)
             rewards = roll_rewards(config)
 
             mallum

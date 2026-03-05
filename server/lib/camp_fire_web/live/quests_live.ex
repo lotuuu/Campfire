@@ -47,6 +47,8 @@ defmodule CampFireWeb.QuestsLive do
            reward_pool: []
          }) do
       {:ok, quest} ->
+        CampFire.ConfigCache.refresh()
+
         {:noreply,
          socket
          |> assign(quests: Admin.list_quests())
@@ -67,6 +69,8 @@ defmodule CampFireWeb.QuestsLive do
 
         case Admin.update_quest(quest, attrs) do
           {:ok, _} ->
+            CampFire.ConfigCache.refresh()
+
             {:noreply,
              socket
              |> put_flash(:info, "Quest updated")
@@ -87,6 +91,8 @@ defmodule CampFireWeb.QuestsLive do
 
     case Admin.delete_quest(quest) do
       {:ok, _} ->
+        CampFire.ConfigCache.refresh()
+
         {:noreply,
          socket
          |> put_flash(:info, "Quest deleted")
