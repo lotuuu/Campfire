@@ -8,13 +8,15 @@ defmodule CampFire.Economy.PlayerEconomy do
     field :mana, :float, default: 50.0
     field :gems, :integer, default: 5
     field :flame_level, :integer, default: 1
+    field :lat, :float
+    field :lon, :float
     field :last_mana_collect_utc, :utc_datetime
     timestamps(type: :utc_datetime)
   end
 
   def changeset(economy, attrs) do
     economy
-    |> cast(attrs, [:player_uid, :mana, :gems, :flame_level, :last_mana_collect_utc])
+    |> cast(attrs, [:player_uid, :mana, :gems, :flame_level, :last_mana_collect_utc, :lat, :lon])
     |> validate_required([:player_uid])
     |> validate_number(:mana, greater_than_or_equal_to: 0)
     |> validate_number(:gems, greater_than_or_equal_to: 0)
