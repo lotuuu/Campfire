@@ -87,11 +87,14 @@ The campsite uses a hex grid with flat-top layout. `HexGridUtil.HexToPixel(q, r,
 
 ### Social / Backend
 
-A Node.js/Express backend lives in `server/` (routes: `/auth`, `/friends`, `/village`, `/gifts`). Run with Docker via `server/docker-compose.yml`.
+An Elixir/Phoenix backend lives in `server/` (routes: `/auth`, `/friends`, `/village`, `/gifts`, `/visitors`). Postgres runs via Docker (`server/docker-compose.yml`). Run with `make dev` (port 4000). Tests via `mix test`.
 
+- Phoenix contexts: `Accounts`, `Social`, `Villages`, `Gifts`, `Visitors`
+- Ecto schemas map to 8 Postgres tables; raw SQL for visit count upsert
+- Bearer token auth via custom Plug; ETS rate limiting via Hammer
 - `SocialSaveManager` stores `SocialData` to a separate `social.json` file
 - `SocialService` auto-registers new players via `POST /auth/register` on first launch (no explicit sign-in); auth uses Bearer token stored in `social.json`
-- In editor, server URL is `localhost:3000`; in builds uses `DevServerConfig.BaseUrl`
+- In editor, server URL is `localhost:4000`; in builds uses `DevServerConfig.BaseUrl`
 - `SaveManager.Flush()` pushes a village snapshot on every save
 
 ### UI Toolkit Architecture
@@ -131,7 +134,7 @@ A Node.js/Express backend lives in `server/` (routes: `/auth`, `/friends`, `/vil
 - Templates: `Assets/Resources/UI/Templates/*.uxml`
 - Tests: `Assets/Tests/EditMode/`
 - Scene: `Assets/Scenes/Garden.unity`
-- Social backend: `server/` (Node.js/Express, Docker)
+- Social backend: `server/` (Elixir/Phoenix, Docker for Postgres)
 
 ## Unity Development
 

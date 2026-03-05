@@ -1,6 +1,6 @@
 # Backend Migration Todo (Elixir)
 
-Features to migrate to the server when rebuilding the backend in Elixir. Currently all client-side only.
+Elixir/Phoenix backend migration complete (March 2026). All existing endpoints ported 1:1. Features below are next — to be built on the new Elixir foundation.
 
 ## Tier 1 — Economy & Core State
 
