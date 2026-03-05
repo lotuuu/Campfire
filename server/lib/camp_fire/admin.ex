@@ -170,7 +170,13 @@ defmodule CampFire.Admin do
     )
   end
 
-  def search_players(_), do: []
+  def search_players(_) do
+    Repo.all(
+      from p in Player,
+        order_by: [desc: p.updated_at],
+        limit: 100
+    )
+  end
 
   def get_player_detail(uid) when is_binary(uid) do
     case Repo.get_by(Player, uid: uid) do

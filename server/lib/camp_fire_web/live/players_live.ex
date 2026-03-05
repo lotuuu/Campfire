@@ -8,7 +8,7 @@ defmodule CampFireWeb.PlayersLive do
      assign(socket,
        active_tab: :players,
        search_query: "",
-       search_results: [],
+       search_results: Admin.search_players(nil),
        detail: nil,
        editing_economy: false,
        economy_form: nil
