@@ -14,6 +14,8 @@ defmodule CampFire.Application do
       {Phoenix.PubSub, name: CampFire.PubSub},
       # Start a worker by calling: CampFire.Worker.start_link(arg)
       # {CampFire.Worker, arg},
+      # Weather poller — polls OWM for active locations
+      CampFire.Game.WeatherPoller,
       # Start to serve requests, typically the last entry
       CampFireWeb.Endpoint
     ]

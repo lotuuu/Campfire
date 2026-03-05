@@ -41,7 +41,8 @@ defmodule CampFire.MixProject do
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
-      {:hammer, "~> 6.2"}
+      {:hammer, "~> 6.2"},
+      {:req, "~> 0.5"}
     ]
   end
 

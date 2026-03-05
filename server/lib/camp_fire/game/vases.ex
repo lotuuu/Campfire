@@ -1,0 +1,218 @@
+defmodule CampFire.Game.Vases do
+  import Ecto.Query
+  alias CampFire.Repo
+  alias CampFire.Game.{PlayerVase, PlayerMallum}
+  alias CampFire.Economy
+
+  @vase_mana_cost 15
+  @default_capacity 5
+  @fill_seconds_per_unit 60
+
+  # --- Queries ---
+
+  def list_vases(player_uid) do
+    from(v in PlayerVase, where: v.player_uid == ^player_uid) |> Repo.all()
+  end
+
+  # --- Craft ---
+
+  def craft_vase(player_uid, grid_x, grid_y) do
+    Repo.transaction(fn ->
+      case Economy.spend_mana(player_uid, @vase_mana_cost) do
+        {:ok, _economy} -> :ok
+        {:error, reason} -> Repo.rollback(reason)
+      end
+
+      %PlayerVase{}
+      |> PlayerVase.changeset(%{
+        player_uid: player_uid,
+        state: "empty",
+        capacity: @default_capacity,
+        current_water: 0,
+        grid_x: grid_x,
+        grid_y: grid_y
+      })
+      |> Repo.insert!()
+    end)
+  end
+
+  # --- Fill ---
+
+  def start_fill(player_uid, vase_id) do
+    vase = Repo.get!(PlayerVase, vase_id)
+
+    cond do
+      vase.player_uid != player_uid ->
+        {:error, :not_owned}
+
+      vase.state == "filling" ->
+        {:error, :already_filling}
+
+      true ->
+        # Claim an idle mallum for water fetching
+        case claim_idle_mallum_for_water(player_uid, vase_id) do
+          {:error, reason} ->
+            {:error, reason}
+
+          {:ok, _mallum} ->
+            now = DateTime.utc_now() |> DateTime.truncate(:second)
+
+            vase
+            |> PlayerVase.changeset(%{
+              state: "filling",
+              fill_start_time_utc: now
+            })
+            |> Repo.update()
+        end
+    end
+  end
+
+  def check_fill(player_uid, vase_id) do
+    vase = Repo.get!(PlayerVase, vase_id)
+
+    cond do
+      vase.player_uid != player_uid ->
+        {:error, :not_owned}
+
+      vase.state != "filling" ->
+        {:error, :not_filling}
+
+      true ->
+        now = DateTime.utc_now() |> DateTime.truncate(:second)
+        elapsed = DateTime.diff(now, vase.fill_start_time_utc, :second)
+        required = vase.capacity * @fill_seconds_per_unit
+
+        if elapsed >= required do
+          # Free the mallum assigned to this vase
+          free_mallum_for_vase(player_uid, vase_id)
+
+          vase
+          |> PlayerVase.changeset(%{
+            state: "full",
+            current_water: vase.capacity,
+            fill_start_time_utc: nil
+          })
+          |> Repo.update()
+        else
+          {:ok, vase}
+        end
+    end
+  end
+
+  # --- Water Usage ---
+
+  def use_water(vase_id, amount) when is_integer(amount) and amount > 0 do
+    vase = Repo.get!(PlayerVase, vase_id)
+
+    if vase.current_water < amount do
+      {:error, :insufficient_water}
+    else
+      new_water = vase.current_water - amount
+      new_state = if new_water == 0, do: "empty", else: vase.state
+
+      vase
+      |> PlayerVase.changeset(%{current_water: new_water, state: new_state})
+      |> Repo.update()
+    end
+  end
+
+  def set_water(vase_id, amount) when is_integer(amount) and amount >= 0 do
+    vase = Repo.get!(PlayerVase, vase_id)
+    new_state = if amount == 0, do: "empty", else: "full"
+
+    vase
+    |> PlayerVase.changeset(%{current_water: amount, state: new_state})
+    |> Repo.update()
+  end
+
+  # --- Rain ---
+
+  def rain_fill_all(player_uid) do
+    vases = from(v in PlayerVase, where: v.player_uid == ^player_uid) |> Repo.all()
+
+    Enum.each(vases, fn vase ->
+      vase
+      |> PlayerVase.changeset(%{
+        current_water: vase.capacity,
+        state: "full",
+        fill_start_time_utc: nil
+      })
+      |> Repo.update!()
+    end)
+
+    # Free all mallums fetching water
+    from(m in PlayerMallum,
+      where: m.player_uid == ^player_uid and m.state == "fetching_water"
+    )
+    |> Repo.all()
+    |> Enum.each(fn mallum ->
+      mallum
+      |> PlayerMallum.changeset(%{state: "idle", assigned_vase_id: nil})
+      |> Repo.update!()
+    end)
+
+    :ok
+  end
+
+  # --- Skins ---
+
+  def set_skin(player_uid, vase_id, skin_name) do
+    vase = Repo.get!(PlayerVase, vase_id)
+
+    cond do
+      vase.player_uid != player_uid ->
+        {:error, :not_owned}
+
+      skin_name not in (vase.unlocked_skins || []) ->
+        {:error, :skin_not_unlocked}
+
+      true ->
+        vase
+        |> PlayerVase.changeset(%{skin_name: skin_name})
+        |> Repo.update()
+    end
+  end
+
+  # --- Private Helpers ---
+
+  defp claim_idle_mallum_for_water(player_uid, vase_id) do
+    case Repo.one(
+           from(m in PlayerMallum,
+             where: m.player_uid == ^player_uid and m.state == "idle",
+             limit: 1
+           )
+         ) do
+      nil ->
+        {:error, :no_idle_mallum}
+
+      mallum ->
+        now = DateTime.utc_now() |> DateTime.truncate(:second)
+
+        mallum
+        |> PlayerMallum.changeset(%{
+          state: "fetching_water",
+          assigned_vase_id: vase_id,
+          start_time_utc: now
+        })
+        |> Repo.update()
+    end
+  end
+
+  defp free_mallum_for_vase(player_uid, vase_id) do
+    case Repo.one(
+           from(m in PlayerMallum,
+             where:
+               m.player_uid == ^player_uid and
+                 m.state == "fetching_water" and
+                 m.assigned_vase_id == ^vase_id,
+             limit: 1
+           )
+         ) do
+      nil -> :ok
+      mallum ->
+        mallum
+        |> PlayerMallum.changeset(%{state: "idle", assigned_vase_id: nil, start_time_utc: nil})
+        |> Repo.update!()
+    end
+  end
+end

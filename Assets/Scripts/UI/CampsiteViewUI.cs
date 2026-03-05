@@ -62,6 +62,11 @@ namespace Garden
         private readonly List<(VisualElement fill, int vaseIndex)> fillingVases = new();
         private readonly List<(VisualElement fill, int plotIndex)> cooldownPlots = new();
 
+        // Sprites
+        private Sprite emptyPlotSprite;
+        private Sprite growingPlotSprite;
+        private Sprite maturePlotSprite;
+
         // Current grid state
         private int currentGridSize;
         private bool suppressRebuild;
@@ -82,6 +87,16 @@ namespace Garden
             interactionActions = root.Q("interaction-actions");
 
             cellTemplate = Resources.Load<VisualTreeAsset>("UI/Templates/GridCell");
+            var hexSprites = Resources.LoadAll<Sprite>("Sprites/TX_HexagonTest");
+            Debug.Log($"[CampsiteViewUI] Loaded {hexSprites.Length} sprites from TX_HexagonTest");
+            foreach (var s in hexSprites)
+            {
+                Debug.Log($"[CampsiteViewUI] Sprite: {s.name}");
+                if (s.name == "TX_HexagonTest_3") emptyPlotSprite = s;
+                else if (s.name == "TX_HexagonTest_2") growingPlotSprite = s;
+                else if (s.name == "TX_HexagonTest_0") maturePlotSprite = s;
+            }
+            Debug.Log($"[CampsiteViewUI] empty={emptyPlotSprite != null}, growing={growingPlotSprite != null}, mature={maturePlotSprite != null}");
             visitTransition = root.Q("visit-transition");
 
             panController = new CampsitePanController(viewport, canvas);
@@ -348,9 +363,12 @@ namespace Garden
                         });
                     }
 
-                    // Draw hex shape via Painter2D
-                    cell.generateVisualContent += DrawHexCell;
-                    cell.RegisterCallback<CustomStyleResolvedEvent>(_ => cell.MarkDirtyRepaint());
+                    // Draw hex shape via Painter2D (skip for sprite cells)
+                    if (!cell.ClassListContains("grid-cell--sprite"))
+                    {
+                        cell.generateVisualContent += DrawHexCell;
+                        cell.RegisterCallback<CustomStyleResolvedEvent>(_ => cell.MarkDirtyRepaint());
+                    }
 
                     canvas.Add(cell);
                 }
@@ -394,12 +412,29 @@ namespace Garden
                     var plot = SaveManager.Instance.Data.plots[index];
                     if (label != null) label.text = string.IsNullOrEmpty(plot.seedName) ? "Plot" : PlotManager.GetSeedDisplayName(plot.seedName);
                     if (status != null) status.text = plot.state.ToString();
-                    if (plot.state == PlotState.Mature)
-                        cell.AddToClassList("grid-cell--plot-mature");
-                    if (plot.state == PlotState.Growing && progress != null && progressFill != null)
+                    Debug.Log($"[CampsiteViewUI] Plot {index} state={plot.state}");
+                    if (plot.state == PlotState.Empty && emptyPlotSprite != null)
                     {
-                        progress.AddToClassList("cell-progress--visible");
-                        growingPlots.Add((progressFill, index));
+                        cell.style.backgroundImage = new StyleBackground(emptyPlotSprite);
+                        cell.AddToClassList("grid-cell--sprite");
+                        Debug.Log($"[CampsiteViewUI] Applied EMPTY sprite to plot {index}");
+                    }
+                    else if (plot.state == PlotState.Growing && growingPlotSprite != null)
+                    {
+                        cell.style.backgroundImage = new StyleBackground(growingPlotSprite);
+                        cell.AddToClassList("grid-cell--sprite");
+                        Debug.Log($"[CampsiteViewUI] Applied GROWING sprite to plot {index}");
+                        if (progress != null && progressFill != null)
+                        {
+                            progress.AddToClassList("cell-progress--visible");
+                            growingPlots.Add((progressFill, index));
+                        }
+                    }
+                    else if (plot.state == PlotState.Mature && maturePlotSprite != null)
+                    {
+                        cell.style.backgroundImage = new StyleBackground(maturePlotSprite);
+                        cell.AddToClassList("grid-cell--sprite");
+                        Debug.Log($"[CampsiteViewUI] Applied MATURE sprite to plot {index}");
                     }
                     break;
 
@@ -880,6 +915,7 @@ namespace Garden
         private static void DrawHexCell(MeshGenerationContext ctx)
         {
             var el = ctx.visualElement;
+            if (el.ClassListContains("grid-cell--sprite")) return;
             float w = el.resolvedStyle.width;
             float h = el.resolvedStyle.height;
             if (float.IsNaN(w) || float.IsNaN(h) || w <= 0 || h <= 0) return;
