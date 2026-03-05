@@ -55,10 +55,8 @@ defmodule CampFire.Accounts do
   end
 
   def touch_last_online(uid) do
-    Task.start(fn ->
-      from(p in Player, where: p.uid == ^uid)
-      |> Repo.update_all(set: [updated_at: DateTime.utc_now()])
-    end)
+    from(p in Player, where: p.uid == ^uid)
+    |> Repo.update_all(set: [updated_at: DateTime.utc_now()])
   end
 
   defp generate_friend_code do
