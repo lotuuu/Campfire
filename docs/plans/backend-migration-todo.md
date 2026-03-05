@@ -12,32 +12,32 @@ Elixir/Phoenix backend migration complete (March 2026). All existing endpoints p
 
 4. ~~**Seed & item inventory**~~ ✅ — `player_seeds` and `player_items` tables with upsert/spend operations. Client syncs full state on launch.
 
-## Tier 2 — Game Systems
+## Tier 2 — Game Systems ✅
 
-5. **Mallum quest completion & rewards** — Server manages quest timers, rolls rewards on completion, prevents instant-complete and re-rolling.
+5. ~~**Mallum quest completion & rewards**~~ ✅ — Server manages quest timers, rolls rewards on completion. 8 quests with weighted reward pools. Speed-up consumes Speed_Potion server-side.
 
-6. **Harvest quality scoring** — Server stores weather snapshots during growth and re-evaluates GrowthRecipe at harvest. Client can't fake perfect weather.
+6. ~~**Harvest quality scoring**~~ ✅ — Server stores weather snapshots during growth via WeatherPoller GenServer. GrowthRecipe evaluation ported to Elixir. seed_configs table stores per-seed recipe parameters.
 
-7. **Gift item ownership validation** — Server verifies sender actually owns the items before allowing gift send. Currently trusts the client.
+7. ~~**Gift item ownership validation**~~ ✅ — `send_gift` deducts items from sender in a transaction before creating the gift. `claim_gift` adds items to receiver.
 
-8. **Garden yield timers** — Server manages yield intervals and collection. Prevents manipulating lastYieldTimeUtc.
+8. ~~**Garden yield timers**~~ ✅ — Server manages garden growth and yield intervals. BerryBush and Oak configs. Lazy evaluation on collect.
 
-9. **Recipe mixing validation** — Server checks ingredient ownership and consumes them for Apotheke recipes.
+9. ~~**Recipe mixing validation**~~ ✅ — Handled via existing `POST /economy/spend-items` (Tier 1) + `POST /economy/add-items`. Server validates ingredient ownership.
 
-## Tier 3 — Timers & Weather
+## Tier 3 — Timers & Weather ✅
 
-10. **Plant growth timer validation** — Server tracks plantTimeUtc and validates maturity before allowing harvest.
+10. ~~**Plant growth timer validation**~~ ✅ — Server tracks plant_time_utc, validates maturity via seed_configs growth_duration_hours before allowing harvest. Lazy evaluation on harvest and GET /game/state.
 
-11. **Vase fill timer validation** — Server authorizes fill requests and tracks fill completion time.
+11. ~~**Vase fill timer validation**~~ ✅ — Server authorizes fill (requires idle mallum), tracks fill_start_time_utc, validates completion (60s per unit). Lazy evaluation on check.
 
-12. **Weather as server-side source of truth** — Server fetches weather data (or caches OpenWeatherMap responses) so all players at same location get identical weather. Eliminates client-side debug weather abuse.
+12. ~~**Weather as server-side source of truth**~~ ✅ — WeatherPoller GenServer proactively polls OWM every 15min for locations with active growth. weather_cache table with 15min TTL. Rain detection auto-fills vases after 15min sustained rain.
 
-13. **Save data migration** — Move from local save.json to server-authoritative save. Client becomes a cache that syncs on load. Server is source of truth.
+13. ~~**Save data migration**~~ ✅ — `GET /game/state` returns full game state (economy + entities + weather + cosmetic state). `PUT /game/state` saves cosmetic JSONB. Client is display cache; server is source of truth.
 
 ## Already Server-Driven
 
 - **Visitor system** — GET /visitors/tonight, quest accept/complete (implemented March 2026)
 - **Friend system** — requests, acceptance, friend list
-- **Gift delivery** — friendship-gated with daily limits (but no item ownership validation yet)
+- **Gift delivery** — friendship-gated with daily limits, now with item ownership validation
 - **Village snapshots** — display-only, pushed on save
 - **Auth** — auto-register, bearer token
