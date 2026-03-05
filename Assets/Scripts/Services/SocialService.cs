@@ -14,7 +14,7 @@ namespace Garden
         // Set via build script or DevServerConfig resource at runtime
         public static readonly string ServerBaseUrl =
 #if UNITY_EDITOR
-            "http://localhost:3000";
+            "http://localhost:4000";
 #else
             DevServerConfig.BaseUrl;
 #endif
