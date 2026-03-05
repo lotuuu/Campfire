@@ -169,6 +169,7 @@ namespace Garden
         private void ClearSaveData()
         {
             SaveManager.Instance.DeleteSave();
+            SocialSaveManager.Instance?.DeleteSave();
             Debug.Log("[Debug] Save data cleared. Reloading scene...");
             UnityEngine.SceneManagement.SceneManager.LoadScene(
                 UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
