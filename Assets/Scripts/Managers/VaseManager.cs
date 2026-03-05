@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Garden
@@ -62,6 +63,12 @@ namespace Garden
                     vase.state = VaseState.Full;
                     vase.fillStartTimeUtc = null;
                     changed = true;
+
+                    // Notify server
+                    if (GameService.Instance != null && GameService.Instance.IsOnline && vase.serverId > 0)
+                    {
+                        _ = GameService.Instance.CheckVase(vase.serverId);
+                    }
                 }
             }
             if (changed)
@@ -96,6 +103,13 @@ namespace Garden
             vase.fillStartTimeUtc = GameTime.UtcNow.ToString("o");
             SaveManager.Instance.Save();
             OnVasesChanged?.Invoke();
+
+            // Notify server
+            if (GameService.Instance != null && GameService.Instance.IsOnline && vase.serverId > 0)
+            {
+                _ = GameService.Instance.FillVase(vase.serverId);
+            }
+
             return true;
         }
 
@@ -136,8 +150,30 @@ namespace Garden
 
             data.vases.Add(new VaseSave { capacity = config.BaseCapacity, state = VaseState.Empty, gridX = gridX, gridY = gridY });
             SaveManager.Instance.Save();
+            int newIndex = data.vases.Count - 1;
             OnVasesChanged?.Invoke();
+
+            // Notify server
+            if (GameService.Instance != null && GameService.Instance.IsOnline)
+            {
+                _ = NotifyServerCraftVase(newIndex, gridX, gridY);
+            }
+
             return true;
+        }
+
+        private async Task NotifyServerCraftVase(int vaseIndex, int gridX, int gridY)
+        {
+            var result = await GameService.Instance.CraftVase(gridX, gridY);
+            if (result != null)
+            {
+                var data = SaveManager.Instance.Data;
+                if (vaseIndex < data.vases.Count)
+                {
+                    data.vases[vaseIndex].serverId = result.id;
+                    SaveManager.Instance.Save();
+                }
+            }
         }
 
         public float GetRemainingSeconds(int vaseIndex)

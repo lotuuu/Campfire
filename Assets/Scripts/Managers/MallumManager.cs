@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Garden
@@ -60,6 +61,12 @@ namespace Garden
                         CompleteQuest(mallum);
                         NotificationService.Instance?.CancelQuestNotification(i);
                         changed = true;
+
+                        // Notify server
+                        if (GameService.Instance != null && GameService.Instance.IsOnline && mallum.serverId > 0)
+                        {
+                            _ = GameService.Instance.CheckQuest(mallum.serverId);
+                        }
                     }
                 }
             }
@@ -106,6 +113,9 @@ namespace Garden
 
             SaveManager.Instance.Save();
             OnMallumsChanged?.Invoke();
+
+            // Note: VaseManager.SendToCollect already notifies server via GameService.FillVase
+
             return true;
         }
 
@@ -127,6 +137,13 @@ namespace Garden
 
             SaveManager.Instance.Save();
             OnMallumsChanged?.Invoke();
+
+            // Notify server
+            if (GameService.Instance != null && GameService.Instance.IsOnline)
+            {
+                _ = GameService.Instance.StartQuest(quest.questName);
+            }
+
             return true;
         }
 
@@ -137,6 +154,7 @@ namespace Garden
             var mallum = data.mallums[mallumIndex];
             if (mallum.state != MallumState.QuestComplete) return null;
 
+            int serverId = mallum.serverId;
             var rewards = CollectRewards(mallum);
 
             foreach (var r in rewards)
@@ -144,7 +162,24 @@ namespace Garden
 
             SaveManager.Instance.Save();
             OnMallumsChanged?.Invoke();
+
+            // Notify server for authoritative rewards
+            if (GameService.Instance != null && GameService.Instance.IsOnline && serverId > 0)
+            {
+                _ = NotifyServerCollectQuest(serverId);
+            }
+
             return rewards;
+        }
+
+        private async Task NotifyServerCollectQuest(int mallumServerId)
+        {
+            var resp = await GameService.Instance.CollectQuest(mallumServerId);
+            if (resp != null)
+            {
+                // Server response is authoritative — sync economy for seed rewards
+                await EconomyService.Instance.SyncFromServer();
+            }
         }
 
         public bool CraftMallumHouse(int gridX, int gridY)
@@ -249,10 +284,18 @@ namespace Garden
                 if (potion.count <= 0) data.items.Remove(potion);
             }
 
+            int serverId = mallum.serverId;
             CompleteQuest(mallum);
             NotificationService.Instance?.CancelQuestNotification(mallumIndex);
             SaveManager.Instance.Save();
             OnMallumsChanged?.Invoke();
+
+            // Notify server
+            if (GameService.Instance != null && GameService.Instance.IsOnline && serverId > 0)
+            {
+                _ = GameService.Instance.SpeedUpQuest(serverId);
+            }
+
             return true;
         }
 

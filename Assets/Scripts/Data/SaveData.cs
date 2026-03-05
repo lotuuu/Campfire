@@ -31,6 +31,7 @@ namespace Garden
     [Serializable]
     public class VaseSave
     {
+        public int serverId;
         public int capacity = 5;
         public int currentWater;
         public string fillStartTimeUtc;
@@ -44,6 +45,7 @@ namespace Garden
     [Serializable]
     public class PlotSave
     {
+        public int serverId;
         public string seedName;
         public string plantTimeUtc;
         public int waterCount;
@@ -60,6 +62,7 @@ namespace Garden
     [Serializable]
     public class GardenSave
     {
+        public int serverId;
         public string plantName;
         public string plantTimeUtc;
         public string lastYieldTimeUtc;

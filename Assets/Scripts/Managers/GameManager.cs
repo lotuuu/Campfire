@@ -32,7 +32,7 @@ namespace Garden
             }
 
             if (SocialService.Instance != null)
-                SocialService.Instance.OnSignedIn += () => EconomyService.Instance?.Initialize();
+                SocialService.Instance.OnSignedIn += OnSignedIn;
         }
 
         private void Update()
@@ -43,6 +43,30 @@ namespace Garden
                 Keyboard.current.leftShiftKey.isPressed)
                 CurrencyManager.Instance?.GrantInfiniteGems();
 #endif
+        }
+
+        private void OnSignedIn()
+        {
+            EconomyService.Instance?.Initialize();
+
+            // Initialize GameService after EconomyService starts
+            if (EconomyService.Instance != null)
+            {
+                EconomyService.Instance.OnStateSynced += OnEconomySynced;
+            }
+            else
+            {
+                // Fallback: init GameService directly if no EconomyService
+                GameService.Instance?.Initialize();
+            }
+        }
+
+        private void OnEconomySynced()
+        {
+            if (EconomyService.Instance != null)
+                EconomyService.Instance.OnStateSynced -= OnEconomySynced;
+
+            GameService.Instance?.Initialize();
         }
 
         private void InitializeNewPlayer()

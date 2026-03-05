@@ -14,6 +14,7 @@ namespace Garden
     [Serializable]
     public class MallumSave
     {
+        public int serverId;
         public MallumState state = MallumState.Idle;
         public int assignedVaseIndex = -1;
         public string assignedQuestName;

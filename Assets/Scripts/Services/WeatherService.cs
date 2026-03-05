@@ -91,6 +91,13 @@ namespace Garden
                 IsLocationResolved = true;
                 Debug.Log($"Location acquired: {latitude}, {longitude}");
                 OnLocationResolved?.Invoke(true);
+
+                // Submit location to game server
+                if (GameService.Instance != null && GameService.Instance.IsOnline)
+                {
+                    _ = GameService.Instance.SubmitLocation(latitude, longitude);
+                }
+
                 if (_fetchLoopCoroutine != null) StopCoroutine(_fetchLoopCoroutine);
                 _fetchLoopCoroutine = StartCoroutine(FetchWeatherLoop());
 #if UNITY_ANDROID

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Garden
@@ -52,6 +53,13 @@ namespace Garden
 
             SaveManager.Instance.Save();
             OnGardenChanged?.Invoke(gardenIndex);
+
+            // Notify server
+            if (GameService.Instance != null && GameService.Instance.IsOnline)
+            {
+                _ = GameService.Instance.PlantGarden(plantName, garden.gridX, garden.gridY);
+            }
+
             return true;
         }
 
@@ -118,6 +126,12 @@ namespace Garden
                     garden.lastYieldTimeUtc = now.ToString("o");
                     changed = true;
                     OnYieldCollected?.Invoke(i, plantData.yieldItem, plantData.yieldAmount);
+
+                    // Notify server
+                    if (GameService.Instance != null && GameService.Instance.IsOnline && garden.serverId > 0)
+                    {
+                        _ = GameService.Instance.CollectGarden(garden.serverId);
+                    }
                 }
             }
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Garden
@@ -171,8 +172,30 @@ namespace Garden
 
             data.plots.Add(new PlotSave { state = PlotState.Empty, gridX = gridX, gridY = gridY });
             SaveManager.Instance.Save();
-            OnPlotChanged?.Invoke(data.plots.Count - 1);
+            int newIndex = data.plots.Count - 1;
+            OnPlotChanged?.Invoke(newIndex);
+
+            // Notify server
+            if (GameService.Instance != null && GameService.Instance.IsOnline)
+            {
+                _ = NotifyServerCraftPlot(newIndex, gridX, gridY);
+            }
+
             return true;
+        }
+
+        private async Task NotifyServerCraftPlot(int plotIndex, int gridX, int gridY)
+        {
+            var result = await GameService.Instance.CraftPlot(gridX, gridY);
+            if (result != null)
+            {
+                var data = SaveManager.Instance.Data;
+                if (plotIndex < data.plots.Count)
+                {
+                    data.plots[plotIndex].serverId = result.id;
+                    SaveManager.Instance.Save();
+                }
+            }
         }
 
         public bool Plant(int plotIndex, string seedName)
@@ -209,6 +232,12 @@ namespace Garden
             var remaining = GetRemainingSeconds(plotIndex);
             NotificationService.Instance?.SchedulePlantNotification(plotIndex, seedName, remaining);
 
+            // Notify server
+            if (GameService.Instance != null && GameService.Instance.IsOnline && plot.serverId > 0)
+            {
+                _ = GameService.Instance.PlantSeed(plot.serverId, seedName);
+            }
+
             return true;
         }
 
@@ -231,6 +260,21 @@ namespace Garden
 
             SaveManager.Instance.Save();
             OnPlotChanged?.Invoke(plotIndex);
+
+            // Notify server — find the vase that provided the water
+            if (GameService.Instance != null && GameService.Instance.IsOnline && plot.serverId > 0)
+            {
+                // Find the most recently used vase (the one that just had water spent)
+                var vases = data.vases;
+                int vaseServerId = 0;
+                for (int i = 0; i < vases.Count; i++)
+                {
+                    if (vases[i].serverId > 0) { vaseServerId = vases[i].serverId; break; }
+                }
+                if (vaseServerId > 0)
+                    _ = GameService.Instance.WaterPlot(plot.serverId, vaseServerId);
+            }
+
             return true;
         }
 
@@ -279,15 +323,11 @@ namespace Garden
             var seed = LoadSeed(plot.seedName);
             if (seed == null) return null;
 
+            // Local fallback calculation
             float score = 1f;
             if (seed.recipe != null)
                 score = seed.recipe.Evaluate(plot.snapshots ?? new GrowthSnapshots(), plot.waterCount);
-
             int drops = Mathf.Max(1, Mathf.RoundToInt(seed.baseDrops * score));
-
-            AddItem(data, seed.name + "_harvest", drops);
-            EconomyService.Instance?.Enqueue("add-items",
-                JsonUtility.ToJson(new AddItemRequest { item_name = seed.name + "_harvest", count = drops }));
 
             var result = new HarvestResult
             {
@@ -299,12 +339,19 @@ namespace Garden
                 recipe = seed.recipe
             };
 
+            int serverId = plot.serverId;
+
             plot.seedName = null;
             plot.plantTimeUtc = null;
             plot.waterCount = 0;
             plot.snapshots = new GrowthSnapshots();
             plot.lastWateredUtc = null;
             plot.state = PlotState.Empty;
+
+            // Add items locally as fallback (server response will be authoritative)
+            AddItem(data, seed.name + "_harvest", drops);
+            EconomyService.Instance?.Enqueue("add-items",
+                JsonUtility.ToJson(new AddItemRequest { item_name = seed.name + "_harvest", count = drops }));
 
             SaveManager.Instance.Save();
 
@@ -314,7 +361,23 @@ namespace Garden
             NotificationService.Instance?.CancelPlantNotification(plotIndex);
             NotificationService.Instance?.CancelWaterNotification(plotIndex);
 
+            // Notify server for authoritative harvest
+            if (GameService.Instance != null && GameService.Instance.IsOnline && serverId > 0)
+            {
+                _ = NotifyServerHarvest(serverId, result);
+            }
+
             return result;
+        }
+
+        private async Task NotifyServerHarvest(int serverId, HarvestResult localResult)
+        {
+            var resp = await GameService.Instance.Harvest(serverId);
+            if (resp != null)
+            {
+                // Server response is authoritative — sync economy
+                await EconomyService.Instance.SyncFromServer();
+            }
         }
 
         public bool InstantFinish(int plotIndex)
