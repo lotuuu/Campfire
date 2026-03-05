@@ -26,6 +26,26 @@ defmodule CampFireWeb do
       # Import common connection and controller functions to use in pipelines
       import Plug.Conn
       import Phoenix.Controller
+      import Phoenix.LiveView.Router
+    end
+  end
+
+  def html do
+    quote do
+      use Phoenix.Component
+      import Phoenix.HTML
+      import Plug.CSRFProtection, only: [get_csrf_token: 0]
+      unquote(verified_routes())
+    end
+  end
+
+  def live_view do
+    quote do
+      use Phoenix.LiveView,
+        layout: {CampFireWeb.Layouts, :admin}
+
+      import Phoenix.HTML
+      unquote(verified_routes())
     end
   end
 

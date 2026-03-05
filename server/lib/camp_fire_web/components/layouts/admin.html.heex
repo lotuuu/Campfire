@@ -1,0 +1,15 @@
+<div class="flex h-screen">
+  <nav class="w-56 bg-gray-900 text-gray-300 flex flex-col py-4">
+    <div class="px-4 mb-6">
+      <h1 class="text-lg font-bold text-white">Camp Fire Admin</h1>
+    </div>
+    <a href="/admin/seeds" class={"block px-4 py-2 hover:bg-gray-800 #{if @active_tab == :seeds, do: "bg-gray-800 text-white", else: ""}"}>Seeds</a>
+    <a href="/admin/economy" class={"block px-4 py-2 hover:bg-gray-800 #{if @active_tab == :economy, do: "bg-gray-800 text-white", else: ""}"}>Economy</a>
+    <a href="/admin/visitors" class={"block px-4 py-2 hover:bg-gray-800 #{if @active_tab == :visitors, do: "bg-gray-800 text-white", else: ""}"}>Visitors</a>
+    <a href="/admin/quests" class={"block px-4 py-2 hover:bg-gray-800 #{if @active_tab == :quests, do: "bg-gray-800 text-white", else: ""}"}>Quests</a>
+    <a href="/admin/players" class={"block px-4 py-2 hover:bg-gray-800 #{if @active_tab == :players, do: "bg-gray-800 text-white", else: ""}"}>Players</a>
+  </nav>
+  <main class="flex-1 overflow-y-auto p-6">
+    {@inner_content}
+  </main>
+</div>
