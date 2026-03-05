@@ -40,6 +40,8 @@ defmodule CampFire.MixProject do
       {:telemetry_poller, "~> 1.0"},
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
+      {:phoenix_html, "~> 4.1"},
+      {:phoenix_live_view, "~> 1.0"},
       {:bandit, "~> 1.5"},
       {:hammer, "~> 6.2"},
       {:req, "~> 0.5"}
