@@ -88,15 +88,12 @@ namespace Garden
 
             cellTemplate = Resources.Load<VisualTreeAsset>("UI/Templates/GridCell");
             var hexSprites = Resources.LoadAll<Sprite>("Sprites/TX_HexagonTest");
-            Debug.Log($"[CampsiteViewUI] Loaded {hexSprites.Length} sprites from TX_HexagonTest");
             foreach (var s in hexSprites)
             {
-                Debug.Log($"[CampsiteViewUI] Sprite: {s.name}");
                 if (s.name == "TX_HexagonTest_3") emptyPlotSprite = s;
                 else if (s.name == "TX_HexagonTest_2") growingPlotSprite = s;
                 else if (s.name == "TX_HexagonTest_0") maturePlotSprite = s;
             }
-            Debug.Log($"[CampsiteViewUI] empty={emptyPlotSprite != null}, growing={growingPlotSprite != null}, mature={maturePlotSprite != null}");
             visitTransition = root.Q("visit-transition");
 
             panController = new CampsitePanController(viewport, canvas);
@@ -126,6 +123,8 @@ namespace Garden
                 VisitorManager.Instance.OnVisitorArrived += RebuildGrid;
                 VisitorManager.Instance.OnVisitorDeparted += RebuildGrid;
             }
+            if (GameService.Instance != null)
+                GameService.Instance.OnStateLoaded += RebuildGrid;
 
             // Tap backdrop to close interaction panel (consumes the tap)
             interactionBackdrop?.RegisterCallback<ClickEvent>(evt =>
@@ -149,6 +148,8 @@ namespace Garden
                 VaseManager.Instance.OnVasesChanged -= RebuildGrid;
             if (MallumManager.Instance != null)
                 MallumManager.Instance.OnMallumsChanged -= RebuildGrid;
+            if (GameService.Instance != null)
+                GameService.Instance.OnStateLoaded -= RebuildGrid;
         }
 
         private void Update()
@@ -412,18 +413,15 @@ namespace Garden
                     var plot = SaveManager.Instance.Data.plots[index];
                     if (label != null) label.text = string.IsNullOrEmpty(plot.seedName) ? "Plot" : PlotManager.GetSeedDisplayName(plot.seedName);
                     if (status != null) status.text = plot.state.ToString();
-                    Debug.Log($"[CampsiteViewUI] Plot {index} state={plot.state}");
                     if (plot.state == PlotState.Empty && emptyPlotSprite != null)
                     {
                         cell.style.backgroundImage = new StyleBackground(emptyPlotSprite);
                         cell.AddToClassList("grid-cell--sprite");
-                        Debug.Log($"[CampsiteViewUI] Applied EMPTY sprite to plot {index}");
                     }
                     else if (plot.state == PlotState.Growing && growingPlotSprite != null)
                     {
                         cell.style.backgroundImage = new StyleBackground(growingPlotSprite);
                         cell.AddToClassList("grid-cell--sprite");
-                        Debug.Log($"[CampsiteViewUI] Applied GROWING sprite to plot {index}");
                         if (progress != null && progressFill != null)
                         {
                             progress.AddToClassList("cell-progress--visible");
@@ -434,7 +432,6 @@ namespace Garden
                     {
                         cell.style.backgroundImage = new StyleBackground(maturePlotSprite);
                         cell.AddToClassList("grid-cell--sprite");
-                        Debug.Log($"[CampsiteViewUI] Applied MATURE sprite to plot {index}");
                     }
                     break;
 
