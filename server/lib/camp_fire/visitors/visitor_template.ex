@@ -7,10 +7,10 @@ defmodule CampFire.Visitors.VisitorTemplate do
     field :portrait_id, :string
     field :type, :string
     field :flame_level_min, :integer, default: 1
-    field :dialogue_pool, {:array, :map}, default: []
-    field :offer_pool, {:array, :map}, default: []
-    field :gift_pool, {:array, :map}, default: []
-    field :quest_pool, {:array, :map}, default: []
+    field :dialogue_pool, CampFire.JsonArray, default: []
+    field :offer_pool, CampFire.JsonArray, default: []
+    field :gift_pool, CampFire.JsonArray, default: []
+    field :quest_pool, CampFire.JsonArray, default: []
     field :weight, :float, default: 1.0
   end
 end

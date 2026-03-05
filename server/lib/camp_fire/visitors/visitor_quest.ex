@@ -9,7 +9,7 @@ defmodule CampFire.Visitors.VisitorQuest do
     field :request_count, :integer
     field :return_date_utc, :date
     field :reward, :map, default: %{}
-    field :return_dialogue, {:array, :string}, default: []
+    field :return_dialogue, CampFire.JsonArray, default: []
     timestamps()
   end
 
