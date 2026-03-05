@@ -194,3 +194,80 @@ for config <- seed_configs do
 end
 
 IO.puts("Seeds complete.")
+
+# ── Admin Config Seeds ──
+
+alias CampFire.Admin.{QuestConfig, GardenConfig, GameConfig}
+
+# Quest configs (from Game.Mallums @quest_configs)
+quests = [
+  %{quest_name: "SwampForage", duration_minutes: 30, required_flame_level: 1, reward_rolls: 1,
+    reward_pool: [%{"seed_name" => "Sprouts", "weight" => 40, "min" => 1, "max" => 2}, %{"seed_name" => "Cress", "weight" => 30, "min" => 1, "max" => 1}, %{"seed_name" => "Basil", "weight" => 20, "min" => 1, "max" => 1}, %{"seed_name" => "Mint", "weight" => 10, "min" => 1, "max" => 1}]},
+  %{quest_name: "MeadowExpedition", duration_minutes: 60, required_flame_level: 2, reward_rolls: 1,
+    reward_pool: [%{"seed_name" => "Basil", "weight" => 30, "min" => 1, "max" => 2}, %{"seed_name" => "Chamomile", "weight" => 25, "min" => 1, "max" => 1}, %{"seed_name" => "Mint", "weight" => 25, "min" => 1, "max" => 1}, %{"seed_name" => "Marigold", "weight" => 15, "min" => 1, "max" => 1}, %{"seed_name" => "Sprouts", "weight" => 5, "min" => 1, "max" => 2}]},
+  %{quest_name: "DeepWoodsTrek", duration_minutes: 120, required_flame_level: 3, reward_rolls: 2,
+    reward_pool: [%{"seed_name" => "Lavender", "weight" => 25, "min" => 1, "max" => 2}, %{"seed_name" => "Rosemary", "weight" => 25, "min" => 1, "max" => 1}, %{"seed_name" => "Chamomile", "weight" => 20, "min" => 1, "max" => 2}, %{"seed_name" => "Poppy", "weight" => 20, "min" => 1, "max" => 1}, %{"seed_name" => "Basil", "weight" => 10, "min" => 1, "max" => 2}]},
+  %{quest_name: "MountainPass", duration_minutes: 180, required_flame_level: 4, reward_rolls: 2,
+    reward_pool: [%{"seed_name" => "Dahlia", "weight" => 25, "min" => 1, "max" => 1}, %{"seed_name" => "Poppy", "weight" => 25, "min" => 1, "max" => 2}, %{"seed_name" => "Lavender", "weight" => 20, "min" => 1, "max" => 2}, %{"seed_name" => "Rosemary", "weight" => 15, "min" => 1, "max" => 1}, %{"seed_name" => "Marigold", "weight" => 15, "min" => 1, "max" => 2}]},
+  %{quest_name: "CrystalCavern", duration_minutes: 240, required_flame_level: 5, reward_rolls: 2,
+    reward_pool: [%{"seed_name" => "Jasmine", "weight" => 25, "min" => 1, "max" => 1}, %{"seed_name" => "Dahlia", "weight" => 25, "min" => 1, "max" => 2}, %{"seed_name" => "Moonflower", "weight" => 15, "min" => 1, "max" => 1}, %{"seed_name" => "Lavender", "weight" => 20, "min" => 1, "max" => 2}, %{"seed_name" => "Poppy", "weight" => 15, "min" => 1, "max" => 1}]},
+  %{quest_name: "StarlitMarsh", duration_minutes: 300, required_flame_level: 6, reward_rolls: 3,
+    reward_pool: [%{"seed_name" => "Moonflower", "weight" => 25, "min" => 1, "max" => 1}, %{"seed_name" => "Jasmine", "weight" => 25, "min" => 1, "max" => 2}, %{"seed_name" => "Snowdrop", "weight" => 15, "min" => 1, "max" => 1}, %{"seed_name" => "Dahlia", "weight" => 20, "min" => 1, "max" => 1}, %{"seed_name" => "Rosemary", "weight" => 15, "min" => 1, "max" => 2}]},
+  %{quest_name: "FrostpeakSummit", duration_minutes: 360, required_flame_level: 7, reward_rolls: 3,
+    reward_pool: [%{"seed_name" => "Snowdrop", "weight" => 30, "min" => 1, "max" => 2}, %{"seed_name" => "Moonflower", "weight" => 25, "min" => 1, "max" => 1}, %{"seed_name" => "Jasmine", "weight" => 20, "min" => 1, "max" => 2}, %{"seed_name" => "Dahlia", "weight" => 15, "min" => 1, "max" => 1}, %{"seed_name" => "Lavender", "weight" => 10, "min" => 1, "max" => 2}]},
+  %{quest_name: "AncientGrove", duration_minutes: 480, required_flame_level: 8, reward_rolls: 3,
+    reward_pool: [%{"seed_name" => "Moonflower", "weight" => 25, "min" => 1, "max" => 2}, %{"seed_name" => "Snowdrop", "weight" => 25, "min" => 1, "max" => 2}, %{"seed_name" => "Jasmine", "weight" => 20, "min" => 1, "max" => 2}, %{"seed_name" => "Dahlia", "weight" => 15, "min" => 1, "max" => 2}, %{"seed_name" => "Rosemary", "weight" => 15, "min" => 1, "max" => 2}]}
+]
+
+for q <- quests do
+  %QuestConfig{}
+  |> QuestConfig.changeset(q)
+  |> Repo.insert!(on_conflict: :nothing, conflict_target: :quest_name)
+end
+
+# Garden configs
+gardens = [
+  %{plant_name: "BerryBush", growth_duration_hours: 24.0, yield_item: "Berry", yield_amount: 2, yield_interval_hours: 12.0, water_required: 1, mana_cost: 30.0},
+  %{plant_name: "Oak", growth_duration_hours: 48.0, yield_item: "Acorn", yield_amount: 1, yield_interval_hours: 24.0, water_required: 1, mana_cost: 50.0}
+]
+
+for g <- gardens do
+  %GardenConfig{}
+  |> GardenConfig.changeset(g)
+  |> Repo.insert!(on_conflict: :nothing, conflict_target: :plant_name)
+end
+
+# Game configs (economy constants)
+game_configs = [
+  %{key: "flame_config", value: %{
+    "base_mana_per_second" => 0.5,
+    "mana_per_level" => 0.3,
+    "max_flame_level" => 12,
+    "entity_caps" => [6, 6, 8, 8, 12, 15, 18, 22, 26, 30, 35, 40],
+    "grid_sizes" => [2, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5]
+  }},
+  %{key: "vase_config", value: %{
+    "craft_cost" => 15,
+    "default_capacity" => 5,
+    "fill_seconds_per_unit" => 60,
+    "capacity_tiers" => [5, 8, 12, 20],
+    "upgrade_costs" => [75, 200, 500]
+  }},
+  %{key: "mallum_house_config", value: %{
+    "mallums_per_house" => 1,
+    "house_costs" => [
+      %{"mana" => 15, "harvests" => []},
+      %{"mana" => 30, "harvests" => [%{"item" => "Basil_harvest", "count" => 2}]},
+      %{"mana" => 60, "harvests" => [%{"item" => "Lavender_harvest", "count" => 3}]},
+      %{"mana" => 100, "harvests" => [%{"item" => "Chamomile_harvest", "count" => 2}, %{"item" => "Mint_harvest", "count" => 2}]}
+    ]
+  }}
+]
+
+for c <- game_configs do
+  %GameConfig{}
+  |> GameConfig.changeset(c)
+  |> Repo.insert!(on_conflict: :nothing, conflict_target: :key)
+end
+
+IO.puts("Admin config seeds complete.")
