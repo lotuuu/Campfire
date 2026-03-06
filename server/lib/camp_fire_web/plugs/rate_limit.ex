@@ -21,9 +21,20 @@ defmodule CampFireWeb.Plugs.RateLimit do
         conn
 
       {:deny, _limit} ->
+        accepts = get_req_header(conn, "accept")
+        is_html = Enum.any?(accepts, &String.contains?(&1, "text/html"))
+
         conn
         |> put_status(429)
-        |> Phoenix.Controller.json(%{error: "Too many requests, please try again later"})
+        |> then(fn c ->
+          if is_html do
+            c
+            |> Phoenix.Controller.put_view(CampFireWeb.ErrorHTML)
+            |> Phoenix.Controller.text("Too many requests, please try again later")
+          else
+            Phoenix.Controller.json(c, %{error: "Too many requests, please try again later"})
+          end
+        end)
         |> halt()
     end
   end

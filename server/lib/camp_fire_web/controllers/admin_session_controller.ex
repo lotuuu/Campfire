@@ -4,7 +4,7 @@ defmodule CampFireWeb.AdminSessionController do
   def create(conn, %{"secret" => secret}) do
     admin_secret = System.get_env("ADMIN_SECRET") || "dev-admin-secret"
 
-    if secret == admin_secret do
+    if Plug.Crypto.secure_compare(secret, admin_secret) do
       conn
       |> put_session(:admin_authenticated, true)
       |> redirect(to: "/admin/seeds")

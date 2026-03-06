@@ -4,7 +4,7 @@ defmodule CampFire.Accounts.Player do
 
   schema "players" do
     field :uid, :string
-    field :auth_token, :string
+    field :token_hash, :string
     field :friend_code, :string
     field :display_name, :string, default: "Camper"
     timestamps()
@@ -12,10 +12,10 @@ defmodule CampFire.Accounts.Player do
 
   def registration_changeset(player, attrs) do
     player
-    |> cast(attrs, [:uid, :auth_token, :friend_code])
-    |> validate_required([:uid, :auth_token, :friend_code])
+    |> cast(attrs, [:uid, :token_hash, :friend_code])
+    |> validate_required([:uid, :token_hash, :friend_code])
     |> unique_constraint(:uid)
-    |> unique_constraint(:auth_token)
+    |> unique_constraint(:token_hash)
     |> unique_constraint(:friend_code)
   end
 

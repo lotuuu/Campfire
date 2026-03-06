@@ -49,7 +49,7 @@ namespace Garden
         public void SaveWeatherData(string apiKey, float lat, float lon, WeatherCondition condition)
         {
 #if UNITY_IOS
-            PlayerPrefs.SetString("weather_api_key", apiKey);
+            KeychainHelper.SetString("weather_api_key", apiKey);
             PlayerPrefs.SetFloat("weather_lat", lat);
             PlayerPrefs.SetFloat("weather_lon", lon);
             PlayerPrefs.SetInt("weather_condition", (int)condition);

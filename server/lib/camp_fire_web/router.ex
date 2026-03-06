@@ -23,9 +23,13 @@ defmodule CampFireWeb.Router do
     plug CampFireWeb.Plugs.Authenticate
   end
 
+  pipeline :admin_rate_limit do
+    plug CampFireWeb.Plugs.RateLimit, max: 5, window_ms: 60_000
+  end
+
   # Admin login (no auth required)
   scope "/admin", CampFireWeb do
-    pipe_through :browser
+    pipe_through [:browser, :admin_rate_limit]
 
     live "/login", AdminLoginLive, :index
     post "/login", AdminSessionController, :create

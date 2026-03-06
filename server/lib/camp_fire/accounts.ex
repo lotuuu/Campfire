@@ -7,8 +7,13 @@ defmodule CampFire.Accounts do
   @code_chars String.graphemes("ABCDEFGHJKLMNPQRSTUVWXYZ23456789")
   @max_retries 10
 
+  def hash_token(token) do
+    :crypto.hash(:sha256, token) |> Base.encode16(case: :lower)
+  end
+
   def get_player_by_token(token) do
-    Repo.one(from p in Player, where: p.auth_token == ^token)
+    hash = hash_token(token)
+    Repo.one(from p in Player, where: p.token_hash == ^hash)
   end
 
   def get_player_by_uid(uid) do
@@ -32,9 +37,10 @@ defmodule CampFire.Accounts do
 
   defp do_register(uid, auth_token, attempt) do
     friend_code = generate_friend_code()
+    token_hash = hash_token(auth_token)
 
     %Player{}
-    |> Player.registration_changeset(%{uid: uid, auth_token: auth_token, friend_code: friend_code})
+    |> Player.registration_changeset(%{uid: uid, token_hash: token_hash, friend_code: friend_code})
     |> Repo.insert()
     |> case do
       {:ok, player} ->

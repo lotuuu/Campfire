@@ -64,3 +64,16 @@ config :phoenix, :plug_init_mode, :runtime
 
 # Disable rate limiting in dev
 config :camp_fire, disable_rate_limit: true
+
+# In dev, read OWM key from Unity's secrets.json so devs don't need env vars
+secrets_path = Path.expand("../../Assets/Resources/Config/secrets.json", __DIR__)
+
+if File.exists?(secrets_path) do
+  case secrets_path |> File.read!() |> :json.decode() do
+    %{"openWeatherMapApiKey" => key} when is_binary(key) and key != "" ->
+      config :camp_fire, :owm_api_key, key
+
+    _ ->
+      :ok
+  end
+end

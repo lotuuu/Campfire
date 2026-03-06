@@ -1,12 +1,29 @@
 #import "UnityAppController.h"
 #import <UserNotifications/UserNotifications.h>
 #import <Foundation/Foundation.h>
+#import <Security/Security.h>
 
-// NSUserDefaults keys — must match PlayerPrefs keys set from C#.
-static NSString* const kApiKey    = @"weather_api_key";
-static NSString* const kLatKey    = @"weather_lat";
-static NSString* const kLonKey    = @"weather_lon";
-static NSString* const kCondKey   = @"weather_condition";
+static NSString* const kApiKeychain = @"weather_api_key";
+static NSString* const kLatKey      = @"weather_lat";
+static NSString* const kLonKey      = @"weather_lon";
+static NSString* const kCondKey     = @"weather_condition";
+
+static NSString* KeychainGetString(NSString* key) {
+    NSString* service = [[NSBundle mainBundle] bundleIdentifier] ?: @"com.garden.campfire";
+    NSDictionary* query = @{
+        (__bridge id)kSecClass:       (__bridge id)kSecClassGenericPassword,
+        (__bridge id)kSecAttrService: service,
+        (__bridge id)kSecAttrAccount: key,
+        (__bridge id)kSecReturnData:  @YES,
+        (__bridge id)kSecMatchLimit:  (__bridge id)kSecMatchLimitOne
+    };
+    CFDataRef dataRef = NULL;
+    OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef)query,
+                                          (CFTypeRef*)&dataRef);
+    if (status != errSecSuccess || !dataRef) return nil;
+    return [[NSString alloc] initWithData:(__bridge_transfer NSData*)dataRef
+                                 encoding:NSUTF8StringEncoding];
+}
 
 @implementation UnityAppController (WeatherFetch)
 
@@ -14,7 +31,7 @@ static NSString* const kCondKey   = @"weather_condition";
     performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
 {
     NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
-    NSString* apiKey  = [defaults stringForKey:kApiKey];
+    NSString* apiKey  = KeychainGetString(kApiKeychain);
     double lat        = [defaults doubleForKey:kLatKey];
     double lon        = [defaults doubleForKey:kLonKey];
     NSInteger lastCond = [defaults integerForKey:kCondKey];
