@@ -22,9 +22,6 @@ namespace Garden
         [Header("Category")]
         public RecipeCategory category;
 
-        [Header("Visuals")]
-        public Sprite icon;
-
         public static string FormatItemName(string internalName)
         {
             if (string.IsNullOrEmpty(internalName)) return "";

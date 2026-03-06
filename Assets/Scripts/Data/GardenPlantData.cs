@@ -24,11 +24,6 @@ namespace Garden
         [Header("Building Costs")]
         public List<GardenCostTier> costTiers = new();
 
-        [Header("Visuals")]
-        public Sprite icon;
-        public Sprite[] growthSprites;
-        public Sprite matureSprite;
-
         public GardenCostTier GetCost(int existingCount)
         {
             if (existingCount < 0 || existingCount >= costTiers.Count) return null;
