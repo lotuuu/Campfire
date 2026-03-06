@@ -4,114 +4,16 @@ defmodule CampFire.Game.Mallums do
   alias CampFire.Game.PlayerMallum
   alias CampFire.Economy
 
-  @quest_configs %{
-    "SwampForage" => %{
-      duration_minutes: 30,
-      flame_level: 1,
-      reward_rolls: 1,
-      rewards: [
-        %{seed: "Sprouts", weight: 40, min: 1, max: 2},
-        %{seed: "Cress", weight: 30, min: 1, max: 1},
-        %{seed: "Basil", weight: 20, min: 1, max: 1},
-        %{seed: "Mint", weight: 10, min: 1, max: 1}
-      ]
-    },
-    "MeadowExpedition" => %{
-      duration_minutes: 60,
-      flame_level: 2,
-      reward_rolls: 1,
-      rewards: [
-        %{seed: "Basil", weight: 30, min: 1, max: 2},
-        %{seed: "Chamomile", weight: 25, min: 1, max: 1},
-        %{seed: "Mint", weight: 25, min: 1, max: 1},
-        %{seed: "Marigold", weight: 15, min: 1, max: 1},
-        %{seed: "Sprouts", weight: 5, min: 1, max: 2}
-      ]
-    },
-    "DeepWoodsTrek" => %{
-      duration_minutes: 120,
-      flame_level: 3,
-      reward_rolls: 2,
-      rewards: [
-        %{seed: "Lavender", weight: 25, min: 1, max: 2},
-        %{seed: "Rosemary", weight: 25, min: 1, max: 1},
-        %{seed: "Chamomile", weight: 20, min: 1, max: 2},
-        %{seed: "Poppy", weight: 20, min: 1, max: 1},
-        %{seed: "Basil", weight: 10, min: 1, max: 2}
-      ]
-    },
-    "MountainPass" => %{
-      duration_minutes: 180,
-      flame_level: 4,
-      reward_rolls: 2,
-      rewards: [
-        %{seed: "Dahlia", weight: 25, min: 1, max: 1},
-        %{seed: "Poppy", weight: 25, min: 1, max: 2},
-        %{seed: "Lavender", weight: 20, min: 1, max: 2},
-        %{seed: "Rosemary", weight: 15, min: 1, max: 1},
-        %{seed: "Marigold", weight: 15, min: 1, max: 2}
-      ]
-    },
-    "CrystalCavern" => %{
-      duration_minutes: 240,
-      flame_level: 5,
-      reward_rolls: 2,
-      rewards: [
-        %{seed: "Jasmine", weight: 25, min: 1, max: 1},
-        %{seed: "Dahlia", weight: 25, min: 1, max: 2},
-        %{seed: "Moonflower", weight: 15, min: 1, max: 1},
-        %{seed: "Lavender", weight: 20, min: 1, max: 2},
-        %{seed: "Poppy", weight: 15, min: 1, max: 1}
-      ]
-    },
-    "StarlitMarsh" => %{
-      duration_minutes: 300,
-      flame_level: 6,
-      reward_rolls: 3,
-      rewards: [
-        %{seed: "Moonflower", weight: 25, min: 1, max: 1},
-        %{seed: "Jasmine", weight: 25, min: 1, max: 2},
-        %{seed: "Snowdrop", weight: 15, min: 1, max: 1},
-        %{seed: "Dahlia", weight: 20, min: 1, max: 1},
-        %{seed: "Rosemary", weight: 15, min: 1, max: 2}
-      ]
-    },
-    "FrostpeakSummit" => %{
-      duration_minutes: 360,
-      flame_level: 7,
-      reward_rolls: 3,
-      rewards: [
-        %{seed: "Snowdrop", weight: 30, min: 1, max: 2},
-        %{seed: "Moonflower", weight: 25, min: 1, max: 1},
-        %{seed: "Jasmine", weight: 20, min: 1, max: 2},
-        %{seed: "Dahlia", weight: 15, min: 1, max: 1},
-        %{seed: "Lavender", weight: 10, min: 1, max: 2}
-      ]
-    },
-    "AncientGrove" => %{
-      duration_minutes: 480,
-      flame_level: 8,
-      reward_rolls: 3,
-      rewards: [
-        %{seed: "Moonflower", weight: 25, min: 1, max: 2},
-        %{seed: "Snowdrop", weight: 25, min: 1, max: 2},
-        %{seed: "Jasmine", weight: 20, min: 1, max: 2},
-        %{seed: "Dahlia", weight: 15, min: 1, max: 2},
-        %{seed: "Rosemary", weight: 15, min: 1, max: 2}
-      ]
-    }
-  }
-
   # --- Config Helpers ---
 
   defp get_quest_config(quest_name) do
     case CampFire.ConfigCache.get("quest_configs") do
       nil ->
-        Map.get(@quest_configs, quest_name)
+        nil
 
       quest_map ->
         case Map.get(quest_map, quest_name) do
-          nil -> Map.get(@quest_configs, quest_name)
+          nil -> nil
           cached -> normalize_quest_config(cached)
         end
     end
@@ -119,25 +21,17 @@ defmodule CampFire.Game.Mallums do
 
   defp get_all_quest_configs do
     case CampFire.ConfigCache.get("quest_configs") do
-      nil ->
-        @quest_configs
-
-      quest_map when map_size(quest_map) == 0 ->
-        @quest_configs
-
-      quest_map ->
-        merged = Map.merge(@quest_configs, Map.new(quest_map, fn {k, v} -> {k, normalize_quest_config(v)} end))
-        merged
+      nil -> %{}
+      quest_map -> Map.new(quest_map, fn {k, v} -> {k, normalize_quest_config(v)} end)
     end
   end
 
-  # Translate cached QuestConfig fields to the format used by @quest_configs
   defp normalize_quest_config(cached) do
     rewards =
       (cached[:reward_pool] || cached["reward_pool"] || [])
       |> Enum.map(fn entry ->
         %{
-          seed: entry["seed"] || entry[:seed],
+          seed: entry["seed_name"] || entry["seed"] || entry[:seed_name] || entry[:seed],
           weight: entry["weight"] || entry[:weight],
           min: entry["min"] || entry[:min],
           max: entry["max"] || entry[:max]

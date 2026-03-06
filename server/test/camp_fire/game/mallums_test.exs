@@ -4,10 +4,16 @@ defmodule CampFire.Game.MallumsTest do
   alias CampFire.Game.{Mallums, PlayerMallum}
   alias CampFire.Economy
 
+  setup do
+    seed_quest_configs()
+    :ok
+  end
+
   defp setup_player(_context \\ %{}) do
     player = register_player()
     {:ok, _economy} = Economy.init_economy(player.uid)
-    {:ok, mallum} = Mallums.create_mallum(player.uid)
+    # init_economy creates a starter mallum
+    [mallum] = Mallums.list_mallums(player.uid)
     {player, mallum}
   end
 
@@ -53,8 +59,8 @@ defmodule CampFire.Game.MallumsTest do
       {player, _mallum} = setup_player()
       {:ok, quest_mallum} = Mallums.send_on_quest(player.uid, "SwampForage")
 
-      # Set start_time_utc far in the past (SwampForage is 30 min)
-      past = DateTime.add(DateTime.utc_now(), -3600, :second) |> DateTime.truncate(:second)
+      # Set start_time_utc far in the past (SwampForage is 5 min)
+      past = DateTime.add(DateTime.utc_now(), -600, :second) |> DateTime.truncate(:second)
 
       quest_mallum
       |> Ecto.Changeset.change(start_time_utc: past)
@@ -89,8 +95,8 @@ defmodule CampFire.Game.MallumsTest do
       {player, _mallum} = setup_player()
       {:ok, quest_mallum} = Mallums.send_on_quest(player.uid, "SwampForage")
 
-      # Set start_time_utc far in the past
-      past = DateTime.add(DateTime.utc_now(), -3600, :second) |> DateTime.truncate(:second)
+      # Set start_time_utc far in the past (SwampForage is 5 min)
+      past = DateTime.add(DateTime.utc_now(), -600, :second) |> DateTime.truncate(:second)
 
       quest_mallum
       |> Ecto.Changeset.change(start_time_utc: past)
@@ -180,8 +186,8 @@ defmodule CampFire.Game.MallumsTest do
       config = Mallums.get_quest_configs() |> Map.fetch!("DeepWoodsTrek")
       rewards = Mallums.roll_rewards(config)
 
-      # DeepWoodsTrek has reward_rolls: 2
-      assert length(rewards) == 2
+      # DeepWoodsTrek has reward_rolls: 3
+      assert length(rewards) == 3
     end
   end
 end

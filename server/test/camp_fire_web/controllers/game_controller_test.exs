@@ -26,6 +26,7 @@ defmodule CampFireWeb.GameControllerTest do
     {:ok, _economy} = Economy.init_economy(player.uid)
 
     ensure_seed_config()
+    seed_quest_configs()
 
     {:ok, _} = Economy.upsert_seed(player.uid, "Basil", 5)
     {:ok, _mallum} = Mallums.create_mallum(player.uid)
