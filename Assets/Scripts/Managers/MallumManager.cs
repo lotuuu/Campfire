@@ -23,6 +23,73 @@ namespace Garden
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
             allQuests = Resources.LoadAll<QuestData>("Quests");
+            ApplyServerQuestConfigs();
+        }
+
+        /// <summary>
+        /// Overlays server quest config values onto local QuestData assets.
+        /// Keeps SeedData sprite references from local assets.
+        /// </summary>
+        private void ApplyServerQuestConfigs()
+        {
+            var cs = ConfigService.Instance;
+            if (cs == null || !cs.IsLoaded) return;
+
+            foreach (var quest in allQuests)
+            {
+                var serverQuest = cs.GetQuest(quest.questName);
+                if (serverQuest == null) continue;
+
+                quest.durationMinutes = serverQuest.durationMinutes;
+                quest.requiredFlameLevel = serverQuest.requiredFlameLevel;
+                quest.rewardRolls = serverQuest.rewardRolls;
+
+                // Overlay reward pool — match by seed_name, keep local SeedData refs
+                var serverPool = cs.GetQuestRewardPool(quest.questName);
+                if (serverPool != null && serverPool.Count > 0)
+                {
+                    // Build a lookup of existing seed references by name
+                    var seedLookup = new Dictionary<string, SeedData>();
+                    foreach (var r in quest.rewardPool)
+                        if (r.seed != null && !seedLookup.ContainsKey(r.seed.name))
+                            seedLookup[r.seed.name] = r.seed;
+
+                    // Also load all seeds for any new entries
+                    foreach (var s in Resources.LoadAll<SeedData>("Seeds"))
+                        if (!seedLookup.ContainsKey(s.name))
+                            seedLookup[s.name] = s;
+
+                    quest.rewardPool.Clear();
+                    foreach (var sr in serverPool)
+                    {
+                        string seedName = sr.TryGetValue("seed_name", out var sn) && sn is string s ? s : null;
+                        if (seedName == null) continue;
+
+                        float weight = sr.TryGetValue("weight", out var w) ? ToFloat(w) : 1f;
+                        int min = sr.TryGetValue("min", out var mn) ? (int)ToFloat(mn) : 1;
+                        int max = sr.TryGetValue("max", out var mx) ? (int)ToFloat(mx) : 1;
+
+                        seedLookup.TryGetValue(seedName, out var seedRef);
+
+                        quest.rewardPool.Add(new QuestReward
+                        {
+                            seed = seedRef,
+                            weight = weight,
+                            minCount = min,
+                            maxCount = max
+                        });
+                    }
+                }
+            }
+        }
+
+        private static float ToFloat(object val)
+        {
+            if (val is double d) return (float)d;
+            if (val is long l) return l;
+            if (val is float f) return f;
+            if (val is int i) return i;
+            return 0f;
         }
 
         private void Start()

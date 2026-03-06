@@ -92,6 +92,35 @@ namespace Garden
                 foreach (var seed in Resources.LoadAll<SeedData>("Seeds"))
                     _seedCache[seed.name] = seed;
             }
+
+            ApplyServerSeedConfigs();
+        }
+
+        /// <summary>
+        /// Called once at startup (and can be re-called if configs refresh).
+        /// Overlays server config values onto the cached SeedData instances.
+        /// </summary>
+        public static void ApplyServerSeedConfigs()
+        {
+            if (_seedCache == null) return;
+            var cs = ConfigService.Instance;
+            if (cs == null || !cs.IsLoaded) return;
+
+            foreach (var kv in _seedCache)
+            {
+                var serverSeed = cs.GetSeed(kv.Key);
+                if (serverSeed == null) continue;
+
+                var seed = kv.Value;
+                seed.growthDurationHours = serverSeed.growthDurationHours;
+                seed.baseDrops = serverSeed.baseDrops;
+                seed.manaCost = serverSeed.manaCost;
+                seed.tier = serverSeed.tier;
+
+                var recipeMap = cs.GetSeedRecipe(kv.Key);
+                if (recipeMap != null)
+                    seed.recipe = ConfigService.ConvertRecipe(recipeMap);
+            }
         }
 
         private void OnEnable()

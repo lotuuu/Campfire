@@ -25,6 +25,28 @@ namespace Garden
                 foreach (var plant in Resources.LoadAll<GardenPlantData>("GardenPlants"))
                     _plantCache[plant.plantName] = plant;
             }
+
+            ApplyServerGardenConfigs();
+        }
+
+        private static void ApplyServerGardenConfigs()
+        {
+            if (_plantCache == null) return;
+            var cs = ConfigService.Instance;
+            if (cs == null || !cs.IsLoaded) return;
+
+            foreach (var kv in _plantCache)
+            {
+                var serverGarden = cs.GetGarden(kv.Key);
+                if (serverGarden == null) continue;
+
+                var plant = kv.Value;
+                plant.growthDurationHours = serverGarden.growthDurationHours;
+                plant.yieldItem = serverGarden.yieldItem;
+                plant.yieldAmount = serverGarden.yieldAmount;
+                plant.yieldIntervalHours = serverGarden.yieldIntervalHours;
+                plant.waterRequired = serverGarden.waterRequired;
+            }
         }
 
         private void Update()
