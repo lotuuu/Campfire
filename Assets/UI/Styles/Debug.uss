@@ -73,6 +73,15 @@
     border-radius: var(--radius-sm);
 }
 
+/* All debug panel buttons */
+#debug-panel Button {
+    min-height: 96px;
+    min-width: 160px;
+    font-size: var(--font-md);
+    padding: var(--spacing-sm) var(--spacing-md);
+    margin-bottom: var(--spacing-xs);
+}
+
 /* Preset buttons */
 #preset-buttons {
     flex-direction: row;
