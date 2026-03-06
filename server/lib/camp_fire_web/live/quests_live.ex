@@ -5,7 +5,8 @@ defmodule CampFireWeb.QuestsLive do
   alias CampFire.Admin.QuestConfig
 
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, active_tab: :quests, quests: Admin.list_quests())}
+    seed_names = Admin.list_seeds() |> Enum.map(& &1.seed_name) |> Enum.sort()
+    {:ok, assign(socket, active_tab: :quests, quests: Admin.list_quests(), seed_names: seed_names)}
   end
 
   def handle_params(%{"id" => id}, _uri, socket) do
@@ -250,16 +251,18 @@ defmodule CampFireWeb.QuestsLive do
                         <% pct = probability_pct(reward.weight, total) %>
                         <tr class="hover:bg-gray-50">
                           <td class="px-3 py-2">
-                            <input
+                            <select
                               id={"reward-#{idx}-seed"}
-                              type="text"
-                              value={reward.seed}
                               phx-hook="RewardInput"
                               data-index={idx}
                               data-field="seed"
                               class="w-full border rounded px-2 py-1 text-sm"
-                              placeholder="e.g. Chamomile"
-                            />
+                            >
+                              <option value="">-- select seed --</option>
+                              <%= for name <- @seed_names do %>
+                                <option value={name} selected={name == reward.seed}>{name}</option>
+                              <% end %>
+                            </select>
                           </td>
                           <td class="px-3 py-2">
                             <input
