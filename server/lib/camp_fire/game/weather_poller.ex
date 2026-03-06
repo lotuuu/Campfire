@@ -21,7 +21,7 @@ defmodule CampFire.Game.WeatherPoller do
 
   @impl true
   def init(_opts) do
-    schedule_poll()
+    send(self(), :poll)
     {:ok, %{}}
   end
 
