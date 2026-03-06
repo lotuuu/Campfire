@@ -20,8 +20,8 @@ No external test runner or CI pipeline exists. The test assembly (`Garden.Tests.
 
 All managers and services are MonoBehaviour singletons with duplicate-destroy guards in `Awake()`. They are **scene-bound** (no `DontDestroyOnLoad`). Access via `ClassName.Instance`.
 
-- **Services** (`Scripts/Services/`): `WeatherService`, `SaveManager`, `SocialSaveManager`, `SocialService`, `CurrencyManager`, `NotificationService`
-- **Managers** (`Scripts/Managers/`): `FlameManager`, `PlotManager`, `VaseManager`, `GardenManager`, `ApothekeManager`, `MallumManager`, `GameManager`, `VisitorSystem`
+- **Services** (`Scripts/Services/`): `WeatherService`, `SaveManager`, `SocialSaveManager`, `SocialService`, `CurrencyManager`, `NotificationService`, `ConfigService`, `EconomyService`, `GameService`
+- **Managers** (`Scripts/Managers/`): `FlameManager`, `PlotManager`, `VaseManager`, `GardenManager`, `ApothekeManager`, `MallumManager`, `GameManager`, `VisitorManager`, `BirdManager`, `SkinManager`
 
 ### Resources (Economy)
 
@@ -40,6 +40,9 @@ All managers and services are MonoBehaviour singletons with duplicate-destroy gu
 - `RecipeData`: Apotheke mixing recipes with ingredient lists
 - `MallumConfig`: max Mallums per flame level
 - `QuestData`: quest name, description, duration, required flame level, reward pool with weighted seed drops
+- `BuildingCostConfig`: scaling mana + harvest costs for plots, vases, and Mallum houses (indexed by current count)
+- `MallumHouseConfig`: Mallum house properties
+- `SkinData`: cosmetic skins for camp buildings
 - `WeatherData`: plain `[Serializable]` struct carrying all weather state
 
 ### GrowthRecipe (Weather Quality System)
@@ -62,9 +65,21 @@ All managers and services are MonoBehaviour singletons with duplicate-destroy gu
 
 **ApothekeManager**: Seed storage, mixing. Loads recipes from `Resources/Recipes`. `Mix()` consumes ingredients, produces result.
 
-**VisitorSystem**: Daily night visitor gifts seed or water.
+**VisitorManager**: Server-driven visitor system. Visitors arrive/depart based on server state.
+
+**BirdManager**: Random bird visits that drop seeds. Chance-based with halving factor.
+
+**SkinManager**: Manages cosmetic skins for camp buildings. Loads from `Resources/Skins`.
 
 **GameManager**: Init and new-player setup (50 mana, 5 gems, 2 vases, 1 plot, 3 Basil seeds, initial Mallums).
+
+### Server-Authoritative Services
+
+The game is moving toward server-authoritative economy. Three services communicate with the Phoenix backend:
+
+- **`ConfigService`**: Fetches seed, quest, garden, and flame configs from the server and patches local ScriptableObjects at runtime
+- **`EconomyService`**: Queues economy actions (spend mana, add seeds, etc.) and syncs with `/api/economy` endpoints
+- **`GameService`**: Orchestrates initialization — fetches configs, then game state; exposes `IsOnline` / `IsInitialized` flags
 
 ### Hex Grid
 
@@ -87,10 +102,17 @@ The campsite uses a hex grid with flat-top layout. `HexGridUtil.HexToPixel(q, r,
 
 ### Social / Backend
 
-An Elixir/Phoenix backend lives in `server/` (routes: `/auth`, `/friends`, `/village`, `/gifts`, `/visitors`). Postgres runs via Docker (`server/docker-compose.yml`). Run with `make dev` (port 4000). Tests via `mix test`.
+An Elixir/Phoenix backend lives in `server/` (routes: `/auth`, `/friends`, `/village`, `/gifts`, `/visitors`, `/api/economy`, `/api/game`). Postgres runs via Docker (`server/docker-compose.yml`). Tests via `mix test`.
 
-- Phoenix contexts: `Accounts`, `Social`, `Villages`, `Gifts`, `Visitors`
-- Ecto schemas map to 8 Postgres tables; raw SQL for visit count upsert
+**Server commands** (run from `server/`):
+- `make setup` — start DB, install deps, create + migrate + seed
+- `make dev` — start Phoenix server (port 4000)
+- `make psql` — open psql shell
+- `make tunnel` / `make tunnel-stop` — ngrok tunnel for device testing (writes URL into `DevServerConfig.cs`)
+
+- Phoenix contexts: `Accounts`, `Social`, `Villages`, `Gifts`, `Visitors`, `Economy`, `Game`, `Admin`, `ConfigCache`
+- Admin dashboard via Phoenix LiveView at `/admin/*` (seeds, quests, players, economy, weather, visitors)
+- Ecto schemas map to Postgres tables; raw SQL for visit count upsert
 - Bearer token auth via custom Plug; ETS rate limiting via Hammer
 - `SocialSaveManager` stores `SocialData` to a separate `social.json` file
 - `SocialService` auto-registers new players via `POST /auth/register` on first launch (no explicit sign-in); auth uses Bearer token stored in `social.json`
@@ -104,7 +126,7 @@ An Elixir/Phoenix backend lives in `server/` (routes: `/auth`, `/friends`, `/vil
 - **Single campsite view** with slide-up overlay panels (Apotheke, Letters, Build/Craft)
 - **Top bar**: weather display + resource counters (mana, water, gems)
 - **Bottom nav**: buttons opening overlay panels
-- Sub-controllers: `WeatherBarUI`, `ResourceDisplayUI`, `BottomNavUI`, `CampsiteViewUI`, `ApothekeUI`, `BuildUI`, `LettersUI`, `QuestUI`, `QuestButtonUI`, `SafeAreaController`
+- Sub-controllers: `WeatherBarUI`, `ResourceDisplayUI`, `BottomNavUI`, `CampsiteViewUI`, `ApothekeUI`, `BuildUI`, `LettersUI`, `QuestUI`, `QuestButtonUI`, `SafeAreaController`, `DialogueUI`, `VisitorUI`
 - All controllers are MonoBehaviours on the same GameObject, initialized via `Initialize(VisualElement root)` where they cache element refs with `root.Q<>()`
 - Dynamic list items use `VisualTreeAsset.CloneTree()` from templates in `Assets/Resources/UI/Templates/`
 - Stylesheets in `Assets/UI/Styles/`; `Variables.uss` defines shared CSS custom properties
@@ -128,7 +150,7 @@ An Elixir/Phoenix backend lives in `server/` (routes: `/auth`, `/friends`, `/vil
 - Quest assets: `Assets/Resources/Quests/*.asset`
 - Garden plant assets: `Assets/Resources/GardenPlants/*.asset`
 - Recipe assets: `Assets/Resources/Recipes/*.asset`
-- Config: `Assets/Resources/Config/{FlameConfig,VaseConfig,MallumConfig}.asset`
+- Config: `Assets/Resources/Config/{FlameConfig,VaseConfig,MallumConfig,BuildingCostConfig,MallumHouseConfig}.asset`
 - Root UXML: `Assets/UI/Documents/CampFireRoot.uxml`
 - Stylesheets: `Assets/UI/Styles/*.uss`
 - Templates: `Assets/Resources/UI/Templates/*.uxml`
