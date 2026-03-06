@@ -130,76 +130,76 @@ defmodule RecipeHelper do
 end
 
 seed_configs = [
-  %{seed_name: "Sprouts", growth_duration_hours: 0.00833, base_drops: 1, mana_cost: 0.0, recipe: %{
+  %{seed_name: "Sprouts", growth_duration_hours: 0.00833, base_drops: 1, mana_cost: 0.0, tier: 0, recipe: %{
     "humidity" => RecipeHelper.axis(40, 80, 20, 1),
     "waterings" => RecipeHelper.axis(1, 1, 1, 0.5)
   }},
-  %{seed_name: "Cress", growth_duration_hours: 0.08333, base_drops: 1, mana_cost: 0.0, recipe: %{
+  %{seed_name: "Cress", growth_duration_hours: 0.08333, base_drops: 1, mana_cost: 0.0, tier: 0, recipe: %{
     "heat" => RecipeHelper.axis(10, 25, 15, 1),
     "humidity" => RecipeHelper.axis(50, 85, 15, 1)
   }},
-  %{seed_name: "Basil", growth_duration_hours: 1.0, base_drops: 1, mana_cost: 0.0, recipe: %{
+  %{seed_name: "Basil", growth_duration_hours: 1.0, base_drops: 1, mana_cost: 0.0, tier: 1, recipe: %{
     "heat" => RecipeHelper.axis(20, 30, 10, 1),
     "waterings" => RecipeHelper.axis(1, 1, 1, 0.5)
   }},
-  %{seed_name: "Chamomile", growth_duration_hours: 1.5, base_drops: 2, mana_cost: 0.0, recipe: %{
+  %{seed_name: "Chamomile", growth_duration_hours: 1.5, base_drops: 2, mana_cost: 0.0, tier: 1, recipe: %{
     "heat" => RecipeHelper.axis(15, 25, 10, 1),
     "sunlight" => RecipeHelper.axis(50, 90, 20, 1)
   }},
-  %{seed_name: "Marigold", growth_duration_hours: 2.0, base_drops: 2, mana_cost: 0.0, recipe: %{
+  %{seed_name: "Marigold", growth_duration_hours: 2.0, base_drops: 2, mana_cost: 0.0, tier: 2, recipe: %{
     "heat" => RecipeHelper.axis(20, 35, 10, 1),
     "sunlight" => RecipeHelper.axis(60, 100, 20, 1),
     "waterings" => RecipeHelper.axis(1, 2, 1, 0.5)
   }},
-  %{seed_name: "Snowdrop", growth_duration_hours: 2.5, base_drops: 2, mana_cost: 0.0, recipe: %{
+  %{seed_name: "Snowdrop", growth_duration_hours: 2.5, base_drops: 2, mana_cost: 0.0, tier: 2, recipe: %{
     "heat" => RecipeHelper.axis(0, 10, 10, 1.5),
     "humidity" => RecipeHelper.axis(50, 80, 20, 1),
     "waterings" => RecipeHelper.axis(1, 2, 1, 0.5)
   }},
-  %{seed_name: "Mint", growth_duration_hours: 3.0, base_drops: 3, mana_cost: 0.0, recipe: %{
+  %{seed_name: "Mint", growth_duration_hours: 3.0, base_drops: 3, mana_cost: 0.0, tier: 3, recipe: %{
     "humidity" => RecipeHelper.axis(50, 80, 20, 1),
     "rain" => RecipeHelper.axis(0.2, 0.6, 0.3, 1.5),
     "waterings" => RecipeHelper.axis(1, 2, 1, 0.5)
   }},
-  %{seed_name: "Lavender", growth_duration_hours: 5.0, base_drops: 3, mana_cost: 0.0, recipe: %{
+  %{seed_name: "Lavender", growth_duration_hours: 5.0, base_drops: 3, mana_cost: 0.0, tier: 4, recipe: %{
     "heat" => RecipeHelper.axis(25, 35, 10, 1.5),
     "wind" => RecipeHelper.axis(5, 15, 5, 1),
     "sunlight" => RecipeHelper.axis(70, 100, 20, 1.5)
   }},
-  %{seed_name: "Pansy", growth_duration_hours: 6.0, base_drops: 3, mana_cost: 0.0, recipe: %{
+  %{seed_name: "Pansy", growth_duration_hours: 6.0, base_drops: 3, mana_cost: 0.0, tier: 3, recipe: %{
     "heat" => RecipeHelper.axis(5, 15, 10, 1.5),
     "sunlight" => RecipeHelper.axis(40, 80, 20, 1),
     "rain" => RecipeHelper.axis(0.2, 0.6, 0.3, 1)
   }},
-  %{seed_name: "Poppy", growth_duration_hours: 8.0, base_drops: 4, mana_cost: 0.0, recipe: %{
+  %{seed_name: "Poppy", growth_duration_hours: 8.0, base_drops: 4, mana_cost: 0.0, tier: 5, recipe: %{
     "heat" => RecipeHelper.axis(15, 25, 10, 1),
     "humidity" => RecipeHelper.axis(40, 75, 20, 1),
     "rain" => RecipeHelper.axis(0.3, 0.7, 0.3, 1.5)
   }},
-  %{seed_name: "Jasmine", growth_duration_hours: 12.0, base_drops: 4, mana_cost: 0.0, recipe: %{
+  %{seed_name: "Jasmine", growth_duration_hours: 12.0, base_drops: 4, mana_cost: 0.0, tier: 6, recipe: %{
     "heat" => RecipeHelper.axis(20, 30, 10, 1),
     "humidity" => RecipeHelper.axis(60, 90, 20, 1.5),
     "waterings" => RecipeHelper.axis(2, 4, 2, 1)
   }},
-  %{seed_name: "Rosemary", growth_duration_hours: 18.0, base_drops: 5, mana_cost: 0.0, recipe: %{
+  %{seed_name: "Rosemary", growth_duration_hours: 18.0, base_drops: 5, mana_cost: 0.0, tier: 7, recipe: %{
     "heat" => RecipeHelper.axis(20, 35, 10, 1),
     "wind" => RecipeHelper.axis(5, 20, 5, 1),
     "sunlight" => RecipeHelper.axis(60, 100, 20, 1.5)
   }},
-  %{seed_name: "Dahlia", growth_duration_hours: 30.0, base_drops: 6, mana_cost: 0.0, recipe: %{
+  %{seed_name: "Dahlia", growth_duration_hours: 30.0, base_drops: 6, mana_cost: 0.0, tier: 8, recipe: %{
     "heat" => RecipeHelper.axis(18, 28, 8, 1),
     "humidity" => RecipeHelper.axis(50, 80, 20, 1),
     "sunlight" => RecipeHelper.axis(50, 90, 20, 1),
     "waterings" => RecipeHelper.axis(3, 6, 2, 1)
   }},
-  %{seed_name: "Moonflower", growth_duration_hours: 48.0, base_drops: 8, mana_cost: 0.0, recipe: %{
+  %{seed_name: "Moonflower", growth_duration_hours: 48.0, base_drops: 8, mana_cost: 0.0, tier: 9, recipe: %{
     "humidity" => RecipeHelper.axis(60, 90, 20, 1),
     "moon" => RecipeHelper.axis(4, 4, 0, 3),
     "waterings" => RecipeHelper.axis(3, 6, 2, 1)
   }}
 ]
 
-replace_fields = [:growth_duration_hours, :base_drops, :mana_cost, :recipe, :updated_at]
+replace_fields = [:growth_duration_hours, :base_drops, :mana_cost, :tier, :recipe, :updated_at]
 
 for config <- seed_configs do
   %SeedConfig{}
