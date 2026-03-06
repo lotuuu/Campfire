@@ -39,7 +39,8 @@ defmodule CampFire.Game.PlotsTest do
       |> SeedConfig.changeset(%{
         seed_name: "Basil",
         growth_duration_hours: 0.001,
-        base_drops: 2,
+        min_drops: 1,
+        max_drops: 4,
         recipe: @basil_recipe
       })
       |> Repo.insert!()
@@ -193,7 +194,8 @@ defmodule CampFire.Game.PlotsTest do
       |> SeedConfig.changeset(%{
         seed_name: "HarvestTest",
         growth_duration_hours: 0.001,
-        base_drops: 4,
+        min_drops: 2,
+        max_drops: 8,
         recipe: %{}
       })
       |> Repo.insert!()
@@ -208,7 +210,7 @@ defmodule CampFire.Game.PlotsTest do
       {:ok, result} = Plots.harvest(player.uid, plot.id)
 
       assert result.item_name == "HarvestTest_harvest"
-      assert result.drops == 4
+      assert result.drops >= 2 and result.drops <= 8
       assert result.score == 1.0
     end
 
@@ -220,7 +222,8 @@ defmodule CampFire.Game.PlotsTest do
       |> SeedConfig.changeset(%{
         seed_name: "SimpleSeed",
         growth_duration_hours: 0.001,
-        base_drops: 3,
+        min_drops: 2,
+        max_drops: 6,
         recipe: %{}
       })
       |> Repo.insert!()
@@ -272,7 +275,8 @@ defmodule CampFire.Game.PlotsTest do
       |> SeedConfig.changeset(%{
         seed_name: "SlowPlant",
         growth_duration_hours: 9999.0,
-        base_drops: 1,
+        min_drops: 1,
+        max_drops: 3,
         recipe: %{}
       })
       |> Repo.insert!()

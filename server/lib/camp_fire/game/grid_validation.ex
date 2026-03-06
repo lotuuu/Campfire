@@ -31,18 +31,22 @@ defmodule CampFire.Game.GridValidation do
   """
   def check_entity_cap(player_uid) do
     flame_config = CampFire.ConfigCache.get("flame_config")
-    economy = Repo.get!(PlayerEconomy, player_uid)
-    flame_level = economy.flame_level
 
-    entity_caps = flame_config["entity_caps"]
-    cap = Enum.at(entity_caps, flame_level - 1)
+    case Repo.get(PlayerEconomy, player_uid) do
+      nil ->
+        {:error, :not_found}
 
-    entity_count = count_entities(player_uid)
+      economy ->
+        flame_level = economy.flame_level
+        entity_caps = flame_config["entity_caps"]
+        cap = Enum.at(entity_caps, flame_level - 1)
+        entity_count = count_entities(player_uid)
 
-    if entity_count < cap do
-      :ok
-    else
-      {:error, :entity_cap_reached}
+        if entity_count < cap do
+          :ok
+        else
+          {:error, :entity_cap_reached}
+        end
     end
   end
 
@@ -57,23 +61,27 @@ defmodule CampFire.Game.GridValidation do
   """
   def validate_grid_placement(player_uid, grid_x, grid_y) do
     flame_config = CampFire.ConfigCache.get("flame_config")
-    economy = Repo.get!(PlayerEconomy, player_uid)
-    flame_level = economy.flame_level
 
-    grid_sizes = flame_config["grid_sizes"]
-    grid_radius = Enum.at(grid_sizes, flame_level - 1)
+    case Repo.get(PlayerEconomy, player_uid) do
+      nil ->
+        {:error, :not_found}
 
-    distance = hex_distance(grid_x, grid_y)
+      economy ->
+        flame_level = economy.flame_level
+        grid_sizes = flame_config["grid_sizes"]
+        grid_radius = Enum.at(grid_sizes, flame_level - 1)
+        distance = hex_distance(grid_x, grid_y)
 
-    cond do
-      distance > grid_radius ->
-        {:error, :out_of_bounds}
+        cond do
+          distance > grid_radius ->
+            {:error, :out_of_bounds}
 
-      hex_occupied?(player_uid, grid_x, grid_y) ->
-        {:error, :hex_occupied}
+          hex_occupied?(player_uid, grid_x, grid_y) ->
+            {:error, :hex_occupied}
 
-      true ->
-        :ok
+          true ->
+            :ok
+        end
     end
   end
 
@@ -84,19 +92,23 @@ defmodule CampFire.Game.GridValidation do
   """
   def get_free_tiles(player_uid) do
     flame_config = CampFire.ConfigCache.get("flame_config")
-    economy = Repo.get!(PlayerEconomy, player_uid)
-    flame_level = economy.flame_level
 
-    grid_sizes = flame_config["grid_sizes"]
-    grid_radius = Enum.at(grid_sizes, flame_level - 1)
+    case Repo.get(PlayerEconomy, player_uid) do
+      nil ->
+        []
 
-    occupied = get_occupied_hexes(player_uid)
+      economy ->
+        flame_level = economy.flame_level
+        grid_sizes = flame_config["grid_sizes"]
+        grid_radius = Enum.at(grid_sizes, flame_level - 1)
+        occupied = get_occupied_hexes(player_uid)
 
-    for q <- -grid_radius..grid_radius,
-        r <- -grid_radius..grid_radius,
-        hex_distance(q, r) <= grid_radius,
-        not MapSet.member?(occupied, {q, r}) do
-      {q, r}
+        for q <- -grid_radius..grid_radius,
+            r <- -grid_radius..grid_radius,
+            hex_distance(q, r) <= grid_radius,
+            not MapSet.member?(occupied, {q, r}) do
+          {q, r}
+        end
     end
   end
 

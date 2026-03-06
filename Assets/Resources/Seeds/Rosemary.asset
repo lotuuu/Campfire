@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   seedName: Rosemary Seed
   growthDurationHours: 18
-  baseDrops: 5
+  minDrops: 3
+  maxDrops: 14
   recipe:
     useHeat: 1
     idealTempMin: 20

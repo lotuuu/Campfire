@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   seedName: Marigold Seed
   growthDurationHours: 2
-  baseDrops: 2
+  minDrops: 2
+  maxDrops: 6
   recipe:
     useHeat: 1
     idealTempMin: 20

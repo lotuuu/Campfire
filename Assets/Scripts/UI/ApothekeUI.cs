@@ -127,10 +127,10 @@ namespace Garden
 
                 var dropsRow = new VisualElement();
                 dropsRow.AddToClassList("seed-recipe-row");
-                var dropsLabel = new Label("Max drops");
+                var dropsLabel = new Label("Drops");
                 dropsLabel.AddToClassList("seed-recipe-label");
                 dropsRow.Add(dropsLabel);
-                var dropsValue = new Label($"{seedData.baseDrops}");
+                var dropsValue = new Label($"{seedData.minDrops}-{seedData.maxDrops}");
                 dropsValue.AddToClassList("seed-recipe-value");
                 dropsRow.Add(dropsValue);
                 details.Add(dropsRow);

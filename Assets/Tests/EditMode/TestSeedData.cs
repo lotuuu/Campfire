@@ -11,11 +11,13 @@ namespace Garden.Tests
             var seed = ScriptableObject.CreateInstance<SeedData>();
             seed.seedName = "TestSeed";
             seed.growthDurationHours = 4f;
-            seed.baseDrops = 3;
+            seed.minDrops = 2;
+            seed.maxDrops = 6;
 
             Assert.AreEqual("TestSeed", seed.seedName);
             Assert.AreEqual(4f, seed.growthDurationHours);
-            Assert.AreEqual(3, seed.baseDrops);
+            Assert.AreEqual(2, seed.minDrops);
+            Assert.AreEqual(6, seed.maxDrops);
         }
 
         [Test]

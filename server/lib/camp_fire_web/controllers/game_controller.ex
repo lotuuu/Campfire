@@ -25,7 +25,8 @@ defmodule CampFireWeb.GameController do
          %{
            seedName: s.seed_name,
            growthDurationHours: s.growth_duration_hours,
-           baseDrops: s.base_drops,
+           minDrops: s.min_drops,
+           maxDrops: s.max_drops,
            tier: s.tier,
            recipe: s.recipe
          }}

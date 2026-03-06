@@ -98,9 +98,9 @@ defmodule CampFire.Game.BirdsTest do
 
       # Override seed configs: tier 0 seeds + one tier 5 seed that should be excluded at level 1
       configs = %{
-        "Sprouts" => %{"growth_duration_hours" => 0.5, "base_drops" => 2, "tier" => 0, "recipe" => %{}},
-        "Cress" => %{"growth_duration_hours" => 1.0, "base_drops" => 2, "tier" => 0, "recipe" => %{}},
-        "RareSeed" => %{"growth_duration_hours" => 10.0, "base_drops" => 5, "tier" => 5, "recipe" => %{}}
+        "Sprouts" => %{"growth_duration_hours" => 0.5, "min_drops" => 1, "max_drops" => 3, "tier" => 0, "recipe" => %{}},
+        "Cress" => %{"growth_duration_hours" => 1.0, "min_drops" => 1, "max_drops" => 3, "tier" => 0, "recipe" => %{}},
+        "RareSeed" => %{"growth_duration_hours" => 10.0, "min_drops" => 3, "max_drops" => 10, "tier" => 5, "recipe" => %{}}
       }
 
       :ets.insert(:config_cache, {"seed_configs", configs})

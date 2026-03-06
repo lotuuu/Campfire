@@ -16,87 +16,87 @@ MonoBehaviour:
   - manaCost: 150
     harvestCosts:
     - itemName: Sprouts_harvest
-      count: 1
+      count: 2
   - manaCost: 200
     harvestCosts:
     - itemName: Basil_harvest
-      count: 1
+      count: 2
   - manaCost: 260
     harvestCosts:
     - itemName: Basil_harvest
-      count: 2
+      count: 3
   - manaCost: 330
     harvestCosts:
     - itemName: Chamomile_harvest
-      count: 1
+      count: 2
   - manaCost: 420
     harvestCosts:
     - itemName: Chamomile_harvest
-      count: 1
+      count: 2
   - manaCost: 520
     harvestCosts:
     - itemName: Chamomile_harvest
-      count: 1
+      count: 2
     - itemName: Basil_harvest
-      count: 1
+      count: 2
   - manaCost: 640
     harvestCosts:
     - itemName: Chamomile_harvest
-      count: 2
+      count: 3
   - manaCost: 780
     harvestCosts:
     - itemName: Lavender_harvest
-      count: 1
+      count: 2
     - itemName: Chamomile_harvest
-      count: 1
+      count: 2
   - manaCost: 940
     harvestCosts:
     - itemName: Mint_harvest
-      count: 1
+      count: 2
     - itemName: Lavender_harvest
-      count: 1
+      count: 2
   - manaCost: 1120
     harvestCosts:
     - itemName: Mint_harvest
-      count: 2
+      count: 3
     - itemName: Chamomile_harvest
-      count: 1
+      count: 2
   vaseCosts:
   - manaCost: 100
     harvestCosts:
     - itemName: Cress_harvest
-      count: 1
+      count: 2
   - manaCost: 120
     harvestCosts:
     - itemName: Basil_harvest
-      count: 2
+      count: 3
   - manaCost: 150
     harvestCosts:
     - itemName: Chamomile_harvest
-      count: 1
+      count: 2
   - manaCost: 180
     harvestCosts:
     - itemName: Chamomile_harvest
-      count: 1
+      count: 2
   - manaCost: 220
     harvestCosts:
     - itemName: Chamomile_harvest
-      count: 1
+      count: 2
     - itemName: Basil_harvest
-      count: 1
+      count: 2
   - manaCost: 260
     harvestCosts:
     - itemName: Chamomile_harvest
-      count: 2
+      count: 3
   - manaCost: 310
     harvestCosts:
     - itemName: Lavender_harvest
-      count: 1
+      count: 2
     - itemName: Basil_harvest
-      count: 1
+      count: 2
   - manaCost: 370
     harvestCosts:
     - itemName: Lavender_harvest
-      count: 1
+      count: 2
     - itemName: Chamomile_harvest
-      count: 1
+      count: 2

@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   seedName: Mint Seed
   growthDurationHours: 3
-  baseDrops: 3
+  minDrops: 2
+  maxDrops: 8
   recipe:
     useHeat: 0
     idealTempMin: 0

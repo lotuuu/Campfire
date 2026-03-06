@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   seedName: Cress Seed
   growthDurationHours: 0.08333
-  baseDrops: 1
+  minDrops: 1
+  maxDrops: 3
   recipe:
     useHeat: 1
     idealTempMin: 10

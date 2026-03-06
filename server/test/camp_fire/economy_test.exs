@@ -109,7 +109,7 @@ defmodule CampFire.EconomyTest do
     test "spend deletes row when count reaches zero" do
       player = register_player()
       {:ok, _} = Economy.init_economy(player.uid)
-      {:ok, :deleted} = Economy.spend_seed(player.uid, "Sprouts", 5)
+      {:ok, :spent} = Economy.spend_seed(player.uid, "Sprouts", 5)
       seeds = Economy.list_seeds(player.uid)
       assert Enum.find(seeds, &(&1.seed_name == "Sprouts")) == nil
     end

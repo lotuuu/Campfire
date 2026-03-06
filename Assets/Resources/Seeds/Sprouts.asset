@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   seedName: Sprouts Seed
   growthDurationHours: 0.00833
-  baseDrops: 1
+  minDrops: 1
+  maxDrops: 3
   recipe:
     useHeat: 0
     idealTempMin: 0

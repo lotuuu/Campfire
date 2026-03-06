@@ -65,90 +65,90 @@ defmodule CampFire.Game.Vases do
   # --- Fill ---
 
   def start_fill(player_uid, vase_id) do
-    vase = Repo.get!(PlayerVase, vase_id)
+    with %PlayerVase{} = vase <- Repo.get(PlayerVase, vase_id),
+         true <- vase.player_uid == player_uid || {:error, :not_owned},
+         true <- vase.state != "filling" || {:error, :already_filling} do
+      case claim_idle_mallum_for_water(player_uid, vase_id) do
+        {:error, reason} ->
+          {:error, reason}
 
-    cond do
-      vase.player_uid != player_uid ->
-        {:error, :not_owned}
+        {:ok, _mallum} ->
+          now = DateTime.utc_now() |> DateTime.truncate(:second)
 
-      vase.state == "filling" ->
-        {:error, :already_filling}
-
-      true ->
-        # Claim an idle mallum for water fetching
-        case claim_idle_mallum_for_water(player_uid, vase_id) do
-          {:error, reason} ->
-            {:error, reason}
-
-          {:ok, _mallum} ->
-            now = DateTime.utc_now() |> DateTime.truncate(:second)
-
-            vase
-            |> PlayerVase.changeset(%{
-              state: "filling",
-              fill_start_time_utc: now
-            })
-            |> Repo.update()
-        end
+          vase
+          |> PlayerVase.changeset(%{
+            state: "filling",
+            fill_start_time_utc: now
+          })
+          |> Repo.update()
+      end
+    else
+      nil -> {:error, :not_found}
+      {:error, _} = err -> err
     end
   end
 
   def check_fill(player_uid, vase_id) do
-    vase = Repo.get!(PlayerVase, vase_id)
+    with %PlayerVase{} = vase <- Repo.get(PlayerVase, vase_id),
+         true <- vase.player_uid == player_uid || {:error, :not_owned},
+         true <- vase.state == "filling" || {:error, :not_filling} do
+      now = DateTime.utc_now() |> DateTime.truncate(:second)
+      elapsed = DateTime.diff(now, vase.fill_start_time_utc, :second)
+      required = vase.capacity * @fill_seconds_per_unit
 
-    cond do
-      vase.player_uid != player_uid ->
-        {:error, :not_owned}
+      if elapsed >= required do
+        # Free the mallum assigned to this vase
+        free_mallum_for_vase(player_uid, vase_id)
 
-      vase.state != "filling" ->
-        {:error, :not_filling}
-
-      true ->
-        now = DateTime.utc_now() |> DateTime.truncate(:second)
-        elapsed = DateTime.diff(now, vase.fill_start_time_utc, :second)
-        required = vase.capacity * @fill_seconds_per_unit
-
-        if elapsed >= required do
-          # Free the mallum assigned to this vase
-          free_mallum_for_vase(player_uid, vase_id)
-
-          vase
-          |> PlayerVase.changeset(%{
-            state: "full",
-            current_water: vase.capacity,
-            fill_start_time_utc: nil
-          })
-          |> Repo.update()
-        else
-          {:ok, vase}
-        end
+        vase
+        |> PlayerVase.changeset(%{
+          state: "full",
+          current_water: vase.capacity,
+          fill_start_time_utc: nil
+        })
+        |> Repo.update()
+      else
+        {:ok, vase}
+      end
+    else
+      nil -> {:error, :not_found}
+      {:error, _} = err -> err
     end
   end
 
   # --- Water Usage ---
 
   def use_water(vase_id, amount) when is_integer(amount) and amount > 0 do
-    vase = Repo.get!(PlayerVase, vase_id)
+    case Repo.get(PlayerVase, vase_id) do
+      nil ->
+        {:error, :not_found}
 
-    if vase.current_water < amount do
-      {:error, :insufficient_water}
-    else
-      new_water = vase.current_water - amount
-      new_state = if new_water == 0, do: "empty", else: vase.state
+      vase ->
+        if vase.current_water < amount do
+          {:error, :insufficient_water}
+        else
+          new_water = vase.current_water - amount
+          new_state = if new_water == 0, do: "empty", else: vase.state
 
-      vase
-      |> PlayerVase.changeset(%{current_water: new_water, state: new_state})
-      |> Repo.update()
+          vase
+          |> PlayerVase.changeset(%{current_water: new_water, state: new_state})
+          |> Repo.update()
+        end
     end
   end
 
   def set_water(vase_id, amount) when is_integer(amount) and amount >= 0 do
-    vase = Repo.get!(PlayerVase, vase_id)
-    new_state = if amount == 0, do: "empty", else: "full"
+    case Repo.get(PlayerVase, vase_id) do
+      nil ->
+        {:error, :not_found}
 
-    vase
-    |> PlayerVase.changeset(%{current_water: amount, state: new_state})
-    |> Repo.update()
+      vase ->
+        new_state = if amount == 0, do: "empty", else: "full"
+
+        vase
+        |> PlayerVase.changeset(%{current_water: amount, state: new_state})
+        |> Repo.update()
+    end
   end
 
   # --- Rain ---
@@ -183,19 +183,15 @@ defmodule CampFire.Game.Vases do
   # --- Skins ---
 
   def set_skin(player_uid, vase_id, skin_name) do
-    vase = Repo.get!(PlayerVase, vase_id)
-
-    cond do
-      vase.player_uid != player_uid ->
-        {:error, :not_owned}
-
-      skin_name not in (vase.unlocked_skins || []) ->
-        {:error, :skin_not_unlocked}
-
-      true ->
-        vase
-        |> PlayerVase.changeset(%{skin_name: skin_name})
-        |> Repo.update()
+    with %PlayerVase{} = vase <- Repo.get(PlayerVase, vase_id),
+         true <- vase.player_uid == player_uid || {:error, :not_owned},
+         true <- skin_name in (vase.unlocked_skins || []) || {:error, :skin_not_unlocked} do
+      vase
+      |> PlayerVase.changeset(%{skin_name: skin_name})
+      |> Repo.update()
+    else
+      nil -> {:error, :not_found}
+      {:error, _} = err -> err
     end
   end
 

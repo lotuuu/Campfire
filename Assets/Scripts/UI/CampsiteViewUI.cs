@@ -1395,7 +1395,7 @@ namespace Garden
                     stats.AddToClassList("seed-card--stats");
 
                     AddSeedStat(stats, "Growth", TimeUtils.FormatDurationHours(seedData.growthDurationHours));
-                    AddSeedStat(stats, "Drops", $"{seedData.baseDrops}");
+                    AddSeedStat(stats, "Drops", $"{seedData.minDrops}-{seedData.maxDrops}");
 
                     card.Add(stats);
 

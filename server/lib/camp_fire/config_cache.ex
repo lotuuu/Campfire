@@ -80,7 +80,8 @@ defmodule CampFire.ConfigCache do
          %{
            seed_name: s.seed_name,
            growth_duration_hours: s.growth_duration_hours,
-           base_drops: s.base_drops,
+           min_drops: s.min_drops,
+           max_drops: s.max_drops,
            tier: s.tier,
            recipe: s.recipe
          }}

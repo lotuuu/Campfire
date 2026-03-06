@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   seedName: Chamomile Seed
   growthDurationHours: 1.5
-  baseDrops: 2
+  minDrops: 2
+  maxDrops: 5
   recipe:
     useHeat: 1
     idealTempMin: 15

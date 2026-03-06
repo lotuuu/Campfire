@@ -30,11 +30,15 @@ defmodule CampFire.Game.Weather do
   end
 
   def update_player_location(player_uid, lat, lon) do
-    economy = Repo.get!(PlayerEconomy, player_uid)
+    case Repo.get(PlayerEconomy, player_uid) do
+      nil ->
+        {:error, :not_found}
 
-    economy
-    |> PlayerEconomy.changeset(%{lat: lat, lon: lon})
-    |> Repo.update()
+      economy ->
+        economy
+        |> PlayerEconomy.changeset(%{lat: lat, lon: lon})
+        |> Repo.update()
+    end
   end
 
   def active_locations do

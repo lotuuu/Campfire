@@ -43,70 +43,70 @@ MonoBehaviour:
   upgradeRecipes:
   - ingredients:
     - itemName: Sprouts_harvest
-      count: 1
-  - ingredients:
-    - itemName: Sprouts_harvest
-      count: 5
-    - itemName: Cress_harvest
       count: 2
   - ingredients:
-    - itemName: Basil_harvest
+    - itemName: Sprouts_harvest
+      count: 7
+    - itemName: Cress_harvest
       count: 3
   - ingredients:
-    - itemName: Chamomile_harvest
+    - itemName: Basil_harvest
       count: 5
   - ingredients:
+    - itemName: Chamomile_harvest
+      count: 6
+  - ingredients:
     - itemName: Marigold_harvest
-      count: 12
+      count: 16
     - itemName: Snowdrop_harvest
-      count: 8
+      count: 10
     - itemName: Basil_harvest
-      count: 8
+      count: 12
   - ingredients:
     - itemName: Mint_harvest
-      count: 8
+      count: 10
     - itemName: Pansy_harvest
-      count: 4
+      count: 6
     - itemName: Chamomile_harvest
-      count: 8
+      count: 10
   - ingredients:
     - itemName: Lavender_harvest
-      count: 22
+      count: 28
     - itemName: Snowdrop_harvest
-      count: 24
+      count: 30
     - itemName: Basil_harvest
-      count: 18
+      count: 24
   - ingredients:
     - itemName: Poppy_harvest
-      count: 35
+      count: 45
     - itemName: Pansy_harvest
-      count: 30
+      count: 38
     - itemName: Marigold_harvest
-      count: 50
+      count: 65
   - ingredients:
     - itemName: Jasmine_harvest
-      count: 60
+      count: 75
     - itemName: Lavender_harvest
-      count: 50
+      count: 65
     - itemName: Poppy_harvest
-      count: 60
+      count: 75
   - ingredients:
     - itemName: Rosemary_harvest
-      count: 50
+      count: 65
     - itemName: Jasmine_harvest
-      count: 60
+      count: 75
     - itemName: Lavender_harvest
-      count: 55
+      count: 70
     - itemName: Snowdrop_harvest
-      count: 40
+      count: 50
   - ingredients:
     - itemName: Dahlia_harvest
-      count: 50
+      count: 55
     - itemName: Moonflower_harvest
-      count: 30
+      count: 35
     - itemName: Rosemary_harvest
-      count: 60
+      count: 70
     - itemName: Poppy_harvest
-      count: 80
+      count: 90
     - itemName: Basil_harvest
-      count: 50
+      count: 65

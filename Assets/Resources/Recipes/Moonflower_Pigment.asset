@@ -15,7 +15,7 @@ MonoBehaviour:
   recipeName: Moonflower Pigment
   ingredients:
   - itemName: Moonflower_harvest
-    quantity: 2
+    quantity: 3
   result: Moonflower_pigment
   resultQuantity: 1
   icon: {fileID: 21300000, guid: 697c519d04154de493b3ea511953cd07, type: 3}

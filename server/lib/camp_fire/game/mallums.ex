@@ -81,21 +81,70 @@ defmodule CampFire.Game.Mallums do
   end
 
   def check_quest(player_uid, mallum_id) do
-    mallum = Repo.get!(PlayerMallum, mallum_id)
+    with %PlayerMallum{} = mallum <- Repo.get(PlayerMallum, mallum_id),
+         true <- mallum.player_uid == player_uid || {:error, :not_owned},
+         true <- mallum.state == "on_quest" || {:error, :not_on_quest} do
+      config = get_quest_config(mallum.assigned_quest_name)
+      now = DateTime.utc_now() |> DateTime.truncate(:second)
+      elapsed_minutes = DateTime.diff(now, mallum.start_time_utc, :second) / 60.0
 
-    cond do
-      mallum.player_uid != player_uid ->
-        {:error, :not_owned}
+      if elapsed_minutes >= config.duration_minutes do
+        rewards = roll_rewards(config)
 
-      mallum.state != "on_quest" ->
-        {:error, :not_on_quest}
+        mallum
+        |> PlayerMallum.changeset(%{
+          state: "quest_complete",
+          pending_rewards: rewards
+        })
+        |> Repo.update()
+      else
+        {:ok, mallum}
+      end
+    else
+      nil -> {:error, :not_found}
+      {:error, _} = err -> err
+    end
+  end
 
-      true ->
-        config = get_quest_config(mallum.assigned_quest_name)
-        now = DateTime.utc_now() |> DateTime.truncate(:second)
-        elapsed_minutes = DateTime.diff(now, mallum.start_time_utc, :second) / 60.0
+  def collect_rewards(player_uid, mallum_id) do
+    with %PlayerMallum{} = mallum <- Repo.get(PlayerMallum, mallum_id),
+         true <- mallum.player_uid == player_uid || {:error, :not_owned},
+         true <- mallum.state == "quest_complete" || {:error, :not_quest_complete},
+         true <- mallum.pending_rewards != [] || {:error, :no_rewards} do
+      Enum.each(mallum.pending_rewards, fn reward ->
+        seed_name = reward["seed_name"]
+        count = reward["count"]
+        Economy.upsert_seed(player_uid, seed_name, count)
+      end)
 
-        if elapsed_minutes >= config.duration_minutes do
+      rewards = mallum.pending_rewards
+
+      mallum
+      |> PlayerMallum.changeset(%{
+        state: "idle",
+        assigned_quest_name: nil,
+        start_time_utc: nil,
+        pending_rewards: []
+      })
+      |> Repo.update()
+
+      {:ok, %{rewards: rewards}}
+    else
+      nil -> {:error, :not_found}
+      {:error, _} = err -> err
+    end
+  end
+
+  def speed_up_quest(player_uid, mallum_id) do
+    with %PlayerMallum{} = mallum <- Repo.get(PlayerMallum, mallum_id),
+         true <- mallum.player_uid == player_uid || {:error, :not_owned},
+         true <- mallum.state == "on_quest" || {:error, :not_on_quest} do
+      case Economy.spend_item(player_uid, "Speed_Potion", 1) do
+        {:error, reason} ->
+          {:error, reason}
+
+        _ ->
+          config = get_quest_config(mallum.assigned_quest_name)
           rewards = roll_rewards(config)
 
           mallum
@@ -104,73 +153,10 @@ defmodule CampFire.Game.Mallums do
             pending_rewards: rewards
           })
           |> Repo.update()
-        else
-          {:ok, mallum}
-        end
-    end
-  end
-
-  def collect_rewards(player_uid, mallum_id) do
-    mallum = Repo.get!(PlayerMallum, mallum_id)
-
-    cond do
-      mallum.player_uid != player_uid ->
-        {:error, :not_owned}
-
-      mallum.state != "quest_complete" ->
-        {:error, :not_quest_complete}
-
-      mallum.pending_rewards == [] ->
-        {:error, :no_rewards}
-
-      true ->
-        Enum.each(mallum.pending_rewards, fn reward ->
-          seed_name = reward["seed_name"]
-          count = reward["count"]
-          Economy.upsert_seed(player_uid, seed_name, count)
-        end)
-
-        rewards = mallum.pending_rewards
-
-        mallum
-        |> PlayerMallum.changeset(%{
-          state: "idle",
-          assigned_quest_name: nil,
-          start_time_utc: nil,
-          pending_rewards: []
-        })
-        |> Repo.update()
-
-        {:ok, %{rewards: rewards}}
-    end
-  end
-
-  def speed_up_quest(player_uid, mallum_id) do
-    mallum = Repo.get!(PlayerMallum, mallum_id)
-
-    cond do
-      mallum.player_uid != player_uid ->
-        {:error, :not_owned}
-
-      mallum.state != "on_quest" ->
-        {:error, :not_on_quest}
-
-      true ->
-        case Economy.spend_item(player_uid, "Speed_Potion", 1) do
-          {:error, reason} ->
-            {:error, reason}
-
-          _ ->
-            config = get_quest_config(mallum.assigned_quest_name)
-            rewards = roll_rewards(config)
-
-            mallum
-            |> PlayerMallum.changeset(%{
-              state: "quest_complete",
-              pending_rewards: rewards
-            })
-            |> Repo.update()
-        end
+      end
+    else
+      nil -> {:error, :not_found}
+      {:error, _} = err -> err
     end
   end
 
@@ -188,14 +174,18 @@ defmodule CampFire.Game.Mallums do
   # --- Reward Rolling ---
 
   def roll_rewards(config) do
-    total_weight = Enum.reduce(config.rewards, 0, fn r, acc -> acc + r.weight end)
+    if config.rewards == [] do
+      []
+    else
+      total_weight = Enum.reduce(config.rewards, 0, fn r, acc -> acc + r.weight end)
 
-    Enum.map(1..config.reward_rolls, fn _ ->
-      roll = :rand.uniform(total_weight)
-      selected = pick_by_weight(config.rewards, roll, 0)
-      count = Enum.random(selected.min..selected.max)
-      %{"seed_name" => selected.seed, "count" => count}
-    end)
+      Enum.map(1..config.reward_rolls, fn _ ->
+        roll = :rand.uniform(total_weight)
+        selected = pick_by_weight(config.rewards, roll, 0)
+        count = Enum.random(selected.min..selected.max)
+        %{"seed_name" => selected.seed, "count" => count}
+      end)
+    end
   end
 
   # --- Private Helpers ---

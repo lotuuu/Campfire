@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   seedName: Moonflower Seed
   growthDurationHours: 48
-  baseDrops: 8
+  minDrops: 5
+  maxDrops: 20
   recipe:
     useHeat: 0
     idealTempMin: 0

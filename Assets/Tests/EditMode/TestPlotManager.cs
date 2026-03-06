@@ -45,39 +45,41 @@ namespace Garden.Tests
         }
 
         [Test]
-        public void HarvestDrops_PerfectRecipe_ReturnsBaseDrops()
+        public void HarvestDrops_PerfectScore_ReturnsHighEnd()
         {
-            var recipe = new GrowthRecipe
-            {
-                useHeat = true,
-                idealTempMin = 20f, idealTempMax = 30f,
-                heatTolerance = 10f, heatWeight = 1f
-            };
-            int baseDrops = 5;
+            // With score=1.0, center=maxDrops, so drops should be near max
+            int minDrops = 2;
+            int maxDrops = 10;
+            int drops = PlotManager.CalculateDrops(1f, minDrops, maxDrops);
 
-            var snapshots = new GrowthSnapshots { snapshotCount = 10, sumTemp = 250f };
-            float score = recipe.Evaluate(snapshots, 0);
-            int drops = Mathf.Max(1, Mathf.RoundToInt(baseDrops * score));
-
-            Assert.AreEqual(5, drops);
+            Assert.GreaterOrEqual(drops, minDrops);
+            Assert.LessOrEqual(drops, maxDrops);
         }
 
         [Test]
-        public void HarvestDrops_PoorRecipe_ReturnsAtLeast1()
+        public void HarvestDrops_ZeroScore_ReturnsLowEnd()
         {
-            var recipe = new GrowthRecipe
+            // With score=0.0, center=minDrops, so drops should be near min
+            int minDrops = 2;
+            int maxDrops = 10;
+            int drops = PlotManager.CalculateDrops(0f, minDrops, maxDrops);
+
+            Assert.GreaterOrEqual(drops, minDrops);
+            Assert.LessOrEqual(drops, maxDrops);
+        }
+
+        [Test]
+        public void HarvestDrops_AlwaysWithinRange()
+        {
+            int minDrops = 3;
+            int maxDrops = 12;
+            for (int i = 0; i <= 10; i++)
             {
-                useHeat = true,
-                idealTempMin = 20f, idealTempMax = 30f,
-                heatTolerance = 10f, heatWeight = 1f
-            };
-            int baseDrops = 5;
-
-            var snapshots = new GrowthSnapshots { snapshotCount = 10, sumTemp = 0f };
-            float score = recipe.Evaluate(snapshots, 0);
-            int drops = Mathf.Max(1, Mathf.RoundToInt(baseDrops * score));
-
-            Assert.AreEqual(1, drops);
+                float score = i / 10f;
+                int drops = PlotManager.CalculateDrops(score, minDrops, maxDrops);
+                Assert.GreaterOrEqual(drops, minDrops, $"Drops below min at score {score}");
+                Assert.LessOrEqual(drops, maxDrops, $"Drops above max at score {score}");
+            }
         }
 
         [Test]

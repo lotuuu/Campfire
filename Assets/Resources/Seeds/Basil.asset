@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   seedName: Basil Seed
   growthDurationHours: 1
-  baseDrops: 1
+  minDrops: 1
+  maxDrops: 4
   recipe:
     useHeat: 1
     idealTempMin: 20

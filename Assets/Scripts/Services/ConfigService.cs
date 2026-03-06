@@ -14,7 +14,8 @@ namespace Garden
     {
         public string seedName;
         public float growthDurationHours;
-        public int baseDrops;
+        public int minDrops;
+        public int maxDrops;
         public float manaCost;
         public int tier;
         // recipe is deserialized manually (nested map)
@@ -251,7 +252,8 @@ namespace Garden
                         {
                             seedName = GetString(seedMap, "seedName"),
                             growthDurationHours = GetFloat(seedMap, "growthDurationHours"),
-                            baseDrops = (int)GetFloat(seedMap, "baseDrops"),
+                            minDrops = (int)GetFloat(seedMap, "minDrops"),
+                            maxDrops = (int)GetFloat(seedMap, "maxDrops"),
                             manaCost = GetFloat(seedMap, "manaCost"),
                             tier = (int)GetFloat(seedMap, "tier")
                         };

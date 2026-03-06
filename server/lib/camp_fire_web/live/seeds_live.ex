@@ -42,7 +42,8 @@ defmodule CampFireWeb.SeedsLive do
     case Admin.create_seed(%{
            seed_name: "NewSeed_#{System.unique_integer([:positive])}",
            growth_duration_hours: 1.0,
-           base_drops: 1,
+           min_drops: 1,
+           max_drops: 3,
            recipe: %{}
          }) do
       {:ok, seed} ->
@@ -132,11 +133,20 @@ defmodule CampFireWeb.SeedsLive do
                 />
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700">Base Drops</label>
+                <label class="block text-sm font-medium text-gray-700">Min Drops</label>
                 <input
                   type="number"
-                  name="seed_config[base_drops]"
-                  value={@form[:base_drops].value}
+                  name="seed_config[min_drops]"
+                  value={@form[:min_drops].value}
+                  class="mt-1 block w-full border rounded px-3 py-2"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Max Drops</label>
+                <input
+                  type="number"
+                  name="seed_config[max_drops]"
+                  value={@form[:max_drops].value}
                   class="mt-1 block w-full border rounded px-3 py-2"
                 />
               </div>
@@ -182,7 +192,7 @@ defmodule CampFireWeb.SeedsLive do
           <tr>
             <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Seed Name</th>
             <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Growth (hrs)</th>
-            <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Base Drops</th>
+            <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Drops</th>
             <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Recipe</th>
             <th class="px-4 py-3 text-left text-sm font-medium text-gray-500"></th>
           </tr>
@@ -192,7 +202,7 @@ defmodule CampFireWeb.SeedsLive do
             <tr class="hover:bg-gray-50">
               <td class="px-4 py-3 font-medium">{seed.seed_name}</td>
               <td class="px-4 py-3">{seed.growth_duration_hours}</td>
-              <td class="px-4 py-3">{seed.base_drops}</td>
+              <td class="px-4 py-3">{seed.min_drops}-{seed.max_drops}</td>
               <td class="px-4 py-3 text-sm text-gray-500">{recipe_summary(seed.recipe)}</td>
               <td class="px-4 py-3">
                 <button phx-click="edit" phx-value-id={seed.id} class="text-blue-600 hover:underline">

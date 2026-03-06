@@ -115,7 +115,8 @@ namespace Garden
 
                 var seed = kv.Value;
                 seed.growthDurationHours = serverSeed.growthDurationHours;
-                seed.baseDrops = serverSeed.baseDrops;
+                seed.minDrops = serverSeed.minDrops;
+                seed.maxDrops = serverSeed.maxDrops;
                 seed.manaCost = serverSeed.manaCost;
                 seed.tier = serverSeed.tier;
 
@@ -398,11 +399,11 @@ namespace Garden
             var seed = LoadSeed(plot.seedName);
             if (seed == null) return null;
 
-            // Local fallback calculation
+            // Local fallback calculation — randomized drops scaled by quality
             float score = 1f;
             if (seed.recipe != null)
                 score = seed.recipe.Evaluate(plot.snapshots ?? new GrowthSnapshots(), plot.waterCount);
-            int drops = Mathf.Max(1, Mathf.RoundToInt(seed.baseDrops * score));
+            int drops = CalculateDrops(score, seed.minDrops, seed.maxDrops);
 
             var result = new HarvestResult
             {
@@ -600,6 +601,15 @@ namespace Garden
         {
             var seed = LoadSeed(assetName);
             return seed != null ? seed.seedName : assetName;
+        }
+
+        public static int CalculateDrops(float score, int minDrops, int maxDrops)
+        {
+            float center = minDrops + score * (maxDrops - minDrops);
+            float spread = (maxDrops - minDrops) * 0.3f;
+            int low = Mathf.Max(minDrops, Mathf.RoundToInt(center - spread));
+            int high = Mathf.Min(maxDrops, Mathf.RoundToInt(center + spread));
+            return UnityEngine.Random.Range(low, high + 1);
         }
     }
 

@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   seedName: Jasmine Seed
   growthDurationHours: 12
-  baseDrops: 4
+  minDrops: 3
+  maxDrops: 12
   recipe:
     useHeat: 1
     idealTempMin: 20

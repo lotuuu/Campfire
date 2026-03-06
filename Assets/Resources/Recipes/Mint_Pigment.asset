@@ -15,7 +15,7 @@ MonoBehaviour:
   recipeName: Mint Pigment
   ingredients:
   - itemName: Mint_harvest
-    quantity: 2
+    quantity: 3
   result: Mint_pigment
   resultQuantity: 1
   icon: {fileID: 21300000, guid: 6597d595d1ff4bc0830a7fef7bb4c882, type: 3}

@@ -8,7 +8,7 @@ defmodule CampFire.Game.PlayerMallumHouse do
     field :grid_y, :integer
     field :skin_name, :string
     field :unlocked_skins, {:array, :string}, default: []
-    timestamps()
+    timestamps(type: :utc_datetime)
   end
 
   def changeset(house, attrs) do

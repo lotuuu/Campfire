@@ -7,7 +7,8 @@ namespace Garden
     {
         public string seedName;
         public float growthDurationHours = 4f;
-        public int baseDrops = 1;
+        public int minDrops = 1;
+        public int maxDrops = 3;
         public GrowthRecipe recipe;
 
         [Header("Visuals")]

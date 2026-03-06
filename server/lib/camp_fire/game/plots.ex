@@ -73,37 +73,32 @@ defmodule CampFire.Game.Plots do
 
   def plant(player_uid, plot_id, seed_name) do
     seed_configs = CampFire.ConfigCache.get("seed_configs") || %{}
-    plot = Repo.get!(PlayerPlot, plot_id)
 
-    cond do
-      not Map.has_key?(seed_configs, seed_name) ->
-        {:error, :unknown_seed}
+    with %PlayerPlot{} = plot <- Repo.get(PlayerPlot, plot_id),
+         true <- plot.player_uid == player_uid || {:error, :not_owned},
+         true <- Map.has_key?(seed_configs, seed_name) || {:error, :unknown_seed},
+         true <- plot.state == "empty" || {:error, :plot_not_empty} do
+      case Economy.spend_seed(player_uid, seed_name, 1) do
+        {:error, reason} ->
+          {:error, reason}
 
-      plot.player_uid != player_uid ->
-        {:error, :not_owned}
+        _ ->
+          now = DateTime.utc_now() |> DateTime.truncate(:second)
 
-      plot.state != "empty" ->
-        {:error, :plot_not_empty}
-
-      true ->
-        case Economy.spend_seed(player_uid, seed_name, 1) do
-          {:error, reason} ->
-            {:error, reason}
-
-          _ ->
-            now = DateTime.utc_now() |> DateTime.truncate(:second)
-
-            plot
-            |> PlayerPlot.changeset(%{
-              seed_name: seed_name,
-              state: "growing",
-              plant_time_utc: now,
-              water_count: 0,
-              last_watered_utc: nil,
-              snapshots: @empty_snapshots
-            })
-            |> Repo.update()
-        end
+          plot
+          |> PlayerPlot.changeset(%{
+            seed_name: seed_name,
+            state: "growing",
+            plant_time_utc: now,
+            water_count: 0,
+            last_watered_utc: nil,
+            snapshots: @empty_snapshots
+          })
+          |> Repo.update()
+      end
+    else
+      nil -> {:error, :not_found}
+      {:error, _} = err -> err
     end
   end
 
@@ -112,157 +107,163 @@ defmodule CampFire.Game.Plots do
   def water(player_uid, plot_id, vase_id) do
     alias CampFire.Game.Vases
 
-    plot = Repo.get!(PlayerPlot, plot_id)
-    vase = Repo.get!(PlayerVase, vase_id)
-    now = DateTime.utc_now() |> DateTime.truncate(:second)
+    with %PlayerPlot{} = plot <- Repo.get(PlayerPlot, plot_id),
+         %PlayerVase{} = vase <- Repo.get(PlayerVase, vase_id) || {:error, :vase_not_found} do
+      now = DateTime.utc_now() |> DateTime.truncate(:second)
 
-    cond do
-      plot.player_uid != player_uid ->
-        {:error, :not_owned}
+      cond do
+        plot.player_uid != player_uid ->
+          {:error, :not_owned}
 
-      vase.player_uid != player_uid ->
-        {:error, :not_owned}
+        vase.player_uid != player_uid ->
+          {:error, :not_owned}
 
-      plot.state != "growing" ->
-        {:error, :not_growing}
+        plot.state != "growing" ->
+          {:error, :not_growing}
 
-      plot.last_watered_utc != nil and
-          DateTime.diff(now, plot.last_watered_utc, :second) < @water_cooldown_seconds ->
-        {:error, :water_cooldown}
+        plot.last_watered_utc != nil and
+            DateTime.diff(now, plot.last_watered_utc, :second) < @water_cooldown_seconds ->
+          {:error, :water_cooldown}
 
-      true ->
-        Repo.transaction(fn ->
-          case Vases.use_water(vase_id, 1) do
-            {:error, reason} ->
-              Repo.rollback(reason)
+        true ->
+          Repo.transaction(fn ->
+            case Vases.use_water(vase_id, 1) do
+              {:error, reason} ->
+                Repo.rollback(reason)
 
-            {:ok, _vase} ->
-              plot
-              |> PlayerPlot.changeset(%{
-                water_count: plot.water_count + 1,
-                last_watered_utc: now
-              })
-              |> Repo.update!()
-          end
-        end)
+              {:ok, _vase} ->
+                plot
+                |> PlayerPlot.changeset(%{
+                  water_count: plot.water_count + 1,
+                  last_watered_utc: now
+                })
+                |> Repo.update!()
+            end
+          end)
+      end
+    else
+      nil -> {:error, :not_found}
+      {:error, _} = err -> err
     end
   end
 
   # --- Harvest ---
 
   def harvest(player_uid, plot_id) do
-    plot = Repo.get!(PlayerPlot, plot_id)
+    with %PlayerPlot{} = plot <- Repo.get(PlayerPlot, plot_id),
+         true <- plot.player_uid == player_uid || {:error, :not_owned},
+         true <- plot.state == "mature" || {:error, :not_mature} do
+      Repo.transaction(fn ->
+        seed_config =
+          Repo.one!(from sc in SeedConfig, where: sc.seed_name == ^plot.seed_name)
 
-    cond do
-      plot.player_uid != player_uid ->
-        {:error, :not_owned}
+        score = GrowthRecipe.evaluate(seed_config.recipe, plot.snapshots, plot.water_count)
+        drops = GrowthRecipe.calculate_drops(score, seed_config.min_drops, seed_config.max_drops)
+        item_name = "#{plot.seed_name}_harvest"
 
-      plot.state != "mature" ->
-        {:error, :not_mature}
+        Economy.upsert_item(player_uid, item_name, drops)
 
-      true ->
-        Repo.transaction(fn ->
-          seed_config =
-            Repo.one!(from sc in SeedConfig, where: sc.seed_name == ^plot.seed_name)
+        plot
+        |> PlayerPlot.changeset(%{
+          state: "empty",
+          seed_name: nil,
+          plant_time_utc: nil,
+          water_count: 0,
+          last_watered_utc: nil,
+          snapshots: %{}
+        })
+        |> Repo.update!()
 
-          score = GrowthRecipe.evaluate(seed_config.recipe, plot.snapshots, plot.water_count)
-          drops = GrowthRecipe.calculate_drops(score, seed_config.base_drops)
-          item_name = "#{plot.seed_name}_harvest"
-
-          Economy.upsert_item(player_uid, item_name, drops)
-
-          plot
-          |> PlayerPlot.changeset(%{
-            state: "empty",
-            seed_name: nil,
-            plant_time_utc: nil,
-            water_count: 0,
-            last_watered_utc: nil,
-            snapshots: %{}
-          })
-          |> Repo.update!()
-
-          %{score: score, drops: drops, item_name: item_name}
-        end)
+        %{score: score, drops: drops, item_name: item_name}
+      end)
+    else
+      nil -> {:error, :not_found}
+      {:error, _} = err -> err
     end
   end
 
   # --- Maturity Check ---
 
   def check_maturity(plot_id) do
-    plot = Repo.get!(PlayerPlot, plot_id)
+    case Repo.get(PlayerPlot, plot_id) do
+      nil ->
+        {:error, :not_found}
 
-    if plot.state == "growing" do
-      seed_config =
-        Repo.one!(from sc in SeedConfig, where: sc.seed_name == ^plot.seed_name)
+      plot ->
+        if plot.state == "growing" do
+          seed_config =
+            Repo.one!(from sc in SeedConfig, where: sc.seed_name == ^plot.seed_name)
 
-      now = DateTime.utc_now() |> DateTime.truncate(:second)
-      elapsed_hours = DateTime.diff(now, plot.plant_time_utc, :second) / 3600.0
+          now = DateTime.utc_now() |> DateTime.truncate(:second)
+          elapsed_hours = DateTime.diff(now, plot.plant_time_utc, :second) / 3600.0
 
-      if elapsed_hours >= seed_config.growth_duration_hours do
-        plot
-        |> PlayerPlot.changeset(%{state: "mature"})
-        |> Repo.update()
-      else
-        {:ok, plot}
-      end
-    else
-      {:ok, plot}
+          if elapsed_hours >= seed_config.growth_duration_hours do
+            plot
+            |> PlayerPlot.changeset(%{state: "mature"})
+            |> Repo.update()
+          else
+            {:ok, plot}
+          end
+        else
+          {:ok, plot}
+        end
     end
   end
 
   # --- Snapshot Recording ---
 
   def record_snapshot(plot_id, weather_data) do
-    plot = Repo.get!(PlayerPlot, plot_id)
+    case Repo.get(PlayerPlot, plot_id) do
+      nil ->
+        {:error, :not_found}
 
-    if plot.state == "growing" do
-      snapshots = plot.snapshots || @empty_snapshots
+      plot ->
+        if plot.state == "growing" do
+          snapshots = plot.snapshots || @empty_snapshots
 
-      updated_snapshots = %{
-        "temperatures" => (snapshots["temperatures"] || []) ++ [weather_data["temperature"] || 0.0],
-        "wind_speeds" => (snapshots["wind_speeds"] || []) ++ [weather_data["wind_speed"] || 0.0],
-        "humidities" => (snapshots["humidities"] || []) ++ [weather_data["humidity"] || 0.0],
-        "cloud_covers" => (snapshots["cloud_covers"] || []) ++ [weather_data["cloud_cover"] || 0.0],
-        "rain_snapshots" => (snapshots["rain_snapshots"] || []) ++ [if(weather_data["is_raining"], do: 1.0, else: 0.0)],
-        "moon_phase_snapshots" => (snapshots["moon_phase_snapshots"] || []) ++ [weather_data["moon_phase"] || 0.0],
-        "snapshot_count" => (snapshots["snapshot_count"] || 0) + 1
-      }
+          updated_snapshots = %{
+            "temperatures" => (snapshots["temperatures"] || []) ++ [weather_data["temperature"] || 0.0],
+            "wind_speeds" => (snapshots["wind_speeds"] || []) ++ [weather_data["wind_speed"] || 0.0],
+            "humidities" => (snapshots["humidities"] || []) ++ [weather_data["humidity"] || 0.0],
+            "cloud_covers" => (snapshots["cloud_covers"] || []) ++ [weather_data["cloud_cover"] || 0.0],
+            "rain_snapshots" => (snapshots["rain_snapshots"] || []) ++ [if(weather_data["is_raining"], do: 1.0, else: 0.0)],
+            "moon_phase_snapshots" => (snapshots["moon_phase_snapshots"] || []) ++ [weather_data["moon_phase"] || 0.0],
+            "snapshot_count" => (snapshots["snapshot_count"] || 0) + 1
+          }
 
-      plot
-      |> PlayerPlot.changeset(%{snapshots: updated_snapshots})
-      |> Repo.update()
-    else
-      {:ok, plot}
+          plot
+          |> PlayerPlot.changeset(%{snapshots: updated_snapshots})
+          |> Repo.update()
+        else
+          {:ok, plot}
+        end
     end
   end
 
   # --- Skins ---
 
   def set_skin(player_uid, plot_id, skin_name) do
-    plot = Repo.get!(PlayerPlot, plot_id)
-
-    cond do
-      plot.player_uid != player_uid ->
-        {:error, :not_owned}
-
-      skin_name not in (plot.unlocked_skins || []) ->
-        {:error, :skin_not_unlocked}
-
-      true ->
-        plot
-        |> PlayerPlot.changeset(%{skin_name: skin_name})
-        |> Repo.update()
+    with %PlayerPlot{} = plot <- Repo.get(PlayerPlot, plot_id),
+         true <- plot.player_uid == player_uid || {:error, :not_owned},
+         true <- skin_name in (plot.unlocked_skins || []) || {:error, :skin_not_unlocked} do
+      plot
+      |> PlayerPlot.changeset(%{skin_name: skin_name})
+      |> Repo.update()
+    else
+      nil -> {:error, :not_found}
+      {:error, _} = err -> err
     end
   end
 
   # --- Testing ---
 
   def force_mature(plot_id) do
-    plot = Repo.get!(PlayerPlot, plot_id)
-
-    plot
-    |> PlayerPlot.changeset(%{state: "mature"})
-    |> Repo.update()
+    case Repo.get(PlayerPlot, plot_id) do
+      nil -> {:error, :not_found}
+      plot ->
+        plot
+        |> PlayerPlot.changeset(%{state: "mature"})
+        |> Repo.update()
+    end
   end
 end

@@ -45,7 +45,11 @@ defmodule CampFire.Game.Birds do
     # Walk hours from last_check to current_hour (exclusive of last_check, inclusive of current)
     hours = build_hour_range(last_check, current_hour)
 
-    economy = Repo.get!(PlayerEconomy, player_uid)
+    economy = Repo.get(PlayerEconomy, player_uid)
+
+    if economy == nil do
+      {:ok, []}
+    else
     flame_level = economy.flame_level
 
     new_birds =
@@ -68,6 +72,7 @@ defmodule CampFire.Game.Birds do
     set_last_bird_check_hour(player_uid, current_hour)
 
     {:ok, new_birds}
+    end
   end
 
   @doc """

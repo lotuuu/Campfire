@@ -14,7 +14,8 @@ defmodule CampFireWeb.GameControllerTest do
       |> SeedConfig.changeset(%{
         seed_name: "Basil",
         growth_duration_hours: 0.001,
-        base_drops: 2,
+        min_drops: 1,
+        max_drops: 4,
         recipe: %{}
       })
       |> Repo.insert!()

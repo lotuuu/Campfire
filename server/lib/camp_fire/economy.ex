@@ -50,60 +50,75 @@ defmodule CampFire.Economy do
   # --- Mana ---
 
   def collect_mana(player_uid) do
-    economy = Repo.get!(PlayerEconomy, player_uid)
-    now = DateTime.utc_now() |> DateTime.truncate(:second)
-    elapsed = max(DateTime.diff(now, economy.last_mana_collect_utc, :second), 0)
+    case Repo.get(PlayerEconomy, player_uid) do
+      nil ->
+        {:error, :not_found}
 
-    mana_rate = @base_mana_per_second + (economy.flame_level - 1) * @mana_per_level
-    earned = mana_rate * elapsed
+      economy ->
+        now = DateTime.utc_now() |> DateTime.truncate(:second)
+        elapsed = max(DateTime.diff(now, economy.last_mana_collect_utc, :second), 0)
 
-    economy
-    |> PlayerEconomy.changeset(%{mana: economy.mana + earned, last_mana_collect_utc: now})
-    |> Repo.update()
+        mana_rate = @base_mana_per_second + (economy.flame_level - 1) * @mana_per_level
+        earned = mana_rate * elapsed
+
+        {1, [updated]} =
+          from(e in PlayerEconomy, where: e.player_uid == ^player_uid, select: e)
+          |> Repo.update_all(inc: [mana: earned], set: [last_mana_collect_utc: now])
+
+        {:ok, updated}
+    end
+  end
+
+  def add_mana(player_uid, amount) when is_number(amount) and amount > 0 do
+    {count, results} =
+      from(e in PlayerEconomy, where: e.player_uid == ^player_uid, select: e)
+      |> Repo.update_all(inc: [mana: amount])
+
+    if count == 1, do: {:ok, hd(results)}, else: {:error, :not_found}
   end
 
   def spend_mana(player_uid, amount) when is_number(amount) and amount > 0 do
-    economy = Repo.get!(PlayerEconomy, player_uid)
+    {count, results} =
+      from(e in PlayerEconomy,
+        where: e.player_uid == ^player_uid and e.mana >= ^amount,
+        select: e
+      )
+      |> Repo.update_all(inc: [mana: -amount])
 
-    if economy.mana < amount do
-      {:error, :insufficient_mana}
-    else
-      economy
-      |> PlayerEconomy.changeset(%{mana: economy.mana - amount})
-      |> Repo.update()
-    end
+    if count == 1, do: {:ok, hd(results)}, else: {:error, :insufficient_mana}
   end
 
   # --- Gems ---
 
   def add_gems(player_uid, amount) when is_integer(amount) and amount > 0 do
-    economy = Repo.get!(PlayerEconomy, player_uid)
+    {count, results} =
+      from(e in PlayerEconomy, where: e.player_uid == ^player_uid, select: e)
+      |> Repo.update_all(inc: [gems: amount])
 
-    economy
-    |> PlayerEconomy.changeset(%{gems: economy.gems + amount})
-    |> Repo.update()
+    if count == 1, do: {:ok, hd(results)}, else: {:error, :not_found}
   end
 
   def spend_gems(player_uid, amount) when is_integer(amount) and amount > 0 do
-    economy = Repo.get!(PlayerEconomy, player_uid)
+    {count, results} =
+      from(e in PlayerEconomy,
+        where: e.player_uid == ^player_uid and e.gems >= ^amount,
+        select: e
+      )
+      |> Repo.update_all(inc: [gems: -amount])
 
-    if economy.gems < amount do
-      {:error, :insufficient_gems}
-    else
-      economy
-      |> PlayerEconomy.changeset(%{gems: economy.gems - amount})
-      |> Repo.update()
-    end
+    if count == 1, do: {:ok, hd(results)}, else: {:error, :insufficient_gems}
   end
 
   # --- Flame ---
 
   def upgrade_flame(player_uid, required_items) when is_list(required_items) do
     Repo.transaction(fn ->
-      economy = Repo.get!(PlayerEconomy, player_uid)
+      economy = Repo.get(PlayerEconomy, player_uid)
 
-      if economy.flame_level >= @max_flame_level do
-        Repo.rollback(:max_level)
+      cond do
+        economy == nil -> Repo.rollback(:not_found)
+        economy.flame_level >= @max_flame_level -> Repo.rollback(:max_level)
+        true -> :ok
       end
 
       Enum.each(required_items, fn %{"item_name" => name, "count" => count} ->
@@ -115,9 +130,11 @@ defmodule CampFire.Economy do
 
       now = DateTime.utc_now() |> DateTime.truncate(:second)
 
-      economy
-      |> PlayerEconomy.changeset(%{flame_level: economy.flame_level + 1, last_mana_collect_utc: now})
-      |> Repo.update!()
+      {1, [updated]} =
+        from(e in PlayerEconomy, where: e.player_uid == ^player_uid, select: e)
+        |> Repo.update_all(inc: [flame_level: 1], set: [last_mana_collect_utc: now])
+
+      updated
     end)
   end
 
@@ -128,28 +145,31 @@ defmodule CampFire.Economy do
   end
 
   def upsert_seed(player_uid, seed_name, count) when is_integer(count) and count > 0 do
-    case Repo.one(from s in PlayerSeed, where: s.player_uid == ^player_uid and s.seed_name == ^seed_name) do
-      nil ->
-        %PlayerSeed{}
-        |> PlayerSeed.changeset(%{player_uid: player_uid, seed_name: seed_name, count: count})
-        |> Repo.insert()
-
-      existing ->
-        existing
-        |> PlayerSeed.changeset(%{count: existing.count + count})
-        |> Repo.update()
-    end
+    %PlayerSeed{player_uid: player_uid, seed_name: seed_name, count: count}
+    |> Repo.insert(
+      on_conflict: [inc: [count: count]],
+      conflict_target: [:player_uid, :seed_name],
+      returning: true
+    )
   end
 
   def spend_seed(player_uid, seed_name, count) when is_integer(count) and count > 0 do
-    case Repo.one(from s in PlayerSeed, where: s.player_uid == ^player_uid and s.seed_name == ^seed_name) do
-      nil -> {:error, :insufficient_seeds}
-      existing when existing.count < count -> {:error, :insufficient_seeds}
-      existing when existing.count == count ->
-        Repo.delete(existing)
-        {:ok, :deleted}
-      existing ->
-        existing |> PlayerSeed.changeset(%{count: existing.count - count}) |> Repo.update()
+    {updated, _} =
+      from(s in PlayerSeed,
+        where: s.player_uid == ^player_uid and s.seed_name == ^seed_name and s.count >= ^count
+      )
+      |> Repo.update_all(inc: [count: -count])
+
+    if updated == 0 do
+      {:error, :insufficient_seeds}
+    else
+      # Clean up zero-count rows
+      from(s in PlayerSeed,
+        where: s.player_uid == ^player_uid and s.seed_name == ^seed_name and s.count == 0
+      )
+      |> Repo.delete_all()
+
+      {:ok, :spent}
     end
   end
 
@@ -160,28 +180,31 @@ defmodule CampFire.Economy do
   end
 
   def upsert_item(player_uid, item_name, count) when is_integer(count) and count > 0 do
-    case Repo.one(from i in PlayerItem, where: i.player_uid == ^player_uid and i.item_name == ^item_name) do
-      nil ->
-        %PlayerItem{}
-        |> PlayerItem.changeset(%{player_uid: player_uid, item_name: item_name, count: count})
-        |> Repo.insert()
-
-      existing ->
-        existing
-        |> PlayerItem.changeset(%{count: existing.count + count})
-        |> Repo.update()
-    end
+    %PlayerItem{player_uid: player_uid, item_name: item_name, count: count}
+    |> Repo.insert(
+      on_conflict: [inc: [count: count]],
+      conflict_target: [:player_uid, :item_name],
+      returning: true
+    )
   end
 
   def spend_item(player_uid, item_name, count) when is_integer(count) and count > 0 do
-    case Repo.one(from i in PlayerItem, where: i.player_uid == ^player_uid and i.item_name == ^item_name) do
-      nil -> {:error, :insufficient_items}
-      existing when existing.count < count -> {:error, :insufficient_items}
-      existing when existing.count == count ->
-        Repo.delete(existing)
-        {:ok, :deleted}
-      existing ->
-        existing |> PlayerItem.changeset(%{count: existing.count - count}) |> Repo.update()
+    {updated, _} =
+      from(i in PlayerItem,
+        where: i.player_uid == ^player_uid and i.item_name == ^item_name and i.count >= ^count
+      )
+      |> Repo.update_all(inc: [count: -count])
+
+    if updated == 0 do
+      {:error, :insufficient_items}
+    else
+      # Clean up zero-count rows
+      from(i in PlayerItem,
+        where: i.player_uid == ^player_uid and i.item_name == ^item_name and i.count == 0
+      )
+      |> Repo.delete_all()
+
+      {:ok, :spent}
     end
   end
 
@@ -241,15 +264,21 @@ defmodule CampFire.Economy do
   end
 
   defp spend_items_in_tx(player_uid, item_name, count) do
-    case Repo.one(from i in PlayerItem, where: i.player_uid == ^player_uid and i.item_name == ^item_name) do
-      nil -> {:error, {:insufficient_items, item_name}}
-      existing when existing.count < count -> {:error, {:insufficient_items, item_name}}
-      existing when existing.count == count ->
-        Repo.delete!(existing)
-        :ok
-      existing ->
-        existing |> PlayerItem.changeset(%{count: existing.count - count}) |> Repo.update!()
-        :ok
+    {updated, _} =
+      from(i in PlayerItem,
+        where: i.player_uid == ^player_uid and i.item_name == ^item_name and i.count >= ^count
+      )
+      |> Repo.update_all(inc: [count: -count])
+
+    if updated == 0 do
+      {:error, {:insufficient_items, item_name}}
+    else
+      from(i in PlayerItem,
+        where: i.player_uid == ^player_uid and i.item_name == ^item_name and i.count == 0
+      )
+      |> Repo.delete_all()
+
+      :ok
     end
   end
 end

@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   seedName: Lavender Seed
   growthDurationHours: 5
-  baseDrops: 3
+  minDrops: 2
+  maxDrops: 9
   recipe:
     useHeat: 1
     idealTempMin: 25

@@ -15,7 +15,7 @@ MonoBehaviour:
   recipeName: Snowdrop Pigment
   ingredients:
   - itemName: Snowdrop_harvest
-    quantity: 2
+    quantity: 3
   result: Snowdrop_pigment
   resultQuantity: 1
   icon: {fileID: 21300000, guid: 3a99337ed34249a0a1dc04acce8ca990, type: 3}

@@ -64,11 +64,15 @@ defmodule CampFire.Game.GrowthRecipe do
   def evaluate(_recipe, _snapshots, _water_count), do: 1.0
 
   @doc """
-  Calculate drops from quality score and base drops.
-  Minimum of 1 drop.
+  Calculate drops from quality score using min/max range with randomness.
+  Score interpolates within the range; +-30% spread adds noise.
   """
-  def calculate_drops(score, base_drops) do
-    max(1, round(base_drops * score))
+  def calculate_drops(score, min_drops, max_drops) do
+    center = min_drops + score * (max_drops - min_drops)
+    spread = (max_drops - min_drops) * 0.3
+    low = max(min_drops, round(center - spread))
+    high = min(max_drops, round(center + spread))
+    Enum.random(low..high)
   end
 
   # --- Private helpers ---

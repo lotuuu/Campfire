@@ -178,21 +178,28 @@ defmodule CampFire.Game.GrowthRecipeTest do
     end
   end
 
-  describe "calculate_drops/2" do
-    test "perfect score returns base drops" do
-      assert GrowthRecipe.calculate_drops(1.0, 4) == 4
+  describe "calculate_drops/3" do
+    test "perfect score returns within upper range" do
+      drops = GrowthRecipe.calculate_drops(1.0, 2, 10)
+      assert drops >= 2 and drops <= 10
     end
 
-    test "half score returns half base drops" do
-      assert GrowthRecipe.calculate_drops(0.5, 4) == 2
+    test "zero score returns within lower range" do
+      drops = GrowthRecipe.calculate_drops(0.0, 2, 10)
+      assert drops >= 2 and drops <= 10
     end
 
-    test "zero score returns minimum of 1" do
-      assert GrowthRecipe.calculate_drops(0.0, 4) == 1
+    test "mid score returns within range" do
+      drops = GrowthRecipe.calculate_drops(0.5, 2, 10)
+      assert drops >= 2 and drops <= 10
     end
 
-    test "low score still returns at least 1" do
-      assert GrowthRecipe.calculate_drops(0.1, 2) == 1
+    test "always respects min and max bounds" do
+      for _ <- 1..50 do
+        score = :rand.uniform()
+        drops = GrowthRecipe.calculate_drops(score, 3, 12)
+        assert drops >= 3 and drops <= 12
+      end
     end
   end
 end

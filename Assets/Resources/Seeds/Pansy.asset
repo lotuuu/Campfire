@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   seedName: Pansy Seed
   growthDurationHours: 6
-  baseDrops: 3
+  minDrops: 2
+  maxDrops: 8
   recipe:
     useHeat: 1
     idealTempMin: 5
