@@ -61,6 +61,10 @@ defmodule CampFire.Accounts do
     |> Repo.update()
   end
 
+  def count_players do
+    Repo.aggregate(Player, :count)
+  end
+
   def touch_last_online(uid) do
     from(p in Player, where: p.uid == ^uid)
     |> Repo.update_all(set: [updated_at: DateTime.utc_now()])

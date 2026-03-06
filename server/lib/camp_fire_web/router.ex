@@ -52,6 +52,11 @@ defmodule CampFireWeb.Router do
   end
 
   scope "/", CampFireWeb do
+    pipe_through :browser
+    live "/", HomeLive, :index
+  end
+
+  scope "/", CampFireWeb do
     pipe_through :api
     get "/health", HealthController, :index
   end
