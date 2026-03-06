@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Garden
@@ -15,6 +16,7 @@ namespace Garden
         private static readonly float HalvingFactor = 0.5f;
 
         private List<SeedData> allSeeds;
+        private bool _isChecking;
 
         private void Awake()
         {
@@ -28,6 +30,14 @@ namespace Garden
             var data = SaveManager.Instance?.Data;
             if (data == null) return;
 
+            // When online, use server for bird spawning
+            if (GameService.Instance != null && GameService.Instance.IsOnline)
+            {
+                CheckBirdsFromServer();
+                return;
+            }
+
+            // Offline fallback: local processing
             int gridRadius = FlameManager.Instance != null
                 ? FlameManager.Instance.Config.GetGridSize(data.flameLevel)
                 : 2;
@@ -38,6 +48,83 @@ namespace Garden
                 SaveManager.Instance.Save();
                 OnBirdPlaced?.Invoke();
             }
+        }
+
+        private async void CheckBirdsFromServer()
+        {
+            if (_isChecking) return;
+
+            // Only check hourly
+            var data = SaveManager.Instance.Data;
+            var now = GameTime.UtcNow;
+            var currentHour = new DateTime(now.Year, now.Month, now.Day, now.Hour, 0, 0, DateTimeKind.Utc);
+
+            if (!string.IsNullOrEmpty(data.lastBirdCheckHourUtc))
+            {
+                var lastCheck = DateTime.Parse(data.lastBirdCheckHourUtc, null,
+                    System.Globalization.DateTimeStyles.RoundtripKind);
+                if (lastCheck >= currentHour) return;
+            }
+
+            _isChecking = true;
+            try
+            {
+                var newBirds = await GameService.Instance.CheckBirds();
+                if (newBirds != null && newBirds.Count > 0)
+                {
+                    foreach (var bird in newBirds)
+                    {
+                        data.birds.Add(new BirdSave
+                        {
+                            serverId = bird.id,
+                            gridX = bird.gridX,
+                            gridY = bird.gridY,
+                            seedName = bird.seedName,
+                            seedCount = bird.seedCount
+                        });
+                    }
+                    SaveManager.Instance.Save();
+                    OnBirdPlaced?.Invoke();
+                }
+                data.lastBirdCheckHourUtc = currentHour.ToString("o");
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"BirdManager: Server check failed: {e.Message}");
+            }
+            finally
+            {
+                _isChecking = false;
+            }
+        }
+
+        public async Task<BirdSave> CollectBirdFromServer(int birdIndex)
+        {
+            var data = SaveManager.Instance.Data;
+            if (birdIndex < 0 || birdIndex >= data.birds.Count) return null;
+            var bird = data.birds[birdIndex];
+
+            if (bird.serverId > 0 && GameService.Instance != null && GameService.Instance.IsOnline)
+            {
+                var reward = await GameService.Instance.CollectBird(bird.serverId);
+                if (reward == null) return null;
+
+                data.birds.RemoveAt(birdIndex);
+                ApothekeManager.Instance.AddSeed(reward.seedName, reward.seedCount);
+                SaveManager.Instance.Save();
+                OnBirdCollected?.Invoke(bird);
+                return bird;
+            }
+
+            // Offline fallback
+            var collected = CollectBird(data, birdIndex);
+            if (collected != null)
+            {
+                ApothekeManager.Instance.AddSeed(collected.seedName, collected.seedCount);
+                SaveManager.Instance.Save();
+                NotifyBirdCollected(collected);
+            }
+            return collected;
         }
 
         public void NotifyBirdCollected(BirdSave bird)

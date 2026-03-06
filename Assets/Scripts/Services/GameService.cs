@@ -563,6 +563,46 @@ namespace Garden
             return null;
         }
 
+        // ── Bird Endpoints ──
+
+        public async Task<List<ServerBird>> CheckBirds()
+        {
+            if (!IsOnline) return null;
+            try
+            {
+                using var req = PostJson("/game/bird/check", "{}");
+                await SendAsync(req);
+
+                if (req.responseCode >= 200 && req.responseCode < 300)
+                {
+                    var response = JsonUtility.FromJson<BirdCheckResponse>(req.downloadHandler.text);
+                    return response?.newBirds;
+                }
+
+                Debug.LogWarning($"GameService: CheckBirds failed (HTTP {req.responseCode}): {req.downloadHandler.text}");
+            }
+            catch (Exception e) { Debug.LogWarning($"GameService: CheckBirds failed: {e.Message}"); }
+            return null;
+        }
+
+        public async Task<BirdCollectResponse> CollectBird(int birdId)
+        {
+            if (!IsOnline) return null;
+            try
+            {
+                var body = JsonUtility.ToJson(new BirdCollectRequest { birdId = birdId });
+                using var req = PostJson("/game/bird/collect", body);
+                await SendAsync(req);
+
+                if (req.responseCode >= 200 && req.responseCode < 300)
+                    return JsonUtility.FromJson<BirdCollectResponse>(req.downloadHandler.text);
+
+                Debug.LogWarning($"GameService: CollectBird failed (HTTP {req.responseCode}): {req.downloadHandler.text}");
+            }
+            catch (Exception e) { Debug.LogWarning($"GameService: CollectBird failed: {e.Message}"); }
+            return null;
+        }
+
         // ── Weather Endpoints ──
 
         public async Task SubmitLocation(float lat, float lon)
