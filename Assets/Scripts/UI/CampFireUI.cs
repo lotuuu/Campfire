@@ -95,7 +95,7 @@ namespace Garden
                 bottomNav.OnApothekeClicked += () =>
                 {
                     apotheke?.Refresh();
-                    OpenOverlay("Seeds", apothekePanel);
+                    OpenOverlay("Apotheke", apothekePanel);
                 };
                 bottomNav.OnLettersClicked += () => OpenOverlay("Social", lettersPanel);
                 bottomNav.OnQuestClicked += () =>
@@ -144,7 +144,7 @@ namespace Garden
                 campsiteView.OnApothekeTapped += () =>
                 {
                     apotheke?.Refresh();
-                    OpenOverlay("Seeds", apothekePanel);
+                    OpenOverlay("Apotheke", apothekePanel);
                 };
             }
 
