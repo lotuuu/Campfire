@@ -14,7 +14,7 @@ namespace Garden
             badge = root.Q<Label>("quest-badge");
 
             var icon = root.Q("quest-float-icon");
-            var tex = Resources.Load<Texture2D>("UI/Icons/quest-compass");
+            var tex = SpriteService.Instance?.GetTexture("ui/quest-compass");
             if (icon != null && tex != null)
                 icon.style.backgroundImage = tex;
 

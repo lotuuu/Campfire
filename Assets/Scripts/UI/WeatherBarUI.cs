@@ -37,24 +37,24 @@ namespace Garden
             // Load moon textures
             moonTextures = new Texture2D[8];
             for (int i = 0; i < 8; i++)
-                moonTextures[i] = Resources.Load<Texture2D>($"MoonPhases/Moon_Phase_{i + 1}");
+                moonTextures[i] = SpriteService.Instance?.GetTexture($"moon/phase-{i + 1}");
 
             // Load weather condition icons
             weatherIcons = new Dictionary<WeatherCondition, Texture2D>
             {
-                { WeatherCondition.Clear, Resources.Load<Texture2D>("UI/Icons/weather-clear") },
-                { WeatherCondition.Cloudy, Resources.Load<Texture2D>("UI/Icons/weather-cloudy") },
-                { WeatherCondition.Rain, Resources.Load<Texture2D>("UI/Icons/weather-rain") },
-                { WeatherCondition.Storm, Resources.Load<Texture2D>("UI/Icons/weather-storm") },
-                { WeatherCondition.Snow, Resources.Load<Texture2D>("UI/Icons/weather-snow") },
+                { WeatherCondition.Clear, SpriteService.Instance?.GetTexture("ui/weather-clear") },
+                { WeatherCondition.Cloudy, SpriteService.Instance?.GetTexture("ui/weather-cloudy") },
+                { WeatherCondition.Rain, SpriteService.Instance?.GetTexture("ui/weather-rain") },
+                { WeatherCondition.Storm, SpriteService.Instance?.GetTexture("ui/weather-storm") },
+                { WeatherCondition.Snow, SpriteService.Instance?.GetTexture("ui/weather-snow") },
             };
 
             // Load static icons
             var humidityIcon = root.Q("weather-humidity-icon");
-            SetIcon(humidityIcon, "UI/Icons/weather-humidity");
+            SetIcon(humidityIcon, "ui/weather-humidity");
 
             var tempIcon = root.Q("weather-temp-icon");
-            SetIcon(tempIcon, "UI/Icons/weather-temp");
+            SetIcon(tempIcon, "ui/weather-temp");
 
 
             weatherBar = root.Q("weather-bar");
@@ -351,10 +351,10 @@ namespace Garden
             }
         }
 
-        private static void SetIcon(VisualElement el, string resourcePath)
+        private static void SetIcon(VisualElement el, string spriteKey)
         {
             if (el == null) return;
-            var tex = Resources.Load<Texture2D>(resourcePath);
+            var tex = SpriteService.Instance?.GetTexture(spriteKey);
             if (tex != null)
                 el.style.backgroundImage = tex;
         }

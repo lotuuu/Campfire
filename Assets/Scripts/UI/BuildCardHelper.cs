@@ -40,7 +40,7 @@ namespace Garden
                 Sprite icon = spriteIcon;
                 if (icon == null && !string.IsNullOrEmpty(iconPath))
                 {
-                    var tex = Resources.Load<Texture2D>(iconPath);
+                    var tex = SpriteService.Instance?.GetTexture(iconPath);
                     if (tex != null)
                         iconEl.style.backgroundImage = new StyleBackground(tex);
                 }
@@ -174,32 +174,21 @@ namespace Garden
             return chips;
         }
 
-        private static Sprite _manaIcon;
-
         private static Sprite LoadManaIcon()
         {
-            if (_manaIcon == null)
-            {
-                var tex = Resources.Load<Texture2D>("UI/Icons/resource-mana");
-                if (tex != null)
-                    _manaIcon = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
-            }
-            return _manaIcon;
+            return SpriteService.Instance?.GetSprite("ui/resource-mana");
         }
 
         private static Sprite LoadHarvestIcon(string itemName)
         {
             string seedName = itemName.Replace("_harvest", "");
-            var seedData = Resources.Load<SeedData>($"Seeds/{seedName}");
-            if (seedData != null && seedData.icon != null)
-                return seedData.icon;
 
-            // Fallback: try garden plant data
-            var plantData = Resources.Load<GardenPlantData>($"GardenPlants/{seedName}");
-            if (plantData != null && plantData.icon != null)
-                return plantData.icon;
+            // Try seed icon
+            var sprite = SpriteService.Instance?.GetSprite($"seeds/{seedName.ToLower()}/icon");
+            if (sprite != null) return sprite;
 
-            return null;
+            // Fallback: try garden plant icon
+            return SpriteService.Instance?.GetSprite($"gardens/{seedName.ToLower()}/icon");
         }
     }
 }

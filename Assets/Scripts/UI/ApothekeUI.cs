@@ -91,8 +91,12 @@ namespace Garden
 
             var icon = new VisualElement();
             icon.AddToClassList("seed-icon");
-            if (seedData != null && seedData.icon != null)
-                icon.style.backgroundImage = new StyleBackground(seedData.icon);
+            if (seedData != null)
+            {
+                var sprite = SpriteService.Instance?.GetSprite($"seeds/{seedData.seedName.ToLower()}/icon");
+                if (sprite != null)
+                    icon.style.backgroundImage = new StyleBackground(sprite);
+            }
             header.Add(icon);
 
             var info = new VisualElement();

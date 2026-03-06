@@ -34,7 +34,7 @@ namespace Garden
                     && CurrencyManager.Instance.CanAffordMana(plotCost.manaCost)
                     && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, plotCost.harvestCosts);
                 buildList.Add(BuildCardHelper.CreateBuildCard(
-                    "Plot", "Grow seeds", "UI/Icons/Buildings/plot", null,
+                    "Plot", "Grow seeds", "ui/buildings/plot", null,
                     BuildCardHelper.FromBuildingCost(plotCost), capText,
                     canAfford, canPlace,
                     () => OnRequestPlacement?.Invoke(CampBuildingType.Plot)));
@@ -48,7 +48,7 @@ namespace Garden
                     && CurrencyManager.Instance.CanAffordMana(vaseCost.manaCost)
                     && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, vaseCost.harvestCosts);
                 buildList.Add(BuildCardHelper.CreateBuildCard(
-                    "Vase", "Stores water", "UI/Icons/Buildings/vase", null,
+                    "Vase", "Stores water", "ui/buildings/vase", null,
                     BuildCardHelper.FromBuildingCost(vaseCost), capText,
                     canAfford, canPlace,
                     () => OnRequestPlacement?.Invoke(CampBuildingType.Vase)));
@@ -64,7 +64,7 @@ namespace Garden
                         && CurrencyManager.Instance.CanAffordMana(nextCost.manaCost)
                         && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, nextCost.harvestCosts);
                     buildList.Add(BuildCardHelper.CreateBuildCard(
-                        "House", "Houses 1 Mallum", "UI/Icons/Buildings/house", null,
+                        "House", "Houses 1 Mallum", "ui/buildings/house", null,
                         BuildCardHelper.FromBuildingCost(nextCost), capText,
                         canAfford, canPlace,
                         () => OnRequestPlacement?.Invoke(CampBuildingType.MallumHouse)));
@@ -79,7 +79,7 @@ namespace Garden
                     && CurrencyManager.Instance.CanAffordMana(gardenCost.manaCost)
                     && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, gardenCost.harvestCosts);
                 buildList.Add(BuildCardHelper.CreateBuildCard(
-                    "Garden", "Grow fruit trees", "UI/Icons/Buildings/garden", null,
+                    "Garden", "Grow fruit trees", "ui/buildings/garden", null,
                     BuildCardHelper.FromBuildingCost(gardenCost), capText,
                     canAfford, canPlace,
                     () => OnRequestPlacement?.Invoke(CampBuildingType.Garden)));
@@ -90,7 +90,7 @@ namespace Garden
             {
                 var recipe = FlameManager.Instance.Config.GetUpgradeRecipe(FlameManager.Instance.Level);
                 buildList.Add(BuildCardHelper.CreateBuildCard(
-                    "Upgrade Flame", "Expand your camp", "UI/Icons/Buildings/flame", null,
+                    "Upgrade Flame", "Expand your camp", "ui/buildings/flame", null,
                     BuildCardHelper.FromFlameRecipe(recipe), "", true, true, () =>
                     {
                         FlameManager.Instance.UpgradeFlame();

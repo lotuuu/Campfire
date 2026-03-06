@@ -24,9 +24,9 @@ namespace Garden
             btnMail?.RegisterCallback<ClickEvent>(_ => OnLettersClicked?.Invoke());
 
             // Load nav icons
-            SetIcon(root.Q("nav-icon-seeds"), "UI/Icons/nav-seeds");
-            SetIcon(root.Q("nav-icon-quest"), "UI/Icons/quest-compass");
-            SetIcon(root.Q("nav-icon-mail"), "UI/Icons/nav-mail");
+            SetIcon(root.Q("nav-icon-seeds"), "ui/nav-seeds");
+            SetIcon(root.Q("nav-icon-quest"), "ui/quest-compass");
+            SetIcon(root.Q("nav-icon-mail"), "ui/nav-mail");
 
             questBadge = root.Q<Label>("nav-quest-badge");
             socialBadge = root.Q<Label>("nav-social-badge");
@@ -56,10 +56,10 @@ namespace Garden
             }
         }
 
-        private static void SetIcon(VisualElement el, string resourcePath)
+        private static void SetIcon(VisualElement el, string spriteKey)
         {
             if (el == null) return;
-            var tex = Resources.Load<Texture2D>(resourcePath);
+            var tex = SpriteService.Instance?.GetTexture(spriteKey);
             if (tex != null)
                 el.style.backgroundImage = tex;
         }

@@ -604,7 +604,7 @@ namespace Garden
                         && CurrencyManager.Instance.CanAffordMana(plotCost.manaCost)
                         && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, plotCost.harvestCosts);
                     scroll.Add(BuildCardHelper.CreateBuildCard(
-                        "Plot", "Grow seeds", "UI/Icons/Buildings/plot", null,
+                        "Plot", "Grow seeds", "ui/buildings/plot", null,
                         BuildCardHelper.FromBuildingCost(plotCost), capText,
                         canAffordPlot, canPlace, () =>
                         {
@@ -624,7 +624,7 @@ namespace Garden
                         && CurrencyManager.Instance.CanAffordMana(vaseCost.manaCost)
                         && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, vaseCost.harvestCosts);
                     scroll.Add(BuildCardHelper.CreateBuildCard(
-                        "Vase", "Stores water", "UI/Icons/Buildings/vase", null,
+                        "Vase", "Stores water", "ui/buildings/vase", null,
                         BuildCardHelper.FromBuildingCost(vaseCost), capText,
                         canAffordVase, canPlace, () =>
                         {
@@ -644,7 +644,7 @@ namespace Garden
                         && CurrencyManager.Instance.CanAffordMana(cost.manaCost)
                         && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, cost.harvestCosts);
                     scroll.Add(BuildCardHelper.CreateBuildCard(
-                        "House", "Houses 1 Mallum", "UI/Icons/Buildings/house", null,
+                        "House", "Houses 1 Mallum", "ui/buildings/house", null,
                         BuildCardHelper.FromBuildingCost(cost), capText,
                         canAffordHouse, canPlace, () =>
                         {
@@ -664,7 +664,7 @@ namespace Garden
                         && CurrencyManager.Instance.CanAffordMana(gardenCost.manaCost)
                         && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, gardenCost.harvestCosts);
                     scroll.Add(BuildCardHelper.CreateBuildCard(
-                        "Garden", "Grow fruit trees", "UI/Icons/Buildings/garden", null,
+                        "Garden", "Grow fruit trees", "ui/buildings/garden", null,
                         BuildCardHelper.FromBuildingCost(gardenCost), capText,
                         canAffordGarden, canPlace, () =>
                         {
@@ -1164,7 +1164,7 @@ namespace Garden
                     && CurrencyManager.Instance.CanAffordMana(plotCost.manaCost)
                     && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, plotCost.harvestCosts);
                 scroll.Add(BuildCardHelper.CreateBuildCard(
-                    "Plot", "Grow seeds", "UI/Icons/Buildings/plot", null,
+                    "Plot", "Grow seeds", "ui/buildings/plot", null,
                     BuildCardHelper.FromBuildingCost(plotCost), capText,
                     canAfford, canPlaceEntity, () =>
                     {
@@ -1181,7 +1181,7 @@ namespace Garden
                     && CurrencyManager.Instance.CanAffordMana(vaseCost.manaCost)
                     && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, vaseCost.harvestCosts);
                 scroll.Add(BuildCardHelper.CreateBuildCard(
-                    "Vase", "Stores water", "UI/Icons/Buildings/vase", null,
+                    "Vase", "Stores water", "ui/buildings/vase", null,
                     BuildCardHelper.FromBuildingCost(vaseCost), capText,
                     canAfford, canPlaceEntity, () =>
                     {
@@ -1200,7 +1200,7 @@ namespace Garden
                         && CurrencyManager.Instance.CanAffordMana(nextCost.manaCost)
                         && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, nextCost.harvestCosts);
                     scroll.Add(BuildCardHelper.CreateBuildCard(
-                        "House", "Houses 1 Mallum", "UI/Icons/Buildings/house", null,
+                        "House", "Houses 1 Mallum", "ui/buildings/house", null,
                         BuildCardHelper.FromBuildingCost(nextCost), capText,
                         canAfford, canPlaceEntity, () =>
                         {
@@ -1220,7 +1220,7 @@ namespace Garden
                         && CurrencyManager.Instance.CanAffordMana(gardenCost.manaCost)
                         && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, gardenCost.harvestCosts);
                     scroll.Add(BuildCardHelper.CreateBuildCard(
-                        "Garden", "Grow fruit trees", "UI/Icons/Buildings/garden", null,
+                        "Garden", "Grow fruit trees", "ui/buildings/garden", null,
                         BuildCardHelper.FromBuildingCost(gardenCost), capText,
                         canAfford, canPlaceEntity, () =>
                         {
@@ -1325,12 +1325,12 @@ namespace Garden
             // Seed icon + yield row
             var yieldRow = new VisualElement();
             yieldRow.AddToClassList("harvest-yield-row");
-            var seed = Resources.Load<SeedData>("Seeds/" + result.seedName);
-            if (seed != null && seed.icon != null)
+            var seedSprite = SpriteService.Instance?.GetSprite($"seeds/{result.seedName.ToLower()}/icon");
+            if (seedSprite != null)
             {
                 var iconEl = new VisualElement();
                 iconEl.AddToClassList("harvest-seed-icon");
-                iconEl.style.backgroundImage = new StyleBackground(seed.icon);
+                iconEl.style.backgroundImage = new StyleBackground(seedSprite);
                 yieldRow.Add(iconEl);
             }
             var yieldLabel = new Label($"{PlotManager.GetSeedDisplayName(result.seedName)} x{result.drops}");
@@ -1735,7 +1735,7 @@ namespace Garden
             {
                 var lockIcon = new VisualElement();
                 lockIcon.AddToClassList("skin-swatch-lock");
-                var lockTex = Resources.Load<Texture2D>("UI/Icons/lorc-padlock");
+                var lockTex = SpriteService.Instance?.GetTexture("ui/lorc-padlock");
                 if (lockTex != null)
                     lockIcon.style.backgroundImage = lockTex;
                 swatch.Add(lockIcon);
@@ -1949,7 +1949,7 @@ namespace Garden
 
                 var pigmentIcon = new VisualElement();
                 pigmentIcon.AddToClassList("skin-cost-icon");
-                var iconTex = Resources.Load<Texture2D>($"UI/Icons/Items/{skin.costItemName}");
+                var iconTex = SpriteService.Instance?.GetTexture($"ui/items/{skin.costItemName.ToLower()}");
                 if (iconTex != null)
                     pigmentIcon.style.backgroundImage = iconTex;
                 costRow.Add(pigmentIcon);

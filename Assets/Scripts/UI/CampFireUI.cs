@@ -158,7 +158,7 @@ namespace Garden
 
                     if (!visitor.dialogueSeen && visitor.dialogueLines != null && visitor.dialogueLines.Count > 0 && dialogueUI != null)
                     {
-                        Texture2D portrait = Resources.Load<Texture2D>($"Portraits/{visitor.portraitId}");
+                        Texture2D portrait = SpriteService.Instance?.GetTexture($"portraits/{visitor.portraitId}");
 
                         dialogueUI.Show(visitor.visitorName, visitor.dialogueLines, () =>
                         {

@@ -16,9 +16,9 @@ namespace Garden
             mallumDisplay = root.Q<Label>("mallum-display");
 
             // Load resource icons
-            SetIcon(root.Q("mana-icon"), "UI/Icons/resource-mana");
-            SetIcon(root.Q("water-icon"), "UI/Icons/resource-water");
-            SetIcon(root.Q("mallum-icon"), "UI/Icons/resource-mallum");
+            SetIcon(root.Q("mana-icon"), "ui/resource-mana");
+            SetIcon(root.Q("water-icon"), "ui/resource-water");
+            SetIcon(root.Q("mallum-icon"), "ui/resource-mallum");
 
             if (CurrencyManager.Instance != null)
                 CurrencyManager.Instance.OnCurrencyChanged += OnCurrencyChanged;
@@ -56,10 +56,10 @@ namespace Garden
                 mallumDisplay.text = $"{MallumManager.Instance.GetAvailableMallumCount()}/{MallumManager.Instance.GetTotalMallumCount()}";
         }
 
-        private static void SetIcon(VisualElement el, string resourcePath)
+        private static void SetIcon(VisualElement el, string spriteKey)
         {
             if (el == null) return;
-            var tex = Resources.Load<Texture2D>(resourcePath);
+            var tex = SpriteService.Instance?.GetTexture(spriteKey);
             if (tex != null)
                 el.style.backgroundImage = tex;
         }
