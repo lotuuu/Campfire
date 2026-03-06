@@ -274,23 +274,28 @@
     --hex-border: rgba(160, 220, 80, 0.7);
 }
 
+/* ── Watering mode dim for non-waterable cells ── */
+.grid-cell--dimmed {
+    opacity: 0.35;
+}
+
 /* ── Placement cancel button ── */
 #placement-cancel {
     position: absolute;
-    bottom: var(--spacing-md);
+    bottom: var(--spacing-lg);
     left: 50%;
     translate: -50% 0;
-    padding: var(--spacing-xs) var(--spacing-lg);
-    background-color: rgba(140, 40, 30, 0.7);
-    border-width: 1px;
-    border-color: rgba(200, 80, 60, 0.4);
-    border-radius: var(--radius-sm);
+    padding: var(--spacing-sm) var(--spacing-xl);
+    background-color: rgba(140, 40, 30, 0.8);
+    border-width: 2px;
+    border-color: rgba(200, 80, 60, 0.5);
+    border-radius: var(--radius-md);
     color: rgb(255, 220, 200);
-    font-size: var(--font-sm);
+    font-size: var(--font-md);
 }
 
 #placement-cancel:hover {
-    background-color: rgba(160, 50, 35, 0.85);
+    background-color: rgba(160, 50, 35, 0.9);
 }
 
 /* ── Visit back button ── */

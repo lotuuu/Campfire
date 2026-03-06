@@ -302,27 +302,36 @@ namespace Garden
                     {
                         PopulateOccupiedCell(cell, label, status, progress, progressFill, info.type, info.index);
 
-                        // In watering mode, highlight planted plots as targets or show cooldown
-                        if (mode == CampsiteMode.Watering && info.type == CampBuildingType.Plot)
+                        // In watering mode, highlight planted plots as targets or dim non-waterable cells
+                        if (mode == CampsiteMode.Watering)
                         {
-                            var plot = data.plots[info.index];
-                            if (plot.state == PlotState.Growing)
+                            bool isWaterTarget = false;
+                            if (info.type == CampBuildingType.Plot)
                             {
-                                double cooldownRemaining = PlotManager.GetWaterCooldownRemaining(plot);
-                                if (cooldownRemaining <= 0)
+                                var plot = data.plots[info.index];
+                                if (plot.state == PlotState.Growing)
                                 {
-                                    cell.AddToClassList("grid-cell--water-target");
-                                }
-                                else
-                                {
-                                    cell.AddToClassList("grid-cell--water-cooldown");
-                                    if (progress != null && progressFill != null)
+                                    double cooldownRemaining = PlotManager.GetWaterCooldownRemaining(plot);
+                                    if (cooldownRemaining <= 0)
                                     {
-                                        progress.AddToClassList("cell-progress--visible");
-                                        progressFill.AddToClassList("cell-progress-fill--cooldown");
-                                        cooldownPlots.Add((progressFill, info.index));
+                                        cell.AddToClassList("grid-cell--water-target");
+                                        isWaterTarget = true;
+                                    }
+                                    else
+                                    {
+                                        cell.AddToClassList("grid-cell--water-cooldown");
+                                        if (progress != null && progressFill != null)
+                                        {
+                                            progress.AddToClassList("cell-progress--visible");
+                                            progressFill.AddToClassList("cell-progress-fill--cooldown");
+                                            cooldownPlots.Add((progressFill, info.index));
+                                        }
                                     }
                                 }
+                            }
+                            if (!isWaterTarget)
+                            {
+                                cell.AddToClassList("grid-cell--dimmed");
                             }
                         }
 
@@ -355,6 +364,8 @@ namespace Garden
 
                         if (mode == CampsiteMode.Placing)
                             cell.AddToClassList("grid-cell--placeable");
+                        else if (mode == CampsiteMode.Watering)
+                            cell.AddToClassList("grid-cell--dimmed");
 
                         cell.RegisterCallback<ClickEvent>(evt =>
                         {
