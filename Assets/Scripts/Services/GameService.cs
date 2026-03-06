@@ -37,6 +37,14 @@ namespace Garden
 
             try
             {
+                // Fetch server configs before game state
+                if (ConfigService.Instance != null)
+                {
+                    var configLoaded = await ConfigService.Instance.FetchConfigs();
+                    if (!configLoaded)
+                        Debug.LogWarning("GameService: Config fetch failed, using local ScriptableObjects.");
+                }
+
                 using var req = GetAuth("/game/state");
                 await SendAsync(req);
 
