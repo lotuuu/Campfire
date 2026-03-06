@@ -50,7 +50,7 @@ defmodule CampFireWeb.ItemsLive do
     assign(socket, editing: seed, form: form, recipe_json: recipe_json)
   end
 
-  defp handle_edit_params(%{"name" => name}, %{assigns: %{sub_tab: sub_tab}} = socket)
+  defp handle_edit_params(%{"id" => name}, %{assigns: %{sub_tab: sub_tab}} = socket)
        when sub_tab in [:pigments, :potions, :fertilizer] do
     case Admin.get_recipe(name) do
       nil ->
@@ -69,7 +69,7 @@ defmodule CampFireWeb.ItemsLive do
     end
   end
 
-  defp handle_edit_params(%{"name" => name}, %{assigns: %{sub_tab: :skins}} = socket) do
+  defp handle_edit_params(%{"id" => name}, %{assigns: %{sub_tab: :skins}} = socket) do
     case Admin.get_skin(name) do
       nil ->
         assign(socket, editing: nil, skin_form: %{})
