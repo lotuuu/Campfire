@@ -46,7 +46,6 @@ namespace Garden
                 plant.yieldAmount = serverGarden.yieldAmount;
                 plant.yieldIntervalHours = serverGarden.yieldIntervalHours;
                 plant.waterRequired = serverGarden.waterRequired;
-                plant.manaCost = serverGarden.manaCost;
             }
         }
 
@@ -66,9 +65,6 @@ namespace Garden
 
             var plantData = LoadPlantData(plantName);
             if (plantData == null) return false;
-
-            if (plantData.manaCost > 0 && !CurrencyManager.Instance.SpendMana(plantData.manaCost))
-                return false;
 
             if (!CurrencyManager.Instance.SpendWater(plantData.waterRequired)) return false;
 
@@ -170,6 +166,64 @@ namespace Garden
             if (existing != null) existing.count += count;
             else data.items.Add(new InventoryItem { itemName = itemName, count = count });
         }
+
+        // ── Garden Building ──────────────────────────────────────────
+
+        public static bool TryCraftGarden(SaveData data, GardenPlantData plantData, int gridX, int gridY)
+        {
+            int existingCount = 0;
+            foreach (var g in data.gardens)
+            {
+                if (g.plantName == plantData.plantName) existingCount++;
+            }
+
+            var cost = plantData.GetCost(existingCount);
+            if (cost == null) return false;
+
+            if (data.mana < cost.manaCost) return false;
+
+            if (cost.seedCost > 0)
+            {
+                var item = data.items.Find(it => it.itemName == plantData.yieldItem);
+                if (item == null || item.count < cost.seedCost) return false;
+                item.count -= cost.seedCost;
+            }
+
+            data.mana -= cost.manaCost;
+
+            data.gardens.Add(new GardenSave
+            {
+                plantName = plantData.plantName,
+                plantTimeUtc = GameTime.UtcNow.ToString("o"),
+                gridX = gridX,
+                gridY = gridY
+            });
+
+            return true;
+        }
+
+        public bool CraftGarden(string plantName, int gridX, int gridY)
+        {
+            if (!FlameManager.Instance.CanPlaceEntity()) return false;
+
+            var plantData = LoadPlantData(plantName);
+            if (plantData == null) return false;
+
+            var data = SaveManager.Instance.Data;
+            if (!TryCraftGarden(data, plantData, gridX, gridY)) return false;
+
+            SaveManager.Instance.Save();
+            OnGardenChanged?.Invoke(data.gardens.Count - 1);
+
+            if (GameService.Instance != null && GameService.Instance.IsOnline)
+            {
+                _ = GameService.Instance.PlantGarden(plantName, gridX, gridY);
+            }
+
+            return true;
+        }
+
+        // ── Helpers ─────────────────────────────────────────────────
 
         private static GardenPlantData LoadPlantData(string plantName)
         {
