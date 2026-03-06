@@ -48,11 +48,43 @@ namespace Garden
 
             if (!string.IsNullOrEmpty(social.uid) && !string.IsNullOrEmpty(social.authToken))
             {
-                IsSignedIn = true;
-                OnSignedIn?.Invoke();
-                return;
+                // Validate existing token — DB may have been reset
+                if (await ValidateToken())
+                {
+                    IsSignedIn = true;
+                    OnSignedIn?.Invoke();
+                    return;
+                }
+
+                // Token is stale, clear and re-register
+                Debug.LogWarning("SocialService: Stored token is invalid, re-registering...");
+                social.uid = null;
+                social.authToken = null;
+                social.friendCode = null;
+                SocialSaveManager.Instance.Save();
             }
 
+            await Register();
+        }
+
+        private async Task<bool> ValidateToken()
+        {
+            try
+            {
+                using var request = GetAuth("/auth/me");
+                await SendAsync(request);
+                return request.responseCode != 401;
+            }
+            catch
+            {
+                // Network error — assume token is fine, will fail later if not
+                return true;
+            }
+        }
+
+        private async Task Register()
+        {
+            var social = SocialSaveManager.Instance.Data;
             try
             {
                 var body = JsonUtility.ToJson(new RegisterRequest
@@ -81,7 +113,7 @@ namespace Garden
             }
             catch (Exception e)
             {
-                Debug.LogError($"SocialService: Initialize failed: {e.Message}");
+                Debug.LogError($"SocialService: Registration failed: {e.Message}");
             }
         }
 

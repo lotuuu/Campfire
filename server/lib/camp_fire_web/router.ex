@@ -58,9 +58,10 @@ defmodule CampFireWeb.Router do
     post "/register", AuthController, :register
   end
 
-  # Display name (auth required, normal rate limit)
+  # Auth (requires auth)
   scope "/auth", CampFireWeb do
     pipe_through [:api, :authenticated]
+    get "/me", AuthController, :me
     put "/display-name", AuthController, :update_display_name
   end
 

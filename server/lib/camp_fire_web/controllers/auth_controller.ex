@@ -19,6 +19,11 @@ defmodule CampFireWeb.AuthController do
     end
   end
 
+  def me(conn, _params) do
+    player = conn.assigns.current_player
+    json(conn, %{uid: player.uid, friendCode: player.friend_code, displayName: player.display_name})
+  end
+
   def update_display_name(conn, %{"displayName" => display_name}) do
     player = conn.assigns.current_player
 
