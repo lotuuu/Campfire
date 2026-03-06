@@ -44,8 +44,9 @@ namespace Garden
             if (FreeMode) return true;
             if (!CanAffordMana(amount)) return false;
             AddMana(-amount);
-            EconomyService.Instance?.Enqueue("spend-mana",
-                JsonUtility.ToJson(new SpendManaRequest { amount = amount }));
+            if (!(GameService.Instance != null && GameService.Instance.IsOnline))
+                EconomyService.Instance?.Enqueue("spend-mana",
+                    JsonUtility.ToJson(new SpendManaRequest { amount = amount }));
             return true;
         }
 
@@ -88,7 +89,7 @@ namespace Garden
             data.gems = Mathf.Max(0, data.gems + amount);
             OnCurrencyChanged?.Invoke(CurrencyType.Gems, old, data.gems);
             SaveManager.Instance.Save();
-            if (amount > 0)
+            if (amount > 0 && !(GameService.Instance != null && GameService.Instance.IsOnline))
                 EconomyService.Instance?.Enqueue("add-gems",
                     JsonUtility.ToJson(new AddGemsRequest { amount = amount }));
         }
@@ -98,8 +99,9 @@ namespace Garden
             if (FreeMode) return true;
             if (amount <= 0 || SaveManager.Instance.Data.gems < amount) return false;
             AddGems(-amount);
-            EconomyService.Instance?.Enqueue("spend-gems",
-                JsonUtility.ToJson(new SpendGemsRequest { amount = amount }));
+            if (!(GameService.Instance != null && GameService.Instance.IsOnline))
+                EconomyService.Instance?.Enqueue("spend-gems",
+                    JsonUtility.ToJson(new SpendGemsRequest { amount = amount }));
             return true;
         }
 

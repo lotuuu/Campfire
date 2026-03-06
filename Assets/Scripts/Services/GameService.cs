@@ -134,7 +134,8 @@ namespace Garden
                 if (!onServer) data.vases.Add(lv);
             }
 
-            // Gardens
+            // Gardens — preserve local-only gardens (serverId == 0)
+            var localGardens = data.gardens.FindAll(g => g.serverId == 0);
             data.gardens.Clear();
             if (state.gardens != null)
             {
@@ -151,6 +152,11 @@ namespace Garden
                         gridY = sg.gridY
                     });
                 }
+            }
+            foreach (var lg in localGardens)
+            {
+                bool onServer = data.gardens.Exists(g => g.gridX == lg.gridX && g.gridY == lg.gridY);
+                if (!onServer) data.gardens.Add(lg);
             }
 
             // Mallums — preserve local-only mallums up to house-based max
@@ -180,12 +186,9 @@ namespace Garden
             int maxMallums = MallumManager.Instance != null
                 ? MallumManager.Instance.HouseConfig.GetMaxMallums(data.mallumHouses.Count)
                 : data.mallumHouses.Count;
-            foreach (var lm in localMallums)
-            {
-                if (data.mallums.Count >= maxMallums) break;
-                if (!data.mallums.Exists(m => m.serverId == lm.serverId))
-                    data.mallums.Add(lm);
-            }
+            int slotsAvailable = maxMallums - data.mallums.Count;
+            for (int i = 0; i < Math.Min(localMallums.Count, slotsAvailable); i++)
+                data.mallums.Add(localMallums[i]);
 
             // Mallum Houses
             var localHouses = data.mallumHouses.FindAll(h => h.serverId == 0);
@@ -436,6 +439,24 @@ namespace Garden
                 Debug.LogWarning($"GameService: SetVaseSkin failed (HTTP {req.responseCode}): {req.downloadHandler.text}");
             }
             catch (Exception e) { Debug.LogWarning($"GameService: SetVaseSkin failed: {e.Message}"); }
+            return null;
+        }
+
+        public async Task<ServerVase> InstantFinishVase(int vaseId)
+        {
+            if (!IsOnline) return null;
+            try
+            {
+                var body = JsonUtility.ToJson(new InstantFinishVaseRequest { vaseId = vaseId });
+                using var req = PostJson("/game/vase/instant-finish", body);
+                await SendAsync(req);
+
+                if (req.responseCode >= 200 && req.responseCode < 300)
+                    return JsonUtility.FromJson<ServerVase>(req.downloadHandler.text);
+
+                Debug.LogWarning($"GameService: InstantFinishVase failed (HTTP {req.responseCode}): {req.downloadHandler.text}");
+            }
+            catch (Exception e) { Debug.LogWarning($"GameService: InstantFinishVase failed: {e.Message}"); }
             return null;
         }
 

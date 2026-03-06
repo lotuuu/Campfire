@@ -234,7 +234,8 @@ namespace Garden
                 if (entry.count <= 0) data.items.Remove(entry);
             }
 
-            if (EconomyService.Instance != null && !CurrencyManager.FreeMode)
+            if (EconomyService.Instance != null && !CurrencyManager.FreeMode
+                && !(GameService.Instance != null && GameService.Instance.IsOnline))
             {
                 foreach (var hc in cost.harvestCosts)
                 {
@@ -287,8 +288,9 @@ namespace Garden
                 if (seedEntry == null || seedEntry.count <= 0) return false;
                 seedEntry.count--;
                 if (seedEntry.count <= 0) data.seedInventory.Remove(seedEntry);
-                EconomyService.Instance?.Enqueue("spend-seeds",
-                    JsonUtility.ToJson(new SpendSeedRequest { seed_name = seedName, count = 1 }));
+                if (!(GameService.Instance != null && GameService.Instance.IsOnline))
+                    EconomyService.Instance?.Enqueue("spend-seeds",
+                        JsonUtility.ToJson(new SpendSeedRequest { seed_name = seedName, count = 1 }));
             }
 
             plot.seedName = seedName;
@@ -426,8 +428,9 @@ namespace Garden
 
             // Add items locally as fallback (server response will be authoritative)
             AddItem(data, seed.name + "_harvest", drops);
-            EconomyService.Instance?.Enqueue("add-items",
-                JsonUtility.ToJson(new AddItemRequest { item_name = seed.name + "_harvest", count = drops }));
+            if (!(GameService.Instance != null && GameService.Instance.IsOnline))
+                EconomyService.Instance?.Enqueue("add-items",
+                    JsonUtility.ToJson(new AddItemRequest { item_name = seed.name + "_harvest", count = drops }));
 
             SaveManager.Instance.Save();
 

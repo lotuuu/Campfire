@@ -94,6 +94,7 @@ namespace Garden
     [Serializable] public class HarvestRequest { public int plotId; }
     [Serializable] public class FillVaseRequest { public int vaseId; }
     [Serializable] public class CheckVaseRequest { public int vaseId; }
+    [Serializable] public class InstantFinishVaseRequest { public int vaseId; }
     [Serializable] public class PlantGardenRequest { public string plantName; public int gridX; public int gridY; }
     [Serializable] public class CollectGardenRequest { public int gardenId; }
     [Serializable] public class QuestRequest { public string questName; }

@@ -216,6 +216,8 @@ namespace Garden
             }
         }
 
+        private const int MaxRetries = 3;
+
         private async Task DrainQueue()
         {
             if (_isSyncing) return;
@@ -226,7 +228,15 @@ namespace Garden
                 while (_queue.actions.Count > 0)
                 {
                     var action = _queue.actions[0];
-                    bool success = await SendAction(action);
+                    bool success = false;
+
+                    for (int attempt = 0; attempt < MaxRetries; attempt++)
+                    {
+                        success = await SendAction(action);
+                        if (success) break;
+                        if (attempt < MaxRetries - 1)
+                            await Task.Delay(1000);
+                    }
 
                     if (success)
                     {
@@ -235,12 +245,14 @@ namespace Garden
                     }
                     else
                     {
-                        Debug.LogWarning($"EconomyService: Action {action.type} rejected, syncing full state.");
-                        ClearQueue();
-                        await SyncFromServer();
-                        break;
+                        Debug.LogWarning($"EconomyService: Action {action.type} failed after {MaxRetries} retries, skipping.");
+                        _queue.actions.RemoveAt(0);
+                        SaveQueue();
                     }
                 }
+
+                // Sync from server after drain completes to reconcile state
+                await SyncFromServer();
             }
             finally
             {

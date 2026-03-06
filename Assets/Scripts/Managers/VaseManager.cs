@@ -111,6 +111,11 @@ namespace Garden
             vase.fillStartTimeUtc = null;
             SaveManager.Instance.Save();
             OnVasesChanged?.Invoke();
+
+            // Notify server
+            if (GameService.Instance != null && GameService.Instance.IsOnline && vase.serverId > 0)
+                _ = GameService.Instance.InstantFinishVase(vase.serverId);
+
             return true;
         }
 
