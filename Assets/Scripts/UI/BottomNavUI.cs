@@ -13,6 +13,9 @@ namespace Garden
         private Label questBadge;
         private Label socialBadge;
 
+        private VisualElement iconSeeds, iconQuest, iconMail;
+        private bool iconsLoaded;
+
         public void Initialize(VisualElement root)
         {
             var btnSeeds = root.Q<Button>("btn-seeds");
@@ -23,13 +26,23 @@ namespace Garden
             btnQuest?.RegisterCallback<ClickEvent>(_ => OnQuestClicked?.Invoke());
             btnMail?.RegisterCallback<ClickEvent>(_ => OnLettersClicked?.Invoke());
 
-            // Load nav icons
-            SetIcon(root.Q("nav-icon-seeds"), "ui/nav-seeds");
-            SetIcon(root.Q("nav-icon-quest"), "ui/quest-compass");
-            SetIcon(root.Q("nav-icon-mail"), "ui/nav-mail");
+            iconSeeds = root.Q("nav-icon-seeds");
+            iconQuest = root.Q("nav-icon-quest");
+            iconMail = root.Q("nav-icon-mail");
 
             questBadge = root.Q<Label>("nav-quest-badge");
             socialBadge = root.Q<Label>("nav-social-badge");
+        }
+
+        private void Update()
+        {
+            if (!iconsLoaded && SpriteService.Instance != null)
+            {
+                SetIcon(iconSeeds, "ui/nav-seeds");
+                SetIcon(iconQuest, "ui/quest-compass");
+                SetIcon(iconMail, "ui/nav-mail");
+                iconsLoaded = iconSeeds?.style.backgroundImage.value.texture != null;
+            }
         }
 
         public void UpdateQuestBadge(int count)

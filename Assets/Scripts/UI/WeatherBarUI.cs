@@ -21,8 +21,9 @@ namespace Garden
         private VisualElement questFloatBtn;
 
         private static readonly int[] MoonPhaseToSpriteIndex = { 5, 6, 7, 8, 1, 2, 3, 4 };
-        private Texture2D[] moonTextures;
-        private Dictionary<WeatherCondition, Texture2D> weatherIcons;
+        private VisualElement humidityIconEl;
+        private VisualElement tempIconEl;
+        private bool iconsLoaded;
 
         public void Initialize(VisualElement root)
         {
@@ -34,27 +35,8 @@ namespace Garden
             playerName = root.Q<Label>("player-name");
             dateTime = root.Q<Label>("date-time");
 
-            // Load moon textures
-            moonTextures = new Texture2D[8];
-            for (int i = 0; i < 8; i++)
-                moonTextures[i] = SpriteService.Instance?.GetTexture($"moon/phase-{i + 1}");
-
-            // Load weather condition icons
-            weatherIcons = new Dictionary<WeatherCondition, Texture2D>
-            {
-                { WeatherCondition.Clear, SpriteService.Instance?.GetTexture("ui/weather-clear") },
-                { WeatherCondition.Cloudy, SpriteService.Instance?.GetTexture("ui/weather-cloudy") },
-                { WeatherCondition.Rain, SpriteService.Instance?.GetTexture("ui/weather-rain") },
-                { WeatherCondition.Storm, SpriteService.Instance?.GetTexture("ui/weather-storm") },
-                { WeatherCondition.Snow, SpriteService.Instance?.GetTexture("ui/weather-snow") },
-            };
-
-            // Load static icons
-            var humidityIcon = root.Q("weather-humidity-icon");
-            SetIcon(humidityIcon, "ui/weather-humidity");
-
-            var tempIcon = root.Q("weather-temp-icon");
-            SetIcon(tempIcon, "ui/weather-temp");
+            humidityIconEl = root.Q("weather-humidity-icon");
+            tempIconEl = root.Q("weather-temp-icon");
 
 
             weatherBar = root.Q("weather-bar");
@@ -186,16 +168,16 @@ namespace Garden
 
                 var icon = new VisualElement();
                 icon.AddToClassList("forecast-day-icon");
-                if (weatherIcons.TryGetValue(day.condition, out var tex) && tex != null)
-                    icon.style.backgroundImage = tex;
+                var dayWeatherTex = GetWeatherIcon(day.condition);
+                if (dayWeatherTex != null)
+                    icon.style.backgroundImage = dayWeatherTex;
                 header.Add(icon);
 
                 var condLabel = new Label(day.condition.ToString());
                 condLabel.AddToClassList("forecast-day-condition");
                 header.Add(condLabel);
 
-                int spriteIdx = MoonPhaseToSpriteIndex[(int)day.moonPhase] - 1;
-                var moonTex = moonTextures[spriteIdx];
+                var moonTex = GetMoonTexture((int)day.moonPhase);
                 if (moonTex != null)
                 {
                     var moonIcon = new VisualElement();
@@ -245,16 +227,16 @@ namespace Garden
 
             var icon = new VisualElement();
             icon.AddToClassList("forecast-day-icon");
-            if (weatherIcons.TryGetValue(weather.condition, out var tex) && tex != null)
-                icon.style.backgroundImage = tex;
+            var todayWeatherTex = GetWeatherIcon(weather.condition);
+            if (todayWeatherTex != null)
+                icon.style.backgroundImage = todayWeatherTex;
             header.Add(icon);
 
             var condLabel = new Label(weather.condition.ToString());
             condLabel.AddToClassList("forecast-day-condition");
             header.Add(condLabel);
 
-            int spriteIdx = MoonPhaseToSpriteIndex[(int)weather.moonPhase] - 1;
-            var moonTex = moonTextures[spriteIdx];
+            var moonTex = GetMoonTexture((int)weather.moonPhase);
             if (moonTex != null)
             {
                 var moonIcon = new VisualElement();
@@ -337,26 +319,55 @@ namespace Garden
 
         private void UpdateWeather(WeatherData weather)
         {
-            if (weatherIcon != null && weatherIcons.TryGetValue(weather.condition, out var tex) && tex != null)
+            EnsureStaticIcons();
+
+            var tex = GetWeatherIcon(weather.condition);
+            if (weatherIcon != null && tex != null)
                 weatherIcon.style.backgroundImage = tex;
             if (weatherConditionLabel != null) weatherConditionLabel.text = weather.condition.ToString().ToUpper();
             if (weatherHumidity != null) weatherHumidity.text = $"{weather.humidity:F0}";
             if (weatherTemp != null) weatherTemp.text = $"{weather.temperature:F0}\u00b0";
             if (weatherMoon != null)
             {
-                int spriteIdx = MoonPhaseToSpriteIndex[(int)weather.moonPhase] - 1;
-                var moonTex = moonTextures[spriteIdx];
+                var moonTex = GetMoonTexture((int)weather.moonPhase);
                 if (moonTex != null)
                     weatherMoon.style.backgroundImage = moonTex;
             }
         }
 
-        private static void SetIcon(VisualElement el, string spriteKey)
+        private Texture2D GetMoonTexture(int phaseIndex)
         {
-            if (el == null) return;
-            var tex = SpriteService.Instance?.GetTexture(spriteKey);
-            if (tex != null)
-                el.style.backgroundImage = tex;
+            int spriteIdx = MoonPhaseToSpriteIndex[phaseIndex] - 1;
+            return SpriteService.Instance?.GetTexture($"moon/phase-{spriteIdx + 1}");
+        }
+
+        private static readonly string[] WeatherConditionKeys =
+        {
+            "ui/weather-clear", "ui/weather-cloudy", "ui/weather-rain",
+            "ui/weather-storm", "ui/weather-snow"
+        };
+
+        private Texture2D GetWeatherIcon(WeatherCondition condition)
+        {
+            int idx = (int)condition;
+            if (idx < 0 || idx >= WeatherConditionKeys.Length) return null;
+            return SpriteService.Instance?.GetTexture(WeatherConditionKeys[idx]);
+        }
+
+        private void EnsureStaticIcons()
+        {
+            if (iconsLoaded) return;
+            if (SpriteService.Instance == null) return;
+
+            var tex = SpriteService.Instance.GetTexture("ui/weather-humidity");
+            if (tex != null && humidityIconEl != null)
+                humidityIconEl.style.backgroundImage = tex;
+
+            tex = SpriteService.Instance.GetTexture("ui/weather-temp");
+            if (tex != null && tempIconEl != null)
+                tempIconEl.style.backgroundImage = tex;
+
+            iconsLoaded = true;
         }
     }
 }

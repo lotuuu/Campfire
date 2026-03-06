@@ -7,18 +7,29 @@ namespace Garden
     {
         private Button floatBtn;
         private Label badge;
+        private VisualElement iconEl;
+        private bool iconLoaded;
 
         public void Initialize(VisualElement root)
         {
             floatBtn = root.Q<Button>("quest-float-btn");
             badge = root.Q<Label>("quest-badge");
-
-            var icon = root.Q("quest-float-icon");
-            var tex = SpriteService.Instance?.GetTexture("ui/quest-compass");
-            if (icon != null && tex != null)
-                icon.style.backgroundImage = tex;
+            iconEl = root.Q("quest-float-icon");
 
             UpdateBadge();
+        }
+
+        private void Update()
+        {
+            if (!iconLoaded && iconEl != null && SpriteService.Instance != null)
+            {
+                var tex = SpriteService.Instance.GetTexture("ui/quest-compass");
+                if (tex != null)
+                {
+                    iconEl.style.backgroundImage = tex;
+                    iconLoaded = true;
+                }
+            }
         }
 
         public void UpdateBadge()

@@ -9,16 +9,18 @@ namespace Garden
         private Label waterDisplay;
         private Label mallumDisplay;
 
+        private VisualElement manaIcon, waterIcon, mallumIcon;
+        private bool iconsLoaded;
+
         public void Initialize(VisualElement root)
         {
             manaDisplay = root.Q<Label>("mana-display");
             waterDisplay = root.Q<Label>("water-display");
             mallumDisplay = root.Q<Label>("mallum-display");
 
-            // Load resource icons
-            SetIcon(root.Q("mana-icon"), "ui/resource-mana");
-            SetIcon(root.Q("water-icon"), "ui/resource-water");
-            SetIcon(root.Q("mallum-icon"), "ui/resource-mallum");
+            manaIcon = root.Q("mana-icon");
+            waterIcon = root.Q("water-icon");
+            mallumIcon = root.Q("mallum-icon");
 
             if (CurrencyManager.Instance != null)
                 CurrencyManager.Instance.OnCurrencyChanged += OnCurrencyChanged;
@@ -43,6 +45,13 @@ namespace Garden
 
         private void Update()
         {
+            if (!iconsLoaded && SpriteService.Instance != null)
+            {
+                SetIcon(manaIcon, "ui/resource-mana");
+                SetIcon(waterIcon, "ui/resource-water");
+                SetIcon(mallumIcon, "ui/resource-mallum");
+                iconsLoaded = manaIcon?.style.backgroundImage.value.texture != null;
+            }
             UpdateDisplay();
         }
 
