@@ -40,8 +40,20 @@ defmodule CampFireWeb.EconomyLive do
   # --- Structured saves ---
 
   def handle_event("save_flame", params, socket) do
-    # Preserve upgrade_recipes from existing data (edited via JSON if needed)
-    upgrade_recipes = (socket.assigns.edit_data || %{})["upgrade_recipes"]
+    upgrade_recipes =
+      (params["recipe"] || %{})
+      |> Enum.sort_by(fn {k, _v} -> parse_int(k) end)
+      |> Enum.map(fn {_idx, recipe_params} ->
+        ingredients =
+          (recipe_params["ingredient"] || %{})
+          |> Enum.sort_by(fn {k, _} -> parse_int(k) end)
+          |> Enum.map(fn {_i, ing} ->
+            %{"itemName" => ing["itemName"], "count" => parse_int(ing["count"])}
+          end)
+          |> Enum.reject(fn ing -> ing["itemName"] == "" or ing["itemName"] == nil end)
+
+        %{"ingredients" => ingredients}
+      end)
 
     value = %{
       "max_flame_level" => parse_int(params["max_flame_level"]),
@@ -125,6 +137,30 @@ defmodule CampFireWeb.EconomyLive do
     recipes = List.delete_at(data["upgrade_recipes"] || [], i)
     data = data |> Map.put("entity_caps", caps) |> Map.put("grid_sizes", sizes) |> Map.put("mana_rates", rates) |> Map.put("upgrade_recipes", recipes)
     {:noreply, assign(socket, edit_data: data)}
+  end
+
+  # Add/remove flame recipe ingredients
+  def handle_event("add_recipe_ingredient", %{"recipe-index" => ri}, socket) do
+    i = parse_int(ri)
+    data = socket.assigns.edit_data
+    recipes = data["upgrade_recipes"] || []
+    recipe = Enum.at(recipes, i)
+    ingredients = (recipe["ingredients"] || []) ++ [%{"itemName" => "", "count" => 1}]
+    recipe = Map.put(recipe, "ingredients", ingredients)
+    recipes = List.replace_at(recipes, i, recipe)
+    {:noreply, assign(socket, edit_data: Map.put(data, "upgrade_recipes", recipes))}
+  end
+
+  def handle_event("remove_recipe_ingredient", %{"recipe-index" => ri, "ingredient-index" => ii}, socket) do
+    i = parse_int(ri)
+    j = parse_int(ii)
+    data = socket.assigns.edit_data
+    recipes = data["upgrade_recipes"] || []
+    recipe = Enum.at(recipes, i)
+    ingredients = List.delete_at(recipe["ingredients"] || [], j)
+    recipe = Map.put(recipe, "ingredients", ingredients)
+    recipes = List.replace_at(recipes, i, recipe)
+    {:noreply, assign(socket, edit_data: Map.put(data, "upgrade_recipes", recipes))}
   end
 
   # Add/remove rows for vase tiers
@@ -602,13 +638,15 @@ defmodule CampFireWeb.EconomyLive do
     caps = d["entity_caps"] || []
     sizes = d["grid_sizes"] || []
     rates = d["mana_rates"] || []
+    recipes = d["upgrade_recipes"] || []
 
     assigns =
       assign(assigns,
         max_level: d["max_flame_level"],
         caps: caps,
         sizes: sizes,
-        rates: rates
+        rates: rates,
+        recipes: recipes
       )
 
     ~H"""
@@ -629,15 +667,35 @@ defmodule CampFireWeb.EconomyLive do
             <th class="px-3 py-2 text-left text-gray-500">Mana/s</th>
             <th class="px-3 py-2 text-left text-gray-500">Entity Cap</th>
             <th class="px-3 py-2 text-left text-gray-500">Grid Size</th>
+            <th class="px-3 py-2 text-left text-gray-500">Upgrade Recipe</th>
             <th class="px-3 py-2 w-10"></th>
           </tr></thead>
           <tbody class="divide-y">
             <%= for {cap, i} <- Enum.with_index(@caps) do %>
-              <tr>
+              <tr class="align-top">
                 <td class="px-3 py-1.5 font-medium text-gray-500">{i + 1}</td>
                 <td class="px-3 py-1"><input type="number" step="0.01" name={"mana_rate_#{i}"} value={Enum.at(@rates, i, 0.0)} class="w-full border rounded px-2 py-1" /></td>
                 <td class="px-3 py-1"><input type="number" name={"entity_cap_#{i}"} value={cap} class="w-full border rounded px-2 py-1" /></td>
                 <td class="px-3 py-1"><input type="number" name={"grid_size_#{i}"} value={Enum.at(@sizes, i, 2)} class="w-full border rounded px-2 py-1" /></td>
+                <td class="px-3 py-1">
+                  <%= if i == 0 do %>
+                    <span class="text-gray-400 text-xs">base level</span>
+                  <% else %>
+                    <% recipe = Enum.at(@recipes, i - 1) %>
+                    <% ingredients = if recipe, do: recipe["ingredients"] || [], else: [] %>
+                    <div class="space-y-1">
+                      <%= for {ing, j} <- Enum.with_index(ingredients) do %>
+                        <div class="flex gap-1 items-center">
+                          <input type="text" name={"recipe[#{i - 1}][ingredient][#{j}][itemName]"} value={ing["itemName"]} placeholder="item" class="border rounded px-1 py-0.5 text-xs w-24" />
+                          <span class="text-gray-400 text-xs">x</span>
+                          <input type="number" name={"recipe[#{i - 1}][ingredient][#{j}][count]"} value={ing["count"]} class="border rounded px-1 py-0.5 text-xs w-14" />
+                          <button type="button" phx-click="remove_recipe_ingredient" phx-value-recipe-index={i - 1} phx-value-ingredient-index={j} class="text-red-500 hover:text-red-700 text-xs">X</button>
+                        </div>
+                      <% end %>
+                      <button type="button" phx-click="add_recipe_ingredient" phx-value-recipe-index={i - 1} class="text-xs text-green-600 hover:underline">+ ingredient</button>
+                    </div>
+                  <% end %>
+                </td>
                 <td class="px-3 py-1">
                   <button type="button" phx-click="remove_flame_level" phx-value-index={i} class="text-red-500 hover:text-red-700 text-xs">X</button>
                 </td>
