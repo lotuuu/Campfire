@@ -85,6 +85,7 @@ namespace Garden
         private ServerMallumHouseConfig _mallumHouseConfig;
         private List<Dictionary<string, object>> _houseCosts;
         private Dictionary<string, object> _buildingCostConfig;
+        private Dictionary<string, string> _spriteManifest = new();
 
         private static string ServerBaseUrl =>
 #if UNITY_EDITOR
@@ -156,6 +157,7 @@ namespace Garden
         public ServerMallumHouseConfig MallumHouseConfig => _mallumHouseConfig;
         public List<Dictionary<string, object>> HouseCosts => _houseCosts;
         public Dictionary<string, object> BuildingCostConfig => _buildingCostConfig;
+        public Dictionary<string, string> SpriteManifest => _spriteManifest;
 
         // ── Recipe Conversion ──
 
@@ -372,6 +374,17 @@ namespace Garden
             if (root.TryGetValue("buildingCostConfig", out var buildObj) && buildObj is Dictionary<string, object> build)
             {
                 _buildingCostConfig = build;
+            }
+
+            // Sprite manifest
+            if (root.TryGetValue("sprites", out var spritesObj) && spritesObj is Dictionary<string, object> sprites)
+            {
+                _spriteManifest.Clear();
+                foreach (var kv in sprites)
+                {
+                    if (kv.Value is string hash)
+                        _spriteManifest[kv.Key] = hash;
+                }
             }
         }
 
