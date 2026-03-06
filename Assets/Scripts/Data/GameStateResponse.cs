@@ -11,6 +11,8 @@ namespace Garden
         public List<ServerVase> vases;
         public List<ServerGarden> gardens;
         public List<ServerMallum> mallums;
+        public List<ServerMallumHouse> mallumHouses;
+        public List<ServerBird> birds;
         public ServerWeather weather;
     }
 
@@ -99,6 +101,32 @@ namespace Garden
     [Serializable] public class SetSkinRequest { public string skinName; }
     [Serializable] public class PlotSkinRequest { public int plotId; public string skinName; }
     [Serializable] public class VaseSkinRequest { public int vaseId; public string skinName; }
+    [Serializable]
+    public class ServerMallumHouse
+    {
+        public int id;
+        public int gridX;
+        public int gridY;
+        public string skinName;
+        public List<string> unlockedSkins;
+    }
+
+    [Serializable]
+    public class ServerBird
+    {
+        public int id;
+        public int gridX;
+        public int gridY;
+        public string seedName;
+        public int seedCount;
+    }
+
+    [Serializable] public class BirdCollectRequest { public int birdId; }
+    [Serializable] public class ApothekeCraftRequest { public string recipeName; }
+    [Serializable] public class ApothekeCraftResponse { public string resultItem; public int resultQuantity; }
+    [Serializable] public class BirdCheckResponse { public List<ServerBird> newBirds; }
+    [Serializable] public class BirdCollectResponse { public string seedName; public int seedCount; }
+    [Serializable] public class HouseSkinRequest { public int houseId; public string skinName; }
     [Serializable] public class LocationRequest { public float lat; public float lon; }
     [Serializable] public class HarvestResponse { public float score; public int drops; public string itemName; }
     [Serializable] public class CollectGardenResponse { public ServerGarden garden; public string yieldItem; public int yieldAmount; }

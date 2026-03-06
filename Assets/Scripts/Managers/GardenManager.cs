@@ -46,6 +46,7 @@ namespace Garden
                 plant.yieldAmount = serverGarden.yieldAmount;
                 plant.yieldIntervalHours = serverGarden.yieldIntervalHours;
                 plant.waterRequired = serverGarden.waterRequired;
+                plant.manaCost = serverGarden.manaCost;
             }
         }
 
@@ -65,6 +66,9 @@ namespace Garden
 
             var plantData = LoadPlantData(plantName);
             if (plantData == null) return false;
+
+            if (plantData.manaCost > 0 && !CurrencyManager.Instance.SpendMana(plantData.manaCost))
+                return false;
 
             if (!CurrencyManager.Instance.SpendWater(plantData.waterRequired)) return false;
 

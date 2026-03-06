@@ -6,14 +6,15 @@ defmodule CampFire.Game.MallumsTest do
 
   setup do
     seed_quest_configs()
+    seed_mallum_house_config()
     :ok
   end
 
   defp setup_player(_context \\ %{}) do
     player = register_player()
     {:ok, _economy} = Economy.init_economy(player.uid)
-    # init_economy creates a starter mallum
-    [mallum] = Mallums.list_mallums(player.uid)
+    # init_economy creates 2 starter mallums (mallums_per_house=2)
+    [mallum | _] = Mallums.list_mallums(player.uid)
     {player, mallum}
   end
 
@@ -37,12 +38,16 @@ defmodule CampFire.Game.MallumsTest do
     end
 
     test "fails with no idle mallum" do
-      {player, mallum} = setup_player()
+      {player, _mallum} = setup_player()
 
-      # Put mallum on quest
-      mallum
-      |> PlayerMallum.changeset(%{state: "on_quest", assigned_quest_name: "SwampForage"})
-      |> Repo.update!()
+      # Put all mallums on quest
+      mallums = Mallums.list_mallums(player.uid)
+
+      Enum.each(mallums, fn m ->
+        m
+        |> PlayerMallum.changeset(%{state: "on_quest", assigned_quest_name: "SwampForage"})
+        |> Repo.update!()
+      end)
 
       {:error, :no_idle_mallum} = Mallums.send_on_quest(player.uid, "SwampForage")
     end

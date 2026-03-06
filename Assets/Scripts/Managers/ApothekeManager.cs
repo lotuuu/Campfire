@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Garden
@@ -68,6 +69,26 @@ namespace Garden
                     JsonUtility.ToJson(new AddItemRequest { item_name = recipe.result, count = recipe.resultQuantity }));
             }
             return true;
+        }
+
+        public async Task<bool> CraftOnServer(RecipeData recipe)
+        {
+            if (!CanMix(recipe)) return false;
+
+            if (GameService.Instance != null && GameService.Instance.IsOnline)
+            {
+                var result = await GameService.Instance.CraftApotheke(recipe.recipeName);
+                if (result == null) return false;
+
+                // Server succeeded — sync inventory from economy service
+                if (EconomyService.Instance != null)
+                    EconomyService.Instance.Initialize();
+
+                return true;
+            }
+
+            // Offline fallback: use existing local Mix
+            return Mix(recipe);
         }
 
         public void AddSeed(string seedName, int count = 1)

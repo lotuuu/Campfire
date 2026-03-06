@@ -2,7 +2,7 @@ defmodule CampFireWeb.GameController do
   use CampFireWeb, :controller
 
   alias CampFire.Economy
-  alias CampFire.Game.{Plots, Vases, Gardens, Mallums, Weather, PlayerState}
+  alias CampFire.Game.{Plots, Vases, Gardens, Mallums, MallumHouses, Birds, Weather, PlayerState, Apotheke, Skins}
   alias CampFire.Repo
 
   alias CampFire.ConfigCache
@@ -17,6 +17,7 @@ defmodule CampFireWeb.GameController do
     vase_config = ConfigCache.get("vase_config") || %{}
     mallum_house_config = ConfigCache.get("mallum_house_config") || %{}
     building_cost_config = ConfigCache.get("building_cost_config") || %{}
+    skin_configs = ConfigCache.get("skin_configs") || %{}
 
     seeds =
       Map.new(seed_configs, fn {name, s} ->
@@ -65,7 +66,9 @@ defmodule CampFireWeb.GameController do
       flameConfig: serialize_game_config(flame_config),
       vaseConfig: serialize_game_config(vase_config),
       mallumHouseConfig: serialize_game_config(mallum_house_config),
-      buildingCostConfig: serialize_game_config(building_cost_config)
+      buildingCostConfig: serialize_game_config(building_cost_config),
+      recipes: ConfigCache.get("recipe_configs") || %{},
+      skins: skin_configs
     })
   end
 
@@ -96,6 +99,8 @@ defmodule CampFireWeb.GameController do
     vases = Vases.list_vases(uid)
     gardens = Gardens.list_gardens(uid)
     mallums = Mallums.list_mallums(uid)
+    houses = MallumHouses.list_houses(uid)
+    birds = Birds.list_birds(uid)
 
     {economy, seeds, items} =
       case Economy.get_economy(uid) do
@@ -141,6 +146,8 @@ defmodule CampFireWeb.GameController do
       vases: Enum.map(vases, &serialize_vase/1),
       gardens: Enum.map(gardens, &serialize_garden/1),
       mallums: Enum.map(mallums, &serialize_mallum/1),
+      mallumHouses: Enum.map(houses, &serialize_mallum_house/1),
+      birds: Enum.map(birds, &serialize_bird/1),
       cosmeticState: player_state,
       weather: weather_data
     })
@@ -248,7 +255,7 @@ defmodule CampFireWeb.GameController do
   def set_plot_skin(conn, %{"plotId" => plot_id, "skinName" => skin}) do
     uid = conn.assigns.current_player.uid
 
-    case Plots.set_skin(uid, plot_id, skin) do
+    case Skins.apply_skin(uid, :plot, plot_id, skin) do
       {:ok, plot} ->
         conn |> put_status(200) |> json(serialize_plot(plot))
 
@@ -320,7 +327,7 @@ defmodule CampFireWeb.GameController do
   def set_vase_skin(conn, %{"vaseId" => vase_id, "skinName" => skin}) do
     uid = conn.assigns.current_player.uid
 
-    case Vases.set_skin(uid, vase_id, skin) do
+    case Skins.apply_skin(uid, :vase, vase_id, skin) do
       {:ok, vase} ->
         conn |> put_status(200) |> json(serialize_vase(vase))
 
@@ -452,6 +459,82 @@ defmodule CampFireWeb.GameController do
     conn |> put_status(400) |> json(%{error: "Missing 'mallumId'"})
   end
 
+  # ── Mallum Houses ─────────────────────────────────────────────
+
+  def craft_mallum_house(conn, %{"gridX" => gx, "gridY" => gy}) do
+    uid = conn.assigns.current_player.uid
+
+    case MallumHouses.craft_house(uid, gx, gy) do
+      {:ok, house} -> conn |> put_status(201) |> json(serialize_mallum_house(house))
+      {:error, reason} -> conn |> put_status(422) |> json(%{error: format_error(reason)})
+    end
+  end
+
+  def craft_mallum_house(conn, _params) do
+    conn |> put_status(400) |> json(%{error: "Missing 'gridX' and 'gridY'"})
+  end
+
+  def set_mallum_house_skin(conn, %{"houseId" => house_id, "skinName" => skin}) do
+    uid = conn.assigns.current_player.uid
+
+    case Skins.apply_skin(uid, :mallum_house, house_id, skin) do
+      {:ok, house} ->
+        conn |> put_status(200) |> json(serialize_mallum_house(house))
+
+      {:error, reason} ->
+        conn |> put_status(422) |> json(%{error: format_error(reason)})
+    end
+  end
+
+  def set_mallum_house_skin(conn, _params) do
+    conn |> put_status(400) |> json(%{error: "Missing 'houseId' and 'skinName'"})
+  end
+
+  # ── Apotheke ────────────────────────────────────────────────
+
+  def craft_apotheke(conn, %{"recipeName" => recipe_name}) do
+    uid = conn.assigns.current_player.uid
+
+    case Apotheke.craft(uid, recipe_name) do
+      {:ok, result} ->
+        conn |> put_status(200) |> json(%{resultItem: result.result_item, resultQuantity: result.result_quantity})
+
+      {:error, reason} ->
+        conn |> put_status(422) |> json(%{error: format_error(reason)})
+    end
+  end
+
+  def craft_apotheke(conn, _params) do
+    conn |> put_status(400) |> json(%{error: "Missing 'recipeName'"})
+  end
+
+  # ── Birds ───────────────────────────────────────────────────
+
+  def check_birds(conn, _params) do
+    uid = conn.assigns.current_player.uid
+
+    case Birds.check_spawns(uid) do
+      {:ok, new_birds} ->
+        conn |> put_status(200) |> json(%{newBirds: Enum.map(new_birds, &serialize_bird/1)})
+    end
+  end
+
+  def collect_bird(conn, %{"birdId" => bird_id}) do
+    uid = conn.assigns.current_player.uid
+
+    case Birds.collect_bird(uid, bird_id) do
+      {:ok, reward} ->
+        conn |> put_status(200) |> json(%{seedName: reward.seed_name, seedCount: reward.seed_count})
+
+      {:error, reason} ->
+        conn |> put_status(422) |> json(%{error: format_error(reason)})
+    end
+  end
+
+  def collect_bird(conn, _params) do
+    conn |> put_status(400) |> json(%{error: "Missing 'birdId'"})
+  end
+
   # ── Weather ─────────────────────────────────────────────────
 
   def submit_location(conn, %{"lat" => lat, "lon" => lon})
@@ -545,6 +628,27 @@ defmodule CampFireWeb.GameController do
       startTimeUtc: format_datetime(mallum.start_time_utc),
       assignedVaseId: mallum.assigned_vase_id,
       pendingRewards: mallum.pending_rewards
+    }
+  end
+
+  defp serialize_mallum_house(house) do
+    %{
+      id: house.id,
+      gridX: house.grid_x,
+      gridY: house.grid_y,
+      skinName: house.skin_name,
+      unlockedSkins: house.unlocked_skins || []
+    }
+  end
+
+  defp serialize_bird(bird) do
+    %{
+      id: bird.id,
+      gridX: bird.grid_x,
+      gridY: bird.grid_y,
+      seedName: bird.seed_name,
+      seedCount: bird.seed_count,
+      spawnedAtUtc: format_datetime(bird.spawned_at_utc)
     }
   end
 

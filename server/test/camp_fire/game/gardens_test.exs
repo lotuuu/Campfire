@@ -6,6 +6,8 @@ defmodule CampFire.Game.GardensTest do
 
   defp setup_player(_context \\ %{}) do
     seed_garden_configs()
+    seed_flame_config()
+    seed_mallum_house_config()
     player = register_player()
     {:ok, _economy} = Economy.init_economy(player.uid)
     player
@@ -15,12 +17,12 @@ defmodule CampFire.Game.GardensTest do
     test "creates garden with correct plant_time_utc" do
       player = setup_player()
 
-      {:ok, garden} = Gardens.plant(player.uid, "BerryBush", 0, 0)
+      {:ok, garden} = Gardens.plant(player.uid, "BerryBush", 2, 0)
 
       assert garden.plant_name == "BerryBush"
       assert garden.plant_time_utc != nil
       assert garden.mature == false
-      assert garden.grid_x == 0
+      assert garden.grid_x == 2
       assert garden.grid_y == 0
 
       # BerryBush costs 30 mana, started with 50
@@ -31,21 +33,21 @@ defmodule CampFire.Game.GardensTest do
     test "fails with unknown plant name" do
       player = setup_player()
 
-      {:error, :unknown_plant} = Gardens.plant(player.uid, "MagicTree", 0, 0)
+      {:error, :unknown_plant} = Gardens.plant(player.uid, "MagicTree", 2, 0)
     end
 
     test "fails with insufficient mana" do
       player = setup_player()
       {:ok, _} = Economy.spend_mana(player.uid, 50.0)
 
-      {:error, :insufficient_mana} = Gardens.plant(player.uid, "BerryBush", 0, 0)
+      {:error, :insufficient_mana} = Gardens.plant(player.uid, "BerryBush", 2, 0)
     end
   end
 
   describe "check_and_collect/2" do
     test "on immature garden returns growing status" do
       player = setup_player()
-      {:ok, garden} = Gardens.plant(player.uid, "BerryBush", 0, 0)
+      {:ok, garden} = Gardens.plant(player.uid, "BerryBush", 2, 0)
 
       {:ok, result} = Gardens.check_and_collect(player.uid, garden.id)
 
@@ -54,7 +56,7 @@ defmodule CampFire.Game.GardensTest do
 
     test "on mature garden with elapsed yield interval adds items" do
       player = setup_player()
-      {:ok, garden} = Gardens.plant(player.uid, "BerryBush", 0, 0)
+      {:ok, garden} = Gardens.plant(player.uid, "BerryBush", 2, 0)
 
       # Set plant_time_utc far in the past so it matures and yield interval passes
       # BerryBush: growth_hours=24, yield_interval_hours=12
@@ -79,7 +81,7 @@ defmodule CampFire.Game.GardensTest do
 
     test "mature garden within yield interval returns not_ready" do
       player = setup_player()
-      {:ok, garden} = Gardens.plant(player.uid, "BerryBush", 0, 0)
+      {:ok, garden} = Gardens.plant(player.uid, "BerryBush", 2, 0)
 
       # Set plant_time_utc past growth time but within yield interval
       # BerryBush: growth_hours=24, yield_interval_hours=12

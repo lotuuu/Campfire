@@ -6,6 +6,7 @@ namespace Garden
     [Serializable]
     public class MallumHouseSave
     {
+        public int serverId;
         public int gridX;
         public int gridY;
         public string skinName;

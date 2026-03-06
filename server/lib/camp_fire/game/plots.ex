@@ -1,7 +1,7 @@
 defmodule CampFire.Game.Plots do
   import Ecto.Query
   alias CampFire.Repo
-  alias CampFire.Game.{PlayerPlot, SeedConfig, GrowthRecipe}
+  alias CampFire.Game.{PlayerPlot, PlayerVase, SeedConfig, GrowthRecipe, GridValidation}
   alias CampFire.Economy
 
   @water_cooldown_seconds 7200
@@ -37,10 +37,12 @@ defmodule CampFire.Game.Plots do
   end
 
   def craft_plot(player_uid, grid_x, grid_y) do
-    plot_count = count_plots(player_uid)
-    cost = get_plot_cost(plot_count)
+    with :ok <- GridValidation.check_entity_cap(player_uid),
+         :ok <- GridValidation.validate_grid_placement(player_uid, grid_x, grid_y) do
+      plot_count = count_plots(player_uid)
+      cost = get_plot_cost(plot_count)
 
-    Repo.transaction(fn ->
+      Repo.transaction(fn ->
       case Economy.spend_mana(player_uid, cost["manaCost"]) do
         {:ok, _economy} -> :ok
         {:error, reason} -> Repo.rollback(reason)
@@ -63,15 +65,20 @@ defmodule CampFire.Game.Plots do
         grid_y: grid_y
       })
       |> Repo.insert!()
-    end)
+      end)
+    end
   end
 
   # --- Plant ---
 
   def plant(player_uid, plot_id, seed_name) do
+    seed_configs = CampFire.ConfigCache.get("seed_configs") || %{}
     plot = Repo.get!(PlayerPlot, plot_id)
 
     cond do
+      not Map.has_key?(seed_configs, seed_name) ->
+        {:error, :unknown_seed}
+
       plot.player_uid != player_uid ->
         {:error, :not_owned}
 
@@ -106,10 +113,14 @@ defmodule CampFire.Game.Plots do
     alias CampFire.Game.Vases
 
     plot = Repo.get!(PlayerPlot, plot_id)
+    vase = Repo.get!(PlayerVase, vase_id)
     now = DateTime.utc_now() |> DateTime.truncate(:second)
 
     cond do
       plot.player_uid != player_uid ->
+        {:error, :not_owned}
+
+      vase.player_uid != player_uid ->
         {:error, :not_owned}
 
       plot.state != "growing" ->
@@ -120,18 +131,20 @@ defmodule CampFire.Game.Plots do
         {:error, :water_cooldown}
 
       true ->
-        case Vases.use_water(vase_id, 1) do
-          {:error, reason} ->
-            {:error, reason}
+        Repo.transaction(fn ->
+          case Vases.use_water(vase_id, 1) do
+            {:error, reason} ->
+              Repo.rollback(reason)
 
-          {:ok, _vase} ->
-            plot
-            |> PlayerPlot.changeset(%{
-              water_count: plot.water_count + 1,
-              last_watered_utc: now
-            })
-            |> Repo.update()
-        end
+            {:ok, _vase} ->
+              plot
+              |> PlayerPlot.changeset(%{
+                water_count: plot.water_count + 1,
+                last_watered_utc: now
+              })
+              |> Repo.update!()
+          end
+        end)
     end
   end
 
@@ -148,27 +161,29 @@ defmodule CampFire.Game.Plots do
         {:error, :not_mature}
 
       true ->
-        seed_config =
-          Repo.one!(from sc in SeedConfig, where: sc.seed_name == ^plot.seed_name)
+        Repo.transaction(fn ->
+          seed_config =
+            Repo.one!(from sc in SeedConfig, where: sc.seed_name == ^plot.seed_name)
 
-        score = GrowthRecipe.evaluate(seed_config.recipe, plot.snapshots, plot.water_count)
-        drops = GrowthRecipe.calculate_drops(score, seed_config.base_drops)
-        item_name = "#{plot.seed_name}_harvest"
+          score = GrowthRecipe.evaluate(seed_config.recipe, plot.snapshots, plot.water_count)
+          drops = GrowthRecipe.calculate_drops(score, seed_config.base_drops)
+          item_name = "#{plot.seed_name}_harvest"
 
-        Economy.upsert_item(player_uid, item_name, drops)
+          Economy.upsert_item(player_uid, item_name, drops)
 
-        plot
-        |> PlayerPlot.changeset(%{
-          state: "empty",
-          seed_name: nil,
-          plant_time_utc: nil,
-          water_count: 0,
-          last_watered_utc: nil,
-          snapshots: %{}
-        })
-        |> Repo.update()
+          plot
+          |> PlayerPlot.changeset(%{
+            state: "empty",
+            seed_name: nil,
+            plant_time_utc: nil,
+            water_count: 0,
+            last_watered_utc: nil,
+            snapshots: %{}
+          })
+          |> Repo.update!()
 
-        {:ok, %{score: score, drops: drops, item_name: item_name}}
+          %{score: score, drops: drops, item_name: item_name}
+        end)
     end
   end
 

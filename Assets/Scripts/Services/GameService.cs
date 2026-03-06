@@ -183,6 +183,46 @@ namespace Garden
                     data.mallums.Add(lm);
             }
 
+            // Mallum Houses
+            var localHouses = data.mallumHouses.FindAll(h => h.serverId == 0);
+            data.mallumHouses.Clear();
+            if (state.mallumHouses != null)
+            {
+                foreach (var sh in state.mallumHouses)
+                {
+                    data.mallumHouses.Add(new MallumHouseSave
+                    {
+                        serverId = sh.id,
+                        gridX = sh.gridX,
+                        gridY = sh.gridY,
+                        skinName = sh.skinName,
+                        unlockedSkins = sh.unlockedSkins ?? new List<string>()
+                    });
+                }
+            }
+            foreach (var lh in localHouses)
+            {
+                bool onServer = data.mallumHouses.Exists(h => h.gridX == lh.gridX && h.gridY == lh.gridY);
+                if (!onServer) data.mallumHouses.Add(lh);
+            }
+
+            // Birds
+            data.birds.Clear();
+            if (state.birds != null)
+            {
+                foreach (var sb in state.birds)
+                {
+                    data.birds.Add(new BirdSave
+                    {
+                        serverId = sb.id,
+                        gridX = sb.gridX,
+                        gridY = sb.gridY,
+                        seedName = sb.seedName,
+                        seedCount = sb.seedCount
+                    });
+                }
+            }
+
             SaveManager.Instance.Save();
         }
 
@@ -503,6 +543,86 @@ namespace Garden
             return null;
         }
 
+        // ── Mallum House Endpoints ──
+
+        public async Task<ServerMallumHouse> CraftMallumHouse(int gridX, int gridY)
+        {
+            if (!IsOnline) return null;
+            try
+            {
+                var body = JsonUtility.ToJson(new CraftRequest { gridX = gridX, gridY = gridY });
+                using var req = PostJson("/game/mallum-house/craft", body);
+                await SendAsync(req);
+
+                if (req.responseCode >= 200 && req.responseCode < 300)
+                    return JsonUtility.FromJson<ServerMallumHouse>(req.downloadHandler.text);
+
+                Debug.LogWarning($"GameService: CraftMallumHouse failed (HTTP {req.responseCode}): {req.downloadHandler.text}");
+            }
+            catch (Exception e) { Debug.LogWarning($"GameService: CraftMallumHouse failed: {e.Message}"); }
+            return null;
+        }
+
+        // ── Mallum House Skin ──
+
+        public async Task<ServerMallumHouse> SetMallumHouseSkin(int houseId, string skinName)
+        {
+            if (!IsOnline) return null;
+            try
+            {
+                var body = JsonUtility.ToJson(new HouseSkinRequest { houseId = houseId, skinName = skinName });
+                using var req = PostJson("/game/mallum-house/set-skin", body);
+                await SendAsync(req);
+
+                if (req.responseCode >= 200 && req.responseCode < 300)
+                    return JsonUtility.FromJson<ServerMallumHouse>(req.downloadHandler.text);
+
+                Debug.LogWarning($"GameService: SetMallumHouseSkin failed (HTTP {req.responseCode}): {req.downloadHandler.text}");
+            }
+            catch (Exception e) { Debug.LogWarning($"GameService: SetMallumHouseSkin failed: {e.Message}"); }
+            return null;
+        }
+
+        // ── Bird Endpoints ──
+
+        public async Task<List<ServerBird>> CheckBirds()
+        {
+            if (!IsOnline) return null;
+            try
+            {
+                using var req = PostJson("/game/bird/check", "{}");
+                await SendAsync(req);
+
+                if (req.responseCode >= 200 && req.responseCode < 300)
+                {
+                    var response = JsonUtility.FromJson<BirdCheckResponse>(req.downloadHandler.text);
+                    return response?.newBirds;
+                }
+
+                Debug.LogWarning($"GameService: CheckBirds failed (HTTP {req.responseCode}): {req.downloadHandler.text}");
+            }
+            catch (Exception e) { Debug.LogWarning($"GameService: CheckBirds failed: {e.Message}"); }
+            return null;
+        }
+
+        public async Task<BirdCollectResponse> CollectBird(int birdId)
+        {
+            if (!IsOnline) return null;
+            try
+            {
+                var body = JsonUtility.ToJson(new BirdCollectRequest { birdId = birdId });
+                using var req = PostJson("/game/bird/collect", body);
+                await SendAsync(req);
+
+                if (req.responseCode >= 200 && req.responseCode < 300)
+                    return JsonUtility.FromJson<BirdCollectResponse>(req.downloadHandler.text);
+
+                Debug.LogWarning($"GameService: CollectBird failed (HTTP {req.responseCode}): {req.downloadHandler.text}");
+            }
+            catch (Exception e) { Debug.LogWarning($"GameService: CollectBird failed: {e.Message}"); }
+            return null;
+        }
+
         // ── Weather Endpoints ──
 
         public async Task SubmitLocation(float lat, float lon)
@@ -534,6 +654,26 @@ namespace Garden
                 Debug.LogWarning($"GameService: GetWeather failed (HTTP {req.responseCode})");
             }
             catch (Exception e) { Debug.LogWarning($"GameService: GetWeather failed: {e.Message}"); }
+            return null;
+        }
+
+        // ── Apotheke Endpoints ──
+
+        public async Task<ApothekeCraftResponse> CraftApotheke(string recipeName)
+        {
+            if (!IsOnline) return null;
+            try
+            {
+                var body = JsonUtility.ToJson(new ApothekeCraftRequest { recipeName = recipeName });
+                using var req = PostJson("/game/apotheke/craft", body);
+                await SendAsync(req);
+
+                if (req.responseCode >= 200 && req.responseCode < 300)
+                    return JsonUtility.FromJson<ApothekeCraftResponse>(req.downloadHandler.text);
+
+                Debug.LogWarning($"GameService: CraftApotheke failed (HTTP {req.responseCode}): {req.downloadHandler.text}");
+            }
+            catch (Exception e) { Debug.LogWarning($"GameService: CraftApotheke failed: {e.Message}"); }
             return null;
         }
 

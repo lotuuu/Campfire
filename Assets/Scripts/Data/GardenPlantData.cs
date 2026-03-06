@@ -11,6 +11,7 @@ namespace Garden
         public int yieldAmount = 1;
         public float yieldIntervalHours = 12f;
         public int waterRequired = 3;
+        public float manaCost;
 
         [Header("Visuals")]
         public Sprite icon;

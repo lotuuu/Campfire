@@ -324,7 +324,30 @@ namespace Garden
 
             SaveManager.Instance.Save();
             OnMallumsChanged?.Invoke();
+
+            // Notify server
+            if (GameService.Instance != null && GameService.Instance.IsOnline)
+            {
+                _ = NotifyServerCraftHouse(gridX, gridY);
+            }
+
             return true;
+        }
+
+        private async Task NotifyServerCraftHouse(int gridX, int gridY)
+        {
+            var result = await GameService.Instance.CraftMallumHouse(gridX, gridY);
+            if (result != null)
+            {
+                var data = SaveManager.Instance.Data;
+                // Find the house we just created at these coordinates and set its serverId
+                var house = data.mallumHouses.Find(h => h.gridX == gridX && h.gridY == gridY && h.serverId == 0);
+                if (house != null)
+                {
+                    house.serverId = result.id;
+                    SaveManager.Instance.Save();
+                }
+            }
         }
 
         public QuestData[] GetAllQuests() => allQuests;

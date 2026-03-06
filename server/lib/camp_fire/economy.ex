@@ -197,7 +197,7 @@ defmodule CampFire.Economy do
   end
 
   defp create_starter_buildings(player_uid) do
-    alias CampFire.Game.{PlayerPlot, PlayerVase, PlayerMallum}
+    alias CampFire.Game.{PlayerPlot, PlayerVase, PlayerMallum, PlayerMallumHouse}
 
     %PlayerPlot{}
     |> PlayerPlot.changeset(%{
@@ -219,12 +219,25 @@ defmodule CampFire.Economy do
     })
     |> Repo.insert!()
 
-    %PlayerMallum{}
-    |> PlayerMallum.changeset(%{
+    %PlayerMallumHouse{}
+    |> PlayerMallumHouse.changeset(%{
       player_uid: player_uid,
-      state: "idle"
+      grid_x: 1,
+      grid_y: -1
     })
     |> Repo.insert!()
+
+    mallum_house_config = CampFire.ConfigCache.get("mallum_house_config")
+    mallums_per_house = (mallum_house_config && mallum_house_config["mallums_per_house"]) || 2
+
+    for _ <- 1..mallums_per_house do
+      %PlayerMallum{}
+      |> PlayerMallum.changeset(%{
+        player_uid: player_uid,
+        state: "idle"
+      })
+      |> Repo.insert!()
+    end
   end
 
   defp spend_items_in_tx(player_uid, item_name, count) do
