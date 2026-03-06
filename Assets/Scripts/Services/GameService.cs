@@ -183,6 +183,46 @@ namespace Garden
                     data.mallums.Add(lm);
             }
 
+            // Mallum Houses
+            var localHouses = data.mallumHouses.FindAll(h => h.serverId == 0);
+            data.mallumHouses.Clear();
+            if (state.mallumHouses != null)
+            {
+                foreach (var sh in state.mallumHouses)
+                {
+                    data.mallumHouses.Add(new MallumHouseSave
+                    {
+                        serverId = sh.id,
+                        gridX = sh.gridX,
+                        gridY = sh.gridY,
+                        skinName = sh.skinName,
+                        unlockedSkins = sh.unlockedSkins ?? new List<string>()
+                    });
+                }
+            }
+            foreach (var lh in localHouses)
+            {
+                bool onServer = data.mallumHouses.Exists(h => h.gridX == lh.gridX && h.gridY == lh.gridY);
+                if (!onServer) data.mallumHouses.Add(lh);
+            }
+
+            // Birds
+            data.birds.Clear();
+            if (state.birds != null)
+            {
+                foreach (var sb in state.birds)
+                {
+                    data.birds.Add(new BirdSave
+                    {
+                        serverId = sb.id,
+                        gridX = sb.gridX,
+                        gridY = sb.gridY,
+                        seedName = sb.seedName,
+                        seedCount = sb.seedCount
+                    });
+                }
+            }
+
             SaveManager.Instance.Save();
         }
 
@@ -500,6 +540,26 @@ namespace Garden
                 Debug.LogWarning($"GameService: SpeedUpQuest failed (HTTP {req.responseCode}): {req.downloadHandler.text}");
             }
             catch (Exception e) { Debug.LogWarning($"GameService: SpeedUpQuest failed: {e.Message}"); }
+            return null;
+        }
+
+        // ── Mallum House Endpoints ──
+
+        public async Task<ServerMallumHouse> CraftMallumHouse(int gridX, int gridY)
+        {
+            if (!IsOnline) return null;
+            try
+            {
+                var body = JsonUtility.ToJson(new CraftRequest { gridX = gridX, gridY = gridY });
+                using var req = PostJson("/game/mallum-house/craft", body);
+                await SendAsync(req);
+
+                if (req.responseCode >= 200 && req.responseCode < 300)
+                    return JsonUtility.FromJson<ServerMallumHouse>(req.downloadHandler.text);
+
+                Debug.LogWarning($"GameService: CraftMallumHouse failed (HTTP {req.responseCode}): {req.downloadHandler.text}");
+            }
+            catch (Exception e) { Debug.LogWarning($"GameService: CraftMallumHouse failed: {e.Message}"); }
             return null;
         }
 
