@@ -119,3 +119,14 @@ MonoBehaviour:
       count: 30
     - itemName: Mint_harvest
       count: 40
+  gardenCosts:
+  - manaCost: 200
+    harvestCosts: []
+  - manaCost: 350
+    harvestCosts: []
+  - manaCost: 550
+    harvestCosts: []
+  - manaCost: 800
+    harvestCosts: []
+  - manaCost: 1100
+    harvestCosts: []

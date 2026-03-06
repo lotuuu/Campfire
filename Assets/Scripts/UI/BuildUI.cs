@@ -9,7 +9,6 @@ namespace Garden
         private VisualElement buildList;
 
         public event Action<CampBuildingType> OnRequestPlacement;
-        public string SelectedGardenPlant { get; private set; }
 
         public void Initialize(VisualElement root)
         {
@@ -72,43 +71,18 @@ namespace Garden
                 }
             }
 
-            // Garden entries
+            // Garden
             if (GardenManager.Instance != null && FlameManager.Instance != null)
             {
-                var data = SaveManager.Instance.Data;
-                foreach (var plantData in Resources.LoadAll<GardenPlantData>("GardenPlants"))
-                {
-                    int existingCount = 0;
-                    foreach (var g in data.gardens)
-                        if (g.plantName == plantData.plantName) existingCount++;
-
-                    var cost = plantData.GetCost(existingCount);
-                    if (cost == null)
-                    {
-                        buildList.Add(BuildCardHelper.CreateBuildCard(
-                            plantData.plantName, $"Yields {plantData.yieldItem}",
-                            null, plantData.icon, null, "Max",
-                            false, false, null));
-                        continue;
-                    }
-
-                    var item = data.items.Find(it => it.itemName == plantData.yieldItem);
-                    int haveItems = item?.count ?? 0;
-                    bool canAfford = canPlace
-                        && data.mana >= cost.manaCost
-                        && haveItems >= cost.seedCost;
-
-                    string pName = plantData.plantName;
-                    buildList.Add(BuildCardHelper.CreateBuildCard(
-                        pName, $"Yields {plantData.yieldItem}",
-                        null, plantData.icon,
-                        BuildCardHelper.FromGardenCost(cost, plantData.yieldItem), capText,
-                        canAfford, canPlace, () =>
-                        {
-                            SelectedGardenPlant = pName;
-                            OnRequestPlacement?.Invoke(CampBuildingType.Garden);
-                        }));
-                }
+                var gardenCost = GardenManager.Instance.GetNextGardenCost();
+                bool canAfford = canPlace && gardenCost != null
+                    && CurrencyManager.Instance.CanAffordMana(gardenCost.manaCost)
+                    && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, gardenCost.harvestCosts);
+                buildList.Add(BuildCardHelper.CreateBuildCard(
+                    "Garden", "Grow fruit trees", "UI/Icons/Buildings/garden", null,
+                    BuildCardHelper.FromBuildingCost(gardenCost), capText,
+                    canAfford, canPlace,
+                    () => OnRequestPlacement?.Invoke(CampBuildingType.Garden)));
             }
 
             // Flame upgrade

@@ -24,6 +24,7 @@ namespace Garden
         [SerializeField] private List<BuildingCost> plotCosts = new();
         [SerializeField] private List<BuildingCost> vaseCosts = new();
         [SerializeField] private List<BuildingCost> houseCosts = new();
+        [SerializeField] private List<BuildingCost> gardenCosts = new();
 
         public BuildingCost GetPlotCost(int currentPlotCount)
         {
@@ -49,6 +50,13 @@ namespace Garden
         public bool CanBuildNextHouse(int currentHouseCount)
         {
             return GetHouseCost(currentHouseCount) != null;
+        }
+
+        public BuildingCost GetGardenCost(int currentGardenCount)
+        {
+            if (gardenCosts.Count == 0) return null;
+            int index = Mathf.Clamp(currentGardenCount, 0, gardenCosts.Count - 1);
+            return gardenCosts[index];
         }
     }
 }

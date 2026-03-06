@@ -67,136 +67,33 @@ namespace Garden.Tests
             Assert.IsFalse(GardenManager.CheckYieldReady(garden, 12f, DateTime.UtcNow));
         }
 
-        // ── GardenCostTier / CraftGarden Tests ──────────────────────
+        // ── BuildingCostConfig Garden Cost Tests ──────────────────────
 
         [Test]
-        public void GardenPlantData_GetCost_ReturnsCorrectTier()
+        public void BuildingCostConfig_GetGardenCost_ReturnsScalingCost()
         {
-            var data = ScriptableObject.CreateInstance<GardenPlantData>();
-            data.costTiers = new System.Collections.Generic.List<GardenCostTier>
+            var config = ScriptableObject.CreateInstance<BuildingCostConfig>();
+
+            // Use reflection to set private gardenCosts field
+            var field = typeof(BuildingCostConfig).GetField("gardenCosts",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            field.SetValue(config, new System.Collections.Generic.List<BuildingCost>
             {
-                new GardenCostTier { manaCost = 200, seedCost = 1 },
-                new GardenCostTier { manaCost = 300, seedCost = 2 },
-            };
-            Assert.AreEqual(200, data.GetCost(0).manaCost);
-            Assert.AreEqual(2, data.GetCost(1).seedCost);
-            Assert.IsNull(data.GetCost(2));
+                new BuildingCost { manaCost = 200 },
+                new BuildingCost { manaCost = 350 },
+            });
+
+            Assert.AreEqual(200, config.GetGardenCost(0).manaCost);
+            Assert.AreEqual(350, config.GetGardenCost(1).manaCost);
+            // Beyond list clamps to last
+            Assert.AreEqual(350, config.GetGardenCost(5).manaCost);
         }
 
         [Test]
-        public void CraftGarden_Success_CreatesGardenAndSpendsCosts()
+        public void BuildingCostConfig_GetGardenCost_EmptyList_ReturnsNull()
         {
-            var data = new SaveData();
-            data.items.Add(new InventoryItem { itemName = "Acorn", count = 5 });
-            data.mana = 500f;
-
-            var plantData = ScriptableObject.CreateInstance<GardenPlantData>();
-            plantData.plantName = "Oak";
-            plantData.yieldItem = "Acorn";
-            plantData.waterRequired = 3;
-            plantData.growthDurationHours = 48;
-            plantData.costTiers = new System.Collections.Generic.List<GardenCostTier>
-            {
-                new GardenCostTier { manaCost = 200, seedCost = 1 },
-                new GardenCostTier { manaCost = 300, seedCost = 2 },
-            };
-
-            bool result = GardenManager.TryCraftGarden(data, plantData, 2, 3);
-            Assert.IsTrue(result);
-            Assert.AreEqual(1, data.gardens.Count);
-            Assert.AreEqual("Oak", data.gardens[0].plantName);
-            Assert.AreEqual(2, data.gardens[0].gridX);
-            Assert.AreEqual(3, data.gardens[0].gridY);
-            Assert.AreEqual(300f, data.mana, 0.01f);
-            Assert.AreEqual(4, data.items[0].count);
-        }
-
-        [Test]
-        public void CraftGarden_ScalingCost_SecondCostsMore()
-        {
-            var data = new SaveData();
-            data.items.Add(new InventoryItem { itemName = "Acorn", count = 10 });
-            data.mana = 1000f;
-
-            var plantData = ScriptableObject.CreateInstance<GardenPlantData>();
-            plantData.plantName = "Oak";
-            plantData.yieldItem = "Acorn";
-            plantData.waterRequired = 0;
-            plantData.growthDurationHours = 48;
-            plantData.costTiers = new System.Collections.Generic.List<GardenCostTier>
-            {
-                new GardenCostTier { manaCost = 200, seedCost = 1 },
-                new GardenCostTier { manaCost = 300, seedCost = 2 },
-            };
-
-            GardenManager.TryCraftGarden(data, plantData, 0, 0);
-            GardenManager.TryCraftGarden(data, plantData, 1, 0);
-
-            Assert.AreEqual(2, data.gardens.Count);
-            Assert.AreEqual(500f, data.mana, 0.01f);
-            Assert.AreEqual(7, data.items[0].count);
-        }
-
-        [Test]
-        public void CraftGarden_AtCap_ReturnsFalse()
-        {
-            var data = new SaveData();
-            data.items.Add(new InventoryItem { itemName = "Acorn", count = 10 });
-            data.mana = 1000f;
-
-            var plantData = ScriptableObject.CreateInstance<GardenPlantData>();
-            plantData.plantName = "Oak";
-            plantData.yieldItem = "Acorn";
-            plantData.costTiers = new System.Collections.Generic.List<GardenCostTier>
-            {
-                new GardenCostTier { manaCost = 100, seedCost = 1 },
-            };
-
-            GardenManager.TryCraftGarden(data, plantData, 0, 0);
-            bool result = GardenManager.TryCraftGarden(data, plantData, 1, 0);
-
-            Assert.IsFalse(result);
-            Assert.AreEqual(1, data.gardens.Count);
-        }
-
-        [Test]
-        public void CraftGarden_CantAffordMana_ReturnsFalse()
-        {
-            var data = new SaveData();
-            data.items.Add(new InventoryItem { itemName = "Acorn", count = 5 });
-            data.mana = 50f;
-
-            var plantData = ScriptableObject.CreateInstance<GardenPlantData>();
-            plantData.plantName = "Oak";
-            plantData.yieldItem = "Acorn";
-            plantData.costTiers = new System.Collections.Generic.List<GardenCostTier>
-            {
-                new GardenCostTier { manaCost = 200, seedCost = 1 },
-            };
-
-            bool result = GardenManager.TryCraftGarden(data, plantData, 0, 0);
-            Assert.IsFalse(result);
-            Assert.AreEqual(0, data.gardens.Count);
-            Assert.AreEqual(50f, data.mana, 0.01f);
-        }
-
-        [Test]
-        public void CraftGarden_CantAffordItems_ReturnsFalse()
-        {
-            var data = new SaveData();
-            data.mana = 1000f;
-
-            var plantData = ScriptableObject.CreateInstance<GardenPlantData>();
-            plantData.plantName = "Oak";
-            plantData.yieldItem = "Acorn";
-            plantData.costTiers = new System.Collections.Generic.List<GardenCostTier>
-            {
-                new GardenCostTier { manaCost = 200, seedCost = 1 },
-            };
-
-            bool result = GardenManager.TryCraftGarden(data, plantData, 0, 0);
-            Assert.IsFalse(result);
-            Assert.AreEqual(0, data.gardens.Count);
+            var config = ScriptableObject.CreateInstance<BuildingCostConfig>();
+            Assert.IsNull(config.GetGardenCost(0));
         }
     }
 }

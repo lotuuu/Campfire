@@ -462,8 +462,8 @@ namespace Garden
                 case CampBuildingType.Garden:
                     cell.AddToClassList("grid-cell--garden");
                     var garden = SaveManager.Instance.Data.gardens[index];
-                    if (label != null) label.text = garden.plantName ?? "Garden";
-                    if (status != null) status.text = garden.mature ? "Mature" : "Growing";
+                    if (label != null) label.text = string.IsNullOrEmpty(garden.plantName) ? "Garden" : garden.plantName;
+                    if (status != null) status.text = string.IsNullOrEmpty(garden.plantName) ? "Empty" : (garden.mature ? "Mature" : "Growing");
                     break;
 
                 case CampBuildingType.Apotheke:
@@ -563,9 +563,7 @@ namespace Garden
                         success = MallumManager.Instance.CraftMallumHouse(gridX, gridY);
                         break;
                     case CampBuildingType.Garden:
-                        var buildUI = GetComponent<BuildUI>();
-                        if (buildUI != null && !string.IsNullOrEmpty(buildUI.SelectedGardenPlant))
-                            success = GardenManager.Instance.CraftGarden(buildUI.SelectedGardenPlant, gridX, gridY);
+                        success = GardenManager.Instance.CraftEmptyGarden(gridX, gridY);
                         break;
                 }
                 if (success) ExitMode();
@@ -651,6 +649,26 @@ namespace Garden
                         canAffordHouse, canPlace, () =>
                         {
                             if (MallumManager.Instance.CraftMallumHouse(gridX, gridY))
+                                CloseInteractionPanel();
+                        }));
+                }
+            }
+
+            // Garden
+            if (GardenManager.Instance != null)
+            {
+                var gardenCost = GardenManager.Instance.GetNextGardenCost();
+                if (gardenCost != null)
+                {
+                    bool canAffordGarden = canPlace
+                        && CurrencyManager.Instance.CanAffordMana(gardenCost.manaCost)
+                        && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, gardenCost.harvestCosts);
+                    scroll.Add(BuildCardHelper.CreateBuildCard(
+                        "Garden", "Grow fruit trees", "UI/Icons/Buildings/garden", null,
+                        BuildCardHelper.FromBuildingCost(gardenCost), capText,
+                        canAffordGarden, canPlace, () =>
+                        {
+                            if (GardenManager.Instance.CraftEmptyGarden(gridX, gridY))
                                 CloseInteractionPanel();
                         }));
                 }
@@ -914,8 +932,8 @@ namespace Garden
                 case CampBuildingType.Garden:
                     cell.AddToClassList("grid-cell--garden");
                     var garden = visitSnapshot.gardens[index];
-                    if (label != null) label.text = garden.plantName ?? "Garden";
-                    if (status != null) status.text = garden.mature ? "Mature" : "Growing";
+                    if (label != null) label.text = string.IsNullOrEmpty(garden.plantName) ? "Garden" : garden.plantName;
+                    if (status != null) status.text = string.IsNullOrEmpty(garden.plantName) ? "Empty" : (garden.mature ? "Mature" : "Growing");
                     break;
 
                 case CampBuildingType.Apotheke:
@@ -1188,6 +1206,26 @@ namespace Garden
                         {
                             CloseInteractionPanel();
                             EnterPlacementMode(CampBuildingType.MallumHouse);
+                        }));
+                }
+            }
+
+            // Garden
+            if (GardenManager.Instance != null)
+            {
+                var gardenCost = GardenManager.Instance.GetNextGardenCost();
+                if (gardenCost != null)
+                {
+                    bool canAfford = canPlaceEntity
+                        && CurrencyManager.Instance.CanAffordMana(gardenCost.manaCost)
+                        && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, gardenCost.harvestCosts);
+                    scroll.Add(BuildCardHelper.CreateBuildCard(
+                        "Garden", "Grow fruit trees", "UI/Icons/Buildings/garden", null,
+                        BuildCardHelper.FromBuildingCost(gardenCost), capText,
+                        canAfford, canPlaceEntity, () =>
+                        {
+                            CloseInteractionPanel();
+                            EnterPlacementMode(CampBuildingType.Garden);
                         }));
                 }
             }
@@ -1617,7 +1655,40 @@ namespace Garden
         private void ShowGardenInteraction(int index)
         {
             var garden = SaveManager.Instance.Data.gardens[index];
-            interactionTitle.text = garden.plantName ?? "Garden";
+
+            if (string.IsNullOrEmpty(garden.plantName))
+            {
+                interactionTitle.text = "Garden";
+
+                var hint = new Label("Choose a plant to grow:");
+                hint.AddToClassList("interaction-info");
+                interactionBody.Add(hint);
+
+                foreach (var plantData in Resources.LoadAll<GardenPlantData>("GardenPlants"))
+                {
+                    string pName = plantData.plantName;
+                    string desc = $"Water: {plantData.waterRequired}";
+                    bool canAfford = CurrencyManager.Instance != null
+                        && CurrencyManager.Instance.CanAffordWater(plantData.waterRequired);
+
+                    var btn = new Button(() =>
+                    {
+                        if (GardenManager.Instance.Plant(index, pName))
+                        {
+                            CloseInteractionPanel();
+                            RebuildGrid();
+                        }
+                    }) { text = $"{pName} ({desc})" };
+                    btn.AddToClassList("interaction-btn-primary");
+                    btn.SetEnabled(canAfford);
+                    interactionActions.Add(btn);
+                }
+
+                AddCloseButton();
+                return;
+            }
+
+            interactionTitle.text = garden.plantName;
 
             var stateLabel = new Label(garden.mature ? "Mature - yielding fruit" : "Growing...");
             stateLabel.AddToClassList("interaction-info");

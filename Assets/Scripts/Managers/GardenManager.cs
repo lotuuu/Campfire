@@ -169,57 +169,49 @@ namespace Garden
 
         // ── Garden Building ──────────────────────────────────────────
 
-        public static bool TryCraftGarden(SaveData data, GardenPlantData plantData, int gridX, int gridY)
-        {
-            int existingCount = 0;
-            foreach (var g in data.gardens)
-            {
-                if (g.plantName == plantData.plantName) existingCount++;
-            }
+        private static BuildingCostConfig _buildingCostConfig;
 
-            var cost = plantData.GetCost(existingCount);
+        private static BuildingCostConfig LoadBuildingCostConfig()
+        {
+            if (_buildingCostConfig == null)
+                _buildingCostConfig = Resources.Load<BuildingCostConfig>("Config/BuildingCostConfig");
+            return _buildingCostConfig;
+        }
+
+        public BuildingCost GetNextGardenCost()
+        {
+            return LoadBuildingCostConfig()?.GetGardenCost(SaveManager.Instance.Data.gardens.Count);
+        }
+
+        public bool CraftEmptyGarden(int gridX, int gridY)
+        {
+            if (!FlameManager.Instance.CanPlaceEntity) return false;
+
+            var data = SaveManager.Instance.Data;
+            var cost = GetNextGardenCost();
             if (cost == null) return false;
 
-            if (data.mana < cost.manaCost) return false;
+            if (!CurrencyManager.Instance.CanAffordMana(cost.manaCost)) return false;
+            if (!MallumManager.CanAffordHarvests(data.items, cost.harvestCosts)) return false;
 
-            if (cost.seedCost > 0)
+            CurrencyManager.Instance.SpendMana(cost.manaCost);
+
+            if (!CurrencyManager.FreeMode)
+            foreach (var hc in cost.harvestCosts)
             {
-                var item = data.items.Find(it => it.itemName == plantData.yieldItem);
-                if (item == null || item.count < cost.seedCost) return false;
-                item.count -= cost.seedCost;
+                var entry = data.items.Find(i => i.itemName == hc.itemName);
+                entry.count -= hc.count;
+                if (entry.count <= 0) data.items.Remove(entry);
             }
-
-            data.mana -= cost.manaCost;
 
             data.gardens.Add(new GardenSave
             {
-                plantName = plantData.plantName,
-                plantTimeUtc = GameTime.UtcNow.ToString("o"),
                 gridX = gridX,
                 gridY = gridY
             });
 
-            return true;
-        }
-
-        public bool CraftGarden(string plantName, int gridX, int gridY)
-        {
-            if (!FlameManager.Instance.CanPlaceEntity) return false;
-
-            var plantData = LoadPlantData(plantName);
-            if (plantData == null) return false;
-
-            var data = SaveManager.Instance.Data;
-            if (!TryCraftGarden(data, plantData, gridX, gridY)) return false;
-
             SaveManager.Instance.Save();
             OnGardenChanged?.Invoke(data.gardens.Count - 1);
-
-            if (GameService.Instance != null && GameService.Instance.IsOnline)
-            {
-                _ = GameService.Instance.PlantGarden(plantName, gridX, gridY);
-            }
-
             return true;
         }
 
