@@ -20,7 +20,7 @@ No external test runner or CI pipeline exists. The test assembly (`Garden.Tests.
 
 All managers and services are MonoBehaviour singletons with duplicate-destroy guards in `Awake()`. They are **scene-bound** (no `DontDestroyOnLoad`). Access via `ClassName.Instance`.
 
-- **Services** (`Scripts/Services/`): `WeatherService`, `SaveManager`, `SocialSaveManager`, `SocialService`, `CurrencyManager`, `NotificationService`, `ConfigService`, `EconomyService`, `GameService`
+- **Services** (`Scripts/Services/`): `WeatherService`, `SaveManager`, `SocialSaveManager`, `SocialService`, `CurrencyManager`, `NotificationService`, `ConfigService`, `EconomyService`, `GameService`, `SpriteService`
 - **Managers** (`Scripts/Managers/`): `FlameManager`, `PlotManager`, `VaseManager`, `GardenManager`, `ApothekeManager`, `MallumManager`, `GameManager`, `VisitorManager`, `BirdManager`, `SkinManager`
 
 ### Resources (Economy)
@@ -71,7 +71,7 @@ All managers and services are MonoBehaviour singletons with duplicate-destroy gu
 
 **SkinManager**: Manages cosmetic skins for camp buildings. Loads from `Resources/Skins`.
 
-**GameManager**: Init and new-player setup (50 mana, 5 gems, 2 vases, 1 plot, 3 Basil seeds, initial Mallums).
+**GameManager**: Init and new-player setup (50 mana, 5 gems, 1 vase, 1 plot, 5 Sprouts + 3 Cress seeds, initial Mallums).
 
 ### Server-Authoritative Services
 
@@ -80,6 +80,23 @@ The game is moving toward server-authoritative economy. Three services communica
 - **`ConfigService`**: Fetches seed, quest, garden, and flame configs from the server and patches local ScriptableObjects at runtime
 - **`EconomyService`**: Queues economy actions (spend mana, add seeds, etc.) and syncs with `/api/economy` endpoints
 - **`GameService`**: Orchestrates initialization — fetches configs, then game state; exposes `IsOnline` / `IsInitialized` flags
+
+### Server-Served Sprites
+
+All game sprites are decoupled from the Unity build and served from the Phoenix backend. The pipeline:
+
+1. **Server**: PNGs live in `server/priv/static/assets/sprites/`. `CampFire.Sprites` scans the directory; `CampFire.SpriteManifest` builds a `key → content_hash` map stored in ETS.
+2. **Config endpoint**: `/api/game/configs` includes `sprite_manifest` in the response.
+3. **Client**: `SpriteService` compares server manifest to local cache (`persistentDataPath/sprite_cache/`), downloads changed sprites, loads textures into memory.
+4. **Admin**: `/admin/sprites` LiveView page for uploading, replacing, renaming, and deleting sprites. Organized by category (first path segment of key).
+
+**Percentage-based sprite resolution**: Sprite keys with numeric names act as percentage thresholds. `SpriteService.GetTextureByPercentage(prefix, percent01)` scans keys like `{prefix}/0`, `{prefix}/50`, `{prefix}/100` and picks the highest threshold ≤ current percentage. Used for:
+- **Vases**: `hex/vase/0`, `hex/vase/50`, `hex/vase/100` (water fullness %)
+- **Crops**: `hex/plot/{seed}/0`, `hex/plot/{seed}/50`, `hex/plot/{seed}/100` (growth %)
+
+**Seed name to sprite key**: `SeedToSpriteKey()` in `CampsiteViewUI` strips trailing " Seed" and lowercases, so `"Sprouts Seed"` → `"sprouts"` → looks up `hex/plot/sprouts/{pct}`.
+
+**Fallback**: `TrySetHexSprite`/`TrySetHexSpriteByPercent` return `false` when no sprite exists; callers fall back to colored hex drawing via `--hex-fill`/`--hex-border` CSS custom properties.
 
 ### Hex Grid
 
@@ -110,8 +127,8 @@ An Elixir/Phoenix backend lives in `server/` (routes: `/auth`, `/friends`, `/vil
 - `make psql` — open psql shell
 - `make tunnel` / `make tunnel-stop` — ngrok tunnel for device testing (writes URL into `DevServerConfig.cs`)
 
-- Phoenix contexts: `Accounts`, `Social`, `Villages`, `Gifts`, `Visitors`, `Economy`, `Game`, `Admin`, `ConfigCache`
-- Admin dashboard via Phoenix LiveView at `/admin/*` (seeds, quests, players, economy, weather, visitors)
+- Phoenix contexts: `Accounts`, `Social`, `Villages`, `Gifts`, `Visitors`, `Economy`, `Game`, `Admin`, `ConfigCache`, `Sprites`, `SpriteManifest`
+- Admin dashboard via Phoenix LiveView at `/admin/*` (seeds, quests, players, economy, weather, visitors, sprites)
 - Ecto schemas map to Postgres tables; raw SQL for visit count upsert
 - Bearer token auth via custom Plug; ETS rate limiting via Hammer
 - `SocialSaveManager` stores `SocialData` to a separate `social.json` file
@@ -146,7 +163,7 @@ An Elixir/Phoenix backend lives in `server/` (routes: `/auth`, `/friends`, `/vil
 ## Key File Locations
 
 - Runtime scripts: `Assets/Scripts/{Data,Services,Managers,UI,Utils,Debug}/`
-- Seed assets: `Assets/Resources/Seeds/*.asset` (Basil, Chamomile, Dahlia, Jasmine, Lavender, Marigold, Mint, Moonflower, Poppy, Rosemary)
+- Seed assets: `Assets/Resources/Seeds/*.asset` (Sprouts, Cress, Basil, Chamomile, Dahlia, Jasmine, Lavender, Marigold, Mint, Moonflower, Pansy, Poppy, Rosemary, Snowdrop)
 - Quest assets: `Assets/Resources/Quests/*.asset`
 - Garden plant assets: `Assets/Resources/GardenPlants/*.asset`
 - Recipe assets: `Assets/Resources/Recipes/*.asset`
@@ -156,6 +173,7 @@ An Elixir/Phoenix backend lives in `server/` (routes: `/auth`, `/friends`, `/vil
 - Templates: `Assets/Resources/UI/Templates/*.uxml`
 - Tests: `Assets/Tests/EditMode/`
 - Scene: `Assets/Scenes/Garden.unity`
+- Server sprites: `server/priv/static/assets/sprites/` (served at `/assets/sprites/{key}.png`)
 - Social backend: `server/` (Elixir/Phoenix, Docker for Postgres)
 
 ## Unity Development
