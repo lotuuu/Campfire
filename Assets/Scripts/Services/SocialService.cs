@@ -20,6 +20,7 @@ namespace Garden
 #endif
 
         public event Action OnSignedIn;
+        public event Action<string> OnInitFailed;
         public event Action<List<FriendRequest>> OnFriendRequestsUpdated;
         public event Action<List<GiftMessage>> OnGiftsUpdated;
         public event Action<List<CachedFriend>> OnFriendListUpdated;
@@ -98,6 +99,7 @@ namespace Garden
                 if (request.result != UnityWebRequest.Result.Success)
                 {
                     Debug.LogError($"SocialService: Registration failed: {request.error} — {request.downloadHandler.text}");
+                    OnInitFailed?.Invoke("Could not connect to server");
                     return;
                 }
 
@@ -114,6 +116,7 @@ namespace Garden
             catch (Exception e)
             {
                 Debug.LogError($"SocialService: Registration failed: {e.Message}");
+                OnInitFailed?.Invoke("Could not connect to server");
             }
         }
 

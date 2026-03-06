@@ -102,6 +102,7 @@ namespace Garden
         public bool IsOnline { get; private set; }
 
         public event Action OnStateSynced;
+        public event Action<string> OnInitFailed;
 
         private EconomyQueue _queue = new();
         private string _queuePath;
@@ -159,17 +160,17 @@ namespace Garden
                     }
                 }
 
-                Debug.LogWarning("EconomyService: Could not sync with server, running offline.");
+                Debug.LogWarning("EconomyService: Could not sync with server.");
                 IsInitialized = true;
                 IsOnline = false;
-                OnStateSynced?.Invoke();
+                OnInitFailed?.Invoke("Could not sync economy with server");
             }
             catch (Exception e)
             {
-                Debug.LogWarning($"EconomyService: Init failed ({e.Message}), running offline.");
+                Debug.LogWarning($"EconomyService: Init failed ({e.Message}).");
                 IsInitialized = true;
                 IsOnline = false;
-                OnStateSynced?.Invoke();
+                OnInitFailed?.Invoke("Could not sync economy with server");
             }
         }
 

@@ -36,12 +36,15 @@ namespace Garden
 
         // Loading gate
         private VisualElement loadingGate;
+        private Label loadingGateTitle;
         private Label loadingStatus;
+        private VisualElement loadingBarTrack;
         private VisualElement loadingBarFill;
         private bool _weatherDone;
         private bool _socialDone;
         private bool _economyDone;
         private bool _gameDone;
+        private bool _failed;
 
         private void Awake()
         {
@@ -185,10 +188,12 @@ namespace Garden
 
             // Loading gate — block UI until all services are ready
             loadingGate = root.Q("loading-gate");
+            loadingGateTitle = root.Q<Label>("loading-gate-title");
             loadingStatus = root.Q<Label>("loading-gate-status");
+            loadingBarTrack = root.Q("loading-gate-bar-track");
             loadingBarFill = root.Q("loading-gate-bar-fill");
 
-            // Subscribe to service completion events
+            // Subscribe to service completion + failure events
             if (WeatherService.Instance != null)
             {
                 if (WeatherService.Instance.IsLocationResolved)
@@ -203,25 +208,40 @@ namespace Garden
                 if (SocialService.Instance.IsSignedIn)
                     _socialDone = true;
                 else
+                {
                     SocialService.Instance.OnSignedIn += OnSocialReady;
+                    SocialService.Instance.OnInitFailed += OnServiceFailed;
+                }
             }
             else _socialDone = true;
 
             if (EconomyService.Instance != null)
             {
                 if (EconomyService.Instance.IsInitialized)
-                    _economyDone = true;
+                {
+                    _economyDone = EconomyService.Instance.IsOnline;
+                    if (!_economyDone) { OnServiceFailed("Could not sync economy with server"); return; }
+                }
                 else
+                {
                     EconomyService.Instance.OnStateSynced += OnEconomyReady;
+                    EconomyService.Instance.OnInitFailed += OnServiceFailed;
+                }
             }
             else _economyDone = true;
 
             if (GameService.Instance != null)
             {
                 if (GameService.Instance.IsInitialized)
-                    _gameDone = true;
+                {
+                    _gameDone = GameService.Instance.IsOnline;
+                    if (!_gameDone) { OnServiceFailed("Could not load game state from server"); return; }
+                }
                 else
+                {
                     GameService.Instance.OnStateLoaded += OnGameReady;
+                    GameService.Instance.OnInitFailed += OnServiceFailed;
+                }
             }
             else _gameDone = true;
 
@@ -265,9 +285,20 @@ namespace Garden
             UpdateLoadingGate();
         }
 
+        private void OnServiceFailed(string reason)
+        {
+            if (_failed) return;
+            _failed = true;
+
+            if (loadingGate == null) return;
+            loadingGateTitle.text = "Connection Failed";
+            loadingStatus.text = reason;
+            loadingBarTrack.style.display = DisplayStyle.None;
+        }
+
         private void UpdateLoadingGate()
         {
-            if (loadingGate == null) return;
+            if (loadingGate == null || _failed) return;
 
             int done = (_socialDone ? 1 : 0) + (_economyDone ? 1 : 0)
                      + (_gameDone ? 1 : 0) + (_weatherDone ? 1 : 0);

@@ -15,6 +15,7 @@ namespace Garden
         public bool IsOnline { get; private set; }
 
         public event Action OnStateLoaded;
+        public event Action<string> OnInitFailed;
 
         private static string ServerBaseUrl =>
 #if UNITY_EDITOR
@@ -64,17 +65,17 @@ namespace Garden
                     return;
                 }
 
-                Debug.LogWarning($"GameService: Could not load game state (HTTP {req.responseCode}), running offline.");
+                Debug.LogWarning($"GameService: Could not load game state (HTTP {req.responseCode}).");
                 IsInitialized = true;
                 IsOnline = false;
-                OnStateLoaded?.Invoke();
+                OnInitFailed?.Invoke("Could not load game state from server");
             }
             catch (Exception e)
             {
-                Debug.LogWarning($"GameService: Init failed ({e.Message}), running offline.");
+                Debug.LogWarning($"GameService: Init failed ({e.Message}).");
                 IsInitialized = true;
                 IsOnline = false;
-                OnStateLoaded?.Invoke();
+                OnInitFailed?.Invoke("Could not load game state from server");
             }
         }
 
