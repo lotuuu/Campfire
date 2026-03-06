@@ -376,6 +376,7 @@ defmodule CampFireWeb.QuestsLive do
       <table class="w-full bg-white border rounded-lg">
         <thead class="bg-gray-50">
           <tr>
+            <th class="px-4 py-3 w-12"></th>
             <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Quest Name</th>
             <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Duration</th>
             <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Flame Lvl</th>
@@ -389,6 +390,10 @@ defmodule CampFireWeb.QuestsLive do
             <% pool = quest.reward_pool || [] %>
             <% tw = Enum.reduce(pool, 0.0, fn r, acc -> acc + (r["weight"] || 0) end) %>
             <tr class="hover:bg-gray-50 align-top">
+              <td class="px-4 py-3">
+                <img src={CampFire.Sprites.sprite_url("quests/#{String.downcase(quest.quest_name)}")}
+                  class="w-8 h-8 object-contain" onerror="this.style.display='none'" />
+              </td>
               <td class="px-4 py-3 font-medium">{quest.quest_name}</td>
               <td class="px-4 py-3">{format_duration(quest.duration_minutes)}</td>
               <td class="px-4 py-3">{quest.required_flame_level}</td>

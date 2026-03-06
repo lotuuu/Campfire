@@ -572,6 +572,7 @@ defmodule CampFireWeb.ItemsLive do
       <table class="w-full bg-white border rounded-lg">
         <thead class="bg-gray-50">
           <tr>
+            <th class="px-4 py-3 w-12"></th>
             <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Seed Name</th>
             <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Growth Time</th>
             <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Drops</th>
@@ -582,6 +583,10 @@ defmodule CampFireWeb.ItemsLive do
         <tbody class="divide-y">
           <%= for seed <- Enum.sort_by(@seeds, & &1.growth_duration_hours) do %>
             <tr class="hover:bg-gray-50">
+              <td class="px-4 py-3">
+                <img src={CampFire.Sprites.sprite_url("seeds/#{String.downcase(seed.seed_name)}/icon")}
+                  class="w-8 h-8 object-contain" onerror="this.style.display='none'" />
+              </td>
               <td class="px-4 py-3 font-medium">{seed.seed_name}</td>
               <td class="px-4 py-3">{format_duration(seed.growth_duration_hours)}</td>
               <td class="px-4 py-3">{seed.min_drops}-{seed.max_drops}</td>
@@ -815,6 +820,7 @@ defmodule CampFireWeb.ItemsLive do
       <table class="w-full bg-white border rounded-lg">
         <thead class="bg-gray-50">
           <tr>
+            <th class="px-4 py-3 w-12"></th>
             <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Skin Name</th>
             <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Building Type</th>
             <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Cost</th>
@@ -824,6 +830,10 @@ defmodule CampFireWeb.ItemsLive do
         <tbody class="divide-y">
           <%= for {name, skin} <- @skin_list do %>
             <tr class="hover:bg-gray-50">
+              <td class="px-4 py-3">
+                <img src={CampFire.Sprites.sprite_url("skins/#{String.downcase(name)}")}
+                  class="w-8 h-8 object-contain" onerror="this.style.display='none'" />
+              </td>
               <td class="px-4 py-3 font-medium">{name}</td>
               <td class="px-4 py-3 text-sm">{skin["building_type"]}</td>
               <td class="px-4 py-3 text-sm text-gray-500">{skin["cost_item_name"]} x{skin["cost_quantity"]}</td>
