@@ -102,8 +102,9 @@
 
       const RewardInput = {
         mounted() {
+          const eventName = this.el.dataset.event || "update_reward";
           const pushValue = () => {
-            this.pushEvent("update_reward", {
+            this.pushEvent(eventName, {
               index: this.el.dataset.index,
               field: this.el.dataset.field,
               value: this.el.value

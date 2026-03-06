@@ -39,8 +39,9 @@ defmodule CampFireWeb.Router do
   scope "/admin", CampFireWeb do
     pipe_through [:browser, CampFireWeb.Plugs.AdminAuth]
 
-    live "/seeds", SeedsLive, :index
-    live "/seeds/:id/edit", SeedsLive, :edit
+    live "/items", ItemsLive, :index
+    live "/items/:sub", ItemsLive, :sub
+    live "/items/:sub/:id/edit", ItemsLive, :edit
     live "/economy", EconomyLive, :index
     live "/visitors", VisitorsLive, :index
     live "/visitors/:id/edit", VisitorsLive, :edit

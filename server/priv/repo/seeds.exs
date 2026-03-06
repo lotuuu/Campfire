@@ -314,7 +314,32 @@ game_configs = [
       %{"manaCost" => 310, "harvestCosts" => [%{"itemName" => "Lavender_harvest", "count" => 1}, %{"itemName" => "Basil_harvest", "count" => 1}]},
       %{"manaCost" => 370, "harvestCosts" => [%{"itemName" => "Lavender_harvest", "count" => 1}, %{"itemName" => "Chamomile_harvest", "count" => 1}]}
     ]
-  }}
+  }},
+  %{key: "recipe_configs", value: %{
+    "Basil_Pigment" => %{"ingredients" => [%{"item_name" => "Basil_harvest", "count" => 3}], "result_item" => "Basil_pigment", "result_quantity" => 1, "category" => "Pigment"},
+    "Chamomile_Pigment" => %{"ingredients" => [%{"item_name" => "Chamomile_harvest", "count" => 3}], "result_item" => "Chamomile_pigment", "result_quantity" => 1, "category" => "Pigment"},
+    "Dahlia_Pigment" => %{"ingredients" => [%{"item_name" => "Dahlia_harvest", "count" => 3}], "result_item" => "Dahlia_pigment", "result_quantity" => 1, "category" => "Pigment"},
+    "Jasmine_Pigment" => %{"ingredients" => [%{"item_name" => "Jasmine_harvest", "count" => 3}], "result_item" => "Jasmine_pigment", "result_quantity" => 1, "category" => "Pigment"},
+    "Lavender_Pigment" => %{"ingredients" => [%{"item_name" => "Lavender_harvest", "count" => 3}], "result_item" => "Lavender_pigment", "result_quantity" => 1, "category" => "Pigment"},
+    "Marigold_Pigment" => %{"ingredients" => [%{"item_name" => "Marigold_harvest", "count" => 3}], "result_item" => "Marigold_pigment", "result_quantity" => 1, "category" => "Pigment"},
+    "Mint_Pigment" => %{"ingredients" => [%{"item_name" => "Mint_harvest", "count" => 3}], "result_item" => "Mint_pigment", "result_quantity" => 1, "category" => "Pigment"},
+    "Moonflower_Pigment" => %{"ingredients" => [%{"item_name" => "Moonflower_harvest", "count" => 3}], "result_item" => "Moonflower_pigment", "result_quantity" => 1, "category" => "Pigment"},
+    "Pansy_Pigment" => %{"ingredients" => [%{"item_name" => "Pansy_harvest", "count" => 3}], "result_item" => "Pansy_pigment", "result_quantity" => 1, "category" => "Pigment"},
+    "Poppy_Pigment" => %{"ingredients" => [%{"item_name" => "Poppy_harvest", "count" => 3}], "result_item" => "Poppy_pigment", "result_quantity" => 1, "category" => "Pigment"},
+    "Rosemary_Pigment" => %{"ingredients" => [%{"item_name" => "Rosemary_harvest", "count" => 3}], "result_item" => "Rosemary_pigment", "result_quantity" => 1, "category" => "Pigment"},
+    "Snowdrop_Pigment" => %{"ingredients" => [%{"item_name" => "Snowdrop_harvest", "count" => 3}], "result_item" => "Snowdrop_pigment", "result_quantity" => 1, "category" => "Pigment"},
+    "Speed_Potion" => %{"ingredients" => [%{"item_name" => "Mint_harvest", "count" => 4}, %{"item_name" => "Chamomile_harvest", "count" => 3}], "result_item" => "Speed_Potion", "result_quantity" => 1, "category" => "Potion"},
+    "Fertilizer" => %{"ingredients" => [%{"item_name" => "Berry", "count" => 3}, %{"item_name" => "Acorn", "count" => 1}], "result_item" => "Fertilizer", "result_quantity" => 1, "category" => "Material"}
+  }},
+  %{key: "skin_configs", value:
+    Enum.reduce(~w(Basil Chamomile Dahlia Jasmine Lavender Marigold Mint Moonflower Pansy Poppy Rosemary Snowdrop), %{}, fn plant, acc ->
+      pigment = "#{plant}_pigment"
+      acc
+      |> Map.put("#{plant}_plot", %{"building_type" => "plot", "cost_item_name" => pigment, "cost_quantity" => 1})
+      |> Map.put("#{plant}_vase", %{"building_type" => "vase", "cost_item_name" => pigment, "cost_quantity" => 1})
+      |> Map.put("#{plant}_house", %{"building_type" => "mallum_house", "cost_item_name" => pigment, "cost_quantity" => 1})
+    end)
+  }
 ]
 
 for c <- game_configs do

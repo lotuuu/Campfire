@@ -115,6 +115,68 @@ defmodule CampFire.Admin do
   end
 
   # ---------------------------------------------------------------------------
+  # Recipes (stored in game_configs as "recipe_configs" JSON map)
+  # ---------------------------------------------------------------------------
+
+  def list_recipes do
+    case get_game_config_by_key("recipe_configs") do
+      nil -> %{}
+      config -> config.value || %{}
+    end
+  end
+
+  def get_recipe(name) do
+    Map.get(list_recipes(), name)
+  end
+
+  def upsert_recipe(name, recipe_data) do
+    recipes = list_recipes()
+    updated = Map.put(recipes, name, recipe_data)
+    upsert_game_config("recipe_configs", updated)
+  end
+
+  def delete_recipe(name) do
+    recipes = list_recipes() |> Map.delete(name)
+    upsert_game_config("recipe_configs", recipes)
+  end
+
+  def rename_recipe(old_name, new_name, recipe_data) do
+    recipes = list_recipes() |> Map.delete(old_name) |> Map.put(new_name, recipe_data)
+    upsert_game_config("recipe_configs", recipes)
+  end
+
+  # ---------------------------------------------------------------------------
+  # Skins (stored in game_configs as "skin_configs" JSON map)
+  # ---------------------------------------------------------------------------
+
+  def list_skins do
+    case get_game_config_by_key("skin_configs") do
+      nil -> %{}
+      config -> config.value || %{}
+    end
+  end
+
+  def get_skin(name) do
+    Map.get(list_skins(), name)
+  end
+
+  def upsert_skin(name, skin_data) do
+    skins = list_skins()
+    updated = Map.put(skins, name, skin_data)
+    upsert_game_config("skin_configs", updated)
+  end
+
+  def delete_skin(name) do
+    skins = list_skins() |> Map.delete(name)
+    upsert_game_config("skin_configs", skins)
+  end
+
+  def rename_skin(old_name, new_name, skin_data) do
+    skins = list_skins() |> Map.delete(old_name) |> Map.put(new_name, skin_data)
+    upsert_game_config("skin_configs", skins)
+  end
+
+  # ---------------------------------------------------------------------------
   # Visitors (VisitorTemplate)
   # ---------------------------------------------------------------------------
 

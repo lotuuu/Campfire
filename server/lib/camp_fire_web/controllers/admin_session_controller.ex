@@ -7,7 +7,7 @@ defmodule CampFireWeb.AdminSessionController do
     if Plug.Crypto.secure_compare(secret, admin_secret) do
       conn
       |> put_session(:admin_authenticated, true)
-      |> redirect(to: "/admin/seeds")
+      |> redirect(to: "/admin/items")
     else
       conn
       |> put_flash(:error, "Invalid secret")
