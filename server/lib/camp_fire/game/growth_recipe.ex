@@ -95,7 +95,7 @@ defmodule CampFire.Game.GrowthRecipe do
 
     axes = maybe_add_axis(axes, recipe, "sunlight", fn ->
       case avg_from_list(snapshots, "cloud_covers", count) do
-        0.0 when count == 0 -> 0.0
+        +0.0 when count == 0 -> 0.0
         avg -> 100.0 - avg
       end
     end)
