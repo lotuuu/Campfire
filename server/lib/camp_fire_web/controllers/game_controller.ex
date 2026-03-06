@@ -2,7 +2,7 @@ defmodule CampFireWeb.GameController do
   use CampFireWeb, :controller
 
   alias CampFire.Economy
-  alias CampFire.Game.{Plots, Vases, Gardens, Mallums, MallumHouses, Birds, Weather, PlayerState, Apotheke}
+  alias CampFire.Game.{Plots, Vases, Gardens, Mallums, MallumHouses, Birds, Weather, PlayerState, Apotheke, Skins}
   alias CampFire.Repo
 
   alias CampFire.ConfigCache
@@ -17,6 +17,7 @@ defmodule CampFireWeb.GameController do
     vase_config = ConfigCache.get("vase_config") || %{}
     mallum_house_config = ConfigCache.get("mallum_house_config") || %{}
     building_cost_config = ConfigCache.get("building_cost_config") || %{}
+    skin_configs = ConfigCache.get("skin_configs") || %{}
 
     seeds =
       Map.new(seed_configs, fn {name, s} ->
@@ -66,7 +67,8 @@ defmodule CampFireWeb.GameController do
       vaseConfig: serialize_game_config(vase_config),
       mallumHouseConfig: serialize_game_config(mallum_house_config),
       buildingCostConfig: serialize_game_config(building_cost_config),
-      recipes: ConfigCache.get("recipe_configs") || %{}
+      recipes: ConfigCache.get("recipe_configs") || %{},
+      skins: skin_configs
     })
   end
 
@@ -253,7 +255,7 @@ defmodule CampFireWeb.GameController do
   def set_plot_skin(conn, %{"plotId" => plot_id, "skinName" => skin}) do
     uid = conn.assigns.current_player.uid
 
-    case Plots.set_skin(uid, plot_id, skin) do
+    case Skins.apply_skin(uid, :plot, plot_id, skin) do
       {:ok, plot} ->
         conn |> put_status(200) |> json(serialize_plot(plot))
 
@@ -325,7 +327,7 @@ defmodule CampFireWeb.GameController do
   def set_vase_skin(conn, %{"vaseId" => vase_id, "skinName" => skin}) do
     uid = conn.assigns.current_player.uid
 
-    case Vases.set_skin(uid, vase_id, skin) do
+    case Skins.apply_skin(uid, :vase, vase_id, skin) do
       {:ok, vase} ->
         conn |> put_status(200) |> json(serialize_vase(vase))
 
@@ -470,6 +472,22 @@ defmodule CampFireWeb.GameController do
 
   def craft_mallum_house(conn, _params) do
     conn |> put_status(400) |> json(%{error: "Missing 'gridX' and 'gridY'"})
+  end
+
+  def set_mallum_house_skin(conn, %{"houseId" => house_id, "skinName" => skin}) do
+    uid = conn.assigns.current_player.uid
+
+    case Skins.apply_skin(uid, :mallum_house, house_id, skin) do
+      {:ok, house} ->
+        conn |> put_status(200) |> json(serialize_mallum_house(house))
+
+      {:error, reason} ->
+        conn |> put_status(422) |> json(%{error: format_error(reason)})
+    end
+  end
+
+  def set_mallum_house_skin(conn, _params) do
+    conn |> put_status(400) |> json(%{error: "Missing 'houseId' and 'skinName'"})
   end
 
   # ── Apotheke ────────────────────────────────────────────────

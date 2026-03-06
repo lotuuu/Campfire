@@ -133,6 +133,17 @@ defmodule CampFire.TestHelpers do
     :ets.insert(:config_cache, {"recipe_configs", recipes})
   end
 
+  def seed_skin_configs do
+    configs = %{
+      "GreenPlot" => %{"building_type" => "plot", "cost_item_name" => "Basil_harvest", "cost_quantity" => 3},
+      "BluePlot" => %{"building_type" => "plot", "cost_item_name" => "Chamomile_harvest", "cost_quantity" => 2},
+      "FancyVase" => %{"building_type" => "vase", "cost_item_name" => "Basil_harvest", "cost_quantity" => 2},
+      "CozyHouse" => %{"building_type" => "mallum_house", "cost_item_name" => "Basil_harvest", "cost_quantity" => 5}
+    }
+
+    :ets.insert(:config_cache, {"skin_configs", configs})
+  end
+
   def auth_header(player) do
     [{"authorization", "Bearer #{player.auth_token}"}]
   end
