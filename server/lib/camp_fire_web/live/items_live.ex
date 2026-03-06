@@ -152,9 +152,32 @@ defmodule CampFireWeb.ItemsLive do
     seed = socket.assigns.editing
     recipe_json = Map.get(params, "recipe_json", "{}")
 
+    # Parse growth stages CSV into float list
+    growth_stages =
+      case Map.get(params, "growth_stages_csv", "") do
+        "" -> []
+        csv ->
+          csv
+          |> String.split(",")
+          |> Enum.map(&String.trim/1)
+          |> Enum.reject(&(&1 == ""))
+          |> Enum.map(fn s ->
+            case Float.parse(s) do
+              {f, _} -> f
+              :error -> nil
+            end
+          end)
+          |> Enum.reject(&is_nil/1)
+      end
+
     case Jason.decode(recipe_json) do
       {:ok, recipe} ->
-        attrs = Map.put(params, "recipe", recipe) |> Map.delete("recipe_json")
+        attrs =
+          params
+          |> Map.put("recipe", recipe)
+          |> Map.delete("recipe_json")
+          |> Map.delete("growth_stages_csv")
+          |> Map.put("growth_stages", growth_stages)
 
         case Admin.update_seed(seed, attrs) do
           {:ok, _seed} ->
@@ -546,6 +569,13 @@ defmodule CampFireWeb.ItemsLive do
                 <input type="number" name="seed_config[max_drops]" value={@form[:max_drops].value}
                   class="mt-1 block w-full border rounded px-3 py-2" />
               </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Growth Stages (comma-separated thresholds, e.g. 0,0.33,0.66,1)</label>
+              <input type="text" name="seed_config[growth_stages_csv]"
+                value={Enum.join(@editing.growth_stages || [], ",")}
+                class="mt-1 block w-full border rounded px-3 py-2"
+                placeholder="0,0.33,0.66,1" />
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Recipe (JSON)</label>

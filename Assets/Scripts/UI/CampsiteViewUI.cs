@@ -62,10 +62,8 @@ namespace Garden
         private readonly List<(VisualElement fill, int vaseIndex)> fillingVases = new();
         private readonly List<(VisualElement fill, int plotIndex)> cooldownPlots = new();
 
-        // Sprites
-        private Sprite emptyPlotSprite;
-        private Sprite growingPlotSprite;
-        private Sprite maturePlotSprite;
+        // Default growth stages when server doesn't specify per-seed stages
+        private static readonly List<float> DefaultGrowthStages = new() { 0f, 0.33f, 0.66f, 1f };
 
         // Current grid state
         private int currentGridSize;
@@ -87,13 +85,6 @@ namespace Garden
             interactionActions = root.Q("interaction-actions");
 
             cellTemplate = Resources.Load<VisualTreeAsset>("UI/Templates/GridCell");
-            var hexSprites = Resources.LoadAll<Sprite>("Sprites/TX_HexagonTest");
-            foreach (var s in hexSprites)
-            {
-                if (s.name == "TX_HexagonTest_3") emptyPlotSprite = s;
-                else if (s.name == "TX_HexagonTest_2") growingPlotSprite = s;
-                else if (s.name == "TX_HexagonTest_0") maturePlotSprite = s;
-            }
             visitTransition = root.Q("visit-transition");
 
             panController = new CampsitePanController(viewport, canvas);
@@ -359,6 +350,7 @@ namespace Garden
                     else
                     {
                         cell.AddToClassList("grid-cell--empty");
+                        TrySetHexSprite(cell, "hex/terrain");
                         if (label != null) label.text = "";
                         if (status != null) status.text = "";
 
@@ -414,44 +406,60 @@ namespace Garden
             {
                 case CampBuildingType.Flame:
                     cell.AddToClassList("grid-cell--flame");
+                    TrySetHexSprite(cell, "hex/flame");
                     if (label != null) label.text = $"Lv.{FlameManager.Instance.Level}";
                     if (status != null) status.text = "Spark of Ara";
                     break;
 
                 case CampBuildingType.Plot:
                     cell.AddToClassList("grid-cell--plot");
-                    ApplySkinColors(cell, SaveManager.Instance.Data.plots[index].skinName);
                     var plot = SaveManager.Instance.Data.plots[index];
+                    string plotSkin = plot.skinName;
                     if (label != null) label.text = string.IsNullOrEmpty(plot.seedName) ? "Plot" : PlotManager.GetSeedDisplayName(plot.seedName);
                     if (status != null) status.text = plot.state.ToString();
-                    if (plot.state == PlotState.Empty && emptyPlotSprite != null)
+
+                    if (plot.state == PlotState.Empty)
                     {
-                        cell.style.backgroundImage = new StyleBackground(emptyPlotSprite);
-                        cell.AddToClassList("grid-cell--sprite");
+                        if (!TrySetHexSprite(cell, "hex/plot/empty", plotSkin))
+                            ApplySkinColors(cell, plotSkin);
                     }
-                    else if (plot.state == PlotState.Growing && growingPlotSprite != null)
+                    else if (plot.state == PlotState.Growing)
                     {
-                        cell.style.backgroundImage = new StyleBackground(growingPlotSprite);
-                        cell.AddToClassList("grid-cell--sprite");
+                        string seed = plot.seedName?.ToLower();
+                        float growthPct = PlotManager.Instance != null ? PlotManager.Instance.GetGrowthProgress(index) : 0f;
+                        int stage = GetGrowthStageIndex(seed, growthPct);
+                        if (!TrySetHexSprite(cell, $"hex/plot/{seed}/stage-{stage}", plotSkin))
+                            ApplySkinColors(cell, plotSkin);
                         if (progress != null && progressFill != null)
                         {
                             progress.AddToClassList("cell-progress--visible");
                             growingPlots.Add((progressFill, index));
                         }
                     }
-                    else if (plot.state == PlotState.Mature && maturePlotSprite != null)
+                    else if (plot.state == PlotState.Mature)
                     {
-                        cell.style.backgroundImage = new StyleBackground(maturePlotSprite);
-                        cell.AddToClassList("grid-cell--sprite");
+                        string seed = plot.seedName?.ToLower();
+                        if (!TrySetHexSprite(cell, $"hex/plot/{seed}/mature", plotSkin))
+                        {
+                            ApplySkinColors(cell, plotSkin);
+                            cell.AddToClassList("grid-cell--plot-mature");
+                        }
                     }
                     break;
 
                 case CampBuildingType.Vase:
                     cell.AddToClassList("grid-cell--vase");
-                    ApplySkinColors(cell, SaveManager.Instance.Data.vases[index].skinName);
                     var vase = SaveManager.Instance.Data.vases[index];
+                    string vaseSkin = vase.skinName;
                     if (label != null) label.text = vase.currentWater >= vase.capacity ? "Full Vase" : vase.currentWater > 0 ? "Vase" : "Empty Vase";
                     if (status != null) status.text = $"{vase.currentWater}/{vase.capacity}";
+
+                    string vaseState = vase.state == VaseState.Filling ? "filling"
+                        : vase.currentWater >= vase.capacity ? "full"
+                        : "empty";
+                    if (!TrySetHexSprite(cell, $"hex/vase/{vaseState}", vaseSkin))
+                        ApplySkinColors(cell, vaseSkin);
+
                     if (vase.state == VaseState.Filling && progress != null && progressFill != null)
                     {
                         progress.AddToClassList("cell-progress--visible");
@@ -462,19 +470,37 @@ namespace Garden
                 case CampBuildingType.Garden:
                     cell.AddToClassList("grid-cell--garden");
                     var garden = SaveManager.Instance.Data.gardens[index];
+                    string plant = garden.plantName?.ToLower();
                     if (label != null) label.text = string.IsNullOrEmpty(garden.plantName) ? "Garden" : garden.plantName;
-                    if (status != null) status.text = string.IsNullOrEmpty(garden.plantName) ? "Empty" : (garden.mature ? "Mature" : "Growing");
+                    if (string.IsNullOrEmpty(garden.plantName))
+                    {
+                        TrySetHexSprite(cell, "hex/garden/empty");
+                        if (status != null) status.text = "Empty";
+                    }
+                    else if (garden.mature)
+                    {
+                        TrySetHexSprite(cell, $"hex/garden/{plant}/mature");
+                        if (status != null) status.text = "Mature";
+                    }
+                    else
+                    {
+                        TrySetHexSprite(cell, $"hex/garden/{plant}/growing");
+                        if (status != null) status.text = "Growing";
+                    }
                     break;
 
                 case CampBuildingType.Apotheke:
                     cell.AddToClassList("grid-cell--apotheke");
+                    TrySetHexSprite(cell, "hex/apotheke");
                     if (label != null) label.text = "Apotheke";
                     if (status != null) status.text = "Mixing";
                     break;
 
                 case CampBuildingType.MallumHouse:
                     cell.AddToClassList("grid-cell--mallum-house");
-                    ApplySkinColors(cell, SaveManager.Instance.Data.mallumHouses[index].skinName);
+                    string houseSkin = SaveManager.Instance.Data.mallumHouses[index].skinName;
+                    if (!TrySetHexSprite(cell, "hex/house", houseSkin))
+                        ApplySkinColors(cell, houseSkin);
                     if (label != null) label.text = "House";
                     if (status != null)
                     {
@@ -487,6 +513,7 @@ namespace Garden
 
                 case CampBuildingType.Bird:
                     cell.AddToClassList("grid-cell--bird");
+                    TrySetHexSprite(cell, "hex/bird");
                     var bird = SaveManager.Instance.Data.birds[index];
                     if (label != null) label.text = "Bird";
                     if (status != null) status.text = $"{bird.seedCount}x {PlotManager.GetSeedDisplayName(bird.seedName)}";
@@ -494,6 +521,7 @@ namespace Garden
 
                 case CampBuildingType.Visitor:
                     cell.AddToClassList("grid-cell--visitor");
+                    TrySetHexSprite(cell, "hex/visitor");
                     var visitor = SaveManager.Instance.Data.currentVisitor;
                     if (label != null) label.text = visitor?.visitorName ?? "Visitor";
                     if (status != null)
@@ -508,6 +536,66 @@ namespace Garden
                     }
                     break;
             }
+        }
+
+        /// <summary>
+        /// Tries to set a hex sprite from SpriteService. With skin, tries skin key first.
+        /// Returns true if a sprite was set (cell gets grid-cell--sprite class).
+        /// Returns false → caller should fall back to colored hex drawing.
+        /// </summary>
+        private static bool TrySetHexSprite(VisualElement cell, string key, string skinName = null)
+        {
+            if (SpriteService.Instance == null) return false;
+
+            Texture2D tex = null;
+
+            // Try skin-specific sprite first
+            if (!string.IsNullOrEmpty(skinName))
+            {
+                // key = "hex/plot/empty" → skin key = "hex/plot/skin-{name}/empty"
+                int firstSlash = key.IndexOf('/');
+                int secondSlash = firstSlash >= 0 ? key.IndexOf('/', firstSlash + 1) : -1;
+                if (secondSlash >= 0)
+                {
+                    string prefix = key[..secondSlash];
+                    string suffix = key[secondSlash..];
+                    tex = SpriteService.Instance.GetTexture($"{prefix}/skin-{skinName}{suffix}");
+                }
+            }
+
+            // Fall back to base key
+            if (tex == null)
+                tex = SpriteService.Instance.GetTexture(key);
+
+            if (tex == null) return false;
+
+            cell.style.backgroundImage = tex;
+            cell.AddToClassList("grid-cell--sprite");
+            return true;
+        }
+
+        /// <summary>
+        /// Returns the growth stage index for a seed at a given progress (0-1).
+        /// Uses per-seed stages from server config, or default stages.
+        /// </summary>
+        private static int GetGrowthStageIndex(string seedName, float progress)
+        {
+            List<float> stages = null;
+            if (!string.IsNullOrEmpty(seedName) && ConfigService.Instance != null)
+            {
+                var config = ConfigService.Instance.GetSeed(seedName.Substring(0, 1).ToUpper() + seedName.Substring(1));
+                if (config == null) config = ConfigService.Instance.GetSeed(seedName);
+                stages = config?.growthStages;
+            }
+
+            if (stages == null || stages.Count == 0)
+                stages = DefaultGrowthStages;
+
+            for (int i = stages.Count - 1; i >= 0; i--)
+            {
+                if (progress >= stages[i]) return i;
+            }
+            return 0;
         }
 
         // ── Cell Tap Handlers ──
@@ -881,12 +969,16 @@ namespace Garden
                     else
                     {
                         cell.AddToClassList("grid-cell--empty");
+                        TrySetHexSprite(cell, "hex/terrain");
                         if (label != null) label.text = "";
                         if (status != null) status.text = "";
                     }
 
-                    cell.generateVisualContent += DrawHexCell;
-                    cell.RegisterCallback<CustomStyleResolvedEvent>(_ => cell.MarkDirtyRepaint());
+                    if (!cell.ClassListContains("grid-cell--sprite"))
+                    {
+                        cell.generateVisualContent += DrawHexCell;
+                        cell.RegisterCallback<CustomStyleResolvedEvent>(_ => cell.MarkDirtyRepaint());
+                    }
                     canvas.Add(cell);
                 }
             }
@@ -911,6 +1003,7 @@ namespace Garden
             {
                 case CampBuildingType.Flame:
                     cell.AddToClassList("grid-cell--flame");
+                    TrySetHexSprite(cell, "hex/flame");
                     if (label != null) label.text = $"Lv.{visitSnapshot.flameLevel}";
                     if (status != null) status.text = "Spark of Ara";
                     break;
@@ -918,6 +1011,13 @@ namespace Garden
                 case CampBuildingType.Plot:
                     cell.AddToClassList("grid-cell--plot");
                     var plot = visitSnapshot.plots[index];
+                    string seed = plot.seedName?.ToLower();
+                    if (string.IsNullOrEmpty(plot.seedName) || plot.state == "empty")
+                        TrySetHexSprite(cell, "hex/plot/empty");
+                    else if (plot.state == "mature")
+                        TrySetHexSprite(cell, $"hex/plot/{seed}/mature");
+                    else
+                        TrySetHexSprite(cell, $"hex/plot/{seed}/stage-0");
                     if (label != null) label.text = string.IsNullOrEmpty(plot.seedName) ? "Plot" : PlotManager.GetSeedDisplayName(plot.seedName);
                     if (status != null) status.text = plot.state ?? "";
                     break;
@@ -925,6 +1025,10 @@ namespace Garden
                 case CampBuildingType.Vase:
                     cell.AddToClassList("grid-cell--vase");
                     var vase = visitSnapshot.vases[index];
+                    string vs = vase.state == "filling" ? "filling"
+                        : vase.currentWater >= vase.capacity ? "full"
+                        : "empty";
+                    TrySetHexSprite(cell, $"hex/vase/{vs}");
                     if (label != null) label.text = $"{vase.currentWater}/{vase.capacity}";
                     if (status != null) status.text = vase.state ?? "";
                     break;
@@ -932,12 +1036,20 @@ namespace Garden
                 case CampBuildingType.Garden:
                     cell.AddToClassList("grid-cell--garden");
                     var garden = visitSnapshot.gardens[index];
+                    string plant = garden.plantName?.ToLower();
+                    if (string.IsNullOrEmpty(garden.plantName))
+                        TrySetHexSprite(cell, "hex/garden/empty");
+                    else if (garden.mature)
+                        TrySetHexSprite(cell, $"hex/garden/{plant}/mature");
+                    else
+                        TrySetHexSprite(cell, $"hex/garden/{plant}/growing");
                     if (label != null) label.text = string.IsNullOrEmpty(garden.plantName) ? "Garden" : garden.plantName;
                     if (status != null) status.text = string.IsNullOrEmpty(garden.plantName) ? "Empty" : (garden.mature ? "Mature" : "Growing");
                     break;
 
                 case CampBuildingType.Apotheke:
                     cell.AddToClassList("grid-cell--apotheke");
+                    TrySetHexSprite(cell, "hex/apotheke");
                     if (label != null) label.text = "Apotheke";
                     if (status != null) status.text = "Mixing";
                     break;

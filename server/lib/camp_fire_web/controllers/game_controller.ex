@@ -29,7 +29,8 @@ defmodule CampFireWeb.GameController do
            minDrops: s.min_drops,
            maxDrops: s.max_drops,
            tier: s.tier,
-           recipe: s.recipe
+           recipe: s.recipe,
+           growthStages: s.growth_stages
          }}
       end)
 
