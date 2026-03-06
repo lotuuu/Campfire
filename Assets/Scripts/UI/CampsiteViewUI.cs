@@ -62,9 +62,6 @@ namespace Garden
         private readonly List<(VisualElement fill, int vaseIndex)> fillingVases = new();
         private readonly List<(VisualElement fill, int plotIndex)> cooldownPlots = new();
 
-        // Default growth stages when server doesn't specify per-seed stages
-        private static readonly List<float> DefaultGrowthStages = new() { 0f, 0.33f, 0.66f, 1f };
-
         // Current grid state
         private int currentGridSize;
         private bool suppressRebuild;
@@ -425,10 +422,9 @@ namespace Garden
                     }
                     else if (plot.state == PlotState.Growing)
                     {
-                        string seed = plot.seedName?.ToLower();
+                        string seed = SeedToSpriteKey(plot.seedName);
                         float growthPct = PlotManager.Instance != null ? PlotManager.Instance.GetGrowthProgress(index) : 0f;
-                        int stage = GetGrowthStageIndex(seed, growthPct);
-                        if (!TrySetHexSprite(cell, $"hex/plot/{seed}/stage-{stage}", plotSkin))
+                        if (!TrySetHexSpriteByPercent(cell, $"hex/plot/{seed}", growthPct, plotSkin))
                             ApplySkinColors(cell, plotSkin);
                         if (progress != null && progressFill != null)
                         {
@@ -438,8 +434,8 @@ namespace Garden
                     }
                     else if (plot.state == PlotState.Mature)
                     {
-                        string seed = plot.seedName?.ToLower();
-                        if (!TrySetHexSprite(cell, $"hex/plot/{seed}/mature", plotSkin))
+                        string seed = SeedToSpriteKey(plot.seedName);
+                        if (!TrySetHexSpriteByPercent(cell, $"hex/plot/{seed}", 1f, plotSkin))
                         {
                             ApplySkinColors(cell, plotSkin);
                             cell.AddToClassList("grid-cell--plot-mature");
@@ -454,10 +450,8 @@ namespace Garden
                     if (label != null) label.text = vase.currentWater >= vase.capacity ? "Full Vase" : vase.currentWater > 0 ? "Vase" : "Empty Vase";
                     if (status != null) status.text = $"{vase.currentWater}/{vase.capacity}";
 
-                    string vaseState = vase.state == VaseState.Filling ? "filling"
-                        : vase.currentWater >= vase.capacity ? "full"
-                        : "empty";
-                    if (!TrySetHexSprite(cell, $"hex/vase/{vaseState}", vaseSkin))
+                    float vasePct = vase.capacity > 0 ? (float)vase.currentWater / vase.capacity : 0f;
+                    if (!TrySetHexSpriteByPercent(cell, "hex/vase", vasePct, vaseSkin))
                         ApplySkinColors(cell, vaseSkin);
 
                     if (vase.state == VaseState.Filling && progress != null && progressFill != null)
@@ -575,27 +569,48 @@ namespace Garden
         }
 
         /// <summary>
-        /// Returns the growth stage index for a seed at a given progress (0-1).
-        /// Uses per-seed stages from server config, or default stages.
+        /// Converts a seedName like "Sprouts Seed" to a sprite-friendly slug "sprouts".
+        /// Strips trailing " Seed"/" seed", lowercases, replaces spaces with hyphens.
         /// </summary>
-        private static int GetGrowthStageIndex(string seedName, float progress)
+        private static string SeedToSpriteKey(string seedName)
         {
-            List<float> stages = null;
-            if (!string.IsNullOrEmpty(seedName) && ConfigService.Instance != null)
+            if (string.IsNullOrEmpty(seedName)) return seedName;
+            var s = seedName.Trim();
+            if (s.EndsWith(" Seed", StringComparison.OrdinalIgnoreCase))
+                s = s.Substring(0, s.Length - 5);
+            return s.ToLower().Replace(' ', '-');
+        }
+
+        /// <summary>
+        /// Picks the best sprite by scanning keys like {prefix}/0, {prefix}/50, {prefix}/100
+        /// and choosing the highest numeric threshold ≤ the given percentage.
+        /// </summary>
+        private static bool TrySetHexSpriteByPercent(VisualElement cell, string prefix, float percent01, string skinName = null)
+        {
+            if (SpriteService.Instance == null) return false;
+
+            Texture2D tex = null;
+
+            // Try skin-specific sprites first
+            if (!string.IsNullOrEmpty(skinName))
             {
-                var config = ConfigService.Instance.GetSeed(seedName.Substring(0, 1).ToUpper() + seedName.Substring(1));
-                if (config == null) config = ConfigService.Instance.GetSeed(seedName);
-                stages = config?.growthStages;
+                int firstSlash = prefix.IndexOf('/');
+                int secondSlash = firstSlash >= 0 ? prefix.IndexOf('/', firstSlash + 1) : -1;
+                if (secondSlash >= 0)
+                {
+                    string skinPrefix = $"{prefix[..secondSlash]}/skin-{skinName}{prefix[secondSlash..]}";
+                    tex = SpriteService.Instance.GetTextureByPercentage(skinPrefix, percent01);
+                }
             }
 
-            if (stages == null || stages.Count == 0)
-                stages = DefaultGrowthStages;
+            if (tex == null)
+                tex = SpriteService.Instance.GetTextureByPercentage(prefix, percent01);
 
-            for (int i = stages.Count - 1; i >= 0; i--)
-            {
-                if (progress >= stages[i]) return i;
-            }
-            return 0;
+            if (tex == null) return false;
+
+            cell.style.backgroundImage = tex;
+            cell.AddToClassList("grid-cell--sprite");
+            return true;
         }
 
         // ── Cell Tap Handlers ──
@@ -1011,13 +1026,13 @@ namespace Garden
                 case CampBuildingType.Plot:
                     cell.AddToClassList("grid-cell--plot");
                     var plot = visitSnapshot.plots[index];
-                    string seed = plot.seedName?.ToLower();
+                    string seed = SeedToSpriteKey(plot.seedName);
                     if (string.IsNullOrEmpty(plot.seedName) || plot.state == "empty")
                         TrySetHexSprite(cell, "hex/plot/empty");
                     else if (plot.state == "mature")
-                        TrySetHexSprite(cell, $"hex/plot/{seed}/mature");
+                        TrySetHexSpriteByPercent(cell, $"hex/plot/{seed}", 1f);
                     else
-                        TrySetHexSprite(cell, $"hex/plot/{seed}/stage-0");
+                        TrySetHexSpriteByPercent(cell, $"hex/plot/{seed}", 0f);
                     if (label != null) label.text = string.IsNullOrEmpty(plot.seedName) ? "Plot" : PlotManager.GetSeedDisplayName(plot.seedName);
                     if (status != null) status.text = plot.state ?? "";
                     break;
@@ -1025,10 +1040,8 @@ namespace Garden
                 case CampBuildingType.Vase:
                     cell.AddToClassList("grid-cell--vase");
                     var vase = visitSnapshot.vases[index];
-                    string vs = vase.state == "filling" ? "filling"
-                        : vase.currentWater >= vase.capacity ? "full"
-                        : "empty";
-                    TrySetHexSprite(cell, $"hex/vase/{vs}");
+                    float visitVasePct = vase.capacity > 0 ? (float)vase.currentWater / vase.capacity : 0f;
+                    TrySetHexSpriteByPercent(cell, "hex/vase", visitVasePct);
                     if (label != null) label.text = $"{vase.currentWater}/{vase.capacity}";
                     if (status != null) status.text = vase.state ?? "";
                     break;

@@ -42,6 +42,35 @@ namespace Garden
             return tex;
         }
 
+        /// <summary>
+        /// Finds the best sprite for a prefix + percentage.
+        /// Given prefix "hex/vase" and percent 0.2, searches for keys like
+        /// hex/vase/0, hex/vase/10, hex/vase/100 and returns the one with
+        /// the highest threshold ≤ 20 (i.e. hex/vase/10).
+        /// </summary>
+        public Texture2D GetTextureByPercentage(string prefix, float percent01)
+        {
+            int pct = Mathf.RoundToInt(percent01 * 100f);
+            string bestKey = null;
+            int bestThreshold = -1;
+
+            foreach (var key in _textures.Keys)
+            {
+                if (key.Length <= prefix.Length + 1 || key[prefix.Length] != '/' || !key.StartsWith(prefix))
+                    continue;
+                var suffix = key.Substring(prefix.Length + 1);
+                if (suffix.IndexOf('/') >= 0) continue;
+                if (!int.TryParse(suffix, out int threshold)) continue;
+                if (threshold <= pct && threshold > bestThreshold)
+                {
+                    bestThreshold = threshold;
+                    bestKey = key;
+                }
+            }
+
+            return bestKey != null ? _textures[bestKey] : null;
+        }
+
         public Sprite GetSprite(string key)
         {
             if (_sprites.TryGetValue(key, out var cached)) return cached;
