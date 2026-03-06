@@ -88,5 +88,8 @@ defmodule CampFire.ConfigCache do
       end)
 
     :ets.insert(@table, {"seed_configs", seed_map})
+
+    sprite_manifest = CampFire.SpriteManifest.build()
+    :ets.insert(@table, {"sprite_manifest", sprite_manifest})
   end
 end
