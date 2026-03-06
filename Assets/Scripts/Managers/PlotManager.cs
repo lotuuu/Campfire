@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -94,6 +95,7 @@ namespace Garden
             }
 
             ApplyServerSeedConfigs();
+            ApplyServerBuildingCostConfig();
         }
 
         /// <summary>
@@ -121,6 +123,50 @@ namespace Garden
                 if (recipeMap != null)
                     seed.recipe = ConfigService.ConvertRecipe(recipeMap);
             }
+        }
+
+        private void ApplyServerBuildingCostConfig()
+        {
+            var cs = ConfigService.Instance;
+            if (cs == null || !cs.IsLoaded || cs.BuildingCostConfig == null) return;
+
+            var bcc = LoadBuildingCostConfig();
+            if (bcc == null) return;
+
+            var flags = BindingFlags.NonPublic | BindingFlags.Instance;
+            var type = typeof(BuildingCostConfig);
+
+            if (cs.BuildingCostConfig.TryGetValue("plot_costs", out var pcObj) && pcObj is List<object> plotCosts)
+                type.GetField("plotCosts", flags)?.SetValue(bcc, ParseBuildingCostList(plotCosts));
+
+            if (cs.BuildingCostConfig.TryGetValue("vase_costs", out var vcObj) && vcObj is List<object> vaseCosts)
+                type.GetField("vaseCosts", flags)?.SetValue(bcc, ParseBuildingCostList(vaseCosts));
+        }
+
+        private static List<BuildingCost> ParseBuildingCostList(List<object> list)
+        {
+            var result = new List<BuildingCost>();
+            foreach (var item in list)
+            {
+                if (item is not Dictionary<string, object> d) continue;
+                var cost = new BuildingCost();
+                if (d.TryGetValue("manaCost", out var mc))
+                    cost.manaCost = mc is double dd ? (float)dd : mc is long ll ? ll : 0f;
+
+                if (d.TryGetValue("harvestCosts", out var hcObj) && hcObj is List<object> hcList)
+                {
+                    foreach (var hc in hcList)
+                    {
+                        if (hc is not Dictionary<string, object> hd) continue;
+                        string itemName = hd.TryGetValue("itemName", out var n) && n is string s ? s : null;
+                        int count = hd.TryGetValue("count", out var c) ? (c is double cd ? (int)cd : c is long cl ? (int)cl : 0) : 0;
+                        if (itemName != null)
+                            cost.harvestCosts.Add(new HarvestCost { itemName = itemName, count = count });
+                    }
+                }
+                result.Add(cost);
+            }
+            return result;
         }
 
         private void OnEnable()

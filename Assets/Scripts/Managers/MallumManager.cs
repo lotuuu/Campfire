@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -24,6 +25,7 @@ namespace Garden
             Instance = this;
             allQuests = Resources.LoadAll<QuestData>("Quests");
             ApplyServerQuestConfigs();
+            ApplyServerHouseConfig();
         }
 
         /// <summary>
@@ -80,6 +82,44 @@ namespace Garden
                         });
                     }
                 }
+            }
+        }
+
+        private void ApplyServerHouseConfig()
+        {
+            var cs = ConfigService.Instance;
+            if (cs == null || !cs.IsLoaded || cs.MallumHouseConfig == null) return;
+
+            var flags = BindingFlags.NonPublic | BindingFlags.Instance;
+            var type = typeof(MallumHouseConfig);
+
+            type.GetField("mallumsPerHouse", flags)?.SetValue(houseConfig, cs.MallumHouseConfig.mallums_per_house);
+
+            var serverCosts = cs.HouseCosts;
+            if (serverCosts != null && serverCosts.Count > 0)
+            {
+                var costs = new List<HouseCost>();
+                foreach (var sc in serverCosts)
+                {
+                    var cost = new HouseCost();
+                    cost.manaCost = sc.TryGetValue("mana", out var m) ? ToFloat(m) : 0f;
+
+                    if (sc.TryGetValue("harvests", out var hObj) && hObj is List<object> harvests)
+                    {
+                        foreach (var h in harvests)
+                        {
+                            if (h is Dictionary<string, object> hd)
+                            {
+                                string item = hd.TryGetValue("item", out var n) && n is string s ? s : null;
+                                int count = hd.TryGetValue("count", out var c) ? (int)ToFloat(c) : 0;
+                                if (item != null)
+                                    cost.harvestCosts.Add(new HarvestCost { itemName = item, count = count });
+                            }
+                        }
+                    }
+                    costs.Add(cost);
+                }
+                type.GetField("houseCosts", flags)?.SetValue(houseConfig, costs);
             }
         }
 
