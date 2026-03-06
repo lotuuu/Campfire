@@ -34,7 +34,8 @@ namespace Garden
         {
             var data = SaveManager.Instance.Data;
             float old = data.mana;
-            data.mana = Mathf.Max(0f, data.mana + amount);
+            float cap = FlameManager.Instance != null ? FlameManager.Instance.ManaCap : float.MaxValue;
+            data.mana = Mathf.Clamp(data.mana + amount, 0f, cap);
             OnCurrencyChanged?.Invoke(CurrencyType.Mana, old, data.mana);
             SaveManager.Instance.Save();
         }

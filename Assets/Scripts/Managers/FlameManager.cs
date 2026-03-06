@@ -15,6 +15,7 @@ namespace Garden
         public int Level => SaveManager.Instance.Data.flameLevel;
         public float ManaPerSecond => config.GetManaPerSecond(Level);
         public int MaxEntities => config.GetMaxEntities(Level);
+        public float ManaCap => config.GetManaCap(Level);
 
         public int CurrentEntityCount
         {
@@ -91,7 +92,7 @@ namespace Garden
         private void Update()
         {
             SaveManager.Instance.Data.mana = AccumulateMana(
-                SaveManager.Instance.Data.mana, ManaPerSecond, Time.deltaTime);
+                SaveManager.Instance.Data.mana, ManaPerSecond, Time.deltaTime, ManaCap);
 
             _manaCollectTimer += Time.deltaTime;
             if (_manaCollectTimer >= ManaCollectIntervalSeconds)
@@ -101,9 +102,9 @@ namespace Garden
             }
         }
 
-        public static float AccumulateMana(float currentMana, float manaPerSecond, float deltaTime)
+        public static float AccumulateMana(float currentMana, float manaPerSecond, float deltaTime, float manaCap = float.MaxValue)
         {
-            return currentMana + manaPerSecond * deltaTime;
+            return Mathf.Min(currentMana + manaPerSecond * deltaTime, manaCap);
         }
 
         public bool CanUpgrade()

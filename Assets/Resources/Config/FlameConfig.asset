@@ -14,6 +14,19 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   baseManaPerSecond: 0.5
   manaPerLevel: 0.3
+  manaCapPerLevel:
+  - 300
+  - 500
+  - 750
+  - 1000
+  - 1500
+  - 2000
+  - 3000
+  - 4000
+  - 5000
+  - 7000
+  - 9000
+  - 12000
   maxEntitiesPerLevel:
   - 6
   - 6

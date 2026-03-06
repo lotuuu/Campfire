@@ -24,6 +24,9 @@ namespace Garden
         [SerializeField] private float baseManaPerSecond = 0.5f;
         [SerializeField] private float manaPerLevel = 0.3f;
 
+        [Header("Mana Cap")]
+        [SerializeField] private int[] manaCapPerLevel = { 300, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 7000, 9000, 12000 };
+
         [Header("Entity Capacity (apotheke + plots + vases + gardens + houses)")]
         [SerializeField] private int[] maxEntitiesPerLevel = { 6, 8, 12, 15, 18, 22, 26, 30, 35, 40 };
 
@@ -36,6 +39,12 @@ namespace Garden
         public float GetManaPerSecond(int flameLevel)
         {
             return baseManaPerSecond + (flameLevel - 1) * manaPerLevel;
+        }
+
+        public float GetManaCap(int flameLevel)
+        {
+            int index = Mathf.Clamp(flameLevel - 1, 0, manaCapPerLevel.Length - 1);
+            return manaCapPerLevel[index];
         }
 
         public int GetMaxEntities(int flameLevel)
