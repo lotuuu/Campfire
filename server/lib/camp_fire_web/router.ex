@@ -50,6 +50,7 @@ defmodule CampFireWeb.Router do
     live "/players", PlayersLive, :index
     live "/players/:uid", PlayersLive, :show
     live "/weather", WeatherLive, :index
+    live "/sprites", SpritesLive, :index
   end
 
   scope "/", CampFireWeb do

@@ -9,6 +9,7 @@
     <.link navigate="/admin/quests" class={"block px-4 py-2 hover:bg-gray-800 #{if @active_tab == :quests, do: "bg-gray-800 text-white", else: ""}"}>Quests</.link>
     <.link navigate="/admin/players" class={"block px-4 py-2 hover:bg-gray-800 #{if @active_tab == :players, do: "bg-gray-800 text-white", else: ""}"}>Players</.link>
     <.link navigate="/admin/weather" class={"block px-4 py-2 hover:bg-gray-800 #{if @active_tab == :weather, do: "bg-gray-800 text-white", else: ""}"}>Weather</.link>
+    <.link navigate="/admin/sprites" class={"block px-4 py-2 hover:bg-gray-800 #{if @active_tab == :sprites, do: "bg-gray-800 text-white", else: ""}"}>Sprites</.link>
   </nav>
   <main class="flex-1 overflow-y-auto p-6">
     {@inner_content}
