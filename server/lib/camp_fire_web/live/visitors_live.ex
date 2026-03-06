@@ -200,20 +200,48 @@ defmodule CampFireWeb.VisitorsLive do
 
               <div class="grid grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-gray-700">Dialogue Pool (JSON)</label>
-                  <textarea name="visitor[dialogue_pool_json]" rows="4" class="mt-1 block w-full border rounded px-3 py-2 font-mono text-sm">{@dialogue_pool_json}</textarea>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Dialogue Pool (JSON)</label>
+                  <div id="dialogue-editor" phx-hook="JsonEditor" class="json-editor-wrap" phx-update="ignore">
+                    <div class="json-toolbar">
+                      <button type="button" data-action="format">Format</button>
+                      <button type="button" data-action="minify">Minify</button>
+                    </div>
+                    <textarea name="visitor[dialogue_pool_json]" rows="6" class="mt-1 block w-full border rounded px-3 py-2">{@dialogue_pool_json}</textarea>
+                    <div class="json-error-msg"></div>
+                  </div>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700">Offer Pool (JSON)</label>
-                  <textarea name="visitor[offer_pool_json]" rows="4" class="mt-1 block w-full border rounded px-3 py-2 font-mono text-sm">{@offer_pool_json}</textarea>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Offer Pool (JSON)</label>
+                  <div id="offer-editor" phx-hook="JsonEditor" class="json-editor-wrap" phx-update="ignore">
+                    <div class="json-toolbar">
+                      <button type="button" data-action="format">Format</button>
+                      <button type="button" data-action="minify">Minify</button>
+                    </div>
+                    <textarea name="visitor[offer_pool_json]" rows="6" class="mt-1 block w-full border rounded px-3 py-2">{@offer_pool_json}</textarea>
+                    <div class="json-error-msg"></div>
+                  </div>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700">Gift Pool (JSON)</label>
-                  <textarea name="visitor[gift_pool_json]" rows="4" class="mt-1 block w-full border rounded px-3 py-2 font-mono text-sm">{@gift_pool_json}</textarea>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Gift Pool (JSON)</label>
+                  <div id="gift-editor" phx-hook="JsonEditor" class="json-editor-wrap" phx-update="ignore">
+                    <div class="json-toolbar">
+                      <button type="button" data-action="format">Format</button>
+                      <button type="button" data-action="minify">Minify</button>
+                    </div>
+                    <textarea name="visitor[gift_pool_json]" rows="6" class="mt-1 block w-full border rounded px-3 py-2">{@gift_pool_json}</textarea>
+                    <div class="json-error-msg"></div>
+                  </div>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-gray-700">Quest Pool (JSON)</label>
-                  <textarea name="visitor[quest_pool_json]" rows="4" class="mt-1 block w-full border rounded px-3 py-2 font-mono text-sm">{@quest_pool_json}</textarea>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Quest Pool (JSON)</label>
+                  <div id="quest-pool-editor" phx-hook="JsonEditor" class="json-editor-wrap" phx-update="ignore">
+                    <div class="json-toolbar">
+                      <button type="button" data-action="format">Format</button>
+                      <button type="button" data-action="minify">Minify</button>
+                    </div>
+                    <textarea name="visitor[quest_pool_json]" rows="6" class="mt-1 block w-full border rounded px-3 py-2">{@quest_pool_json}</textarea>
+                    <div class="json-error-msg"></div>
+                  </div>
                 </div>
               </div>
 

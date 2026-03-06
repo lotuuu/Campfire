@@ -44,6 +44,7 @@ defmodule CampFireWeb.Router do
     live "/quests/:id/edit", QuestsLive, :edit
     live "/players", PlayersLive, :index
     live "/players/:uid", PlayersLive, :show
+    live "/weather", WeatherLive, :index
   end
 
   scope "/", CampFireWeb do
@@ -57,9 +58,9 @@ defmodule CampFireWeb.Router do
     post "/register", AuthController, :register
   end
 
-  # Display name (auth + extra rate limit)
+  # Display name (auth required, normal rate limit)
   scope "/auth", CampFireWeb do
-    pipe_through [:api, :auth_rate_limit, :authenticated]
+    pipe_through [:api, :authenticated]
     put "/display-name", AuthController, :update_display_name
   end
 

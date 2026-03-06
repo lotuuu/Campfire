@@ -7,12 +7,104 @@
     <title>Camp Fire Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/phoenix@1.7.21/priv/static/phoenix.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/phoenix_live_view@1.0.0/priv/static/phoenix_live_view.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/phoenix_live_view@1.1.26/priv/static/phoenix_live_view.min.js"></script>
+    <style>
+      .json-editor-wrap { position: relative; }
+      .json-editor-wrap textarea {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 13px;
+        line-height: 1.5;
+        tab-size: 2;
+        resize: vertical;
+      }
+      .json-editor-wrap textarea.json-valid {
+        border-color: #22c55e;
+        box-shadow: 0 0 0 1px #22c55e;
+      }
+      .json-editor-wrap textarea.json-invalid {
+        border-color: #ef4444;
+        box-shadow: 0 0 0 1px #ef4444;
+      }
+      .json-error-msg {
+        font-size: 12px;
+        color: #ef4444;
+        margin-top: 2px;
+        min-height: 18px;
+      }
+      .json-toolbar {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 4px;
+      }
+      .json-toolbar button {
+        font-size: 12px;
+        padding: 2px 8px;
+        border-radius: 4px;
+        border: 1px solid #d1d5db;
+        background: #f9fafb;
+        cursor: pointer;
+      }
+      .json-toolbar button:hover { background: #e5e7eb; }
+    </style>
     <script>
+      const JsonEditor = {
+        mounted() {
+          const ta = this.el.querySelector("textarea");
+          const errEl = this.el.querySelector(".json-error-msg");
+          const validate = () => {
+            try {
+              JSON.parse(ta.value);
+              ta.classList.remove("json-invalid");
+              ta.classList.add("json-valid");
+              if (errEl) errEl.textContent = "";
+            } catch(e) {
+              ta.classList.remove("json-valid");
+              ta.classList.add("json-invalid");
+              if (errEl) errEl.textContent = e.message;
+            }
+          };
+          ta.addEventListener("input", validate);
+          ta.addEventListener("keydown", (e) => {
+            if (e.key === "Tab") {
+              e.preventDefault();
+              const start = ta.selectionStart;
+              const end = ta.selectionEnd;
+              ta.value = ta.value.substring(0, start) + "  " + ta.value.substring(end);
+              ta.selectionStart = ta.selectionEnd = start + 2;
+              ta.dispatchEvent(new Event("input", {bubbles: true}));
+            }
+          });
+          validate();
+
+          const fmtBtn = this.el.querySelector("[data-action=format]");
+          if (fmtBtn) {
+            fmtBtn.addEventListener("click", () => {
+              try {
+                ta.value = JSON.stringify(JSON.parse(ta.value), null, 2);
+                ta.dispatchEvent(new Event("input", {bubbles: true}));
+                validate();
+              } catch(_) {}
+            });
+          }
+
+          const minBtn = this.el.querySelector("[data-action=minify]");
+          if (minBtn) {
+            minBtn.addEventListener("click", () => {
+              try {
+                ta.value = JSON.stringify(JSON.parse(ta.value));
+                ta.dispatchEvent(new Event("input", {bubbles: true}));
+                validate();
+              } catch(_) {}
+            });
+          }
+        }
+      };
+
       window.addEventListener("DOMContentLoaded", () => {
         let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content");
         let liveSocket = new window.LiveView.LiveSocket("/live", window.Phoenix.Socket, {
           params: { _csrf_token: csrfToken },
+          hooks: { JsonEditor },
           longPollFallbackMs: 2500
         });
         liveSocket.connect();

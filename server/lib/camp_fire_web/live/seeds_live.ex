@@ -153,12 +153,19 @@ defmodule CampFireWeb.SeedsLive do
               </div>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700">Recipe (JSON)</label>
-              <textarea
-                name="seed_config[recipe_json]"
-                rows="6"
-                class="mt-1 block w-full border rounded px-3 py-2 font-mono text-sm"
-              >{@recipe_json}</textarea>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Recipe (JSON)</label>
+              <div id="recipe-editor" phx-hook="JsonEditor" class="json-editor-wrap" phx-update="ignore">
+                <div class="json-toolbar">
+                  <button type="button" data-action="format">Format</button>
+                  <button type="button" data-action="minify">Minify</button>
+                </div>
+                <textarea
+                  name="seed_config[recipe_json]"
+                  rows="10"
+                  class="mt-1 block w-full border rounded px-3 py-2"
+                >{@recipe_json}</textarea>
+                <div class="json-error-msg"></div>
+              </div>
             </div>
             <div class="flex gap-2">
               <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
@@ -219,8 +226,8 @@ defmodule CampFireWeb.SeedsLive do
   defp recipe_summary(recipe) do
     axes =
       recipe
-      |> Enum.filter(fn {k, v} -> String.starts_with?(k, "use") and v == true end)
-      |> Enum.map(fn {k, _} -> String.replace_prefix(k, "use", "") end)
+      |> Enum.filter(fn {_k, v} -> is_map(v) and v["enabled"] == true end)
+      |> Enum.map(fn {k, _} -> k end)
 
     case axes do
       [] -> "no axes"

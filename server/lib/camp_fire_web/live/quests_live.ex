@@ -157,12 +157,19 @@ defmodule CampFireWeb.QuestsLive do
               </div>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700">Reward Pool (JSON)</label>
-              <textarea
-                name="quest_config[reward_pool_json]"
-                rows="6"
-                class="mt-1 block w-full border rounded px-3 py-2 font-mono text-sm"
-              >{@reward_pool_json}</textarea>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Reward Pool (JSON)</label>
+              <div id="reward-pool-editor" phx-hook="JsonEditor" class="json-editor-wrap" phx-update="ignore">
+                <div class="json-toolbar">
+                  <button type="button" data-action="format">Format</button>
+                  <button type="button" data-action="minify">Minify</button>
+                </div>
+                <textarea
+                  name="quest_config[reward_pool_json]"
+                  rows="10"
+                  class="mt-1 block w-full border rounded px-3 py-2"
+                >{@reward_pool_json}</textarea>
+                <div class="json-error-msg"></div>
+              </div>
             </div>
             <div class="flex gap-2">
               <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Save</button>

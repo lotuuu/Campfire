@@ -9,7 +9,7 @@ defmodule CampFire.Admin do
 
   alias CampFire.Repo
   alias CampFire.Admin.{QuestConfig, GardenConfig, GameConfig}
-  alias CampFire.Game.{SeedConfig, PlayerPlot, PlayerVase, PlayerGarden, PlayerMallum}
+  alias CampFire.Game.{SeedConfig, PlayerPlot, PlayerVase, PlayerGarden, PlayerMallum, WeatherCache}
   alias CampFire.Economy.{PlayerEconomy, PlayerSeed, PlayerItem}
   alias CampFire.Accounts.Player
   alias CampFire.Visitors.{VisitorTemplate, VisitorSchedule}
@@ -43,7 +43,7 @@ defmodule CampFire.Admin do
   # ---------------------------------------------------------------------------
 
   def list_quests do
-    Repo.all(from q in QuestConfig, order_by: q.quest_name)
+    Repo.all(from q in QuestConfig, order_by: [q.required_flame_level, q.quest_name])
   end
 
   def get_quest!(id), do: Repo.get!(QuestConfig, id)
@@ -207,5 +207,33 @@ defmodule CampFire.Admin do
         |> PlayerEconomy.changeset(attrs)
         |> Repo.update()
     end
+  end
+
+  # ---------------------------------------------------------------------------
+  # Weather
+  # ---------------------------------------------------------------------------
+
+  def list_weather_caches do
+    Repo.all(from w in WeatherCache, order_by: [desc: w.fetched_at])
+  end
+
+  def weather_player_counts do
+    from(pe in PlayerEconomy,
+      where: not is_nil(pe.lat) and not is_nil(pe.lon),
+      group_by: [
+        fragment("ROUND(CAST(? AS numeric), 2)", pe.lat),
+        fragment("ROUND(CAST(? AS numeric), 2)", pe.lon)
+      ],
+      select: %{
+        lat: fragment("ROUND(CAST(? AS numeric), 2)", pe.lat),
+        lon: fragment("ROUND(CAST(? AS numeric), 2)", pe.lon),
+        count: count(pe.player_uid)
+      }
+    )
+    |> Repo.all()
+  end
+
+  def active_location_count do
+    CampFire.Game.Weather.active_locations() |> length()
   end
 end

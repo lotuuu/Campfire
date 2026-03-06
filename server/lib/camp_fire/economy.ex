@@ -30,6 +30,7 @@ defmodule CampFire.Economy do
         upsert_seed(player_uid, "Sprouts", 5)
         upsert_seed(player_uid, "Cress", 3)
         upsert_item(player_uid, "Speed_Potion", 3)
+        create_starter_buildings(player_uid)
         {:ok, economy}
 
       {:error, changeset} ->
@@ -193,6 +194,37 @@ defmodule CampFire.Economy do
         end
       end)
     end)
+  end
+
+  defp create_starter_buildings(player_uid) do
+    alias CampFire.Game.{PlayerPlot, PlayerVase, PlayerMallum}
+
+    %PlayerPlot{}
+    |> PlayerPlot.changeset(%{
+      player_uid: player_uid,
+      state: "empty",
+      grid_x: -1,
+      grid_y: 0
+    })
+    |> Repo.insert!()
+
+    %PlayerVase{}
+    |> PlayerVase.changeset(%{
+      player_uid: player_uid,
+      state: "full",
+      capacity: 5,
+      current_water: 5,
+      grid_x: 0,
+      grid_y: -1
+    })
+    |> Repo.insert!()
+
+    %PlayerMallum{}
+    |> PlayerMallum.changeset(%{
+      player_uid: player_uid,
+      state: "idle"
+    })
+    |> Repo.insert!()
   end
 
   defp spend_items_in_tx(player_uid, item_name, count) do
