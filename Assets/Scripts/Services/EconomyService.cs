@@ -162,12 +162,14 @@ namespace Garden
                 Debug.LogWarning("EconomyService: Could not sync with server, running offline.");
                 IsInitialized = true;
                 IsOnline = false;
+                OnStateSynced?.Invoke();
             }
             catch (Exception e)
             {
                 Debug.LogWarning($"EconomyService: Init failed ({e.Message}), running offline.");
                 IsInitialized = true;
                 IsOnline = false;
+                OnStateSynced?.Invoke();
             }
         }
 

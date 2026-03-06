@@ -33,7 +33,15 @@ namespace Garden
         private VisualElement debugPanelElement;
         private VisualElement questsPanel;
         private VisualElement visitorPanel;
-        private VisualElement weatherGate;
+
+        // Loading gate
+        private VisualElement loadingGate;
+        private Label loadingStatus;
+        private VisualElement loadingBarFill;
+        private bool _weatherDone;
+        private bool _socialDone;
+        private bool _economyDone;
+        private bool _gameDone;
 
         private void Awake()
         {
@@ -175,17 +183,49 @@ namespace Garden
                     }
                 };
 
-            // Weather gate — block UI until weather is available
-            weatherGate = root.Q("weather-gate");
-            if (WeatherService.Instance != null && WeatherService.Instance.IsLocationResolved)
+            // Loading gate — block UI until all services are ready
+            loadingGate = root.Q("loading-gate");
+            loadingStatus = root.Q<Label>("loading-gate-status");
+            loadingBarFill = root.Q("loading-gate-bar-fill");
+
+            // Subscribe to service completion events
+            if (WeatherService.Instance != null)
             {
-                weatherGate?.RemoveFromHierarchy();
-                weatherGate = null;
+                if (WeatherService.Instance.IsLocationResolved)
+                    _weatherDone = true;
+                else
+                    WeatherService.Instance.OnLocationResolved += OnWeatherReady;
             }
-            else if (WeatherService.Instance != null)
+            else _weatherDone = true;
+
+            if (SocialService.Instance != null)
             {
-                WeatherService.Instance.OnLocationResolved += OnLocationResolved;
+                if (SocialService.Instance.IsSignedIn)
+                    _socialDone = true;
+                else
+                    SocialService.Instance.OnSignedIn += OnSocialReady;
             }
+            else _socialDone = true;
+
+            if (EconomyService.Instance != null)
+            {
+                if (EconomyService.Instance.IsInitialized)
+                    _economyDone = true;
+                else
+                    EconomyService.Instance.OnStateSynced += OnEconomyReady;
+            }
+            else _economyDone = true;
+
+            if (GameService.Instance != null)
+            {
+                if (GameService.Instance.IsInitialized)
+                    _gameDone = true;
+                else
+                    GameService.Instance.OnStateLoaded += OnGameReady;
+            }
+            else _gameDone = true;
+
+            UpdateLoadingGate();
         }
 
         private void UpdateQuestBadge()
@@ -195,14 +235,59 @@ namespace Garden
             bottomNav.UpdateQuestBadge(completed);
         }
 
-        private void OnLocationResolved(bool success)
+        // ── Loading gate callbacks ──
+
+        private void OnWeatherReady(bool success)
         {
-            WeatherService.Instance.OnLocationResolved -= OnLocationResolved;
-            if (weatherGate != null)
+            WeatherService.Instance.OnLocationResolved -= OnWeatherReady;
+            _weatherDone = true;
+            UpdateLoadingGate();
+        }
+
+        private void OnSocialReady()
+        {
+            SocialService.Instance.OnSignedIn -= OnSocialReady;
+            _socialDone = true;
+            UpdateLoadingGate();
+        }
+
+        private void OnEconomyReady()
+        {
+            EconomyService.Instance.OnStateSynced -= OnEconomyReady;
+            _economyDone = true;
+            UpdateLoadingGate();
+        }
+
+        private void OnGameReady()
+        {
+            GameService.Instance.OnStateLoaded -= OnGameReady;
+            _gameDone = true;
+            UpdateLoadingGate();
+        }
+
+        private void UpdateLoadingGate()
+        {
+            if (loadingGate == null) return;
+
+            int done = (_socialDone ? 1 : 0) + (_economyDone ? 1 : 0)
+                     + (_gameDone ? 1 : 0) + (_weatherDone ? 1 : 0);
+            const int total = 4;
+            float pct = (float)done / total;
+
+            loadingBarFill.style.width = Length.Percent(pct * 100f);
+
+            if (done >= total)
             {
-                weatherGate.RemoveFromHierarchy();
-                weatherGate = null;
+                loadingGate.RemoveFromHierarchy();
+                loadingGate = null;
+                return;
             }
+
+            // Show status of what's currently loading
+            if (!_socialDone) loadingStatus.text = "Connecting...";
+            else if (!_economyDone) loadingStatus.text = "Syncing economy...";
+            else if (!_gameDone) loadingStatus.text = "Loading game state...";
+            else if (!_weatherDone) loadingStatus.text = "Reading the skies...";
         }
 
         public void OpenOverlay(string title, VisualElement panel)

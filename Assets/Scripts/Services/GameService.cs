@@ -67,12 +67,14 @@ namespace Garden
                 Debug.LogWarning($"GameService: Could not load game state (HTTP {req.responseCode}), running offline.");
                 IsInitialized = true;
                 IsOnline = false;
+                OnStateLoaded?.Invoke();
             }
             catch (Exception e)
             {
                 Debug.LogWarning($"GameService: Init failed ({e.Message}), running offline.");
                 IsInitialized = true;
                 IsOnline = false;
+                OnStateLoaded?.Invoke();
             }
         }
 

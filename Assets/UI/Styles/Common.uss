@@ -162,8 +162,8 @@
     -unity-text-align: middle-center;
 }
 
-/* Weather loading gate */
-#weather-gate {
+/* Loading gate */
+#loading-gate {
     position: absolute;
     left: 0;
     right: 0;
@@ -174,10 +174,36 @@
     align-items: center;
 }
 
-#weather-gate-label {
-    font-size: var(--font-lg);
+#loading-gate-title {
+    font-size: var(--font-xxl);
+    color: var(--color-text-bright);
+    -unity-font-style: bold;
+    margin-bottom: var(--spacing-sm);
+    -unity-text-align: middle-center;
+}
+
+#loading-gate-status {
+    font-size: var(--font-sm);
     color: var(--color-text-dim);
     -unity-text-align: middle-center;
+    margin-bottom: var(--spacing-md);
+}
+
+#loading-gate-bar-track {
+    width: 240px;
+    height: 8px;
+    background-color: rgb(30, 30, 40);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+#loading-gate-bar-fill {
+    height: 100%;
+    width: 0;
+    background-color: var(--color-mana);
+    border-radius: 4px;
+    transition-property: width;
+    transition-duration: 300ms;
 }
 
 /* Page content (inside SwipeablePageView) */
