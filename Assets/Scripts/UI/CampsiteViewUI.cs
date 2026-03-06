@@ -58,7 +58,7 @@ namespace Garden
         private Button visitBackBtn;
 
         // Grid cell tracking for Update loop
-        private readonly List<(VisualElement fill, int plotIndex)> growingPlots = new();
+        private readonly List<(VisualElement fill, VisualElement cell, string spritePrefix, string skin, int plotIndex)> growingPlots = new();
         private readonly List<(VisualElement fill, int vaseIndex)> fillingVases = new();
         private readonly List<(VisualElement fill, int plotIndex)> cooldownPlots = new();
 
@@ -144,10 +144,11 @@ namespace Garden
         {
             if (PlotManager.Instance != null)
             {
-                foreach (var (fill, plotIndex) in growingPlots)
+                foreach (var (fill, cell, spritePrefix, skin, plotIndex) in growingPlots)
                 {
                     float progress = PlotManager.Instance.GetGrowthProgress(plotIndex);
                     fill.style.width = new Length(progress * 100f, LengthUnit.Percent);
+                    TrySetHexSpriteByPercent(cell, spritePrefix, progress, skin);
                 }
             }
 
@@ -423,13 +424,14 @@ namespace Garden
                     else if (plot.state == PlotState.Growing)
                     {
                         string seed = SeedToSpriteKey(plot.seedName);
+                        string spritePrefix = $"hex/plot/{seed}";
                         float growthPct = PlotManager.Instance != null ? PlotManager.Instance.GetGrowthProgress(index) : 0f;
-                        if (!TrySetHexSpriteByPercent(cell, $"hex/plot/{seed}", growthPct, plotSkin))
+                        if (!TrySetHexSpriteByPercent(cell, spritePrefix, growthPct, plotSkin))
                             ApplySkinColors(cell, plotSkin);
                         if (progress != null && progressFill != null)
                         {
                             progress.AddToClassList("cell-progress--visible");
-                            growingPlots.Add((progressFill, index));
+                            growingPlots.Add((progressFill, cell, spritePrefix, plotSkin, index));
                         }
                     }
                     else if (plot.state == PlotState.Mature)
