@@ -16,18 +16,18 @@ defmodule CampFireWeb.QuestsLive do
       |> QuestConfig.changeset(%{})
       |> to_form()
 
-    reward_pool_json = Jason.encode!(quest.reward_pool || [], pretty: true)
+    rewards = reward_pool_to_editable(quest.reward_pool)
 
     {:noreply,
      assign(socket,
        editing: quest,
        form: form,
-       reward_pool_json: reward_pool_json
+       rewards: rewards
      )}
   end
 
   def handle_params(_params, _uri, socket) do
-    {:noreply, assign(socket, editing: nil, form: nil, reward_pool_json: nil)}
+    {:noreply, assign(socket, editing: nil, form: nil, rewards: [])}
   end
 
   def handle_event("edit", %{"id" => id}, socket) do
@@ -61,29 +61,51 @@ defmodule CampFireWeb.QuestsLive do
 
   def handle_event("save", %{"quest_config" => params}, socket) do
     quest = socket.assigns.editing
-    reward_json = Map.get(params, "reward_pool_json", "[]")
+    rewards = socket.assigns.rewards
 
-    case Jason.decode(reward_json) do
-      {:ok, reward_pool} ->
-        attrs = Map.put(params, "reward_pool", reward_pool) |> Map.delete("reward_pool_json")
+    reward_pool =
+      Enum.map(rewards, fn r ->
+        %{
+          "seed" => r.seed,
+          "weight" => parse_number(r.weight),
+          "minCount" => parse_int(r.min_count),
+          "maxCount" => parse_int(r.max_count)
+        }
+      end)
 
-        case Admin.update_quest(quest, attrs) do
-          {:ok, _} ->
-            CampFire.ConfigCache.refresh()
+    attrs = Map.put(params, "reward_pool", reward_pool)
 
-            {:noreply,
-             socket
-             |> put_flash(:info, "Quest updated")
-             |> assign(quests: Admin.list_quests())
-             |> push_patch(to: "/admin/quests")}
+    case Admin.update_quest(quest, attrs) do
+      {:ok, _} ->
+        CampFire.ConfigCache.refresh()
 
-          {:error, changeset} ->
-            {:noreply, assign(socket, form: to_form(changeset))}
-        end
+        {:noreply,
+         socket
+         |> put_flash(:info, "Quest updated")
+         |> assign(quests: Admin.list_quests())
+         |> push_patch(to: "/admin/quests")}
 
-      {:error, _} ->
-        {:noreply, put_flash(socket, :error, "Invalid reward pool JSON")}
+      {:error, changeset} ->
+        {:noreply, assign(socket, form: to_form(changeset))}
     end
+  end
+
+  def handle_event("add_reward", _params, socket) do
+    rewards = socket.assigns.rewards ++ [%{seed: "", weight: "1", min_count: "1", max_count: "1"}]
+    {:noreply, assign(socket, rewards: rewards)}
+  end
+
+  def handle_event("remove_reward", %{"index" => index}, socket) do
+    idx = String.to_integer(index)
+    rewards = List.delete_at(socket.assigns.rewards, idx)
+    {:noreply, assign(socket, rewards: rewards)}
+  end
+
+  def handle_event("update_reward", %{"index" => index, "field" => field, "value" => value}, socket) do
+    idx = String.to_integer(index)
+    field_atom = String.to_existing_atom(field)
+    rewards = List.update_at(socket.assigns.rewards, idx, &Map.put(&1, field_atom, value))
+    {:noreply, assign(socket, rewards: rewards)}
   end
 
   def handle_event("delete", %{"id" => id}, socket) do
@@ -103,6 +125,44 @@ defmodule CampFireWeb.QuestsLive do
         {:noreply, put_flash(socket, :error, "Failed to delete quest")}
     end
   end
+
+  defp parse_number(val) when is_binary(val) do
+    case Float.parse(val) do
+      {f, _} -> f
+      :error -> 0
+    end
+  end
+
+  defp parse_number(val) when is_number(val), do: val
+  defp parse_number(_), do: 0
+
+  defp parse_int(val) when is_binary(val) do
+    case Integer.parse(val) do
+      {i, _} -> i
+      :error -> 0
+    end
+  end
+
+  defp parse_int(val) when is_integer(val), do: val
+  defp parse_int(_), do: 0
+
+  defp reward_pool_to_editable(reward_pool) do
+    Enum.map(reward_pool || [], fn r ->
+      %{
+        seed: to_string(r["seed"] || ""),
+        weight: to_string(r["weight"] || 1),
+        min_count: to_string(r["minCount"] || 1),
+        max_count: to_string(r["maxCount"] || 1)
+      }
+    end)
+  end
+
+  defp total_weight(rewards) do
+    Enum.reduce(rewards, 0.0, fn r, acc -> acc + parse_number(r.weight) end)
+  end
+
+  defp probability_pct(weight, total) when total > 0, do: Float.round(parse_number(weight) / total * 100, 1)
+  defp probability_pct(_, _), do: 0.0
 
   def render(assigns) do
     ~H"""
@@ -156,21 +216,115 @@ defmodule CampFireWeb.QuestsLive do
                 />
               </div>
             </div>
+
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Reward Pool (JSON)</label>
-              <div id="reward-pool-editor" phx-hook="JsonEditor" class="json-editor-wrap" phx-update="ignore">
-                <div class="json-toolbar">
-                  <button type="button" data-action="format">Format</button>
-                  <button type="button" data-action="minify">Minify</button>
-                </div>
-                <textarea
-                  name="quest_config[reward_pool_json]"
-                  rows="10"
-                  class="mt-1 block w-full border rounded px-3 py-2"
-                >{@reward_pool_json}</textarea>
-                <div class="json-error-msg"></div>
+              <div class="flex justify-between items-center mb-2">
+                <label class="block text-sm font-medium text-gray-700">Reward Pool</label>
+                <button
+                  type="button"
+                  phx-click="add_reward"
+                  class="text-sm bg-green-100 text-green-700 px-3 py-1 rounded hover:bg-green-200"
+                >
+                  + Add Reward
+                </button>
               </div>
+
+              <%= if @rewards == [] do %>
+                <p class="text-sm text-gray-400 italic py-4 text-center">No rewards yet. Click "+ Add Reward" to add one.</p>
+              <% else %>
+                <div class="border rounded-lg overflow-hidden">
+                  <table class="w-full text-sm">
+                    <thead class="bg-gray-50">
+                      <tr>
+                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Seed Name</th>
+                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 w-24">Weight</th>
+                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 w-20">Min</th>
+                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 w-20">Max</th>
+                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 w-28">Probability</th>
+                        <th class="px-3 py-2 w-10"></th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y">
+                      <% total = total_weight(@rewards) %>
+                      <%= for {reward, idx} <- Enum.with_index(@rewards) do %>
+                        <% pct = probability_pct(reward.weight, total) %>
+                        <tr class="hover:bg-gray-50">
+                          <td class="px-3 py-2">
+                            <input
+                              id={"reward-#{idx}-seed"}
+                              type="text"
+                              value={reward.seed}
+                              phx-hook="RewardInput"
+                              data-index={idx}
+                              data-field="seed"
+                              class="w-full border rounded px-2 py-1 text-sm"
+                              placeholder="e.g. Chamomile"
+                            />
+                          </td>
+                          <td class="px-3 py-2">
+                            <input
+                              id={"reward-#{idx}-weight"}
+                              type="number"
+                              value={reward.weight}
+                              phx-hook="RewardInput"
+                              data-index={idx}
+                              data-field="weight"
+                              step="0.1"
+                              min="0"
+                              class="w-full border rounded px-2 py-1 text-sm"
+                            />
+                          </td>
+                          <td class="px-3 py-2">
+                            <input
+                              id={"reward-#{idx}-min_count"}
+                              type="number"
+                              value={reward.min_count}
+                              phx-hook="RewardInput"
+                              data-index={idx}
+                              data-field="min_count"
+                              min="0"
+                              class="w-full border rounded px-2 py-1 text-sm"
+                            />
+                          </td>
+                          <td class="px-3 py-2">
+                            <input
+                              id={"reward-#{idx}-max_count"}
+                              type="number"
+                              value={reward.max_count}
+                              phx-hook="RewardInput"
+                              data-index={idx}
+                              data-field="max_count"
+                              min="0"
+                              class="w-full border rounded px-2 py-1 text-sm"
+                            />
+                          </td>
+                          <td class="px-3 py-2">
+                            <div class="flex items-center gap-2">
+                              <div class="flex-1 bg-gray-200 rounded-full h-2">
+                                <div class="bg-blue-500 rounded-full h-2" style={"width: #{pct}%"}></div>
+                              </div>
+                              <span class="text-xs text-gray-500 w-12 text-right">{pct}%</span>
+                            </div>
+                          </td>
+                          <td class="px-3 py-2">
+                            <button
+                              type="button"
+                              phx-click="remove_reward"
+                              phx-value-index={idx}
+                              class="text-red-400 hover:text-red-600 text-lg leading-none"
+                              title="Remove"
+                            >
+                              &times;
+                            </button>
+                          </td>
+                        </tr>
+                      <% end %>
+                    </tbody>
+                  </table>
+                </div>
+              <% end %>
             </div>
+
             <div class="flex gap-2">
               <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Save</button>
               <button type="button" phx-click="cancel" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Cancel</button>
@@ -192,21 +346,41 @@ defmodule CampFireWeb.QuestsLive do
         <thead class="bg-gray-50">
           <tr>
             <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Quest Name</th>
-            <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Duration (min)</th>
+            <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Duration</th>
             <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Flame Lvl</th>
-            <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Reward Rolls</th>
-            <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Rewards</th>
+            <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Rolls</th>
+            <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Reward Pool</th>
             <th class="px-4 py-3 text-left text-sm font-medium text-gray-500"></th>
           </tr>
         </thead>
         <tbody class="divide-y">
           <%= for quest <- @quests do %>
-            <tr class="hover:bg-gray-50">
+            <% pool = quest.reward_pool || [] %>
+            <% tw = Enum.reduce(pool, 0.0, fn r, acc -> acc + (r["weight"] || 0) end) %>
+            <tr class="hover:bg-gray-50 align-top">
               <td class="px-4 py-3 font-medium">{quest.quest_name}</td>
-              <td class="px-4 py-3">{quest.duration_minutes}</td>
+              <td class="px-4 py-3">{format_duration(quest.duration_minutes)}</td>
               <td class="px-4 py-3">{quest.required_flame_level}</td>
               <td class="px-4 py-3">{quest.reward_rolls}</td>
-              <td class="px-4 py-3 text-sm text-gray-500">{length(quest.reward_pool || [])} items</td>
+              <td class="px-4 py-3">
+                <%= if pool == [] do %>
+                  <span class="text-gray-400 text-sm italic">none</span>
+                <% else %>
+                  <div class="space-y-1">
+                    <%= for r <- pool do %>
+                      <% pct = if tw > 0, do: Float.round((r["weight"] || 0) / tw * 100, 1), else: 0.0 %>
+                      <div class="flex items-center gap-2 text-sm">
+                        <span class="font-medium w-24 truncate" title={r["seed"]}>{r["seed"]}</span>
+                        <div class="flex-1 bg-gray-200 rounded-full h-1.5 max-w-[80px]">
+                          <div class="bg-blue-500 rounded-full h-1.5" style={"width: #{pct}%"}></div>
+                        </div>
+                        <span class="text-gray-500 text-xs w-10 text-right">{pct}%</span>
+                        <span class="text-gray-400 text-xs">({r["minCount"]}-{r["maxCount"]})</span>
+                      </div>
+                    <% end %>
+                  </div>
+                <% end %>
+              </td>
               <td class="px-4 py-3">
                 <button phx-click="edit" phx-value-id={quest.id} class="text-blue-600 hover:underline">Edit</button>
               </td>
@@ -217,4 +391,8 @@ defmodule CampFireWeb.QuestsLive do
     </div>
     """
   end
+
+  defp format_duration(minutes) when minutes < 60, do: "#{minutes}m"
+  defp format_duration(minutes) when rem(minutes, 60) == 0, do: "#{div(minutes, 60)}h"
+  defp format_duration(minutes), do: "#{div(minutes, 60)}h #{rem(minutes, 60)}m"
 end

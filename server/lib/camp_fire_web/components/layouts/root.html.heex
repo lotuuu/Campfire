@@ -100,11 +100,30 @@
         }
       };
 
+      const RewardInput = {
+        mounted() {
+          this.el.addEventListener("blur", () => {
+            this.pushEvent("update_reward", {
+              index: this.el.dataset.index,
+              field: this.el.dataset.field,
+              value: this.el.value
+            });
+          });
+          // Also push on Enter for convenience
+          this.el.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              this.el.blur();
+            }
+          });
+        }
+      };
+
       window.addEventListener("DOMContentLoaded", () => {
         let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content");
         let liveSocket = new window.LiveView.LiveSocket("/live", window.Phoenix.Socket, {
           params: { _csrf_token: csrfToken },
-          hooks: { JsonEditor },
+          hooks: { JsonEditor, RewardInput },
           longPollFallbackMs: 2500
         });
         liveSocket.connect();
