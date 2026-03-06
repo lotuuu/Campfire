@@ -2,7 +2,7 @@ defmodule CampFireWeb.GameController do
   use CampFireWeb, :controller
 
   alias CampFire.Economy
-  alias CampFire.Game.{Plots, Vases, Gardens, Mallums, MallumHouses, Birds, Weather, PlayerState}
+  alias CampFire.Game.{Plots, Vases, Gardens, Mallums, MallumHouses, Birds, Weather, PlayerState, Apotheke}
   alias CampFire.Repo
 
   alias CampFire.ConfigCache
@@ -65,7 +65,8 @@ defmodule CampFireWeb.GameController do
       flameConfig: serialize_game_config(flame_config),
       vaseConfig: serialize_game_config(vase_config),
       mallumHouseConfig: serialize_game_config(mallum_house_config),
-      buildingCostConfig: serialize_game_config(building_cost_config)
+      buildingCostConfig: serialize_game_config(building_cost_config),
+      recipes: ConfigCache.get("recipe_configs") || %{}
     })
   end
 
@@ -469,6 +470,24 @@ defmodule CampFireWeb.GameController do
 
   def craft_mallum_house(conn, _params) do
     conn |> put_status(400) |> json(%{error: "Missing 'gridX' and 'gridY'"})
+  end
+
+  # ── Apotheke ────────────────────────────────────────────────
+
+  def craft_apotheke(conn, %{"recipeName" => recipe_name}) do
+    uid = conn.assigns.current_player.uid
+
+    case Apotheke.craft(uid, recipe_name) do
+      {:ok, result} ->
+        conn |> put_status(200) |> json(%{resultItem: result.result_item, resultQuantity: result.result_quantity})
+
+      {:error, reason} ->
+        conn |> put_status(422) |> json(%{error: format_error(reason)})
+    end
+  end
+
+  def craft_apotheke(conn, _params) do
+    conn |> put_status(400) |> json(%{error: "Missing 'recipeName'"})
   end
 
   # ── Birds ───────────────────────────────────────────────────

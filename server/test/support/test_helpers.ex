@@ -111,6 +111,28 @@ defmodule CampFire.TestHelpers do
     :ets.insert(:config_cache, {"mallum_house_config", config})
   end
 
+  def seed_recipe_configs do
+    recipes = %{
+      "Fertilizer" => %{
+        "ingredients" => [%{"item_name" => "Basil_harvest", "count" => 2}],
+        "result_item" => "Fertilizer",
+        "result_quantity" => 1,
+        "category" => "consumable"
+      },
+      "Speed_Potion" => %{
+        "ingredients" => [
+          %{"item_name" => "Mint_harvest", "count" => 2},
+          %{"item_name" => "Chamomile_harvest", "count" => 1}
+        ],
+        "result_item" => "Speed_Potion",
+        "result_quantity" => 1,
+        "category" => "consumable"
+      }
+    }
+
+    :ets.insert(:config_cache, {"recipe_configs", recipes})
+  end
+
   def auth_header(player) do
     [{"authorization", "Bearer #{player.auth_token}"}]
   end
