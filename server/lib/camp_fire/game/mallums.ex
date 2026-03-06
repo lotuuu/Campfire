@@ -31,10 +31,10 @@ defmodule CampFire.Game.Mallums do
       (cached[:reward_pool] || cached["reward_pool"] || [])
       |> Enum.map(fn entry ->
         %{
-          seed: entry["seed_name"] || entry["seed"] || entry[:seed_name] || entry[:seed],
+          seed: entry["seed"] || entry["seed_name"] || entry[:seed] || entry[:seed_name],
           weight: entry["weight"] || entry[:weight],
-          min: entry["min"] || entry[:min],
-          max: entry["max"] || entry[:max]
+          min: entry["minCount"] || entry["min"] || entry[:minCount] || entry[:min],
+          max: entry["maxCount"] || entry["max"] || entry[:maxCount] || entry[:max]
         }
       end)
 

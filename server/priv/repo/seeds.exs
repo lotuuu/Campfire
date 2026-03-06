@@ -219,27 +219,27 @@ alias CampFire.Admin.{QuestConfig, GardenConfig, GameConfig}
 # Quest configs (from Game.Mallums @quest_configs)
 quests = [
   %{quest_name: "SwampForage", duration_minutes: 5, required_flame_level: 1, reward_rolls: 2,
-    reward_pool: [%{"seed_name" => "Basil", "weight" => 3, "min" => 1, "max" => 2}, %{"seed_name" => "Chamomile", "weight" => 2, "min" => 1, "max" => 2}]},
+    reward_pool: [%{"seed" => "Basil", "weight" => 3, "minCount" => 1, "maxCount" => 2}, %{"seed" => "Chamomile", "weight" => 2, "minCount" => 1, "maxCount" => 2}]},
   %{quest_name: "MeadowExpedition", duration_minutes: 15, required_flame_level: 2, reward_rolls: 3,
-    reward_pool: [%{"seed_name" => "Marigold", "weight" => 3, "min" => 1, "max" => 2}, %{"seed_name" => "Snowdrop", "weight" => 2, "min" => 1, "max" => 2}]},
+    reward_pool: [%{"seed" => "Marigold", "weight" => 3, "minCount" => 1, "maxCount" => 2}, %{"seed" => "Snowdrop", "weight" => 2, "minCount" => 1, "maxCount" => 2}]},
   %{quest_name: "DeepWoodsTrek", duration_minutes: 60, required_flame_level: 3, reward_rolls: 3,
-    reward_pool: [%{"seed_name" => "Mint", "weight" => 3, "min" => 1, "max" => 2}, %{"seed_name" => "Pansy", "weight" => 2, "min" => 1, "max" => 1}]},
+    reward_pool: [%{"seed" => "Mint", "weight" => 3, "minCount" => 1, "maxCount" => 2}, %{"seed" => "Pansy", "weight" => 2, "minCount" => 1, "maxCount" => 1}]},
   %{quest_name: "HighlandPass", duration_minutes: 120, required_flame_level: 4, reward_rolls: 3,
-    reward_pool: [%{"seed_name" => "Lavender", "weight" => 3, "min" => 1, "max" => 2}, %{"seed_name" => "Marigold", "weight" => 1, "min" => 1, "max" => 1}]},
+    reward_pool: [%{"seed" => "Lavender", "weight" => 3, "minCount" => 1, "maxCount" => 2}, %{"seed" => "Marigold", "weight" => 1, "minCount" => 1, "maxCount" => 1}]},
   %{quest_name: "DeepMarsh", duration_minutes: 240, required_flame_level: 5, reward_rolls: 4,
-    reward_pool: [%{"seed_name" => "Poppy", "weight" => 3, "min" => 1, "max" => 2}, %{"seed_name" => "Mint", "weight" => 1, "min" => 1, "max" => 1}]},
+    reward_pool: [%{"seed" => "Poppy", "weight" => 3, "minCount" => 1, "maxCount" => 2}, %{"seed" => "Mint", "weight" => 1, "minCount" => 1, "maxCount" => 1}]},
   %{quest_name: "MountainAscent", duration_minutes: 360, required_flame_level: 6, reward_rolls: 4,
-    reward_pool: [%{"seed_name" => "Jasmine", "weight" => 3, "min" => 1, "max" => 2}, %{"seed_name" => "Lavender", "weight" => 1, "min" => 1, "max" => 1}]},
+    reward_pool: [%{"seed" => "Jasmine", "weight" => 3, "minCount" => 1, "maxCount" => 2}, %{"seed" => "Lavender", "weight" => 1, "minCount" => 1, "maxCount" => 1}]},
   %{quest_name: "MoonlitPath", duration_minutes: 480, required_flame_level: 7, reward_rolls: 4,
-    reward_pool: [%{"seed_name" => "Rosemary", "weight" => 3, "min" => 1, "max" => 2}, %{"seed_name" => "Pansy", "weight" => 1, "min" => 1, "max" => 1}]},
+    reward_pool: [%{"seed" => "Rosemary", "weight" => 3, "minCount" => 1, "maxCount" => 2}, %{"seed" => "Pansy", "weight" => 1, "minCount" => 1, "maxCount" => 1}]},
   %{quest_name: "AncientGrove", duration_minutes: 720, required_flame_level: 8, reward_rolls: 5,
-    reward_pool: [%{"seed_name" => "Dahlia", "weight" => 3, "min" => 1, "max" => 2}, %{"seed_name" => "Moonflower", "weight" => 1, "min" => 1, "max" => 1}, %{"seed_name" => "Rosemary", "weight" => 1, "min" => 1, "max" => 1}]}
+    reward_pool: [%{"seed" => "Dahlia", "weight" => 3, "minCount" => 1, "maxCount" => 2}, %{"seed" => "Moonflower", "weight" => 1, "minCount" => 1, "maxCount" => 1}, %{"seed" => "Rosemary", "weight" => 1, "minCount" => 1, "maxCount" => 1}]}
 ]
 
 for q <- quests do
   %QuestConfig{}
   |> QuestConfig.changeset(q)
-  |> Repo.insert!(on_conflict: :nothing, conflict_target: :quest_name)
+  |> Repo.insert!(on_conflict: {:replace, [:duration_minutes, :required_flame_level, :reward_rolls, :reward_pool, :updated_at]}, conflict_target: :quest_name)
 end
 
 # Garden configs

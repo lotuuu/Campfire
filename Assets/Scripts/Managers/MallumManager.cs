@@ -77,12 +77,15 @@ namespace Garden
                     quest.rewardPool.Clear();
                     foreach (var sr in serverPool)
                     {
-                        string seedName = sr.TryGetValue("seed_name", out var sn) && sn is string s ? s : null;
+                        string seedName = sr.TryGetValue("seed", out var sn) && sn is string s ? s
+                            : sr.TryGetValue("seed_name", out var sn2) && sn2 is string s2 ? s2 : null;
                         if (seedName == null) continue;
 
                         float weight = sr.TryGetValue("weight", out var w) ? ToFloat(w) : 1f;
-                        int min = sr.TryGetValue("min", out var mn) ? (int)ToFloat(mn) : 1;
-                        int max = sr.TryGetValue("max", out var mx) ? (int)ToFloat(mx) : 1;
+                        int min = sr.TryGetValue("minCount", out var mn) ? (int)ToFloat(mn)
+                            : sr.TryGetValue("min", out var mn2) ? (int)ToFloat(mn2) : 1;
+                        int max = sr.TryGetValue("maxCount", out var mx) ? (int)ToFloat(mx)
+                            : sr.TryGetValue("max", out var mx2) ? (int)ToFloat(mx2) : 1;
 
                         seedLookup.TryGetValue(seedName, out var seedRef);
 
