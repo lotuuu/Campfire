@@ -4,52 +4,22 @@ defmodule CampFire.Game.Gardens do
   alias CampFire.Game.PlayerGarden
   alias CampFire.Economy
 
-  @plant_configs %{
-    "BerryBush" => %{
-      growth_hours: 24,
-      yield_item: "Berry",
-      yield_amount: 2,
-      yield_interval_hours: 12,
-      mana_cost: 30
-    },
-    "Oak" => %{
-      growth_hours: 48,
-      yield_item: "Acorn",
-      yield_amount: 1,
-      yield_interval_hours: 24,
-      mana_cost: 50
-    }
-  }
-
   # --- Config Helpers ---
 
   defp get_plant_config(plant_name) do
-    case CampFire.ConfigCache.get("garden_configs") do
-      nil ->
-        Map.get(@plant_configs, plant_name)
+    garden_map = CampFire.ConfigCache.get("garden_configs")
 
-      garden_map ->
-        case Map.get(garden_map, plant_name) do
-          nil -> Map.get(@plant_configs, plant_name)
-          cached -> normalize_plant_config(cached)
-        end
+    case Map.get(garden_map, plant_name) do
+      nil -> nil
+      cached -> normalize_plant_config(cached)
     end
   end
 
   defp get_all_plant_configs do
-    case CampFire.ConfigCache.get("garden_configs") do
-      nil ->
-        @plant_configs
-
-      garden_map when map_size(garden_map) == 0 ->
-        @plant_configs
-
-      garden_map ->
-        Map.merge(@plant_configs, Map.new(garden_map, fn {k, v} -> {k, normalize_plant_config(v)} end))
-    end
+    garden_map = CampFire.ConfigCache.get("garden_configs")
+    Map.new(garden_map, fn {k, v} -> {k, normalize_plant_config(v)} end)
   end
 
-  # Translate cached GardenConfig fields to the format used by @plant_configs
   defp normalize_plant_config(cached) do
     %{
       growth_hours: cached[:growth_duration_hours] || cached["growth_duration_hours"],

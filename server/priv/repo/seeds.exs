@@ -270,6 +270,30 @@ game_configs = [
     "capacity_tiers" => [5, 8, 12, 20],
     "upgrade_costs" => [75, 200, 500]
   }},
+  %{key: "building_cost_config", value: %{
+    "plot_costs" => [
+      %{"mana_cost" => 150, "harvest_costs" => [%{"item_name" => "Sprouts_harvest", "count" => 1}]},
+      %{"mana_cost" => 200, "harvest_costs" => [%{"item_name" => "Basil_harvest", "count" => 1}]},
+      %{"mana_cost" => 260, "harvest_costs" => [%{"item_name" => "Basil_harvest", "count" => 2}]},
+      %{"mana_cost" => 330, "harvest_costs" => [%{"item_name" => "Chamomile_harvest", "count" => 1}]},
+      %{"mana_cost" => 420, "harvest_costs" => [%{"item_name" => "Chamomile_harvest", "count" => 1}]},
+      %{"mana_cost" => 520, "harvest_costs" => [%{"item_name" => "Chamomile_harvest", "count" => 1}, %{"item_name" => "Basil_harvest", "count" => 1}]},
+      %{"mana_cost" => 640, "harvest_costs" => [%{"item_name" => "Chamomile_harvest", "count" => 2}]},
+      %{"mana_cost" => 780, "harvest_costs" => [%{"item_name" => "Lavender_harvest", "count" => 1}, %{"item_name" => "Chamomile_harvest", "count" => 1}]},
+      %{"mana_cost" => 940, "harvest_costs" => [%{"item_name" => "Mint_harvest", "count" => 1}, %{"item_name" => "Lavender_harvest", "count" => 1}]},
+      %{"mana_cost" => 1120, "harvest_costs" => [%{"item_name" => "Mint_harvest", "count" => 2}, %{"item_name" => "Chamomile_harvest", "count" => 1}]}
+    ],
+    "vase_costs" => [
+      %{"mana_cost" => 100, "harvest_costs" => [%{"item_name" => "Cress_harvest", "count" => 1}]},
+      %{"mana_cost" => 120, "harvest_costs" => [%{"item_name" => "Basil_harvest", "count" => 2}]},
+      %{"mana_cost" => 150, "harvest_costs" => [%{"item_name" => "Chamomile_harvest", "count" => 1}]},
+      %{"mana_cost" => 180, "harvest_costs" => [%{"item_name" => "Chamomile_harvest", "count" => 1}]},
+      %{"mana_cost" => 220, "harvest_costs" => [%{"item_name" => "Chamomile_harvest", "count" => 1}, %{"item_name" => "Basil_harvest", "count" => 1}]},
+      %{"mana_cost" => 260, "harvest_costs" => [%{"item_name" => "Chamomile_harvest", "count" => 2}]},
+      %{"mana_cost" => 310, "harvest_costs" => [%{"item_name" => "Lavender_harvest", "count" => 1}, %{"item_name" => "Basil_harvest", "count" => 1}]},
+      %{"mana_cost" => 370, "harvest_costs" => [%{"item_name" => "Lavender_harvest", "count" => 1}, %{"item_name" => "Chamomile_harvest", "count" => 1}]}
+    ]
+  }},
   %{key: "mallum_house_config", value: %{
     "mallums_per_house" => 1,
     "house_costs" => [

@@ -4,7 +4,6 @@ defmodule CampFire.Game.Plots do
   alias CampFire.Game.{PlayerPlot, SeedConfig, GrowthRecipe}
   alias CampFire.Economy
 
-  @plot_mana_cost 10
   @water_cooldown_seconds 7200
 
   @empty_snapshots %{
@@ -25,12 +24,36 @@ defmodule CampFire.Game.Plots do
 
   # --- Craft ---
 
+  def count_plots(player_uid) do
+    from(p in PlayerPlot, where: p.player_uid == ^player_uid, select: count(p.id))
+    |> Repo.one()
+  end
+
+  defp get_plot_cost(plot_count) do
+    config = CampFire.ConfigCache.get("building_cost_config")
+    costs = config["plot_costs"]
+    idx = min(plot_count, length(costs) - 1)
+    Enum.at(costs, idx)
+  end
+
   def craft_plot(player_uid, grid_x, grid_y) do
+    plot_count = count_plots(player_uid)
+    cost = get_plot_cost(plot_count)
+
     Repo.transaction(fn ->
-      case Economy.spend_mana(player_uid, @plot_mana_cost) do
+      case Economy.spend_mana(player_uid, cost["mana_cost"]) do
         {:ok, _economy} -> :ok
         {:error, reason} -> Repo.rollback(reason)
       end
+
+      harvest_costs = cost["harvest_costs"] || []
+
+      Enum.each(harvest_costs, fn %{"item_name" => name, "count" => count} ->
+        case Economy.spend_item(player_uid, name, count) do
+          {:ok, _} -> :ok
+          {:error, reason} -> Repo.rollback(reason)
+        end
+      end)
 
       %PlayerPlot{}
       |> PlayerPlot.changeset(%{

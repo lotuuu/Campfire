@@ -5,6 +5,7 @@ defmodule CampFire.Game.GardensTest do
   alias CampFire.Economy
 
   defp setup_player(_context \\ %{}) do
+    seed_garden_configs()
     player = register_player()
     {:ok, _economy} = Economy.init_economy(player.uid)
     player
@@ -67,13 +68,13 @@ defmodule CampFire.Game.GardensTest do
 
       assert result.status == :collected
       assert result.item == "Berry"
-      assert result.amount == 2
+      assert result.amount == 3
 
       # Check item was added to inventory
       items = Economy.list_items(player.uid)
       berry = Enum.find(items, &(&1.item_name == "Berry"))
       assert berry != nil
-      assert berry.count == 2
+      assert berry.count == 3
     end
 
     test "mature garden within yield interval returns not_ready" do

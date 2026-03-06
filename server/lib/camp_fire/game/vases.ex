@@ -4,7 +4,6 @@ defmodule CampFire.Game.Vases do
   alias CampFire.Game.{PlayerVase, PlayerMallum}
   alias CampFire.Economy
 
-  @vase_mana_cost 15
   @default_capacity 5
   @fill_seconds_per_unit 60
 
@@ -16,12 +15,36 @@ defmodule CampFire.Game.Vases do
 
   # --- Craft ---
 
+  def count_vases(player_uid) do
+    from(v in PlayerVase, where: v.player_uid == ^player_uid, select: count(v.id))
+    |> Repo.one()
+  end
+
+  defp get_vase_cost(vase_count) do
+    config = CampFire.ConfigCache.get("building_cost_config")
+    costs = config["vase_costs"]
+    idx = min(vase_count, length(costs) - 1)
+    Enum.at(costs, idx)
+  end
+
   def craft_vase(player_uid, grid_x, grid_y) do
+    vase_count = count_vases(player_uid)
+    cost = get_vase_cost(vase_count)
+
     Repo.transaction(fn ->
-      case Economy.spend_mana(player_uid, @vase_mana_cost) do
+      case Economy.spend_mana(player_uid, cost["mana_cost"]) do
         {:ok, _economy} -> :ok
         {:error, reason} -> Repo.rollback(reason)
       end
+
+      harvest_costs = cost["harvest_costs"] || []
+
+      Enum.each(harvest_costs, fn %{"item_name" => name, "count" => count} ->
+        case Economy.spend_item(player_uid, name, count) do
+          {:ok, _} -> :ok
+          {:error, reason} -> Repo.rollback(reason)
+        end
+      end)
 
       %PlayerVase{}
       |> PlayerVase.changeset(%{

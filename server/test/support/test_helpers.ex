@@ -21,6 +21,45 @@ defmodule CampFire.TestHelpers do
     :ets.insert(:config_cache, {"quest_configs", quest_map})
   end
 
+  def seed_building_costs do
+    config = %{
+      "plot_costs" => [
+        %{"mana_cost" => 150, "harvest_costs" => [%{"item_name" => "Sprouts_harvest", "count" => 1}]},
+        %{"mana_cost" => 200, "harvest_costs" => [%{"item_name" => "Basil_harvest", "count" => 1}]},
+        %{"mana_cost" => 260, "harvest_costs" => [%{"item_name" => "Basil_harvest", "count" => 2}]},
+        %{"mana_cost" => 330, "harvest_costs" => [%{"item_name" => "Chamomile_harvest", "count" => 1}]}
+      ],
+      "vase_costs" => [
+        %{"mana_cost" => 100, "harvest_costs" => [%{"item_name" => "Cress_harvest", "count" => 1}]},
+        %{"mana_cost" => 120, "harvest_costs" => [%{"item_name" => "Basil_harvest", "count" => 2}]},
+        %{"mana_cost" => 150, "harvest_costs" => [%{"item_name" => "Chamomile_harvest", "count" => 1}]}
+      ]
+    }
+
+    :ets.insert(:config_cache, {"building_cost_config", config})
+  end
+
+  def seed_garden_configs do
+    configs = %{
+      "BerryBush" => %{
+        "growth_duration_hours" => 24.0,
+        "yield_item" => "Berry",
+        "yield_amount" => 3,
+        "yield_interval_hours" => 12.0,
+        "mana_cost" => 30.0
+      },
+      "Oak" => %{
+        "growth_duration_hours" => 48.0,
+        "yield_item" => "Acorn",
+        "yield_amount" => 2,
+        "yield_interval_hours" => 24.0,
+        "mana_cost" => 50.0
+      }
+    }
+
+    :ets.insert(:config_cache, {"garden_configs", configs})
+  end
+
   def auth_header(player) do
     [{"authorization", "Bearer #{player.auth_token}"}]
   end

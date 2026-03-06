@@ -27,6 +27,16 @@ defmodule CampFireWeb.GameControllerTest do
 
     ensure_seed_config()
     seed_quest_configs()
+    seed_building_costs()
+    seed_garden_configs()
+
+    # Boost mana and provide harvest items for crafting
+    economy = Economy.get_economy(player.uid)
+    economy |> Ecto.Changeset.change(mana: 2000.0) |> Repo.update!()
+    Economy.upsert_item(player.uid, "Sprouts_harvest", 10)
+    Economy.upsert_item(player.uid, "Basil_harvest", 10)
+    Economy.upsert_item(player.uid, "Cress_harvest", 10)
+    Economy.upsert_item(player.uid, "Chamomile_harvest", 10)
 
     {:ok, _} = Economy.upsert_seed(player.uid, "Basil", 5)
     {:ok, _mallum} = Mallums.create_mallum(player.uid)

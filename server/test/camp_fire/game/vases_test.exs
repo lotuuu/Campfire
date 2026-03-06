@@ -4,16 +4,29 @@ defmodule CampFire.Game.VasesTest do
   alias CampFire.Game.{Vases, Mallums, PlayerVase, PlayerMallum}
   alias CampFire.Economy
 
+  # init_economy creates 1 starter vase + 1 starter plot + 1 mallum
+  # So the first craft_vase in tests is the 2nd vase (index 1):
+  #   vase_costs[1] = 120 mana + 2 Basil_harvest
+  # The 3rd vase (index 2) = 150 mana + 1 Chamomile_harvest
+
   defp setup_player(_context \\ %{}) do
+    seed_building_costs()
     player = register_player()
     {:ok, _economy} = Economy.init_economy(player.uid)
+    # Boost mana for crafting tests
+    economy = Economy.get_economy(player.uid)
+    economy |> Ecto.Changeset.change(mana: 1000.0) |> Repo.update!()
+    # Give harvest items for vase crafting
+    Economy.upsert_item(player.uid, "Cress_harvest", 10)
+    Economy.upsert_item(player.uid, "Basil_harvest", 10)
+    Economy.upsert_item(player.uid, "Chamomile_harvest", 10)
     # init_economy creates a starter mallum
     [mallum] = Mallums.list_mallums(player.uid)
     {player, mallum}
   end
 
   describe "craft_vase/3" do
-    test "creates empty vase and deducts mana" do
+    test "creates empty vase and deducts mana + harvest items" do
       {player, _mallum} = setup_player()
 
       {:ok, vase} = Vases.craft_vase(player.uid, 0, 0)
@@ -25,15 +38,50 @@ defmodule CampFire.Game.VasesTest do
       assert vase.grid_y == 0
 
       economy = Economy.get_economy(player.uid)
-      # Started with 50, vase costs 15
-      assert economy.mana == 35.0
+      # Started with 1000, 2nd vase (index 1) costs 120
+      assert economy.mana == 880.0
+
+      # 2nd vase costs 2 Basil_harvest
+      items = Economy.list_items(player.uid)
+      basil_h = Enum.find(items, &(&1.item_name == "Basil_harvest"))
+      assert basil_h.count == 8
+    end
+
+    test "escalates cost for subsequent vases" do
+      {player, _mallum} = setup_player()
+
+      {:ok, _} = Vases.craft_vase(player.uid, 0, 0)
+      {:ok, _} = Vases.craft_vase(player.uid, 1, 0)
+
+      economy = Economy.get_economy(player.uid)
+      # 1000 - 120 (index 1) - 150 (index 2) = 730
+      assert economy.mana == 730.0
+
+      # 3rd vase (index 2) costs 1 Chamomile_harvest
+      items = Economy.list_items(player.uid)
+      chamomile_h = Enum.find(items, &(&1.item_name == "Chamomile_harvest"))
+      assert chamomile_h.count == 9
     end
 
     test "fails with insufficient mana" do
-      {player, _mallum} = setup_player()
-      {:ok, _} = Economy.spend_mana(player.uid, 50.0)
+      seed_building_costs()
+      player = register_player()
+      {:ok, _economy} = Economy.init_economy(player.uid)
+      # Default 50 mana, 2nd vase (index 1) costs 120
+      Economy.upsert_item(player.uid, "Basil_harvest", 10)
 
       {:error, :insufficient_mana} = Vases.craft_vase(player.uid, 0, 0)
+    end
+
+    test "fails with insufficient harvest items" do
+      seed_building_costs()
+      player = register_player()
+      {:ok, _economy} = Economy.init_economy(player.uid)
+      economy = Economy.get_economy(player.uid)
+      economy |> Ecto.Changeset.change(mana: 1000.0) |> Repo.update!()
+      # No Basil_harvest given — 2nd vase (index 1) needs 2 Basil_harvest
+
+      {:error, :insufficient_items} = Vases.craft_vase(player.uid, 0, 0)
     end
   end
 

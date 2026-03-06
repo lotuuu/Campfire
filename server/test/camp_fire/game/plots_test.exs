@@ -14,9 +14,19 @@ defmodule CampFire.Game.PlotsTest do
     }
   }
 
+  # init_economy creates 1 starter plot + 1 starter vase + 1 mallum
+  # So the first craft_plot in tests is actually the 2nd plot (index 1):
+  #   plot_costs[1] = 200 mana + 1 Basil_harvest
+  # The 3rd plot (index 2) = 260 mana + 2 Basil_harvest
+
   defp setup_player(_context \\ %{}) do
+    seed_building_costs()
     player = register_player()
     {:ok, _economy} = Economy.init_economy(player.uid)
+
+    # Boost mana for crafting tests
+    economy = Economy.get_economy(player.uid)
+    economy |> Ecto.Changeset.change(mana: 1000.0) |> Repo.update!()
 
     # Insert a fast-growing seed config for testing
     %SeedConfig{}
@@ -31,11 +41,16 @@ defmodule CampFire.Game.PlotsTest do
     # Give player some Basil seeds
     {:ok, _} = Economy.upsert_seed(player.uid, "Basil", 5)
 
+    # Give harvest items needed for plot/vase crafting
+    Economy.upsert_item(player.uid, "Sprouts_harvest", 10)
+    Economy.upsert_item(player.uid, "Basil_harvest", 10)
+    Economy.upsert_item(player.uid, "Cress_harvest", 10)
+
     player
   end
 
   describe "craft_plot/3" do
-    test "creates empty plot and deducts mana" do
+    test "creates empty plot and deducts mana + harvest items" do
       player = setup_player()
 
       {:ok, plot} = Plots.craft_plot(player.uid, 0, 0)
@@ -46,16 +61,50 @@ defmodule CampFire.Game.PlotsTest do
       assert plot.player_uid == player.uid
 
       economy = Economy.get_economy(player.uid)
-      # Started with 50, plot costs 10
-      assert economy.mana == 40.0
+      # Started with 1000, 2nd plot (index 1) costs 200 mana
+      assert economy.mana == 800.0
+
+      # 2nd plot costs 1 Basil_harvest
+      items = Economy.list_items(player.uid)
+      basil_h = Enum.find(items, &(&1.item_name == "Basil_harvest"))
+      assert basil_h.count == 9
+    end
+
+    test "escalates cost for subsequent plots" do
+      player = setup_player()
+
+      {:ok, _} = Plots.craft_plot(player.uid, 0, 0)
+      {:ok, _} = Plots.craft_plot(player.uid, 1, 0)
+
+      economy = Economy.get_economy(player.uid)
+      # 1000 - 200 (index 1) - 260 (index 2) = 540
+      assert economy.mana == 540.0
+
+      # 3rd plot (index 2) costs 2 Basil_harvest, plus the 1 from 2nd plot = 3 total
+      items = Economy.list_items(player.uid)
+      basil_h = Enum.find(items, &(&1.item_name == "Basil_harvest"))
+      assert basil_h.count == 7
     end
 
     test "fails with insufficient mana" do
-      player = setup_player()
-      # Drain mana first
-      {:ok, _} = Economy.spend_mana(player.uid, 50.0)
+      seed_building_costs()
+      player = register_player()
+      {:ok, _economy} = Economy.init_economy(player.uid)
+      # Default 50 mana, 2nd plot (index 1) costs 200
+      Economy.upsert_item(player.uid, "Basil_harvest", 10)
 
       {:error, :insufficient_mana} = Plots.craft_plot(player.uid, 0, 0)
+    end
+
+    test "fails with insufficient harvest items" do
+      seed_building_costs()
+      player = register_player()
+      {:ok, _economy} = Economy.init_economy(player.uid)
+      economy = Economy.get_economy(player.uid)
+      economy |> Ecto.Changeset.change(mana: 1000.0) |> Repo.update!()
+      # No Basil_harvest given — 2nd plot (index 1) needs 1 Basil_harvest
+
+      {:error, :insufficient_items} = Plots.craft_plot(player.uid, 0, 0)
     end
   end
 
