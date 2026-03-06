@@ -9,6 +9,7 @@ defmodule CampFireWeb.HomeLive do
     {:ok, assign(socket, player_count: player_count), layout: false}
   end
 
+  @impl true
   def render(assigns) do
     ~H"""
     <div class="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-amber-50 to-orange-100">

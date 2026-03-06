@@ -31,6 +31,8 @@ defmodule CampFireWeb.SpritesLive do
     {:noreply, assign(socket, replace_key: key, upload_category: nil)}
   end
 
+  def handle_event("noop", _params, socket), do: {:noreply, socket}
+
   def handle_event("cancel_upload", _params, socket) do
     {:noreply, assign(socket, upload_category: nil, replace_key: nil, new_key: "")}
   end
@@ -132,12 +134,12 @@ defmodule CampFireWeb.SpritesLive do
             <%= for sprite <- sprites do %>
               <div class="bg-white border rounded-lg p-3 text-center group relative">
                 <img
-                  src={Sprites.sprite_url(sprite.key)}
+                  src={"#{Sprites.sprite_url(sprite.key)}?v=#{sprite.hash}"}
                   class="w-16 h-16 mx-auto mb-2 object-contain bg-gray-100 rounded"
                   onerror="this.style.display='none'"
                 />
                 <div class="text-xs text-gray-600 truncate" title={sprite.key}>
-                  {sprite.key |> String.split("/") |> List.last()}
+                  {sprite.key |> String.split("/", parts: 2) |> List.last()}
                 </div>
                 <div class="text-xs text-gray-400">{format_size(sprite.size)}</div>
                 <div class="absolute top-1 right-1 hidden group-hover:flex gap-1">
@@ -158,7 +160,7 @@ defmodule CampFireWeb.SpritesLive do
 
                 <%= if @replace_key == sprite.key do %>
                   <div class="mt-2 border-t pt-2">
-                    <form phx-submit="save_upload" class="space-y-1">
+                    <form phx-submit="save_upload" phx-change="noop" class="space-y-1">
                       <.live_file_input upload={@uploads.sprite} class="text-xs w-full" />
                       <div class="flex gap-1 justify-center">
                         <button type="submit" class="text-xs bg-blue-600 text-white px-2 py-0.5 rounded">Replace</button>

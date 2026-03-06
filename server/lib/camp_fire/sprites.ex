@@ -80,7 +80,8 @@ defmodule CampFire.Sprites do
         String.ends_with?(entry, ".png") ->
           key = String.replace_suffix(rel, ".png", "")
           %File.Stat{size: size} = File.stat!(full)
-          [%{key: key, size: size, category: category(key)}]
+          hash = full |> File.read!() |> then(&:crypto.hash(:md5, &1)) |> Base.encode16(case: :lower) |> String.slice(0, 8)
+          [%{key: key, size: size, category: category(key), hash: hash}]
 
         true ->
           []
