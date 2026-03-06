@@ -263,6 +263,22 @@ defmodule CampFire.Game.Plots do
     end
   end
 
+  # --- Instant Finish ---
+
+  def instant_finish(player_uid, plot_id) do
+    with %PlayerPlot{} = plot <- Repo.get(PlayerPlot, plot_id),
+         true <- plot.player_uid == player_uid || {:error, :not_owned},
+         true <- plot.state == "growing" || {:error, :not_growing},
+         {:ok, _} <- CampFire.Economy.spend_item(player_uid, "Speed_Potion", 1) do
+      plot
+      |> PlayerPlot.changeset(%{state: "mature"})
+      |> Repo.update()
+    else
+      nil -> {:error, :not_found}
+      {:error, _} = err -> err
+    end
+  end
+
   # --- Testing ---
 
   def force_mature(plot_id) do

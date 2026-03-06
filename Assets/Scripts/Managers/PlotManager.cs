@@ -469,6 +469,11 @@ namespace Garden
             plot.state = PlotState.Mature;
             SaveManager.Instance.Save();
             OnPlotChanged?.Invoke(plotIndex);
+
+            // Notify server
+            if (GameService.Instance != null && GameService.Instance.IsOnline && plot.serverId > 0)
+                _ = GameService.Instance.InstantFinishPlot(plot.serverId);
+
             return true;
         }
 

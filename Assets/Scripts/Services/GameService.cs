@@ -448,6 +448,24 @@ namespace Garden
             return null;
         }
 
+        public async Task<ServerPlot> InstantFinishPlot(int plotId)
+        {
+            if (!IsOnline) return null;
+            try
+            {
+                var body = JsonUtility.ToJson(new InstantFinishPlotRequest { plotId = plotId });
+                using var req = PostJson("/game/plot/instant-finish", body);
+                await SendAsync(req);
+
+                if (req.responseCode >= 200 && req.responseCode < 300)
+                    return JsonUtility.FromJson<ServerPlot>(req.downloadHandler.text);
+
+                Debug.LogWarning($"GameService: InstantFinishPlot failed (HTTP {req.responseCode}): {req.downloadHandler.text}");
+            }
+            catch (Exception e) { Debug.LogWarning($"GameService: InstantFinishPlot failed: {e.Message}"); }
+            return null;
+        }
+
         public async Task<ServerVase> InstantFinishVase(int vaseId)
         {
             if (!IsOnline) return null;

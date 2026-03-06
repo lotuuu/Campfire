@@ -358,6 +358,22 @@ defmodule CampFireWeb.GameController do
     conn |> put_status(400) |> json(%{error: "Missing 'vaseId' and 'skinName'"})
   end
 
+  def instant_finish_plot(conn, %{"plotId" => plot_id}) do
+    uid = conn.assigns.current_player.uid
+
+    case Plots.instant_finish(uid, plot_id) do
+      {:ok, plot} ->
+        conn |> put_status(200) |> json(serialize_plot(plot))
+
+      {:error, reason} ->
+        conn |> put_status(422) |> json(%{error: format_error(reason)})
+    end
+  end
+
+  def instant_finish_plot(conn, _params) do
+    conn |> put_status(400) |> json(%{error: "Missing 'plotId'"})
+  end
+
   def instant_finish_vase(conn, %{"vaseId" => vase_id}) do
     uid = conn.assigns.current_player.uid
 
