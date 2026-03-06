@@ -135,6 +135,24 @@ namespace Garden
                 });
             }
 
+            // Auto-capitalize and auto-dash friend code input (format: PREFIX-XXXX)
+            friendCodeInput?.RegisterValueChangedCallback(evt =>
+            {
+                var val = evt.newValue?.ToUpperInvariant() ?? "";
+                var prev = evt.previousValue ?? "";
+
+                // Backspacing the dash also removes the last prefix char
+                if (prev.Length == 6 && prev[5] == '-' && val.Length == 5)
+                    val = val.Substring(0, 4);
+
+                // Auto-insert dash after 5-char prefix
+                if (val.Length == 5 && !val.Contains("-") && prev.Length < val.Length)
+                    val += "-";
+
+                if (val != evt.newValue)
+                    friendCodeInput.SetValueWithoutNotify(val);
+            });
+
             // Wire add friend button
             sendRequestBtn?.RegisterCallback<ClickEvent>(_ => OnSendFriendRequest());
             shareCodeBtn?.RegisterCallback<ClickEvent>(_ => OnShareCode());

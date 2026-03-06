@@ -66,11 +66,10 @@ namespace Garden
         private IEnumerator InitializeLocation()
         {
 #if UNITY_EDITOR
-            Debug.Log("Editor detected — using simulated weather.");
-            useDebugOverride = true;
+            // In editor, mark location as resolved so the app can proceed.
+            // Server weather will be applied once GameService syncs state.
             hasLocation = true;
             IsLocationResolved = true;
-            ApplyDebugWeather();
             OnLocationResolved?.Invoke(true);
             yield break;
 #else
@@ -181,6 +180,45 @@ namespace Garden
             IsLocationResolved = false;
             Input.location.Stop();
             StartCoroutine(InitializeLocation());
+        }
+
+        public void ApplyServerWeather(ServerWeather sw)
+        {
+            if (sw == null) return;
+            var now = GameTime.Now;
+            float sunriseHour = 6.5f;
+            float sunsetHour = 18.5f;
+            var weather = new WeatherData
+            {
+                temperature = sw.temperature,
+                humidity = sw.humidity,
+                windSpeed = sw.wind_speed,
+                cloudCover = sw.cloud_cover,
+                sunriseHour = sunriseHour,
+                sunsetHour = sunsetHour,
+                condition = ParseServerCondition(sw.condition),
+                timeOfDay = TimeUtils.GetTimeOfDay(now, sunriseHour, sunsetHour),
+                isNight = TimeUtils.IsNight(now, sunriseHour, sunsetHour),
+                isGoldenHour = TimeUtils.IsGoldenHour(now, sunsetHour),
+                moonPhase = (MoonPhase)sw.moon_phase,
+                calendarEvent = CalendarEvents.GetEvent(now)
+            };
+            useDebugOverride = false;
+            CurrentWeather = weather;
+            OnWeatherUpdated?.Invoke(weather);
+        }
+
+        private static WeatherCondition ParseServerCondition(string condition)
+        {
+            if (string.IsNullOrEmpty(condition)) return WeatherCondition.Clear;
+            return condition.ToLower() switch
+            {
+                "rain" => WeatherCondition.Rain,
+                "storm" => WeatherCondition.Storm,
+                "snow" => WeatherCondition.Snow,
+                "cloudy" => WeatherCondition.Cloudy,
+                _ => WeatherCondition.Clear
+            };
         }
 
         public void SetDebugWeather(WeatherData data)

@@ -177,8 +177,12 @@ namespace Garden
                     data.mallums.Add(mallum);
                 }
             }
+            int maxMallums = MallumManager.Instance != null
+                ? MallumManager.Instance.HouseConfig.GetMaxMallums(data.mallumHouses.Count)
+                : data.mallumHouses.Count;
             foreach (var lm in localMallums)
             {
+                if (data.mallums.Count >= maxMallums) break;
                 if (!data.mallums.Exists(m => m.serverId == lm.serverId))
                     data.mallums.Add(lm);
             }
@@ -222,6 +226,10 @@ namespace Garden
                     });
                 }
             }
+
+            // Apply server weather if available
+            if (state.weather != null && WeatherService.Instance != null)
+                WeatherService.Instance.ApplyServerWeather(state.weather);
 
             SaveManager.Instance.Save();
         }

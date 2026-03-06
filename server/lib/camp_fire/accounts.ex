@@ -16,7 +16,8 @@ defmodule CampFire.Accounts do
   end
 
   def get_player_by_friend_code(code) do
-    Repo.one(from p in Player, where: p.friend_code == ^code)
+    upper = String.upcase(code)
+    Repo.one(from p in Player, where: p.friend_code == ^upper)
   end
 
   def register_player do
