@@ -151,6 +151,7 @@ defmodule CampFireWeb.Router do
     post "/apotheke/craft", GameController, :craft_apotheke
     post "/bird/check", GameController, :check_birds
     post "/bird/collect", GameController, :collect_bird
+    post "/move-building", GameController, :move_building
   end
 
   scope "/weather", CampFireWeb do

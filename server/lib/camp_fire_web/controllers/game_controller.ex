@@ -587,6 +587,45 @@ defmodule CampFireWeb.GameController do
     conn |> put_status(400) |> json(%{error: "Missing 'birdId'"})
   end
 
+  # ── Move building ──────────────────────────────────────────
+
+  alias CampFire.Game.{PlayerPlot, PlayerVase, PlayerGarden, PlayerMallumHouse}
+
+  def move_building(conn, %{"type" => type, "id" => id, "gridX" => gx, "gridY" => gy})
+      when is_integer(id) and is_integer(gx) and is_integer(gy) do
+    uid = conn.assigns.current_player.uid
+
+    schema = case type do
+      "plot" -> PlayerPlot
+      "vase" -> PlayerVase
+      "garden" -> PlayerGarden
+      "mallum_house" -> PlayerMallumHouse
+      _ -> nil
+    end
+
+    if schema == nil do
+      conn |> put_status(400) |> json(%{error: "Invalid building type"})
+    else
+      case Repo.get_by(schema, id: id, player_uid: uid) do
+        nil ->
+          conn |> put_status(404) |> json(%{error: "Building not found"})
+
+        record ->
+          record
+          |> Ecto.Changeset.change(%{grid_x: gx, grid_y: gy})
+          |> Repo.update()
+          |> case do
+            {:ok, _} -> json(conn, %{ok: true})
+            {:error, _} -> conn |> put_status(422) |> json(%{error: "Failed to move building"})
+          end
+      end
+    end
+  end
+
+  def move_building(conn, _params) do
+    conn |> put_status(400) |> json(%{error: "Missing required fields: type, id, gridX, gridY"})
+  end
+
   # ── Weather ─────────────────────────────────────────────────
 
   def submit_location(conn, %{"lat" => lat, "lon" => lon})

@@ -639,6 +639,23 @@ namespace Garden
             return null;
         }
 
+        // ── Move Building ──
+
+        public async Task MoveBuilding(string type, int id, int gridX, int gridY)
+        {
+            if (!IsOnline) return;
+            try
+            {
+                var body = JsonUtility.ToJson(new MoveBuildingRequest { type = type, id = id, gridX = gridX, gridY = gridY });
+                using var req = PostJson("/game/move-building", body);
+                await SendAsync(req);
+
+                if (req.responseCode < 200 || req.responseCode >= 300)
+                    Debug.LogWarning($"GameService: MoveBuilding failed (HTTP {req.responseCode}): {req.downloadHandler.text}");
+            }
+            catch (Exception e) { Debug.LogWarning($"GameService: MoveBuilding failed: {e.Message}"); }
+        }
+
         // ── Bird Endpoints ──
 
         public async Task<List<ServerBird>> CheckBirds()
