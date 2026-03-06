@@ -28,7 +28,9 @@ namespace Garden
         public static string FormatItemName(string internalName)
         {
             if (string.IsNullOrEmpty(internalName)) return "";
-            return internalName.Replace('_', ' ');
+            string name = internalName;
+            if (name.EndsWith("_harvest")) name = name[..^8];
+            return name.Replace('_', ' ');
         }
     }
 

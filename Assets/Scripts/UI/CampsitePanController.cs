@@ -14,7 +14,7 @@ namespace Garden
         private Vector2 centeredOffset;
         private bool panEnabledX;
         private bool panEnabledY;
-        private const float DragThreshold = 10f;
+        private const float DragThreshold = 20f;
         private float dragDistance;
 
         public bool WasDragged { get; private set; }
@@ -102,6 +102,8 @@ namespace Garden
             activePointerId = -1;
             if (viewport.HasPointerCapture(evt.pointerId))
                 viewport.ReleasePointer(evt.pointerId);
+            // Reset so stale WasDragged doesn't block the next tap's ClickEvent
+            WasDragged = false;
         }
 
         private void OnPointerCancel(PointerCancelEvent evt)

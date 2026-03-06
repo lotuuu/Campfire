@@ -342,7 +342,7 @@ namespace Garden
                 ApothekeManager.Instance.Mix(recipe);
                 Refresh();
             });
-            mixBtn.text = "Mix";
+            mixBtn.text = "Craft";
             mixBtn.AddToClassList("recipe-action");
             mixBtn.SetEnabled(canMix);
             details.Add(mixBtn);
