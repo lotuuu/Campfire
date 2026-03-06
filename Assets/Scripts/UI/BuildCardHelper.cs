@@ -91,6 +91,14 @@ namespace Garden
                 card.SetEnabled(enabled);
                 if (enabled && onClick != null)
                     card.clicked += onClick;
+
+                if (!enabled)
+                {
+                    string reason = !canPlace ? "Cap reached" : "Can't afford";
+                    var lockedLabel = new Label(reason);
+                    lockedLabel.AddToClassList("build-card__locked-label");
+                    card.Add(lockedLabel);
+                }
             }
 
             return tree;

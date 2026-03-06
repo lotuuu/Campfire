@@ -36,9 +36,30 @@
 }
 
 .build-card:disabled {
-    background-color: rgba(40, 30, 18, 0.4);
-    border-color: rgba(100, 70, 35, 0.2);
-    opacity: 0.6;
+    background-color: rgba(30, 25, 16, 0.5);
+    border-color: rgba(80, 60, 30, 0.15);
+    opacity: 0.45;
+}
+
+.build-card:disabled .build-card__icon {
+    -unity-background-image-tint-color: rgb(120, 120, 120);
+}
+
+.build-card:disabled .build-card__name {
+    color: rgb(140, 130, 110);
+}
+
+.build-card:disabled .build-card__cost-chip-label {
+    color: rgb(160, 130, 80);
+}
+
+/* Shown on disabled cards to explain why */
+.build-card__locked-label {
+    font-size: var(--font-sm);
+    color: rgb(220, 100, 80);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    margin-top: 4px;
 }
 
 .build-card__icon {
