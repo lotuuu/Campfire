@@ -261,7 +261,20 @@ game_configs = [
     "mana_per_level" => 0.3,
     "max_flame_level" => 12,
     "entity_caps" => [6, 6, 8, 8, 12, 15, 18, 22, 26, 30, 35, 40],
-    "grid_sizes" => [2, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5]
+    "grid_sizes" => [2, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5],
+    "upgrade_recipes" => [
+      %{"ingredients" => [%{"itemName" => "Sprouts_harvest", "count" => 1}]},
+      %{"ingredients" => [%{"itemName" => "Sprouts_harvest", "count" => 5}, %{"itemName" => "Cress_harvest", "count" => 2}]},
+      %{"ingredients" => [%{"itemName" => "Basil_harvest", "count" => 3}]},
+      %{"ingredients" => [%{"itemName" => "Chamomile_harvest", "count" => 5}]},
+      %{"ingredients" => [%{"itemName" => "Marigold_harvest", "count" => 12}, %{"itemName" => "Snowdrop_harvest", "count" => 8}, %{"itemName" => "Basil_harvest", "count" => 8}]},
+      %{"ingredients" => [%{"itemName" => "Mint_harvest", "count" => 8}, %{"itemName" => "Pansy_harvest", "count" => 4}, %{"itemName" => "Chamomile_harvest", "count" => 8}]},
+      %{"ingredients" => [%{"itemName" => "Lavender_harvest", "count" => 22}, %{"itemName" => "Snowdrop_harvest", "count" => 24}, %{"itemName" => "Basil_harvest", "count" => 18}]},
+      %{"ingredients" => [%{"itemName" => "Poppy_harvest", "count" => 35}, %{"itemName" => "Pansy_harvest", "count" => 30}, %{"itemName" => "Marigold_harvest", "count" => 50}]},
+      %{"ingredients" => [%{"itemName" => "Jasmine_harvest", "count" => 60}, %{"itemName" => "Lavender_harvest", "count" => 50}, %{"itemName" => "Poppy_harvest", "count" => 60}]},
+      %{"ingredients" => [%{"itemName" => "Rosemary_harvest", "count" => 50}, %{"itemName" => "Jasmine_harvest", "count" => 60}, %{"itemName" => "Lavender_harvest", "count" => 55}, %{"itemName" => "Snowdrop_harvest", "count" => 40}]},
+      %{"ingredients" => [%{"itemName" => "Dahlia_harvest", "count" => 50}, %{"itemName" => "Moonflower_harvest", "count" => 30}, %{"itemName" => "Rosemary_harvest", "count" => 60}, %{"itemName" => "Poppy_harvest", "count" => 80}, %{"itemName" => "Basil_harvest", "count" => 50}]}
+    ]
   }},
   %{key: "vase_config", value: %{
     "craft_cost_mana" => 100,
@@ -278,13 +291,40 @@ game_configs = [
       %{"mana" => 60, "harvests" => [%{"item" => "Lavender_harvest", "count" => 3}]},
       %{"mana" => 100, "harvests" => [%{"item" => "Chamomile_harvest", "count" => 2}, %{"item" => "Mint_harvest", "count" => 2}]}
     ]
+  }},
+  %{key: "building_cost_config", value: %{
+    "plot_costs" => [
+      %{"manaCost" => 150, "harvestCosts" => [%{"itemName" => "Sprouts_harvest", "count" => 1}]},
+      %{"manaCost" => 200, "harvestCosts" => [%{"itemName" => "Basil_harvest", "count" => 1}]},
+      %{"manaCost" => 260, "harvestCosts" => [%{"itemName" => "Basil_harvest", "count" => 2}]},
+      %{"manaCost" => 330, "harvestCosts" => [%{"itemName" => "Chamomile_harvest", "count" => 1}]},
+      %{"manaCost" => 420, "harvestCosts" => [%{"itemName" => "Chamomile_harvest", "count" => 1}]},
+      %{"manaCost" => 520, "harvestCosts" => [%{"itemName" => "Chamomile_harvest", "count" => 1}, %{"itemName" => "Basil_harvest", "count" => 1}]},
+      %{"manaCost" => 640, "harvestCosts" => [%{"itemName" => "Chamomile_harvest", "count" => 2}]},
+      %{"manaCost" => 780, "harvestCosts" => [%{"itemName" => "Lavender_harvest", "count" => 1}, %{"itemName" => "Chamomile_harvest", "count" => 1}]},
+      %{"manaCost" => 940, "harvestCosts" => [%{"itemName" => "Mint_harvest", "count" => 1}, %{"itemName" => "Lavender_harvest", "count" => 1}]},
+      %{"manaCost" => 1120, "harvestCosts" => [%{"itemName" => "Mint_harvest", "count" => 2}, %{"itemName" => "Chamomile_harvest", "count" => 1}]}
+    ],
+    "vase_costs" => [
+      %{"manaCost" => 100, "harvestCosts" => [%{"itemName" => "Cress_harvest", "count" => 1}]},
+      %{"manaCost" => 120, "harvestCosts" => [%{"itemName" => "Basil_harvest", "count" => 2}]},
+      %{"manaCost" => 150, "harvestCosts" => [%{"itemName" => "Chamomile_harvest", "count" => 1}]},
+      %{"manaCost" => 180, "harvestCosts" => [%{"itemName" => "Chamomile_harvest", "count" => 1}]},
+      %{"manaCost" => 220, "harvestCosts" => [%{"itemName" => "Chamomile_harvest", "count" => 1}, %{"itemName" => "Basil_harvest", "count" => 1}]},
+      %{"manaCost" => 260, "harvestCosts" => [%{"itemName" => "Chamomile_harvest", "count" => 2}]},
+      %{"manaCost" => 310, "harvestCosts" => [%{"itemName" => "Lavender_harvest", "count" => 1}, %{"itemName" => "Basil_harvest", "count" => 1}]},
+      %{"manaCost" => 370, "harvestCosts" => [%{"itemName" => "Lavender_harvest", "count" => 1}, %{"itemName" => "Chamomile_harvest", "count" => 1}]}
+    ]
   }}
 ]
 
 for c <- game_configs do
   %GameConfig{}
   |> GameConfig.changeset(c)
-  |> Repo.insert!(on_conflict: :nothing, conflict_target: :key)
+  |> Repo.insert!(
+    on_conflict: {:replace, [:value, :updated_at]},
+    conflict_target: :key
+  )
 end
 
 IO.puts("Admin config seeds complete.")
