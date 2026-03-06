@@ -76,7 +76,10 @@ defmodule CampFireWeb.WeatherLive do
             <div class="bg-white border rounded-lg p-4">
               <div class="flex justify-between items-start mb-3">
                 <div>
-                  <span class="font-mono text-sm text-gray-600">
+                  <span class="font-semibold text-gray-800">
+                    {location_name(entry.cache.weather_data)}
+                  </span>
+                  <span class="ml-2 font-mono text-sm text-gray-500">
                     ({entry.cache.lat}, {entry.cache.lon})
                   </span>
                   <span class="ml-2 text-sm text-gray-500">
@@ -169,6 +172,18 @@ defmodule CampFireWeb.WeatherLive do
   end
 
   defp cache_age(_), do: "-"
+
+  defp location_name(nil), do: "Unknown"
+  defp location_name(data) do
+    city = data["city"] || ""
+    country = data["country"] || ""
+    case {city, country} do
+      {"", ""} -> "Unknown"
+      {"", c} -> c
+      {c, ""} -> c
+      {c, co} -> "#{c}, #{co}"
+    end
+  end
 
   defp format_num(nil), do: "-"
   defp format_num(n) when is_float(n), do: :erlang.float_to_binary(n, decimals: 1)

@@ -196,6 +196,8 @@ defmodule CampFire.Game.Weather do
     is_raining = condition in ["Rain", "Thunderstorm", "Drizzle"]
 
     moon_phase = MoonPhase.calculate()
+    city_name = body["name"] || ""
+    country = get_in(body, ["sys", "country"]) || ""
 
     %{
       "temperature" => temperature * 1.0,
@@ -204,7 +206,9 @@ defmodule CampFire.Game.Weather do
       "cloud_cover" => cloud_cover * 1.0,
       "condition" => condition,
       "is_raining" => is_raining,
-      "moon_phase" => moon_phase * 1.0
+      "moon_phase" => moon_phase * 1.0,
+      "city" => city_name,
+      "country" => country
     }
   end
 
