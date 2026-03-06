@@ -563,6 +563,26 @@ namespace Garden
             return null;
         }
 
+        // ── Mallum House Skin ──
+
+        public async Task<ServerMallumHouse> SetMallumHouseSkin(int houseId, string skinName)
+        {
+            if (!IsOnline) return null;
+            try
+            {
+                var body = JsonUtility.ToJson(new HouseSkinRequest { houseId = houseId, skinName = skinName });
+                using var req = PostJson("/game/mallum-house/set-skin", body);
+                await SendAsync(req);
+
+                if (req.responseCode >= 200 && req.responseCode < 300)
+                    return JsonUtility.FromJson<ServerMallumHouse>(req.downloadHandler.text);
+
+                Debug.LogWarning($"GameService: SetMallumHouseSkin failed (HTTP {req.responseCode}): {req.downloadHandler.text}");
+            }
+            catch (Exception e) { Debug.LogWarning($"GameService: SetMallumHouseSkin failed: {e.Message}"); }
+            return null;
+        }
+
         // ── Bird Endpoints ──
 
         public async Task<List<ServerBird>> CheckBirds()

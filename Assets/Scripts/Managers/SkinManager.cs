@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Garden
@@ -114,6 +115,57 @@ namespace Garden
             }
 
             SaveManager.Instance.Save();
+            return true;
+        }
+
+        public async Task<bool> ApplySkinOnServer(CampBuildingType type, int index, SkinData skin)
+        {
+            if (GameService.Instance == null || !GameService.Instance.IsOnline)
+                return ApplySkin(type, index, skin);
+
+            var data = SaveManager.Instance.Data;
+            int serverId;
+
+            switch (type)
+            {
+                case CampBuildingType.Plot:
+                    if (index < 0 || index >= data.plots.Count) return false;
+                    serverId = data.plots[index].serverId;
+                    if (serverId <= 0) return ApplySkin(type, index, skin);
+                    var plotResult = await GameService.Instance.SetPlotSkin(serverId, skin.skinName);
+                    if (plotResult == null) return false;
+                    data.plots[index].skinName = plotResult.skinName;
+                    data.plots[index].unlockedSkins = plotResult.unlockedSkins ?? new List<string>();
+                    break;
+
+                case CampBuildingType.Vase:
+                    if (index < 0 || index >= data.vases.Count) return false;
+                    serverId = data.vases[index].serverId;
+                    if (serverId <= 0) return ApplySkin(type, index, skin);
+                    var vaseResult = await GameService.Instance.SetVaseSkin(serverId, skin.skinName);
+                    if (vaseResult == null) return false;
+                    data.vases[index].skinName = vaseResult.skinName;
+                    data.vases[index].unlockedSkins = vaseResult.unlockedSkins ?? new List<string>();
+                    break;
+
+                case CampBuildingType.MallumHouse:
+                    if (index < 0 || index >= data.mallumHouses.Count) return false;
+                    serverId = data.mallumHouses[index].serverId;
+                    if (serverId <= 0) return ApplySkin(type, index, skin);
+                    var houseResult = await GameService.Instance.SetMallumHouseSkin(serverId, skin.skinName);
+                    if (houseResult == null) return false;
+                    data.mallumHouses[index].skinName = houseResult.skinName;
+                    data.mallumHouses[index].unlockedSkins = houseResult.unlockedSkins ?? new List<string>();
+                    break;
+
+                default:
+                    return ApplySkin(type, index, skin);
+            }
+
+            SaveManager.Instance.Save();
+            // Sync economy (items may have been spent for unlock)
+            if (EconomyService.Instance != null)
+                EconomyService.Instance.Initialize();
             return true;
         }
 
