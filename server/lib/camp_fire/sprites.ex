@@ -11,7 +11,7 @@ defmodule CampFire.Sprites do
     if File.dir?(base) do
       base
       |> scan_dir("")
-      |> Enum.sort_by(fn s -> s.key end)
+      |> Enum.sort_by(fn s -> natural_sort_key(s.key) end)
     else
       []
     end
@@ -23,6 +23,22 @@ defmodule CampFire.Sprites do
     File.write!(path, binary_data)
     refresh_manifest()
     :ok
+  end
+
+  def rename_sprite(old_key, new_key) do
+    old_path = sprite_path(old_key)
+    new_path = sprite_path(new_key)
+
+    cond do
+      !File.exists?(old_path) -> {:error, :not_found}
+      File.exists?(new_path) -> {:error, :already_exists}
+      true ->
+        File.mkdir_p!(Path.dirname(new_path))
+        File.rename!(old_path, new_path)
+        cleanup_empty_dirs(Path.dirname(old_path))
+        refresh_manifest()
+        :ok
+    end
   end
 
   def delete_sprite(key) do
@@ -91,5 +107,15 @@ defmodule CampFire.Sprites do
 
   defp category(key) do
     key |> String.split("/") |> hd()
+  end
+
+  defp natural_sort_key(key) do
+    Regex.split(~r/(\d+)/, key, include_captures: true)
+    |> Enum.map(fn part ->
+      case Integer.parse(part) do
+        {n, ""} -> {0, n}
+        _ -> {1, part}
+      end
+    end)
   end
 end

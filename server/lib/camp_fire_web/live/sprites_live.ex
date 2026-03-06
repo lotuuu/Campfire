@@ -14,7 +14,8 @@ defmodule CampFireWeb.SpritesLive do
        sprites: Sprites.list_sprites(),
        new_key: "",
        upload_category: nil,
-       replace_key: nil
+       edit_key: nil,
+       edit_name: ""
      )
      |> allow_upload(:sprite,
        accept: @accept,
@@ -24,44 +25,89 @@ defmodule CampFireWeb.SpritesLive do
   end
 
   def handle_event("start_upload", %{"category" => category}, socket) do
-    {:noreply, assign(socket, upload_category: category, replace_key: nil, new_key: "")}
+    {:noreply, assign(socket, upload_category: category, edit_key: nil, new_key: "")}
   end
 
-  def handle_event("start_replace", %{"key" => key}, socket) do
-    {:noreply, assign(socket, replace_key: key, upload_category: nil)}
+  def handle_event("start_edit", %{"key" => key}, socket) do
+    {:noreply, assign(socket, edit_key: key, edit_name: key, upload_category: nil)}
   end
 
   def handle_event("noop", _params, socket), do: {:noreply, socket}
 
   def handle_event("cancel_upload", _params, socket) do
-    {:noreply, assign(socket, upload_category: nil, replace_key: nil, new_key: "")}
+    {:noreply, assign(socket, upload_category: nil, edit_key: nil, new_key: "")}
+  end
+
+  def handle_event("update_edit", %{"name" => name}, socket) do
+    {:noreply, assign(socket, edit_name: name)}
   end
 
   def handle_event("update_new_key", %{"key" => key}, socket) do
     {:noreply, assign(socket, new_key: key)}
   end
 
+  def handle_event("save_edit", _params, socket) do
+    old_key = socket.assigns.edit_key
+    new_key = String.trim(socket.assigns.edit_name)
+    has_upload? = socket.assigns.uploads.sprite.entries != []
+
+    cond do
+      new_key == "" ->
+        {:noreply, put_flash(socket, :error, "Name cannot be empty")}
+
+      new_key != old_key ->
+        case Sprites.rename_sprite(old_key, new_key) do
+          :ok ->
+            if has_upload? do
+              consume_uploaded_entries(socket, :sprite, fn %{path: path}, _entry ->
+                Sprites.upload_sprite(new_key, File.read!(path))
+                {:ok, new_key}
+              end)
+            end
+
+            {:noreply,
+             socket
+             |> put_flash(:info, "Updated '#{old_key}' → '#{new_key}'")
+             |> assign(sprites: Sprites.list_sprites(), edit_key: nil, edit_name: "")}
+
+          {:error, :not_found} ->
+            {:noreply, put_flash(socket, :error, "Sprite not found")}
+
+          {:error, :already_exists} ->
+            {:noreply, put_flash(socket, :error, "A sprite named '#{new_key}' already exists")}
+        end
+
+      has_upload? ->
+        consume_uploaded_entries(socket, :sprite, fn %{path: path}, _entry ->
+          Sprites.upload_sprite(old_key, File.read!(path))
+          {:ok, old_key}
+        end)
+
+        {:noreply,
+         socket
+         |> put_flash(:info, "Replaced image for '#{old_key}'")
+         |> assign(sprites: Sprites.list_sprites(), edit_key: nil, edit_name: "")}
+
+      true ->
+        {:noreply, assign(socket, edit_key: nil, edit_name: "")}
+    end
+  end
+
   def handle_event("save_upload", _params, socket) do
-    key =
-      if socket.assigns.replace_key do
-        socket.assigns.replace_key
-      else
-        category = socket.assigns.upload_category
-        name = String.trim(socket.assigns.new_key)
-        if name == "", do: nil, else: "#{category}/#{name}"
-      end
+    category = socket.assigns.upload_category
+    name = String.trim(socket.assigns.new_key)
+    key = if name == "", do: nil, else: "#{category}/#{name}"
 
     if key do
       consume_uploaded_entries(socket, :sprite, fn %{path: path}, _entry ->
-        data = File.read!(path)
-        Sprites.upload_sprite(key, data)
+        Sprites.upload_sprite(key, File.read!(path))
         {:ok, key}
       end)
 
       {:noreply,
        socket
        |> put_flash(:info, "Sprite '#{key}' uploaded")
-       |> assign(sprites: Sprites.list_sprites(), upload_category: nil, replace_key: nil, new_key: "")}
+       |> assign(sprites: Sprites.list_sprites(), upload_category: nil, new_key: "")}
     else
       {:noreply, put_flash(socket, :error, "Please enter a sprite name")}
     end
@@ -109,6 +155,36 @@ defmodule CampFireWeb.SpritesLive do
             </button>
           </div>
 
+          <%= if category == "hex" do %>
+            <details class="mb-4 text-sm text-gray-500 border border-gray-200 rounded-lg p-3">
+              <summary class="cursor-pointer font-medium text-gray-600">Naming guide</summary>
+              <div class="mt-2 space-y-1.5">
+                <p>Sprites with <strong>numeric names</strong> act as percentage thresholds. The client picks the highest number &le; the current %.</p>
+                <div class="grid grid-cols-2 gap-x-6 gap-y-1 mt-2 font-mono text-xs">
+                  <div class="font-semibold col-span-2 text-gray-600 text-sm mt-1">Vases (water %)</div>
+                  <div>vase/<strong>0</strong></div><div class="text-gray-400">0 &ndash; 49%</div>
+                  <div>vase/<strong>50</strong></div><div class="text-gray-400">50 &ndash; 99%</div>
+                  <div>vase/<strong>100</strong></div><div class="text-gray-400">100%</div>
+                  <div class="font-semibold col-span-2 text-gray-600 text-sm mt-1">Crops (growth %)</div>
+                  <div>plot/<strong>{"{seed}"}</strong>/0</div><div class="text-gray-400">0 &ndash; 49%</div>
+                  <div>plot/<strong>{"{seed}"}</strong>/50</div><div class="text-gray-400">50 &ndash; 99%</div>
+                  <div>plot/<strong>{"{seed}"}</strong>/100</div><div class="text-gray-400">100% (mature)</div>
+                  <div class="font-semibold col-span-2 text-gray-600 text-sm mt-1">Other</div>
+                  <div>terrain</div><div class="text-gray-400">empty cell</div>
+                  <div>flame</div><div class="text-gray-400">Spark of Ara</div>
+                  <div>plot/empty</div><div class="text-gray-400">plot with no seed</div>
+                  <div>garden/empty</div><div class="text-gray-400">garden with no plant</div>
+                  <div>garden/{"{plant}"}/mature</div><div class="text-gray-400">mature garden</div>
+                  <div>house</div><div class="text-gray-400">Mallum house</div>
+                  <div>bird</div><div class="text-gray-400">visiting bird</div>
+                  <div>visitor</div><div class="text-gray-400">camp visitor</div>
+                  <div>apotheke</div><div class="text-gray-400">mixing station</div>
+                </div>
+                <p class="mt-2">Add thresholds as needed &mdash; e.g. <code class="bg-gray-100 px-1 rounded">vase/10</code> would show for 10&ndash;49% if 50 is the next threshold.</p>
+              </div>
+            </details>
+          <% end %>
+
           <%= if @upload_category == category do %>
             <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
               <form phx-submit="save_upload" phx-change="update_new_key" class="flex items-end gap-3">
@@ -144,11 +220,11 @@ defmodule CampFireWeb.SpritesLive do
                 <div class="text-xs text-gray-400">{format_size(sprite.size)}</div>
                 <div class="absolute top-1 right-1 hidden group-hover:flex gap-1">
                   <button
-                    phx-click="start_replace"
+                    phx-click="start_edit"
                     phx-value-key={sprite.key}
                     class="text-xs bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded hover:bg-blue-200"
-                    title="Replace"
-                  >R</button>
+                    title="Edit"
+                  >E</button>
                   <button
                     phx-click="delete_sprite"
                     phx-value-key={sprite.key}
@@ -158,12 +234,14 @@ defmodule CampFireWeb.SpritesLive do
                   >X</button>
                 </div>
 
-                <%= if @replace_key == sprite.key do %>
+                <%= if @edit_key == sprite.key do %>
                   <div class="mt-2 border-t pt-2">
-                    <form phx-submit="save_upload" phx-change="noop" class="space-y-1">
+                    <form phx-submit="save_edit" phx-change="update_edit" class="space-y-1.5">
+                      <input type="text" name="name" value={@edit_name}
+                        class="text-xs border rounded px-1.5 py-0.5 w-full" />
                       <.live_file_input upload={@uploads.sprite} class="text-xs w-full" />
                       <div class="flex gap-1 justify-center">
-                        <button type="submit" class="text-xs bg-blue-600 text-white px-2 py-0.5 rounded">Replace</button>
+                        <button type="submit" class="text-xs bg-blue-600 text-white px-2 py-0.5 rounded">Save</button>
                         <button type="button" phx-click="cancel_upload" class="text-xs text-gray-500">Cancel</button>
                       </div>
                     </form>
