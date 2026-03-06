@@ -134,6 +134,8 @@ defmodule CampFireWeb.Router do
     post "/quest/collect", GameController, :collect_quest
     post "/quest/speed-up", GameController, :speed_up_quest
     post "/mallum-house/craft", GameController, :craft_mallum_house
+    post "/bird/check", GameController, :check_birds
+    post "/bird/collect", GameController, :collect_bird
   end
 
   scope "/weather", CampFireWeb do

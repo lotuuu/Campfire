@@ -2,7 +2,7 @@ defmodule CampFireWeb.GameController do
   use CampFireWeb, :controller
 
   alias CampFire.Economy
-  alias CampFire.Game.{Plots, Vases, Gardens, Mallums, MallumHouses, Weather, PlayerState}
+  alias CampFire.Game.{Plots, Vases, Gardens, Mallums, MallumHouses, Birds, Weather, PlayerState}
   alias CampFire.Repo
 
   alias CampFire.ConfigCache
@@ -97,6 +97,7 @@ defmodule CampFireWeb.GameController do
     gardens = Gardens.list_gardens(uid)
     mallums = Mallums.list_mallums(uid)
     houses = MallumHouses.list_houses(uid)
+    birds = Birds.list_birds(uid)
 
     {economy, seeds, items} =
       case Economy.get_economy(uid) do
@@ -143,6 +144,7 @@ defmodule CampFireWeb.GameController do
       gardens: Enum.map(gardens, &serialize_garden/1),
       mallums: Enum.map(mallums, &serialize_mallum/1),
       mallumHouses: Enum.map(houses, &serialize_mallum_house/1),
+      birds: Enum.map(birds, &serialize_bird/1),
       cosmeticState: player_state,
       weather: weather_data
     })
@@ -469,6 +471,33 @@ defmodule CampFireWeb.GameController do
     conn |> put_status(400) |> json(%{error: "Missing 'gridX' and 'gridY'"})
   end
 
+  # ── Birds ───────────────────────────────────────────────────
+
+  def check_birds(conn, _params) do
+    uid = conn.assigns.current_player.uid
+
+    case Birds.check_spawns(uid) do
+      {:ok, new_birds} ->
+        conn |> put_status(200) |> json(%{newBirds: Enum.map(new_birds, &serialize_bird/1)})
+    end
+  end
+
+  def collect_bird(conn, %{"birdId" => bird_id}) do
+    uid = conn.assigns.current_player.uid
+
+    case Birds.collect_bird(uid, bird_id) do
+      {:ok, reward} ->
+        conn |> put_status(200) |> json(%{seedName: reward.seed_name, seedCount: reward.seed_count})
+
+      {:error, reason} ->
+        conn |> put_status(422) |> json(%{error: format_error(reason)})
+    end
+  end
+
+  def collect_bird(conn, _params) do
+    conn |> put_status(400) |> json(%{error: "Missing 'birdId'"})
+  end
+
   # ── Weather ─────────────────────────────────────────────────
 
   def submit_location(conn, %{"lat" => lat, "lon" => lon})
@@ -572,6 +601,17 @@ defmodule CampFireWeb.GameController do
       gridY: house.grid_y,
       skinName: house.skin_name,
       unlockedSkins: house.unlocked_skins || []
+    }
+  end
+
+  defp serialize_bird(bird) do
+    %{
+      id: bird.id,
+      gridX: bird.grid_x,
+      gridY: bird.grid_y,
+      seedName: bird.seed_name,
+      seedCount: bird.seed_count,
+      spawnedAtUtc: format_datetime(bird.spawned_at_utc)
     }
   end
 

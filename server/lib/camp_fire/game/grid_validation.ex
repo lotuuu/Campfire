@@ -8,7 +8,7 @@ defmodule CampFire.Game.GridValidation do
 
   import Ecto.Query
   alias CampFire.Repo
-  alias CampFire.Game.{PlayerPlot, PlayerVase, PlayerGarden, PlayerMallumHouse, PlayerState}
+  alias CampFire.Game.{PlayerPlot, PlayerVase, PlayerGarden, PlayerMallumHouse, PlayerBird, PlayerState}
   alias CampFire.Economy.PlayerEconomy
 
   @doc """
@@ -157,6 +157,12 @@ defmodule CampFire.Game.GridValidation do
               where:
                 h.player_uid == ^player_uid and h.grid_x == ^grid_x and h.grid_y == ^grid_y
             )
+          ) or
+          Repo.exists?(
+            from(b in PlayerBird,
+              where:
+                b.player_uid == ^player_uid and b.grid_x == ^grid_x and b.grid_y == ^grid_y
+            )
           )
       end
     end
@@ -191,10 +197,17 @@ defmodule CampFire.Game.GridValidation do
       )
       |> Repo.all()
 
+    birds =
+      from(b in PlayerBird,
+        where: b.player_uid == ^player_uid,
+        select: {b.grid_x, b.grid_y}
+      )
+      |> Repo.all()
+
     apotheke_pos = get_apotheke_position(player_uid)
 
     # Flame at origin + apotheke + all entity positions
-    [{0, 0}, apotheke_pos | plots ++ vases ++ gardens ++ houses]
+    [{0, 0}, apotheke_pos | plots ++ vases ++ gardens ++ houses ++ birds]
     |> MapSet.new()
   end
 
