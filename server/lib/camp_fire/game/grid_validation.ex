@@ -8,7 +8,7 @@ defmodule CampFire.Game.GridValidation do
 
   import Ecto.Query
   alias CampFire.Repo
-  alias CampFire.Game.{PlayerPlot, PlayerVase, PlayerGarden, PlayerState}
+  alias CampFire.Game.{PlayerPlot, PlayerVase, PlayerGarden, PlayerMallumHouse, PlayerState}
   alias CampFire.Economy.PlayerEconomy
 
   @doc """
@@ -115,9 +115,12 @@ defmodule CampFire.Game.GridValidation do
       from(g in PlayerGarden, where: g.player_uid == ^player_uid, select: count(g.id))
       |> Repo.one()
 
+    house_count =
+      from(h in PlayerMallumHouse, where: h.player_uid == ^player_uid, select: count(h.id))
+      |> Repo.one()
+
     # +1 for apotheke (always present)
-    # TODO (Task 3): Add mallum house count when mallum_houses table exists
-    plot_count + vase_count + garden_count + 1
+    plot_count + vase_count + garden_count + house_count + 1
   end
 
   defp hex_occupied?(player_uid, grid_x, grid_y) do
@@ -131,8 +134,7 @@ defmodule CampFire.Game.GridValidation do
       if {grid_x, grid_y} == apotheke_pos do
         true
       else
-        # Check plots, vases, gardens
-        # NOTE: birds and mallum houses will be added later
+        # Check plots, vases, gardens, mallum houses
         Repo.exists?(
           from(p in PlayerPlot,
             where: p.player_uid == ^player_uid and p.grid_x == ^grid_x and p.grid_y == ^grid_y
@@ -148,6 +150,12 @@ defmodule CampFire.Game.GridValidation do
             from(g in PlayerGarden,
               where:
                 g.player_uid == ^player_uid and g.grid_x == ^grid_x and g.grid_y == ^grid_y
+            )
+          ) or
+          Repo.exists?(
+            from(h in PlayerMallumHouse,
+              where:
+                h.player_uid == ^player_uid and h.grid_x == ^grid_x and h.grid_y == ^grid_y
             )
           )
       end
@@ -176,11 +184,17 @@ defmodule CampFire.Game.GridValidation do
       )
       |> Repo.all()
 
+    houses =
+      from(h in PlayerMallumHouse,
+        where: h.player_uid == ^player_uid,
+        select: {h.grid_x, h.grid_y}
+      )
+      |> Repo.all()
+
     apotheke_pos = get_apotheke_position(player_uid)
 
     # Flame at origin + apotheke + all entity positions
-    # NOTE: birds and mallum houses will be added later
-    [{0, 0}, apotheke_pos | plots ++ vases ++ gardens]
+    [{0, 0}, apotheke_pos | plots ++ vases ++ gardens ++ houses]
     |> MapSet.new()
   end
 

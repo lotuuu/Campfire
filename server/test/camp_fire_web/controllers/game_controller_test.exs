@@ -2,7 +2,7 @@ defmodule CampFireWeb.GameControllerTest do
   use CampFireWeb.ConnCase
   import CampFire.TestHelpers
   alias CampFire.Economy
-  alias CampFire.Game.{Mallums, Vases, Plots}
+  alias CampFire.Game.{Vases, Plots}
   alias CampFire.Repo
 
   defp ensure_seed_config do
@@ -22,6 +22,7 @@ defmodule CampFireWeb.GameControllerTest do
   end
 
   defp setup_player(conn) do
+    seed_mallum_house_config()
     player = register_player()
     {:ok, _economy} = Economy.init_economy(player.uid)
 
@@ -41,7 +42,6 @@ defmodule CampFireWeb.GameControllerTest do
     Economy.upsert_item(player.uid, "Chamomile_harvest", 10)
 
     {:ok, _} = Economy.upsert_seed(player.uid, "Basil", 5)
-    {:ok, _mallum} = Mallums.create_mallum(player.uid)
 
     {player, authed_conn(conn, player)}
   end
@@ -58,11 +58,13 @@ defmodule CampFireWeb.GameControllerTest do
       assert Map.has_key?(body, "vases")
       assert Map.has_key?(body, "gardens")
       assert Map.has_key?(body, "mallums")
+      assert Map.has_key?(body, "mallumHouses")
       assert Map.has_key?(body, "cosmeticState")
       assert is_list(body["plots"])
       assert is_list(body["vases"])
       assert is_list(body["gardens"])
       assert is_list(body["mallums"])
+      assert is_list(body["mallumHouses"])
     end
   end
 

@@ -65,7 +65,7 @@ defmodule CampFire.TestHelpers do
       "base_mana_per_second" => 0.5,
       "mana_per_level" => 0.3,
       "max_flame_level" => 12,
-      "entity_caps" => [5, 7, 10, 13, 16, 20, 24, 28, 32, 36, 40, 45],
+      "entity_caps" => [8, 10, 13, 16, 20, 24, 28, 32, 36, 40, 45, 50],
       "grid_sizes" => [2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7],
       "upgrade_recipes" => []
     }
@@ -78,7 +78,7 @@ defmodule CampFire.TestHelpers do
       "base_mana_per_second" => 0.5,
       "mana_per_level" => 0.3,
       "max_flame_level" => 12,
-      "entity_caps" => [3, 5, 7, 10, 13, 16, 20, 24, 28, 32, 36, 40],
+      "entity_caps" => [4, 5, 7, 10, 13, 16, 20, 24, 28, 32, 36, 40],
       "grid_sizes" => [2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7],
       "upgrade_recipes" => []
     }
@@ -97,6 +97,18 @@ defmodule CampFire.TestHelpers do
     }
 
     :ets.insert(:config_cache, {"seed_configs", configs})
+  end
+
+  def seed_mallum_house_config do
+    config = %{
+      "mallums_per_house" => 2,
+      "house_costs" => [
+        %{"manaCost" => 200, "harvestCosts" => [%{"itemName" => "Basil_harvest", "count" => 1}]},
+        %{"manaCost" => 350, "harvestCosts" => [%{"itemName" => "Chamomile_harvest", "count" => 2}]}
+      ]
+    }
+
+    :ets.insert(:config_cache, {"mallum_house_config", config})
   end
 
   def auth_header(player) do

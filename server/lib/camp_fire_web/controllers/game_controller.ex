@@ -2,7 +2,7 @@ defmodule CampFireWeb.GameController do
   use CampFireWeb, :controller
 
   alias CampFire.Economy
-  alias CampFire.Game.{Plots, Vases, Gardens, Mallums, Weather, PlayerState}
+  alias CampFire.Game.{Plots, Vases, Gardens, Mallums, MallumHouses, Weather, PlayerState}
   alias CampFire.Repo
 
   alias CampFire.ConfigCache
@@ -96,6 +96,7 @@ defmodule CampFireWeb.GameController do
     vases = Vases.list_vases(uid)
     gardens = Gardens.list_gardens(uid)
     mallums = Mallums.list_mallums(uid)
+    houses = MallumHouses.list_houses(uid)
 
     {economy, seeds, items} =
       case Economy.get_economy(uid) do
@@ -141,6 +142,7 @@ defmodule CampFireWeb.GameController do
       vases: Enum.map(vases, &serialize_vase/1),
       gardens: Enum.map(gardens, &serialize_garden/1),
       mallums: Enum.map(mallums, &serialize_mallum/1),
+      mallumHouses: Enum.map(houses, &serialize_mallum_house/1),
       cosmeticState: player_state,
       weather: weather_data
     })
@@ -452,6 +454,21 @@ defmodule CampFireWeb.GameController do
     conn |> put_status(400) |> json(%{error: "Missing 'mallumId'"})
   end
 
+  # ── Mallum Houses ─────────────────────────────────────────────
+
+  def craft_mallum_house(conn, %{"gridX" => gx, "gridY" => gy}) do
+    uid = conn.assigns.current_player.uid
+
+    case MallumHouses.craft_house(uid, gx, gy) do
+      {:ok, house} -> conn |> put_status(201) |> json(serialize_mallum_house(house))
+      {:error, reason} -> conn |> put_status(422) |> json(%{error: format_error(reason)})
+    end
+  end
+
+  def craft_mallum_house(conn, _params) do
+    conn |> put_status(400) |> json(%{error: "Missing 'gridX' and 'gridY'"})
+  end
+
   # ── Weather ─────────────────────────────────────────────────
 
   def submit_location(conn, %{"lat" => lat, "lon" => lon})
@@ -545,6 +562,16 @@ defmodule CampFireWeb.GameController do
       startTimeUtc: format_datetime(mallum.start_time_utc),
       assignedVaseId: mallum.assigned_vase_id,
       pendingRewards: mallum.pending_rewards
+    }
+  end
+
+  defp serialize_mallum_house(house) do
+    %{
+      id: house.id,
+      gridX: house.grid_x,
+      gridY: house.grid_y,
+      skinName: house.skin_name,
+      unlockedSkins: house.unlocked_skins || []
     }
   end
 

@@ -7,6 +7,7 @@ defmodule CampFire.Game.GridValidationTest do
   defp setup_player(_context \\ %{}) do
     seed_flame_config()
     seed_building_costs()
+    seed_mallum_house_config()
     player = register_player()
     {:ok, _economy} = Economy.init_economy(player.uid)
     player
@@ -67,6 +68,14 @@ defmodule CampFire.Game.GridValidationTest do
                GridValidation.validate_grid_placement(player.uid, 1, 0)
     end
 
+    test "rejects hex with existing mallum house" do
+      # init_economy creates a mallum house at (1, -1)
+      player = setup_player()
+
+      assert {:error, :hex_occupied} =
+               GridValidation.validate_grid_placement(player.uid, 1, -1)
+    end
+
     test "accepts valid empty hex within radius" do
       player = setup_player()
 
@@ -78,17 +87,18 @@ defmodule CampFire.Game.GridValidationTest do
   describe "check_entity_cap/1" do
     test "allows when under cap" do
       # Default flame_config has cap=5 at level 1
-      # init_economy creates: 1 plot + 1 vase + 1 apotheke = 3 entities
+      # init_economy creates: 1 plot + 1 vase + 1 house + 1 apotheke = 4 entities
       player = setup_player()
 
       assert :ok = GridValidation.check_entity_cap(player.uid)
     end
 
     test "rejects when at cap" do
-      # Low cap config has cap=3 at level 1
-      # init_economy creates: 1 plot + 1 vase + 1 apotheke = 3 entities (exactly at cap)
+      # Low cap config has cap=4 at level 1
+      # init_economy creates: 1 plot + 1 vase + 1 house + 1 apotheke = 4 entities (exactly at cap)
       seed_flame_config_with_low_cap()
       seed_building_costs()
+      seed_mallum_house_config()
       player = register_player()
       {:ok, _economy} = Economy.init_economy(player.uid)
 
@@ -109,11 +119,12 @@ defmodule CampFire.Game.GridValidationTest do
 
       free = GridValidation.get_free_tiles(player.uid)
 
-      # Flame at (0,0), plot at (-1,0), vase at (0,-1), apotheke at (1,0)
+      # Flame at (0,0), plot at (-1,0), vase at (0,-1), apotheke at (1,0), house at (1,-1)
       refute {0, 0} in free
       refute {-1, 0} in free
       refute {0, -1} in free
       refute {1, 0} in free
+      refute {1, -1} in free
     end
 
     test "all returned tiles are within grid radius" do

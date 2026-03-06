@@ -4,7 +4,7 @@ defmodule CampFire.Game.VasesTest do
   alias CampFire.Game.{Vases, Mallums, PlayerVase, PlayerMallum}
   alias CampFire.Economy
 
-  # init_economy creates 1 starter vase + 1 starter plot + 1 mallum
+  # init_economy creates 1 starter vase + 1 starter plot + 1 mallum house + 2 mallums
   # So the first craft_vase in tests is the 2nd vase (index 1):
   #   vase_costs[1] = 120 mana + 2 Basil_harvest
   # The 3rd vase (index 2) = 150 mana + 1 Chamomile_harvest
@@ -12,6 +12,7 @@ defmodule CampFire.Game.VasesTest do
   defp setup_player(_context \\ %{}) do
     seed_building_costs()
     seed_flame_config()
+    seed_mallum_house_config()
     player = register_player()
     {:ok, _economy} = Economy.init_economy(player.uid)
     # Boost mana for crafting tests
@@ -21,8 +22,8 @@ defmodule CampFire.Game.VasesTest do
     Economy.upsert_item(player.uid, "Cress_harvest", 10)
     Economy.upsert_item(player.uid, "Basil_harvest", 10)
     Economy.upsert_item(player.uid, "Chamomile_harvest", 10)
-    # init_economy creates a starter mallum
-    [mallum] = Mallums.list_mallums(player.uid)
+    # init_economy creates 2 starter mallums, grab the first idle one
+    [mallum | _] = Mallums.list_mallums(player.uid)
     {player, mallum}
   end
 
@@ -67,6 +68,7 @@ defmodule CampFire.Game.VasesTest do
     test "fails with insufficient mana" do
       seed_building_costs()
       seed_flame_config()
+      seed_mallum_house_config()
       player = register_player()
       {:ok, _economy} = Economy.init_economy(player.uid)
       # Default 50 mana, 2nd vase (index 1) costs 120
@@ -78,6 +80,7 @@ defmodule CampFire.Game.VasesTest do
     test "fails with insufficient harvest items" do
       seed_building_costs()
       seed_flame_config()
+      seed_mallum_house_config()
       player = register_player()
       {:ok, _economy} = Economy.init_economy(player.uid)
       economy = Economy.get_economy(player.uid)
@@ -106,13 +109,17 @@ defmodule CampFire.Game.VasesTest do
     end
 
     test "fails with no idle mallum" do
-      {player, mallum} = setup_player()
+      {player, _mallum} = setup_player()
       {:ok, vase} = Vases.craft_vase(player.uid, 2, 0)
 
-      # Put the mallum on a quest so none are idle
-      mallum
-      |> PlayerMallum.changeset(%{state: "on_quest", assigned_quest_name: "SwampForage"})
-      |> Repo.update!()
+      # Put all mallums on quest so none are idle
+      mallums = Mallums.list_mallums(player.uid)
+
+      Enum.each(mallums, fn m ->
+        m
+        |> PlayerMallum.changeset(%{state: "on_quest", assigned_quest_name: "SwampForage"})
+        |> Repo.update!()
+      end)
 
       {:error, :no_idle_mallum} = Vases.start_fill(player.uid, vase.id)
     end
@@ -230,6 +237,7 @@ defmodule CampFire.Game.VasesTest do
     test "rejects when entity cap reached" do
       seed_building_costs()
       seed_flame_config_with_low_cap()
+      seed_mallum_house_config()
       player = register_player()
       {:ok, _economy} = Economy.init_economy(player.uid)
 
@@ -240,7 +248,7 @@ defmodule CampFire.Game.VasesTest do
       Economy.upsert_item(player.uid, "Basil_harvest", 50)
       Economy.upsert_item(player.uid, "Chamomile_harvest", 50)
 
-      # low_cap at level 1 = 3, init_economy creates 1 plot + 1 vase = 2 + 1 apotheke = 3
+      # low_cap at level 1 = 4, init_economy creates 1 plot + 1 vase + 1 house = 3 + 1 apotheke = 4
       {:error, :entity_cap_reached} = Vases.craft_vase(player.uid, -1, -1)
     end
 

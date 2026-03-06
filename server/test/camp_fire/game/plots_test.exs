@@ -14,7 +14,7 @@ defmodule CampFire.Game.PlotsTest do
     }
   }
 
-  # init_economy creates 1 starter plot + 1 starter vase + 1 mallum
+  # init_economy creates 1 starter plot + 1 starter vase + 1 mallum house + 2 mallums
   # So the first craft_plot in tests is actually the 2nd plot (index 1):
   #   plot_costs[1] = 200 mana + 1 Basil_harvest
   # The 3rd plot (index 2) = 260 mana + 2 Basil_harvest
@@ -23,6 +23,7 @@ defmodule CampFire.Game.PlotsTest do
     seed_building_costs()
     seed_flame_config()
     seed_seed_configs()
+    seed_mallum_house_config()
     player = register_player()
     {:ok, _economy} = Economy.init_economy(player.uid)
 
@@ -95,6 +96,7 @@ defmodule CampFire.Game.PlotsTest do
     test "fails with insufficient mana" do
       seed_building_costs()
       seed_flame_config()
+      seed_mallum_house_config()
       player = register_player()
       {:ok, _economy} = Economy.init_economy(player.uid)
       # Default 50 mana, 2nd plot (index 1) costs 200
@@ -106,6 +108,7 @@ defmodule CampFire.Game.PlotsTest do
     test "fails with insufficient harvest items" do
       seed_building_costs()
       seed_flame_config()
+      seed_mallum_house_config()
       player = register_player()
       {:ok, _economy} = Economy.init_economy(player.uid)
       economy = Economy.get_economy(player.uid)
@@ -322,6 +325,7 @@ defmodule CampFire.Game.PlotsTest do
       seed_building_costs()
       seed_flame_config_with_low_cap()
       seed_seed_configs()
+      seed_mallum_house_config()
       player = register_player()
       {:ok, _economy} = Economy.init_economy(player.uid)
 
@@ -333,7 +337,7 @@ defmodule CampFire.Game.PlotsTest do
       Economy.upsert_item(player.uid, "Chamomile_harvest", 50)
       Economy.upsert_item(player.uid, "Cress_harvest", 50)
 
-      # low_cap at level 1 = 3, init_economy creates 1 plot + 1 vase = 2 entities + 1 apotheke = 3
+      # low_cap at level 1 = 4, init_economy creates 1 plot + 1 vase + 1 house = 3 entities + 1 apotheke = 4
       # So the next craft should fail
       {:error, :entity_cap_reached} = Plots.craft_plot(player.uid, -1, -1)
     end

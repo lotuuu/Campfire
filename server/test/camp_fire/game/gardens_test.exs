@@ -7,6 +7,7 @@ defmodule CampFire.Game.GardensTest do
   defp setup_player(_context \\ %{}) do
     seed_garden_configs()
     seed_flame_config()
+    seed_mallum_house_config()
     player = register_player()
     {:ok, _economy} = Economy.init_economy(player.uid)
     player
