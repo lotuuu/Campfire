@@ -29,6 +29,8 @@ defmodule CampFireWeb.GameControllerTest do
     seed_quest_configs()
     seed_building_costs()
     seed_garden_configs()
+    seed_flame_config()
+    seed_seed_configs()
 
     # Boost mana and provide harvest items for crafting
     economy = Economy.get_economy(player.uid)
@@ -83,11 +85,11 @@ defmodule CampFireWeb.GameControllerTest do
     test "returns 201 with plot", %{conn: conn} do
       {_player, conn} = setup_player(conn)
 
-      conn = post(conn, "/game/plot/craft", %{gridX: 0, gridY: 0})
+      conn = post(conn, "/game/plot/craft", %{gridX: 2, gridY: 0})
       body = json_response(conn, 201)
 
       assert body["state"] == "empty"
-      assert body["gridX"] == 0
+      assert body["gridX"] == 2
       assert body["gridY"] == 0
       assert body["id"] != nil
     end
@@ -98,13 +100,13 @@ defmodule CampFireWeb.GameControllerTest do
       {player, conn} = setup_player(conn)
 
       # Craft plot
-      conn1 = post(conn, "/game/plot/craft", %{gridX: 0, gridY: 0})
+      conn1 = post(conn, "/game/plot/craft", %{gridX: 2, gridY: 0})
       plot = json_response(conn1, 201)
       plot_id = plot["id"]
       assert plot["state"] == "empty"
 
       # Craft vase and fill it with water
-      conn2 = build_conn() |> authed_conn(player) |> post("/game/vase/craft", %{gridX: 1, gridY: 0})
+      conn2 = build_conn() |> authed_conn(player) |> post("/game/vase/craft", %{gridX: 0, gridY: 2})
       vase = json_response(conn2, 201)
       vase_id = vase["id"]
 
@@ -138,7 +140,7 @@ defmodule CampFireWeb.GameControllerTest do
     test "returns 201", %{conn: conn} do
       {_player, conn} = setup_player(conn)
 
-      conn = post(conn, "/game/vase/craft", %{gridX: 0, gridY: 0})
+      conn = post(conn, "/game/vase/craft", %{gridX: 2, gridY: 0})
       body = json_response(conn, 201)
 
       assert body["state"] == "empty"
@@ -152,7 +154,7 @@ defmodule CampFireWeb.GameControllerTest do
       {player, conn} = setup_player(conn)
 
       # Craft vase
-      conn1 = post(conn, "/game/vase/craft", %{gridX: 0, gridY: 0})
+      conn1 = post(conn, "/game/vase/craft", %{gridX: 2, gridY: 0})
       vase = json_response(conn1, 201)
 
       # Start fill
@@ -168,7 +170,7 @@ defmodule CampFireWeb.GameControllerTest do
     test "returns 201", %{conn: conn} do
       {_player, conn} = setup_player(conn)
 
-      conn = post(conn, "/game/garden/plant", %{plantName: "BerryBush", gridX: 0, gridY: 0})
+      conn = post(conn, "/game/garden/plant", %{plantName: "BerryBush", gridX: 2, gridY: 0})
       body = json_response(conn, 201)
 
       assert body["plantName"] == "BerryBush"
@@ -179,7 +181,7 @@ defmodule CampFireWeb.GameControllerTest do
     test "fails with unknown plant", %{conn: conn} do
       {_player, conn} = setup_player(conn)
 
-      conn = post(conn, "/game/garden/plant", %{plantName: "FakeTree", gridX: 0, gridY: 0})
+      conn = post(conn, "/game/garden/plant", %{plantName: "FakeTree", gridX: 0, gridY: 2})
       assert json_response(conn, 422)["error"] =~ "unknown_plant"
     end
   end

@@ -86,6 +86,19 @@ defmodule CampFire.TestHelpers do
     :ets.insert(:config_cache, {"flame_config", config})
   end
 
+  def seed_seed_configs do
+    configs = %{
+      "Basil" => %{"growth_duration_hours" => 2.0, "base_drops" => 3, "tier" => 1, "recipe" => %{}},
+      "Sprouts" => %{"growth_duration_hours" => 0.5, "base_drops" => 2, "tier" => 0, "recipe" => %{}},
+      "Cress" => %{"growth_duration_hours" => 1.0, "base_drops" => 2, "tier" => 0, "recipe" => %{}},
+      "HarvestTest" => %{"growth_duration_hours" => 0.001, "base_drops" => 4, "tier" => 0, "recipe" => %{}},
+      "SimpleSeed" => %{"growth_duration_hours" => 0.001, "base_drops" => 3, "tier" => 0, "recipe" => %{}},
+      "SlowPlant" => %{"growth_duration_hours" => 9999.0, "base_drops" => 1, "tier" => 0, "recipe" => %{}}
+    }
+
+    :ets.insert(:config_cache, {"seed_configs", configs})
+  end
+
   def auth_header(player) do
     [{"authorization", "Bearer #{player.auth_token}"}]
   end

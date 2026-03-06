@@ -1,7 +1,7 @@
 defmodule CampFire.Game.Vases do
   import Ecto.Query
   alias CampFire.Repo
-  alias CampFire.Game.{PlayerVase, PlayerMallum}
+  alias CampFire.Game.{PlayerVase, PlayerMallum, GridValidation}
   alias CampFire.Economy
 
   @default_capacity 5
@@ -28,10 +28,12 @@ defmodule CampFire.Game.Vases do
   end
 
   def craft_vase(player_uid, grid_x, grid_y) do
-    vase_count = count_vases(player_uid)
-    cost = get_vase_cost(vase_count)
+    with :ok <- GridValidation.check_entity_cap(player_uid),
+         :ok <- GridValidation.validate_grid_placement(player_uid, grid_x, grid_y) do
+      vase_count = count_vases(player_uid)
+      cost = get_vase_cost(vase_count)
 
-    Repo.transaction(fn ->
+      Repo.transaction(fn ->
       case Economy.spend_mana(player_uid, cost["manaCost"]) do
         {:ok, _economy} -> :ok
         {:error, reason} -> Repo.rollback(reason)
@@ -56,7 +58,8 @@ defmodule CampFire.Game.Vases do
         grid_y: grid_y
       })
       |> Repo.insert!()
-    end)
+      end)
+    end
   end
 
   # --- Fill ---

@@ -1,7 +1,7 @@
 defmodule CampFire.Game.Gardens do
   import Ecto.Query
   alias CampFire.Repo
-  alias CampFire.Game.PlayerGarden
+  alias CampFire.Game.{PlayerGarden, GridValidation}
   alias CampFire.Economy
 
   # --- Config Helpers ---
@@ -41,12 +41,10 @@ defmodule CampFire.Game.Gardens do
   # --- Plant ---
 
   def plant(player_uid, plant_name, grid_x, grid_y) do
-    case get_plant_config(plant_name) do
-      nil ->
-        {:error, :unknown_plant}
-
-      config ->
-        Repo.transaction(fn ->
+    with {:config, config} when config != nil <- {:config, get_plant_config(plant_name)},
+         :ok <- GridValidation.check_entity_cap(player_uid),
+         :ok <- GridValidation.validate_grid_placement(player_uid, grid_x, grid_y) do
+      Repo.transaction(fn ->
           case Economy.spend_mana(player_uid, config.mana_cost) do
             {:ok, _economy} -> :ok
             {:error, reason} -> Repo.rollback(reason)
@@ -65,6 +63,9 @@ defmodule CampFire.Game.Gardens do
           })
           |> Repo.insert!()
         end)
+    else
+      {:config, nil} -> {:error, :unknown_plant}
+      error -> error
     end
   end
 

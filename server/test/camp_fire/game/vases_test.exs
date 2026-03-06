@@ -11,6 +11,7 @@ defmodule CampFire.Game.VasesTest do
 
   defp setup_player(_context \\ %{}) do
     seed_building_costs()
+    seed_flame_config()
     player = register_player()
     {:ok, _economy} = Economy.init_economy(player.uid)
     # Boost mana for crafting tests
@@ -29,12 +30,12 @@ defmodule CampFire.Game.VasesTest do
     test "creates empty vase and deducts mana + harvest items" do
       {player, _mallum} = setup_player()
 
-      {:ok, vase} = Vases.craft_vase(player.uid, 0, 0)
+      {:ok, vase} = Vases.craft_vase(player.uid, 2, 0)
 
       assert vase.state == "empty"
       assert vase.capacity == 5
       assert vase.current_water == 0
-      assert vase.grid_x == 0
+      assert vase.grid_x == 2
       assert vase.grid_y == 0
 
       economy = Economy.get_economy(player.uid)
@@ -50,8 +51,8 @@ defmodule CampFire.Game.VasesTest do
     test "escalates cost for subsequent vases" do
       {player, _mallum} = setup_player()
 
-      {:ok, _} = Vases.craft_vase(player.uid, 0, 0)
-      {:ok, _} = Vases.craft_vase(player.uid, 1, 0)
+      {:ok, _} = Vases.craft_vase(player.uid, 2, 0)
+      {:ok, _} = Vases.craft_vase(player.uid, 0, 1)
 
       economy = Economy.get_economy(player.uid)
       # 1000 - 120 (index 1) - 150 (index 2) = 730
@@ -65,30 +66,32 @@ defmodule CampFire.Game.VasesTest do
 
     test "fails with insufficient mana" do
       seed_building_costs()
+      seed_flame_config()
       player = register_player()
       {:ok, _economy} = Economy.init_economy(player.uid)
       # Default 50 mana, 2nd vase (index 1) costs 120
       Economy.upsert_item(player.uid, "Basil_harvest", 10)
 
-      {:error, :insufficient_mana} = Vases.craft_vase(player.uid, 0, 0)
+      {:error, :insufficient_mana} = Vases.craft_vase(player.uid, 2, 0)
     end
 
     test "fails with insufficient harvest items" do
       seed_building_costs()
+      seed_flame_config()
       player = register_player()
       {:ok, _economy} = Economy.init_economy(player.uid)
       economy = Economy.get_economy(player.uid)
       economy |> Ecto.Changeset.change(mana: 1000.0) |> Repo.update!()
       # No Basil_harvest given — 2nd vase (index 1) needs 2 Basil_harvest
 
-      {:error, :insufficient_items} = Vases.craft_vase(player.uid, 0, 0)
+      {:error, :insufficient_items} = Vases.craft_vase(player.uid, 2, 0)
     end
   end
 
   describe "start_fill/2" do
     test "claims mallum and sets filling state" do
       {player, _mallum} = setup_player()
-      {:ok, vase} = Vases.craft_vase(player.uid, 0, 0)
+      {:ok, vase} = Vases.craft_vase(player.uid, 2, 0)
 
       {:ok, filling_vase} = Vases.start_fill(player.uid, vase.id)
 
@@ -104,7 +107,7 @@ defmodule CampFire.Game.VasesTest do
 
     test "fails with no idle mallum" do
       {player, mallum} = setup_player()
-      {:ok, vase} = Vases.craft_vase(player.uid, 0, 0)
+      {:ok, vase} = Vases.craft_vase(player.uid, 2, 0)
 
       # Put the mallum on a quest so none are idle
       mallum
@@ -116,7 +119,7 @@ defmodule CampFire.Game.VasesTest do
 
     test "fails when already filling" do
       {player, _mallum} = setup_player()
-      {:ok, vase} = Vases.craft_vase(player.uid, 0, 0)
+      {:ok, vase} = Vases.craft_vase(player.uid, 2, 0)
       {:ok, _} = Vases.start_fill(player.uid, vase.id)
 
       {:error, :already_filling} = Vases.start_fill(player.uid, vase.id)
@@ -126,7 +129,7 @@ defmodule CampFire.Game.VasesTest do
   describe "check_fill/2" do
     test "transitions to full when time elapsed" do
       {player, _mallum} = setup_player()
-      {:ok, vase} = Vases.craft_vase(player.uid, 0, 0)
+      {:ok, vase} = Vases.craft_vase(player.uid, 2, 0)
       {:ok, filling} = Vases.start_fill(player.uid, vase.id)
 
       # Set fill_start_time_utc far in the past
@@ -145,7 +148,7 @@ defmodule CampFire.Game.VasesTest do
 
     test "frees mallum on completion" do
       {player, _mallum} = setup_player()
-      {:ok, vase} = Vases.craft_vase(player.uid, 0, 0)
+      {:ok, vase} = Vases.craft_vase(player.uid, 2, 0)
       {:ok, filling} = Vases.start_fill(player.uid, vase.id)
 
       past = DateTime.add(DateTime.utc_now(), -3600, :second) |> DateTime.truncate(:second)
@@ -162,7 +165,7 @@ defmodule CampFire.Game.VasesTest do
 
     test "returns unchanged vase when fill not complete" do
       {player, _mallum} = setup_player()
-      {:ok, vase} = Vases.craft_vase(player.uid, 0, 0)
+      {:ok, vase} = Vases.craft_vase(player.uid, 2, 0)
       {:ok, _} = Vases.start_fill(player.uid, vase.id)
 
       # Don't manipulate time — fill just started
@@ -174,7 +177,7 @@ defmodule CampFire.Game.VasesTest do
   describe "use_water/2" do
     test "deducts water" do
       {player, _mallum} = setup_player()
-      {:ok, vase} = Vases.craft_vase(player.uid, 0, 0)
+      {:ok, vase} = Vases.craft_vase(player.uid, 2, 0)
       {:ok, _} = Vases.set_water(vase.id, 5)
 
       {:ok, updated} = Vases.use_water(vase.id, 2)
@@ -184,14 +187,14 @@ defmodule CampFire.Game.VasesTest do
 
     test "fails with insufficient water" do
       {player, _mallum} = setup_player()
-      {:ok, vase} = Vases.craft_vase(player.uid, 0, 0)
+      {:ok, vase} = Vases.craft_vase(player.uid, 2, 0)
 
       {:error, :insufficient_water} = Vases.use_water(vase.id, 1)
     end
 
     test "sets state to empty when water reaches zero" do
       {player, _mallum} = setup_player()
-      {:ok, vase} = Vases.craft_vase(player.uid, 0, 0)
+      {:ok, vase} = Vases.craft_vase(player.uid, 2, 0)
       {:ok, _} = Vases.set_water(vase.id, 1)
 
       {:ok, empty} = Vases.use_water(vase.id, 1)
@@ -203,8 +206,8 @@ defmodule CampFire.Game.VasesTest do
   describe "rain_fill_all/1" do
     test "fills all vases and frees mallums" do
       {player, _mallum} = setup_player()
-      {:ok, vase1} = Vases.craft_vase(player.uid, 0, 0)
-      {:ok, vase2} = Vases.craft_vase(player.uid, 1, 0)
+      {:ok, vase1} = Vases.craft_vase(player.uid, 2, 0)
+      {:ok, vase2} = Vases.craft_vase(player.uid, 0, 1)
       {:ok, _} = Vases.start_fill(player.uid, vase1.id)
 
       :ok = Vases.rain_fill_all(player.uid)
@@ -220,6 +223,34 @@ defmodule CampFire.Game.VasesTest do
       # Mallums should all be idle
       mallums = Mallums.list_mallums(player.uid)
       assert Enum.all?(mallums, &(&1.state == "idle"))
+    end
+  end
+
+  describe "craft_vase/3 grid validation" do
+    test "rejects when entity cap reached" do
+      seed_building_costs()
+      seed_flame_config_with_low_cap()
+      player = register_player()
+      {:ok, _economy} = Economy.init_economy(player.uid)
+
+      # Boost mana and give harvest items
+      economy = Economy.get_economy(player.uid)
+      economy |> Ecto.Changeset.change(mana: 10000.0) |> Repo.update!()
+      Economy.upsert_item(player.uid, "Cress_harvest", 50)
+      Economy.upsert_item(player.uid, "Basil_harvest", 50)
+      Economy.upsert_item(player.uid, "Chamomile_harvest", 50)
+
+      # low_cap at level 1 = 3, init_economy creates 1 plot + 1 vase = 2 + 1 apotheke = 3
+      {:error, :entity_cap_reached} = Vases.craft_vase(player.uid, -1, -1)
+    end
+
+    test "rejects occupied hex" do
+      {player, _mallum} = setup_player()
+
+      {:ok, _vase} = Vases.craft_vase(player.uid, 2, 0)
+
+      # Try to place another vase at the same hex
+      {:error, :hex_occupied} = Vases.craft_vase(player.uid, 2, 0)
     end
   end
 end
