@@ -18,7 +18,6 @@ namespace Garden
         public int maxDrops;
         public float manaCost;
         public int tier;
-        public List<float> growthStages;
         // recipe is deserialized manually (nested map)
     }
 
@@ -256,8 +255,7 @@ namespace Garden
                             minDrops = (int)GetFloat(seedMap, "minDrops"),
                             maxDrops = (int)GetFloat(seedMap, "maxDrops"),
                             manaCost = GetFloat(seedMap, "manaCost"),
-                            tier = (int)GetFloat(seedMap, "tier"),
-                            growthStages = GetFloatList(seedMap, "growthStages")
+                            tier = (int)GetFloat(seedMap, "tier")
                         };
                         _seedConfigs[kv.Key] = config;
 

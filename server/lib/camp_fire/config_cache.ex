@@ -83,8 +83,7 @@ defmodule CampFire.ConfigCache do
            min_drops: s.min_drops,
            max_drops: s.max_drops,
            tier: s.tier,
-           recipe: s.recipe,
-           growth_stages: s.growth_stages || []
+           recipe: s.recipe
          }}
       end)
 
