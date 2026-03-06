@@ -3,7 +3,7 @@ defmodule CampFireWeb.EconomyLive do
 
   alias CampFire.Admin
 
-  @known_keys ~w(flame_config vase_config mallum_house_config)
+  @known_keys ~w(flame_config vase_config mallum_house_config building_cost_config)
 
   def mount(_params, _session, socket) do
     {:ok,
@@ -40,12 +40,15 @@ defmodule CampFireWeb.EconomyLive do
   # --- Structured saves ---
 
   def handle_event("save_flame", params, socket) do
+    # Preserve upgrade_recipes from existing data (edited via JSON if needed)
+    upgrade_recipes = (socket.assigns.edit_data || %{})["upgrade_recipes"]
+
     value = %{
-      "base_mana_per_second" => parse_float(params["base_mana_per_second"]),
-      "mana_per_level" => parse_float(params["mana_per_level"]),
       "max_flame_level" => parse_int(params["max_flame_level"]),
+      "mana_rates" => parse_float_list(params, "mana_rate"),
       "entity_caps" => parse_int_list(params, "entity_cap"),
-      "grid_sizes" => parse_int_list(params, "grid_size")
+      "grid_sizes" => parse_int_list(params, "grid_size"),
+      "upgrade_recipes" => upgrade_recipes
     }
 
     save_config("flame_config", value, socket)
@@ -90,12 +93,26 @@ defmodule CampFireWeb.EconomyLive do
     save_config("mallum_house_config", value, socket)
   end
 
+  def handle_event("save_building_cost", params, socket) do
+    plot_costs = parse_cost_list(params, "plot_cost")
+    vase_costs = parse_cost_list(params, "vase_cost")
+
+    value = %{
+      "plot_costs" => plot_costs,
+      "vase_costs" => vase_costs
+    }
+
+    save_config("building_cost_config", value, socket)
+  end
+
   # Add/remove rows for flame config
   def handle_event("add_flame_level", _params, socket) do
     data = socket.assigns.edit_data
     caps = (data["entity_caps"] || []) ++ [0]
     sizes = (data["grid_sizes"] || []) ++ [2]
-    data = data |> Map.put("entity_caps", caps) |> Map.put("grid_sizes", sizes)
+    rates = (data["mana_rates"] || []) ++ [0.0]
+    recipes = (data["upgrade_recipes"] || []) ++ [%{"ingredients" => []}]
+    data = data |> Map.put("entity_caps", caps) |> Map.put("grid_sizes", sizes) |> Map.put("mana_rates", rates) |> Map.put("upgrade_recipes", recipes)
     {:noreply, assign(socket, edit_data: data)}
   end
 
@@ -104,7 +121,9 @@ defmodule CampFireWeb.EconomyLive do
     data = socket.assigns.edit_data
     caps = List.delete_at(data["entity_caps"] || [], i)
     sizes = List.delete_at(data["grid_sizes"] || [], i)
-    data = data |> Map.put("entity_caps", caps) |> Map.put("grid_sizes", sizes)
+    rates = List.delete_at(data["mana_rates"] || [], i)
+    recipes = List.delete_at(data["upgrade_recipes"] || [], i)
+    data = data |> Map.put("entity_caps", caps) |> Map.put("grid_sizes", sizes) |> Map.put("mana_rates", rates) |> Map.put("upgrade_recipes", recipes)
     {:noreply, assign(socket, edit_data: data)}
   end
 
@@ -161,6 +180,47 @@ defmodule CampFireWeb.EconomyLive do
     house = Map.put(house, "harvests", harvests)
     costs = List.replace_at(costs, i, house)
     {:noreply, assign(socket, edit_data: Map.put(data, "house_costs", costs))}
+  end
+
+  # Add/remove building cost rows
+  def handle_event("add_building_cost", %{"type" => type}, socket) do
+    data = socket.assigns.edit_data
+    key = type <> "_costs"
+    costs = (data[key] || []) ++ [%{"manaCost" => 0, "harvestCosts" => []}]
+    {:noreply, assign(socket, edit_data: Map.put(data, key, costs))}
+  end
+
+  def handle_event("remove_building_cost", %{"type" => type, "index" => idx}, socket) do
+    i = parse_int(idx)
+    data = socket.assigns.edit_data
+    key = type <> "_costs"
+    costs = List.delete_at(data[key] || [], i)
+    {:noreply, assign(socket, edit_data: Map.put(data, key, costs))}
+  end
+
+  def handle_event("add_building_harvest", %{"type" => type, "cost-index" => ci}, socket) do
+    i = parse_int(ci)
+    data = socket.assigns.edit_data
+    key = type <> "_costs"
+    costs = data[key] || []
+    entry = Enum.at(costs, i)
+    harvests = (entry["harvestCosts"] || []) ++ [%{"itemName" => "", "count" => 1}]
+    entry = Map.put(entry, "harvestCosts", harvests)
+    costs = List.replace_at(costs, i, entry)
+    {:noreply, assign(socket, edit_data: Map.put(data, key, costs))}
+  end
+
+  def handle_event("remove_building_harvest", %{"type" => type, "cost-index" => ci, "harvest-index" => hi}, socket) do
+    i = parse_int(ci)
+    j = parse_int(hi)
+    data = socket.assigns.edit_data
+    key = type <> "_costs"
+    costs = data[key] || []
+    entry = Enum.at(costs, i)
+    harvests = List.delete_at(entry["harvestCosts"] || [], j)
+    entry = Map.put(entry, "harvestCosts", harvests)
+    costs = List.replace_at(costs, i, entry)
+    {:noreply, assign(socket, edit_data: Map.put(data, key, costs))}
   end
 
   # --- Generic JSON save (fallback for unknown keys) ---
@@ -222,6 +282,29 @@ defmodule CampFireWeb.EconomyLive do
     |> Enum.filter(fn {k, _} -> String.starts_with?(k, prefix <> "_") end)
     |> Enum.sort_by(fn {k, _} -> parse_int(String.replace(k, prefix <> "_", "")) end)
     |> Enum.map(fn {_, v} -> parse_int(v) end)
+  end
+
+  defp parse_float_list(params, prefix) do
+    params
+    |> Enum.filter(fn {k, _} -> String.starts_with?(k, prefix <> "_") end)
+    |> Enum.sort_by(fn {k, _} -> parse_int(String.replace(k, prefix <> "_", "")) end)
+    |> Enum.map(fn {_, v} -> parse_float(v) end)
+  end
+
+  defp parse_cost_list(params, prefix) do
+    (params[prefix] || %{})
+    |> Enum.sort_by(fn {k, _v} -> parse_int(k) end)
+    |> Enum.map(fn {_idx, cost_params} ->
+      harvests =
+        (cost_params["harvest"] || %{})
+        |> Enum.sort_by(fn {k, _} -> parse_int(k) end)
+        |> Enum.map(fn {_i, h} ->
+          %{"itemName" => h["itemName"], "count" => parse_int(h["count"])}
+        end)
+        |> Enum.reject(fn h -> h["itemName"] == "" or h["itemName"] == nil end)
+
+      %{"manaCost" => parse_int(cost_params["manaCost"]), "harvestCosts" => harvests}
+    end)
   end
 
   # --- Render ---
@@ -292,6 +375,7 @@ defmodule CampFireWeb.EconomyLive do
       "flame_config" -> render_flame_display(assigns)
       "vase_config" -> render_vase_display(assigns)
       "mallum_house_config" -> render_mallum_display(assigns)
+      "building_cost_config" -> render_building_cost_display(assigns)
       _ -> render_json_display(assigns)
     end
   end
@@ -301,32 +385,49 @@ defmodule CampFireWeb.EconomyLive do
 
     assigns =
       assign(assigns,
-        base_mana: v["base_mana_per_second"],
-        mana_per_level: v["mana_per_level"],
         max_level: v["max_flame_level"],
+        mana_rates: v["mana_rates"] || [],
         caps: v["entity_caps"] || [],
-        sizes: v["grid_sizes"] || []
+        sizes: v["grid_sizes"] || [],
+        recipes: v["upgrade_recipes"] || []
       )
 
     ~H"""
     <div class="mt-3 space-y-3">
-      <div class="grid grid-cols-3 gap-4 text-sm">
-        <div><span class="text-gray-500">Base Mana/s:</span> <span class="font-medium">{@base_mana}</span></div>
-        <div><span class="text-gray-500">Mana/Level:</span> <span class="font-medium">{@mana_per_level}</span></div>
-        <div><span class="text-gray-500">Max Level:</span> <span class="font-medium">{@max_level}</span></div>
+      <div class="text-sm">
+        <span class="text-gray-500">Max Level:</span> <span class="font-medium">{@max_level}</span>
       </div>
       <table class="w-full text-sm">
         <thead><tr class="bg-gray-50">
           <th class="px-3 py-2 text-left text-gray-500">Level</th>
+          <th class="px-3 py-2 text-left text-gray-500">Mana/s</th>
           <th class="px-3 py-2 text-left text-gray-500">Entity Cap</th>
           <th class="px-3 py-2 text-left text-gray-500">Grid Size</th>
+          <th class="px-3 py-2 text-left text-gray-500">Upgrade Recipe</th>
         </tr></thead>
         <tbody class="divide-y">
           <%= for {cap, i} <- Enum.with_index(@caps) do %>
             <tr>
               <td class="px-3 py-1.5 font-medium">{i + 1}</td>
+              <td class="px-3 py-1.5">{Enum.at(@mana_rates, i, "-")}</td>
               <td class="px-3 py-1.5">{cap}</td>
               <td class="px-3 py-1.5">{Enum.at(@sizes, i, "-")}</td>
+              <td class="px-3 py-1.5">
+                <%= if i == 0 do %>
+                  <span class="text-gray-400">-</span>
+                <% else %>
+                  <% recipe = Enum.at(@recipes, i - 1) %>
+                  <%= if recipe && recipe["ingredients"] != [] do %>
+                    <%= for ing <- recipe["ingredients"] || [] do %>
+                      <span class="inline-block bg-purple-100 text-purple-800 rounded px-2 py-0.5 text-xs mr-1">
+                        {ing["count"]}x {ing["itemName"]}
+                      </span>
+                    <% end %>
+                  <% else %>
+                    <span class="text-gray-400">none</span>
+                  <% end %>
+                <% end %>
+              </td>
             </tr>
           <% end %>
         </tbody>
@@ -416,6 +517,66 @@ defmodule CampFireWeb.EconomyLive do
     """
   end
 
+  defp render_building_cost_display(assigns) do
+    v = assigns.config.value
+    assigns = assign(assigns, plot_costs: v["plot_costs"] || [], vase_costs: v["vase_costs"] || [])
+
+    ~H"""
+    <div class="mt-3 space-y-4">
+      <div>
+        <h4 class="text-sm font-semibold text-gray-700 mb-1">Plot Costs</h4>
+        <table class="w-full text-sm">
+          <thead><tr class="bg-gray-50">
+            <th class="px-3 py-2 text-left text-gray-500">#</th>
+            <th class="px-3 py-2 text-left text-gray-500">Mana</th>
+            <th class="px-3 py-2 text-left text-gray-500">Harvest Requirements</th>
+          </tr></thead>
+          <tbody class="divide-y">
+            <%= for {cost, i} <- Enum.with_index(@plot_costs) do %>
+              <tr>
+                <td class="px-3 py-1.5 font-medium">{i + 1}</td>
+                <td class="px-3 py-1.5">{cost["manaCost"]}</td>
+                <td class="px-3 py-1.5">
+                  <%= for h <- cost["harvestCosts"] || [] do %>
+                    <span class="inline-block bg-amber-100 text-amber-800 rounded px-2 py-0.5 text-xs mr-1">
+                      {h["count"]}x {h["itemName"]}
+                    </span>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <h4 class="text-sm font-semibold text-gray-700 mb-1">Vase Costs</h4>
+        <table class="w-full text-sm">
+          <thead><tr class="bg-gray-50">
+            <th class="px-3 py-2 text-left text-gray-500">#</th>
+            <th class="px-3 py-2 text-left text-gray-500">Mana</th>
+            <th class="px-3 py-2 text-left text-gray-500">Harvest Requirements</th>
+          </tr></thead>
+          <tbody class="divide-y">
+            <%= for {cost, i} <- Enum.with_index(@vase_costs) do %>
+              <tr>
+                <td class="px-3 py-1.5 font-medium">{i + 1}</td>
+                <td class="px-3 py-1.5">{cost["manaCost"]}</td>
+                <td class="px-3 py-1.5">
+                  <%= for h <- cost["harvestCosts"] || [] do %>
+                    <span class="inline-block bg-amber-100 text-amber-800 rounded px-2 py-0.5 text-xs mr-1">
+                      {h["count"]}x {h["itemName"]}
+                    </span>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    """
+  end
+
   defp render_json_display(assigns) do
     ~H"""
     <pre class="mt-2 text-sm text-gray-600 bg-gray-50 rounded p-3 max-h-48 overflow-auto font-mono leading-relaxed">{Jason.encode!(@config.value, pretty: true)}</pre>
@@ -431,6 +592,7 @@ defmodule CampFireWeb.EconomyLive do
       "flame_config" -> render_flame_editor(assigns)
       "vase_config" -> render_vase_editor(assigns)
       "mallum_house_config" -> render_mallum_editor(assigns)
+      "building_cost_config" -> render_building_cost_editor(assigns)
       _ -> render_json_editor(assigns)
     end
   end
@@ -439,31 +601,21 @@ defmodule CampFireWeb.EconomyLive do
     d = assigns.edit_data
     caps = d["entity_caps"] || []
     sizes = d["grid_sizes"] || []
+    rates = d["mana_rates"] || []
 
     assigns =
       assign(assigns,
-        base_mana: d["base_mana_per_second"],
-        mana_per_level: d["mana_per_level"],
         max_level: d["max_flame_level"],
         caps: caps,
-        sizes: sizes
+        sizes: sizes,
+        rates: rates
       )
 
     ~H"""
     <form phx-submit="save_flame" class="mt-3 space-y-4">
-      <div class="grid grid-cols-3 gap-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Base Mana/s</label>
-          <input type="number" step="0.01" name="base_mana_per_second" value={@base_mana} class="mt-1 w-full border rounded px-3 py-2" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Mana/Level</label>
-          <input type="number" step="0.01" name="mana_per_level" value={@mana_per_level} class="mt-1 w-full border rounded px-3 py-2" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Max Flame Level</label>
-          <input type="number" name="max_flame_level" value={@max_level} class="mt-1 w-full border rounded px-3 py-2" />
-        </div>
+      <div class="w-48">
+        <label class="block text-sm font-medium text-gray-700">Max Flame Level</label>
+        <input type="number" name="max_flame_level" value={@max_level} class="mt-1 w-full border rounded px-3 py-2" />
       </div>
 
       <div>
@@ -474,6 +626,7 @@ defmodule CampFireWeb.EconomyLive do
         <table class="w-full text-sm border">
           <thead><tr class="bg-gray-50">
             <th class="px-3 py-2 text-left text-gray-500 w-16">Level</th>
+            <th class="px-3 py-2 text-left text-gray-500">Mana/s</th>
             <th class="px-3 py-2 text-left text-gray-500">Entity Cap</th>
             <th class="px-3 py-2 text-left text-gray-500">Grid Size</th>
             <th class="px-3 py-2 w-10"></th>
@@ -482,6 +635,7 @@ defmodule CampFireWeb.EconomyLive do
             <%= for {cap, i} <- Enum.with_index(@caps) do %>
               <tr>
                 <td class="px-3 py-1.5 font-medium text-gray-500">{i + 1}</td>
+                <td class="px-3 py-1"><input type="number" step="0.01" name={"mana_rate_#{i}"} value={Enum.at(@rates, i, 0.0)} class="w-full border rounded px-2 py-1" /></td>
                 <td class="px-3 py-1"><input type="number" name={"entity_cap_#{i}"} value={cap} class="w-full border rounded px-2 py-1" /></td>
                 <td class="px-3 py-1"><input type="number" name={"grid_size_#{i}"} value={Enum.at(@sizes, i, 2)} class="w-full border rounded px-2 py-1" /></td>
                 <td class="px-3 py-1">
@@ -626,6 +780,58 @@ defmodule CampFireWeb.EconomyLive do
           <% end %>
         </div>
       </div>
+
+      <div class="flex gap-2">
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Save</button>
+        <button type="button" phx-click="cancel" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Cancel</button>
+      </div>
+    </form>
+    """
+  end
+
+  defp render_building_cost_editor(assigns) do
+    d = assigns.edit_data
+    assigns = assign(assigns, plot_costs: d["plot_costs"] || [], vase_costs: d["vase_costs"] || [])
+
+    ~H"""
+    <form phx-submit="save_building_cost" class="mt-3 space-y-4">
+      <%= for {type, label, costs} <- [{"plot", "Plot Costs", @plot_costs}, {"vase", "Vase Costs", @vase_costs}] do %>
+        <div>
+          <div class="flex justify-between items-center mb-2">
+            <label class="text-sm font-semibold text-gray-700">{label}</label>
+            <button type="button" phx-click="add_building_cost" phx-value-type={type} class="text-sm text-green-600 hover:underline">+ Add</button>
+          </div>
+          <div class="space-y-3">
+            <%= for {cost, i} <- Enum.with_index(costs) do %>
+              <div class="border rounded p-3 bg-gray-50">
+                <div class="flex justify-between items-center mb-2">
+                  <span class="text-sm font-medium text-gray-700">#{i + 1}</span>
+                  <button type="button" phx-click="remove_building_cost" phx-value-type={type} phx-value-index={i} class="text-red-500 hover:text-red-700 text-xs">Remove</button>
+                </div>
+                <div class="flex gap-3 items-end mb-2">
+                  <div class="w-32">
+                    <label class="block text-xs text-gray-500">Mana Cost</label>
+                    <input type="number" name={"#{type}_cost[#{i}][manaCost]"} value={cost["manaCost"]} class="w-full border rounded px-2 py-1 text-sm" />
+                  </div>
+                  <button type="button" phx-click="add_building_harvest" phx-value-type={type} phx-value-cost-index={i} class="text-xs text-green-600 hover:underline">+ Harvest Req</button>
+                </div>
+                <%= if (cost["harvestCosts"] || []) != [] do %>
+                  <div class="space-y-1 ml-4">
+                    <%= for {h, j} <- Enum.with_index(cost["harvestCosts"] || []) do %>
+                      <div class="flex gap-2 items-center">
+                        <input type="text" name={"#{type}_cost[#{i}][harvest][#{j}][itemName]"} value={h["itemName"]} placeholder="item_name" class="border rounded px-2 py-1 text-sm w-40" />
+                        <span class="text-gray-400 text-xs">x</span>
+                        <input type="number" name={"#{type}_cost[#{i}][harvest][#{j}][count]"} value={h["count"]} class="border rounded px-2 py-1 text-sm w-16" />
+                        <button type="button" phx-click="remove_building_harvest" phx-value-type={type} phx-value-cost-index={i} phx-value-harvest-index={j} class="text-red-500 hover:text-red-700 text-xs">X</button>
+                      </div>
+                    <% end %>
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
 
       <div class="flex gap-2">
         <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Save</button>

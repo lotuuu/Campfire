@@ -43,7 +43,6 @@ defmodule CampFireWeb.SeedsLive do
            seed_name: "NewSeed_#{System.unique_integer([:positive])}",
            growth_duration_hours: 1.0,
            base_drops: 1,
-           mana_cost: 0.0,
            recipe: %{}
          }) do
       {:ok, seed} ->
@@ -141,16 +140,6 @@ defmodule CampFireWeb.SeedsLive do
                   class="mt-1 block w-full border rounded px-3 py-2"
                 />
               </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700">Mana Cost</label>
-                <input
-                  type="number"
-                  step="0.1"
-                  name="seed_config[mana_cost]"
-                  value={@form[:mana_cost].value}
-                  class="mt-1 block w-full border rounded px-3 py-2"
-                />
-              </div>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Recipe (JSON)</label>
@@ -194,7 +183,6 @@ defmodule CampFireWeb.SeedsLive do
             <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Seed Name</th>
             <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Growth (hrs)</th>
             <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Base Drops</th>
-            <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Mana Cost</th>
             <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Recipe</th>
             <th class="px-4 py-3 text-left text-sm font-medium text-gray-500"></th>
           </tr>
@@ -205,7 +193,6 @@ defmodule CampFireWeb.SeedsLive do
               <td class="px-4 py-3 font-medium">{seed.seed_name}</td>
               <td class="px-4 py-3">{seed.growth_duration_hours}</td>
               <td class="px-4 py-3">{seed.base_drops}</td>
-              <td class="px-4 py-3">{seed.mana_cost}</td>
               <td class="px-4 py-3 text-sm text-gray-500">{recipe_summary(seed.recipe)}</td>
               <td class="px-4 py-3">
                 <button phx-click="edit" phx-value-id={seed.id} class="text-blue-600 hover:underline">

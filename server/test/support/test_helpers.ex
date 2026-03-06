@@ -24,15 +24,15 @@ defmodule CampFire.TestHelpers do
   def seed_building_costs do
     config = %{
       "plot_costs" => [
-        %{"mana_cost" => 150, "harvest_costs" => [%{"item_name" => "Sprouts_harvest", "count" => 1}]},
-        %{"mana_cost" => 200, "harvest_costs" => [%{"item_name" => "Basil_harvest", "count" => 1}]},
-        %{"mana_cost" => 260, "harvest_costs" => [%{"item_name" => "Basil_harvest", "count" => 2}]},
-        %{"mana_cost" => 330, "harvest_costs" => [%{"item_name" => "Chamomile_harvest", "count" => 1}]}
+        %{"manaCost" => 150, "harvestCosts" => [%{"itemName" => "Sprouts_harvest", "count" => 1}]},
+        %{"manaCost" => 200, "harvestCosts" => [%{"itemName" => "Basil_harvest", "count" => 1}]},
+        %{"manaCost" => 260, "harvestCosts" => [%{"itemName" => "Basil_harvest", "count" => 2}]},
+        %{"manaCost" => 330, "harvestCosts" => [%{"itemName" => "Chamomile_harvest", "count" => 1}]}
       ],
       "vase_costs" => [
-        %{"mana_cost" => 100, "harvest_costs" => [%{"item_name" => "Cress_harvest", "count" => 1}]},
-        %{"mana_cost" => 120, "harvest_costs" => [%{"item_name" => "Basil_harvest", "count" => 2}]},
-        %{"mana_cost" => 150, "harvest_costs" => [%{"item_name" => "Chamomile_harvest", "count" => 1}]}
+        %{"manaCost" => 100, "harvestCosts" => [%{"itemName" => "Cress_harvest", "count" => 1}]},
+        %{"manaCost" => 120, "harvestCosts" => [%{"itemName" => "Basil_harvest", "count" => 2}]},
+        %{"manaCost" => 150, "harvestCosts" => [%{"itemName" => "Chamomile_harvest", "count" => 1}]}
       ]
     }
 

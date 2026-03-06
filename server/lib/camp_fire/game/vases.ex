@@ -32,14 +32,14 @@ defmodule CampFire.Game.Vases do
     cost = get_vase_cost(vase_count)
 
     Repo.transaction(fn ->
-      case Economy.spend_mana(player_uid, cost["mana_cost"]) do
+      case Economy.spend_mana(player_uid, cost["manaCost"]) do
         {:ok, _economy} -> :ok
         {:error, reason} -> Repo.rollback(reason)
       end
 
-      harvest_costs = cost["harvest_costs"] || []
+      harvest_costs = cost["harvestCosts"] || []
 
-      Enum.each(harvest_costs, fn %{"item_name" => name, "count" => count} ->
+      Enum.each(harvest_costs, fn %{"itemName" => name, "count" => count} ->
         case Economy.spend_item(player_uid, name, count) do
           {:ok, _} -> :ok
           {:error, reason} -> Repo.rollback(reason)

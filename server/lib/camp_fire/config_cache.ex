@@ -81,7 +81,6 @@ defmodule CampFire.ConfigCache do
            seed_name: s.seed_name,
            growth_duration_hours: s.growth_duration_hours,
            base_drops: s.base_drops,
-           mana_cost: s.mana_cost,
            tier: s.tier,
            recipe: s.recipe
          }}

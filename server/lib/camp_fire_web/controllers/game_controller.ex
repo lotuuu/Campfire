@@ -25,7 +25,6 @@ defmodule CampFireWeb.GameController do
            seedName: s.seed_name,
            growthDurationHours: s.growth_duration_hours,
            baseDrops: s.base_drops,
-           manaCost: s.mana_cost,
            tier: s.tier,
            recipe: s.recipe
          }}
