@@ -7,7 +7,7 @@ namespace Garden
     public class QuestUI : MonoBehaviour
     {
         private VisualElement root;
-        private Label mallumStatusLabel;
+        private VisualElement mallumStatusContainer;
         private VisualElement activeSection;
         private VisualElement availableSection;
         private VisualElement lockedSection;
@@ -16,7 +16,7 @@ namespace Garden
         public void Initialize(VisualElement rootElement)
         {
             root = rootElement;
-            mallumStatusLabel = root.Q<Label>("quest-mallum-status");
+            mallumStatusContainer = root.Q("quest-mallum-status");
             activeSection = root.Q("quest-active-section");
             availableSection = root.Q("quest-available-section");
             lockedSection = root.Q("quest-locked-section");
@@ -35,9 +35,50 @@ namespace Garden
 
         private void UpdateMallumStatus()
         {
+            mallumStatusContainer.Clear();
+
             int available = MallumManager.Instance.GetAvailableMallumCount();
             int total = MallumManager.Instance.GetTotalMallumCount();
-            mallumStatusLabel.text = $"Mallums: {available} / {total} available";
+
+            var label = new Label($"Expedition Party   {available} / {total} idle");
+            label.AddToClassList("quest-mallum-status-label");
+            mallumStatusContainer.Add(label);
+
+            // Visual dots for each Mallum
+            var data = SaveManager.Instance.Data;
+            for (int i = 0; i < data.mallums.Count; i++)
+            {
+                var dot = new VisualElement();
+                dot.AddToClassList("quest-mallum-dot");
+                if (data.mallums[i].state == MallumState.Idle)
+                    dot.AddToClassList("quest-mallum-dot--idle");
+                else
+                    dot.AddToClassList("quest-mallum-dot--busy");
+                mallumStatusContainer.Add(dot);
+            }
+        }
+
+        private VisualElement MakeSectionHeader(string text, bool first = false)
+        {
+            var header = new VisualElement();
+            header.AddToClassList("quest-section-header");
+            if (first) header.AddToClassList("quest-section-header-first");
+
+            var title = new Label(text);
+            title.AddToClassList("quest-section-title");
+            header.Add(title);
+
+            var rule = new VisualElement();
+            rule.AddToClassList("quest-section-rule");
+            header.Add(rule);
+
+            return header;
+        }
+
+        private string TierClass(int flameLevel)
+        {
+            int tier = Mathf.Clamp(flameLevel, 1, 8);
+            return $"quest-tier-{tier}";
         }
 
         private void BuildActiveSection()
@@ -54,12 +95,16 @@ namespace Garden
                 hasActive = true;
                 var card = questCardTemplate.CloneTree();
                 var cardRoot = card.Q(className: "quest-card");
+                var accentStrip = card.Q("quest-accent-strip");
                 var nameLabel = card.Q<Label>("quest-name");
+                var levelBadge = card.Q<Label>("quest-level-badge");
                 var durationLabel = card.Q<Label>("quest-duration");
                 var descLabel = card.Q<Label>("quest-description");
                 var rewardsContainer = card.Q("quest-rewards");
+                var rewardList = card.Q("quest-reward-list");
                 var progressContainer = card.Q("quest-progress-container");
                 var progressFill = card.Q("quest-progress-fill");
+                var progressText = card.Q<Label>("quest-progress-text");
                 var timerLabel = card.Q<Label>("quest-timer");
                 var actionBtn = card.Q<Button>("quest-action");
                 var lockedLabel = card.Q<Label>("quest-locked");
@@ -67,6 +112,7 @@ namespace Garden
                 lockedLabel.style.display = DisplayStyle.None;
                 rewardsContainer.style.display = DisplayStyle.None;
                 descLabel.style.display = DisplayStyle.None;
+                levelBadge.style.display = DisplayStyle.None;
 
                 int mallumIndex = i;
 
@@ -76,9 +122,10 @@ namespace Garden
                         cardRoot.AddToClassList("quest-card--active");
                         nameLabel.text = "Fetching Water";
                         float waterRemaining = VaseManager.Instance.GetRemainingSeconds(mallum.assignedVaseIndex);
-                        durationLabel.text = FormatTime(waterRemaining);
                         float waterProgress = VaseManager.Instance.GetFillProgress(mallum.assignedVaseIndex);
+                        durationLabel.text = FormatTime(waterRemaining);
                         progressFill.style.width = new StyleLength(new Length(waterProgress * 100f, LengthUnit.Percent));
+                        progressText.text = $"{Mathf.RoundToInt(waterProgress * 100)}%";
                         timerLabel.style.display = DisplayStyle.None;
                         actionBtn.style.display = DisplayStyle.None;
                         break;
@@ -86,13 +133,22 @@ namespace Garden
                     case MallumState.OnQuest:
                         cardRoot.AddToClassList("quest-card--active");
                         nameLabel.text = mallum.assignedQuestName;
+
+                        // Find quest data for tier color
+                        var questData = FindQuestByName(mallum.assignedQuestName);
+                        if (questData != null)
+                            accentStrip.AddToClassList(TierClass(questData.requiredFlameLevel));
+
                         float remaining = MallumManager.Instance.GetQuestRemainingSeconds(mallum);
                         float progress = MallumManager.Instance.GetQuestProgress(mallum);
                         durationLabel.text = FormatTime(remaining);
                         progressFill.style.width = new StyleLength(new Length(progress * 100f, LengthUnit.Percent));
+                        progressText.text = $"{Mathf.RoundToInt(progress * 100)}%";
                         timerLabel.style.display = DisplayStyle.None;
+
                         int potionCount = MallumManager.Instance.GetSpeedPotionCount();
-                        actionBtn.text = $"Speed Up ({potionCount})";
+                        actionBtn.text = potionCount > 0 ? $"Speed Up ({potionCount})" : "Speed Up";
+                        actionBtn.AddToClassList("quest-speedup-btn");
                         actionBtn.SetEnabled(potionCount > 0);
                         actionBtn.clicked += () =>
                         {
@@ -106,6 +162,12 @@ namespace Garden
                         cardRoot.AddToClassList("quest-card--complete");
                         nameLabel.text = mallum.assignedQuestName;
                         durationLabel.text = "Complete!";
+                        durationLabel.style.color = new StyleColor(new Color32(80, 190, 100, 255));
+
+                        var completeQuest = FindQuestByName(mallum.assignedQuestName);
+                        if (completeQuest != null)
+                            accentStrip.AddToClassList(TierClass(completeQuest.requiredFlameLevel));
+
                         progressContainer.style.display = DisplayStyle.None;
                         timerLabel.style.display = DisplayStyle.None;
 
@@ -114,13 +176,14 @@ namespace Garden
                         {
                             var chip = new VisualElement();
                             chip.AddToClassList("quest-reward-chip");
+                            chip.AddToClassList("quest-reward-chip--collected");
                             var chipLabel = new Label($"{PlotManager.GetSeedDisplayName(reward.seedName)} x{reward.count}");
                             chipLabel.AddToClassList("quest-reward-name");
                             chip.Add(chipLabel);
-                            rewardsContainer.Add(chip);
+                            rewardList.Add(chip);
                         }
 
-                        actionBtn.text = "Collect";
+                        actionBtn.text = "Collect Rewards";
                         actionBtn.AddToClassList("quest-collect-btn");
                         actionBtn.clicked += () =>
                         {
@@ -135,16 +198,13 @@ namespace Garden
 
             if (!hasActive)
             {
-                var empty = new Label("No active Mallums");
+                var empty = new Label("All Mallums idle - send them on a quest!");
                 empty.AddToClassList("quest-empty-text");
                 activeSection.Add(empty);
             }
             else
             {
-                var title = new Label("Active");
-                title.AddToClassList("quest-section-title");
-                title.AddToClassList("quest-section-title-first");
-                activeSection.Insert(0, title);
+                activeSection.Insert(0, MakeSectionHeader("Active", true));
             }
         }
 
@@ -154,25 +214,28 @@ namespace Garden
             var quests = MallumManager.Instance.GetAvailableQuests();
             if (quests.Count == 0) return;
 
-            var title = new Label("Available Quests");
-            title.AddToClassList("quest-section-title");
-            availableSection.Add(title);
+            availableSection.Add(MakeSectionHeader("Available Quests"));
 
             int available = MallumManager.Instance.GetAvailableMallumCount();
 
             foreach (var quest in quests)
             {
                 var card = questCardTemplate.CloneTree();
+                var accentStrip = card.Q("quest-accent-strip");
                 var nameLabel = card.Q<Label>("quest-name");
+                var levelBadge = card.Q<Label>("quest-level-badge");
                 var durationLabel = card.Q<Label>("quest-duration");
                 var descLabel = card.Q<Label>("quest-description");
                 var rewardsContainer = card.Q("quest-rewards");
+                var rewardList = card.Q("quest-reward-list");
                 var progressContainer = card.Q("quest-progress-container");
                 var timerLabel = card.Q<Label>("quest-timer");
                 var actionBtn = card.Q<Button>("quest-action");
                 var lockedLabel = card.Q<Label>("quest-locked");
 
+                accentStrip.AddToClassList(TierClass(quest.requiredFlameLevel));
                 nameLabel.text = quest.questName;
+                levelBadge.text = $"Lv {quest.requiredFlameLevel}";
                 durationLabel.text = FormatDuration(quest.durationMinutes);
                 descLabel.text = quest.description;
                 progressContainer.style.display = DisplayStyle.None;
@@ -186,11 +249,11 @@ namespace Garden
                     var chipLabel = new Label(reward.seed != null ? reward.seed.seedName : "?");
                     chipLabel.AddToClassList("quest-reward-name");
                     chip.Add(chipLabel);
-                    rewardsContainer.Add(chip);
+                    rewardList.Add(chip);
                 }
 
                 var capturedQuest = quest;
-                actionBtn.text = $"Send Mallum ({available} available)";
+                actionBtn.text = available > 0 ? "Send Mallum" : "No Mallums Idle";
                 actionBtn.SetEnabled(available > 0);
                 actionBtn.clicked += () =>
                 {
@@ -208,15 +271,15 @@ namespace Garden
             var locked = MallumManager.Instance.GetLockedQuests();
             if (locked.Count == 0) return;
 
-            var title = new Label("Locked");
-            title.AddToClassList("quest-section-title");
-            lockedSection.Add(title);
+            lockedSection.Add(MakeSectionHeader("Locked"));
 
             foreach (var quest in locked)
             {
                 var card = questCardTemplate.CloneTree();
                 var cardRoot = card.Q(className: "quest-card");
+                var accentStrip = card.Q("quest-accent-strip");
                 var nameLabel = card.Q<Label>("quest-name");
+                var levelBadge = card.Q<Label>("quest-level-badge");
                 var durationLabel = card.Q<Label>("quest-duration");
                 var descLabel = card.Q<Label>("quest-description");
                 var rewardsContainer = card.Q("quest-rewards");
@@ -226,16 +289,33 @@ namespace Garden
                 var lockedLabel = card.Q<Label>("quest-locked");
 
                 cardRoot.AddToClassList("quest-card--locked");
+                accentStrip.AddToClassList(TierClass(quest.requiredFlameLevel));
                 nameLabel.text = quest.questName;
+                levelBadge.text = $"Lv {quest.requiredFlameLevel}";
                 durationLabel.text = FormatDuration(quest.durationMinutes);
                 descLabel.text = quest.description;
                 progressContainer.style.display = DisplayStyle.None;
                 timerLabel.style.display = DisplayStyle.None;
                 actionBtn.style.display = DisplayStyle.None;
+                rewardsContainer.style.display = DisplayStyle.None;
                 lockedLabel.text = $"Requires Flame Level {quest.requiredFlameLevel}";
 
                 lockedSection.Add(card);
             }
+        }
+
+        private QuestData FindQuestByName(string questName)
+        {
+            if (MallumManager.Instance == null) return null;
+            foreach (var q in MallumManager.Instance.GetAvailableQuests())
+                if (q.questName == questName) return q;
+            foreach (var q in MallumManager.Instance.GetLockedQuests())
+                if (q.questName == questName) return q;
+            // Search all loaded quests
+            var all = Resources.LoadAll<QuestData>("Quests");
+            foreach (var q in all)
+                if (q.questName == questName) return q;
+            return null;
         }
 
         private static string FormatTime(float seconds)

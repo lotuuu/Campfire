@@ -194,7 +194,7 @@
 
                     <!-- Quest panel -->
                     <ui:VisualElement name="quests-panel">
-                        <ui:Label name="quest-mallum-status" class="quest-mallum-status" />
+                        <ui:VisualElement name="quest-mallum-status" class="quest-mallum-status" />
                         <ui:VisualElement name="quest-active-section" />
                         <ui:VisualElement name="quest-available-section" />
                         <ui:VisualElement name="quest-locked-section" />

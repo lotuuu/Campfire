@@ -1,4 +1,339 @@
-/* Floating quest button */
+/* ===== Quest Panel ===== */
+
+#quests-panel {
+    flex-direction: column;
+    flex-grow: 1;
+    padding-top: 4px;
+}
+
+/* --- Mallum Party Status --- */
+
+.quest-mallum-status {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 20px;
+    margin-bottom: 20px;
+    background-color: var(--color-bg-dark);
+    border-radius: var(--radius-md);
+    border-width: 1px;
+    border-color: var(--color-border);
+}
+
+.quest-mallum-status-label {
+    font-size: var(--font-sm);
+    color: var(--color-text);
+    -unity-font-style: bold;
+}
+
+.quest-mallum-dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 9px;
+    margin-left: 6px;
+    margin-right: 6px;
+}
+
+.quest-mallum-dot--idle {
+    background-color: var(--color-text-accent);
+}
+
+.quest-mallum-dot--busy {
+    background-color: var(--color-dim);
+}
+
+/* --- Section Headers --- */
+
+.quest-section-header {
+    flex-direction: row;
+    align-items: center;
+    margin-top: 24px;
+    margin-bottom: 14px;
+    padding-left: 4px;
+}
+
+.quest-section-header-first {
+    margin-top: 0;
+}
+
+.quest-section-title {
+    font-size: var(--font-sm);
+    -unity-font-style: bold;
+    color: var(--color-text-dim);
+    margin-right: 12px;
+}
+
+.quest-section-rule {
+    flex-grow: 1;
+    height: 2px;
+    background-color: var(--color-border);
+    border-radius: 1px;
+}
+
+.quest-empty-text {
+    font-size: var(--font-sm);
+    color: var(--color-dim);
+    -unity-font-style: italic;
+    -unity-text-align: middle-center;
+    padding: 32px 24px;
+}
+
+/* --- Quest Card --- */
+
+.quest-card {
+    flex-direction: row;
+    background-color: var(--color-bg-panel);
+    border-radius: var(--radius-md);
+    margin-bottom: 14px;
+    border-width: 2px;
+    border-color: var(--color-border);
+    overflow: hidden;
+    transition-property: scale;
+    transition-duration: 100ms;
+}
+
+.quest-card:hover {
+    scale: 1.01;
+}
+
+/* Left accent strip — colored per difficulty tier */
+.quest-accent-strip {
+    width: 10px;
+    flex-shrink: 0;
+    background-color: var(--color-border);
+}
+
+/* Tier colors applied via C# */
+.quest-tier-1 { background-color: rgb(120, 180, 100); }
+.quest-tier-2 { background-color: rgb(100, 170, 200); }
+.quest-tier-3 { background-color: rgb(180, 140, 220); }
+.quest-tier-4 { background-color: rgb(220, 160, 80); }
+.quest-tier-5 { background-color: rgb(220, 100, 100); }
+.quest-tier-6 { background-color: rgb(200, 80, 160); }
+.quest-tier-7 { background-color: rgb(100, 120, 220); }
+.quest-tier-8 { background-color: rgb(220, 200, 80); }
+
+.quest-card-body {
+    flex-direction: column;
+    flex-grow: 1;
+    padding: 18px 20px;
+}
+
+/* Active state */
+.quest-card--active {
+    border-color: var(--color-text-accent);
+}
+
+.quest-card--active .quest-accent-strip {
+    background-color: var(--color-text-accent);
+}
+
+/* Complete state — warm glow */
+.quest-card--complete {
+    border-color: rgb(80, 190, 100);
+    background-color: rgb(55, 42, 18);
+}
+
+.quest-card--complete .quest-accent-strip {
+    background-color: rgb(80, 190, 100);
+}
+
+/* Locked state */
+.quest-card--locked {
+    opacity: 0.45;
+}
+
+/* --- Card Header --- */
+
+.quest-card-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 6px;
+}
+
+.quest-card-title-row {
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 1;
+    flex-wrap: wrap;
+}
+
+.quest-card-name {
+    font-size: var(--font-md);
+    -unity-font-style: bold;
+    color: var(--color-text);
+    margin-right: 10px;
+}
+
+.quest-level-badge {
+    font-size: 20px;
+    color: var(--color-text-dim);
+    background-color: var(--color-bg-dark);
+    border-radius: 8px;
+    padding: 2px 10px;
+    -unity-text-align: middle-center;
+}
+
+.quest-card-duration {
+    font-size: var(--font-sm);
+    color: var(--color-text-dim);
+    flex-shrink: 0;
+    margin-left: 12px;
+    padding-top: 4px;
+}
+
+/* --- Description --- */
+
+.quest-card-description {
+    font-size: var(--font-sm);
+    color: var(--color-text-dim);
+    margin-bottom: 14px;
+    white-space: normal;
+    padding-right: 8px;
+}
+
+/* --- Rewards --- */
+
+.quest-card-rewards {
+    flex-direction: column;
+    margin-bottom: 14px;
+}
+
+.quest-rewards-label {
+    font-size: 22px;
+    color: var(--color-dim);
+    -unity-font-style: bold;
+    margin-bottom: 8px;
+    letter-spacing: 2px;
+}
+
+.quest-reward-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.quest-reward-chip {
+    flex-direction: row;
+    align-items: center;
+    background-color: var(--color-bg-dark);
+    border-radius: 14px;
+    padding: 6px 14px;
+    margin-right: 8px;
+    margin-bottom: 6px;
+    border-width: 1px;
+    border-color: var(--color-border);
+}
+
+.quest-reward-name {
+    font-size: var(--font-xs);
+    color: var(--color-text);
+}
+
+/* Collected reward chips in complete state */
+.quest-reward-chip--collected {
+    background-color: rgb(50, 60, 30);
+    border-color: rgb(80, 190, 100);
+}
+
+/* --- Progress Bar --- */
+
+.quest-card-progress {
+    height: 14px;
+    background-color: var(--color-bg-dark);
+    border-radius: 7px;
+    margin-bottom: 14px;
+    overflow: hidden;
+    justify-content: center;
+}
+
+.quest-card-progress-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    background-color: var(--color-text-accent);
+    border-radius: 7px;
+    transition-property: width;
+    transition-duration: 300ms;
+}
+
+.quest-card--complete .quest-card-progress-fill {
+    background-color: rgb(80, 190, 100);
+}
+
+.quest-progress-text {
+    font-size: 18px;
+    color: var(--color-text-bright);
+    -unity-text-align: middle-center;
+    -unity-font-style: bold;
+}
+
+/* --- Timer --- */
+
+.quest-card-timer {
+    font-size: var(--font-sm);
+    color: var(--color-text-accent);
+    -unity-text-align: middle-center;
+    margin-bottom: 10px;
+    -unity-font-style: bold;
+}
+
+/* --- Action Buttons --- */
+
+.quest-card-action {
+    align-self: stretch;
+    height: 64px;
+    border-radius: var(--radius-sm);
+    background-color: var(--color-text-accent);
+    color: var(--color-bg-dark);
+    font-size: var(--font-sm);
+    -unity-font-style: bold;
+    border-width: 0;
+    transition-property: opacity;
+    transition-duration: 100ms;
+}
+
+.quest-card-action:hover {
+    opacity: 0.85;
+}
+
+.quest-card-action:disabled {
+    background-color: var(--color-button-bg-disabled);
+    color: var(--color-dim);
+    opacity: 0.6;
+}
+
+.quest-collect-btn {
+    background-color: rgb(80, 190, 100);
+    color: rgb(20, 30, 10);
+}
+
+.quest-speedup-btn {
+    background-color: var(--color-button-bg);
+    color: var(--color-text-accent);
+    border-width: 2px;
+    border-color: var(--color-text-accent);
+}
+
+.quest-speedup-btn:disabled {
+    border-color: var(--color-dim);
+    color: var(--color-dim);
+    background-color: var(--color-button-bg-disabled);
+}
+
+/* --- Locked Label --- */
+
+.quest-locked-label {
+    font-size: var(--font-xs);
+    color: var(--color-dim);
+    -unity-font-style: italic;
+    -unity-text-align: middle-center;
+    padding: 8px 0;
+}
+
+/* --- Floating Quest Button (kept for legacy/nav) --- */
+
 #quest-float-btn {
     position: absolute;
     bottom: 200px;
@@ -44,169 +379,4 @@
     padding-left: 8px;
     padding-right: 8px;
     display: none;
-}
-
-/* Quest panel */
-#quests-panel {
-    flex-direction: column;
-    flex-grow: 1;
-}
-
-.quest-section-title {
-    font-size: var(--font-sm);
-    -unity-font-style: bold;
-    color: var(--color-text-dim);
-    margin-bottom: 12px;
-    margin-top: 24px;
-    padding-left: 8px;
-}
-
-.quest-section-title-first {
-    margin-top: 0;
-}
-
-/* Quest card */
-.quest-card {
-    flex-direction: column;
-    background-color: var(--color-bg-panel);
-    border-radius: var(--radius-md);
-    padding: 20px;
-    margin-bottom: 12px;
-    border-width: 2px;
-    border-color: var(--color-border);
-    transition-property: scale;
-    transition-duration: 100ms;
-}
-
-.quest-card:hover {
-    scale: 1.01;
-}
-
-.quest-card--active {
-    border-color: var(--color-text-accent);
-}
-
-.quest-card--complete {
-    border-color: #27ae60;
-}
-
-.quest-card--locked {
-    opacity: 0.5;
-}
-
-.quest-card-header {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-}
-
-.quest-card-name {
-    font-size: var(--font-md);
-    -unity-font-style: bold;
-    color: var(--color-text);
-    flex-shrink: 1;
-}
-
-.quest-card-duration {
-    font-size: var(--font-sm);
-    color: var(--color-text-dim);
-    flex-shrink: 0;
-    margin-left: 12px;
-}
-
-.quest-card-description {
-    font-size: var(--font-sm);
-    color: var(--color-text-dim);
-    margin-bottom: 12px;
-    white-space: normal;
-}
-
-.quest-card-rewards {
-    flex-direction: row;
-    flex-wrap: wrap;
-    margin-bottom: 12px;
-}
-
-.quest-reward-chip {
-    flex-direction: row;
-    align-items: center;
-    background-color: var(--color-bg-dark);
-    border-radius: 12px;
-    padding: 4px 12px;
-    margin-right: 8px;
-    margin-bottom: 4px;
-}
-
-.quest-reward-name {
-    font-size: var(--font-xs);
-    color: var(--color-text);
-}
-
-.quest-card-progress {
-    height: 8px;
-    background-color: var(--color-bg-dark);
-    border-radius: 4px;
-    margin-bottom: 12px;
-}
-
-.quest-card-progress-fill {
-    height: 100%;
-    background-color: var(--color-text-accent);
-    border-radius: 4px;
-}
-
-.quest-card-timer {
-    font-size: var(--font-sm);
-    color: var(--color-text-accent);
-    -unity-text-align: middle-center;
-    margin-bottom: 8px;
-}
-
-.quest-card-action {
-    align-self: stretch;
-    height: 64px;
-    border-radius: var(--radius-sm);
-    background-color: var(--color-text-accent);
-    color: var(--color-text-bright);
-    font-size: var(--font-sm);
-    -unity-font-style: bold;
-    border-width: 0;
-}
-
-.quest-card-action:hover {
-    opacity: 0.9;
-}
-
-.quest-card-action:disabled {
-    opacity: 0.4;
-}
-
-.quest-collect-btn {
-    background-color: #27ae60;
-}
-
-.quest-locked-label {
-    font-size: var(--font-xs);
-    color: var(--color-text-dim);
-    -unity-font-style: italic;
-    -unity-text-align: middle-center;
-}
-
-.quest-mallum-status {
-    font-size: var(--font-sm);
-    color: var(--color-text-dim);
-    -unity-text-align: middle-center;
-    margin-bottom: 16px;
-    padding: 12px;
-    background-color: var(--color-bg-panel);
-    border-radius: var(--radius-sm);
-}
-
-.quest-empty-text {
-    font-size: var(--font-sm);
-    color: var(--color-text-dim);
-    -unity-font-style: italic;
-    -unity-text-align: middle-center;
-    padding: 24px;
 }
