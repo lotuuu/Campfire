@@ -7,7 +7,6 @@ namespace Garden
     public class BuildUI : MonoBehaviour
     {
         private VisualElement buildList;
-        private VisualTreeAsset buildTemplate;
 
         public event Action<CampBuildingType> OnRequestPlacement;
         public string SelectedGardenPlant { get; private set; }
@@ -15,7 +14,6 @@ namespace Garden
         public void Initialize(VisualElement root)
         {
             buildList = root.Q("build-list");
-            buildTemplate = Resources.Load<VisualTreeAsset>("UI/Templates/CraftItem");
             Refresh();
         }
 
@@ -24,71 +22,61 @@ namespace Garden
             if (buildList == null) return;
             buildList.Clear();
 
+            bool canPlace = FlameManager.Instance != null && FlameManager.Instance.CanPlaceEntity;
+            string capText = FlameManager.Instance != null
+                ? $"{FlameManager.Instance.CurrentEntityCount}/{FlameManager.Instance.MaxEntities}"
+                : "";
+
+            // Plot
             if (PlotManager.Instance != null && FlameManager.Instance != null)
             {
-                bool canPlace = FlameManager.Instance.CanPlaceEntity;
-                string capText = $"{FlameManager.Instance.CurrentEntityCount}/{FlameManager.Instance.MaxEntities}";
                 var plotCost = PlotManager.Instance.GetNextPlotCost();
                 bool canAfford = canPlace && plotCost != null
                     && CurrencyManager.Instance.CanAffordMana(plotCost.manaCost)
                     && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, plotCost.harvestCosts);
-                string plotCostText = plotCost != null ? FormatBuildingCost(plotCost) : "???";
-                AddBuildItem("New Plot", canPlace ? $"{plotCostText} ({capText})" : $"Cap reached ({capText})", () =>
-                {
-                    if (canAfford)
-                        OnRequestPlacement?.Invoke(CampBuildingType.Plot);
-                });
+                buildList.Add(BuildCardHelper.CreateBuildCard(
+                    "Plot", "Grow seeds", "UI/Icons/Buildings/plot", null,
+                    BuildCardHelper.FromBuildingCost(plotCost), capText,
+                    canAfford, canPlace,
+                    () => OnRequestPlacement?.Invoke(CampBuildingType.Plot)));
             }
 
+            // Vase
             if (VaseManager.Instance != null)
             {
-                bool canPlace = FlameManager.Instance != null && FlameManager.Instance.CanPlaceEntity;
-                string capText = FlameManager.Instance != null
-                    ? $"{FlameManager.Instance.CurrentEntityCount}/{FlameManager.Instance.MaxEntities}"
-                    : "";
                 var vaseCost = VaseManager.Instance.GetNextVaseCost();
                 bool canAfford = canPlace && vaseCost != null
                     && CurrencyManager.Instance.CanAffordMana(vaseCost.manaCost)
                     && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, vaseCost.harvestCosts);
-                string vaseCostText = vaseCost != null ? FormatBuildingCost(vaseCost) : "???";
-                AddBuildItem("New Vase", canPlace ? $"{vaseCostText} ({capText})" : $"Cap reached ({capText})", () =>
-                {
-                    if (canAfford)
-                        OnRequestPlacement?.Invoke(CampBuildingType.Vase);
-                });
+                buildList.Add(BuildCardHelper.CreateBuildCard(
+                    "Vase", "Stores water", "UI/Icons/Buildings/vase", null,
+                    BuildCardHelper.FromBuildingCost(vaseCost), capText,
+                    canAfford, canPlace,
+                    () => OnRequestPlacement?.Invoke(CampBuildingType.Vase)));
             }
 
+            // House
             if (MallumManager.Instance != null)
             {
                 var hConfig = MallumManager.Instance.HouseConfig;
                 var nextCost = hConfig.GetNextHouseCost(SaveManager.Instance.Data.mallumHouses.Count - 1);
                 if (nextCost != null)
                 {
-                    bool canPlace = FlameManager.Instance != null && FlameManager.Instance.CanPlaceEntity;
-                    string capText = FlameManager.Instance != null
-                        ? $"{FlameManager.Instance.CurrentEntityCount}/{FlameManager.Instance.MaxEntities}"
-                        : "";
-                    string costText = $"{nextCost.manaCost:F0} Mana";
-                    foreach (var hc in nextCost.harvestCosts)
-                        costText += $" + {hc.count} {hc.itemName.Replace("_harvest", "")}";
                     bool canAfford = canPlace
                         && CurrencyManager.Instance.CanAffordMana(nextCost.manaCost)
                         && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, nextCost.harvestCosts);
-                    AddBuildItem("House", canPlace ? $"{costText} ({capText})" : $"Cap reached ({capText})", () =>
-                    {
-                        if (canAfford)
-                            OnRequestPlacement?.Invoke(CampBuildingType.MallumHouse);
-                    });
+                    buildList.Add(BuildCardHelper.CreateBuildCard(
+                        "House", "Houses 1 Mallum", "UI/Icons/Buildings/house", null,
+                        BuildCardHelper.FromHouseCost(nextCost), capText,
+                        canAfford, canPlace,
+                        () => OnRequestPlacement?.Invoke(CampBuildingType.MallumHouse)));
                 }
             }
 
-            // Garden entries — one per plant type
+            // Garden entries
             if (GardenManager.Instance != null && FlameManager.Instance != null)
             {
-                bool canPlace = FlameManager.Instance.CanPlaceEntity;
-                string capText = $"{FlameManager.Instance.CurrentEntityCount}/{FlameManager.Instance.MaxEntities}";
                 var data = SaveManager.Instance.Data;
-
                 foreach (var plantData in Resources.LoadAll<GardenPlantData>("GardenPlants"))
                 {
                     int existingCount = 0;
@@ -98,13 +86,12 @@ namespace Garden
                     var cost = plantData.GetCost(existingCount);
                     if (cost == null)
                     {
-                        AddBuildItem(plantData.plantName, "Max reached", () => { });
+                        buildList.Add(BuildCardHelper.CreateBuildCard(
+                            plantData.plantName, $"Yields {plantData.yieldItem}",
+                            null, plantData.icon, null, "Max",
+                            false, false, null));
                         continue;
                     }
-
-                    string costText = $"{cost.manaCost:F0} Mana";
-                    if (cost.seedCost > 0)
-                        costText += $" + {cost.seedCost} {plantData.yieldItem}";
 
                     var item = data.items.Find(it => it.itemName == plantData.yieldItem);
                     int haveItems = item?.count ?? 0;
@@ -112,62 +99,31 @@ namespace Garden
                         && data.mana >= cost.manaCost
                         && haveItems >= cost.seedCost;
 
-                    string displayCost = canPlace ? $"{costText} ({capText})" : $"Cap reached ({capText})";
-                    string pName = plantData.plantName; // capture for lambda
-                    AddBuildItem(pName, displayCost, () =>
-                    {
-                        if (canAfford)
+                    string pName = plantData.plantName;
+                    buildList.Add(BuildCardHelper.CreateBuildCard(
+                        pName, $"Yields {plantData.yieldItem}",
+                        null, plantData.icon,
+                        BuildCardHelper.FromGardenCost(cost, plantData.yieldItem), capText,
+                        canAfford, canPlace, () =>
                         {
                             SelectedGardenPlant = pName;
                             OnRequestPlacement?.Invoke(CampBuildingType.Garden);
-                        }
-                    });
+                        }));
                 }
             }
 
+            // Flame upgrade
             if (FlameManager.Instance != null && FlameManager.Instance.CanUpgrade())
             {
                 var recipe = FlameManager.Instance.Config.GetUpgradeRecipe(FlameManager.Instance.Level);
-                string costText = recipe != null ? FormatRecipeCost(recipe) : "???";
-                AddBuildItem("Upgrade Flame", costText, () =>
-                {
-                    FlameManager.Instance.UpgradeFlame();
-                    Refresh();
-                });
+                buildList.Add(BuildCardHelper.CreateBuildCard(
+                    "Upgrade Flame", "Expand your camp", "UI/Icons/Buildings/flame", null,
+                    BuildCardHelper.FromFlameRecipe(recipe), "", true, true, () =>
+                    {
+                        FlameManager.Instance.UpgradeFlame();
+                        Refresh();
+                    }));
             }
-        }
-
-        private static string FormatBuildingCost(BuildingCost cost)
-        {
-            string text = $"{cost.manaCost:F0} Mana";
-            foreach (var hc in cost.harvestCosts)
-                text += $" + {hc.count} {hc.itemName.Replace("_harvest", "")}";
-            return text;
-        }
-
-        private static string FormatRecipeCost(FlameUpgradeRecipe recipe)
-        {
-            var parts = new System.Collections.Generic.List<string>();
-            foreach (var ing in recipe.ingredients)
-            {
-                string displayName = ing.itemName.Replace("_harvest", "");
-                parts.Add($"{ing.count}x {displayName}");
-            }
-            return string.Join(", ", parts);
-        }
-
-        private void AddBuildItem(string name, string cost, Action onClick)
-        {
-            var el = buildTemplate.CloneTree();
-            var nameLabel = el.Q<Label>(className: "craft-name");
-            var costLabel = el.Q<Label>(className: "craft-cost");
-            var actionBtn = el.Q<Button>(className: "craft-action");
-
-            if (nameLabel != null) nameLabel.text = name;
-            if (costLabel != null) costLabel.text = cost;
-            if (actionBtn != null) actionBtn.clicked += onClick;
-
-            buildList.Add(el);
         }
     }
 }

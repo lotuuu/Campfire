@@ -279,31 +279,17 @@
     color: rgb(120, 100, 75);
 }
 
-/* ── Flame craft/build buttons ── */
+/* ── Build card scroll (horizontal card row in popups) ── */
 
-.flame-craft-btn {
-    align-self: stretch;
-    min-height: 72px;
-    background-color: rgba(50, 35, 18, 0.6);
-    border-width: 1px;
-    border-color: rgba(140, 100, 50, 0.3);
-    border-radius: var(--radius-sm);
-    color: rgb(210, 190, 150);
-    font-size: 24px;
-    -unity-text-align: middle-center;
-    margin-bottom: 8px;
-    padding: var(--spacing-xs) var(--spacing-sm);
+.build-card-scroll {
+    flex-direction: row;
+    max-height: 340px;
+    margin-top: 8px;
 }
 
-.flame-craft-btn:hover {
-    background-color: rgba(70, 48, 24, 0.75);
-    border-color: rgba(200, 140, 50, 0.5);
-}
-
-.flame-craft-btn:disabled {
-    background-color: rgba(40, 30, 18, 0.3);
-    border-color: rgba(100, 70, 35, 0.15);
-    color: rgb(120, 100, 75);
+.build-card-scroll .unity-scroll-view__content-container {
+    flex-direction: row;
+    padding: 4px;
 }
 
 /* ── Water Subscribe Bell ── */

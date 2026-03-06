@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Button class="build-card">
+        <ui:VisualElement class="build-card__icon" />
+        <ui:Label class="build-card__name" text="Building" />
+        <ui:Label class="build-card__desc" text="Description" />
+        <ui:VisualElement class="build-card__costs" />
+        <ui:Label class="build-card__cap" text="3/5" />
+    </ui:Button>
+</ui:UXML>
