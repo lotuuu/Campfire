@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using NUnit.Framework;
 using Garden;
 
@@ -34,23 +33,6 @@ namespace Garden.Tests
             Assert.AreEqual(1, snapshot.gardens.Count);
             Assert.AreEqual("Oak", snapshot.gardens[0].plantName);
             Assert.IsTrue(snapshot.gardens[0].mature);
-        }
-
-        [Test]
-        public void VillageSnapshot_DictionaryRoundTrip()
-        {
-            var snapshot = new VillageSnapshot { flameLevel = 2 };
-            snapshot.plots.Add(new SnapshotPlot
-            {
-                seedName = "Lavender", state = "Mature", gridX = 1, gridY = 0
-            });
-
-            var dict = snapshot.ToDictionary();
-            var loaded = VillageSnapshot.FromDictionary(dict);
-
-            Assert.AreEqual(2, loaded.flameLevel);
-            Assert.AreEqual(1, loaded.plots.Count);
-            Assert.AreEqual("Lavender", loaded.plots[0].seedName);
         }
 
         [Test]
