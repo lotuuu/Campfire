@@ -89,9 +89,11 @@ defmodule CampFire.Game.Birds do
         if bird.player_uid != player_uid do
           {:error, :not_owner}
         else
-          Repo.delete!(bird)
-          Economy.upsert_seed(player_uid, bird.seed_name, bird.seed_count)
-          {:ok, %{seed_name: bird.seed_name, seed_count: bird.seed_count}}
+          Repo.transaction(fn ->
+            Repo.delete!(bird)
+            Economy.upsert_seed(player_uid, bird.seed_name, bird.seed_count)
+            %{seed_name: bird.seed_name, seed_count: bird.seed_count}
+          end)
         end
     end
   end

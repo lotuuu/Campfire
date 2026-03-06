@@ -111,20 +111,26 @@ defmodule CampFire.Game.Gardens do
             elapsed_since_yield = DateTime.diff(now, reference_time, :second) / 3600.0
 
             if elapsed_since_yield >= config.yield_interval_hours do
-              Economy.upsert_item(player_uid, config.yield_item, config.yield_amount)
+              Repo.transaction(fn ->
+                Economy.upsert_item(player_uid, config.yield_item, config.yield_amount)
 
-              updated_garden =
                 garden
                 |> PlayerGarden.changeset(%{last_yield_time_utc: now})
                 |> Repo.update!()
+              end)
+              |> case do
+                {:ok, updated_garden} ->
+                  {:ok,
+                   %{
+                     status: :collected,
+                     garden: updated_garden,
+                     item: config.yield_item,
+                     amount: config.yield_amount
+                   }}
 
-              {:ok,
-               %{
-                 status: :collected,
-                 garden: updated_garden,
-                 item: config.yield_item,
-                 amount: config.yield_amount
-               }}
+                {:error, reason} ->
+                  {:error, reason}
+              end
             else
               {:ok, %{status: :not_ready, garden: garden}}
             end

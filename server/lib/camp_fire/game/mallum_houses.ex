@@ -18,8 +18,10 @@ defmodule CampFire.Game.MallumHouses do
     with :ok <- GridValidation.check_entity_cap(player_uid),
          :ok <- GridValidation.validate_grid_placement(player_uid, grid_x, grid_y) do
       house_count = count_houses(player_uid)
-      cost = get_house_cost(house_count)
 
+      case get_house_cost(house_count) do
+        nil -> {:error, :config_not_loaded}
+        cost ->
       Repo.transaction(fn ->
         case Economy.spend_mana(player_uid, cost["manaCost"]) do
           {:ok, _economy} -> :ok
@@ -58,16 +60,20 @@ defmodule CampFire.Game.MallumHouses do
 
         house
       end)
+      end
     end
   end
 
   # --- Private Helpers ---
 
   defp get_house_cost(house_count) do
-    config = CampFire.ConfigCache.get("mallum_house_config")
-    costs = config["house_costs"]
-    idx = min(house_count, length(costs) - 1)
-    Enum.at(costs, idx)
+    case CampFire.ConfigCache.get("mallum_house_config") do
+      nil -> nil
+      config ->
+        costs = config["house_costs"]
+        idx = min(house_count, length(costs) - 1)
+        Enum.at(costs, idx)
+    end
   end
 
   defp get_mallums_per_house do

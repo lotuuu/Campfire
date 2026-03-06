@@ -83,21 +83,32 @@ defmodule CampFireWeb.GameController do
     uid = conn.assigns.current_player.uid
 
     # Lazy-evaluate timers: mature growing plots, complete filling vases
-    plots_raw = Plots.list_plots(uid)
+    # Use single fetch + in-place updates to avoid N+1 re-fetch
+    plots =
+      Plots.list_plots(uid)
+      |> Enum.map(fn p ->
+        if p.state == "growing" do
+          case Plots.check_maturity(p.id) do
+            {:ok, updated} -> updated
+            _ -> p
+          end
+        else
+          p
+        end
+      end)
 
-    Enum.each(plots_raw, fn p ->
-      if p.state == "growing", do: Plots.check_maturity(p.id)
-    end)
-
-    vases_raw = Vases.list_vases(uid)
-
-    Enum.each(vases_raw, fn v ->
-      if v.state == "filling", do: Vases.check_fill(uid, v.id)
-    end)
-
-    # Re-fetch after lazy eval
-    plots = Plots.list_plots(uid)
-    vases = Vases.list_vases(uid)
+    vases =
+      Vases.list_vases(uid)
+      |> Enum.map(fn v ->
+        if v.state == "filling" do
+          case Vases.check_fill(uid, v.id) do
+            {:ok, updated} -> updated
+            _ -> v
+          end
+        else
+          v
+        end
+      end)
     gardens = Gardens.list_gardens(uid)
     mallums = Mallums.list_mallums(uid)
     houses = MallumHouses.list_houses(uid)
@@ -339,6 +350,22 @@ defmodule CampFireWeb.GameController do
 
   def set_vase_skin(conn, _params) do
     conn |> put_status(400) |> json(%{error: "Missing 'vaseId' and 'skinName'"})
+  end
+
+  def instant_finish_vase(conn, %{"vaseId" => vase_id}) do
+    uid = conn.assigns.current_player.uid
+
+    case Vases.instant_finish(uid, vase_id) do
+      {:ok, vase} ->
+        conn |> put_status(200) |> json(serialize_vase(vase))
+
+      {:error, reason} ->
+        conn |> put_status(422) |> json(%{error: format_error(reason)})
+    end
+  end
+
+  def instant_finish_vase(conn, _params) do
+    conn |> put_status(400) |> json(%{error: "Missing 'vaseId'"})
   end
 
   # ── Gardens ─────────────────────────────────────────────────

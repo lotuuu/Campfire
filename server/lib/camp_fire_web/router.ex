@@ -126,6 +126,7 @@ defmodule CampFireWeb.Router do
     post "/vase/fill", GameController, :fill_vase
     post "/vase/check", GameController, :check_vase
     post "/vase/set-skin", GameController, :set_vase_skin
+    post "/vase/instant-finish", GameController, :instant_finish_vase
     get "/gardens", GameController, :list_gardens
     post "/garden/plant", GameController, :plant_garden
     post "/garden/collect", GameController, :collect_garden

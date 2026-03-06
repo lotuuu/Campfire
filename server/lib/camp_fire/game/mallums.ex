@@ -111,24 +111,26 @@ defmodule CampFire.Game.Mallums do
          true <- mallum.player_uid == player_uid || {:error, :not_owned},
          true <- mallum.state == "quest_complete" || {:error, :not_quest_complete},
          true <- mallum.pending_rewards != [] || {:error, :no_rewards} do
-      Enum.each(mallum.pending_rewards, fn reward ->
-        seed_name = reward["seed_name"]
-        count = reward["count"]
-        Economy.upsert_seed(player_uid, seed_name, count)
-      end)
-
       rewards = mallum.pending_rewards
 
-      mallum
-      |> PlayerMallum.changeset(%{
-        state: "idle",
-        assigned_quest_name: nil,
-        start_time_utc: nil,
-        pending_rewards: []
-      })
-      |> Repo.update()
+      Repo.transaction(fn ->
+        Enum.each(rewards, fn reward ->
+          seed_name = reward["seed_name"]
+          count = reward["count"]
+          Economy.upsert_seed(player_uid, seed_name, count)
+        end)
 
-      {:ok, %{rewards: rewards}}
+        mallum
+        |> PlayerMallum.changeset(%{
+          state: "idle",
+          assigned_quest_name: nil,
+          start_time_utc: nil,
+          pending_rewards: []
+        })
+        |> Repo.update!()
+
+        %{rewards: rewards}
+      end)
     else
       nil -> {:error, :not_found}
       {:error, _} = err -> err
@@ -191,26 +193,29 @@ defmodule CampFire.Game.Mallums do
   # --- Private Helpers ---
 
   defp claim_idle_mallum(player_uid, quest_name) do
-    case Repo.one(
-           from(m in PlayerMallum,
-             where: m.player_uid == ^player_uid and m.state == "idle",
-             limit: 1
-           )
-         ) do
-      nil ->
-        {:error, :no_idle_mallum}
+    Repo.transaction(fn ->
+      case Repo.one(
+             from(m in PlayerMallum,
+               where: m.player_uid == ^player_uid and m.state == "idle",
+               limit: 1,
+               lock: "FOR UPDATE SKIP LOCKED"
+             )
+           ) do
+        nil ->
+          Repo.rollback(:no_idle_mallum)
 
-      mallum ->
-        now = DateTime.utc_now() |> DateTime.truncate(:second)
+        mallum ->
+          now = DateTime.utc_now() |> DateTime.truncate(:second)
 
-        mallum
-        |> PlayerMallum.changeset(%{
-          state: "on_quest",
-          assigned_quest_name: quest_name,
-          start_time_utc: now
-        })
-        |> Repo.update()
-    end
+          mallum
+          |> PlayerMallum.changeset(%{
+            state: "on_quest",
+            assigned_quest_name: quest_name,
+            start_time_utc: now
+          })
+          |> Repo.update!()
+      end
+    end)
   end
 
   defp pick_by_weight([reward | rest], roll, cumulative) do

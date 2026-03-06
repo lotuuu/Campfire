@@ -21,18 +21,23 @@ defmodule CampFire.Game.Vases do
   end
 
   defp get_vase_cost(vase_count) do
-    config = CampFire.ConfigCache.get("building_cost_config")
-    costs = config["vase_costs"]
-    idx = min(vase_count, length(costs) - 1)
-    Enum.at(costs, idx)
+    case CampFire.ConfigCache.get("building_cost_config") do
+      nil -> nil
+      config ->
+        costs = config["vase_costs"]
+        idx = min(vase_count, length(costs) - 1)
+        Enum.at(costs, idx)
+    end
   end
 
   def craft_vase(player_uid, grid_x, grid_y) do
     with :ok <- GridValidation.check_entity_cap(player_uid),
          :ok <- GridValidation.validate_grid_placement(player_uid, grid_x, grid_y) do
       vase_count = count_vases(player_uid)
-      cost = get_vase_cost(vase_count)
 
+      case get_vase_cost(vase_count) do
+        nil -> {:error, :config_not_loaded}
+        cost ->
       Repo.transaction(fn ->
       case Economy.spend_mana(player_uid, cost["manaCost"]) do
         {:ok, _economy} -> :ok
@@ -59,6 +64,7 @@ defmodule CampFire.Game.Vases do
       })
       |> Repo.insert!()
       end)
+      end
     end
   end
 
@@ -110,6 +116,28 @@ defmodule CampFire.Game.Vases do
       else
         {:ok, vase}
       end
+    else
+      nil -> {:error, :not_found}
+      {:error, _} = err -> err
+    end
+  end
+
+  # --- Instant Finish ---
+
+  def instant_finish(player_uid, vase_id) do
+    with %PlayerVase{} = vase <- Repo.get(PlayerVase, vase_id),
+         true <- vase.player_uid == player_uid || {:error, :not_owned},
+         true <- vase.state == "filling" || {:error, :not_filling} do
+      # Free the mallum assigned to this vase
+      free_mallum_for_vase(player_uid, vase_id)
+
+      vase
+      |> PlayerVase.changeset(%{
+        state: "full",
+        current_water: vase.capacity,
+        fill_start_time_utc: nil
+      })
+      |> Repo.update()
     else
       nil -> {:error, :not_found}
       {:error, _} = err -> err
@@ -198,26 +226,29 @@ defmodule CampFire.Game.Vases do
   # --- Private Helpers ---
 
   defp claim_idle_mallum_for_water(player_uid, vase_id) do
-    case Repo.one(
-           from(m in PlayerMallum,
-             where: m.player_uid == ^player_uid and m.state == "idle",
-             limit: 1
-           )
-         ) do
-      nil ->
-        {:error, :no_idle_mallum}
+    Repo.transaction(fn ->
+      case Repo.one(
+             from(m in PlayerMallum,
+               where: m.player_uid == ^player_uid and m.state == "idle",
+               limit: 1,
+               lock: "FOR UPDATE SKIP LOCKED"
+             )
+           ) do
+        nil ->
+          Repo.rollback(:no_idle_mallum)
 
-      mallum ->
-        now = DateTime.utc_now() |> DateTime.truncate(:second)
+        mallum ->
+          now = DateTime.utc_now() |> DateTime.truncate(:second)
 
-        mallum
-        |> PlayerMallum.changeset(%{
-          state: "fetching_water",
-          assigned_vase_id: vase_id,
-          start_time_utc: now
-        })
-        |> Repo.update()
-    end
+          mallum
+          |> PlayerMallum.changeset(%{
+            state: "fetching_water",
+            assigned_vase_id: vase_id,
+            start_time_utc: now
+          })
+          |> Repo.update!()
+      end
+    end)
   end
 
   defp free_mallum_for_vase(player_uid, vase_id) do

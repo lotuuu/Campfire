@@ -30,18 +30,23 @@ defmodule CampFire.Game.Plots do
   end
 
   defp get_plot_cost(plot_count) do
-    config = CampFire.ConfigCache.get("building_cost_config")
-    costs = config["plot_costs"]
-    idx = min(plot_count, length(costs) - 1)
-    Enum.at(costs, idx)
+    case CampFire.ConfigCache.get("building_cost_config") do
+      nil -> nil
+      config ->
+        costs = config["plot_costs"]
+        idx = min(plot_count, length(costs) - 1)
+        Enum.at(costs, idx)
+    end
   end
 
   def craft_plot(player_uid, grid_x, grid_y) do
     with :ok <- GridValidation.check_entity_cap(player_uid),
          :ok <- GridValidation.validate_grid_placement(player_uid, grid_x, grid_y) do
       plot_count = count_plots(player_uid)
-      cost = get_plot_cost(plot_count)
 
+      case get_plot_cost(plot_count) do
+        nil -> {:error, :config_not_loaded}
+        cost ->
       Repo.transaction(fn ->
       case Economy.spend_mana(player_uid, cost["manaCost"]) do
         {:ok, _economy} -> :ok
@@ -66,6 +71,7 @@ defmodule CampFire.Game.Plots do
       })
       |> Repo.insert!()
       end)
+      end
     end
   end
 
@@ -78,24 +84,26 @@ defmodule CampFire.Game.Plots do
          true <- plot.player_uid == player_uid || {:error, :not_owned},
          true <- Map.has_key?(seed_configs, seed_name) || {:error, :unknown_seed},
          true <- plot.state == "empty" || {:error, :plot_not_empty} do
-      case Economy.spend_seed(player_uid, seed_name, 1) do
-        {:error, reason} ->
-          {:error, reason}
+      Repo.transaction(fn ->
+        case Economy.spend_seed(player_uid, seed_name, 1) do
+          {:error, reason} ->
+            Repo.rollback(reason)
 
-        _ ->
-          now = DateTime.utc_now() |> DateTime.truncate(:second)
+          _ ->
+            now = DateTime.utc_now() |> DateTime.truncate(:second)
 
-          plot
-          |> PlayerPlot.changeset(%{
-            seed_name: seed_name,
-            state: "growing",
-            plant_time_utc: now,
-            water_count: 0,
-            last_watered_utc: nil,
-            snapshots: @empty_snapshots
-          })
-          |> Repo.update()
-      end
+            plot
+            |> PlayerPlot.changeset(%{
+              seed_name: seed_name,
+              state: "growing",
+              plant_time_utc: now,
+              water_count: 0,
+              last_watered_utc: nil,
+              snapshots: @empty_snapshots
+            })
+            |> Repo.update!()
+        end
+      end)
     else
       nil -> {:error, :not_found}
       {:error, _} = err -> err
