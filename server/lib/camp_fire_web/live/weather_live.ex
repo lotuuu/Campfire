@@ -41,8 +41,12 @@ defmodule CampFireWeb.WeatherLive do
   end
 
   defp round_key(lat, lon) do
-    {Float.round(lat * 1.0, 2), Float.round(lon * 1.0, 2)}
+    {to_rounded_float(lat), to_rounded_float(lon)}
   end
+
+  defp to_rounded_float(%Decimal{} = d), do: d |> Decimal.round(2) |> Decimal.to_float()
+  defp to_rounded_float(n) when is_float(n), do: Float.round(n, 2)
+  defp to_rounded_float(n) when is_integer(n), do: n * 1.0
 
   def render(assigns) do
     ~H"""
