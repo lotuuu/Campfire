@@ -7,7 +7,8 @@ defmodule CampFire.Game.VasesTest do
   defp setup_player(_context \\ %{}) do
     player = register_player()
     {:ok, _economy} = Economy.init_economy(player.uid)
-    {:ok, mallum} = Mallums.create_mallum(player.uid)
+    # init_economy creates a starter mallum
+    [mallum] = Mallums.list_mallums(player.uid)
     {player, mallum}
   end
 
