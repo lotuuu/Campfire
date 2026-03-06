@@ -36,6 +36,19 @@ namespace Garden
 
         // ── Public API ──
 
+        /// <summary>
+        /// Converts a display name like "Sprouts Seed" to a sprite-friendly slug "sprouts".
+        /// Strips trailing " Seed", lowercases, replaces spaces with hyphens.
+        /// </summary>
+        public static string SeedToSpriteKey(string seedName)
+        {
+            if (string.IsNullOrEmpty(seedName)) return seedName;
+            var s = seedName.Trim();
+            if (s.EndsWith(" Seed", System.StringComparison.OrdinalIgnoreCase))
+                s = s.Substring(0, s.Length - 5);
+            return s.ToLower().Replace(' ', '-');
+        }
+
         public Texture2D GetTexture(string key)
         {
             _textures.TryGetValue(key, out var tex);

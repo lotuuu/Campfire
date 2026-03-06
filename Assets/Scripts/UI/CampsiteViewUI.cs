@@ -573,18 +573,7 @@ namespace Garden
             return true;
         }
 
-        /// <summary>
-        /// Converts a seedName like "Sprouts Seed" to a sprite-friendly slug "sprouts".
-        /// Strips trailing " Seed"/" seed", lowercases, replaces spaces with hyphens.
-        /// </summary>
-        private static string SeedToSpriteKey(string seedName)
-        {
-            if (string.IsNullOrEmpty(seedName)) return seedName;
-            var s = seedName.Trim();
-            if (s.EndsWith(" Seed", StringComparison.OrdinalIgnoreCase))
-                s = s.Substring(0, s.Length - 5);
-            return s.ToLower().Replace(' ', '-');
-        }
+        private static string SeedToSpriteKey(string seedName) => SpriteService.SeedToSpriteKey(seedName);
 
         /// <summary>
         /// Picks the best sprite by scanning keys like {prefix}/0, {prefix}/50, {prefix}/100
@@ -1455,7 +1444,7 @@ namespace Garden
             // Seed icon + yield row
             var yieldRow = new VisualElement();
             yieldRow.AddToClassList("harvest-yield-row");
-            var seedSprite = SpriteService.Instance?.GetSprite($"seeds/{result.seedName.ToLower()}/icon");
+            var seedSprite = SpriteService.Instance?.GetSprite($"seeds/{SeedToSpriteKey(result.seedName)}/icon");
             if (seedSprite != null)
             {
                 var iconEl = new VisualElement();
@@ -2307,19 +2296,28 @@ namespace Garden
         private void MoveBuilding(CampBuildingType type, int index, int newQ, int newR)
         {
             var data = SaveManager.Instance.Data;
+            int serverId = 0;
+            string serverType = null;
+
             switch (type)
             {
                 case CampBuildingType.Plot:
                     data.plots[index].gridX = newQ;
                     data.plots[index].gridY = newR;
+                    serverId = data.plots[index].serverId;
+                    serverType = "plot";
                     break;
                 case CampBuildingType.Vase:
                     data.vases[index].gridX = newQ;
                     data.vases[index].gridY = newR;
+                    serverId = data.vases[index].serverId;
+                    serverType = "vase";
                     break;
                 case CampBuildingType.Garden:
                     data.gardens[index].gridX = newQ;
                     data.gardens[index].gridY = newR;
+                    serverId = data.gardens[index].serverId;
+                    serverType = "garden";
                     break;
                 case CampBuildingType.Apotheke:
                     data.apothekeGridX = newQ;
@@ -2328,9 +2326,16 @@ namespace Garden
                 case CampBuildingType.MallumHouse:
                     data.mallumHouses[index].gridX = newQ;
                     data.mallumHouses[index].gridY = newR;
+                    serverId = data.mallumHouses[index].serverId;
+                    serverType = "mallum_house";
                     break;
             }
             SaveManager.Instance.Save();
+
+            if (serverType != null && serverId > 0 && GameService.Instance != null && GameService.Instance.IsOnline)
+            {
+                _ = GameService.Instance.MoveBuilding(serverType, serverId, newQ, newR);
+            }
         }
 
         private void ExitDragMoveMode(int pointerId)

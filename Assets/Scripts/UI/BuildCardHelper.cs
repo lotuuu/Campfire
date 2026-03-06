@@ -184,11 +184,12 @@ namespace Garden
             string seedName = itemName.Replace("_harvest", "");
 
             // Try seed icon
-            var sprite = SpriteService.Instance?.GetSprite($"seeds/{seedName.ToLower()}/icon");
+            string key = SpriteService.SeedToSpriteKey(seedName);
+            var sprite = SpriteService.Instance?.GetSprite($"seeds/{key}/icon");
             if (sprite != null) return sprite;
 
             // Fallback: try garden plant icon
-            return SpriteService.Instance?.GetSprite($"gardens/{seedName.ToLower()}/icon");
+            return SpriteService.Instance?.GetSprite($"gardens/{key}/icon");
         }
     }
 }
