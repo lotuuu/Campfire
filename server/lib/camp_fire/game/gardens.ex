@@ -44,12 +44,12 @@ defmodule CampFire.Game.Gardens do
 
   # --- Plant ---
 
-  def plant(player_uid, plant_name, grid_x, grid_y) do
+  def plant(player_uid, plant_name, grid_x, grid_y, opts \\ []) do
     with {:config, config} when config != nil <- {:config, get_plant_config(plant_name)},
-         :ok <- GridValidation.check_entity_cap(player_uid),
+         :ok <- GridValidation.check_entity_cap(player_uid, opts),
          :ok <- GridValidation.validate_grid_placement(player_uid, grid_x, grid_y) do
       Repo.transaction(fn ->
-          case Economy.spend_mana(player_uid, config.mana_cost) do
+          case Economy.spend_mana(player_uid, config.mana_cost, opts) do
             {:ok, _economy} -> :ok
             {:error, reason} -> Repo.rollback(reason)
           end

@@ -14,8 +14,8 @@ defmodule CampFire.Game.MallumHouses do
     |> Repo.one()
   end
 
-  def craft_house(player_uid, grid_x, grid_y) do
-    with :ok <- GridValidation.check_entity_cap(player_uid),
+  def craft_house(player_uid, grid_x, grid_y, opts \\ []) do
+    with :ok <- GridValidation.check_entity_cap(player_uid, opts),
          :ok <- GridValidation.validate_grid_placement(player_uid, grid_x, grid_y) do
       house_count = count_houses(player_uid)
 
@@ -23,7 +23,7 @@ defmodule CampFire.Game.MallumHouses do
         nil -> {:error, :config_not_loaded}
         cost ->
       Repo.transaction(fn ->
-        case Economy.spend_mana(player_uid, cost["manaCost"]) do
+        case Economy.spend_mana(player_uid, cost["manaCost"], opts) do
           {:ok, _economy} -> :ok
           {:error, reason} -> Repo.rollback(reason)
         end
@@ -31,7 +31,7 @@ defmodule CampFire.Game.MallumHouses do
         harvest_costs = cost["harvestCosts"] || []
 
         Enum.each(harvest_costs, fn %{"itemName" => name, "count" => count} ->
-          case Economy.spend_item(player_uid, name, count) do
+          case Economy.spend_item(player_uid, name, count, opts) do
             {:ok, _} -> :ok
             {:error, reason} -> Repo.rollback(reason)
           end

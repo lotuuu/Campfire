@@ -26,7 +26,7 @@ namespace Garden
             }
         }
 
-        public bool CanPlaceEntity => CurrentEntityCount < MaxEntities;
+        public bool CanPlaceEntity => CurrencyManager.FreeMode || CurrentEntityCount < MaxEntities;
 
         public event Action OnFlameUpgraded;
 
@@ -127,8 +127,8 @@ namespace Garden
                 var items = new List<SpendItemEntry>();
                 foreach (var ing in recipe.ingredients)
                     items.Add(new SpendItemEntry { item_name = ing.itemName, count = ing.count });
-                EconomyService.Instance.Enqueue("upgrade-flame",
-                    JsonUtility.ToJson(new UpgradeFlameRequest { items = items }));
+                var req = new UpgradeFlameRequest { items = items, freeMode = CurrencyManager.FreeMode };
+                EconomyService.Instance.Enqueue("upgrade-flame", JsonUtility.ToJson(req));
             }
             OnFlameUpgraded?.Invoke();
             return true;

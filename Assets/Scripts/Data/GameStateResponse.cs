@@ -88,16 +88,16 @@ namespace Garden
     }
 
     // Request DTOs
-    [Serializable] public class CraftRequest { public int gridX; public int gridY; }
-    [Serializable] public class PlantRequest { public int plotId; public string seedName; }
+    [Serializable] public class CraftRequest { public int gridX; public int gridY; public bool freeMode; }
+    [Serializable] public class PlantRequest { public int plotId; public string seedName; public bool freeMode; }
     [Serializable] public class WaterRequest { public int plotId; public int vaseId; }
     [Serializable] public class HarvestRequest { public int plotId; }
     [Serializable] public class FillVaseRequest { public int vaseId; }
     [Serializable] public class CheckVaseRequest { public int vaseId; }
     [Serializable] public class InstantFinishVaseRequest { public int vaseId; }
-    [Serializable] public class PlantGardenRequest { public string plantName; public int gridX; public int gridY; }
+    [Serializable] public class PlantGardenRequest { public string plantName; public int gridX; public int gridY; public bool freeMode; }
     [Serializable] public class CollectGardenRequest { public int gardenId; }
-    [Serializable] public class QuestRequest { public string questName; }
+    [Serializable] public class QuestRequest { public string questName; public bool freeMode; }
     [Serializable] public class MallumIdRequest { public int mallumId; }
     [Serializable] public class SetSkinRequest { public string skinName; }
     [Serializable] public class PlotSkinRequest { public int plotId; public string skinName; }
@@ -123,7 +123,7 @@ namespace Garden
     }
 
     [Serializable] public class BirdCollectRequest { public int birdId; }
-    [Serializable] public class ApothekeCraftRequest { public string recipeName; }
+    [Serializable] public class ApothekeCraftRequest { public string recipeName; public bool freeMode; }
     [Serializable] public class ApothekeCraftResponse { public string resultItem; public int resultQuantity; }
     [Serializable] public class BirdCheckResponse { public List<ServerBird> newBirds; }
     [Serializable] public class BirdCollectResponse { public string seedName; public int seedCount; }

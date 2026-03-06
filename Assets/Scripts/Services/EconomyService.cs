@@ -35,12 +35,14 @@ namespace Garden
     public class SpendManaRequest
     {
         public float amount;
+        public bool freeMode;
     }
 
     [Serializable]
     public class SpendGemsRequest
     {
         public int amount;
+        public bool freeMode;
     }
 
     [Serializable]
@@ -61,6 +63,7 @@ namespace Garden
     {
         public string seed_name;
         public int count;
+        public bool freeMode;
     }
 
     [Serializable]
@@ -74,6 +77,7 @@ namespace Garden
     public class SpendItemsRequest
     {
         public List<SpendItemEntry> items;
+        public bool freeMode;
     }
 
     [Serializable]
@@ -87,6 +91,7 @@ namespace Garden
     public class UpgradeFlameRequest
     {
         public List<SpendItemEntry> items;
+        public bool freeMode;
     }
 
     public class EconomyService : MonoBehaviour

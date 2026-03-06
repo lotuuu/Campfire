@@ -241,7 +241,8 @@ namespace Garden
                 {
                     var spendItems = new SpendItemsRequest
                     {
-                        items = new List<SpendItemEntry> { new SpendItemEntry { item_name = hc.itemName, count = hc.count } }
+                        items = new List<SpendItemEntry> { new SpendItemEntry { item_name = hc.itemName, count = hc.count } },
+                        freeMode = CurrencyManager.FreeMode
                     };
                     EconomyService.Instance.Enqueue("spend-items", JsonUtility.ToJson(spendItems));
                 }
@@ -290,7 +291,7 @@ namespace Garden
                 if (seedEntry.count <= 0) data.seedInventory.Remove(seedEntry);
                 if (!(GameService.Instance != null && GameService.Instance.IsOnline))
                     EconomyService.Instance?.Enqueue("spend-seeds",
-                        JsonUtility.ToJson(new SpendSeedRequest { seed_name = seedName, count = 1 }));
+                        JsonUtility.ToJson(new SpendSeedRequest { seed_name = seedName, count = 1, freeMode = CurrencyManager.FreeMode }));
             }
 
             plot.seedName = seedName;

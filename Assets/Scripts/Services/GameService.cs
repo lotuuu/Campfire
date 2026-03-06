@@ -283,7 +283,7 @@ namespace Garden
             if (!IsOnline) return null;
             try
             {
-                var body = JsonUtility.ToJson(new CraftRequest { gridX = gridX, gridY = gridY });
+                var body = JsonUtility.ToJson(new CraftRequest { gridX = gridX, gridY = gridY, freeMode = CurrencyManager.FreeMode });
                 using var req = PostJson("/game/plot/craft", body);
                 await SendAsync(req);
 
@@ -301,7 +301,7 @@ namespace Garden
             if (!IsOnline) return null;
             try
             {
-                var body = JsonUtility.ToJson(new PlantRequest { plotId = plotId, seedName = seedName });
+                var body = JsonUtility.ToJson(new PlantRequest { plotId = plotId, seedName = seedName, freeMode = CurrencyManager.FreeMode });
                 using var req = PostJson("/game/plot/plant", body);
                 await SendAsync(req);
 
@@ -375,7 +375,7 @@ namespace Garden
             if (!IsOnline) return null;
             try
             {
-                var body = JsonUtility.ToJson(new CraftRequest { gridX = gridX, gridY = gridY });
+                var body = JsonUtility.ToJson(new CraftRequest { gridX = gridX, gridY = gridY, freeMode = CurrencyManager.FreeMode });
                 using var req = PostJson("/game/vase/craft", body);
                 await SendAsync(req);
 
@@ -467,7 +467,7 @@ namespace Garden
             if (!IsOnline) return null;
             try
             {
-                var body = JsonUtility.ToJson(new PlantGardenRequest { plantName = plantName, gridX = gridX, gridY = gridY });
+                var body = JsonUtility.ToJson(new PlantGardenRequest { plantName = plantName, gridX = gridX, gridY = gridY, freeMode = CurrencyManager.FreeMode });
                 using var req = PostJson("/game/garden/plant", body);
                 await SendAsync(req);
 
@@ -505,7 +505,7 @@ namespace Garden
             if (!IsOnline) return null;
             try
             {
-                var body = JsonUtility.ToJson(new QuestRequest { questName = questName });
+                var body = JsonUtility.ToJson(new QuestRequest { questName = questName, freeMode = CurrencyManager.FreeMode });
                 using var req = PostJson("/game/quest/start", body);
                 await SendAsync(req);
 
@@ -579,7 +579,7 @@ namespace Garden
             if (!IsOnline) return null;
             try
             {
-                var body = JsonUtility.ToJson(new CraftRequest { gridX = gridX, gridY = gridY });
+                var body = JsonUtility.ToJson(new CraftRequest { gridX = gridX, gridY = gridY, freeMode = CurrencyManager.FreeMode });
                 using var req = PostJson("/game/mallum-house/craft", body);
                 await SendAsync(req);
 
@@ -693,7 +693,7 @@ namespace Garden
             if (!IsOnline) return null;
             try
             {
-                var body = JsonUtility.ToJson(new ApothekeCraftRequest { recipeName = recipeName });
+                var body = JsonUtility.ToJson(new ApothekeCraftRequest { recipeName = recipeName, freeMode = CurrencyManager.FreeMode });
                 using var req = PostJson("/game/apotheke/craft", body);
                 await SendAsync(req);
 

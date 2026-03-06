@@ -29,7 +29,15 @@ defmodule CampFire.Game.GridValidation do
 
   Returns `:ok` or `{:error, :entity_cap_reached}`.
   """
-  def check_entity_cap(player_uid) do
+  def check_entity_cap(player_uid, opts \\ []) do
+    if opts[:free_mode] do
+      :ok
+    else
+      check_entity_cap_impl(player_uid)
+    end
+  end
+
+  defp check_entity_cap_impl(player_uid) do
     case CampFire.ConfigCache.get("flame_config") do
       nil ->
         {:error, :config_not_loaded}

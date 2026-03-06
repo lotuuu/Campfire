@@ -197,10 +197,11 @@ defmodule CampFireWeb.GameController do
     conn |> put_status(200) |> json(%{plots: Enum.map(plots, &serialize_plot/1)})
   end
 
-  def craft_plot(conn, %{"gridX" => x, "gridY" => y}) do
+  def craft_plot(conn, %{"gridX" => x, "gridY" => y} = params) do
     uid = conn.assigns.current_player.uid
+    opts = free_mode_opts(params)
 
-    case Plots.craft_plot(uid, x, y) do
+    case Plots.craft_plot(uid, x, y, opts) do
       {:ok, plot} ->
         conn |> put_status(201) |> json(serialize_plot(plot))
 
@@ -213,10 +214,11 @@ defmodule CampFireWeb.GameController do
     conn |> put_status(400) |> json(%{error: "Missing 'gridX' and 'gridY'"})
   end
 
-  def plant_seed(conn, %{"plotId" => plot_id, "seedName" => seed_name}) do
+  def plant_seed(conn, %{"plotId" => plot_id, "seedName" => seed_name} = params) do
     uid = conn.assigns.current_player.uid
+    opts = free_mode_opts(params)
 
-    case Plots.plant(uid, plot_id, seed_name) do
+    case Plots.plant(uid, plot_id, seed_name, opts) do
       {:ok, plot} ->
         conn |> put_status(200) |> json(serialize_plot(plot))
 
@@ -288,10 +290,11 @@ defmodule CampFireWeb.GameController do
     conn |> put_status(200) |> json(%{vases: Enum.map(vases, &serialize_vase/1)})
   end
 
-  def craft_vase(conn, %{"gridX" => x, "gridY" => y}) do
+  def craft_vase(conn, %{"gridX" => x, "gridY" => y} = params) do
     uid = conn.assigns.current_player.uid
+    opts = free_mode_opts(params)
 
-    case Vases.craft_vase(uid, x, y) do
+    case Vases.craft_vase(uid, x, y, opts) do
       {:ok, vase} ->
         conn |> put_status(201) |> json(serialize_vase(vase))
 
@@ -376,10 +379,11 @@ defmodule CampFireWeb.GameController do
     conn |> put_status(200) |> json(%{gardens: Enum.map(gardens, &serialize_garden/1)})
   end
 
-  def plant_garden(conn, %{"plantName" => name, "gridX" => x, "gridY" => y}) do
+  def plant_garden(conn, %{"plantName" => name, "gridX" => x, "gridY" => y} = params) do
     uid = conn.assigns.current_player.uid
+    opts = free_mode_opts(params)
 
-    case Gardens.plant(uid, name, x, y) do
+    case Gardens.plant(uid, name, x, y, opts) do
       {:ok, garden} ->
         conn |> put_status(201) |> json(serialize_garden(garden))
 
@@ -489,10 +493,11 @@ defmodule CampFireWeb.GameController do
 
   # ── Mallum Houses ─────────────────────────────────────────────
 
-  def craft_mallum_house(conn, %{"gridX" => gx, "gridY" => gy}) do
+  def craft_mallum_house(conn, %{"gridX" => gx, "gridY" => gy} = params) do
     uid = conn.assigns.current_player.uid
+    opts = free_mode_opts(params)
 
-    case MallumHouses.craft_house(uid, gx, gy) do
+    case MallumHouses.craft_house(uid, gx, gy, opts) do
       {:ok, house} -> conn |> put_status(201) |> json(serialize_mallum_house(house))
       {:error, reason} -> conn |> put_status(422) |> json(%{error: format_error(reason)})
     end
@@ -520,10 +525,11 @@ defmodule CampFireWeb.GameController do
 
   # ── Apotheke ────────────────────────────────────────────────
 
-  def craft_apotheke(conn, %{"recipeName" => recipe_name}) do
+  def craft_apotheke(conn, %{"recipeName" => recipe_name} = params) do
     uid = conn.assigns.current_player.uid
+    opts = free_mode_opts(params)
 
-    case Apotheke.craft(uid, recipe_name) do
+    case Apotheke.craft(uid, recipe_name, opts) do
       {:ok, result} ->
         conn |> put_status(200) |> json(%{resultItem: result.result_item, resultQuantity: result.result_quantity})
 
@@ -682,6 +688,10 @@ defmodule CampFireWeb.GameController do
 
   defp format_datetime(nil), do: nil
   defp format_datetime(%DateTime{} = dt), do: DateTime.to_iso8601(dt)
+
+  defp free_mode_opts(params) do
+    if params["freeMode"], do: [free_mode: true], else: []
+  end
 
   defp format_error(reason) when is_atom(reason), do: Atom.to_string(reason)
   defp format_error(reason) when is_binary(reason), do: reason

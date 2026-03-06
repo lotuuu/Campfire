@@ -69,23 +69,22 @@ defmodule CampFire.Economy do
     end
   end
 
-  def add_mana(player_uid, amount) when is_number(amount) and amount > 0 do
-    {count, results} =
-      from(e in PlayerEconomy, where: e.player_uid == ^player_uid, select: e)
-      |> Repo.update_all(inc: [mana: amount])
+  def spend_mana(player_uid, amount, opts \\ []) when is_number(amount) and amount > 0 do
+    if opts[:free_mode] do
+      case Repo.get(PlayerEconomy, player_uid) do
+        nil -> {:error, :insufficient_mana}
+        economy -> {:ok, economy}
+      end
+    else
+      {count, results} =
+        from(e in PlayerEconomy,
+          where: e.player_uid == ^player_uid and e.mana >= ^amount,
+          select: e
+        )
+        |> Repo.update_all(inc: [mana: -amount])
 
-    if count == 1, do: {:ok, hd(results)}, else: {:error, :not_found}
-  end
-
-  def spend_mana(player_uid, amount) when is_number(amount) and amount > 0 do
-    {count, results} =
-      from(e in PlayerEconomy,
-        where: e.player_uid == ^player_uid and e.mana >= ^amount,
-        select: e
-      )
-      |> Repo.update_all(inc: [mana: -amount])
-
-    if count == 1, do: {:ok, hd(results)}, else: {:error, :insufficient_mana}
+      if count == 1, do: {:ok, hd(results)}, else: {:error, :insufficient_mana}
+    end
   end
 
   # --- Gems ---
@@ -98,20 +97,27 @@ defmodule CampFire.Economy do
     if count == 1, do: {:ok, hd(results)}, else: {:error, :not_found}
   end
 
-  def spend_gems(player_uid, amount) when is_integer(amount) and amount > 0 do
-    {count, results} =
-      from(e in PlayerEconomy,
-        where: e.player_uid == ^player_uid and e.gems >= ^amount,
-        select: e
-      )
-      |> Repo.update_all(inc: [gems: -amount])
+  def spend_gems(player_uid, amount, opts \\ []) when is_integer(amount) and amount > 0 do
+    if opts[:free_mode] do
+      case Repo.get(PlayerEconomy, player_uid) do
+        nil -> {:error, :insufficient_gems}
+        economy -> {:ok, economy}
+      end
+    else
+      {count, results} =
+        from(e in PlayerEconomy,
+          where: e.player_uid == ^player_uid and e.gems >= ^amount,
+          select: e
+        )
+        |> Repo.update_all(inc: [gems: -amount])
 
-    if count == 1, do: {:ok, hd(results)}, else: {:error, :insufficient_gems}
+      if count == 1, do: {:ok, hd(results)}, else: {:error, :insufficient_gems}
+    end
   end
 
   # --- Flame ---
 
-  def upgrade_flame(player_uid, required_items) when is_list(required_items) do
+  def upgrade_flame(player_uid, required_items, opts \\ []) when is_list(required_items) do
     Repo.transaction(fn ->
       economy = Repo.get(PlayerEconomy, player_uid)
 
@@ -121,12 +127,14 @@ defmodule CampFire.Economy do
         true -> :ok
       end
 
-      Enum.each(required_items, fn %{"item_name" => name, "count" => count} ->
-        case spend_items_in_tx(player_uid, name, count) do
-          :ok -> :ok
-          {:error, reason} -> Repo.rollback(reason)
-        end
-      end)
+      unless opts[:free_mode] do
+        Enum.each(required_items, fn %{"item_name" => name, "count" => count} ->
+          case spend_items_in_tx(player_uid, name, count) do
+            :ok -> :ok
+            {:error, reason} -> Repo.rollback(reason)
+          end
+        end)
+      end
 
       now = DateTime.utc_now() |> DateTime.truncate(:second)
 
@@ -153,23 +161,27 @@ defmodule CampFire.Economy do
     )
   end
 
-  def spend_seed(player_uid, seed_name, count) when is_integer(count) and count > 0 do
-    {updated, _} =
-      from(s in PlayerSeed,
-        where: s.player_uid == ^player_uid and s.seed_name == ^seed_name and s.count >= ^count
-      )
-      |> Repo.update_all(inc: [count: -count])
-
-    if updated == 0 do
-      {:error, :insufficient_seeds}
-    else
-      # Clean up zero-count rows
-      from(s in PlayerSeed,
-        where: s.player_uid == ^player_uid and s.seed_name == ^seed_name and s.count == 0
-      )
-      |> Repo.delete_all()
-
+  def spend_seed(player_uid, seed_name, count, opts \\ []) when is_integer(count) and count > 0 do
+    if opts[:free_mode] do
       {:ok, :spent}
+    else
+      {updated, _} =
+        from(s in PlayerSeed,
+          where: s.player_uid == ^player_uid and s.seed_name == ^seed_name and s.count >= ^count
+        )
+        |> Repo.update_all(inc: [count: -count])
+
+      if updated == 0 do
+        {:error, :insufficient_seeds}
+      else
+        # Clean up zero-count rows
+        from(s in PlayerSeed,
+          where: s.player_uid == ^player_uid and s.seed_name == ^seed_name and s.count == 0
+        )
+        |> Repo.delete_all()
+
+        {:ok, :spent}
+      end
     end
   end
 
@@ -188,35 +200,43 @@ defmodule CampFire.Economy do
     )
   end
 
-  def spend_item(player_uid, item_name, count) when is_integer(count) and count > 0 do
-    {updated, _} =
-      from(i in PlayerItem,
-        where: i.player_uid == ^player_uid and i.item_name == ^item_name and i.count >= ^count
-      )
-      |> Repo.update_all(inc: [count: -count])
-
-    if updated == 0 do
-      {:error, :insufficient_items}
-    else
-      # Clean up zero-count rows
-      from(i in PlayerItem,
-        where: i.player_uid == ^player_uid and i.item_name == ^item_name and i.count == 0
-      )
-      |> Repo.delete_all()
-
+  def spend_item(player_uid, item_name, count, opts \\ []) when is_integer(count) and count > 0 do
+    if opts[:free_mode] do
       {:ok, :spent}
+    else
+      {updated, _} =
+        from(i in PlayerItem,
+          where: i.player_uid == ^player_uid and i.item_name == ^item_name and i.count >= ^count
+        )
+        |> Repo.update_all(inc: [count: -count])
+
+      if updated == 0 do
+        {:error, :insufficient_items}
+      else
+        # Clean up zero-count rows
+        from(i in PlayerItem,
+          where: i.player_uid == ^player_uid and i.item_name == ^item_name and i.count == 0
+        )
+        |> Repo.delete_all()
+
+        {:ok, :spent}
+      end
     end
   end
 
-  def spend_items(player_uid, items) when is_list(items) do
-    Repo.transaction(fn ->
-      Enum.each(items, fn %{"item_name" => name, "count" => count} ->
-        case spend_items_in_tx(player_uid, name, count) do
-          :ok -> :ok
-          {:error, reason} -> Repo.rollback(reason)
-        end
+  def spend_items(player_uid, items, opts \\ []) when is_list(items) do
+    if opts[:free_mode] do
+      {:ok, nil}
+    else
+      Repo.transaction(fn ->
+        Enum.each(items, fn %{"item_name" => name, "count" => count} ->
+          case spend_items_in_tx(player_uid, name, count) do
+            :ok -> :ok
+            {:error, reason} -> Repo.rollback(reason)
+          end
+        end)
       end)
-    end)
+    end
   end
 
   defp create_starter_buildings(player_uid) do

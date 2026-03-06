@@ -47,7 +47,7 @@ namespace Garden
             AddMana(-amount);
             if (!(GameService.Instance != null && GameService.Instance.IsOnline))
                 EconomyService.Instance?.Enqueue("spend-mana",
-                    JsonUtility.ToJson(new SpendManaRequest { amount = amount }));
+                    JsonUtility.ToJson(new SpendManaRequest { amount = amount, freeMode = FreeMode }));
             return true;
         }
 
@@ -102,7 +102,7 @@ namespace Garden
             AddGems(-amount);
             if (!(GameService.Instance != null && GameService.Instance.IsOnline))
                 EconomyService.Instance?.Enqueue("spend-gems",
-                    JsonUtility.ToJson(new SpendGemsRequest { amount = amount }));
+                    JsonUtility.ToJson(new SpendGemsRequest { amount = amount, freeMode = FreeMode }));
             return true;
         }
 

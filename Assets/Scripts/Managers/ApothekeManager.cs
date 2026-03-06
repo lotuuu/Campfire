@@ -60,7 +60,8 @@ namespace Garden
                 {
                     var spendItems = new SpendItemsRequest
                     {
-                        items = new List<SpendItemEntry> { new SpendItemEntry { item_name = ing.itemName, count = ing.quantity } }
+                        items = new List<SpendItemEntry> { new SpendItemEntry { item_name = ing.itemName, count = ing.quantity } },
+                        freeMode = CurrencyManager.FreeMode
                     };
                     EconomyService.Instance.Enqueue("spend-items", JsonUtility.ToJson(spendItems));
                 }

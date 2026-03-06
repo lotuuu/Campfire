@@ -44,10 +44,10 @@ defmodule CampFireWeb.EconomyController do
     end
   end
 
-  def spend_mana(conn, %{"amount" => amount}) when is_number(amount) do
+  def spend_mana(conn, %{"amount" => amount} = params) when is_number(amount) do
     player_uid = conn.assigns.current_player.uid
 
-    case Economy.spend_mana(player_uid, amount) do
+    case Economy.spend_mana(player_uid, amount, free_mode_opts(params)) do
       {:ok, economy} ->
         conn |> put_status(200) |> json(%{mana: economy.mana})
 
@@ -60,10 +60,10 @@ defmodule CampFireWeb.EconomyController do
     conn |> put_status(400) |> json(%{error: "Missing or invalid 'amount'"})
   end
 
-  def spend_gems(conn, %{"amount" => amount}) when is_integer(amount) do
+  def spend_gems(conn, %{"amount" => amount} = params) when is_integer(amount) do
     player_uid = conn.assigns.current_player.uid
 
-    case Economy.spend_gems(player_uid, amount) do
+    case Economy.spend_gems(player_uid, amount, free_mode_opts(params)) do
       {:ok, economy} ->
         conn |> put_status(200) |> json(%{gems: economy.gems})
 
@@ -92,10 +92,10 @@ defmodule CampFireWeb.EconomyController do
     conn |> put_status(400) |> json(%{error: "Missing or invalid 'amount'"})
   end
 
-  def upgrade_flame(conn, %{"items" => items}) when is_list(items) do
+  def upgrade_flame(conn, %{"items" => items} = params) when is_list(items) do
     player_uid = conn.assigns.current_player.uid
 
-    case Economy.upgrade_flame(player_uid, items) do
+    case Economy.upgrade_flame(player_uid, items, free_mode_opts(params)) do
       {:ok, economy} ->
         conn |> put_status(200) |> json(%{flameLevel: economy.flame_level})
 
@@ -129,11 +129,11 @@ defmodule CampFireWeb.EconomyController do
     conn |> put_status(400) |> json(%{error: "Missing 'seed_name' (string) and 'count' (positive integer)"})
   end
 
-  def spend_seeds(conn, %{"seed_name" => name, "count" => count})
+  def spend_seeds(conn, %{"seed_name" => name, "count" => count} = params)
       when is_binary(name) and is_integer(count) and count > 0 do
     player_uid = conn.assigns.current_player.uid
 
-    case Economy.spend_seed(player_uid, name, count) do
+    case Economy.spend_seed(player_uid, name, count, free_mode_opts(params)) do
       {:ok, _} ->
         seeds = Economy.list_seeds(player_uid)
         conn |> put_status(200) |> json(%{seeds: format_seeds(seeds)})
@@ -165,10 +165,10 @@ defmodule CampFireWeb.EconomyController do
     conn |> put_status(400) |> json(%{error: "Missing 'item_name' (string) and 'count' (positive integer)"})
   end
 
-  def spend_items(conn, %{"items" => items}) when is_list(items) do
+  def spend_items(conn, %{"items" => items} = params) when is_list(items) do
     player_uid = conn.assigns.current_player.uid
 
-    case Economy.spend_items(player_uid, items) do
+    case Economy.spend_items(player_uid, items, free_mode_opts(params)) do
       {:ok, _} ->
         all_items = Economy.list_items(player_uid)
         conn |> put_status(200) |> json(%{items: format_items(all_items)})
@@ -180,6 +180,10 @@ defmodule CampFireWeb.EconomyController do
 
   def spend_items(conn, _params) do
     conn |> put_status(400) |> json(%{error: "Missing 'items' array"})
+  end
+
+  defp free_mode_opts(params) do
+    if params["freeMode"], do: [free_mode: true], else: []
   end
 
   defp format_state(economy, seeds, items) do

@@ -39,8 +39,8 @@ defmodule CampFire.Game.Plots do
     end
   end
 
-  def craft_plot(player_uid, grid_x, grid_y) do
-    with :ok <- GridValidation.check_entity_cap(player_uid),
+  def craft_plot(player_uid, grid_x, grid_y, opts \\ []) do
+    with :ok <- GridValidation.check_entity_cap(player_uid, opts),
          :ok <- GridValidation.validate_grid_placement(player_uid, grid_x, grid_y) do
       plot_count = count_plots(player_uid)
 
@@ -48,7 +48,7 @@ defmodule CampFire.Game.Plots do
         nil -> {:error, :config_not_loaded}
         cost ->
       Repo.transaction(fn ->
-      case Economy.spend_mana(player_uid, cost["manaCost"]) do
+      case Economy.spend_mana(player_uid, cost["manaCost"], opts) do
         {:ok, _economy} -> :ok
         {:error, reason} -> Repo.rollback(reason)
       end
@@ -56,7 +56,7 @@ defmodule CampFire.Game.Plots do
       harvest_costs = cost["harvestCosts"] || []
 
       Enum.each(harvest_costs, fn %{"itemName" => name, "count" => count} ->
-        case Economy.spend_item(player_uid, name, count) do
+        case Economy.spend_item(player_uid, name, count, opts) do
           {:ok, _} -> :ok
           {:error, reason} -> Repo.rollback(reason)
         end
@@ -77,7 +77,7 @@ defmodule CampFire.Game.Plots do
 
   # --- Plant ---
 
-  def plant(player_uid, plot_id, seed_name) do
+  def plant(player_uid, plot_id, seed_name, opts \\ []) do
     seed_configs = CampFire.ConfigCache.get("seed_configs") || %{}
 
     with %PlayerPlot{} = plot <- Repo.get(PlayerPlot, plot_id),
@@ -85,7 +85,7 @@ defmodule CampFire.Game.Plots do
          true <- Map.has_key?(seed_configs, seed_name) || {:error, :unknown_seed},
          true <- plot.state == "empty" || {:error, :plot_not_empty} do
       Repo.transaction(fn ->
-        case Economy.spend_seed(player_uid, seed_name, 1) do
+        case Economy.spend_seed(player_uid, seed_name, 1, opts) do
           {:error, reason} ->
             Repo.rollback(reason)
 
