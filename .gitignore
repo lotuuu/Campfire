@@ -40,3 +40,4 @@ Assets/Resources/Config/secrets.json.meta
 
 # Crashlytics
 crashlytics-build.properties
+.worktrees/
