@@ -1227,7 +1227,17 @@ namespace Garden
                         if (MallumManager.Instance != null && MallumManager.Instance.ConsumeSpeedPotion())
                         {
                             PlotManager.Instance.InstantFinish(index);
-                            CloseInteractionPanel();
+                            suppressRebuild = true;
+                            var result = PlotManager.Instance.Harvest(index);
+                            suppressRebuild = false;
+                            if (result != null)
+                            {
+                                RebuildGrid();
+                                ShowHarvestResult(result);
+                                ShowInteractionPanel();
+                            }
+                            else
+                                CloseInteractionPanel();
                         }
                     }) { text = $"Finish Now ({plotPotionCount} potions)" };
                     finishBtn.SetEnabled(plotPotionCount > 0 || CurrencyManager.FreeMode);
@@ -1570,7 +1580,9 @@ namespace Garden
                         if (MallumManager.Instance != null && MallumManager.Instance.ConsumeSpeedPotion())
                         {
                             VaseManager.Instance.InstantFinish(index);
-                            CloseInteractionPanel();
+                            RebuildGrid();
+                            ShowVaseInteraction(index);
+                            ShowInteractionPanel();
                         }
                     }) { text = $"Finish Now ({vasePotionCount} potions)" };
                     finishVaseBtn.SetEnabled(vasePotionCount > 0 || CurrencyManager.FreeMode);

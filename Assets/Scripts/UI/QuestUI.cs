@@ -97,6 +97,7 @@ namespace Garden
                         actionBtn.clicked += () =>
                         {
                             MallumManager.Instance.SpeedUpQuest(mallumIndex);
+                            MallumManager.Instance.CollectQuestRewards(mallumIndex);
                             Refresh();
                         };
                         break;
