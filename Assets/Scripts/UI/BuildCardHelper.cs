@@ -122,31 +122,6 @@ namespace Garden
             return chips;
         }
 
-        public static List<CostChip> FromHouseCost(HouseCost cost)
-        {
-            var chips = new List<CostChip>();
-            if (cost == null) return chips;
-
-            if (cost.manaCost > 0)
-            {
-                chips.Add(new CostChip
-                {
-                    icon = LoadManaIcon(),
-                    amount = $"{cost.manaCost:F0}"
-                });
-            }
-
-            foreach (var hc in cost.harvestCosts)
-            {
-                chips.Add(new CostChip
-                {
-                    icon = LoadHarvestIcon(hc.itemName),
-                    amount = $"{hc.count}"
-                });
-            }
-
-            return chips;
-        }
 
         public static List<CostChip> FromGardenCost(GardenCostTier cost, string yieldItem)
         {

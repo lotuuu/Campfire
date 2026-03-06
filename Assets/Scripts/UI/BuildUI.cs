@@ -58,8 +58,7 @@ namespace Garden
             // House
             if (MallumManager.Instance != null)
             {
-                var hConfig = MallumManager.Instance.HouseConfig;
-                var nextCost = hConfig.GetNextHouseCost(SaveManager.Instance.Data.mallumHouses.Count - 1);
+                var nextCost = MallumManager.Instance.GetNextHouseCost();
                 if (nextCost != null)
                 {
                     bool canAfford = canPlace
@@ -67,7 +66,7 @@ namespace Garden
                         && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, nextCost.harvestCosts);
                     buildList.Add(BuildCardHelper.CreateBuildCard(
                         "House", "Houses 1 Mallum", "UI/Icons/Buildings/house", null,
-                        BuildCardHelper.FromHouseCost(nextCost), capText,
+                        BuildCardHelper.FromBuildingCost(nextCost), capText,
                         canAfford, canPlace,
                         () => OnRequestPlacement?.Invoke(CampBuildingType.MallumHouse)));
                 }

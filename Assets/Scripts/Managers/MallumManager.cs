@@ -13,8 +13,21 @@ namespace Garden
         [SerializeField] private MallumHouseConfig houseConfig;
 
         private QuestData[] allQuests;
+        private BuildingCostConfig buildingCostConfig;
 
         public MallumHouseConfig HouseConfig => houseConfig;
+
+        private BuildingCostConfig LoadBuildingCostConfig()
+        {
+            if (buildingCostConfig == null)
+                buildingCostConfig = Resources.Load<BuildingCostConfig>("Config/BuildingCostConfig");
+            return buildingCostConfig;
+        }
+
+        public BuildingCost GetNextHouseCost()
+        {
+            return LoadBuildingCostConfig()?.GetHouseCost(SaveManager.Instance.Data.mallumHouses.Count - 1);
+        }
         public event Action OnMallumsChanged;
 
         public void NotifyChanged() => OnMallumsChanged?.Invoke();
@@ -91,17 +104,21 @@ namespace Garden
             if (cs == null || !cs.IsLoaded || cs.MallumHouseConfig == null) return;
 
             var flags = BindingFlags.NonPublic | BindingFlags.Instance;
-            var type = typeof(MallumHouseConfig);
 
-            type.GetField("mallumsPerHouse", flags)?.SetValue(houseConfig, cs.MallumHouseConfig.mallums_per_house);
+            // Apply mallumsPerHouse to MallumHouseConfig
+            typeof(MallumHouseConfig).GetField("mallumsPerHouse", flags)?.SetValue(houseConfig, cs.MallumHouseConfig.mallums_per_house);
 
+            // Apply house costs to BuildingCostConfig
             var serverCosts = cs.HouseCosts;
             if (serverCosts != null && serverCosts.Count > 0)
             {
-                var costs = new List<HouseCost>();
+                var bcc = LoadBuildingCostConfig();
+                if (bcc == null) return;
+
+                var costs = new List<BuildingCost>();
                 foreach (var sc in serverCosts)
                 {
-                    var cost = new HouseCost();
+                    var cost = new BuildingCost();
                     cost.manaCost = sc.TryGetValue("mana", out var m) ? ToFloat(m) : 0f;
 
                     if (sc.TryGetValue("harvests", out var hObj) && hObj is List<object> harvests)
@@ -119,7 +136,7 @@ namespace Garden
                     }
                     costs.Add(cost);
                 }
-                type.GetField("houseCosts", flags)?.SetValue(houseConfig, costs);
+                typeof(BuildingCostConfig).GetField("houseCosts", flags)?.SetValue(bcc, costs);
             }
         }
 
@@ -294,7 +311,7 @@ namespace Garden
             if (!FlameManager.Instance.CanPlaceEntity) return false;
 
             var data = SaveManager.Instance.Data;
-            var cost = houseConfig.GetNextHouseCost(data.mallumHouses.Count - 1);
+            var cost = LoadBuildingCostConfig()?.GetHouseCost(data.mallumHouses.Count - 1);
             if (cost == null) return false;
 
             // Check mana

@@ -13,20 +13,3 @@ MonoBehaviour:
   m_Name: MallumHouseConfig
   m_EditorClassIdentifier: Garden::Garden.MallumHouseConfig
   mallumsPerHouse: 1
-  houseCosts:
-  - manaCost: 15
-    harvestCosts: []
-  - manaCost: 30
-    harvestCosts:
-    - itemName: Basil_harvest
-      count: 3
-  - manaCost: 60
-    harvestCosts:
-    - itemName: Lavender_harvest
-      count: 4
-  - manaCost: 100
-    harvestCosts:
-    - itemName: Chamomile_harvest
-      count: 3
-    - itemName: Mint_harvest
-      count: 3

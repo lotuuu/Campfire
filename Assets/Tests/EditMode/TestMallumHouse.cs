@@ -22,16 +22,16 @@ namespace Garden.Tests
         }
 
         [Test]
-        public void GetNextHouseCost_ReturnsNull_WhenNoCostsDefined()
+        public void GetHouseCost_ReturnsNull_WhenNoCostsDefined()
         {
-            var config = ScriptableObject.CreateInstance<MallumHouseConfig>();
-            Assert.IsNull(config.GetNextHouseCost(0));
+            var config = ScriptableObject.CreateInstance<BuildingCostConfig>();
+            Assert.IsNull(config.GetHouseCost(0));
         }
 
         [Test]
         public void CanBuildNextHouse_ReturnsFalse_WhenNoCostsLeft()
         {
-            var config = ScriptableObject.CreateInstance<MallumHouseConfig>();
+            var config = ScriptableObject.CreateInstance<BuildingCostConfig>();
             Assert.IsFalse(config.CanBuildNextHouse(0));
         }
 

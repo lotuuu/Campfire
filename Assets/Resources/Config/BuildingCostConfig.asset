@@ -100,3 +100,22 @@ MonoBehaviour:
       count: 2
     - itemName: Chamomile_harvest
       count: 2
+  houseCosts:
+  - manaCost: 150
+    harvestCosts:
+    - itemName: Cress_harvest
+      count: 2
+  - manaCost: 1000
+    harvestCosts:
+    - itemName: Basil_harvest
+      count: 20
+  - manaCost: 5000
+    harvestCosts:
+    - itemName: Lavender_harvest
+      count: 40
+  - manaCost: 10000
+    harvestCosts:
+    - itemName: Chamomile_harvest
+      count: 30
+    - itemName: Mint_harvest
+      count: 40

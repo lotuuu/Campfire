@@ -5,6 +5,13 @@ using UnityEngine;
 namespace Garden
 {
     [Serializable]
+    public class HarvestCost
+    {
+        public string itemName;
+        public int count;
+    }
+
+    [Serializable]
     public class BuildingCost
     {
         public float manaCost;
@@ -16,6 +23,7 @@ namespace Garden
     {
         [SerializeField] private List<BuildingCost> plotCosts = new();
         [SerializeField] private List<BuildingCost> vaseCosts = new();
+        [SerializeField] private List<BuildingCost> houseCosts = new();
 
         public BuildingCost GetPlotCost(int currentPlotCount)
         {
@@ -29,6 +37,18 @@ namespace Garden
             if (vaseCosts.Count == 0) return null;
             int index = Mathf.Clamp(currentVaseCount, 0, vaseCosts.Count - 1);
             return vaseCosts[index];
+        }
+
+        public BuildingCost GetHouseCost(int currentHouseCount)
+        {
+            if (currentHouseCount < 0 || currentHouseCount >= houseCosts.Count)
+                return null;
+            return houseCosts[currentHouseCount];
+        }
+
+        public bool CanBuildNextHouse(int currentHouseCount)
+        {
+            return GetHouseCost(currentHouseCount) != null;
         }
     }
 }
