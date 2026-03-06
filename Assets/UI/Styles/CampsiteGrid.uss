@@ -26,22 +26,26 @@
 .grid-cell--placeable {
     --hex-fill: rgba(120, 180, 60, 0.15);
     --hex-border: rgba(120, 180, 60, 0.4);
+    -unity-background-image-tint-color: rgba(150, 255, 150, 1);
 }
 
 .grid-cell--placeable:hover {
     --hex-fill: rgba(120, 180, 60, 0.3);
     --hex-border: rgba(160, 220, 80, 0.6);
+    -unity-background-image-tint-color: rgba(200, 255, 200, 1);
 }
 
 /* ── Watering mode highlights ── */
 .grid-cell--water-target {
     --hex-fill: rgba(60, 140, 220, 0.2);
     --hex-border: rgba(80, 160, 240, 0.5);
+    -unity-background-image-tint-color: rgba(150, 200, 255, 1);
 }
 
 .grid-cell--water-target:hover {
     --hex-fill: rgba(60, 140, 220, 0.35);
     --hex-border: rgba(100, 180, 255, 0.7);
+    -unity-background-image-tint-color: rgba(180, 220, 255, 1);
 }
 
 .grid-cell--water-cooldown {
@@ -267,11 +271,13 @@
 .grid-cell--drop-target {
     --hex-fill: rgba(120, 180, 60, 0.1);
     --hex-border: rgba(120, 180, 60, 0.3);
+    -unity-background-image-tint-color: rgba(150, 255, 150, 1);
 }
 
 .grid-cell--drop-hover {
     --hex-fill: rgba(120, 180, 60, 0.35);
     --hex-border: rgba(160, 220, 80, 0.7);
+    -unity-background-image-tint-color: rgba(200, 255, 200, 1);
 }
 
 /* ── Watering mode dim for non-waterable cells ── */

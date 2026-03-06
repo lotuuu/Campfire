@@ -291,6 +291,9 @@ namespace Garden
                     {
                         PopulateOccupiedCell(cell, label, status, progress, progressFill, info.type, info.index);
 
+                        if (mode == CampsiteMode.Placing)
+                            cell.AddToClassList("grid-cell--dimmed");
+
                         // In watering mode, highlight planted plots as targets or dim non-waterable cells
                         if (mode == CampsiteMode.Watering)
                         {
