@@ -6,7 +6,14 @@ defmodule CampFireWeb.QuestsLive do
 
   def mount(_params, _session, socket) do
     seed_names = Admin.list_seeds() |> Enum.map(& &1.seed_name) |> Enum.sort()
-    {:ok, assign(socket, active_tab: :quests, quests: Admin.list_quests(), seed_names: seed_names)}
+    {:ok,
+     socket
+     |> assign(active_tab: :quests, quests: Admin.list_quests(), seed_names: seed_names)
+     |> allow_upload(:icon,
+       accept: ~w(.png),
+       max_file_size: 512_000,
+       max_entries: 1
+     )}
   end
 
   def handle_params(%{"id" => id}, _uri, socket) do
@@ -61,6 +68,14 @@ defmodule CampFireWeb.QuestsLive do
   end
 
   def handle_event("save", %{"quest_config" => params}, socket) do
+    consume_uploaded_entries(socket, :icon, fn %{path: path}, _entry ->
+      quest = socket.assigns.editing
+      key = "quests/#{String.downcase(quest.quest_name)}"
+      data = File.read!(path)
+      CampFire.Sprites.upload_sprite(key, data)
+      {:ok, key}
+    end)
+
     quest = socket.assigns.editing
     rewards = socket.assigns.rewards
 
@@ -178,6 +193,19 @@ defmodule CampFireWeb.QuestsLive do
       <%= if @editing do %>
         <div class="bg-white border rounded-lg p-6 mb-6">
           <h3 class="text-lg font-semibold mb-4">Edit: {@editing.quest_name}</h3>
+          <div class="flex items-center gap-4 mb-4">
+            <div class="w-16 h-16 bg-gray-100 rounded border flex items-center justify-center overflow-hidden">
+              <img
+                src={CampFire.Sprites.sprite_url("quests/#{String.downcase(@editing.quest_name)}")}
+                class="w-14 h-14 object-contain"
+                onerror="this.parentElement.innerHTML='<span class=\'text-xs text-gray-400\'>No icon</span>'"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Replace icon</label>
+              <.live_file_input upload={@uploads.icon} class="text-sm" />
+            </div>
+          </div>
           <.form for={@form} phx-submit="save" class="space-y-4">
             <div class="grid grid-cols-2 gap-4">
               <div>

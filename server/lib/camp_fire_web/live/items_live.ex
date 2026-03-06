@@ -9,7 +9,8 @@ defmodule CampFireWeb.ItemsLive do
 
   def mount(_params, _session, socket) do
     {:ok,
-     assign(socket,
+     socket
+     |> assign(
        active_tab: :items,
        sub_tab: :seeds,
        seeds: Admin.list_seeds(),
@@ -21,6 +22,11 @@ defmodule CampFireWeb.ItemsLive do
        recipe_json: nil,
        ingredients: [],
        skin_form: %{}
+     )
+     |> allow_upload(:icon,
+       accept: ~w(.png),
+       max_file_size: 512_000,
+       max_entries: 1
      )}
   end
 
@@ -134,6 +140,15 @@ defmodule CampFireWeb.ItemsLive do
   end
 
   def handle_event("save_seed", %{"seed_config" => params}, socket) do
+    # Upload icon if provided
+    consume_uploaded_entries(socket, :icon, fn %{path: path}, _entry ->
+      seed = socket.assigns.editing
+      key = "seeds/#{String.downcase(seed.seed_name)}/icon"
+      data = File.read!(path)
+      CampFire.Sprites.upload_sprite(key, data)
+      {:ok, key}
+    end)
+
     seed = socket.assigns.editing
     recipe_json = Map.get(params, "recipe_json", "{}")
 
@@ -321,6 +336,14 @@ defmodule CampFireWeb.ItemsLive do
   end
 
   def handle_event("save_skin", params, socket) do
+    consume_uploaded_entries(socket, :icon, fn %{path: path}, _entry ->
+      old_name = socket.assigns.editing.name
+      key = "skins/#{String.downcase(old_name)}"
+      data = File.read!(path)
+      CampFire.Sprites.upload_sprite(key, data)
+      {:ok, key}
+    end)
+
     old_name = socket.assigns.editing.name
     new_name = String.trim(params["skin_name"] || old_name)
 
@@ -488,6 +511,19 @@ defmodule CampFireWeb.ItemsLive do
       <%= if @editing do %>
         <div class="bg-white border rounded-lg p-6 mb-6">
           <h3 class="text-lg font-semibold mb-4">Edit: {@editing.seed_name}</h3>
+          <div class="flex items-center gap-4 mb-4">
+            <div class="w-16 h-16 bg-gray-100 rounded border flex items-center justify-center overflow-hidden">
+              <img
+                src={CampFire.Sprites.sprite_url("seeds/#{String.downcase(@editing.seed_name)}/icon")}
+                class="w-14 h-14 object-contain"
+                onerror="this.parentElement.innerHTML='<span class=\'text-xs text-gray-400\'>No icon</span>'"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Replace icon</label>
+              <.live_file_input upload={@uploads.icon} class="text-sm" />
+            </div>
+          </div>
           <.form for={@form} phx-submit="save_seed" class="space-y-4">
             <div class="grid grid-cols-2 gap-4">
               <div>
@@ -726,6 +762,19 @@ defmodule CampFireWeb.ItemsLive do
       <%= if @editing do %>
         <div class="bg-white border rounded-lg p-6 mb-6">
           <h3 class="text-lg font-semibold mb-4">Edit: {@editing.name}</h3>
+          <div class="flex items-center gap-4 mb-4">
+            <div class="w-16 h-16 bg-gray-100 rounded border flex items-center justify-center overflow-hidden">
+              <img
+                src={CampFire.Sprites.sprite_url("skins/#{String.downcase(@editing.name)}")}
+                class="w-14 h-14 object-contain"
+                onerror="this.parentElement.innerHTML='<span class=\'text-xs text-gray-400\'>No icon</span>'"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Replace icon</label>
+              <.live_file_input upload={@uploads.icon} class="text-sm" />
+            </div>
+          </div>
           <form phx-submit="save_skin" class="space-y-4">
             <div class="grid grid-cols-2 gap-4">
               <div>
