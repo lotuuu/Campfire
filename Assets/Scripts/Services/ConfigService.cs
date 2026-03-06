@@ -60,8 +60,6 @@ namespace Garden
         public float craft_cost_mana;
         public int default_capacity;
         public float fill_duration_minutes;
-        public List<int> capacity_tiers;
-        public List<float> upgrade_costs;
     }
 
     [Serializable]
@@ -350,9 +348,7 @@ namespace Garden
                 {
                     craft_cost_mana = GetFloat(vase, "craft_cost_mana"),
                     default_capacity = (int)GetFloat(vase, "default_capacity"),
-                    fill_duration_minutes = GetFloat(vase, "fill_duration_minutes"),
-                    capacity_tiers = GetIntList(vase, "capacity_tiers"),
-                    upgrade_costs = GetFloatList(vase, "upgrade_costs")
+                    fill_duration_minutes = GetFloat(vase, "fill_duration_minutes")
                 };
             }
 

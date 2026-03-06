@@ -15,12 +15,3 @@ MonoBehaviour:
   baseCapacity: 5
   craftCostMana: 100
   fillDurationMinutes: 30
-  capacityPerTier:
-  - 5
-  - 8
-  - 12
-  - 20
-  upgradeCosts:
-  - 75
-  - 200
-  - 500

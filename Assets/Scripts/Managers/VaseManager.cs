@@ -38,11 +38,6 @@ namespace Garden
             type.GetField("craftCostMana", flags)?.SetValue(config, sv.craft_cost_mana);
             type.GetField("fillDurationMinutes", flags)?.SetValue(config, sv.fill_duration_minutes);
 
-            if (sv.capacity_tiers != null && sv.capacity_tiers.Count > 0)
-                type.GetField("capacityPerTier", flags)?.SetValue(config, sv.capacity_tiers.ToArray());
-
-            if (sv.upgrade_costs != null && sv.upgrade_costs.Count > 0)
-                type.GetField("upgradeCosts", flags)?.SetValue(config, sv.upgrade_costs.ToArray());
         }
 
         private void Update()
