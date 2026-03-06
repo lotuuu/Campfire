@@ -130,76 +130,76 @@ defmodule RecipeHelper do
 end
 
 seed_configs = [
-  %{seed_name: "Sprouts", growth_duration_hours: 0.00833, base_drops: 1, mana_cost: 0.0, recipe: %{
+  %{seed_name: "Sprouts", growth_duration_hours: 0.00833, base_drops: 1, mana_cost: 0.0, tier: 0, recipe: %{
     "humidity" => RecipeHelper.axis(40, 80, 20, 1),
     "waterings" => RecipeHelper.axis(1, 1, 1, 0.5)
   }},
-  %{seed_name: "Cress", growth_duration_hours: 0.08333, base_drops: 1, mana_cost: 0.0, recipe: %{
+  %{seed_name: "Cress", growth_duration_hours: 0.08333, base_drops: 1, mana_cost: 0.0, tier: 0, recipe: %{
     "heat" => RecipeHelper.axis(10, 25, 15, 1),
     "humidity" => RecipeHelper.axis(50, 85, 15, 1)
   }},
-  %{seed_name: "Basil", growth_duration_hours: 1.0, base_drops: 1, mana_cost: 0.0, recipe: %{
+  %{seed_name: "Basil", growth_duration_hours: 1.0, base_drops: 1, mana_cost: 0.0, tier: 1, recipe: %{
     "heat" => RecipeHelper.axis(20, 30, 10, 1),
     "waterings" => RecipeHelper.axis(1, 1, 1, 0.5)
   }},
-  %{seed_name: "Chamomile", growth_duration_hours: 1.5, base_drops: 2, mana_cost: 0.0, recipe: %{
+  %{seed_name: "Chamomile", growth_duration_hours: 1.5, base_drops: 2, mana_cost: 0.0, tier: 1, recipe: %{
     "heat" => RecipeHelper.axis(15, 25, 10, 1),
     "sunlight" => RecipeHelper.axis(50, 90, 20, 1)
   }},
-  %{seed_name: "Marigold", growth_duration_hours: 2.0, base_drops: 2, mana_cost: 0.0, recipe: %{
+  %{seed_name: "Marigold", growth_duration_hours: 2.0, base_drops: 2, mana_cost: 0.0, tier: 2, recipe: %{
     "heat" => RecipeHelper.axis(20, 35, 10, 1),
     "sunlight" => RecipeHelper.axis(60, 100, 20, 1),
     "waterings" => RecipeHelper.axis(1, 2, 1, 0.5)
   }},
-  %{seed_name: "Snowdrop", growth_duration_hours: 2.5, base_drops: 2, mana_cost: 0.0, recipe: %{
+  %{seed_name: "Snowdrop", growth_duration_hours: 2.5, base_drops: 2, mana_cost: 0.0, tier: 2, recipe: %{
     "heat" => RecipeHelper.axis(0, 10, 10, 1.5),
     "humidity" => RecipeHelper.axis(50, 80, 20, 1),
     "waterings" => RecipeHelper.axis(1, 2, 1, 0.5)
   }},
-  %{seed_name: "Mint", growth_duration_hours: 3.0, base_drops: 3, mana_cost: 0.0, recipe: %{
+  %{seed_name: "Mint", growth_duration_hours: 3.0, base_drops: 3, mana_cost: 0.0, tier: 3, recipe: %{
     "humidity" => RecipeHelper.axis(50, 80, 20, 1),
     "rain" => RecipeHelper.axis(0.2, 0.6, 0.3, 1.5),
     "waterings" => RecipeHelper.axis(1, 2, 1, 0.5)
   }},
-  %{seed_name: "Lavender", growth_duration_hours: 5.0, base_drops: 3, mana_cost: 0.0, recipe: %{
+  %{seed_name: "Lavender", growth_duration_hours: 5.0, base_drops: 3, mana_cost: 0.0, tier: 4, recipe: %{
     "heat" => RecipeHelper.axis(25, 35, 10, 1.5),
     "wind" => RecipeHelper.axis(5, 15, 5, 1),
     "sunlight" => RecipeHelper.axis(70, 100, 20, 1.5)
   }},
-  %{seed_name: "Pansy", growth_duration_hours: 6.0, base_drops: 3, mana_cost: 0.0, recipe: %{
+  %{seed_name: "Pansy", growth_duration_hours: 6.0, base_drops: 3, mana_cost: 0.0, tier: 3, recipe: %{
     "heat" => RecipeHelper.axis(5, 15, 10, 1.5),
     "sunlight" => RecipeHelper.axis(40, 80, 20, 1),
     "rain" => RecipeHelper.axis(0.2, 0.6, 0.3, 1)
   }},
-  %{seed_name: "Poppy", growth_duration_hours: 8.0, base_drops: 4, mana_cost: 0.0, recipe: %{
+  %{seed_name: "Poppy", growth_duration_hours: 8.0, base_drops: 4, mana_cost: 0.0, tier: 5, recipe: %{
     "heat" => RecipeHelper.axis(15, 25, 10, 1),
     "humidity" => RecipeHelper.axis(40, 75, 20, 1),
     "rain" => RecipeHelper.axis(0.3, 0.7, 0.3, 1.5)
   }},
-  %{seed_name: "Jasmine", growth_duration_hours: 12.0, base_drops: 4, mana_cost: 0.0, recipe: %{
+  %{seed_name: "Jasmine", growth_duration_hours: 12.0, base_drops: 4, mana_cost: 0.0, tier: 6, recipe: %{
     "heat" => RecipeHelper.axis(20, 30, 10, 1),
     "humidity" => RecipeHelper.axis(60, 90, 20, 1.5),
     "waterings" => RecipeHelper.axis(2, 4, 2, 1)
   }},
-  %{seed_name: "Rosemary", growth_duration_hours: 18.0, base_drops: 5, mana_cost: 0.0, recipe: %{
+  %{seed_name: "Rosemary", growth_duration_hours: 18.0, base_drops: 5, mana_cost: 0.0, tier: 7, recipe: %{
     "heat" => RecipeHelper.axis(20, 35, 10, 1),
     "wind" => RecipeHelper.axis(5, 20, 5, 1),
     "sunlight" => RecipeHelper.axis(60, 100, 20, 1.5)
   }},
-  %{seed_name: "Dahlia", growth_duration_hours: 30.0, base_drops: 6, mana_cost: 0.0, recipe: %{
+  %{seed_name: "Dahlia", growth_duration_hours: 30.0, base_drops: 6, mana_cost: 0.0, tier: 8, recipe: %{
     "heat" => RecipeHelper.axis(18, 28, 8, 1),
     "humidity" => RecipeHelper.axis(50, 80, 20, 1),
     "sunlight" => RecipeHelper.axis(50, 90, 20, 1),
     "waterings" => RecipeHelper.axis(3, 6, 2, 1)
   }},
-  %{seed_name: "Moonflower", growth_duration_hours: 48.0, base_drops: 8, mana_cost: 0.0, recipe: %{
+  %{seed_name: "Moonflower", growth_duration_hours: 48.0, base_drops: 8, mana_cost: 0.0, tier: 9, recipe: %{
     "humidity" => RecipeHelper.axis(60, 90, 20, 1),
     "moon" => RecipeHelper.axis(4, 4, 0, 3),
     "waterings" => RecipeHelper.axis(3, 6, 2, 1)
   }}
 ]
 
-replace_fields = [:growth_duration_hours, :base_drops, :mana_cost, :recipe, :updated_at]
+replace_fields = [:growth_duration_hours, :base_drops, :mana_cost, :tier, :recipe, :updated_at]
 
 for config <- seed_configs do
   %SeedConfig{}
@@ -261,7 +261,20 @@ game_configs = [
     "mana_per_level" => 0.3,
     "max_flame_level" => 12,
     "entity_caps" => [6, 6, 8, 8, 12, 15, 18, 22, 26, 30, 35, 40],
-    "grid_sizes" => [2, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5]
+    "grid_sizes" => [2, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5],
+    "upgrade_recipes" => [
+      %{"ingredients" => [%{"itemName" => "Sprouts_harvest", "count" => 1}]},
+      %{"ingredients" => [%{"itemName" => "Sprouts_harvest", "count" => 5}, %{"itemName" => "Cress_harvest", "count" => 2}]},
+      %{"ingredients" => [%{"itemName" => "Basil_harvest", "count" => 3}]},
+      %{"ingredients" => [%{"itemName" => "Chamomile_harvest", "count" => 5}]},
+      %{"ingredients" => [%{"itemName" => "Marigold_harvest", "count" => 12}, %{"itemName" => "Snowdrop_harvest", "count" => 8}, %{"itemName" => "Basil_harvest", "count" => 8}]},
+      %{"ingredients" => [%{"itemName" => "Mint_harvest", "count" => 8}, %{"itemName" => "Pansy_harvest", "count" => 4}, %{"itemName" => "Chamomile_harvest", "count" => 8}]},
+      %{"ingredients" => [%{"itemName" => "Lavender_harvest", "count" => 22}, %{"itemName" => "Snowdrop_harvest", "count" => 24}, %{"itemName" => "Basil_harvest", "count" => 18}]},
+      %{"ingredients" => [%{"itemName" => "Poppy_harvest", "count" => 35}, %{"itemName" => "Pansy_harvest", "count" => 30}, %{"itemName" => "Marigold_harvest", "count" => 50}]},
+      %{"ingredients" => [%{"itemName" => "Jasmine_harvest", "count" => 60}, %{"itemName" => "Lavender_harvest", "count" => 50}, %{"itemName" => "Poppy_harvest", "count" => 60}]},
+      %{"ingredients" => [%{"itemName" => "Rosemary_harvest", "count" => 50}, %{"itemName" => "Jasmine_harvest", "count" => 60}, %{"itemName" => "Lavender_harvest", "count" => 55}, %{"itemName" => "Snowdrop_harvest", "count" => 40}]},
+      %{"ingredients" => [%{"itemName" => "Dahlia_harvest", "count" => 50}, %{"itemName" => "Moonflower_harvest", "count" => 30}, %{"itemName" => "Rosemary_harvest", "count" => 60}, %{"itemName" => "Poppy_harvest", "count" => 80}, %{"itemName" => "Basil_harvest", "count" => 50}]}
+    ]
   }},
   %{key: "vase_config", value: %{
     "craft_cost_mana" => 100,
@@ -302,13 +315,40 @@ game_configs = [
       %{"mana" => 60, "harvests" => [%{"item" => "Lavender_harvest", "count" => 3}]},
       %{"mana" => 100, "harvests" => [%{"item" => "Chamomile_harvest", "count" => 2}, %{"item" => "Mint_harvest", "count" => 2}]}
     ]
+  }},
+  %{key: "building_cost_config", value: %{
+    "plot_costs" => [
+      %{"manaCost" => 150, "harvestCosts" => [%{"itemName" => "Sprouts_harvest", "count" => 1}]},
+      %{"manaCost" => 200, "harvestCosts" => [%{"itemName" => "Basil_harvest", "count" => 1}]},
+      %{"manaCost" => 260, "harvestCosts" => [%{"itemName" => "Basil_harvest", "count" => 2}]},
+      %{"manaCost" => 330, "harvestCosts" => [%{"itemName" => "Chamomile_harvest", "count" => 1}]},
+      %{"manaCost" => 420, "harvestCosts" => [%{"itemName" => "Chamomile_harvest", "count" => 1}]},
+      %{"manaCost" => 520, "harvestCosts" => [%{"itemName" => "Chamomile_harvest", "count" => 1}, %{"itemName" => "Basil_harvest", "count" => 1}]},
+      %{"manaCost" => 640, "harvestCosts" => [%{"itemName" => "Chamomile_harvest", "count" => 2}]},
+      %{"manaCost" => 780, "harvestCosts" => [%{"itemName" => "Lavender_harvest", "count" => 1}, %{"itemName" => "Chamomile_harvest", "count" => 1}]},
+      %{"manaCost" => 940, "harvestCosts" => [%{"itemName" => "Mint_harvest", "count" => 1}, %{"itemName" => "Lavender_harvest", "count" => 1}]},
+      %{"manaCost" => 1120, "harvestCosts" => [%{"itemName" => "Mint_harvest", "count" => 2}, %{"itemName" => "Chamomile_harvest", "count" => 1}]}
+    ],
+    "vase_costs" => [
+      %{"manaCost" => 100, "harvestCosts" => [%{"itemName" => "Cress_harvest", "count" => 1}]},
+      %{"manaCost" => 120, "harvestCosts" => [%{"itemName" => "Basil_harvest", "count" => 2}]},
+      %{"manaCost" => 150, "harvestCosts" => [%{"itemName" => "Chamomile_harvest", "count" => 1}]},
+      %{"manaCost" => 180, "harvestCosts" => [%{"itemName" => "Chamomile_harvest", "count" => 1}]},
+      %{"manaCost" => 220, "harvestCosts" => [%{"itemName" => "Chamomile_harvest", "count" => 1}, %{"itemName" => "Basil_harvest", "count" => 1}]},
+      %{"manaCost" => 260, "harvestCosts" => [%{"itemName" => "Chamomile_harvest", "count" => 2}]},
+      %{"manaCost" => 310, "harvestCosts" => [%{"itemName" => "Lavender_harvest", "count" => 1}, %{"itemName" => "Basil_harvest", "count" => 1}]},
+      %{"manaCost" => 370, "harvestCosts" => [%{"itemName" => "Lavender_harvest", "count" => 1}, %{"itemName" => "Chamomile_harvest", "count" => 1}]}
+    ]
   }}
 ]
 
 for c <- game_configs do
   %GameConfig{}
   |> GameConfig.changeset(c)
-  |> Repo.insert!(on_conflict: :nothing, conflict_target: :key)
+  |> Repo.insert!(
+    on_conflict: {:replace, [:value, :updated_at]},
+    conflict_target: :key
+  )
 end
 
 IO.puts("Admin config seeds complete.")

@@ -71,5 +71,22 @@ defmodule CampFire.ConfigCache do
       end)
 
     :ets.insert(@table, {"garden_configs", garden_map})
+
+    seeds = CampFire.Repo.all(CampFire.Game.SeedConfig)
+
+    seed_map =
+      Map.new(seeds, fn s ->
+        {s.seed_name,
+         %{
+           seed_name: s.seed_name,
+           growth_duration_hours: s.growth_duration_hours,
+           base_drops: s.base_drops,
+           mana_cost: s.mana_cost,
+           tier: s.tier,
+           recipe: s.recipe
+         }}
+      end)
+
+    :ets.insert(@table, {"seed_configs", seed_map})
   end
 end

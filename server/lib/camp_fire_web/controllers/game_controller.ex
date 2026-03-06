@@ -5,6 +5,75 @@ defmodule CampFireWeb.GameController do
   alias CampFire.Game.{Plots, Vases, Gardens, Mallums, Weather, PlayerState}
   alias CampFire.Repo
 
+  alias CampFire.ConfigCache
+
+  # ── Config sync ────────────────────────────────────────────
+
+  def get_configs(conn, _params) do
+    seed_configs = ConfigCache.get("seed_configs") || %{}
+    quest_configs = ConfigCache.get("quest_configs") || %{}
+    garden_configs = ConfigCache.get("garden_configs") || %{}
+    flame_config = ConfigCache.get("flame_config") || %{}
+    vase_config = ConfigCache.get("vase_config") || %{}
+    mallum_house_config = ConfigCache.get("mallum_house_config") || %{}
+    building_cost_config = ConfigCache.get("building_cost_config") || %{}
+
+    seeds =
+      Map.new(seed_configs, fn {name, s} ->
+        {name,
+         %{
+           seedName: s.seed_name,
+           growthDurationHours: s.growth_duration_hours,
+           baseDrops: s.base_drops,
+           manaCost: s.mana_cost,
+           tier: s.tier,
+           recipe: s.recipe
+         }}
+      end)
+
+    quests =
+      Map.new(quest_configs, fn {name, q} ->
+        {name,
+         %{
+           questName: q.quest_name,
+           durationMinutes: q.duration_minutes,
+           requiredFlameLevel: q.required_flame_level,
+           rewardRolls: q.reward_rolls,
+           rewardPool: q.reward_pool
+         }}
+      end)
+
+    gardens =
+      Map.new(garden_configs, fn {name, g} ->
+        {name,
+         %{
+           plantName: g.plant_name,
+           growthDurationHours: g.growth_duration_hours,
+           yieldItem: g.yield_item,
+           yieldAmount: g.yield_amount,
+           yieldIntervalHours: g.yield_interval_hours,
+           waterRequired: g.water_required,
+           manaCost: g.mana_cost
+         }}
+      end)
+
+    conn
+    |> put_status(200)
+    |> json(%{
+      seeds: seeds,
+      quests: quests,
+      gardens: gardens,
+      flameConfig: serialize_game_config(flame_config),
+      vaseConfig: serialize_game_config(vase_config),
+      mallumHouseConfig: serialize_game_config(mallum_house_config),
+      buildingCostConfig: serialize_game_config(building_cost_config)
+    })
+  end
+
+  # game_configs values are already stored with camelCase keys in the DB
+  defp serialize_game_config(config) when is_map(config), do: config
+  defp serialize_game_config(_), do: %{}
+
   # ── State sync ──────────────────────────────────────────────
 
   def get_state(conn, _params) do
