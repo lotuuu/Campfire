@@ -204,7 +204,7 @@ namespace Garden
 
         public bool CraftGarden(string plantName, int gridX, int gridY)
         {
-            if (!FlameManager.Instance.CanPlaceEntity()) return false;
+            if (!FlameManager.Instance.CanPlaceEntity) return false;
 
             var plantData = LoadPlantData(plantName);
             if (plantData == null) return false;
