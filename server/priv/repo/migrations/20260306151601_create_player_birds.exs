@@ -13,5 +13,6 @@ defmodule CampFire.Repo.Migrations.CreatePlayerBirds do
     end
 
     create index(:player_birds, [:player_uid])
+    create unique_index(:player_birds, [:player_uid, :grid_x, :grid_y])
   end
 end

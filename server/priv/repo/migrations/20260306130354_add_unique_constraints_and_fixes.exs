@@ -6,7 +6,5 @@ defmodule CampFire.Repo.Migrations.AddUniqueConstraintsAndFixes do
     create unique_index(:player_plots, [:player_uid, :grid_x, :grid_y])
     create unique_index(:player_vases, [:player_uid, :grid_x, :grid_y])
     create unique_index(:player_gardens, [:player_uid, :grid_x, :grid_y])
-    create unique_index(:player_mallum_houses, [:player_uid, :grid_x, :grid_y])
-    create unique_index(:player_birds, [:player_uid, :grid_x, :grid_y])
   end
 end

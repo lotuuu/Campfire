@@ -12,5 +12,6 @@ defmodule CampFire.Repo.Migrations.CreateMallumHouses do
     end
 
     create index(:player_mallum_houses, [:player_uid])
+    create unique_index(:player_mallum_houses, [:player_uid, :grid_x, :grid_y])
   end
 end
