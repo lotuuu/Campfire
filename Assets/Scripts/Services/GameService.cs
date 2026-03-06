@@ -45,6 +45,12 @@ namespace Garden
                         Debug.LogWarning("GameService: Config fetch failed, using local ScriptableObjects.");
                 }
 
+                // Sync sprites from server
+                if (SpriteService.Instance != null && ConfigService.Instance != null)
+                {
+                    await SpriteService.Instance.SyncSprites(ConfigService.Instance.SpriteManifest);
+                }
+
                 using var req = GetAuth("/game/state");
                 await SendAsync(req);
 
