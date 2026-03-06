@@ -395,6 +395,25 @@ defmodule CampFireWeb.ItemsLive do
   defp parse_int(val) when is_integer(val), do: val
   defp parse_int(_), do: 0
 
+  defp format_duration(hours) when is_number(hours) do
+    total_seconds = round(hours * 3600)
+    h = div(total_seconds, 3600)
+    m = div(rem(total_seconds, 3600), 60)
+    s = rem(total_seconds, 60)
+
+    parts =
+      [{h, "h"}, {m, "m"}, {s, "s"}]
+      |> Enum.reject(fn {v, _} -> v == 0 end)
+      |> Enum.map(fn {v, u} -> "#{v}#{u}" end)
+
+    case parts do
+      [] -> "0s"
+      _ -> Enum.join(parts, " ")
+    end
+  end
+
+  defp format_duration(_), do: "—"
+
   defp recipes_for_category(recipes, category) do
     recipes
     |> Enum.filter(fn {_name, r} -> r["category"] == category end)
@@ -518,17 +537,17 @@ defmodule CampFireWeb.ItemsLive do
         <thead class="bg-gray-50">
           <tr>
             <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Seed Name</th>
-            <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Growth (hrs)</th>
+            <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Growth Time</th>
             <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Drops</th>
             <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Recipe</th>
             <th class="px-4 py-3 text-left text-sm font-medium text-gray-500"></th>
           </tr>
         </thead>
         <tbody class="divide-y">
-          <%= for seed <- @seeds do %>
+          <%= for seed <- Enum.sort_by(@seeds, & &1.growth_duration_hours) do %>
             <tr class="hover:bg-gray-50">
               <td class="px-4 py-3 font-medium">{seed.seed_name}</td>
-              <td class="px-4 py-3">{seed.growth_duration_hours}</td>
+              <td class="px-4 py-3">{format_duration(seed.growth_duration_hours)}</td>
               <td class="px-4 py-3">{seed.min_drops}-{seed.max_drops}</td>
               <td class="px-4 py-3 text-sm text-gray-500">{recipe_summary(seed.recipe)}</td>
               <td class="px-4 py-3">

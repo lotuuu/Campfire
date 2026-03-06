@@ -3,9 +3,10 @@ defmodule CampFireWeb.HomeLive do
 
   alias CampFire.Accounts
 
+  @impl true
   def mount(_params, _session, socket) do
     player_count = Accounts.count_players()
-    {:ok, assign(socket, player_count: player_count)}
+    {:ok, assign(socket, player_count: player_count), layout: false}
   end
 
   def render(assigns) do
