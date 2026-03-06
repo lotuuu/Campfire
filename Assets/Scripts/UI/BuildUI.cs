@@ -10,6 +10,7 @@ namespace Garden
         private VisualTreeAsset buildTemplate;
 
         public event Action<CampBuildingType> OnRequestPlacement;
+        public string SelectedGardenPlant { get; private set; }
 
         public void Initialize(VisualElement root)
         {
@@ -77,6 +78,49 @@ namespace Garden
                     {
                         if (canAfford)
                             OnRequestPlacement?.Invoke(CampBuildingType.MallumHouse);
+                    });
+                }
+            }
+
+            // Garden entries — one per plant type
+            if (GardenManager.Instance != null && FlameManager.Instance != null)
+            {
+                bool canPlace = FlameManager.Instance.CanPlaceEntity;
+                string capText = $"{FlameManager.Instance.CurrentEntityCount}/{FlameManager.Instance.MaxEntities}";
+                var data = SaveManager.Instance.Data;
+
+                foreach (var plantData in Resources.LoadAll<GardenPlantData>("GardenPlants"))
+                {
+                    int existingCount = 0;
+                    foreach (var g in data.gardens)
+                        if (g.plantName == plantData.plantName) existingCount++;
+
+                    var cost = plantData.GetCost(existingCount);
+                    if (cost == null)
+                    {
+                        AddBuildItem(plantData.plantName, "Max reached", () => { });
+                        continue;
+                    }
+
+                    string costText = $"{cost.manaCost:F0} Mana";
+                    if (cost.seedCost > 0)
+                        costText += $" + {cost.seedCost} {plantData.yieldItem}";
+
+                    var item = data.items.Find(it => it.itemName == plantData.yieldItem);
+                    int haveItems = item?.count ?? 0;
+                    bool canAfford = canPlace
+                        && data.mana >= cost.manaCost
+                        && haveItems >= cost.seedCost;
+
+                    string displayCost = canPlace ? $"{costText} ({capText})" : $"Cap reached ({capText})";
+                    string pName = plantData.plantName; // capture for lambda
+                    AddBuildItem(pName, displayCost, () =>
+                    {
+                        if (canAfford)
+                        {
+                            SelectedGardenPlant = pName;
+                            OnRequestPlacement?.Invoke(CampBuildingType.Garden);
+                        }
                     });
                 }
             }

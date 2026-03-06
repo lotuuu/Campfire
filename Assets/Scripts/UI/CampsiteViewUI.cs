@@ -551,6 +551,11 @@ namespace Garden
                     case CampBuildingType.MallumHouse:
                         success = MallumManager.Instance.CraftMallumHouse(gridX, gridY);
                         break;
+                    case CampBuildingType.Garden:
+                        var buildUI = GetComponent<BuildUI>();
+                        if (buildUI != null && !string.IsNullOrEmpty(buildUI.SelectedGardenPlant))
+                            success = GardenManager.Instance.CraftGarden(buildUI.SelectedGardenPlant, gridX, gridY);
+                        break;
                 }
                 if (success) ExitMode();
                 return;
