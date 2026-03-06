@@ -712,6 +712,7 @@ GameObject:
   - component: {fileID: 1436130763}
   - component: {fileID: 1436130766}
   - component: {fileID: 1436130767}
+  - component: {fileID: 1436130768}
   m_Layer: 0
   m_Name: --- Social ---
   m_TagString: Untagged
@@ -780,8 +781,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a852455b754244047ba3f0b66a773f3c, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Garden::Garden.GameService
+--- !u!114 &1436130768
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1436130762}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c4634a1ab224b47ec9c16fa3936965e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Garden::Garden.SpriteService
 --- !u!1 &1550783021
 GameObject:
   m_ObjectHideFlags: 0
