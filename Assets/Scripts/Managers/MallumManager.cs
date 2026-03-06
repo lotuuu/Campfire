@@ -398,6 +398,18 @@ namespace Garden
             return item?.count ?? 0;
         }
 
+        public bool ConsumeSpeedPotion()
+        {
+            if (CurrencyManager.FreeMode) return true;
+            var data = SaveManager.Instance.Data;
+            var potion = data.items.Find(i => i.itemName == SpeedPotionItem);
+            if (potion == null || potion.count <= 0) return false;
+            potion.count--;
+            if (potion.count <= 0) data.items.Remove(potion);
+            SaveManager.Instance.Save();
+            return true;
+        }
+
         public bool SpeedUpQuest(int mallumIndex)
         {
             var data = SaveManager.Instance.Data;

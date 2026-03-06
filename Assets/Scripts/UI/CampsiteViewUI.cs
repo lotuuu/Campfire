@@ -1221,14 +1221,16 @@ namespace Garden
 
                     AddGrowthRecipeSection(plot.seedName);
 
+                    int plotPotionCount = MallumManager.Instance != null ? MallumManager.Instance.GetSpeedPotionCount() : 0;
                     var finishBtn = new Button(() =>
                     {
-                        if (CurrencyManager.Instance != null && CurrencyManager.Instance.SpendGems(1))
+                        if (MallumManager.Instance != null && MallumManager.Instance.ConsumeSpeedPotion())
                         {
                             PlotManager.Instance.InstantFinish(index);
                             CloseInteractionPanel();
                         }
-                    }) { text = "Finish Now (1 Gem)" };
+                    }) { text = $"Finish Now ({plotPotionCount} potions)" };
+                    finishBtn.SetEnabled(plotPotionCount > 0 || CurrencyManager.FreeMode);
                     finishBtn.AddToClassList("interaction-btn-primary");
                     interactionActions.Add(finishBtn);
                     break;
@@ -1562,14 +1564,16 @@ namespace Garden
                     fillingLabel.AddToClassList("interaction-info");
                     interactionBody.Add(fillingLabel);
 
+                    int vasePotionCount = MallumManager.Instance != null ? MallumManager.Instance.GetSpeedPotionCount() : 0;
                     var finishVaseBtn = new Button(() =>
                     {
-                        if (CurrencyManager.Instance != null && CurrencyManager.Instance.SpendGems(1))
+                        if (MallumManager.Instance != null && MallumManager.Instance.ConsumeSpeedPotion())
                         {
                             VaseManager.Instance.InstantFinish(index);
                             CloseInteractionPanel();
                         }
-                    }) { text = "Finish Now (1 Gem)" };
+                    }) { text = $"Finish Now ({vasePotionCount} potions)" };
+                    finishVaseBtn.SetEnabled(vasePotionCount > 0 || CurrencyManager.FreeMode);
                     finishVaseBtn.AddToClassList("interaction-btn-primary");
                     interactionActions.Add(finishVaseBtn);
                     break;
