@@ -120,19 +120,14 @@ defmodule CampFire.Game.Debug do
           end
       end
 
-      # Economy: shift last_mana_collect_utc backward
+      # Economy: reset last_mana_collect_utc to now (don't shift backward —
+      # that would cause collect_mana to calculate massive accumulated mana)
+      now = DateTime.utc_now() |> DateTime.truncate(:second)
+
       from(e in PlayerEconomy,
         where: e.player_uid == ^player_uid
       )
-      |> Repo.update_all(
-        set: [
-          last_mana_collect_utc:
-            dynamic(
-              [e],
-              fragment("? - interval '1 second' * ?", e.last_mana_collect_utc, ^seconds)
-            )
-        ]
-      )
+      |> Repo.update_all(set: [last_mana_collect_utc: now])
 
       :ok
     end)

@@ -6,6 +6,12 @@ defmodule CampFire.Economy do
   @base_mana_per_second 0.5
   @mana_per_level 0.3
   @max_flame_level 12
+  @mana_cap_per_level {300, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 7000, 9000, 12_000}
+
+  defp mana_cap(flame_level) do
+    index = max(flame_level - 1, 0) |> min(tuple_size(@mana_cap_per_level) - 1)
+    elem(@mana_cap_per_level, index)
+  end
 
   # --- Init ---
 
@@ -60,10 +66,12 @@ defmodule CampFire.Economy do
 
         mana_rate = @base_mana_per_second + (economy.flame_level - 1) * @mana_per_level
         earned = mana_rate * elapsed
+        cap = mana_cap(economy.flame_level)
+        capped_mana = min(economy.mana + earned, cap)
 
         {1, [updated]} =
           from(e in PlayerEconomy, where: e.player_uid == ^player_uid, select: e)
-          |> Repo.update_all(inc: [mana: earned], set: [last_mana_collect_utc: now])
+          |> Repo.update_all(set: [mana: capped_mana, last_mana_collect_utc: now])
 
         {:ok, updated}
     end
