@@ -3,7 +3,7 @@ defmodule CampFireWeb.SpritesLive do
 
   alias CampFire.Sprites
 
-  @max_file_size 512_000
+  @max_file_size 5_000_000
   @accept ~w(.png)
 
   def mount(_params, _session, socket) do
@@ -203,6 +203,11 @@ defmodule CampFireWeb.SpritesLive do
                 <button type="submit" class="bg-blue-600 text-white px-3 py-1.5 rounded text-sm hover:bg-blue-700">Upload</button>
                 <button type="button" phx-click="cancel_upload" class="text-gray-500 hover:text-gray-700 text-sm">Cancel</button>
               </form>
+              <%= for entry <- @uploads.sprite.entries do %>
+                <%= for err <- upload_errors(@uploads.sprite, entry) do %>
+                  <p class="text-red-600 text-sm mt-2"><%= upload_error_to_string(err) %></p>
+                <% end %>
+              <% end %>
             </div>
           <% end %>
 
@@ -244,6 +249,11 @@ defmodule CampFireWeb.SpritesLive do
                         <button type="submit" class="text-xs bg-blue-600 text-white px-2 py-0.5 rounded">Save</button>
                         <button type="button" phx-click="cancel_upload" class="text-xs text-gray-500">Cancel</button>
                       </div>
+                      <%= for entry <- @uploads.sprite.entries do %>
+                        <%= for err <- upload_errors(@uploads.sprite, entry) do %>
+                          <p class="text-red-600 text-xs mt-1"><%= upload_error_to_string(err) %></p>
+                        <% end %>
+                      <% end %>
                     </form>
                   </div>
                 <% end %>
@@ -262,4 +272,9 @@ defmodule CampFireWeb.SpritesLive do
 
   defp format_size(bytes) when bytes < 1024, do: "#{bytes} B"
   defp format_size(bytes), do: "#{Float.round(bytes / 1024, 1)} KB"
+
+  defp upload_error_to_string(:too_large), do: "File is too large (max 5 MB)"
+  defp upload_error_to_string(:not_accepted), do: "Only PNG files are accepted"
+  defp upload_error_to_string(:too_many_files), do: "Only one file at a time"
+  defp upload_error_to_string(err), do: "Upload error: #{inspect(err)}"
 end
