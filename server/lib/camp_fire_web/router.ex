@@ -159,4 +159,18 @@ defmodule CampFireWeb.Router do
     post "/location", GameController, :submit_location
     get "/current", GameController, :current_weather
   end
+
+  scope "/debug", CampFireWeb do
+    pipe_through [:api, :authenticated]
+    post "/skip-time", DebugController, :skip_time
+    post "/set-currency", DebugController, :set_currency
+    post "/grant-seeds", DebugController, :grant_seeds
+    post "/grant-items", DebugController, :grant_items
+    post "/spawn-bird", DebugController, :spawn_bird
+    post "/complete-quests", DebugController, :complete_quests
+    post "/fill-vases", DebugController, :fill_vases
+    post "/mature-plots", DebugController, :mature_plots
+    post "/set-flame-level", DebugController, :set_flame_level
+    post "/clear-save", DebugController, :clear_save
+  end
 end

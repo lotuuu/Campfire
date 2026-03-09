@@ -193,17 +193,19 @@ defmodule CampFire.Game.Debug do
       )
       |> Repo.all()
 
-    Enum.map(mallums, fn mallum ->
+    Enum.each(mallums, fn mallum ->
       config = Mallums.get_quest_config_public(mallum.assigned_quest_name)
-      rewards = Mallums.roll_rewards(config)
+      rewards = if config, do: Mallums.roll_rewards(config), else: []
 
       mallum
       |> PlayerMallum.changeset(%{
         state: "quest_complete",
         pending_rewards: rewards
       })
-      |> Repo.update()
+      |> Repo.update!()
     end)
+
+    {:ok, length(mallums)}
   end
 
   # ── Vase Fill ────────────────────────────────────────────────
@@ -216,7 +218,7 @@ defmodule CampFire.Game.Debug do
       )
       |> Repo.all()
 
-    Enum.map(vases, fn vase ->
+    Enum.each(vases, fn vase ->
       # Fill the vase
       vase
       |> PlayerVase.changeset(%{
@@ -236,9 +238,9 @@ defmodule CampFire.Game.Debug do
       |> Repo.update_all(
         set: [state: "idle", assigned_vase_id: nil, start_time_utc: nil]
       )
-
-      vase.id
     end)
+
+    {:ok, length(vases)}
   end
 
   # ── Plot Maturation ──────────────────────────────────────────
