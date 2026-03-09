@@ -175,10 +175,12 @@
 }
 
 #loading-gate-image {
-    width: 200px;
-    height: 200px;
-    margin-bottom: var(--spacing-md);
-    -unity-background-scale-mode: scale-to-fit;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    -unity-background-scale-mode: scale-and-crop;
 }
 
 #loading-gate-title {
