@@ -118,6 +118,11 @@ namespace Garden
                 }
 
                 ParseResponse(req.downloadHandler.text);
+                if (_seedConfigs.Count == 0)
+                {
+                    Debug.LogWarning("ConfigService: response missing seeds section, treating as failed.");
+                    return false;
+                }
                 IsLoaded = true;
                 Debug.Log($"ConfigService: loaded {_seedConfigs.Count} seeds, {_questConfigs.Count} quests, {_gardenConfigs.Count} gardens");
                 return true;

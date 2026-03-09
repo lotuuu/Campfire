@@ -69,6 +69,14 @@ namespace Garden
                 var json = JsonUtility.ToJson(Data, true);
                 File.WriteAllText(TmpPath, json);
 
+                // Verify the write succeeded before replacing the real save
+                var written = File.ReadAllText(TmpPath);
+                if (written.Length != json.Length)
+                {
+                    Debug.LogError("SaveManager: Tmp file verification failed, skipping replace.");
+                    return;
+                }
+
                 if (File.Exists(SavePath))
                     File.Replace(TmpPath, SavePath, BakPath);
                 else
@@ -79,7 +87,7 @@ namespace Garden
                 Debug.LogError($"SaveManager: Flush failed — {e.Message}");
             }
 
-            // Push village snapshot to Firebase (fire-and-forget)
+            // Push village snapshot (fire-and-forget, PushVillageSnapshot has its own try/catch)
             if (SocialService.Instance != null && SocialService.Instance.IsSignedIn)
                 _ = SocialService.Instance.PushVillageSnapshot();
         }

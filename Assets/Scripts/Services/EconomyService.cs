@@ -120,7 +120,7 @@ namespace Garden
 
         public async void Initialize()
         {
-            if (!SocialService.Instance.IsSignedIn) return;
+            if (SocialService.Instance == null || !SocialService.Instance.IsSignedIn) return;
 
             try
             {
@@ -280,6 +280,7 @@ namespace Garden
 
         private void ApplyServerState(EconomyState state)
         {
+            if (state == null) return;
             var data = SaveManager.Instance.Data;
             data.mana = state.mana;
             data.gems = state.gems;
@@ -339,9 +340,12 @@ namespace Garden
                 _ = CollectMana();
         }
 
+        private const int RequestTimeoutSeconds = 15;
+
         private UnityWebRequest GetAuth(string path)
         {
             var request = UnityWebRequest.Get(ServerBaseUrl + path);
+            request.timeout = RequestTimeoutSeconds;
             request.downloadHandler = new DownloadHandlerBuffer();
             SetAuthHeader(request);
             return request;
@@ -350,6 +354,7 @@ namespace Garden
         private UnityWebRequest PostJson(string path, string json)
         {
             var request = new UnityWebRequest(ServerBaseUrl + path, "POST");
+            request.timeout = RequestTimeoutSeconds;
             request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(json));
             request.downloadHandler = new DownloadHandlerBuffer();
             request.SetRequestHeader("Content-Type", "application/json");

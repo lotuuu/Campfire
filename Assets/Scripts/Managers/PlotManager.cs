@@ -324,6 +324,14 @@ namespace Garden
             var plot = data.plots[plotIndex];
             if (!CanWaterPlot(plot, GameTime.UtcNow, ManualWaterCooldownHours)) return false;
 
+            // Identify which vase will supply the water (SpendWater deducts from first with water)
+            int sourceVaseServerId = 0;
+            for (int i = 0; i < data.vases.Count; i++)
+            {
+                if (data.vases[i].currentWater > 0 && data.vases[i].serverId > 0)
+                { sourceVaseServerId = data.vases[i].serverId; break; }
+            }
+
             if (!CurrencyManager.Instance.SpendWater(1)) return false;
 
             ApplyWatering(plot, GameTime.UtcNow.ToString("o"));
@@ -337,19 +345,10 @@ namespace Garden
             SaveManager.Instance.Save();
             OnPlotChanged?.Invoke(plotIndex);
 
-            // Notify server — find the vase that provided the water
-            if (GameService.Instance != null && GameService.Instance.IsOnline && plot.serverId > 0)
-            {
-                // Find the most recently used vase (the one that just had water spent)
-                var vases = data.vases;
-                int vaseServerId = 0;
-                for (int i = 0; i < vases.Count; i++)
-                {
-                    if (vases[i].serverId > 0) { vaseServerId = vases[i].serverId; break; }
-                }
-                if (vaseServerId > 0)
-                    _ = GameService.Instance.WaterPlot(plot.serverId, vaseServerId);
-            }
+            // Notify server with the vase that actually supplied the water
+            if (GameService.Instance != null && GameService.Instance.IsOnline && plot.serverId > 0
+                && sourceVaseServerId > 0)
+                _ = GameService.Instance.WaterPlot(plot.serverId, sourceVaseServerId);
 
             return true;
         }

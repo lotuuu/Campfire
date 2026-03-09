@@ -39,6 +39,12 @@ namespace Garden
 
         private async void Initialize()
         {
+            if (SocialSaveManager.Instance?.Data == null)
+            {
+                Debug.LogWarning("SocialService: SocialSaveManager not ready.");
+                OnInitFailed?.Invoke("Save manager not initialized");
+                return;
+            }
             var social = SocialSaveManager.Instance.Data;
 
             if (!string.IsNullOrEmpty(social.uid) && !string.IsNullOrEmpty(social.authToken))
@@ -70,10 +76,10 @@ namespace Garden
                 await SendAsync(request);
                 return request.responseCode != 401;
             }
-            catch
+            catch (Exception e)
             {
-                // Network error — assume token is fine, will fail later if not
-                return true;
+                Debug.LogWarning($"SocialService: Token validation failed ({e.Message}), re-registering.");
+                return false;
             }
         }
 
@@ -544,9 +550,12 @@ namespace Garden
             return tcs.Task;
         }
 
+        private const int RequestTimeoutSeconds = 15;
+
         private UnityWebRequest GetAuth(string path)
         {
             var request = UnityWebRequest.Get(ServerBaseUrl + path);
+            request.timeout = RequestTimeoutSeconds;
             request.downloadHandler = new DownloadHandlerBuffer();
             SetAuthHeader(request);
             return request;
@@ -555,6 +564,7 @@ namespace Garden
         private UnityWebRequest PostJson(string path, string json, bool authenticated = true)
         {
             var request = new UnityWebRequest(ServerBaseUrl + path, "POST");
+            request.timeout = RequestTimeoutSeconds;
             request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(json));
             request.downloadHandler = new DownloadHandlerBuffer();
             request.SetRequestHeader("Content-Type", "application/json");
@@ -565,6 +575,7 @@ namespace Garden
         private UnityWebRequest PutJson(string path, string json)
         {
             var request = new UnityWebRequest(ServerBaseUrl + path, "PUT");
+            request.timeout = RequestTimeoutSeconds;
             request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(json));
             request.downloadHandler = new DownloadHandlerBuffer();
             request.SetRequestHeader("Content-Type", "application/json");
@@ -575,6 +586,7 @@ namespace Garden
         private UnityWebRequest DeleteAuth(string path)
         {
             var request = UnityWebRequest.Delete(ServerBaseUrl + path);
+            request.timeout = RequestTimeoutSeconds;
             request.downloadHandler = new DownloadHandlerBuffer();
             SetAuthHeader(request);
             return request;

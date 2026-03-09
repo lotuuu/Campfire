@@ -50,9 +50,14 @@ namespace Garden
                 SetIcon(manaIcon, "ui/resource-mana");
                 SetIcon(waterIcon, "ui/resource-water");
                 SetIcon(mallumIcon, "ui/resource-mallum");
-                iconsLoaded = manaIcon?.style.backgroundImage.value.texture != null;
+                iconsLoaded = manaIcon?.style.backgroundImage.value.texture != null
+                           && waterIcon?.style.backgroundImage.value.texture != null
+                           && mallumIcon?.style.backgroundImage.value.texture != null;
             }
-            UpdateDisplay();
+
+            // Mana updates every frame (accumulating), other resources are event-driven
+            if (manaDisplay != null && SaveManager.Instance != null)
+                manaDisplay.text = $"{SaveManager.Instance.Data.mana:F0}";
         }
 
         private void UpdateDisplay()

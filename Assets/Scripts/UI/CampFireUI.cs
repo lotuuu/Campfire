@@ -251,7 +251,7 @@ namespace Garden
                 if (EconomyService.Instance.IsInitialized)
                 {
                     _economyDone = EconomyService.Instance.IsOnline;
-                    if (!_economyDone) { OnServiceFailed("Could not sync economy with server"); return; }
+                    if (!_economyDone) OnServiceFailed("Could not sync economy with server");
                 }
                 else
                 {
@@ -266,7 +266,7 @@ namespace Garden
                 if (GameService.Instance.IsInitialized)
                 {
                     _gameDone = GameService.Instance.IsOnline;
-                    if (!_gameDone) { OnServiceFailed("Could not load game state from server"); return; }
+                    if (!_gameDone) OnServiceFailed("Could not load game state from server");
                 }
                 else
                 {
@@ -290,28 +290,32 @@ namespace Garden
 
         private void OnWeatherReady(bool success)
         {
-            WeatherService.Instance.OnLocationResolved -= OnWeatherReady;
+            if (WeatherService.Instance != null)
+                WeatherService.Instance.OnLocationResolved -= OnWeatherReady;
             _weatherDone = true;
             UpdateLoadingGate();
         }
 
         private void OnSocialReady()
         {
-            SocialService.Instance.OnSignedIn -= OnSocialReady;
+            if (SocialService.Instance != null)
+                SocialService.Instance.OnSignedIn -= OnSocialReady;
             _socialDone = true;
             UpdateLoadingGate();
         }
 
         private void OnEconomyReady()
         {
-            EconomyService.Instance.OnStateSynced -= OnEconomyReady;
+            if (EconomyService.Instance != null)
+                EconomyService.Instance.OnStateSynced -= OnEconomyReady;
             _economyDone = true;
             UpdateLoadingGate();
         }
 
         private void OnGameReady()
         {
-            GameService.Instance.OnStateLoaded -= OnGameReady;
+            if (GameService.Instance != null)
+                GameService.Instance.OnStateLoaded -= OnGameReady;
             _gameDone = true;
             UpdateLoadingGate();
         }
