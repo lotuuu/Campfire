@@ -146,7 +146,7 @@ namespace Garden
 
         public BuildingCost GetNextVaseCost()
         {
-            return LoadBuildingCostConfig()?.GetVaseCost(SaveManager.Instance.Data.vases.Count - 1);
+            return LoadBuildingCostConfig()?.GetVaseCost(SaveManager.Instance.Data.vases.Count);
         }
 
         public bool CraftVase(int gridX, int gridY)
@@ -166,6 +166,7 @@ namespace Garden
             foreach (var hc in cost.harvestCosts)
             {
                 var entry = data.items.Find(i => i.itemName == hc.itemName);
+                if (entry == null) continue;
                 entry.count -= hc.count;
                 if (entry.count <= 0) data.items.Remove(entry);
             }

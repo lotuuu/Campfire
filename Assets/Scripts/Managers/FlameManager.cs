@@ -22,7 +22,7 @@ namespace Garden
             get
             {
                 var data = SaveManager.Instance.Data;
-                return data.plots.Count + data.vases.Count + data.gardens.Count + data.mallumHouses.Count + 1; // +1 for apotheke
+                return data.plots.Count + data.vases.Count + data.gardens.Count + data.mallumHouses.Count;
             }
         }
 

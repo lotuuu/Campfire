@@ -42,6 +42,7 @@ namespace Garden
             foreach (var ing in recipe.ingredients)
             {
                 var item = data.items.Find(i => i.itemName == ing.itemName);
+                if (item == null) continue;
                 item.count -= ing.quantity;
                 if (item.count <= 0) data.items.Remove(item);
             }

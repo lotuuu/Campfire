@@ -26,7 +26,7 @@ namespace Garden
 
         public BuildingCost GetNextHouseCost()
         {
-            return LoadBuildingCostConfig()?.GetHouseCost(SaveManager.Instance.Data.mallumHouses.Count - 1);
+            return LoadBuildingCostConfig()?.GetHouseCost(SaveManager.Instance.Data.mallumHouses.Count);
         }
         public event Action OnMallumsChanged;
 
@@ -314,7 +314,7 @@ namespace Garden
             if (!FlameManager.Instance.CanPlaceEntity) return false;
 
             var data = SaveManager.Instance.Data;
-            var cost = LoadBuildingCostConfig()?.GetHouseCost(data.mallumHouses.Count - 1);
+            var cost = LoadBuildingCostConfig()?.GetHouseCost(data.mallumHouses.Count);
             if (cost == null) return false;
 
             // Check mana
@@ -331,6 +331,7 @@ namespace Garden
             foreach (var hc in cost.harvestCosts)
             {
                 var entry = data.items.Find(i => i.itemName == hc.itemName);
+                if (entry == null) continue;
                 entry.count -= hc.count;
                 if (entry.count <= 0) data.items.Remove(entry);
             }
@@ -561,7 +562,12 @@ namespace Garden
             var rewards = new List<RewardEntry>();
             float totalWeight = 0f;
             foreach (var r in pool)
-                totalWeight += r.weight;
+            {
+                if (r.seed != null)
+                    totalWeight += r.weight;
+            }
+
+            if (totalWeight <= 0f) return rewards;
 
             for (int i = 0; i < rolls; i++)
             {
@@ -569,6 +575,7 @@ namespace Garden
                 float cumulative = 0f;
                 foreach (var r in pool)
                 {
+                    if (r.seed == null) continue;
                     cumulative += r.weight;
                     if (roll < cumulative)
                     {

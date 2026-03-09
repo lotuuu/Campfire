@@ -93,6 +93,7 @@ namespace Garden
                 if (!CurrencyManager.FreeMode)
                 {
                     var item = data.items.Find(i => i.itemName == skin.costItemName);
+                    if (item == null) return false;
                     item.count -= skin.costQuantity;
                     if (item.count <= 0) data.items.Remove(item);
                 }

@@ -200,6 +200,7 @@ namespace Garden
             foreach (var hc in cost.harvestCosts)
             {
                 var entry = data.items.Find(i => i.itemName == hc.itemName);
+                if (entry == null) continue;
                 entry.count -= hc.count;
                 if (entry.count <= 0) data.items.Remove(entry);
             }

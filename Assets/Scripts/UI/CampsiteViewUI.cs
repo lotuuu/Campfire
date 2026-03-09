@@ -94,17 +94,17 @@ namespace Garden
             if (FlameManager.Instance != null)
                 FlameManager.Instance.OnFlameUpgraded += RebuildGrid;
             if (PlotManager.Instance != null)
-                PlotManager.Instance.OnPlotChanged += _ => RebuildGrid();
+                PlotManager.Instance.OnPlotChanged += OnPlotChangedRebuild;
             if (VaseManager.Instance != null)
                 VaseManager.Instance.OnVasesChanged += RebuildGrid;
             if (MallumManager.Instance != null)
                 MallumManager.Instance.OnMallumsChanged += RebuildGrid;
             if (GardenManager.Instance != null)
-                GardenManager.Instance.OnGardenChanged += _ => RebuildGrid();
+                GardenManager.Instance.OnGardenChanged += OnGardenChangedRebuild;
             if (BirdManager.Instance != null)
             {
                 BirdManager.Instance.OnBirdPlaced += RebuildGrid;
-                BirdManager.Instance.OnBirdCollected += _ => RebuildGrid();
+                BirdManager.Instance.OnBirdCollected += OnBirdCollectedRebuild;
             }
             if (VisitorManager.Instance != null)
             {
@@ -128,14 +128,32 @@ namespace Garden
             viewport.RegisterCallback<GeometryChangedEvent>(_ => RebuildGrid());
         }
 
+        private void OnPlotChangedRebuild(int _) => RebuildGrid();
+        private void OnGardenChangedRebuild(int _) => RebuildGrid();
+        private void OnBirdCollectedRebuild(BirdSave _) => RebuildGrid();
+
         private void OnDestroy()
         {
             if (FlameManager.Instance != null)
                 FlameManager.Instance.OnFlameUpgraded -= RebuildGrid;
+            if (PlotManager.Instance != null)
+                PlotManager.Instance.OnPlotChanged -= OnPlotChangedRebuild;
             if (VaseManager.Instance != null)
                 VaseManager.Instance.OnVasesChanged -= RebuildGrid;
             if (MallumManager.Instance != null)
                 MallumManager.Instance.OnMallumsChanged -= RebuildGrid;
+            if (GardenManager.Instance != null)
+                GardenManager.Instance.OnGardenChanged -= OnGardenChangedRebuild;
+            if (BirdManager.Instance != null)
+            {
+                BirdManager.Instance.OnBirdPlaced -= RebuildGrid;
+                BirdManager.Instance.OnBirdCollected -= OnBirdCollectedRebuild;
+            }
+            if (VisitorManager.Instance != null)
+            {
+                VisitorManager.Instance.OnVisitorArrived -= RebuildGrid;
+                VisitorManager.Instance.OnVisitorDeparted -= RebuildGrid;
+            }
             if (GameService.Instance != null)
                 GameService.Instance.OnStateLoaded -= RebuildGrid;
         }

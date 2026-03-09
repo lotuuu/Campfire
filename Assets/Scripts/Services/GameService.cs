@@ -53,6 +53,14 @@ namespace Garden
                 if (req.responseCode == 200)
                 {
                     var state = JsonUtility.FromJson<GameStateResponse>(req.downloadHandler.text);
+                    if (state == null)
+                    {
+                        Debug.LogWarning("GameService: Failed to parse game state response.");
+                        IsInitialized = true;
+                        IsOnline = false;
+                        OnInitFailed?.Invoke("Failed to parse game state");
+                        return;
+                    }
                     ApplyGameState(state);
                     IsInitialized = true;
                     IsOnline = true;
@@ -711,7 +719,15 @@ namespace Garden
                 await SendAsync(req);
 
                 if (req.responseCode < 200 || req.responseCode >= 300)
+                {
                     Debug.LogWarning($"GameService: SubmitLocation failed (HTTP {req.responseCode})");
+                    return;
+                }
+
+                // Now that server has our location, fetch and apply server weather
+                var weather = await GetWeather();
+                if (weather != null && WeatherService.Instance != null)
+                    WeatherService.Instance.ApplyServerWeather(weather);
             }
             catch (Exception e) { Debug.LogWarning($"GameService: SubmitLocation failed: {e.Message}"); }
         }
@@ -725,7 +741,10 @@ namespace Garden
                 await SendAsync(req);
 
                 if (req.responseCode >= 200 && req.responseCode < 300)
-                    return JsonUtility.FromJson<ServerWeather>(req.downloadHandler.text);
+                {
+                    var resp = JsonUtility.FromJson<ServerWeatherResponse>(req.downloadHandler.text);
+                    return resp?.weather;
+                }
 
                 Debug.LogWarning($"GameService: GetWeather failed (HTTP {req.responseCode})");
             }

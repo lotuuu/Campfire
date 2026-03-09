@@ -189,6 +189,7 @@ namespace Garden
                 foreach (var cost in offer.costs)
                 {
                     var item = items.Find(i => i.itemName == cost.itemName);
+                    if (item == null) continue;
                     item.count -= cost.count;
                     if (item.count <= 0) items.Remove(item);
                 }

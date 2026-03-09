@@ -184,11 +184,6 @@ namespace Garden
 
         private void Start()
         {
-            if (WeatherService.Instance != null)
-                WeatherService.Instance.OnWeatherUpdated -= OnWeatherUpdated;
-            if (WeatherService.Instance != null)
-                WeatherService.Instance.OnWeatherUpdated += OnWeatherUpdated;
-
             ScheduleAllPlantNotifications();
         }
 
@@ -210,7 +205,7 @@ namespace Garden
 
         public BuildingCost GetNextPlotCost()
         {
-            return LoadBuildingCostConfig()?.GetPlotCost(SaveManager.Instance.Data.plots.Count - 1);
+            return LoadBuildingCostConfig()?.GetPlotCost(SaveManager.Instance.Data.plots.Count);
         }
 
         public bool CraftPlot(int gridX, int gridY)
@@ -230,6 +225,7 @@ namespace Garden
             foreach (var hc in cost.harvestCosts)
             {
                 var entry = data.items.Find(i => i.itemName == hc.itemName);
+                if (entry == null) continue;
                 entry.count -= hc.count;
                 if (entry.count <= 0) data.items.Remove(entry);
             }
@@ -302,7 +298,8 @@ namespace Garden
             plot.lastWateredUtc = null;
 
             // Record initial weather snapshot so even fast-growing plants get scored
-            if (WeatherService.Instance != null)
+            // Only record if weather has actually been fetched (avoid zero-value snapshots)
+            if (WeatherService.Instance != null && WeatherService.Instance.HasWeather)
                 plot.snapshots.RecordSnapshot(WeatherService.Instance.CurrentWeather);
 
             SaveManager.Instance.Save();
