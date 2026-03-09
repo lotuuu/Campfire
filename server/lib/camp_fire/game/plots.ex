@@ -167,6 +167,12 @@ defmodule CampFire.Game.Plots do
 
         score = GrowthRecipe.evaluate(seed_config.recipe, plot.snapshots, plot.water_count)
         drops = GrowthRecipe.calculate_drops(score, seed_config.min_drops, seed_config.max_drops)
+
+        snapshot_count = get_in(plot.snapshots || %{}, [Access.key("snapshot_count", 0)])
+        if snapshot_count == 0 do
+          require Logger
+          Logger.warning("Harvest with zero snapshots: player=#{player_uid} plot=#{plot_id} seed=#{plot.seed_name}")
+        end
         item_name = "#{plot.seed_name}_harvest"
 
         Economy.upsert_item(player_uid, item_name, drops)

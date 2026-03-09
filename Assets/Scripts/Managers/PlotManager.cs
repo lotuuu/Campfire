@@ -398,6 +398,14 @@ namespace Garden
             var seed = LoadSeed(plot.seedName);
             if (seed == null) return null;
 
+            // Fallback: use current weather if no snapshots were recorded during growth
+            if ((plot.snapshots == null || plot.snapshots.snapshotCount == 0)
+                && WeatherService.Instance != null && WeatherService.Instance.HasWeather)
+            {
+                if (plot.snapshots == null) plot.snapshots = new GrowthSnapshots();
+                plot.snapshots.RecordSnapshot(WeatherService.Instance.CurrentWeather);
+            }
+
             // Local fallback calculation — randomized drops scaled by quality
             float score = 1f;
             if (seed.recipe != null)
@@ -575,6 +583,12 @@ namespace Garden
                 if (plot.state != PlotState.Growing) continue;
                 if (GetGrowthProgress(i) >= 1f)
                 {
+                    // Backfill a snapshot if weather arrived after planting but before maturity
+                    if (plot.snapshots != null && plot.snapshots.snapshotCount == 0
+                        && WeatherService.Instance != null && WeatherService.Instance.HasWeather)
+                    {
+                        plot.snapshots.RecordSnapshot(WeatherService.Instance.CurrentWeather);
+                    }
                     plot.state = PlotState.Mature;
                     changed = true;
                     OnPlotChanged?.Invoke(i);
