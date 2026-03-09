@@ -33,13 +33,20 @@ namespace Garden
     public class VillageSnapshot
     {
         public int flameLevel;
+        public int apothekeGridX;
+        public int apothekeGridY;
         public List<SnapshotPlot> plots = new();
         public List<SnapshotVase> vases = new();
         public List<SnapshotGarden> gardens = new();
 
         public static VillageSnapshot FromSaveData(SaveData data, int flameLevel)
         {
-            var snapshot = new VillageSnapshot { flameLevel = flameLevel };
+            var snapshot = new VillageSnapshot
+            {
+                flameLevel = flameLevel,
+                apothekeGridX = data.apothekeGridX,
+                apothekeGridY = data.apothekeGridY
+            };
 
             foreach (var p in data.plots)
             {

@@ -8,7 +8,7 @@ defmodule CampFire.Game.GridValidation do
 
   import Ecto.Query
   alias CampFire.Repo
-  alias CampFire.Game.{PlayerPlot, PlayerVase, PlayerGarden, PlayerMallumHouse, PlayerBird, PlayerState}
+  alias CampFire.Game.{PlayerPlot, PlayerVase, PlayerGarden, PlayerMallumHouse, PlayerBird, PlayerApotheke}
   alias CampFire.Economy.PlayerEconomy
 
   @doc """
@@ -244,14 +244,9 @@ defmodule CampFire.Game.GridValidation do
   end
 
   defp get_apotheke_position(player_uid) do
-    case Repo.get(PlayerState, player_uid) do
-      nil ->
-        {1, 0}
-
-      state ->
-        q = Map.get(state.data, "apothekeGridX", 1)
-        r = Map.get(state.data, "apothekeGridY", 0)
-        {q, r}
+    case Repo.get_by(PlayerApotheke, player_uid: player_uid) do
+      nil -> {1, 0}
+      apotheke -> {apotheke.grid_x, apotheke.grid_y}
     end
   end
 end

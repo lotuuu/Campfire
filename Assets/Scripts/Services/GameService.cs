@@ -239,6 +239,14 @@ namespace Garden
                 }
             }
 
+            // Apotheke position
+            if (state.apotheke != null)
+            {
+                data.apothekeServerId = state.apotheke.id;
+                data.apothekeGridX = state.apotheke.gridX;
+                data.apothekeGridY = state.apotheke.gridY;
+            }
+
             // Apply server weather if available
             if (state.weather != null && WeatherService.Instance != null)
                 WeatherService.Instance.ApplyServerWeather(state.weather);

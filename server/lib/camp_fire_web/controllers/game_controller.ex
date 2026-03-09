@@ -2,7 +2,7 @@ defmodule CampFireWeb.GameController do
   use CampFireWeb, :controller
 
   alias CampFire.Economy
-  alias CampFire.Game.{Plots, Vases, Gardens, Mallums, MallumHouses, Birds, Weather, PlayerState, Apotheke, Skins}
+  alias CampFire.Game.{Plots, Vases, Gardens, Mallums, MallumHouses, Birds, Weather, PlayerState, Apotheke, PlayerApotheke, Skins}
   alias CampFire.Repo
 
   alias CampFire.ConfigCache
@@ -116,6 +116,9 @@ defmodule CampFireWeb.GameController do
     houses = MallumHouses.list_houses(uid)
     birds = Birds.list_birds(uid)
 
+    apotheke = Repo.get_by(PlayerApotheke, player_uid: uid) ||
+      Repo.insert!(%PlayerApotheke{player_uid: uid, grid_x: 1, grid_y: 0})
+
     {economy, seeds, items} =
       case Economy.get_economy(uid) do
         nil -> {nil, [], []}
@@ -162,6 +165,7 @@ defmodule CampFireWeb.GameController do
       mallums: Enum.map(mallums, &serialize_mallum/1),
       mallumHouses: Enum.map(houses, &serialize_mallum_house/1),
       birds: Enum.map(birds, &serialize_bird/1),
+      apotheke: %{id: apotheke.id, gridX: apotheke.grid_x, gridY: apotheke.grid_y},
       cosmeticState: player_state,
       weather: weather_data
     })
@@ -600,6 +604,7 @@ defmodule CampFireWeb.GameController do
       "vase" -> PlayerVase
       "garden" -> PlayerGarden
       "mallum_house" -> PlayerMallumHouse
+      "apotheke" -> PlayerApotheke
       _ -> nil
     end
 

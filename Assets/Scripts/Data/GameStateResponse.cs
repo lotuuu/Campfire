@@ -13,6 +13,7 @@ namespace Garden
         public List<ServerMallum> mallums;
         public List<ServerMallumHouse> mallumHouses;
         public List<ServerBird> birds;
+        public ServerApotheke apotheke;
         public ServerWeather weather;
     }
 
@@ -122,6 +123,14 @@ namespace Garden
         public int gridY;
         public string seedName;
         public int seedCount;
+    }
+
+    [Serializable]
+    public class ServerApotheke
+    {
+        public int id;
+        public int gridX;
+        public int gridY;
     }
 
     [Serializable] public class BirdCollectRequest { public int birdId; }

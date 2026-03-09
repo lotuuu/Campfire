@@ -948,8 +948,9 @@ namespace Garden
             for (int i = 0; i < visitSnapshot.gardens.Count; i++)
                 occupied[(visitSnapshot.gardens[i].gridX, visitSnapshot.gardens[i].gridY)] = (CampBuildingType.Garden, i);
 
-            // Fixed buildings always take priority (visitor snapshot doesn't store apotheke pos)
-            occupied[(1, 0)] = (CampBuildingType.Apotheke, 0);
+            // Apotheke position from snapshot — (0,0) means unset (old snapshot), fall back to default (1,0)
+            bool apoUnset = visitSnapshot.apothekeGridX == 0 && visitSnapshot.apothekeGridY == 0;
+            occupied[(apoUnset ? 1 : visitSnapshot.apothekeGridX, apoUnset ? 0 : visitSnapshot.apothekeGridY)] = (CampBuildingType.Apotheke, 0);
 
             // Create hex cells — read-only, no interaction handlers
             for (int q = -radius; q <= radius; q++)
@@ -2322,6 +2323,8 @@ namespace Garden
                 case CampBuildingType.Apotheke:
                     data.apothekeGridX = newQ;
                     data.apothekeGridY = newR;
+                    serverId = data.apothekeServerId;
+                    serverType = "apotheke";
                     break;
                 case CampBuildingType.MallumHouse:
                     data.mallumHouses[index].gridX = newQ;
