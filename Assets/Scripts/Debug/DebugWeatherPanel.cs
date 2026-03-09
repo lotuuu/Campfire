@@ -81,31 +81,31 @@ namespace Garden
             root.Q<Button>("time-skip-button")?.RegisterCallback<ClickEvent>(_ => SkipTime());
 
             // Wire economy buttons
-            root.Q<Button>("set-mana-button")?.RegisterCallback<ClickEvent>(_ =>
+            root.Q<Button>("set-mana-button")?.RegisterCallback<ClickEvent>(evt =>
             {
                 var field = root.Q<FloatField>("debug-mana-field");
                 if (field != null) _ = DebugService.Instance?.SetCurrency(mana: field.value);
             });
-            root.Q<Button>("set-gems-button")?.RegisterCallback<ClickEvent>(_ =>
+            root.Q<Button>("set-gems-button")?.RegisterCallback<ClickEvent>(evt =>
             {
                 var field = root.Q<IntegerField>("debug-gems-field");
                 if (field != null) _ = DebugService.Instance?.SetCurrency(gems: field.value);
             });
-            root.Q<Button>("set-flame-button")?.RegisterCallback<ClickEvent>(_ =>
+            root.Q<Button>("set-flame-button")?.RegisterCallback<ClickEvent>(evt =>
             {
                 var field = root.Q<IntegerField>("debug-flame-field");
                 if (field != null) _ = DebugService.Instance?.SetFlameLevel(field.value);
             });
 
             // Wire inventory buttons
-            root.Q<Button>("grant-seeds-button")?.RegisterCallback<ClickEvent>(_ =>
+            root.Q<Button>("grant-seeds-button")?.RegisterCallback<ClickEvent>(evt =>
             {
                 var nameField = root.Q<TextField>("debug-seed-name");
                 var countField = root.Q<IntegerField>("debug-seed-count");
                 if (nameField != null && countField != null)
                     _ = DebugService.Instance?.GrantSeeds(nameField.value, countField.value);
             });
-            root.Q<Button>("grant-items-button")?.RegisterCallback<ClickEvent>(_ =>
+            root.Q<Button>("grant-items-button")?.RegisterCallback<ClickEvent>(evt =>
             {
                 var nameField = root.Q<TextField>("debug-item-name");
                 var countField = root.Q<IntegerField>("debug-item-count");
@@ -114,14 +114,14 @@ namespace Garden
             });
 
             // Wire quick action buttons
-            root.Q<Button>("spawn-bird-button")?.RegisterCallback<ClickEvent>(_ =>
-                _ = DebugService.Instance?.SpawnBird());
-            root.Q<Button>("complete-quests-button")?.RegisterCallback<ClickEvent>(_ =>
-                _ = DebugService.Instance?.CompleteQuests());
-            root.Q<Button>("fill-vases-button")?.RegisterCallback<ClickEvent>(_ =>
-                _ = DebugService.Instance?.FillVases());
-            root.Q<Button>("mature-plots-button")?.RegisterCallback<ClickEvent>(_ =>
-                _ = DebugService.Instance?.MaturePlots());
+            root.Q<Button>("spawn-bird-button")?.RegisterCallback<ClickEvent>(evt =>
+            { _ = DebugService.Instance?.SpawnBird(); });
+            root.Q<Button>("complete-quests-button")?.RegisterCallback<ClickEvent>(evt =>
+            { _ = DebugService.Instance?.CompleteQuests(); });
+            root.Q<Button>("fill-vases-button")?.RegisterCallback<ClickEvent>(evt =>
+            { _ = DebugService.Instance?.FillVases(); });
+            root.Q<Button>("mature-plots-button")?.RegisterCallback<ClickEvent>(evt =>
+            { _ = DebugService.Instance?.MaturePlots(); });
 
             // Wire free mode toggle
             var freeModeToggle = root.Q<Toggle>("free-mode-toggle");
