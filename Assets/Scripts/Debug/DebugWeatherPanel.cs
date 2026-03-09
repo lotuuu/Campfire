@@ -26,6 +26,22 @@ namespace Garden
         {
             panel = root.Q<VisualElement>("debug-panel");
 
+            // Server selector
+            var serverRow = root.Q("debug-server-selector");
+            if (serverRow != null)
+            {
+                foreach (var server in ServerConfig.Servers)
+                {
+                    var btn = new Button { text = server.name };
+                    btn.AddToClassList("server-btn");
+                    if (server.id == ServerConfig.SelectedId)
+                        btn.AddToClassList("server-active");
+                    var capturedId = server.id;
+                    btn.clicked += () => ServerConfig.Select(capturedId);
+                    serverRow.Add(btn);
+                }
+            }
+
             tempSlider = root.Q<Slider>("temp-slider");
             humiditySlider = root.Q<Slider>("humidity-slider");
             windSlider = root.Q<Slider>("wind-slider");

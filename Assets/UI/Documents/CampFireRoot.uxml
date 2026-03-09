@@ -220,6 +220,9 @@
                     <!-- Debug panel -->
                     <ui:VisualElement name="debug-panel">
 
+                        <ui:Label text="Server" class="debug-section-header" />
+                        <ui:VisualElement name="debug-server-selector" class="debug-row" />
+
                         <ui:Label text="Weather Override" class="debug-section-header" />
 
                         <ui:VisualElement class="debug-row">
