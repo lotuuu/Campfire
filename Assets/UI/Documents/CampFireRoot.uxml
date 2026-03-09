@@ -323,6 +323,7 @@
             <ui:VisualElement name="loading-gate-bar-track">
                 <ui:VisualElement name="loading-gate-bar-fill" />
             </ui:VisualElement>
+            <ui:VisualElement name="server-selector" />
         </ui:VisualElement>
 
     </ui:VisualElement>

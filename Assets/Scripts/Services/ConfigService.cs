@@ -87,12 +87,7 @@ namespace Garden
         private Dictionary<string, object> _buildingCostConfig;
         private Dictionary<string, string> _spriteManifest = new();
 
-        private static string ServerBaseUrl =>
-#if UNITY_EDITOR
-            "http://localhost:4000";
-#else
-            DevServerConfig.BaseUrl;
-#endif
+        private static string ServerBaseUrl => ServerConfig.BaseUrl;
 
         private void Awake()
         {

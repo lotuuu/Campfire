@@ -10,7 +10,7 @@ namespace Garden
 
         public SaveData Data { get; private set; } = new();
 
-        private string SavePath => Path.Combine(Application.persistentDataPath, "save.json");
+        private string SavePath => Path.Combine(Application.persistentDataPath, ServerConfig.SavePrefix + "save.json");
         private string TmpPath => SavePath + ".tmp";
         private string BakPath => SavePath + ".bak";
         private const float AutoSaveIntervalSeconds = 30f;

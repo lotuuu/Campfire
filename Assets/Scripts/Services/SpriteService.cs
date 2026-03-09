@@ -21,12 +21,7 @@ namespace Garden
         private static string ManifestPath =>
             Path.Combine(CacheDir, "manifest.json");
 
-        private static string ServerBaseUrl =>
-#if UNITY_EDITOR
-            "http://localhost:4000";
-#else
-            DevServerConfig.BaseUrl;
-#endif
+        private static string ServerBaseUrl => ServerConfig.BaseUrl;
 
         private void Awake()
         {

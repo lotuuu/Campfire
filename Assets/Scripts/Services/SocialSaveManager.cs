@@ -10,7 +10,7 @@ namespace Garden
 
         public SocialData Data { get; private set; } = new();
 
-        private string SavePath => Path.Combine(Application.persistentDataPath, "social.json");
+        private string SavePath => Path.Combine(Application.persistentDataPath, ServerConfig.SavePrefix + "social.json");
         private string TmpPath => SavePath + ".tmp";
         private string BakPath => SavePath + ".bak";
         private bool _isDirty;

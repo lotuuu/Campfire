@@ -108,18 +108,13 @@ namespace Garden
         private string _queuePath;
         private bool _isSyncing;
 
-        private static string ServerBaseUrl =>
-#if UNITY_EDITOR
-            "http://localhost:4000";
-#else
-            DevServerConfig.BaseUrl;
-#endif
+        private static string ServerBaseUrl => ServerConfig.BaseUrl;
 
         private void Awake()
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
-            _queuePath = System.IO.Path.Combine(Application.persistentDataPath, "economy_queue.json");
+            _queuePath = System.IO.Path.Combine(Application.persistentDataPath, ServerConfig.SavePrefix + "economy_queue.json");
             LoadQueue();
         }
 

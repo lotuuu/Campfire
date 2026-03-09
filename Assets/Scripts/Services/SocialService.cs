@@ -11,13 +11,7 @@ namespace Garden
     {
         public static SocialService Instance { get; private set; }
 
-        // Set via build script or DevServerConfig resource at runtime
-        public static readonly string ServerBaseUrl =
-#if UNITY_EDITOR
-            "http://localhost:4000";
-#else
-            DevServerConfig.BaseUrl;
-#endif
+        public static string ServerBaseUrl => ServerConfig.BaseUrl;
 
         public event Action OnSignedIn;
         public event Action<string> OnInitFailed;

@@ -193,6 +193,29 @@ namespace Garden
             loadingBarTrack = root.Q("loading-gate-bar-track");
             loadingBarFill = root.Q("loading-gate-bar-fill");
 
+            // Server selector (editor + debug builds only)
+            var serverSelector = root.Q("server-selector");
+            if (serverSelector != null)
+            {
+                if (Application.isEditor || UnityEngine.Debug.isDebugBuild)
+                {
+                    foreach (var server in ServerConfig.Servers)
+                    {
+                        var btn = new Button { text = server.name };
+                        btn.AddToClassList("server-btn");
+                        if (server.id == ServerConfig.SelectedId)
+                            btn.AddToClassList("server-active");
+                        var capturedId = server.id;
+                        btn.clicked += () => ServerConfig.Select(capturedId);
+                        serverSelector.Add(btn);
+                    }
+                }
+                else
+                {
+                    serverSelector.style.display = DisplayStyle.None;
+                }
+            }
+
             // Set loading screen image from cached sprites
             var loadingImage = root.Q("loading-gate-image");
             var loadingTex = SpriteService.Instance?.GetTexture("ui/loading_screen");

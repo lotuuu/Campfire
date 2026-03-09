@@ -17,12 +17,7 @@ namespace Garden
         public event Action OnStateLoaded;
         public event Action<string> OnInitFailed;
 
-        private static string ServerBaseUrl =>
-#if UNITY_EDITOR
-            "http://localhost:4000";
-#else
-            DevServerConfig.BaseUrl;
-#endif
+        private static string ServerBaseUrl => ServerConfig.BaseUrl;
 
         private void Awake()
         {
