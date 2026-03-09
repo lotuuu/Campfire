@@ -1,4 +1,4 @@
-.PHONY: setup dev start test psql reset up down logs tunnel tunnel-stop deps
+.PHONY: setup dev start test psql reset up down logs tunnel tunnel-stop deps deploy deploy-migrate remote-use
 
 DEV_CONFIG := ../Assets/Scripts/Services/DevServerConfig.cs
 PORT := 4000
@@ -74,3 +74,18 @@ tunnel-stop:
 	fi
 	@printf 'namespace Garden\n{\n    public static class DevServerConfig\n    {\n        public const string BaseUrl = "http://localhost:4000";\n    }\n}\n' > $(DEV_CONFIG)
 	@echo "DevServerConfig.cs reset to localhost."
+
+GIGALIXIR_URL := https://campfire.gigalixirapp.com
+
+# Deploy server/ subtree to Gigalixir
+deploy:
+	cd .. && git subtree push --prefix server gigalixir main
+
+# Run Ecto migrations on Gigalixir
+deploy-migrate:
+	gigalixir run mix ecto.migrate -a campfire
+
+# Point DevServerConfig.cs at Gigalixir
+remote-use:
+	@printf 'namespace Garden\n{\n    public static class DevServerConfig\n    {\n        public const string BaseUrl = "$(GIGALIXIR_URL)";\n    }\n}\n' > $(DEV_CONFIG)
+	@echo "DevServerConfig.cs updated: $(GIGALIXIR_URL)"
