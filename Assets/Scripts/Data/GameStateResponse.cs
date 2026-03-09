@@ -88,6 +88,12 @@ namespace Garden
         public int moon_phase;
     }
 
+    [Serializable]
+    public class ServerWeatherResponse
+    {
+        public ServerWeather weather;
+    }
+
     // Request DTOs
     [Serializable] public class CraftRequest { public int gridX; public int gridY; public bool freeMode; }
     [Serializable] public class PlantRequest { public int plotId; public string seedName; public bool freeMode; }
