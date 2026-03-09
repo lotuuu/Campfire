@@ -54,6 +54,8 @@ defmodule CampFire.Game.Mallums do
 
   def get_quest_configs, do: get_all_quest_configs()
 
+  def get_quest_config_public(quest_name), do: get_quest_config(quest_name)
+
   # --- Quests ---
 
   def send_on_quest(player_uid, quest_name) do

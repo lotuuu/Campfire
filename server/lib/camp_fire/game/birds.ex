@@ -114,6 +114,11 @@ defmodule CampFire.Game.Birds do
     |> Repo.insert()
   end
 
+  @doc "Force-spawn a bird (debug use). Returns {:ok, bird} or :no_tile / :no_seed."
+  def try_spawn_bird_public(player_uid, flame_level) do
+    try_spawn_bird(player_uid, flame_level, [])
+  end
+
   # ── Private Helpers ────────────────────────────────────────
 
   defp count_birds(player_uid) do
