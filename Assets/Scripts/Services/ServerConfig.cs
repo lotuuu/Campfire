@@ -24,7 +24,15 @@ namespace Garden
 
         private static readonly List<ServerEntry> _servers = new()
         {
-            new ServerEntry { id = "local",   name = "Local",      url = "http://localhost:4000" },
+            new ServerEntry
+            {
+                id = "local", name = "Local",
+#if UNITY_EDITOR
+                url = "http://localhost:4000"
+#else
+                url = DevServerConfig.BaseUrl
+#endif
+            },
             new ServerEntry { id = "remote",  name = "Gigalixir",  url = "https://campfire.gigalixirapp.com" },
         };
 
