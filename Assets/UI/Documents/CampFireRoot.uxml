@@ -317,6 +317,7 @@
 
         <!-- Loading gate — covers UI until all services are ready -->
         <ui:VisualElement name="loading-gate">
+            <ui:VisualElement name="loading-gate-image" />
             <ui:Label name="loading-gate-title" text="Camp Fire" />
             <ui:Label name="loading-gate-status" text="Starting up..." />
             <ui:VisualElement name="loading-gate-bar-track">

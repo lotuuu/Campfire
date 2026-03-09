@@ -193,6 +193,14 @@ namespace Garden
             loadingBarTrack = root.Q("loading-gate-bar-track");
             loadingBarFill = root.Q("loading-gate-bar-fill");
 
+            // Set loading screen image from cached sprites
+            var loadingImage = root.Q("loading-gate-image");
+            var loadingTex = SpriteService.Instance?.GetTexture("ui/loading_screen");
+            if (loadingTex != null && loadingImage != null)
+                loadingImage.style.backgroundImage = new StyleBackground(loadingTex);
+            else if (loadingImage != null)
+                loadingImage.style.display = DisplayStyle.None;
+
             // Subscribe to service completion + failure events
             if (WeatherService.Instance != null)
             {

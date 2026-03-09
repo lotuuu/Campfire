@@ -32,6 +32,8 @@ namespace Garden
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
+            // Load cached sprites immediately so they're available for the loading screen
+            LoadAllFromCache();
         }
 
         // ── Public API ──

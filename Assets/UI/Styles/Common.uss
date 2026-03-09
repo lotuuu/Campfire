@@ -174,6 +174,13 @@
     align-items: center;
 }
 
+#loading-gate-image {
+    width: 200px;
+    height: 200px;
+    margin-bottom: var(--spacing-md);
+    -unity-background-scale-mode: scale-to-fit;
+}
+
 #loading-gate-title {
     font-size: var(--font-xxl);
     color: var(--color-text-bright);
