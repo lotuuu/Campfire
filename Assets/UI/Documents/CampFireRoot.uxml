@@ -262,27 +262,50 @@
                         <ui:Button name="apply-button" text="Apply Weather" />
 
                         <ui:Label text="Time" class="debug-section-header" />
-
                         <ui:VisualElement class="debug-row">
                             <ui:Label text="Hours" class="debug-label" />
                             <ui:IntegerField name="time-skip-field" value="1" />
                             <ui:Button name="time-skip-button" text="Skip Time" class="preset-btn" />
                         </ui:VisualElement>
-
-                        <ui:VisualElement class="debug-row">
-                            <ui:Label text="Time" class="debug-label" />
-                            <ui:TextField name="time-override-field" value="" />
-                        </ui:VisualElement>
-                        <ui:VisualElement class="debug-row">
-                            <ui:Button name="set-time-button" text="Set Time" class="preset-btn" />
-                            <ui:Button name="reset-time-button" text="Reset" class="preset-btn" />
-                        </ui:VisualElement>
                         <ui:Label name="current-time-label" />
 
-                        <ui:Label text="Cheats" class="debug-section-header" />
+                        <ui:Label text="Economy" class="debug-section-header" />
+                        <ui:VisualElement class="debug-row">
+                            <ui:Label text="Mana" class="debug-label" />
+                            <ui:FloatField name="debug-mana-field" value="999" />
+                            <ui:Button name="set-mana-button" text="Set" class="preset-btn" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="debug-row">
+                            <ui:Label text="Gems" class="debug-label" />
+                            <ui:IntegerField name="debug-gems-field" value="999" />
+                            <ui:Button name="set-gems-button" text="Set" class="preset-btn" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="debug-row">
+                            <ui:Label text="Flame Lvl" class="debug-label" />
+                            <ui:IntegerField name="debug-flame-field" value="1" />
+                            <ui:Button name="set-flame-button" text="Set" class="preset-btn" />
+                        </ui:VisualElement>
 
+                        <ui:Label text="Inventory" class="debug-section-header" />
+                        <ui:VisualElement class="debug-row">
+                            <ui:TextField name="debug-seed-name" value="Sprouts" />
+                            <ui:IntegerField name="debug-seed-count" value="10" />
+                            <ui:Button name="grant-seeds-button" text="Grant" class="preset-btn" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="debug-row">
+                            <ui:TextField name="debug-item-name" value="Speed_Potion" />
+                            <ui:IntegerField name="debug-item-count" value="5" />
+                            <ui:Button name="grant-items-button" text="Grant" class="preset-btn" />
+                        </ui:VisualElement>
+
+                        <ui:Label text="Quick Actions" class="debug-section-header" />
+                        <ui:Button name="spawn-bird-button" text="Spawn Bird" />
+                        <ui:Button name="complete-quests-button" text="Complete Quests" />
+                        <ui:Button name="fill-vases-button" text="Fill Vases" />
+                        <ui:Button name="mature-plots-button" text="Mature Plots" />
+
+                        <ui:Label text="Danger Zone" class="debug-section-header" />
                         <ui:Toggle name="free-mode-toggle" label="Free Mode" />
-                        <ui:Button name="max-currency-button" text="Max Currency" />
                         <ui:Button name="clear-save-button" text="Clear Save Data" class="btn-danger" />
 
                     </ui:VisualElement>

@@ -1,5 +1,4 @@
 using System;
-using System.Globalization;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -19,7 +18,6 @@ namespace Garden
         private Label humidityValue;
         private Label windValue;
         private IntegerField timeSkipField;
-        private TextField timeOverrideField;
         private Label currentTimeLabel;
 
         public void Initialize(VisualElement root)
@@ -54,7 +52,6 @@ namespace Garden
             windValue = root.Q<Label>("wind-value");
 
             timeSkipField = root.Q<IntegerField>("time-skip-field");
-            timeOverrideField = root.Q<TextField>("time-override-field");
             currentTimeLabel = root.Q<Label>("current-time-label");
 
             // Slider callbacks
@@ -68,7 +65,7 @@ namespace Garden
             if (timeOfDayDropdown != null) timeOfDayDropdown.index = 0;
             if (calendarEventDropdown != null) calendarEventDropdown.index = 0;
 
-            // Wire buttons
+            // Wire weather buttons
             root.Q<Button>("apply-button")?.RegisterCallback<ClickEvent>(_ => ApplySettings());
 
             root.Q<Button>("blizzard-button")?.RegisterCallback<ClickEvent>(_ =>
@@ -80,9 +77,53 @@ namespace Garden
             root.Q<Button>("golden-hour-button")?.RegisterCallback<ClickEvent>(_ =>
                 ApplyPreset(22, 50, 5, 0, 2, 1));
 
+            // Wire time skip
             root.Q<Button>("time-skip-button")?.RegisterCallback<ClickEvent>(_ => SkipTime());
-            root.Q<Button>("set-time-button")?.RegisterCallback<ClickEvent>(_ => SetTimeOverride());
-            root.Q<Button>("reset-time-button")?.RegisterCallback<ClickEvent>(_ => ResetTimeOverride());
+
+            // Wire economy buttons
+            root.Q<Button>("set-mana-button")?.RegisterCallback<ClickEvent>(_ =>
+            {
+                var field = root.Q<FloatField>("debug-mana-field");
+                if (field != null) _ = DebugService.Instance?.SetCurrency(mana: field.value);
+            });
+            root.Q<Button>("set-gems-button")?.RegisterCallback<ClickEvent>(_ =>
+            {
+                var field = root.Q<IntegerField>("debug-gems-field");
+                if (field != null) _ = DebugService.Instance?.SetCurrency(gems: field.value);
+            });
+            root.Q<Button>("set-flame-button")?.RegisterCallback<ClickEvent>(_ =>
+            {
+                var field = root.Q<IntegerField>("debug-flame-field");
+                if (field != null) _ = DebugService.Instance?.SetFlameLevel(field.value);
+            });
+
+            // Wire inventory buttons
+            root.Q<Button>("grant-seeds-button")?.RegisterCallback<ClickEvent>(_ =>
+            {
+                var nameField = root.Q<TextField>("debug-seed-name");
+                var countField = root.Q<IntegerField>("debug-seed-count");
+                if (nameField != null && countField != null)
+                    _ = DebugService.Instance?.GrantSeeds(nameField.value, countField.value);
+            });
+            root.Q<Button>("grant-items-button")?.RegisterCallback<ClickEvent>(_ =>
+            {
+                var nameField = root.Q<TextField>("debug-item-name");
+                var countField = root.Q<IntegerField>("debug-item-count");
+                if (nameField != null && countField != null)
+                    _ = DebugService.Instance?.GrantItems(nameField.value, countField.value);
+            });
+
+            // Wire quick action buttons
+            root.Q<Button>("spawn-bird-button")?.RegisterCallback<ClickEvent>(_ =>
+                _ = DebugService.Instance?.SpawnBird());
+            root.Q<Button>("complete-quests-button")?.RegisterCallback<ClickEvent>(_ =>
+                _ = DebugService.Instance?.CompleteQuests());
+            root.Q<Button>("fill-vases-button")?.RegisterCallback<ClickEvent>(_ =>
+                _ = DebugService.Instance?.FillVases());
+            root.Q<Button>("mature-plots-button")?.RegisterCallback<ClickEvent>(_ =>
+                _ = DebugService.Instance?.MaturePlots());
+
+            // Wire free mode toggle
             var freeModeToggle = root.Q<Toggle>("free-mode-toggle");
             if (freeModeToggle != null)
             {
@@ -93,20 +134,15 @@ namespace Garden
                     Debug.Log($"[Debug] Free Mode {(evt.newValue ? "ON" : "OFF")}");
                 });
             }
-            root.Q<Button>("max-currency-button")?.RegisterCallback<ClickEvent>(_ => MaxCurrency());
-            root.Q<Button>("clear-save-button")?.RegisterCallback<ClickEvent>(_ => ClearSaveData());
 
-            if (timeOverrideField != null)
-                timeOverrideField.value = GameTime.Now.ToString("yyyy-MM-dd HH:mm");
+            // Wire clear save
+            root.Q<Button>("clear-save-button")?.RegisterCallback<ClickEvent>(_ => ClearSaveData());
         }
 
         private void Update()
         {
             if (currentTimeLabel != null && panel != null && panel.resolvedStyle.display == DisplayStyle.Flex)
-            {
-                var prefix = GameTime.IsOverridden ? "[OVERRIDDEN] " : "";
-                currentTimeLabel.text = $"{prefix}{GameTime.Now:yyyy-MM-dd HH:mm:ss}";
-            }
+                currentTimeLabel.text = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss}";
         }
 
         private void ApplyPreset(float temp, float humidity, float wind, int condIdx, int todIdx, int moonIdx)
@@ -144,51 +180,27 @@ namespace Garden
             WeatherService.Instance.SetDebugWeather(weather);
         }
 
-        private void SkipTime()
+        private async void SkipTime()
         {
             int hours = Mathf.Max(1, timeSkipField != null ? timeSkipField.value : 1);
-            var target = GameTime.Now.AddHours(hours);
-            GameTime.SetOverride(target);
-            Debug.Log($"[Debug] Skipped {hours} hour(s) forward.");
+            await DebugService.Instance?.SkipTime(hours);
         }
 
-        private void SetTimeOverride()
+        private async void ClearSaveData()
         {
-            if (timeOverrideField == null) return;
-            if (DateTime.TryParseExact(timeOverrideField.value, "yyyy-MM-dd HH:mm",
-                    CultureInfo.InvariantCulture, DateTimeStyles.None, out var target))
+            Debug.Log("[Debug] Clearing save data via server...");
+            if (DebugService.Instance != null)
             {
-                GameTime.SetOverride(target);
-                Debug.Log($"[Debug] Time overridden to {target:yyyy-MM-dd HH:mm}");
+                await DebugService.Instance.ClearSave();
             }
             else
             {
-                Debug.LogWarning("[Debug] Invalid format. Use yyyy-MM-dd HH:mm");
+                // Fallback for offline
+                SaveManager.Instance.DeleteSave();
+                SocialSaveManager.Instance?.DeleteSave();
+                UnityEngine.SceneManagement.SceneManager.LoadScene(
+                    UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
             }
-        }
-
-        private void ResetTimeOverride()
-        {
-            GameTime.ClearOverride();
-            if (timeOverrideField != null)
-                timeOverrideField.value = GameTime.Now.ToString("yyyy-MM-dd HH:mm");
-            Debug.Log("[Debug] Time override cleared.");
-        }
-
-        private void MaxCurrency()
-        {
-            CurrencyManager.Instance?.GrantInfiniteGems();
-            CurrencyManager.Instance?.AddMana(999999f);
-            Debug.Log("[Debug] Currencies maxed out.");
-        }
-
-        private void ClearSaveData()
-        {
-            SaveManager.Instance.DeleteSave();
-            SocialSaveManager.Instance?.DeleteSave();
-            Debug.Log("[Debug] Save data cleared. Reloading scene...");
-            UnityEngine.SceneManagement.SceneManager.LoadScene(
-                UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
         }
     }
 }

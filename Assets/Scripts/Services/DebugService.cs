@@ -1,0 +1,103 @@
+using System;
+using System.Text;
+using System.Threading.Tasks;
+using UnityEngine;
+using UnityEngine.Networking;
+
+namespace Garden
+{
+    public class DebugService : MonoBehaviour
+    {
+        public static DebugService Instance { get; private set; }
+
+        private static string ServerBaseUrl => ServerConfig.BaseUrl;
+
+        private void Awake()
+        {
+            if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+            Instance = this;
+        }
+
+        public async Task<bool> SkipTime(int hours)
+        {
+            return await Post("/debug/skip-time", JsonUtility.ToJson(new SkipTimeReq { hours = hours }));
+        }
+
+        public async Task<bool> SetCurrency(float? mana = null, int? gems = null)
+        {
+            // Build JSON manually since JsonUtility doesn't handle nullable
+            var parts = new System.Collections.Generic.List<string>();
+            if (mana.HasValue) parts.Add($"\"mana\":{mana.Value}");
+            if (gems.HasValue) parts.Add($"\"gems\":{gems.Value}");
+            return await Post("/debug/set-currency", "{" + string.Join(",", parts) + "}");
+        }
+
+        public async Task<bool> GrantSeeds(string seedName, int count)
+        {
+            return await Post("/debug/grant-seeds",
+                JsonUtility.ToJson(new GrantSeedsReq { seedName = seedName, count = count }));
+        }
+
+        public async Task<bool> GrantItems(string itemName, int count)
+        {
+            return await Post("/debug/grant-items",
+                JsonUtility.ToJson(new GrantItemsReq { itemName = itemName, count = count }));
+        }
+
+        public async Task<bool> SpawnBird() => await Post("/debug/spawn-bird", "{}");
+
+        public async Task<bool> CompleteQuests() => await Post("/debug/complete-quests", "{}");
+
+        public async Task<bool> FillVases() => await Post("/debug/fill-vases", "{}");
+
+        public async Task<bool> MaturePlots() => await Post("/debug/mature-plots", "{}");
+
+        public async Task<bool> SetFlameLevel(int level)
+        {
+            return await Post("/debug/set-flame-level",
+                JsonUtility.ToJson(new SetFlameLevelReq { level = level }));
+        }
+
+        public async Task<bool> ClearSave() => await Post("/debug/clear-save", "{}");
+
+        private async Task<bool> Post(string path, string json)
+        {
+            try
+            {
+                using var req = new UnityWebRequest(ServerBaseUrl + path, "POST");
+                req.timeout = 15;
+                req.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(json));
+                req.downloadHandler = new DownloadHandlerBuffer();
+                req.SetRequestHeader("Content-Type", "application/json");
+                var token = SocialSaveManager.Instance?.Data?.authToken;
+                if (!string.IsNullOrEmpty(token))
+                    req.SetRequestHeader("Authorization", $"Bearer {token}");
+
+                var tcs = new TaskCompletionSource<bool>();
+                var op = req.SendWebRequest();
+                op.completed += _ => tcs.SetResult(true);
+                await tcs.Task;
+
+                if (req.responseCode >= 200 && req.responseCode < 300)
+                {
+                    Debug.Log($"[DebugService] {path} OK: {req.downloadHandler.text}");
+                    GameService.Instance?.Initialize();
+                    return true;
+                }
+
+                Debug.LogWarning($"[DebugService] {path} failed ({req.responseCode}): {req.downloadHandler.text}");
+                return false;
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[DebugService] {path} error: {e.Message}");
+                return false;
+            }
+        }
+
+        [Serializable] private class SkipTimeReq { public int hours; }
+        [Serializable] private class GrantSeedsReq { public string seedName; public int count; }
+        [Serializable] private class GrantItemsReq { public string itemName; public int count; }
+        [Serializable] private class SetFlameLevelReq { public int level; }
+    }
+}

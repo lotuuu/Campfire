@@ -134,7 +134,11 @@ namespace Garden
             if (debugBtn != null)
             {
                 if (Application.isEditor || UnityEngine.Debug.isDebugBuild)
+                {
+                    if (GetComponent<DebugService>() == null)
+                        gameObject.AddComponent<DebugService>();
                     debugBtn.clicked += () => OpenOverlay("Debug", debugPanelElement);
+                }
                 else
                     debugBtn.style.display = DisplayStyle.None;
             }
