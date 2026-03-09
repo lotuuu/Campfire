@@ -30,7 +30,7 @@ namespace Garden
             var data = SaveManager.Instance?.Data;
             if (data == null) return;
 
-            // When online, use server for bird spawning
+            // When online and not time-overridden, use server for bird spawning
             if (GameService.Instance != null && GameService.Instance.IsOnline)
             {
                 CheckBirdsFromServer();

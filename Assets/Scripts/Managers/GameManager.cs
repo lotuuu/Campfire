@@ -1,6 +1,5 @@
 using System.Runtime.InteropServices;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace Garden
 {
@@ -37,12 +36,6 @@ namespace Garden
 
         private void Update()
         {
-#if UNITY_EDITOR
-            if (Keyboard.current != null &&
-                Keyboard.current.gKey.wasPressedThisFrame &&
-                Keyboard.current.leftShiftKey.isPressed)
-                CurrencyManager.Instance?.GrantInfiniteGems();
-#endif
         }
 
         private void OnSignedIn()
