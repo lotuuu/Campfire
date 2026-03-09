@@ -21,8 +21,29 @@ defmodule CampFire.ConfigCache do
   @impl true
   def init(_) do
     table = :ets.new(@table, [:named_table, :set, :public, read_concurrency: true])
-    load_all()
+
+    case load_all() do
+      :ok -> :ok
+      {:error, reason} ->
+        require Logger
+        Logger.warning("ConfigCache failed to load: #{inspect(reason)}, will retry in 5s")
+        Process.send_after(self(), :retry_load, 5_000)
+    end
+
     {:ok, %{table: table}}
+  end
+
+  @impl true
+  def handle_info(:retry_load, state) do
+    case load_all() do
+      :ok -> :ok
+      {:error, reason} ->
+        require Logger
+        Logger.warning("ConfigCache retry failed: #{inspect(reason)}, retrying in 5s")
+        Process.send_after(self(), :retry_load, 5_000)
+    end
+
+    {:noreply, state}
   end
 
   @impl true
@@ -32,6 +53,15 @@ defmodule CampFire.ConfigCache do
   end
 
   defp load_all do
+    try do
+      load_all!()
+      :ok
+    rescue
+      e -> {:error, e}
+    end
+  end
+
+  defp load_all! do
     configs = CampFire.Repo.all(CampFire.Admin.GameConfig)
 
     for config <- configs do

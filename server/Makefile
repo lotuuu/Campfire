@@ -75,15 +75,29 @@ tunnel-stop:
 	@printf 'namespace Garden\n{\n    public static class DevServerConfig\n    {\n        public const string BaseUrl = "http://localhost:4000";\n    }\n}\n' > $(DEV_CONFIG)
 	@echo "DevServerConfig.cs reset to localhost."
 
+GIGALIXIR_APP := campfire
 GIGALIXIR_URL := https://campfire.gigalixirapp.com
+DEPLOY_DIR := /tmp/campfire-deploy
 
-# Deploy server/ subtree to Gigalixir
+# Deploy server/ to Gigalixir (handles LFS dereferencing)
 deploy:
-	cd .. && git subtree push --prefix server gigalixir main
+	@echo "Preparing deploy..."
+	@rm -rf $(DEPLOY_DIR)
+	@mkdir -p $(DEPLOY_DIR)
+	@cd .. && git lfs checkout -- server/
+	@rsync -a --exclude='.git' ./ $(DEPLOY_DIR)/
+	@cd $(DEPLOY_DIR) && git init && git add -A && git commit -m "deploy"
+	@cd $(DEPLOY_DIR) && git remote add gigalixir https://git.gigalixir.com/$(GIGALIXIR_APP).git/
+	@cd $(DEPLOY_DIR) && git push -f gigalixir main
+	@rm -rf $(DEPLOY_DIR)
+	@echo "Deployed to $(GIGALIXIR_URL)"
 
 # Run Ecto migrations on Gigalixir
 deploy-migrate:
-	gigalixir run mix ecto.migrate -a campfire
+	gigalixir run mix ecto.migrate -a $(GIGALIXIR_APP)
+
+# Full deploy: push code then migrate
+deploy-full: deploy deploy-migrate
 
 # Point DevServerConfig.cs at Gigalixir
 remote-use:
