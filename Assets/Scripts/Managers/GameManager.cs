@@ -25,13 +25,20 @@ namespace Garden
 
         private void Start()
         {
-            if (SaveManager.Instance.Data.vases.Count == 0)
-            {
-                InitializeNewPlayer();
-            }
-
             if (SocialService.Instance != null)
                 SocialService.Instance.OnSignedIn += OnSignedIn;
+
+            if (GameService.Instance != null)
+                GameService.Instance.OnStateLoaded += CheckNewPlayer;
+        }
+
+        private void CheckNewPlayer()
+        {
+            if (GameService.Instance != null)
+                GameService.Instance.OnStateLoaded -= CheckNewPlayer;
+
+            if (SaveManager.Instance.Data.vases.Count == 0)
+                InitializeNewPlayer();
         }
 
         private void Update()
