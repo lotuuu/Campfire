@@ -122,12 +122,34 @@ namespace Garden
             if (string.IsNullOrEmpty(condition)) return WeatherCondition.Clear;
             return condition.ToLower() switch
             {
-                "rain" => WeatherCondition.Rain,
-                "storm" => WeatherCondition.Storm,
+                "rain" or "drizzle" => WeatherCondition.Rain,
+                "storm" or "thunderstorm" => WeatherCondition.Storm,
                 "snow" => WeatherCondition.Snow,
-                "cloudy" => WeatherCondition.Cloudy,
+                "cloudy" or "clouds" => WeatherCondition.Cloudy,
                 _ => WeatherCondition.Clear
             };
+        }
+
+        public void ApplyServerForecast(List<ServerForecastDay> days)
+        {
+            if (days == null || days.Count == 0) return;
+            var forecast = new List<DailyForecast>();
+            foreach (var d in days)
+            {
+                forecast.Add(new DailyForecast
+                {
+                    dayLabel = d.dayLabel,
+                    tempHigh = d.tempHigh,
+                    tempLow = d.tempLow,
+                    condition = ParseServerCondition(d.condition),
+                    moonPhase = (MoonPhase)d.moonPhase,
+                    humidity = d.humidity,
+                    windSpeed = d.windSpeed,
+                    cloudCover = d.cloudCover
+                });
+            }
+            Forecast = forecast;
+            OnForecastUpdated?.Invoke();
         }
 
         // ── Debug ──

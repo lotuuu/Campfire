@@ -20,6 +20,10 @@ if System.get_env("PHX_SERVER") do
   config :camp_fire, CampFireWeb.Endpoint, server: true
 end
 
+# OWM API key must be read at runtime so Gigalixir config vars are available
+owm_key = System.get_env("OWM_API_KEY") || ""
+if owm_key != "", do: config(:camp_fire, :owm_api_key, owm_key)
+
 if config_env() == :prod do
   database_url =
     System.get_env("DATABASE_URL") ||
