@@ -60,6 +60,8 @@ namespace Garden
                 manaDisplay.text = $"{SaveManager.Instance.Data.mana:F0}";
         }
 
+        public void Refresh() => UpdateDisplay();
+
         private void UpdateDisplay()
         {
             if (manaDisplay != null && SaveManager.Instance != null)
