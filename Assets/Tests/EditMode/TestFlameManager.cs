@@ -35,9 +35,12 @@ namespace Garden.Tests
         [Test]
         public void GetManaCap_ReturnsCorrectPerLevel()
         {
-            var config = UnityEngine.ScriptableObject.CreateInstance<FlameConfig>();
-            // Uses default values from code: 300, 500, 750, ...
+            var config = new ServerFlameConfig
+            {
+                mana_caps = new System.Collections.Generic.List<int> { 300, 500, 750, 1000 }
+            };
             Assert.AreEqual(300f, config.GetManaCap(1));
+            Assert.AreEqual(500f, config.GetManaCap(2));
         }
     }
 }
