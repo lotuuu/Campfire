@@ -36,5 +36,34 @@ namespace Garden
         {
             return Mathf.Max(Mathf.Abs(q), Mathf.Max(Mathf.Abs(r), Mathf.Abs(q + r))) <= radius;
         }
+
+        /// <summary>
+        /// Returns all valid hex positions within the given radius, excluding the center (0,0).
+        /// </summary>
+        public static System.Collections.Generic.List<(int q, int r)> GetNonCenterPositions(int radius)
+        {
+            var positions = new System.Collections.Generic.List<(int q, int r)>();
+            for (int q = -radius; q <= radius; q++)
+            {
+                for (int r = -radius; r <= radius; r++)
+                {
+                    if (q == 0 && r == 0) continue;
+                    if (IsWithinRadius(q, r, radius)) positions.Add((q, r));
+                }
+            }
+            return positions;
+        }
+
+        /// <summary>
+        /// Fisher-Yates shuffle of a list in place.
+        /// </summary>
+        public static void Shuffle<T>(System.Collections.Generic.List<T> list)
+        {
+            for (int i = list.Count - 1; i > 0; i--)
+            {
+                int j = Random.Range(0, i + 1);
+                (list[i], list[j]) = (list[j], list[i]);
+            }
+        }
     }
 }
