@@ -250,6 +250,24 @@ namespace Garden
                 data.apothekeGridY = state.apotheke.gridY;
             }
 
+            // Economy (mana, gems, flame level, seeds, items)
+            if (state.economy != null)
+            {
+                data.mana = state.economy.mana;
+                data.gems = state.economy.gems;
+                data.flameLevel = state.economy.flameLevel;
+
+                data.seedInventory.Clear();
+                if (state.economy.seeds != null)
+                    foreach (var s in state.economy.seeds)
+                        data.seedInventory.Add(new SeedInventoryEntry { seedName = s.seedName, count = s.count });
+
+                data.items.Clear();
+                if (state.economy.items != null)
+                    foreach (var i in state.economy.items)
+                        data.items.Add(new InventoryItem { itemName = i.itemName, count = i.count });
+            }
+
             // Apply server weather if available
             if (state.weather != null && WeatherService.Instance != null)
                 WeatherService.Instance.ApplyServerWeather(state.weather);
