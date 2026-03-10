@@ -56,6 +56,7 @@ defmodule CampFireWeb.Router do
   scope "/", CampFireWeb do
     pipe_through :browser
     live "/", HomeLive, :index
+    live "/invite/:code", InviteLive, :index
   end
 
   scope "/", CampFireWeb do
