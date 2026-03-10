@@ -215,11 +215,18 @@
     transition-duration: 300ms;
 }
 
-/* Server selector on loading gate */
+/* Server selector on loading gate — hidden until failure or editor/debug */
 #server-selector {
     flex-direction: row;
+    flex-wrap: wrap;
     margin-top: var(--spacing-lg);
     justify-content: center;
+    display: none;
+}
+
+/* Retry button on loading gate failure */
+#loading-gate > .server-btn {
+    margin-top: var(--spacing-md);
 }
 
 #server-selector .server-btn {

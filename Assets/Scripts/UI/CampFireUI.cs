@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
 namespace Garden
@@ -210,36 +211,37 @@ namespace Garden
             loadingBarTrack = root.Q("loading-gate-bar-track");
             loadingBarFill = root.Q("loading-gate-bar-fill");
 
-            // Server selector (editor + debug builds only)
+            // Server selector — populate buttons (shown on failure or in editor/debug)
             var serverSelector = root.Q("server-selector");
             if (serverSelector != null)
             {
+                foreach (var server in ServerConfig.Servers)
+                {
+                    var btn = new Button { text = server.name };
+                    btn.AddToClassList("server-btn");
+                    if (server.id == ServerConfig.SelectedId)
+                        btn.AddToClassList("server-active");
+                    var capturedId = server.id;
+                    btn.clicked += () => ServerConfig.Select(capturedId);
+                    serverSelector.Add(btn);
+                }
+                // Show immediately in editor/debug builds
                 if (Application.isEditor || UnityEngine.Debug.isDebugBuild)
-                {
-                    foreach (var server in ServerConfig.Servers)
-                    {
-                        var btn = new Button { text = server.name };
-                        btn.AddToClassList("server-btn");
-                        if (server.id == ServerConfig.SelectedId)
-                            btn.AddToClassList("server-active");
-                        var capturedId = server.id;
-                        btn.clicked += () => ServerConfig.Select(capturedId);
-                        serverSelector.Add(btn);
-                    }
-                }
-                else
-                {
-                    serverSelector.style.display = DisplayStyle.None;
-                }
+                    serverSelector.style.display = DisplayStyle.Flex;
             }
 
-            // Set loading screen image from cached sprites
+            // Set loading screen image — prefer server sprite, fall back to local asset
             var loadingImage = root.Q("loading-gate-image");
-            var loadingTex = SpriteService.Instance?.GetTexture("ui/loading_screen");
-            if (loadingTex != null && loadingImage != null)
-                loadingImage.style.backgroundImage = new StyleBackground(loadingTex);
-            else if (loadingImage != null)
-                loadingImage.style.display = DisplayStyle.None;
+            if (loadingImage != null)
+            {
+                var loadingTex = SpriteService.Instance?.GetTexture("ui/loading_screen");
+                if (loadingTex == null)
+                    loadingTex = Resources.Load<Texture2D>("UI/Images/loading_screen");
+                if (loadingTex != null)
+                    loadingImage.style.backgroundImage = new StyleBackground(loadingTex);
+                else
+                    loadingImage.style.display = DisplayStyle.None;
+            }
 
             // Subscribe to service completion + failure events
             if (WeatherService.Instance != null)
@@ -346,6 +348,17 @@ namespace Garden
             loadingGateTitle.text = "Connection Failed";
             loadingStatus.text = reason;
             loadingBarTrack.style.display = DisplayStyle.None;
+
+            // Show server selector so the user can switch servers
+            var serverSelector = loadingGate.Q("server-selector");
+            if (serverSelector != null)
+                serverSelector.style.display = DisplayStyle.Flex;
+
+            // Add a retry button
+            var retryBtn = new Button { text = "Retry" };
+            retryBtn.AddToClassList("server-btn");
+            retryBtn.clicked += () => SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            loadingGate.Add(retryBtn);
         }
 
         private void UpdateLoadingGate()
