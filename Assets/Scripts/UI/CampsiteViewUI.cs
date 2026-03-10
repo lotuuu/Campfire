@@ -2161,6 +2161,7 @@ namespace Garden
 
         private void CloseInteractionPanel()
         {
+            AudioManager.Instance?.PlaySFX("ui_panel_close");
             if (interactionBackdrop != null)
                 interactionBackdrop.style.display = DisplayStyle.None;
             if (interactionPanel != null)

@@ -68,6 +68,8 @@ namespace Garden
 
         public void Hide()
         {
+            if (overlay != null && overlay.style.display != DisplayStyle.None)
+                AudioManager.Instance?.PlaySFX("ui_panel_close");
             if (overlay != null) overlay.style.display = DisplayStyle.None;
         }
 
