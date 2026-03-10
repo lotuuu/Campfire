@@ -18,17 +18,27 @@ namespace Garden
         public int maxDrops;
         public float manaCost;
         public int tier;
-        // recipe is deserialized manually (nested map)
+        public GrowthRecipe recipe;
+    }
+
+    [Serializable]
+    public class ServerQuestReward
+    {
+        public string seedName;
+        public float weight = 1f;
+        public int minCount = 1;
+        public int maxCount = 1;
     }
 
     [Serializable]
     public class ServerQuestConfig
     {
         public string questName;
+        public string description;
         public int durationMinutes;
         public int requiredFlameLevel;
         public int rewardRolls;
-        // rewardPool deserialized manually
+        public List<ServerQuestReward> rewardPool = new();
     }
 
     [Serializable]
@@ -46,12 +56,49 @@ namespace Garden
     [Serializable]
     public class ServerFlameConfig
     {
-        public float base_mana_per_second;
-        public float mana_per_level;
         public int max_flame_level;
-        public List<int> entity_caps;
-        public List<int> grid_sizes;
-        // upgrade_recipes deserialized manually
+        public List<float> mana_rates = new();
+        public List<int> mana_caps = new();
+        public List<int> entity_caps = new();
+        public List<int> grid_sizes = new();
+        public List<FlameUpgradeRecipe> upgradeRecipes = new();
+
+        public float GetManaPerSecond(int flameLevel)
+        {
+            if (mana_rates.Count == 0) return 0f;
+            int index = Mathf.Clamp(flameLevel - 1, 0, mana_rates.Count - 1);
+            return mana_rates[index];
+        }
+
+        public float GetManaCap(int flameLevel)
+        {
+            if (mana_caps.Count == 0) return 1000f;
+            int index = Mathf.Clamp(flameLevel - 1, 0, mana_caps.Count - 1);
+            return mana_caps[index];
+        }
+
+        public int GetMaxEntities(int flameLevel)
+        {
+            if (entity_caps.Count == 0) return 6;
+            int index = Mathf.Clamp(flameLevel - 1, 0, entity_caps.Count - 1);
+            return entity_caps[index];
+        }
+
+        public int GetGridSize(int flameLevel)
+        {
+            if (grid_sizes.Count == 0) return 2;
+            int index = Mathf.Clamp(flameLevel - 1, 0, grid_sizes.Count - 1);
+            return grid_sizes[index];
+        }
+
+        public int MaxLevel => upgradeRecipes.Count + 1;
+
+        public FlameUpgradeRecipe GetUpgradeRecipe(int currentLevel)
+        {
+            int index = currentLevel - 1;
+            if (index < 0 || index >= upgradeRecipes.Count) return null;
+            return upgradeRecipes[index];
+        }
     }
 
     [Serializable]
@@ -66,7 +113,10 @@ namespace Garden
     public class ServerMallumHouseConfig
     {
         public int mallums_per_house;
-        // house_costs deserialized manually
+        public List<BuildingCost> houseCosts = new();
+
+        public int MallumsPerHouse => mallums_per_house;
+        public int GetMaxMallums(int houseCount) => houseCount * mallums_per_house;
     }
 
     public class ConfigService : MonoBehaviour
@@ -75,16 +125,12 @@ namespace Garden
         public bool IsLoaded { get; private set; }
 
         private Dictionary<string, ServerSeedConfig> _seedConfigs = new();
-        private Dictionary<string, Dictionary<string, object>> _seedRecipes = new();
         private Dictionary<string, ServerQuestConfig> _questConfigs = new();
-        private Dictionary<string, List<Dictionary<string, object>>> _questRewardPools = new();
         private Dictionary<string, ServerGardenConfig> _gardenConfigs = new();
         private ServerFlameConfig _flameConfig;
-        private List<List<Dictionary<string, object>>> _flameUpgradeRecipes;
         private ServerVaseConfig _vaseConfig;
         private ServerMallumHouseConfig _mallumHouseConfig;
-        private List<Dictionary<string, object>> _houseCosts;
-        private Dictionary<string, object> _buildingCostConfig;
+        private Dictionary<string, List<BuildingCost>> _buildingCosts = new();
         private Dictionary<string, string> _spriteManifest = new();
 
         private static string ServerBaseUrl => ServerConfig.BaseUrl;
@@ -139,25 +185,99 @@ namespace Garden
         public ServerSeedConfig GetSeed(string name) =>
             _seedConfigs.TryGetValue(name, out var s) ? s : null;
 
-        public Dictionary<string, object> GetSeedRecipe(string name) =>
-            _seedRecipes.TryGetValue(name, out var r) ? r : null;
-
         public ServerQuestConfig GetQuest(string name) =>
             _questConfigs.TryGetValue(name, out var q) ? q : null;
-
-        public List<Dictionary<string, object>> GetQuestRewardPool(string name) =>
-            _questRewardPools.TryGetValue(name, out var r) ? r : null;
 
         public ServerGardenConfig GetGarden(string name) =>
             _gardenConfigs.TryGetValue(name, out var g) ? g : null;
 
+        public List<ServerSeedConfig> GetAllSeeds() => new(_seedConfigs.Values);
+        public List<ServerQuestConfig> GetAllQuests() => new(_questConfigs.Values);
+        public List<ServerGardenConfig> GetAllGardens() => new(_gardenConfigs.Values);
+
         public ServerFlameConfig FlameConfig => _flameConfig;
-        public List<List<Dictionary<string, object>>> FlameUpgradeRecipes => _flameUpgradeRecipes;
         public ServerVaseConfig VaseConfig => _vaseConfig;
         public ServerMallumHouseConfig MallumHouseConfig => _mallumHouseConfig;
-        public List<Dictionary<string, object>> HouseCosts => _houseCosts;
-        public Dictionary<string, object> BuildingCostConfig => _buildingCostConfig;
         public Dictionary<string, string> SpriteManifest => _spriteManifest;
+
+        // ── Legacy accessors (kept until managers are migrated) ──
+
+        public Dictionary<string, object> GetSeedRecipe(string name)
+        {
+            // Legacy: returns null; managers should use GetSeed(name).recipe instead
+            return null;
+        }
+
+        public List<Dictionary<string, object>> GetQuestRewardPool(string name)
+        {
+            // Legacy: returns null; managers should use GetQuest(name).rewardPool instead
+            return null;
+        }
+
+        public List<List<Dictionary<string, object>>> FlameUpgradeRecipes
+        {
+            get
+            {
+                // Legacy: returns null; managers should use FlameConfig.upgradeRecipes instead
+                return null;
+            }
+        }
+
+        public List<Dictionary<string, object>> HouseCosts
+        {
+            get
+            {
+                // Legacy: returns null; managers should use MallumHouseConfig.houseCosts instead
+                return null;
+            }
+        }
+
+        public Dictionary<string, object> BuildingCostConfig
+        {
+            get
+            {
+                // Legacy: returns null; managers should use GetPlotCost/GetVaseCost/GetGardenCost instead
+                return null;
+            }
+        }
+
+        // ── Building Cost Accessors ──
+
+        private List<BuildingCost> GetBuildingCostList(string key) =>
+            _buildingCosts.TryGetValue(key, out var list) ? list : null;
+
+        public BuildingCost GetPlotCost(int currentCount)
+        {
+            var list = GetBuildingCostList("plot_costs");
+            if (list == null || list.Count == 0) return null;
+            int index = Mathf.Clamp(currentCount, 0, list.Count - 1);
+            return list[index];
+        }
+
+        public BuildingCost GetVaseCost(int currentCount)
+        {
+            var list = GetBuildingCostList("vase_costs");
+            if (list == null || list.Count == 0) return null;
+            int index = Mathf.Clamp(currentCount, 0, list.Count - 1);
+            return list[index];
+        }
+
+        public BuildingCost GetGardenCost(int currentCount)
+        {
+            var list = GetBuildingCostList("garden_costs");
+            if (list == null || list.Count == 0) return null;
+            int index = Mathf.Clamp(currentCount, 0, list.Count - 1);
+            return list[index];
+        }
+
+        public BuildingCost GetHouseCost(int currentCount)
+        {
+            var list = _mallumHouseConfig?.houseCosts;
+            if (list == null || currentCount < 0 || currentCount >= list.Count) return null;
+            return list[currentCount];
+        }
+
+        public bool CanBuildNextHouse(int currentCount) => GetHouseCost(currentCount) != null;
 
         // ── Recipe Conversion ──
 
@@ -257,10 +377,11 @@ namespace Garden
                             manaCost = GetFloat(seedMap, "manaCost"),
                             tier = (int)GetFloat(seedMap, "tier")
                         };
-                        _seedConfigs[kv.Key] = config;
 
                         if (seedMap.TryGetValue("recipe", out var recipeObj) && recipeObj is Dictionary<string, object> recipeMap)
-                            _seedRecipes[kv.Key] = recipeMap;
+                            config.recipe = ConvertRecipe(recipeMap);
+
+                        _seedConfigs[kv.Key] = config;
                     }
                 }
             }
@@ -275,19 +396,30 @@ namespace Garden
                         var config = new ServerQuestConfig
                         {
                             questName = GetString(questMap, "questName"),
+                            description = GetString(questMap, "description"),
                             durationMinutes = (int)GetFloat(questMap, "durationMinutes"),
                             requiredFlameLevel = (int)GetFloat(questMap, "requiredFlameLevel"),
                             rewardRolls = (int)GetFloat(questMap, "rewardRolls")
                         };
-                        _questConfigs[kv.Key] = config;
 
                         if (questMap.TryGetValue("rewardPool", out var poolObj) && poolObj is List<object> pool)
                         {
-                            var rewards = new List<Dictionary<string, object>>();
                             foreach (var item in pool)
-                                if (item is Dictionary<string, object> r) rewards.Add(r);
-                            _questRewardPools[kv.Key] = rewards;
+                            {
+                                if (item is Dictionary<string, object> r)
+                                {
+                                    config.rewardPool.Add(new ServerQuestReward
+                                    {
+                                        seedName = GetString(r, "seedName"),
+                                        weight = GetFloat(r, "weight", 1f),
+                                        minCount = (int)GetFloat(r, "minCount", 1f),
+                                        maxCount = (int)GetFloat(r, "maxCount", 1f)
+                                    });
+                                }
+                            }
                         }
+
+                        _questConfigs[kv.Key] = config;
                     }
                 }
             }
@@ -318,26 +450,34 @@ namespace Garden
             {
                 _flameConfig = new ServerFlameConfig
                 {
-                    base_mana_per_second = GetFloat(flame, "base_mana_per_second"),
-                    mana_per_level = GetFloat(flame, "mana_per_level"),
                     max_flame_level = (int)GetFloat(flame, "max_flame_level"),
+                    mana_rates = GetFloatList(flame, "mana_rates"),
+                    mana_caps = GetIntList(flame, "mana_caps"),
                     entity_caps = GetIntList(flame, "entity_caps"),
                     grid_sizes = GetIntList(flame, "grid_sizes")
                 };
 
                 if (flame.TryGetValue("upgrade_recipes", out var recipesObj) && recipesObj is List<object> recipes)
                 {
-                    _flameUpgradeRecipes = new List<List<Dictionary<string, object>>>();
                     foreach (var r in recipes)
                     {
                         if (r is Dictionary<string, object> recipeEntry &&
                             recipeEntry.TryGetValue("ingredients", out var ingredientsObj) &&
                             ingredientsObj is List<object> ingredients)
                         {
-                            var list = new List<Dictionary<string, object>>();
+                            var recipe = new FlameUpgradeRecipe();
                             foreach (var ing in ingredients)
-                                if (ing is Dictionary<string, object> d) list.Add(d);
-                            _flameUpgradeRecipes.Add(list);
+                            {
+                                if (ing is Dictionary<string, object> d)
+                                {
+                                    recipe.ingredients.Add(new FlameIngredient
+                                    {
+                                        itemName = GetString(d, "itemName"),
+                                        count = (int)GetFloat(d, "count")
+                                    });
+                                }
+                            }
+                            _flameConfig.upgradeRecipes.Add(recipe);
                         }
                     }
                 }
@@ -364,16 +504,21 @@ namespace Garden
 
                 if (mallum.TryGetValue("house_costs", out var costsObj) && costsObj is List<object> costs)
                 {
-                    _houseCosts = new List<Dictionary<string, object>>();
-                    foreach (var c in costs)
-                        if (c is Dictionary<string, object> d) _houseCosts.Add(d);
+                    _mallumHouseConfig.houseCosts = ParseBuildingCostList(costs);
                 }
             }
 
             // Building cost config
             if (root.TryGetValue("buildingCostConfig", out var buildObj) && buildObj is Dictionary<string, object> build)
             {
-                _buildingCostConfig = build;
+                if (build.TryGetValue("plot_costs", out var pcObj) && pcObj is List<object> plotCosts)
+                    _buildingCosts["plot_costs"] = ParseBuildingCostList(plotCosts);
+
+                if (build.TryGetValue("vase_costs", out var vcObj) && vcObj is List<object> vaseCosts)
+                    _buildingCosts["vase_costs"] = ParseBuildingCostList(vaseCosts);
+
+                if (build.TryGetValue("garden_costs", out var gcObj) && gcObj is List<object> gardenCosts)
+                    _buildingCosts["garden_costs"] = ParseBuildingCostList(gardenCosts);
             }
 
             // Sprite manifest
@@ -415,6 +560,32 @@ namespace Garden
                     if (item is double d) result.Add((float)d);
                     else if (item is long l) result.Add(l);
                 }
+            return result;
+        }
+
+        private static List<BuildingCost> ParseBuildingCostList(List<object> list)
+        {
+            var result = new List<BuildingCost>();
+            foreach (var item in list)
+            {
+                if (item is not Dictionary<string, object> d) continue;
+                var cost = new BuildingCost();
+                if (d.TryGetValue("manaCost", out var mc))
+                    cost.manaCost = mc is double dd ? (float)dd : mc is long ll ? ll : 0f;
+
+                if (d.TryGetValue("harvestCosts", out var hcObj) && hcObj is List<object> hcList)
+                {
+                    foreach (var hc in hcList)
+                    {
+                        if (hc is not Dictionary<string, object> hd) continue;
+                        string itemName = hd.TryGetValue("itemName", out var n) && n is string s ? s : null;
+                        int count = hd.TryGetValue("count", out var c) ? (c is double cd ? (int)cd : c is long cl ? (int)cl : 0) : 0;
+                        if (itemName != null)
+                            cost.harvestCosts.Add(new HarvestCost { itemName = itemName, count = count });
+                    }
+                }
+                result.Add(cost);
+            }
             return result;
         }
     }
