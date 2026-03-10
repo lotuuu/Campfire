@@ -119,6 +119,52 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &7700001
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7700002}
+  - component: {fileID: 7700003}
+  m_Layer: 0
+  m_Name: --- Audio ---
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7700002
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7700001}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 12194301}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7700003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7700001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3fc8384ff1d344f3a6ea628f20d5e775, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Garden::Garden.AudioManager
+  mixer: {fileID: 24100000, guid: 53664d207c39e4a1ba82d83e39ca60f1, type: 2}
+  library: {fileID: 11400000, guid: b4c7e9f1a2d3456789abcdef01234567, type: 2}
 --- !u!1 &8800001
 GameObject:
   m_ObjectHideFlags: 0
@@ -490,7 +536,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ce377f4fbee043ceae6aa1ce2338abf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Garden::Garden.MallumManager
-  houseConfig: {fileID: 11400000, guid: a985b00bde9e444eba94de5a8389eadf, type: 2}
 --- !u!1 &619394800
 GameObject:
   m_ObjectHideFlags: 0
@@ -610,7 +655,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4d16cb476c5894aff8b2d36aab4b939d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Garden::Garden.WeatherService
-  pollIntervalMinutes: 15
   useDebugOverride: 0
   debugWeather:
     temperature: 15
@@ -820,7 +864,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0694f2434b7c24f2c90a72763a843eca, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Garden::Garden.DeepLinkService
 --- !u!1 &1550783021
 GameObject:
@@ -1114,7 +1158,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e8a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Garden::Garden.SettingsUI
 --- !u!1 &1877059791
 GameObject:
@@ -1204,7 +1248,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce7e789960c4b4c7590f955bc0a402b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Garden::Garden.FlameManager
-  config: {fileID: 11400000, guid: e7a4c723eb6d6473cafb993d3552f7c7, type: 2}
 --- !u!1 &2147189051
 GameObject:
   m_ObjectHideFlags: 0
@@ -1249,7 +1292,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a4ab4f447991a4607b84e0d931773167, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Garden::Garden.VaseManager
-  config: {fileID: 11400000, guid: ef28f60112b25499b966a34e74fcf38d, type: 2}
 --- !u!1 &9001234561
 GameObject:
   m_ObjectHideFlags: 0
@@ -1294,52 +1336,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 523009a472dfe4ffa887016d2743211a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Garden::Garden.NotificationService
---- !u!1 &7700001
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 7700002}
-  - component: {fileID: 7700003}
-  m_Layer: 0
-  m_Name: --- Audio ---
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &7700002
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7700001}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 12194301}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7700003
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7700001}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3fc8384ff1d344f3a6ea628f20d5e775, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Garden::Garden.AudioManager
-  mixer: {fileID: 24100000, guid: a3f7b2c8d4e5f6a1b9c0d7e8f2a3b4c5, type: 2}
-  library: {fileID: 11400000, guid: b4c7e9f1a2d3456789abcdef01234567, type: 2}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
