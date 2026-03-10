@@ -159,6 +159,7 @@ defmodule CampFireWeb.Router do
     pipe_through [:api, :authenticated]
     post "/location", GameController, :submit_location
     get "/current", GameController, :current_weather
+    get "/forecast", GameController, :forecast
   end
 
   scope "/debug", CampFireWeb do

@@ -65,6 +65,8 @@ namespace Garden
                     IsInitialized = true;
                     IsOnline = true;
                     OnStateLoaded?.Invoke();
+                    // Fetch forecast in background (don't block init)
+                    _ = FetchAndApplyForecast();
                     return;
                 }
 
@@ -746,6 +748,8 @@ namespace Garden
                 var weather = await GetWeather();
                 if (weather != null && WeatherService.Instance != null)
                     WeatherService.Instance.ApplyServerWeather(weather);
+                // Also fetch forecast
+                await FetchAndApplyForecast();
             }
             catch (Exception e) { Debug.LogWarning($"GameService: SubmitLocation failed: {e.Message}"); }
         }
@@ -767,6 +771,33 @@ namespace Garden
                 Debug.LogWarning($"GameService: GetWeather failed (HTTP {req.responseCode})");
             }
             catch (Exception e) { Debug.LogWarning($"GameService: GetWeather failed: {e.Message}"); }
+            return null;
+        }
+
+        private async Task FetchAndApplyForecast()
+        {
+            var days = await GetForecast();
+            if (days != null && WeatherService.Instance != null)
+                WeatherService.Instance.ApplyServerForecast(days);
+        }
+
+        public async Task<List<ServerForecastDay>> GetForecast()
+        {
+            if (!IsOnline) return null;
+            try
+            {
+                using var req = GetAuth("/weather/forecast");
+                await SendAsync(req);
+
+                if (req.responseCode >= 200 && req.responseCode < 300)
+                {
+                    var resp = JsonUtility.FromJson<ServerForecastResponse>(req.downloadHandler.text);
+                    return resp?.forecast;
+                }
+
+                Debug.LogWarning($"GameService: GetForecast failed (HTTP {req.responseCode})");
+            }
+            catch (Exception e) { Debug.LogWarning($"GameService: GetForecast failed: {e.Message}"); }
             return null;
         }
 

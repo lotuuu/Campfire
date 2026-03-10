@@ -94,6 +94,25 @@ namespace Garden
         public ServerWeather weather;
     }
 
+    [Serializable]
+    public class ServerForecastDay
+    {
+        public string dayLabel;
+        public float tempHigh;
+        public float tempLow;
+        public string condition;
+        public int moonPhase;
+        public float humidity;
+        public float windSpeed;
+        public float cloudCover;
+    }
+
+    [Serializable]
+    public class ServerForecastResponse
+    {
+        public List<ServerForecastDay> forecast;
+    }
+
     // Request DTOs
     [Serializable] public class CraftRequest { public int gridX; public int gridY; public bool freeMode; }
     [Serializable] public class PlantRequest { public int plotId; public string seedName; public bool freeMode; }

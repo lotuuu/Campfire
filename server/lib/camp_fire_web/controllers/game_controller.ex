@@ -672,6 +672,31 @@ defmodule CampFireWeb.GameController do
     end
   end
 
+  def forecast(conn, _params) do
+    uid = conn.assigns.current_player.uid
+    economy = Economy.get_economy(uid)
+
+    cond do
+      economy == nil ->
+        conn |> put_status(404) |> json(%{error: "No economy record"})
+
+      economy.lat == nil or economy.lon == nil ->
+        conn |> put_status(404) |> json(%{error: "No location set"})
+
+      true ->
+        case Weather.get_forecast(economy.lat, economy.lon) do
+          {:ok, days} ->
+            conn |> put_status(200) |> json(%{forecast: days})
+
+          {:error, :no_api_key} ->
+            conn |> put_status(503) |> json(%{error: "Weather service unavailable"})
+
+          {:error, _} ->
+            conn |> put_status(503) |> json(%{error: "Weather service error"})
+        end
+    end
+  end
+
   # ── Serializers ─────────────────────────────────────────────
 
   defp serialize_plot(plot) do

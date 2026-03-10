@@ -117,6 +117,16 @@ defmodule CampFire.Game.Weather do
     end
   end
 
+  def get_forecast(lat, lon) do
+    api_key = Application.get_env(:camp_fire, :owm_api_key, "")
+
+    if api_key == "" do
+      {:error, :no_api_key}
+    else
+      fetch_owm_forecast(lat, lon, api_key)
+    end
+  end
+
   # --- Private Helpers ---
 
   defp get_cache(lat, lon) do
@@ -210,6 +220,74 @@ defmodule CampFire.Game.Weather do
       "city" => city_name,
       "country" => country
     }
+  end
+
+  defp fetch_owm_forecast(lat, lon, api_key) do
+    url =
+      "https://api.openweathermap.org/data/2.5/forecast?lat=#{lat}&lon=#{lon}&units=metric&cnt=40&appid=#{api_key}"
+
+    case Req.get(url) do
+      {:ok, %Req.Response{status: 200, body: body}} ->
+        days = aggregate_forecast(body)
+        {:ok, days}
+
+      {:ok, %Req.Response{status: status}} ->
+        {:error, {:owm_error, status}}
+
+      {:error, reason} ->
+        {:error, {:http_error, reason}}
+    end
+  end
+
+  defp aggregate_forecast(body) do
+    entries = body["list"] || []
+
+    # Group 3-hour entries by date, then pick daily summary
+    entries
+    |> Enum.group_by(fn entry ->
+      entry["dt_txt"] |> String.split(" ") |> hd()
+    end)
+    |> Enum.sort_by(fn {date, _} -> date end)
+    # Skip today (first group) — client already has today from current weather
+    |> Enum.drop(1)
+    |> Enum.take(5)
+    |> Enum.map(fn {date, day_entries} ->
+      temps = Enum.map(day_entries, fn e -> get_in(e, ["main", "temp"]) || 0.0 end)
+      humidities = Enum.map(day_entries, fn e -> get_in(e, ["main", "humidity"]) || 0.0 end)
+      winds = Enum.map(day_entries, fn e -> get_in(e, ["wind", "speed"]) || 0.0 end)
+      clouds = Enum.map(day_entries, fn e -> get_in(e, ["clouds", "all"]) || 0.0 end)
+
+      # Pick condition from the midday entry (or first available)
+      mid = Enum.find(day_entries, hd(day_entries), fn e ->
+        String.contains?(e["dt_txt"] || "", "12:00")
+      end)
+
+      weather_list = mid["weather"] || []
+      condition = if weather_list != [], do: hd(weather_list)["main"] || "Clear", else: "Clear"
+
+      # Parse date to get day label
+      day_label =
+        case Date.from_iso8601(date) do
+          {:ok, d} ->
+            Calendar.strftime(d, "%a")
+
+          _ ->
+            "???"
+        end
+
+      moon_phase = MoonPhase.calculate()
+
+      %{
+        "dayLabel" => day_label,
+        "tempHigh" => Enum.max(temps) * 1.0,
+        "tempLow" => Enum.min(temps) * 1.0,
+        "condition" => condition,
+        "moonPhase" => moon_phase,
+        "humidity" => (Enum.sum(humidities) / max(length(humidities), 1)) * 1.0,
+        "windSpeed" => (Enum.sum(winds) / max(length(winds), 1)) * 1.0,
+        "cloudCover" => (Enum.sum(clouds) / max(length(clouds), 1)) * 1.0
+      }
+    end)
   end
 
   defp players_at_location(lat, lon) do
