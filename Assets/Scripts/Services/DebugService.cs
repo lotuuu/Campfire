@@ -69,6 +69,32 @@ namespace Garden
 
         public async Task<bool> ClearSave() => await Post("/debug/clear-save", "{}");
 
+        public async Task<bool> ReceiveVisitor()
+        {
+            if (VisitorManager.Instance == null) return false;
+            var data = SaveManager.Instance?.Data;
+            if (data == null) return false;
+
+            // Clear any existing visitor so we can fetch a fresh one
+            data.currentVisitor = null;
+            data.lastVisitorFetchDateUtc = null;
+
+            string todayUtc = GameTime.UtcNow.Date.ToString("o");
+            var visitor = await VisitorManager.Instance.FetchTonightVisitor(data, todayUtc);
+            if (visitor == null)
+            {
+                Debug.LogWarning("[DebugService] No visitor available from server");
+                return false;
+            }
+
+            data.currentVisitor = visitor;
+            data.lastVisitorFetchDateUtc = todayUtc;
+            SaveManager.Instance.Save();
+            VisitorManager.Instance.NotifyVisitorArrived();
+            Debug.Log($"[DebugService] Visitor received: {visitor.visitorName}");
+            return true;
+        }
+
         private async Task<bool> PostQuiet(string path, string json)
         {
             try

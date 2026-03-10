@@ -14,6 +14,12 @@ namespace Garden
         public event Action OnVisitorArrived;
         public event Action OnVisitorDeparted;
 
+        public void NotifyVisitorArrived()
+        {
+            OnVisitorArrived?.Invoke();
+            AudioManager.Instance?.PlaySFX("visitor_arrive");
+        }
+
         private void Awake()
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }

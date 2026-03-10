@@ -133,6 +133,8 @@ namespace Garden
             { _ = DebugService.Instance?.FillVases(); });
             root.Q<Button>("mature-plots-button")?.RegisterCallback<ClickEvent>(evt =>
             { _ = DebugService.Instance?.MaturePlots(); });
+            root.Q<Button>("receive-visitor-button")?.RegisterCallback<ClickEvent>(evt =>
+            { _ = DebugService.Instance?.ReceiveVisitor(); });
 
             // Wire free mode toggle
             var freeModeToggle = root.Q<Toggle>("free-mode-toggle");

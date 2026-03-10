@@ -325,6 +325,7 @@
                         <ui:Button name="complete-quests-button" text="Complete Quests" />
                         <ui:Button name="fill-vases-button" text="Fill Vases" />
                         <ui:Button name="mature-plots-button" text="Mature Plots" />
+                        <ui:Button name="receive-visitor-button" text="Receive Visitor" />
 
                         <ui:Label text="Danger Zone" class="debug-section-header" />
                         <ui:Toggle name="free-mode-toggle" label="Free Mode" />
@@ -367,12 +368,14 @@
         <!-- Loading gate — covers UI until all services are ready -->
         <ui:VisualElement name="loading-gate">
             <ui:VisualElement name="loading-gate-image" />
-            <ui:Label name="loading-gate-title" text="Camp Fire" />
-            <ui:Label name="loading-gate-status" text="Starting up..." />
-            <ui:VisualElement name="loading-gate-bar-track">
-                <ui:VisualElement name="loading-gate-bar-fill" />
+            <ui:VisualElement name="loading-gate-content">
+                <ui:Label name="loading-gate-title" text="Camp Fire" />
+                <ui:Label name="loading-gate-status" text="Starting up..." />
+                <ui:VisualElement name="loading-gate-bar-track">
+                    <ui:VisualElement name="loading-gate-bar-fill" />
+                </ui:VisualElement>
+                <ui:VisualElement name="server-selector" />
             </ui:VisualElement>
-            <ui:VisualElement name="server-selector" />
         </ui:VisualElement>
 
     </ui:VisualElement>
