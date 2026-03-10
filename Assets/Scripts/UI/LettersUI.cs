@@ -410,8 +410,7 @@ namespace Garden
             }
 
             var name = SocialSaveManager.Instance?.Data?.displayName ?? "A friend";
-            string inviteUrl = $"{SocialService.ServerBaseUrl}/invite/{code}";
-            string message = $"{name} wants to be your friend in Camp Fire!\n{inviteUrl}";
+            string message = $"{name} wants to be your friend in Camp Fire!\ncampfire://invite/{code}";
 
             GUIUtility.systemCopyBuffer = message;
             if (shareStatus != null) shareStatus.text = "Copied to clipboard!";
