@@ -72,9 +72,9 @@ namespace Garden
                 Debug.Log($"Location acquired: {latitude}, {longitude}");
                 OnLocationResolved?.Invoke(true);
 
-                // Submit location to game server — it will fetch and apply weather
-                if (GameService.Instance != null && GameService.Instance.IsOnline)
-                    _ = GameService.Instance.SubmitLocation(latitude, longitude);
+                // Wait for GameService to be online, then submit location to fetch weather
+                yield return new WaitUntil(() => GameService.Instance != null && GameService.Instance.IsOnline);
+                _ = GameService.Instance.SubmitLocation(latitude, longitude);
             }
             else
             {
@@ -98,6 +98,8 @@ namespace Garden
         public void ApplyServerWeather(ServerWeather sw)
         {
             if (sw == null) return;
+            // Skip empty/placeholder weather (server has no real data yet)
+            if (sw.humidity == 0 && sw.wind_speed == 0 && sw.temperature == 0) return;
             var now = GameTime.Now;
             float sunriseHour = 6.5f;
             float sunsetHour = 18.5f;

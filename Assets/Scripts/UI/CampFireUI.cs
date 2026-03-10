@@ -244,6 +244,7 @@ namespace Garden
             }
 
             // Subscribe to service completion + failure events
+            // All services are required — never skip any
             if (WeatherService.Instance != null)
             {
                 if (WeatherService.Instance.HasWeather)
@@ -251,7 +252,6 @@ namespace Garden
                 else
                     WeatherService.Instance.OnWeatherUpdated += OnWeatherDataReady;
             }
-            else _weatherDone = true;
 
             if (SocialService.Instance != null)
             {
@@ -263,7 +263,6 @@ namespace Garden
                     SocialService.Instance.OnInitFailed += OnServiceFailed;
                 }
             }
-            else _socialDone = true;
 
             if (EconomyService.Instance != null)
             {
@@ -278,7 +277,6 @@ namespace Garden
                     EconomyService.Instance.OnInitFailed += OnServiceFailed;
                 }
             }
-            else _economyDone = true;
 
             if (GameService.Instance != null)
             {
@@ -293,7 +291,6 @@ namespace Garden
                     GameService.Instance.OnInitFailed += OnServiceFailed;
                 }
             }
-            else _gameDone = true;
 
             UpdateLoadingGate();
         }
@@ -376,6 +373,11 @@ namespace Garden
             {
                 loadingGate.RemoveFromHierarchy();
                 loadingGate = null;
+
+                // Refresh all UI now that server state is fully loaded
+                resourceDisplay?.Refresh();
+                campsiteView?.RebuildGrid();
+                UpdateQuestBadge();
                 return;
             }
 
