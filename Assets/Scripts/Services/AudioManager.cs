@@ -34,15 +34,13 @@ namespace Garden
             }
 
             _sfxSources = new AudioSource[SfxPoolSize];
+            var sfxGroups = mixer != null ? mixer.FindMatchingGroups("SFX") : null;
             for (int i = 0; i < SfxPoolSize; i++)
             {
                 _sfxSources[i] = gameObject.AddComponent<AudioSource>();
                 _sfxSources[i].playOnAwake = false;
-                if (mixer != null)
-                {
-                    var sfxGroup = mixer.FindMatchingGroups("SFX");
-                    if (sfxGroup.Length > 0) _sfxSources[i].outputAudioMixerGroup = sfxGroup[0];
-                }
+                if (sfxGroups != null && sfxGroups.Length > 0)
+                    _sfxSources[i].outputAudioMixerGroup = sfxGroups[0];
             }
 
             BuildLookup();

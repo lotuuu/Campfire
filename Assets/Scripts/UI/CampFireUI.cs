@@ -104,7 +104,9 @@ namespace Garden
             closeBtn?.RegisterCallback<ClickEvent>(_ => CloseOverlay());
             overlayBackdrop?.RegisterCallback<ClickEvent>(_ => CloseOverlay());
 
-            CloseOverlay();
+            // Hide overlay on init (skip CloseOverlay to avoid playing sound)
+            HideAllPanels();
+            overlayContainer.style.display = DisplayStyle.None;
 
             // Wire bottom nav
             if (bottomNav != null)
