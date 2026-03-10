@@ -16,6 +16,7 @@
     top: 50%;
     translate: 0 -50%;
     max-height: 85%;
+    overflow: hidden;
     background-color: rgba(30, 20, 12, 0.95);
     border-width: 2px;
     border-color: rgba(180, 120, 60, 0.4);
@@ -24,6 +25,27 @@
     flex-direction: column;
     align-items: center;
     display: none;
+}
+
+#interaction-close {
+    position: absolute;
+    top: var(--spacing-sm);
+    right: var(--spacing-sm);
+    width: 72px;
+    height: 72px;
+    background-color: rgba(60, 40, 20, 0.6);
+    background-image: url("project://database/Assets/ThirdParty/icons/lorc-cross-mark.png");
+    -unity-background-image-tint-color: rgb(200, 120, 100);
+    -unity-background-scale-mode: scale-to-fit;
+    border-width: 1px;
+    border-color: rgba(140, 100, 50, 0.3);
+    border-radius: 36px;
+    padding: 14px;
+}
+
+#interaction-close:hover {
+    background-color: rgba(80, 50, 25, 0.7);
+    border-color: rgba(180, 120, 60, 0.5);
 }
 
 #interaction-title {
@@ -286,14 +308,18 @@
 /* ── Build card scroll (horizontal card row in popups) ── */
 
 .build-card-scroll {
-    flex-direction: row;
-    max-height: 340px;
     margin-top: 8px;
+    align-self: stretch;
 }
 
 .build-card-scroll .unity-scroll-view__content-container {
     flex-direction: row;
     padding: 4px;
+}
+
+.build-card-scroll .build-card {
+    width: 200px;
+    flex-shrink: 0;
 }
 
 /* ── Water Subscribe Bell ── */

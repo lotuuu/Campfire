@@ -81,6 +81,14 @@ namespace Garden
             interactionBody = root.Q("interaction-body");
             interactionActions = root.Q("interaction-actions");
 
+            // Wire interaction close button (X icon)
+            var interactionCloseBtn = root.Q<Button>("interaction-close");
+            interactionCloseBtn?.RegisterCallback<ClickEvent>(evt =>
+            {
+                evt.StopPropagation();
+                CloseInteractionPanel();
+            });
+
             cellTemplate = Resources.Load<VisualTreeAsset>("UI/Templates/GridCell");
             visitTransition = root.Q("visit-transition");
 
@@ -798,7 +806,6 @@ namespace Garden
                 interactionBody.Add(hint);
             }
 
-            AddCloseButton();
             ShowInteractionPanel();
         }
 
@@ -1269,13 +1276,12 @@ namespace Garden
                 }) { text = "Level Up" };
                 upgradeBtn.SetEnabled(canAfford);
                 upgradeBtn.AddToClassList("upgrade-btn");
-                interactionActions.Add(upgradeBtn);
+                interactionBody.Add(upgradeBtn);
             }
 
             // ── Craft / Build section ──
             AddFlameCraftItems();
 
-            AddCloseButton();
         }
 
         private void AddFlameCraftItems()
@@ -1450,7 +1456,6 @@ namespace Garden
                 interactionActions.Add(paintBtn);
             }
 
-            AddCloseButton();
         }
 
         private void ShowHarvestResult(HarvestResult result)
@@ -1546,7 +1551,6 @@ namespace Garden
                 }
             }
 
-            AddCloseButton();
         }
 
         private void BuildSeedPicker(int plotIndex)
@@ -1788,7 +1792,6 @@ namespace Garden
                 interactionActions.Add(paintBtn);
             }
 
-            AddCloseButton();
         }
 
         private void ShowGardenInteraction(int index)
@@ -1823,8 +1826,7 @@ namespace Garden
                     interactionActions.Add(btn);
                 }
 
-                AddCloseButton();
-                return;
+                    return;
             }
 
             interactionTitle.text = garden.plantName;
@@ -1833,7 +1835,6 @@ namespace Garden
             stateLabel.AddToClassList("interaction-info");
             interactionBody.Add(stateLabel);
 
-            AddCloseButton();
         }
 
         private void ShowMallumHouseInteraction(int index)
@@ -1852,7 +1853,6 @@ namespace Garden
                 interactionActions.Add(paintBtn);
             }
 
-            AddCloseButton();
         }
 
         private VisualElement BuildSwatchPreview(SkinData skin, string extraClass = null, bool locked = false)
@@ -2140,13 +2140,6 @@ namespace Garden
             collectBtn.AddToClassList("interaction-btn-primary");
             interactionActions.Add(collectBtn);
 
-            AddCloseButton();
-        }
-
-        private void AddCloseButton()
-        {
-            var closeBtn = new Button(CloseInteractionPanel) { text = "Close" };
-            interactionActions.Add(closeBtn);
         }
 
         private static string FormatTimeRemaining(float seconds)

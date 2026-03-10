@@ -342,6 +342,7 @@
 
         <!-- Interaction panel (tap on camp objects) -->
         <ui:VisualElement name="interaction-panel">
+            <ui:Button name="interaction-close" />
             <ui:Label name="interaction-title" text="" />
             <ui:VisualElement name="interaction-body" />
             <ui:VisualElement name="interaction-actions" />
