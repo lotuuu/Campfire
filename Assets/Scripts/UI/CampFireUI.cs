@@ -220,11 +220,21 @@ namespace Garden
                     var btn = new Button { text = server.name };
                     btn.AddToClassList("server-btn");
                     if (server.id == ServerConfig.SelectedId)
+                    {
                         btn.AddToClassList("server-active");
+                        btn.SetEnabled(false);
+                    }
                     var capturedId = server.id;
                     btn.clicked += () => ServerConfig.Select(capturedId);
                     serverSelector.Add(btn);
                 }
+
+                var reloadBtn = new Button { text = "Reload" };
+                reloadBtn.AddToClassList("server-btn");
+                reloadBtn.clicked += () => UnityEngine.SceneManagement.SceneManager.LoadScene(
+                    UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
+                serverSelector.Add(reloadBtn);
+
                 // Show immediately in editor/debug builds
                 if (Application.isEditor || UnityEngine.Debug.isDebugBuild)
                     serverSelector.style.display = DisplayStyle.Flex;
