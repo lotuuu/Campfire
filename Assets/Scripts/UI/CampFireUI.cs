@@ -246,10 +246,10 @@ namespace Garden
             // Subscribe to service completion + failure events
             if (WeatherService.Instance != null)
             {
-                if (WeatherService.Instance.IsLocationResolved)
+                if (WeatherService.Instance.HasWeather)
                     _weatherDone = true;
                 else
-                    WeatherService.Instance.OnLocationResolved += OnWeatherReady;
+                    WeatherService.Instance.OnWeatherUpdated += OnWeatherDataReady;
             }
             else _weatherDone = true;
 
@@ -307,10 +307,10 @@ namespace Garden
 
         // ── Loading gate callbacks ──
 
-        private void OnWeatherReady(bool success)
+        private void OnWeatherDataReady(WeatherData _)
         {
             if (WeatherService.Instance != null)
-                WeatherService.Instance.OnLocationResolved -= OnWeatherReady;
+                WeatherService.Instance.OnWeatherUpdated -= OnWeatherDataReady;
             _weatherDone = true;
             UpdateLoadingGate();
         }
