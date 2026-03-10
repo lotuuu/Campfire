@@ -10,7 +10,7 @@ namespace Garden.Editor
     {
         // Edit these values before building.
         private const string TeamId = "PVQ68TVT7G";
-        private const string BundleIdentifier = "com.yourcompany.garden";
+        private const string BundleIdentifier = "com.lambdaclass.campfire";
 
         [PostProcessBuild(50)]
         public static void OnPostProcessBuild(BuildTarget target, string buildPath)
