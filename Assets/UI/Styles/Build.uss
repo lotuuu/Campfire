@@ -5,10 +5,6 @@
 }
 
 #build-list {
-    flex-grow: 1;
-}
-
-#build-list .unity-scroll-view__content-container {
     flex-direction: row;
     flex-wrap: wrap;
     padding: var(--spacing-xs);

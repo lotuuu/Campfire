@@ -190,7 +190,7 @@
 
                     <!-- Build panel -->
                     <ui:VisualElement name="build-panel">
-                        <ui:ScrollView name="build-list" horizontal-scroller-visibility="Hidden" vertical-scroller-visibility="Auto" />
+                        <ui:VisualElement name="build-list" />
                     </ui:VisualElement>
 
                     <!-- Quest panel -->
