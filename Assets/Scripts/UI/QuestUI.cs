@@ -7,20 +7,33 @@ namespace Garden
     public class QuestUI : MonoBehaviour
     {
         private VisualElement root;
+        private VisualElement questsPanel;
         private VisualElement mallumStatusContainer;
         private VisualElement activeSection;
         private VisualElement availableSection;
         private VisualElement lockedSection;
         private VisualTreeAsset questCardTemplate;
 
+        private float nextTickTime;
+        private const float TickInterval = 0.5f;
+
         public void Initialize(VisualElement rootElement)
         {
             root = rootElement;
+            questsPanel = root.Q("quests-panel");
             mallumStatusContainer = root.Q("quest-mallum-status");
             activeSection = root.Q("quest-active-section");
             availableSection = root.Q("quest-available-section");
             lockedSection = root.Q("quest-locked-section");
             questCardTemplate = Resources.Load<VisualTreeAsset>("UI/Templates/QuestCard");
+        }
+
+        private void Update()
+        {
+            if (questsPanel == null || questsPanel.resolvedStyle.display == DisplayStyle.None) return;
+            if (Time.time < nextTickTime) return;
+            nextTickTime = Time.time + TickInterval;
+            Refresh();
         }
 
         public void Refresh()
