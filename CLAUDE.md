@@ -31,17 +31,23 @@ All managers and services are MonoBehaviour singletons with duplicate-destroy gu
 
 `CurrencyManager` reads/writes directly into `SaveManager.Instance.Data`.
 
-### ScriptableObject Data Model
+### ConfigService Data Model (Server-Authoritative)
 
-- `FlameConfig`: mana generation rates, entity caps per flame level, upgrade costs, hex grid size per level
-- `SeedData`: seed properties, growth duration, base drops, `GrowthRecipe`, icon/sprites, mana cost
-- `VaseConfig`: water capacity, craft cost, fill duration, upgrade tiers
-- `GardenPlantData`: permanent plants (trees/shrubs), yield items, yield intervals
+All game config is server-authoritative. `ConfigService` fetches JSON from `/api/game/configs` and stores it in typed DTOs. There are **no config ScriptableObjects** — the server is the single source of truth for all tuning values. DTOs live in `ConfigService.cs`:
+
+- `ServerFlameConfig`: mana rates, mana caps, entity caps, grid sizes, upgrade recipes per flame level
+- `ServerSeedConfig`: seed properties, growth duration, base drops, `GrowthRecipe`, tier, mana cost
+- `ServerVaseConfig`: water capacity, craft cost, fill duration
+- `ServerGardenConfig`: permanent plants (trees/shrubs), yield items, yield intervals, water cost
+- `ServerQuestConfig`: quest name, description, duration, required flame level, reward pool (`List<ServerQuestReward>`)
+- `ServerMallumHouseConfig`: mallums per house, house building costs
+
+Building costs (plots, vases, gardens) are stored in `ConfigService` as `Dictionary<string, List<BuildingCost>>` keyed by `"plot_costs"`, `"vase_costs"`, `"garden_costs"`. Accessed via `ConfigService.Instance.GetPlotCost(count)` etc.
+
+Shared plain types (`FlameIngredient`, `FlameUpgradeRecipe`, `BuildingCost`, `HarvestCost`, `GardenCostTier`) live in `Assets/Scripts/Data/ConfigTypes.cs`.
+
+Remaining ScriptableObjects (not server-driven):
 - `RecipeData`: Apotheke mixing recipes with ingredient lists
-- `MallumConfig`: max Mallums per flame level
-- `QuestData`: quest name, description, duration, required flame level, reward pool with weighted seed drops
-- `BuildingCostConfig`: scaling mana + harvest costs for plots, vases, and Mallum houses (indexed by current count)
-- `MallumHouseConfig`: Mallum house properties
 - `SkinData`: cosmetic skins for camp buildings
 - `WeatherData`: plain `[Serializable]` struct carrying all weather state
 
@@ -51,17 +57,17 @@ All managers and services are MonoBehaviour singletons with duplicate-destroy gu
 
 ### Core Systems
 
-**FlameManager**: Heart of the camp. Accumulates Mana per second: `baseManaPerSecond + (level-1) * manaPerLevel`. Controls a **combined entity cap** (plots + vases + gardens share a single cap via `MaxEntities`). Grid radius scales with flame level via `FlameConfig.GetGridSize`.
+**FlameManager**: Heart of the camp. Accumulates Mana per second (rate per level from `ServerFlameConfig.mana_rates`). Controls a **combined entity cap** (plots + vases + gardens share a single cap via `MaxEntities`). Grid radius scales with flame level via `ConfigService.Instance.FlameConfig.GetGridSize()`.
 
 **PlotManager**: Harvest-once planting cycle. `CraftPlot()` (gated by entity cap) → `Plant()` (consumes seed) → `Water()` (spends water, starts growth, records weather snapshots) → `Harvest()` (quality from `GrowthRecipe.Evaluate()`).
 
 **VaseManager**: Water storage. `SendToCollect()` starts fill timer. `CraftVase()` / upgrade spends Mana. **Important**: Vase water-fetch is gated through `MallumManager.SendToFetchWater()` — do not call `VaseManager.SendToCollect()` directly from UI.
 
-**MallumManager**: Mallum (helper creature) system. Mallum count is flame-level-gated via `MallumConfig`. Mallums can be assigned to fetch water or sent on quests. Uses `MallumState` enum: `Idle`, `FetchingWater`, `OnQuest`, `QuestComplete`. Loads all `QuestData` from `Resources/Quests` at `Awake`. Core logic exposed as `public static` methods for testability without MonoBehaviours.
+**MallumManager**: Mallum (helper creature) system. Mallum count is gated by house count via `ServerMallumHouseConfig.GetMaxMallums()`. Mallums can be assigned to fetch water or sent on quests. Uses `MallumState` enum: `Idle`, `FetchingWater`, `OnQuest`, `QuestComplete`. Quest configs loaded from `ConfigService.Instance.GetAllQuests()`. Core logic exposed as `public static` methods for testability without MonoBehaviours.
 
-**Quest Flow**: `SendOnQuest(questData)` → claims idle Mallum → timer runs in `Update()` → `CompleteQuest()` rolls rewards via `RollRewards()` (weighted random from reward pool) → stores in `MallumSave.pendingRewards` → player explicitly collects via `CollectQuestRewards()` which adds seeds to inventory.
+**Quest Flow**: `SendOnQuest(ServerQuestConfig)` → claims idle Mallum → timer runs in `Update()` → `CompleteQuest()` rolls rewards via `RollRewards(List<ServerQuestReward>)` (weighted random from reward pool) → stores in `MallumSave.pendingRewards` → player explicitly collects via `CollectQuestRewards()` which adds seeds to inventory.
 
-**GardenManager**: Permanent plants. Mature gardens yield fruit on `yieldIntervalHours` interval.
+**GardenManager**: Permanent plants (unlocked at flame level 4). Mature gardens yield fruit on `yieldIntervalHours` interval. Plant configs from `ConfigService.Instance.GetGarden(plantName)`.
 
 **ApothekeManager**: Seed storage, mixing. Loads recipes from `Resources/Recipes`. `Mix()` consumes ingredients, produces result.
 
@@ -75,9 +81,9 @@ All managers and services are MonoBehaviour singletons with duplicate-destroy gu
 
 ### Server-Authoritative Services
 
-The game is moving toward server-authoritative economy. Three services communicate with the Phoenix backend:
+The game is online-only with server-authoritative economy. Three services communicate with the Phoenix backend:
 
-- **`ConfigService`**: Fetches seed, quest, garden, and flame configs from the server and patches local ScriptableObjects at runtime
+- **`ConfigService`**: Fetches all game configs (seeds, quests, gardens, flame, vase, mallum house, building costs) from the server and stores them as typed DTOs. The sole source of config data on the client — no local ScriptableObject fallbacks
 - **`EconomyService`**: Queues economy actions (spend mana, add seeds, etc.) and syncs with `/api/economy` endpoints
 - **`GameService`**: Orchestrates initialization — fetches configs, then game state; exposes `IsOnline` / `IsInitialized` flags
 
@@ -113,7 +119,7 @@ The campsite uses a hex grid with flat-top layout. `HexGridUtil.HexToPixel(q, r,
 
 ### Save System
 
-`SaveManager` serializes `SaveData` to JSON at `Application.persistentDataPath/save.json` using `JsonUtility`. All references stored as **name strings**, resolved at load via `Resources.LoadAll<SeedData>("Seeds")`. **Deferred write**: `Save()` sets `_isDirty = true`; actual file write (`Flush()`) happens in `LateUpdate`. On flush, also pushes a village snapshot to the social server.
+`SaveManager` serializes `SaveData` to JSON at `Application.persistentDataPath/save.json` using `JsonUtility`. All references stored as **name strings**, resolved at runtime via `ConfigService` lookups. **Deferred write**: `Save()` sets `_isDirty = true`; actual file write (`Flush()`) happens in `LateUpdate`. On flush, also pushes a village snapshot to the social server.
 
 `SaveData` contains: `version`, `mana`, `gems`, `flameLevel`, `List<VaseSave>`, `List<PlotSave>`, `List<GardenSave>`, `List<SeedInventoryEntry>`, `List<InventoryItem>`, `lastManaCollectTime`, `lastVisitorDateUtc`, `List<MallumSave>`.
 
@@ -158,16 +164,15 @@ An Elixir/Phoenix backend lives in `server/` (routes: `/auth`, `/friends`, `/vil
 
 **Static helpers for testability**: Managers like `MallumManager` expose core logic as `public static` methods so tests can call them without a running MonoBehaviour.
 
-**Entity cap is shared**: Plots, vases, and gardens all share a single entity cap from `FlameConfig.GetMaxEntities(level)`. There is no separate plot cap.
+**Entity cap is shared**: Plots, vases, and gardens all share a single entity cap from `ConfigService.Instance.FlameConfig.GetMaxEntities(level)`. There is no separate plot cap.
 
 ## Key File Locations
 
 - Runtime scripts: `Assets/Scripts/{Data,Services,Managers,UI,Utils,Debug}/`
-- Seed assets: `Assets/Resources/Seeds/*.asset` (Sprouts, Cress, Basil, Chamomile, Dahlia, Jasmine, Lavender, Marigold, Mint, Moonflower, Pansy, Poppy, Rosemary, Snowdrop)
-- Quest assets: `Assets/Resources/Quests/*.asset`
-- Garden plant assets: `Assets/Resources/GardenPlants/*.asset`
+- Config DTOs: `Assets/Scripts/Services/ConfigService.cs` (all `Server*Config` DTOs)
+- Config shared types: `Assets/Scripts/Data/ConfigTypes.cs` (`BuildingCost`, `HarvestCost`, `FlameIngredient`, `FlameUpgradeRecipe`, `GardenCostTier`)
 - Recipe assets: `Assets/Resources/Recipes/*.asset`
-- Config: `Assets/Resources/Config/{FlameConfig,VaseConfig,MallumConfig,BuildingCostConfig,MallumHouseConfig}.asset`
+- Config assets: `Assets/Resources/Config/SoundLibrary.asset` (only remaining config SO)
 - Root UXML: `Assets/UI/Documents/CampFireRoot.uxml`
 - Stylesheets: `Assets/UI/Styles/*.uss`
 - Templates: `Assets/Resources/UI/Templates/*.uxml`
@@ -178,9 +183,9 @@ An Elixir/Phoenix backend lives in `server/` (routes: `/auth`, `/friends`, `/vil
 
 ## Unity Development
 
-When editing Unity prefab/asset values, ALWAYS edit the serialized .asset/.prefab YAML files directly — never rely on changing C# code defaults, as Unity's serialized field values take precedence over code defaults.
+All game config/tuning values come from the server via `ConfigService`. Do NOT create new ScriptableObjects for config data — add new DTOs to `ConfigService.cs` and corresponding server endpoints instead. The only remaining SOs are `RecipeData`, `SkinData`, and `SoundLibrary`.
 
-Do NOT use `[SerializeField]` for config/tuning values (positions, scales, rotations, gameplay constants). Keep those as `static readonly` or `const` in code — code is the single source of truth. `[SerializeField]` is only for asset references (prefabs, sprites, scriptable objects) and structural wiring.
+Do NOT use `[SerializeField]` for config/tuning values (positions, scales, rotations, gameplay constants). Keep those as `static readonly` or `const` in code — code is the single source of truth. `[SerializeField]` is only for asset references (prefabs, sprites) and structural wiring.
 
 When the Unity MCP tool is unavailable or unreliable (especially for asset rename/move operations), fall back immediately to direct filesystem operations (Bash mv + manual .meta file handling) rather than retrying MCP repeatedly.
 
