@@ -38,7 +38,13 @@ namespace Garden
                 {
                     var configLoaded = await ConfigService.Instance.FetchConfigs();
                     if (!configLoaded)
-                        Debug.LogWarning("GameService: Config fetch failed, using local ScriptableObjects.");
+                    {
+                        Debug.LogError("GameService: Config fetch failed — server configs are required.");
+                        IsInitialized = true;
+                        IsOnline = false;
+                        OnInitFailed?.Invoke("Failed to fetch server configs");
+                        return;
+                    }
                 }
 
                 // Sync sprites from server
@@ -795,7 +801,9 @@ namespace Garden
                     return resp?.forecast;
                 }
 
-                Debug.LogWarning($"GameService: GetForecast failed (HTTP {req.responseCode})");
+                // 404 is expected when location hasn't been submitted yet
+                if (req.responseCode != 404)
+                    Debug.LogWarning($"GameService: GetForecast failed (HTTP {req.responseCode})");
             }
             catch (Exception e) { Debug.LogWarning($"GameService: GetForecast failed: {e.Message}"); }
             return null;

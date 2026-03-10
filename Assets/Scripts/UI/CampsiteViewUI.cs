@@ -529,7 +529,7 @@ namespace Garden
                     if (label != null) label.text = "House";
                     if (status != null)
                     {
-                        int mallumCount = MallumManager.Instance != null
+                        int mallumCount = ConfigService.Instance?.MallumHouseConfig != null
                             ? ConfigService.Instance.MallumHouseConfig.MallumsPerHouse
                             : 1;
                         status.text = $"+{mallumCount} Mallums";

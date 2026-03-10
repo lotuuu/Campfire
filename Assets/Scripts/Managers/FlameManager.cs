@@ -8,11 +8,12 @@ namespace Garden
     {
         public static FlameManager Instance { get; private set; }
 
-        private ServerFlameConfig Config => ConfigService.Instance.FlameConfig;
+        private ServerFlameConfig Config => ConfigService.Instance?.FlameConfig;
+        public bool ConfigReady => Config != null;
         public int Level => SaveManager.Instance.Data.flameLevel;
-        public float ManaPerSecond => Config.GetManaPerSecond(Level);
-        public int MaxEntities => Config.GetMaxEntities(Level);
-        public float ManaCap => Config.GetManaCap(Level);
+        public float ManaPerSecond => Config?.GetManaPerSecond(Level) ?? 0f;
+        public int MaxEntities => Config?.GetMaxEntities(Level) ?? 0;
+        public float ManaCap => Config?.GetManaCap(Level) ?? 0f;
 
         public int CurrentEntityCount
         {
@@ -30,9 +31,9 @@ namespace Garden
         private float _manaCollectTimer;
         private const float ManaCollectIntervalSeconds = 60f;
 
-        public FlameUpgradeRecipe GetUpgradeRecipe() => Config.GetUpgradeRecipe(Level);
-        public int GetGridSize() => Config.GetGridSize(Level);
-        public int GetGridSize(int flameLevel) => Config.GetGridSize(flameLevel);
+        public FlameUpgradeRecipe GetUpgradeRecipe() => Config?.GetUpgradeRecipe(Level);
+        public int GetGridSize() => Config?.GetGridSize(Level) ?? 2;
+        public int GetGridSize(int flameLevel) => Config?.GetGridSize(flameLevel) ?? 2;
 
         private void Awake()
         {
@@ -42,6 +43,8 @@ namespace Garden
 
         private void Update()
         {
+            if (Config == null) return;
+
             SaveManager.Instance.Data.mana = AccumulateMana(
                 SaveManager.Instance.Data.mana, ManaPerSecond, Time.deltaTime, ManaCap);
 
@@ -60,14 +63,14 @@ namespace Garden
 
         public bool CanUpgrade()
         {
-            var recipe = Config.GetUpgradeRecipe(Level);
+            var recipe = Config?.GetUpgradeRecipe(Level);
             if (recipe == null) return false;
             return CanAffordUpgrade(recipe, SaveManager.Instance.Data.items);
         }
 
         public bool UpgradeFlame()
         {
-            var recipe = Config.GetUpgradeRecipe(Level);
+            var recipe = Config?.GetUpgradeRecipe(Level);
             if (recipe == null) return false;
             if (!CanAffordUpgrade(recipe, SaveManager.Instance.Data.items)) return false;
             ConsumeIngredients(recipe, SaveManager.Instance.Data.items);

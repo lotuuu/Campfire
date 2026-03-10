@@ -99,13 +99,13 @@ namespace Garden
         public void SetMusicVolume(float volume01)
         {
             float db = volume01 > 0.0001f ? Mathf.Log10(volume01) * 20f : MinDb;
-            mixer?.SetFloat("MusicVolume", db);
+            if (mixer != null) mixer.SetFloat("MusicVolume", db);
         }
 
         public void SetSFXVolume(float volume01)
         {
             float db = volume01 > 0.0001f ? Mathf.Log10(volume01) * 20f : MinDb;
-            mixer?.SetFloat("SFXVolume", db);
+            if (mixer != null) mixer.SetFloat("SFXVolume", db);
         }
     }
 }

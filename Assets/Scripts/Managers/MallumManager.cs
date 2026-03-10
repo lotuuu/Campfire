@@ -21,8 +21,11 @@ namespace Garden
 
         private void Start()
         {
+            var houseConfig = ConfigService.Instance?.MallumHouseConfig;
+            if (houseConfig == null) return;
+
             var data = SaveManager.Instance.Data;
-            int max = ConfigService.Instance.MallumHouseConfig.GetMaxMallums(data.mallumHouses.Count);
+            int max = houseConfig.GetMaxMallums(data.mallumHouses.Count);
             EnsureMallumCount(data.mallums, max);
         }
 
