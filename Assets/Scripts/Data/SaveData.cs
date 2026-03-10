@@ -27,6 +27,8 @@ namespace Garden
         public int apothekeGridY = 0;
         public List<BirdSave> birds = new();
         public string lastBirdCheckHourUtc;
+        public float musicVolume = 1f;
+        public float sfxVolume = 1f;
     }
 
     [Serializable]
