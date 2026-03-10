@@ -1200,6 +1200,7 @@ namespace Garden
 
         private void ShowInteractionPanel()
         {
+            AudioManager.Instance?.PlaySFX("ui_tap");
             if (interactionBackdrop != null)
                 interactionBackdrop.style.display = DisplayStyle.Flex;
             interactionPanel.style.display = DisplayStyle.Flex;

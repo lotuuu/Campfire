@@ -362,6 +362,7 @@ namespace Garden
 
         public void OpenOverlay(string title, VisualElement panel)
         {
+            AudioManager.Instance?.PlaySFX("ui_panel_open");
             HideAllPanels();
             overlayTitle.text = title;
             panel.style.display = DisplayStyle.Flex;
@@ -370,6 +371,7 @@ namespace Garden
 
         public void CloseOverlay()
         {
+            AudioManager.Instance?.PlaySFX("ui_panel_close");
             HideAllPanels();
             overlayContainer.style.display = DisplayStyle.None;
         }

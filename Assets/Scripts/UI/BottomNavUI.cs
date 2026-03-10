@@ -22,9 +22,9 @@ namespace Garden
             var btnQuest = root.Q<Button>("btn-quest");
             var btnMail = root.Q<Button>("btn-mail");
 
-            btnSeeds?.RegisterCallback<ClickEvent>(_ => OnApothekeClicked?.Invoke());
-            btnQuest?.RegisterCallback<ClickEvent>(_ => OnQuestClicked?.Invoke());
-            btnMail?.RegisterCallback<ClickEvent>(_ => OnLettersClicked?.Invoke());
+            btnSeeds?.RegisterCallback<ClickEvent>(_ => { AudioManager.Instance?.PlaySFX("ui_tap"); OnApothekeClicked?.Invoke(); });
+            btnQuest?.RegisterCallback<ClickEvent>(_ => { AudioManager.Instance?.PlaySFX("ui_tap"); OnQuestClicked?.Invoke(); });
+            btnMail?.RegisterCallback<ClickEvent>(_ => { AudioManager.Instance?.PlaySFX("ui_tap"); OnLettersClicked?.Invoke(); });
 
             iconSeeds = root.Q("nav-icon-seeds");
             iconQuest = root.Q("nav-icon-quest");
