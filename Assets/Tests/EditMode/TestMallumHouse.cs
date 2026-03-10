@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using NUnit.Framework;
-using UnityEngine;
 
 namespace Garden.Tests
 {
@@ -9,7 +8,7 @@ namespace Garden.Tests
         [Test]
         public void GetMaxMallums_ReturnsHouseCountTimesPerHouse()
         {
-            var config = ScriptableObject.CreateInstance<MallumHouseConfig>();
+            var config = new ServerMallumHouseConfig { mallums_per_house = 1 };
             Assert.AreEqual(2, config.GetMaxMallums(2));
             Assert.AreEqual(3, config.GetMaxMallums(3));
         }
@@ -17,22 +16,31 @@ namespace Garden.Tests
         [Test]
         public void GetMaxMallums_ReturnsZeroForZeroHouses()
         {
-            var config = ScriptableObject.CreateInstance<MallumHouseConfig>();
+            var config = new ServerMallumHouseConfig { mallums_per_house = 1 };
             Assert.AreEqual(0, config.GetMaxMallums(0));
         }
 
         [Test]
-        public void GetHouseCost_ReturnsNull_WhenNoCostsDefined()
+        public void BuildingCost_CanStoreHouseCost()
         {
-            var config = ScriptableObject.CreateInstance<BuildingCostConfig>();
-            Assert.IsNull(config.GetHouseCost(0));
+            var cost = new BuildingCost
+            {
+                manaCost = 500,
+                harvestCosts = new List<HarvestCost>
+                {
+                    new() { itemName = "Basil_harvest", count = 10 }
+                }
+            };
+            Assert.AreEqual(500, cost.manaCost);
+            Assert.AreEqual(1, cost.harvestCosts.Count);
         }
 
         [Test]
-        public void CanBuildNextHouse_ReturnsFalse_WhenNoCostsLeft()
+        public void MallumHouseConfig_HouseCosts_DefaultEmpty()
         {
-            var config = ScriptableObject.CreateInstance<BuildingCostConfig>();
-            Assert.IsFalse(config.CanBuildNextHouse(0));
+            var config = new ServerMallumHouseConfig { mallums_per_house = 1 };
+            Assert.IsNotNull(config.houseCosts);
+            Assert.AreEqual(0, config.houseCosts.Count);
         }
 
         [Test]

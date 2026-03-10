@@ -1,17 +1,23 @@
 using System.Collections.Generic;
 using NUnit.Framework;
-using UnityEngine;
 
 namespace Garden.Tests
 {
     public class TestFlameConfig
     {
-        private FlameConfig config;
+        private ServerFlameConfig config;
 
         [SetUp]
         public void SetUp()
         {
-            config = ScriptableObject.CreateInstance<FlameConfig>();
+            config = new ServerFlameConfig
+            {
+                mana_rates = new List<float> { 0.5f, 0.8f, 1.1f, 1.4f, 1.7f, 2.0f, 2.3f, 2.6f, 2.9f, 3.2f },
+                mana_caps = new List<int> { 300, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 7000, 9000, 12000 },
+                entity_caps = new List<int> { 6, 8, 12, 15, 18, 22, 26, 30, 35, 40 },
+                grid_sizes = new List<int> { 2, 2, 3, 3, 3, 4, 4, 4, 5, 5 },
+                upgradeRecipes = new List<FlameUpgradeRecipe>()
+            };
         }
 
         [Test]
@@ -71,7 +77,7 @@ namespace Garden.Tests
             {
                 new() { itemName = "Basil_harvest", count = 5 }
             };
-            Assert.IsTrue(FlameConfig.CanAffordUpgrade(recipe, items));
+            Assert.IsTrue(FlameManager.CanAffordUpgrade(recipe, items));
         }
 
         [Test]
@@ -88,7 +94,7 @@ namespace Garden.Tests
             {
                 new() { itemName = "Basil_harvest", count = 2 }
             };
-            Assert.IsFalse(FlameConfig.CanAffordUpgrade(recipe, items));
+            Assert.IsFalse(FlameManager.CanAffordUpgrade(recipe, items));
         }
 
         [Test]
@@ -102,7 +108,7 @@ namespace Garden.Tests
                 }
             };
             var items = new List<InventoryItem>();
-            Assert.IsFalse(FlameConfig.CanAffordUpgrade(recipe, items));
+            Assert.IsFalse(FlameManager.CanAffordUpgrade(recipe, items));
         }
 
         [Test]
@@ -121,7 +127,7 @@ namespace Garden.Tests
                 new() { itemName = "Basil_harvest", count = 5 },
                 new() { itemName = "Chamomile_harvest", count = 4 }
             };
-            FlameConfig.ConsumeIngredients(recipe, items);
+            FlameManager.ConsumeIngredients(recipe, items);
             Assert.AreEqual(2, items.Find(i => i.itemName == "Basil_harvest").count);
             Assert.AreEqual(2, items.Find(i => i.itemName == "Chamomile_harvest").count);
         }

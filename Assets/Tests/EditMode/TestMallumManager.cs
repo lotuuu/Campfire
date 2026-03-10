@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using NUnit.Framework;
-using UnityEngine;
 
 namespace Garden.Tests
 {
@@ -82,16 +81,14 @@ namespace Garden.Tests
         [Test]
         public void RollRewards_ProducesCorrectRollCount()
         {
-            var pool = new List<QuestReward>
+            var pool = new List<ServerQuestReward>
             {
-                new() { seed = ScriptableObject.CreateInstance<SeedData>(), weight = 1f, minCount = 1, maxCount = 1 }
+                new() { seedName = "Basil Seed", weight = 1f, minCount = 1, maxCount = 1 }
             };
-            pool[0].seed.name = "Basil";
-            pool[0].seed.seedName = "Basil Seed";
 
             var rewards = MallumManager.RollRewards(pool, 3);
             Assert.AreEqual(3, rewards.Count);
-            Assert.AreEqual("Basil", rewards[0].seedName);
+            Assert.AreEqual("Basil Seed", rewards[0].seedName);
         }
 
         [Test]

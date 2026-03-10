@@ -1,6 +1,6 @@
 using System;
+using System.Collections.Generic;
 using NUnit.Framework;
-using UnityEngine;
 
 namespace Garden.Tests
 {
@@ -67,33 +67,30 @@ namespace Garden.Tests
             Assert.IsFalse(GardenManager.CheckYieldReady(garden, 12f, DateTime.UtcNow));
         }
 
-        // ── BuildingCostConfig Garden Cost Tests ──────────────────────
+        // ── BuildingCost DTO Tests ──────────────────────
 
         [Test]
-        public void BuildingCostConfig_GetGardenCost_ReturnsScalingCost()
+        public void BuildingCost_HasManaCostAndHarvestCosts()
         {
-            var config = ScriptableObject.CreateInstance<BuildingCostConfig>();
-
-            // Use reflection to set private gardenCosts field
-            var field = typeof(BuildingCostConfig).GetField("gardenCosts",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            field.SetValue(config, new System.Collections.Generic.List<BuildingCost>
+            var cost = new BuildingCost
             {
-                new BuildingCost { manaCost = 200 },
-                new BuildingCost { manaCost = 350 },
-            });
-
-            Assert.AreEqual(200, config.GetGardenCost(0).manaCost);
-            Assert.AreEqual(350, config.GetGardenCost(1).manaCost);
-            // Beyond list clamps to last
-            Assert.AreEqual(350, config.GetGardenCost(5).manaCost);
+                manaCost = 200,
+                harvestCosts = new List<HarvestCost>
+                {
+                    new() { itemName = "Basil_harvest", count = 5 }
+                }
+            };
+            Assert.AreEqual(200, cost.manaCost);
+            Assert.AreEqual(1, cost.harvestCosts.Count);
+            Assert.AreEqual("Basil_harvest", cost.harvestCosts[0].itemName);
         }
 
         [Test]
-        public void BuildingCostConfig_GetGardenCost_EmptyList_ReturnsNull()
+        public void BuildingCost_DefaultHarvestCosts_IsEmpty()
         {
-            var config = ScriptableObject.CreateInstance<BuildingCostConfig>();
-            Assert.IsNull(config.GetGardenCost(0));
+            var cost = new BuildingCost();
+            Assert.IsNotNull(cost.harvestCosts);
+            Assert.AreEqual(0, cost.harvestCosts.Count);
         }
     }
 }

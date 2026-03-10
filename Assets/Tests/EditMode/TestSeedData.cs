@@ -1,18 +1,21 @@
 using NUnit.Framework;
-using UnityEngine;
 
 namespace Garden.Tests
 {
     public class TestSeedData
     {
         [Test]
-        public void SeedData_HasExpectedFields()
+        public void ServerSeedConfig_HasExpectedFields()
         {
-            var seed = ScriptableObject.CreateInstance<SeedData>();
-            seed.seedName = "TestSeed";
-            seed.growthDurationHours = 4f;
-            seed.minDrops = 2;
-            seed.maxDrops = 6;
+            var seed = new ServerSeedConfig
+            {
+                seedName = "TestSeed",
+                growthDurationHours = 4f,
+                minDrops = 2,
+                maxDrops = 6,
+                tier = 1,
+                manaCost = 10f
+            };
 
             Assert.AreEqual("TestSeed", seed.seedName);
             Assert.AreEqual(4f, seed.growthDurationHours);
@@ -21,14 +24,16 @@ namespace Garden.Tests
         }
 
         [Test]
-        public void SeedData_RecipeField_IsAssignable()
+        public void ServerSeedConfig_RecipeField_IsAssignable()
         {
-            var seed = ScriptableObject.CreateInstance<SeedData>();
-            seed.recipe = new GrowthRecipe
+            var seed = new ServerSeedConfig
             {
-                useHeat = true,
-                idealTempMin = 20f,
-                idealTempMax = 30f
+                recipe = new GrowthRecipe
+                {
+                    useHeat = true,
+                    idealTempMin = 20f,
+                    idealTempMax = 30f
+                }
             };
 
             Assert.IsNotNull(seed.recipe);
