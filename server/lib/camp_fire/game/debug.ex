@@ -18,6 +18,7 @@ defmodule CampFire.Game.Debug do
     PlayerMallum,
     PlayerBird,
     PlayerMallumHouse,
+    PlayerApotheke,
     PlayerState,
     Birds,
     Mallums
@@ -273,6 +274,7 @@ defmodule CampFire.Game.Debug do
       from(m in PlayerMallum, where: m.player_uid == ^player_uid) |> Repo.delete_all()
       from(b in PlayerBird, where: b.player_uid == ^player_uid) |> Repo.delete_all()
       from(h in PlayerMallumHouse, where: h.player_uid == ^player_uid) |> Repo.delete_all()
+      from(a in PlayerApotheke, where: a.player_uid == ^player_uid) |> Repo.delete_all()
       from(s in PlayerSeed, where: s.player_uid == ^player_uid) |> Repo.delete_all()
       from(i in PlayerItem, where: i.player_uid == ^player_uid) |> Repo.delete_all()
       from(e in PlayerEconomy, where: e.player_uid == ^player_uid) |> Repo.delete_all()

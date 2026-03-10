@@ -248,33 +248,49 @@ defmodule CampFire.Economy do
   end
 
   defp create_starter_buildings(player_uid) do
-    alias CampFire.Game.{PlayerPlot, PlayerVase, PlayerMallum, PlayerMallumHouse}
+    alias CampFire.Game.{PlayerPlot, PlayerVase, PlayerMallum, PlayerMallumHouse, PlayerApotheke}
+
+    # Pick 4 random distinct hex positions (excluding flame at 0,0)
+    grid_radius = starter_grid_radius()
+    positions = non_center_hex_positions(grid_radius) |> Enum.shuffle() |> Enum.take(4)
+    [plot_pos, vase_pos, house_pos, apotheke_pos] = positions
 
     %PlayerPlot{}
     |> PlayerPlot.changeset(%{
       player_uid: player_uid,
       state: "empty",
-      grid_x: -1,
-      grid_y: 0
+      grid_x: elem(plot_pos, 0),
+      grid_y: elem(plot_pos, 1)
     })
     |> Repo.insert!()
+
+    vase_config = CampFire.ConfigCache.get("vase_config")
+    vase_capacity = (vase_config && vase_config["default_capacity"]) || 5
 
     %PlayerVase{}
     |> PlayerVase.changeset(%{
       player_uid: player_uid,
       state: "full",
-      capacity: 5,
-      current_water: 5,
-      grid_x: 0,
-      grid_y: -1
+      capacity: vase_capacity,
+      current_water: vase_capacity,
+      grid_x: elem(vase_pos, 0),
+      grid_y: elem(vase_pos, 1)
     })
     |> Repo.insert!()
 
     %PlayerMallumHouse{}
     |> PlayerMallumHouse.changeset(%{
       player_uid: player_uid,
-      grid_x: 1,
-      grid_y: -1
+      grid_x: elem(house_pos, 0),
+      grid_y: elem(house_pos, 1)
+    })
+    |> Repo.insert!()
+
+    %PlayerApotheke{}
+    |> PlayerApotheke.changeset(%{
+      player_uid: player_uid,
+      grid_x: elem(apotheke_pos, 0),
+      grid_y: elem(apotheke_pos, 1)
     })
     |> Repo.insert!()
 
@@ -289,6 +305,21 @@ defmodule CampFire.Economy do
       })
       |> Repo.insert!()
     end
+  end
+
+  defp starter_grid_radius do
+    case CampFire.ConfigCache.get("flame_config") do
+      nil -> 2
+      config -> Enum.at(config["grid_sizes"] || [], 0, 2)
+    end
+  end
+
+  defp non_center_hex_positions(radius) do
+    for q <- -radius..radius,
+        r <- -radius..radius,
+        {q, r} != {0, 0},
+        max(abs(q), max(abs(r), abs(q + r))) <= radius,
+        do: {q, r}
   end
 
   defp spend_items_in_tx(player_uid, item_name, count) do
