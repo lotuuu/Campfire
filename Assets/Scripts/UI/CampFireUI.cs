@@ -23,6 +23,8 @@ namespace Garden
         private VisitorUI visitorUI;
         private DialogueUI dialogueUI;
 
+        private SettingsUI settingsUI;
+
         private VisualElement overlayContainer;
         private VisualElement overlayBackdrop;
         private Label overlayTitle;
@@ -33,6 +35,7 @@ namespace Garden
         private VisualElement debugPanelElement;
         private VisualElement questsPanel;
         private VisualElement visitorPanel;
+        private VisualElement settingsPanel;
 
         // Loading gate
         private VisualElement loadingGate;
@@ -81,6 +84,8 @@ namespace Garden
             visitorUI?.Initialize(root);
             dialogueUI = GetComponent<DialogueUI>();
             dialogueUI?.Initialize(root);
+            settingsUI = GetComponent<SettingsUI>();
+            settingsUI?.Initialize(root);
 
             // Overlay setup
             overlayContainer = root.Q("overlay-container");
@@ -93,6 +98,7 @@ namespace Garden
             debugPanelElement = root.Q("debug-panel");
             questsPanel = root.Q("quests-panel");
             visitorPanel = root.Q("visitor-panel");
+            settingsPanel = root.Q("settings-panel");
 
             var closeBtn = root.Q<Button>("overlay-close");
             closeBtn?.RegisterCallback<ClickEvent>(_ => CloseOverlay());
@@ -128,6 +134,11 @@ namespace Garden
             {
                 letters.OnBadgeCountChanged += count => bottomNav?.UpdateSocialBadge(count);
             }
+
+            // Wire settings button
+            var settingsBtn = root.Q<Button>("btn-settings");
+            if (settingsBtn != null)
+                settingsBtn.clicked += () => OpenOverlay("Settings", settingsPanel);
 
             // Wire debug button (editor + development builds)
             var debugBtn = root.Q<Button>("btn-debug");
@@ -384,6 +395,7 @@ namespace Garden
             if (debugPanelElement != null) debugPanelElement.style.display = DisplayStyle.None;
             if (questsPanel != null) questsPanel.style.display = DisplayStyle.None;
             if (visitorPanel != null) visitorPanel.style.display = DisplayStyle.None;
+            if (settingsPanel != null) settingsPanel.style.display = DisplayStyle.None;
         }
     }
 }
