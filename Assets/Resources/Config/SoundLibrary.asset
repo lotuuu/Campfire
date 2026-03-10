@@ -1,0 +1,125 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 211ae948b732439eb5fe42e0273e6c78, type: 3}
+  m_Name: SoundLibrary
+  m_EditorClassIdentifier: Garden::Garden.SoundLibrary
+  entries:
+  - key: ui_tap
+    clip: {fileID: 8300000, guid: 04ecdbafbe3c440e58b3902a55ca0ffc, type: 3}
+    volume: 1
+    pitchMin: 0.95
+    pitchMax: 1.05
+  - key: ui_panel_open
+    clip: {fileID: 8300000, guid: 843bb5a360197443484b3f49e99a45c9, type: 3}
+    volume: 1
+    pitchMin: 1
+    pitchMax: 1
+  - key: ui_panel_close
+    clip: {fileID: 8300000, guid: 98127393842ff4c95b5f54116e550087, type: 3}
+    volume: 1
+    pitchMin: 1
+    pitchMax: 1
+  - key: flame_collect_mana
+    clip: {fileID: 8300000, guid: 3d999ef062290464389a7de7b6d995bf, type: 3}
+    volume: 1
+    pitchMin: 0.95
+    pitchMax: 1.05
+  - key: flame_upgrade
+    clip: {fileID: 8300000, guid: fe4df92d1ce52430384bbce170f9a541, type: 3}
+    volume: 1
+    pitchMin: 1
+    pitchMax: 1
+  - key: plot_craft
+    clip: {fileID: 8300000, guid: 37d5cc0e196334de7a71bc1d98d5e23b, type: 3}
+    volume: 1
+    pitchMin: 1
+    pitchMax: 1
+  - key: plot_plant
+    clip: {fileID: 8300000, guid: 1a08f705f34954c3ebe208fc839e285b, type: 3}
+    volume: 1
+    pitchMin: 0.9
+    pitchMax: 1.1
+  - key: plot_water
+    clip: {fileID: 8300000, guid: 86c679e6e5bc04c51baf8f4726700597, type: 3}
+    volume: 1
+    pitchMin: 0.9
+    pitchMax: 1.1
+  - key: plot_harvest
+    clip: {fileID: 8300000, guid: b3b91b7827f4244fcb64120b90b7d892, type: 3}
+    volume: 1
+    pitchMin: 1
+    pitchMax: 1
+  - key: vase_craft
+    clip: {fileID: 8300000, guid: 120dadcd4d3cb41efa0bfc63ac2d1bcd, type: 3}
+    volume: 1
+    pitchMin: 1
+    pitchMax: 1
+  - key: vase_fill_complete
+    clip: {fileID: 8300000, guid: 1e6f417532a8748fc9dd344da43c8c53, type: 3}
+    volume: 1
+    pitchMin: 1
+    pitchMax: 1
+  - key: mallum_dispatch_water
+    clip: {fileID: 8300000, guid: 09737d54b617e4d51842a47e7f1e149f, type: 3}
+    volume: 1
+    pitchMin: 0.95
+    pitchMax: 1.05
+  - key: mallum_dispatch_quest
+    clip: {fileID: 8300000, guid: 5137e736845de4225a4a5679893cde26, type: 3}
+    volume: 1
+    pitchMin: 0.95
+    pitchMax: 1.05
+  - key: quest_complete
+    clip: {fileID: 8300000, guid: be1b184b651a244649ab646c367b7a20, type: 3}
+    volume: 1
+    pitchMin: 1
+    pitchMax: 1
+  - key: quest_collect_rewards
+    clip: {fileID: 8300000, guid: 1c68e77df02654754bc608b3b1d4ff75, type: 3}
+    volume: 1
+    pitchMin: 1
+    pitchMax: 1
+  - key: apotheke_mix
+    clip: {fileID: 8300000, guid: 5399e8058fed04155888439febee6df4, type: 3}
+    volume: 1
+    pitchMin: 1
+    pitchMax: 1
+  - key: garden_craft
+    clip: {fileID: 8300000, guid: 631f87df03982419dad6b2ec77d3efbd, type: 3}
+    volume: 1
+    pitchMin: 1
+    pitchMax: 1
+  - key: garden_harvest
+    clip: {fileID: 8300000, guid: c99fa7850f3da45d29174db0404008ef, type: 3}
+    volume: 1
+    pitchMin: 1
+    pitchMax: 1
+  - key: bird_arrive
+    clip: {fileID: 8300000, guid: ee3e9d6f226084f87a97c0faa282f823, type: 3}
+    volume: 1
+    pitchMin: 0.9
+    pitchMax: 1.1
+  - key: bird_collect
+    clip: {fileID: 8300000, guid: 07065681c80b74f43a101eee5c505304, type: 3}
+    volume: 1
+    pitchMin: 1
+    pitchMax: 1
+  - key: visitor_arrive
+    clip: {fileID: 8300000, guid: f8bf443851cb24721a11a7e5e68f3946, type: 3}
+    volume: 1
+    pitchMin: 1
+    pitchMax: 1
+  - key: music_main
+    clip: {fileID: 8300000, guid: 8782bbdce2d8e4729b5245976e2572f5, type: 3}
+    volume: 0.5
+    pitchMin: 1
+    pitchMax: 1
