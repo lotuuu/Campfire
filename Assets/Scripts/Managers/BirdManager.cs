@@ -47,6 +47,7 @@ namespace Garden
             {
                 SaveManager.Instance.Save();
                 OnBirdPlaced?.Invoke();
+                AudioManager.Instance?.PlaySFX("bird_arrive");
             }
         }
 
@@ -113,6 +114,7 @@ namespace Garden
                 ApothekeManager.Instance.AddSeed(reward.seedName, reward.seedCount);
                 SaveManager.Instance.Save();
                 OnBirdCollected?.Invoke(bird);
+                AudioManager.Instance?.PlaySFX("bird_collect");
                 return bird;
             }
 
@@ -123,6 +125,7 @@ namespace Garden
                 ApothekeManager.Instance.AddSeed(collected.seedName, collected.seedCount);
                 SaveManager.Instance.Save();
                 NotifyBirdCollected(collected);
+                AudioManager.Instance?.PlaySFX("bird_collect");
             }
             return collected;
         }

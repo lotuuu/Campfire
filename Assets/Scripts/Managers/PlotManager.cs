@@ -248,6 +248,7 @@ namespace Garden
             SaveManager.Instance.Save();
             int newIndex = data.plots.Count - 1;
             OnPlotChanged?.Invoke(newIndex);
+            AudioManager.Instance?.PlaySFX("plot_craft");
 
             // Notify server
             if (GameService.Instance != null && GameService.Instance.IsOnline)
@@ -304,6 +305,7 @@ namespace Garden
 
             SaveManager.Instance.Save();
             OnPlotChanged?.Invoke(plotIndex);
+            AudioManager.Instance?.PlaySFX("plot_plant");
 
             var remaining = GetRemainingSeconds(plotIndex);
             NotificationService.Instance?.SchedulePlantNotification(plotIndex, seedName, remaining);
@@ -344,6 +346,7 @@ namespace Garden
 
             SaveManager.Instance.Save();
             OnPlotChanged?.Invoke(plotIndex);
+            AudioManager.Instance?.PlaySFX("plot_water");
 
             // Notify server with the vase that actually supplied the water
             if (GameService.Instance != null && GameService.Instance.IsOnline && plot.serverId > 0
@@ -441,6 +444,7 @@ namespace Garden
 
             OnPlotChanged?.Invoke(plotIndex);
             OnHarvested?.Invoke(plotIndex, result);
+            AudioManager.Instance?.PlaySFX("plot_harvest");
 
             NotificationService.Instance?.CancelPlantNotification(plotIndex);
             NotificationService.Instance?.CancelWaterNotification(plotIndex);

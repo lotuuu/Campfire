@@ -94,6 +94,7 @@ namespace Garden
                     data.lastVisitorFetchDateUtc = todayUtc;
                     SaveManager.Instance.Save();
                     OnVisitorArrived?.Invoke();
+                    AudioManager.Instance?.PlaySFX("visitor_arrive");
                 }
                 else
                 {

@@ -148,6 +148,7 @@ namespace Garden
                     garden.lastYieldTimeUtc = now.ToString("o");
                     changed = true;
                     OnYieldCollected?.Invoke(i, plantData.yieldItem, plantData.yieldAmount);
+                    AudioManager.Instance?.PlaySFX("garden_harvest");
 
                     // Notify server
                     if (GameService.Instance != null && GameService.Instance.IsOnline && garden.serverId > 0)
@@ -213,6 +214,7 @@ namespace Garden
 
             SaveManager.Instance.Save();
             OnGardenChanged?.Invoke(data.gardens.Count - 1);
+            AudioManager.Instance?.PlaySFX("garden_craft");
             return true;
         }
 

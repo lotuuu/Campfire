@@ -186,6 +186,7 @@ namespace Garden
                     if (IsQuestTimerComplete(mallum))
                     {
                         CompleteQuest(mallum);
+                        AudioManager.Instance?.PlaySFX("quest_complete");
                         NotificationService.Instance?.CancelQuestNotification(i);
                         changed = true;
 
@@ -240,6 +241,7 @@ namespace Garden
 
             SaveManager.Instance.Save();
             OnMallumsChanged?.Invoke();
+            AudioManager.Instance?.PlaySFX("mallum_dispatch_water");
 
             // Note: VaseManager.SendToCollect already notifies server via GameService.FillVase
 
@@ -264,6 +266,7 @@ namespace Garden
 
             SaveManager.Instance.Save();
             OnMallumsChanged?.Invoke();
+            AudioManager.Instance?.PlaySFX("mallum_dispatch_quest");
 
             // Notify server
             if (GameService.Instance != null && GameService.Instance.IsOnline)
@@ -289,6 +292,7 @@ namespace Garden
 
             SaveManager.Instance.Save();
             OnMallumsChanged?.Invoke();
+            AudioManager.Instance?.PlaySFX("quest_collect_rewards");
 
             // Notify server for authoritative rewards
             if (GameService.Instance != null && GameService.Instance.IsOnline && serverId > 0)

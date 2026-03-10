@@ -54,6 +54,7 @@ namespace Garden
                 data.items.Add(new InventoryItem { itemName = recipe.result, count = recipe.resultQuantity });
 
             SaveManager.Instance.Save();
+            AudioManager.Instance?.PlaySFX("apotheke_mix");
             if (EconomyService.Instance != null && !CurrencyManager.FreeMode)
             {
                 // Report consumed ingredients

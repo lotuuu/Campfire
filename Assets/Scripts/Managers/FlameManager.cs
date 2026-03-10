@@ -131,6 +131,7 @@ namespace Garden
                 EconomyService.Instance.Enqueue("upgrade-flame", JsonUtility.ToJson(req));
             }
             OnFlameUpgraded?.Invoke();
+            AudioManager.Instance?.PlaySFX("flame_upgrade");
             return true;
         }
     }

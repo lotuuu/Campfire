@@ -92,6 +92,7 @@ namespace Garden
             {
                 SaveManager.Instance.Save();
                 OnVasesChanged?.Invoke();
+                AudioManager.Instance?.PlaySFX("vase_fill_complete");
             }
         }
 
@@ -175,6 +176,7 @@ namespace Garden
             SaveManager.Instance.Save();
             int newIndex = data.vases.Count - 1;
             OnVasesChanged?.Invoke();
+            AudioManager.Instance?.PlaySFX("vase_craft");
 
             // Notify server
             if (GameService.Instance != null && GameService.Instance.IsOnline)
