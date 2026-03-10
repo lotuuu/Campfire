@@ -76,6 +76,7 @@ namespace Garden
             if (data == null) return false;
 
             // Clear any existing visitor so we can fetch a fresh one
+            VisitorManager.Instance.DebugKeepVisitor = true;
             data.currentVisitor = null;
             data.lastVisitorFetchDateUtc = null;
 

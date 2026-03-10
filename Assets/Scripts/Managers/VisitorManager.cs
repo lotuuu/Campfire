@@ -14,6 +14,9 @@ namespace Garden
         public event Action OnVisitorArrived;
         public event Action OnVisitorDeparted;
 
+        /// <summary>When true, visitor stays regardless of time of day.</summary>
+        public bool DebugKeepVisitor { get; set; }
+
         public void NotifyVisitorArrived()
         {
             OnVisitorArrived?.Invoke();
@@ -67,8 +70,8 @@ namespace Garden
             var now = GameTime.Now;
             var utcNow = GameTime.UtcNow;
 
-            // Departure: remove visitor if outside visitor hour
-            if (data.currentVisitor != null && !IsVisitorHour(now))
+            // Departure: remove visitor if outside visitor hour (unless debug-forced)
+            if (data.currentVisitor != null && !IsVisitorHour(now) && !DebugKeepVisitor)
             {
                 DismissVisitor(data);
                 SaveManager.Instance.Save();
