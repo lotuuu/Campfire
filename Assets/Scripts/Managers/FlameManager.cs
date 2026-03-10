@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using UnityEngine;
 
 namespace Garden
@@ -9,13 +8,11 @@ namespace Garden
     {
         public static FlameManager Instance { get; private set; }
 
-        [SerializeField] private FlameConfig config;
-
-        public FlameConfig Config => config;
+        private ServerFlameConfig Config => ConfigService.Instance.FlameConfig;
         public int Level => SaveManager.Instance.Data.flameLevel;
-        public float ManaPerSecond => config.GetManaPerSecond(Level);
-        public int MaxEntities => config.GetMaxEntities(Level);
-        public float ManaCap => config.GetManaCap(Level);
+        public float ManaPerSecond => Config.GetManaPerSecond(Level);
+        public int MaxEntities => Config.GetMaxEntities(Level);
+        public float ManaCap => Config.GetManaCap(Level);
 
         public int CurrentEntityCount
         {
@@ -33,60 +30,14 @@ namespace Garden
         private float _manaCollectTimer;
         private const float ManaCollectIntervalSeconds = 60f;
 
-        public FlameUpgradeRecipe GetUpgradeRecipe() => config.GetUpgradeRecipe(Level);
+        public FlameUpgradeRecipe GetUpgradeRecipe() => Config.GetUpgradeRecipe(Level);
+        public int GetGridSize() => Config.GetGridSize(Level);
+        public int GetGridSize(int flameLevel) => Config.GetGridSize(flameLevel);
 
         private void Awake()
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
-            ApplyServerFlameConfig();
-        }
-
-        private void ApplyServerFlameConfig()
-        {
-            var cs = ConfigService.Instance;
-            if (cs == null || !cs.IsLoaded || cs.FlameConfig == null) return;
-
-            var sf = cs.FlameConfig;
-            var flags = BindingFlags.NonPublic | BindingFlags.Instance;
-            var type = typeof(FlameConfig);
-
-            type.GetField("baseManaPerSecond", flags)?.SetValue(config, sf.base_mana_per_second);
-            type.GetField("manaPerLevel", flags)?.SetValue(config, sf.mana_per_level);
-
-            if (sf.entity_caps != null && sf.entity_caps.Count > 0)
-                type.GetField("maxEntitiesPerLevel", flags)?.SetValue(config, sf.entity_caps.ToArray());
-
-            if (sf.grid_sizes != null && sf.grid_sizes.Count > 0)
-                type.GetField("gridSizePerLevel", flags)?.SetValue(config, sf.grid_sizes.ToArray());
-
-            // Overlay upgrade recipes
-            var serverRecipes = cs.FlameUpgradeRecipes;
-            if (serverRecipes != null && serverRecipes.Count > 0)
-            {
-                var recipes = new List<FlameUpgradeRecipe>();
-                foreach (var sr in serverRecipes)
-                {
-                    var recipe = new FlameUpgradeRecipe();
-                    foreach (var ing in sr)
-                    {
-                        string itemName = ing.TryGetValue("itemName", out var n) && n is string s ? s : null;
-                        int count = ing.TryGetValue("count", out var c) ? ToInt(c) : 0;
-                        if (itemName != null)
-                            recipe.ingredients.Add(new FlameIngredient { itemName = itemName, count = count });
-                    }
-                    recipes.Add(recipe);
-                }
-                type.GetField("upgradeRecipes", flags)?.SetValue(config, recipes);
-            }
-        }
-
-        private static int ToInt(object val)
-        {
-            if (val is double d) return (int)d;
-            if (val is long l) return (int)l;
-            if (val is int i) return i;
-            return 0;
         }
 
         private void Update()
@@ -109,17 +60,17 @@ namespace Garden
 
         public bool CanUpgrade()
         {
-            var recipe = config.GetUpgradeRecipe(Level);
+            var recipe = Config.GetUpgradeRecipe(Level);
             if (recipe == null) return false;
-            return FlameConfig.CanAffordUpgrade(recipe, SaveManager.Instance.Data.items);
+            return CanAffordUpgrade(recipe, SaveManager.Instance.Data.items);
         }
 
         public bool UpgradeFlame()
         {
-            var recipe = config.GetUpgradeRecipe(Level);
+            var recipe = Config.GetUpgradeRecipe(Level);
             if (recipe == null) return false;
-            if (!FlameConfig.CanAffordUpgrade(recipe, SaveManager.Instance.Data.items)) return false;
-            FlameConfig.ConsumeIngredients(recipe, SaveManager.Instance.Data.items);
+            if (!CanAffordUpgrade(recipe, SaveManager.Instance.Data.items)) return false;
+            ConsumeIngredients(recipe, SaveManager.Instance.Data.items);
             SaveManager.Instance.Data.flameLevel++;
             SaveManager.Instance.Save();
             if (EconomyService.Instance != null)
@@ -133,6 +84,28 @@ namespace Garden
             OnFlameUpgraded?.Invoke();
             AudioManager.Instance?.PlaySFX("flame_upgrade");
             return true;
+        }
+
+        public static bool CanAffordUpgrade(FlameUpgradeRecipe recipe, List<InventoryItem> items)
+        {
+            if (CurrencyManager.FreeMode) return true;
+            foreach (var ingredient in recipe.ingredients)
+            {
+                var item = items.Find(i => i.itemName == ingredient.itemName);
+                if (item == null || item.count < ingredient.count)
+                    return false;
+            }
+            return true;
+        }
+
+        public static void ConsumeIngredients(FlameUpgradeRecipe recipe, List<InventoryItem> items)
+        {
+            if (CurrencyManager.FreeMode) return;
+            foreach (var ingredient in recipe.ingredients)
+            {
+                var item = items.Find(i => i.itemName == ingredient.itemName);
+                item.count -= ingredient.count;
+            }
         }
     }
 }

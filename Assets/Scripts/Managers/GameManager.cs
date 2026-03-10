@@ -69,13 +69,13 @@ namespace Garden
             data.gems = 5;
 
             // Pick 4 random distinct hex positions for starting elements
-            int gridRadius = FlameManager.Instance != null
-                ? FlameManager.Instance.Config.GetGridSize(1)
+            int gridRadius = ConfigService.Instance != null
+                ? ConfigService.Instance.FlameConfig.GetGridSize(1)
                 : 2;
             var positions = HexGridUtil.GetNonCenterPositions(gridRadius);
             HexGridUtil.Shuffle(positions);
 
-            VaseManager.InitializeNewPlayer(data, VaseManager.Instance.Config.BaseCapacity);
+            VaseManager.InitializeNewPlayer(data, ConfigService.Instance.VaseConfig.default_capacity);
             data.vases[0].currentWater = data.vases[0].capacity;
             data.vases[0].state = VaseState.Full;
             data.vases[0].gridX = positions[0].q;
@@ -90,7 +90,7 @@ namespace Garden
             data.mallumHouses.Add(new MallumHouseSave { gridX = positions[2].q, gridY = positions[2].r });
             if (MallumManager.Instance != null)
             {
-                int maxMallums = MallumManager.Instance.HouseConfig.GetMaxMallums(data.mallumHouses.Count);
+                int maxMallums = ConfigService.Instance.MallumHouseConfig.GetMaxMallums(data.mallumHouses.Count);
                 MallumManager.EnsureMallumCount(data.mallums, maxMallums);
             }
             SaveManager.Instance.Save();

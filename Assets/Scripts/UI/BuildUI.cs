@@ -71,24 +71,35 @@ namespace Garden
                 }
             }
 
-            // Garden
+            // Garden (unlocked at flame level 4)
             if (GardenManager.Instance != null && FlameManager.Instance != null)
             {
-                var gardenCost = GardenManager.Instance.GetNextGardenCost();
-                bool canAfford = canPlace && gardenCost != null
-                    && CurrencyManager.Instance.CanAffordMana(gardenCost.manaCost)
-                    && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, gardenCost.harvestCosts);
-                buildList.Add(BuildCardHelper.CreateBuildCard(
-                    "Garden", "Grow fruit trees", "ui/buildings/garden", null,
-                    BuildCardHelper.FromBuildingCost(gardenCost), capText,
-                    canAfford, canPlace,
-                    () => OnRequestPlacement?.Invoke(CampBuildingType.Garden)));
+                bool gardenUnlocked = FlameManager.Instance.Level >= GardenManager.GardenUnlockLevel;
+                if (gardenUnlocked)
+                {
+                    var gardenCost = GardenManager.Instance.GetNextGardenCost();
+                    bool canAfford = canPlace && gardenCost != null
+                        && CurrencyManager.Instance.CanAffordMana(gardenCost.manaCost)
+                        && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, gardenCost.harvestCosts);
+                    buildList.Add(BuildCardHelper.CreateBuildCard(
+                        "Garden", "Grow fruit trees", "ui/buildings/garden", null,
+                        BuildCardHelper.FromBuildingCost(gardenCost), capText,
+                        canAfford, canPlace,
+                        () => OnRequestPlacement?.Invoke(CampBuildingType.Garden)));
+                }
+                else
+                {
+                    buildList.Add(BuildCardHelper.CreateBuildCard(
+                        "Garden", $"Unlocks at Fire Lv.{GardenManager.GardenUnlockLevel}",
+                        "ui/buildings/garden", null,
+                        null, capText, false, false, null));
+                }
             }
 
             // Flame upgrade
             if (FlameManager.Instance != null && FlameManager.Instance.CanUpgrade())
             {
-                var recipe = FlameManager.Instance.Config.GetUpgradeRecipe(FlameManager.Instance.Level);
+                var recipe = FlameManager.Instance.GetUpgradeRecipe();
                 buildList.Add(BuildCardHelper.CreateBuildCard(
                     "Upgrade Flame", "Expand your camp", "ui/buildings/flame", null,
                     BuildCardHelper.FromFlameRecipe(recipe), "", true, true, () =>

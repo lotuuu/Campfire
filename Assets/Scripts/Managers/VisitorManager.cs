@@ -300,8 +300,8 @@ namespace Garden
             if (response == null || string.IsNullOrEmpty(response.visitor_id))
                 return null;
 
-            int gridRadius = FlameManager.Instance != null
-                ? FlameManager.Instance.Config.GetGridSize(data.flameLevel)
+            int gridRadius = ConfigService.Instance != null
+                ? ConfigService.Instance.FlameConfig.GetGridSize(data.flameLevel)
                 : 2;
 
             var freeTiles = BirdManager.GetFreeTiles(data, gridRadius);

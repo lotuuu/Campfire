@@ -197,8 +197,8 @@ namespace Garden
                     data.mallums.Add(mallum);
                 }
             }
-            int maxMallums = MallumManager.Instance != null
-                ? MallumManager.Instance.HouseConfig.GetMaxMallums(data.mallumHouses.Count)
+            int maxMallums = ConfigService.Instance?.MallumHouseConfig != null
+                ? ConfigService.Instance.MallumHouseConfig.GetMaxMallums(data.mallumHouses.Count)
                 : data.mallumHouses.Count;
             int slotsAvailable = maxMallums - data.mallums.Count;
             for (int i = 0; i < Math.Min(localMallums.Count, slotsAvailable); i++)

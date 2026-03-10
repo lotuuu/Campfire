@@ -12,7 +12,6 @@ namespace Garden
         private VisualElement recipeList;
         private Button tabInventory;
         private Button tabCraft;
-        private SeedData[] allSeeds;
         private int expandedIndex = -1;
         private int expandedRecipeIndex = -1;
 
@@ -25,8 +24,6 @@ namespace Garden
             inventoryEmpty = root.Q<Label>("inventory-empty");
             seedList = root.Q("seed-list");
             recipeList = root.Q("recipe-list");
-
-            allSeeds = Resources.LoadAll<SeedData>("Seeds");
 
             tabInventory?.RegisterCallback<ClickEvent>(_ => ShowTab(0));
             tabCraft?.RegisterCallback<ClickEvent>(_ => ShowTab(1));
@@ -74,13 +71,13 @@ namespace Garden
                 var entry = seeds[i];
                 if (entry.count <= 0) continue;
 
-                var seedData = FindSeedData(entry.seedName);
-                var card = BuildSeedCard(entry, seedData, i);
+                var seedConfig = ConfigService.Instance?.GetSeed(entry.seedName);
+                var card = BuildSeedCard(entry, seedConfig, i);
                 seedList.Add(card);
             }
         }
 
-        private VisualElement BuildSeedCard(SeedInventoryEntry entry, SeedData seedData, int index)
+        private VisualElement BuildSeedCard(SeedInventoryEntry entry, ServerSeedConfig seedData, int index)
         {
             var card = new VisualElement();
             card.AddToClassList("seed-card");
@@ -121,13 +118,16 @@ namespace Garden
             var details = new VisualElement();
             details.AddToClassList("seed-card-details");
 
-            if (seedData != null && seedData.recipe != null)
+            if (seedData != null)
             {
-                var title = new Label("Growth Recipe");
-                title.AddToClassList("seed-recipe-title");
-                details.Add(title);
+                if (seedData.recipe != null)
+                {
+                    var title = new Label("Growth Recipe");
+                    title.AddToClassList("seed-recipe-title");
+                    details.Add(title);
 
-                AddRecipeDimensions(details, seedData.recipe);
+                    AddRecipeDimensions(details, seedData.recipe);
+                }
 
                 var dropsRow = new VisualElement();
                 dropsRow.AddToClassList("seed-recipe-row");
@@ -365,12 +365,5 @@ namespace Garden
             return card;
         }
 
-        private SeedData FindSeedData(string seedName)
-        {
-            if (allSeeds == null || string.IsNullOrEmpty(seedName)) return null;
-            foreach (var s in allSeeds)
-                if (s.name == seedName) return s;
-            return null;
-        }
     }
 }

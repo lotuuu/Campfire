@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -10,24 +9,6 @@ namespace Garden
     {
         public static MallumManager Instance { get; private set; }
 
-        [SerializeField] private MallumHouseConfig houseConfig;
-
-        private QuestData[] allQuests;
-        private BuildingCostConfig buildingCostConfig;
-
-        public MallumHouseConfig HouseConfig => houseConfig;
-
-        private BuildingCostConfig LoadBuildingCostConfig()
-        {
-            if (buildingCostConfig == null)
-                buildingCostConfig = Resources.Load<BuildingCostConfig>("Config/BuildingCostConfig");
-            return buildingCostConfig;
-        }
-
-        public BuildingCost GetNextHouseCost()
-        {
-            return LoadBuildingCostConfig()?.GetHouseCost(SaveManager.Instance.Data.mallumHouses.Count);
-        }
         public event Action OnMallumsChanged;
 
         public void NotifyChanged() => OnMallumsChanged?.Invoke();
@@ -36,126 +17,12 @@ namespace Garden
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
-            allQuests = Resources.LoadAll<QuestData>("Quests");
-            ApplyServerQuestConfigs();
-            ApplyServerHouseConfig();
-        }
-
-        /// <summary>
-        /// Overlays server quest config values onto local QuestData assets.
-        /// Keeps SeedData sprite references from local assets.
-        /// </summary>
-        private void ApplyServerQuestConfigs()
-        {
-            var cs = ConfigService.Instance;
-            if (cs == null || !cs.IsLoaded) return;
-
-            foreach (var quest in allQuests)
-            {
-                var serverQuest = cs.GetQuest(quest.questName);
-                if (serverQuest == null) continue;
-
-                quest.durationMinutes = serverQuest.durationMinutes;
-                quest.requiredFlameLevel = serverQuest.requiredFlameLevel;
-                quest.rewardRolls = serverQuest.rewardRolls;
-
-                // Overlay reward pool — match by seed_name, keep local SeedData refs
-                var serverPool = cs.GetQuestRewardPool(quest.questName);
-                if (serverPool != null && serverPool.Count > 0)
-                {
-                    // Build a lookup of existing seed references by name
-                    var seedLookup = new Dictionary<string, SeedData>();
-                    foreach (var r in quest.rewardPool)
-                        if (r.seed != null && !seedLookup.ContainsKey(r.seed.name))
-                            seedLookup[r.seed.name] = r.seed;
-
-                    // Also load all seeds for any new entries
-                    foreach (var s in Resources.LoadAll<SeedData>("Seeds"))
-                        if (!seedLookup.ContainsKey(s.name))
-                            seedLookup[s.name] = s;
-
-                    quest.rewardPool.Clear();
-                    foreach (var sr in serverPool)
-                    {
-                        string seedName = sr.TryGetValue("seed", out var sn) && sn is string s ? s
-                            : sr.TryGetValue("seed_name", out var sn2) && sn2 is string s2 ? s2 : null;
-                        if (seedName == null) continue;
-
-                        float weight = sr.TryGetValue("weight", out var w) ? ToFloat(w) : 1f;
-                        int min = sr.TryGetValue("minCount", out var mn) ? (int)ToFloat(mn)
-                            : sr.TryGetValue("min", out var mn2) ? (int)ToFloat(mn2) : 1;
-                        int max = sr.TryGetValue("maxCount", out var mx) ? (int)ToFloat(mx)
-                            : sr.TryGetValue("max", out var mx2) ? (int)ToFloat(mx2) : 1;
-
-                        seedLookup.TryGetValue(seedName, out var seedRef);
-
-                        quest.rewardPool.Add(new QuestReward
-                        {
-                            seed = seedRef,
-                            weight = weight,
-                            minCount = min,
-                            maxCount = max
-                        });
-                    }
-                }
-            }
-        }
-
-        private void ApplyServerHouseConfig()
-        {
-            var cs = ConfigService.Instance;
-            if (cs == null || !cs.IsLoaded || cs.MallumHouseConfig == null) return;
-
-            var flags = BindingFlags.NonPublic | BindingFlags.Instance;
-
-            // Apply mallumsPerHouse to MallumHouseConfig
-            typeof(MallumHouseConfig).GetField("mallumsPerHouse", flags)?.SetValue(houseConfig, cs.MallumHouseConfig.mallums_per_house);
-
-            // Apply house costs to BuildingCostConfig
-            var serverCosts = cs.HouseCosts;
-            if (serverCosts != null && serverCosts.Count > 0)
-            {
-                var bcc = LoadBuildingCostConfig();
-                if (bcc == null) return;
-
-                var costs = new List<BuildingCost>();
-                foreach (var sc in serverCosts)
-                {
-                    var cost = new BuildingCost();
-                    cost.manaCost = sc.TryGetValue("mana", out var m) ? ToFloat(m) : 0f;
-
-                    if (sc.TryGetValue("harvests", out var hObj) && hObj is List<object> harvests)
-                    {
-                        foreach (var h in harvests)
-                        {
-                            if (h is Dictionary<string, object> hd)
-                            {
-                                string item = hd.TryGetValue("item", out var n) && n is string s ? s : null;
-                                int count = hd.TryGetValue("count", out var c) ? (int)ToFloat(c) : 0;
-                                if (item != null)
-                                    cost.harvestCosts.Add(new HarvestCost { itemName = item, count = count });
-                            }
-                        }
-                    }
-                    costs.Add(cost);
-                }
-                typeof(BuildingCostConfig).GetField("houseCosts", flags)?.SetValue(bcc, costs);
-            }
-        }
-
-        private static float ToFloat(object val)
-        {
-            if (val is double d) return (float)d;
-            if (val is long l) return l;
-            if (val is float f) return f;
-            if (val is int i) return i;
-            return 0f;
         }
 
         private void Start()
         {
             var data = SaveManager.Instance.Data;
-            int max = houseConfig.GetMaxMallums(data.mallumHouses.Count);
+            int max = ConfigService.Instance.MallumHouseConfig.GetMaxMallums(data.mallumHouses.Count);
             EnsureMallumCount(data.mallums, max);
         }
 
@@ -244,7 +111,7 @@ namespace Garden
 
         public int GetMaxMallumCount()
         {
-            return houseConfig.GetMaxMallums(SaveManager.Instance.Data.mallumHouses.Count);
+            return ConfigService.Instance.MallumHouseConfig.GetMaxMallums(SaveManager.Instance.Data.mallumHouses.Count);
         }
 
         public int GetAvailableMallumCount()
@@ -265,7 +132,7 @@ namespace Garden
                 int mallumIndex = data.mallums.FindIndex(m => m.state == MallumState.FetchingWater && m.assignedVaseIndex == vaseIndex);
                 if (mallumIndex >= 0)
                 {
-                    double seconds = VaseManager.Instance.Config.FillDurationMinutes * 60.0;
+                    double seconds = ConfigService.Instance.VaseConfig.fill_duration_minutes * 60.0;
                     NotificationService.Instance.ScheduleWaterFetchNotification(mallumIndex, seconds);
                 }
             }
@@ -279,7 +146,7 @@ namespace Garden
             return true;
         }
 
-        public bool SendOnQuest(QuestData quest)
+        public bool SendOnQuest(ServerQuestConfig quest)
         {
             var data = SaveManager.Instance.Data;
             if (!ClaimMallumForQuest(data.mallums, quest.questName, GameTime.UtcNow.ToString("o")))
@@ -349,7 +216,7 @@ namespace Garden
             if (!FlameManager.Instance.CanPlaceEntity) return false;
 
             var data = SaveManager.Instance.Data;
-            var cost = LoadBuildingCostConfig()?.GetHouseCost(data.mallumHouses.Count);
+            var cost = GetNextHouseCost();
             if (cost == null) return false;
 
             // Check mana
@@ -375,7 +242,7 @@ namespace Garden
             data.mallumHouses.Add(new MallumHouseSave { gridX = gridX, gridY = gridY });
 
             // Add new mallums
-            int max = houseConfig.GetMaxMallums(data.mallumHouses.Count);
+            int max = ConfigService.Instance.MallumHouseConfig.GetMaxMallums(data.mallumHouses.Count);
             EnsureMallumCount(data.mallums, max);
 
             SaveManager.Instance.Save();
@@ -406,12 +273,18 @@ namespace Garden
             }
         }
 
-        public QuestData[] GetAllQuests() => allQuests;
+        public BuildingCost GetNextHouseCost()
+        {
+            return ConfigService.Instance?.GetHouseCost(SaveManager.Instance.Data.mallumHouses.Count);
+        }
 
-        public List<QuestData> GetAvailableQuests()
+        public List<ServerQuestConfig> GetAvailableQuests()
         {
             int level = SaveManager.Instance.Data.flameLevel;
-            var available = new List<QuestData>();
+            var allQuests = ConfigService.Instance?.GetAllQuests();
+            if (allQuests == null) return new List<ServerQuestConfig>();
+
+            var available = new List<ServerQuestConfig>();
             foreach (var q in allQuests)
                 if (q.requiredFlameLevel <= level)
                     available.Add(q);
@@ -419,10 +292,13 @@ namespace Garden
             return available;
         }
 
-        public List<QuestData> GetLockedQuests()
+        public List<ServerQuestConfig> GetLockedQuests()
         {
             int level = SaveManager.Instance.Data.flameLevel;
-            var locked = new List<QuestData>();
+            var allQuests = ConfigService.Instance?.GetAllQuests();
+            if (allQuests == null) return new List<ServerQuestConfig>();
+
+            var locked = new List<ServerQuestConfig>();
             foreach (var q in allQuests)
                 if (q.requiredFlameLevel > level)
                     locked.Add(q);
@@ -526,12 +402,9 @@ namespace Garden
             return Mathf.Clamp01(elapsed / quest.durationMinutes);
         }
 
-        private QuestData FindQuest(string questName)
+        private ServerQuestConfig FindQuest(string questName)
         {
-            foreach (var q in allQuests)
-                if (q.questName == questName)
-                    return q;
-            return null;
+            return ConfigService.Instance?.GetQuest(questName);
         }
 
         // --- Static helpers (testable without MonoBehaviour) ---
@@ -592,13 +465,13 @@ namespace Garden
             return false;
         }
 
-        public static List<RewardEntry> RollRewards(List<QuestReward> pool, int rolls)
+        public static List<RewardEntry> RollRewards(List<ServerQuestReward> pool, int rolls)
         {
             var rewards = new List<RewardEntry>();
             float totalWeight = 0f;
             foreach (var r in pool)
             {
-                if (r.seed != null)
+                if (!string.IsNullOrEmpty(r.seedName))
                     totalWeight += r.weight;
             }
 
@@ -610,14 +483,14 @@ namespace Garden
                 float cumulative = 0f;
                 foreach (var r in pool)
                 {
-                    if (r.seed == null) continue;
+                    if (string.IsNullOrEmpty(r.seedName)) continue;
                     cumulative += r.weight;
                     if (roll < cumulative)
                     {
                         int count = UnityEngine.Random.Range(r.minCount, r.maxCount + 1);
                         rewards.Add(new RewardEntry
                         {
-                            seedName = r.seed.name,
+                            seedName = r.seedName,
                             count = count
                         });
                         break;

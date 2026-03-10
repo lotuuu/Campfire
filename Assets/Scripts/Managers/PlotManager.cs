@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -80,94 +79,10 @@ namespace Garden
             return true;
         }
 
-        private static Dictionary<string, SeedData> _seedCache;
-
         private void Awake()
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
-
-            if (_seedCache == null)
-            {
-                _seedCache = new Dictionary<string, SeedData>();
-                foreach (var seed in Resources.LoadAll<SeedData>("Seeds"))
-                    _seedCache[seed.name] = seed;
-            }
-
-            ApplyServerSeedConfigs();
-            ApplyServerBuildingCostConfig();
-        }
-
-        /// <summary>
-        /// Called once at startup (and can be re-called if configs refresh).
-        /// Overlays server config values onto the cached SeedData instances.
-        /// </summary>
-        public static void ApplyServerSeedConfigs()
-        {
-            if (_seedCache == null) return;
-            var cs = ConfigService.Instance;
-            if (cs == null || !cs.IsLoaded) return;
-
-            foreach (var kv in _seedCache)
-            {
-                var serverSeed = cs.GetSeed(kv.Key);
-                if (serverSeed == null) continue;
-
-                var seed = kv.Value;
-                seed.growthDurationHours = serverSeed.growthDurationHours;
-                seed.minDrops = serverSeed.minDrops;
-                seed.maxDrops = serverSeed.maxDrops;
-                seed.manaCost = serverSeed.manaCost;
-                seed.tier = serverSeed.tier;
-
-                var recipeMap = cs.GetSeedRecipe(kv.Key);
-                if (recipeMap != null)
-                    seed.recipe = ConfigService.ConvertRecipe(recipeMap);
-            }
-        }
-
-        private void ApplyServerBuildingCostConfig()
-        {
-            var cs = ConfigService.Instance;
-            if (cs == null || !cs.IsLoaded || cs.BuildingCostConfig == null) return;
-
-            var bcc = LoadBuildingCostConfig();
-            if (bcc == null) return;
-
-            var flags = BindingFlags.NonPublic | BindingFlags.Instance;
-            var type = typeof(BuildingCostConfig);
-
-            if (cs.BuildingCostConfig.TryGetValue("plot_costs", out var pcObj) && pcObj is List<object> plotCosts)
-                type.GetField("plotCosts", flags)?.SetValue(bcc, ParseBuildingCostList(plotCosts));
-
-            if (cs.BuildingCostConfig.TryGetValue("vase_costs", out var vcObj) && vcObj is List<object> vaseCosts)
-                type.GetField("vaseCosts", flags)?.SetValue(bcc, ParseBuildingCostList(vaseCosts));
-        }
-
-        private static List<BuildingCost> ParseBuildingCostList(List<object> list)
-        {
-            var result = new List<BuildingCost>();
-            foreach (var item in list)
-            {
-                if (item is not Dictionary<string, object> d) continue;
-                var cost = new BuildingCost();
-                if (d.TryGetValue("manaCost", out var mc))
-                    cost.manaCost = mc is double dd ? (float)dd : mc is long ll ? ll : 0f;
-
-                if (d.TryGetValue("harvestCosts", out var hcObj) && hcObj is List<object> hcList)
-                {
-                    foreach (var hc in hcList)
-                    {
-                        if (hc is not Dictionary<string, object> hd) continue;
-                        string itemName = hd.TryGetValue("itemName", out var n) && n is string s ? s : null;
-                        int count = hd.TryGetValue("count", out var c) ? (c is double cd ? (int)cd : c is long cl ? (int)cl : 0) : 0;
-                        if (itemName != null)
-                            cost.harvestCosts.Add(new HarvestCost { itemName = itemName, count = count });
-                    }
-                }
-                result.Add(cost);
-            }
-            return result;
         }
 
         private void OnEnable()
@@ -194,18 +109,9 @@ namespace Garden
 
         public List<PlotSave> Plots => SaveManager.Instance.Data.plots;
 
-        private BuildingCostConfig buildingCostConfig;
-
-        private BuildingCostConfig LoadBuildingCostConfig()
-        {
-            if (buildingCostConfig == null)
-                buildingCostConfig = Resources.Load<BuildingCostConfig>("Config/BuildingCostConfig");
-            return buildingCostConfig;
-        }
-
         public BuildingCost GetNextPlotCost()
         {
-            return LoadBuildingCostConfig()?.GetPlotCost(SaveManager.Instance.Data.plots.Count);
+            return ConfigService.Instance?.GetPlotCost(SaveManager.Instance.Data.plots.Count);
         }
 
         public bool CraftPlot(int gridX, int gridY)
@@ -417,7 +323,7 @@ namespace Garden
 
             var result = new HarvestResult
             {
-                seedName = seed.name,
+                seedName = seed.seedName,
                 drops = drops,
                 recipeScore = score,
                 snapshots = plot.snapshots ?? new GrowthSnapshots(),
@@ -435,10 +341,10 @@ namespace Garden
             plot.state = PlotState.Empty;
 
             // Add items locally as fallback (server response will be authoritative)
-            AddItem(data, seed.name + "_harvest", drops);
+            AddItem(data, seed.seedName + "_harvest", drops);
             if (!(GameService.Instance != null && GameService.Instance.IsOnline))
                 EconomyService.Instance?.Enqueue("add-items",
-                    JsonUtility.ToJson(new AddItemRequest { item_name = seed.name + "_harvest", count = drops }));
+                    JsonUtility.ToJson(new AddItemRequest { item_name = seed.seedName + "_harvest", count = drops }));
 
             SaveManager.Instance.Save();
 
@@ -615,17 +521,15 @@ namespace Garden
             else data.items.Add(new InventoryItem { itemName = itemName, count = count });
         }
 
-        private static SeedData LoadSeed(string seedName)
+        private static ServerSeedConfig LoadSeed(string seedName)
         {
             if (string.IsNullOrEmpty(seedName)) return null;
-            if (_seedCache != null && _seedCache.TryGetValue(seedName, out var seed))
-                return seed;
-            return null;
+            return ConfigService.Instance?.GetSeed(seedName);
         }
 
         /// <summary>
         /// Returns the display name for a seed given its asset name.
-        /// Falls back to the asset name if SeedData is not found.
+        /// Falls back to the asset name if config is not found.
         /// </summary>
         public static string GetSeedDisplayName(string assetName)
         {

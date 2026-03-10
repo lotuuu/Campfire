@@ -259,7 +259,7 @@ namespace Garden
                 {
                     var chip = new VisualElement();
                     chip.AddToClassList("quest-reward-chip");
-                    var chipLabel = new Label(reward.seed != null ? reward.seed.seedName : "?");
+                    var chipLabel = new Label(!string.IsNullOrEmpty(reward.seedName) ? reward.seedName : "?");
                     chipLabel.AddToClassList("quest-reward-name");
                     chip.Add(chipLabel);
                     rewardList.Add(chip);
@@ -317,18 +317,9 @@ namespace Garden
             }
         }
 
-        private QuestData FindQuestByName(string questName)
+        private ServerQuestConfig FindQuestByName(string questName)
         {
-            if (MallumManager.Instance == null) return null;
-            foreach (var q in MallumManager.Instance.GetAvailableQuests())
-                if (q.questName == questName) return q;
-            foreach (var q in MallumManager.Instance.GetLockedQuests())
-                if (q.questName == questName) return q;
-            // Search all loaded quests
-            var all = Resources.LoadAll<QuestData>("Quests");
-            foreach (var q in all)
-                if (q.questName == questName) return q;
-            return null;
+            return ConfigService.Instance?.GetQuest(questName);
         }
 
         private static string FormatTime(float seconds)

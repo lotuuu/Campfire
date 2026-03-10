@@ -15,14 +15,12 @@ namespace Garden
         private static readonly float BaseChance = 0.33f;
         private static readonly float HalvingFactor = 0.5f;
 
-        private List<SeedData> allSeeds;
         private bool _isChecking;
 
         private void Awake()
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
-            allSeeds = new List<SeedData>(Resources.LoadAll<SeedData>("Seeds"));
         }
 
         private void Update()
@@ -39,9 +37,11 @@ namespace Garden
 
             // Offline fallback: local processing
             int gridRadius = FlameManager.Instance != null
-                ? FlameManager.Instance.Config.GetGridSize(data.flameLevel)
+                ? FlameManager.Instance.GetGridSize(data.flameLevel)
                 : 2;
 
+            var allSeeds = ConfigService.Instance?.GetAllSeeds();
+            if (allSeeds == null || allSeeds.Count == 0) return;
             bool changed = ProcessHourlyChecks(data, allSeeds, gridRadius, GameTime.UtcNow);
             if (changed)
             {
@@ -187,9 +187,9 @@ namespace Garden
             return freeTiles;
         }
 
-        public static List<SeedData> GetEligibleSeeds(List<SeedData> allSeeds, int flameLevel)
+        public static List<ServerSeedConfig> GetEligibleSeeds(List<ServerSeedConfig> allSeeds, int flameLevel)
         {
-            var eligible = new List<SeedData>();
+            var eligible = new List<ServerSeedConfig>();
             foreach (var seed in allSeeds)
             {
                 if (seed.tier <= flameLevel)
@@ -198,7 +198,7 @@ namespace Garden
             return eligible;
         }
 
-        public static BirdSave RollSeedDrop(List<SeedData> eligibleSeeds, int flameLevel)
+        public static BirdSave RollSeedDrop(List<ServerSeedConfig> eligibleSeeds, int flameLevel)
         {
             if (eligibleSeeds == null || eligibleSeeds.Count == 0)
                 return null;
@@ -212,12 +212,12 @@ namespace Garden
 
             return new BirdSave
             {
-                seedName = seed.name,
+                seedName = seed.seedName,
                 seedCount = quantity
             };
         }
 
-        public static bool ProcessHourlyChecks(SaveData data, List<SeedData> allSeeds, int gridRadius, DateTime utcNow)
+        public static bool ProcessHourlyChecks(SaveData data, List<ServerSeedConfig> allSeeds, int gridRadius, DateTime utcNow)
         {
             // Truncate to hour boundary
             var currentHour = new DateTime(utcNow.Year, utcNow.Month, utcNow.Day, utcNow.Hour, 0, 0, DateTimeKind.Utc);

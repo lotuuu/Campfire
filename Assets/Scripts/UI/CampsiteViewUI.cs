@@ -231,7 +231,7 @@ namespace Garden
                 return;
             }
 
-            int radius = FlameManager.Instance.Config.GetGridSize(FlameManager.Instance.Level);
+            int radius = FlameManager.Instance.GetGridSize();
             if (radius != currentGridSize)
                 needsRecenter = true;
             currentGridSize = radius;
@@ -530,7 +530,7 @@ namespace Garden
                     if (status != null)
                     {
                         int mallumCount = MallumManager.Instance != null
-                            ? MallumManager.Instance.HouseConfig.MallumsPerHouse
+                            ? ConfigService.Instance.MallumHouseConfig.MallumsPerHouse
                             : 1;
                         status.text = $"+{mallumCount} Mallums";
                     }
@@ -933,7 +933,7 @@ namespace Garden
         {
             // Determine grid radius from the visitor's flame level using the same config
             int radius = FlameManager.Instance != null
-                ? FlameManager.Instance.Config.GetGridSize(visitSnapshot.flameLevel)
+                ? ConfigService.Instance.FlameConfig.GetGridSize(visitSnapshot.flameLevel)
                 : visitSnapshot.flameLevel + 1;
             currentGridSize = radius;
 
@@ -1225,7 +1225,7 @@ namespace Garden
             manaLabel.AddToClassList("interaction-info");
             interactionBody.Add(manaLabel);
 
-            if (FlameManager.Instance.Level >= FlameManager.Instance.Config.MaxLevel)
+            if (FlameManager.Instance.Level >= ConfigService.Instance.FlameConfig.MaxLevel)
             {
                 var maxLabel = new Label("Max level reached");
                 maxLabel.AddToClassList("interaction-info");
@@ -1233,7 +1233,7 @@ namespace Garden
             }
             else
             {
-                var recipe = FlameManager.Instance.Config.GetUpgradeRecipe(FlameManager.Instance.Level);
+                var recipe = FlameManager.Instance.GetUpgradeRecipe();
                 if (recipe != null && recipe.ingredients.Count > 0)
                 {
                     var costList = new VisualElement();
@@ -1555,7 +1555,6 @@ namespace Garden
 
         private void BuildSeedPicker(int plotIndex)
         {
-            var allSeeds = Resources.LoadAll<SeedData>("Seeds");
             var inventory = SaveManager.Instance.Data.seedInventory;
 
             var scroll = new ScrollView(ScrollViewMode.Vertical);
@@ -1568,9 +1567,7 @@ namespace Garden
             {
                 if (entry.count <= 0) continue;
 
-                SeedData seedData = null;
-                foreach (var s in allSeeds)
-                    if (s.name == entry.seedName) { seedData = s; break; }
+                var seedData = ConfigService.Instance?.GetSeed(entry.seedName);
 
                 var card = new VisualElement();
                 card.AddToClassList("seed-card");
@@ -1697,12 +1694,7 @@ namespace Garden
 
         private void AddGrowthRecipeSection(string seedName)
         {
-            var allSeeds = Resources.LoadAll<SeedData>("Seeds");
-            SeedData seed = null;
-            foreach (var s in allSeeds)
-            {
-                if (s.name == seedName) { seed = s; break; }
-            }
+            var seed = ConfigService.Instance?.GetSeed(seedName);
             if (seed == null || seed.recipe == null) return;
 
             var recipe = seed.recipe;
@@ -1806,7 +1798,7 @@ namespace Garden
                 hint.AddToClassList("interaction-info");
                 interactionBody.Add(hint);
 
-                foreach (var plantData in Resources.LoadAll<GardenPlantData>("GardenPlants"))
+                foreach (var plantData in ConfigService.Instance.GetAllGardens())
                 {
                     string pName = plantData.plantName;
                     string desc = $"Water: {plantData.waterRequired}";
@@ -1840,10 +1832,10 @@ namespace Garden
         private void ShowMallumHouseInteraction(int index)
         {
             if (MallumManager.Instance == null) return;
-            var config = MallumManager.Instance.HouseConfig;
+            var houseConfig = ConfigService.Instance.MallumHouseConfig;
             interactionTitle.text = "House";
 
-            var infoLabel = new Label($"Houses {config.MallumsPerHouse} {(config.MallumsPerHouse == 1 ? "Mallum" : "Mallums")}");
+            var infoLabel = new Label($"Houses {houseConfig.MallumsPerHouse} {(houseConfig.MallumsPerHouse == 1 ? "Mallum" : "Mallums")}");
             infoLabel.AddToClassList("interaction-info");
             interactionBody.Add(infoLabel);
 

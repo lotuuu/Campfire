@@ -8,45 +8,15 @@ namespace Garden
     public class GardenManager : MonoBehaviour
     {
         public static GardenManager Instance { get; private set; }
+        public const int GardenUnlockLevel = 4;
 
         public event Action<int> OnGardenChanged;
         public event Action<int, string, int> OnYieldCollected;
-
-        private static Dictionary<string, GardenPlantData> _plantCache;
 
         private void Awake()
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
-
-            if (_plantCache == null)
-            {
-                _plantCache = new Dictionary<string, GardenPlantData>();
-                foreach (var plant in Resources.LoadAll<GardenPlantData>("GardenPlants"))
-                    _plantCache[plant.plantName] = plant;
-            }
-
-            ApplyServerGardenConfigs();
-        }
-
-        private static void ApplyServerGardenConfigs()
-        {
-            if (_plantCache == null) return;
-            var cs = ConfigService.Instance;
-            if (cs == null || !cs.IsLoaded) return;
-
-            foreach (var kv in _plantCache)
-            {
-                var serverGarden = cs.GetGarden(kv.Key);
-                if (serverGarden == null) continue;
-
-                var plant = kv.Value;
-                plant.growthDurationHours = serverGarden.growthDurationHours;
-                plant.yieldItem = serverGarden.yieldItem;
-                plant.yieldAmount = serverGarden.yieldAmount;
-                plant.yieldIntervalHours = serverGarden.yieldIntervalHours;
-                plant.waterRequired = serverGarden.waterRequired;
-            }
         }
 
         private void OnApplicationPause(bool paused)
@@ -214,22 +184,14 @@ namespace Garden
 
         // ── Garden Building ──────────────────────────────────────────
 
-        private static BuildingCostConfig _buildingCostConfig;
-
-        private static BuildingCostConfig LoadBuildingCostConfig()
-        {
-            if (_buildingCostConfig == null)
-                _buildingCostConfig = Resources.Load<BuildingCostConfig>("Config/BuildingCostConfig");
-            return _buildingCostConfig;
-        }
-
         public BuildingCost GetNextGardenCost()
         {
-            return LoadBuildingCostConfig()?.GetGardenCost(SaveManager.Instance.Data.gardens.Count);
+            return ConfigService.Instance?.GetGardenCost(SaveManager.Instance.Data.gardens.Count);
         }
 
         public bool CraftEmptyGarden(int gridX, int gridY)
         {
+            if (FlameManager.Instance.Level < GardenUnlockLevel) return false;
             if (!FlameManager.Instance.CanPlaceEntity) return false;
 
             var data = SaveManager.Instance.Data;
@@ -264,12 +226,10 @@ namespace Garden
 
         // ── Helpers ─────────────────────────────────────────────────
 
-        private static GardenPlantData LoadPlantData(string plantName)
+        private static ServerGardenConfig LoadPlantData(string plantName)
         {
             if (string.IsNullOrEmpty(plantName)) return null;
-            if (_plantCache != null && _plantCache.TryGetValue(plantName, out var plant))
-                return plant;
-            return null;
+            return ConfigService.Instance?.GetGarden(plantName);
         }
     }
 }

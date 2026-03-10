@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -10,9 +9,8 @@ namespace Garden
     {
         public static VaseManager Instance { get; private set; }
 
-        [SerializeField] private VaseConfig config;
-
-        public VaseConfig Config => config;
+        private float FillDurationMinutes => ConfigService.Instance.VaseConfig.fill_duration_minutes;
+        private int BaseCapacity => ConfigService.Instance.VaseConfig.default_capacity;
 
         public event Action OnVasesChanged;
 
@@ -22,22 +20,6 @@ namespace Garden
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
-            ApplyServerVaseConfig();
-        }
-
-        private void ApplyServerVaseConfig()
-        {
-            var cs = ConfigService.Instance;
-            if (cs == null || !cs.IsLoaded || cs.VaseConfig == null) return;
-
-            var sv = cs.VaseConfig;
-            var flags = BindingFlags.NonPublic | BindingFlags.Instance;
-            var type = typeof(VaseConfig);
-
-            type.GetField("baseCapacity", flags)?.SetValue(config, sv.default_capacity);
-            type.GetField("craftCostMana", flags)?.SetValue(config, sv.craft_cost_mana);
-            type.GetField("fillDurationMinutes", flags)?.SetValue(config, sv.fill_duration_minutes);
-
         }
 
         private void Update()
@@ -74,7 +56,7 @@ namespace Garden
                     System.Globalization.DateTimeStyles.RoundtripKind);
                 var elapsed = GameTime.UtcNow - startTime;
 
-                if (elapsed.TotalMinutes >= config.FillDurationMinutes)
+                if (elapsed.TotalMinutes >= FillDurationMinutes)
                 {
                     vase.currentWater = vase.capacity;
                     vase.state = VaseState.Full;
@@ -136,18 +118,9 @@ namespace Garden
             return true;
         }
 
-        private BuildingCostConfig buildingCostConfig;
-
-        private BuildingCostConfig LoadBuildingCostConfig()
-        {
-            if (buildingCostConfig == null)
-                buildingCostConfig = Resources.Load<BuildingCostConfig>("Config/BuildingCostConfig");
-            return buildingCostConfig;
-        }
-
         public BuildingCost GetNextVaseCost()
         {
-            return LoadBuildingCostConfig()?.GetVaseCost(SaveManager.Instance.Data.vases.Count);
+            return ConfigService.Instance?.GetVaseCost(SaveManager.Instance.Data.vases.Count);
         }
 
         public bool CraftVase(int gridX, int gridY)
@@ -172,7 +145,7 @@ namespace Garden
                 if (entry.count <= 0) data.items.Remove(entry);
             }
 
-            data.vases.Add(new VaseSave { capacity = config.BaseCapacity, state = VaseState.Empty, gridX = gridX, gridY = gridY });
+            data.vases.Add(new VaseSave { capacity = BaseCapacity, state = VaseState.Empty, gridX = gridX, gridY = gridY });
             SaveManager.Instance.Save();
             int newIndex = data.vases.Count - 1;
             OnVasesChanged?.Invoke();
@@ -212,7 +185,7 @@ namespace Garden
             var startTime = DateTime.Parse(vase.fillStartTimeUtc, null,
                 System.Globalization.DateTimeStyles.RoundtripKind);
             float elapsedSeconds = (float)(GameTime.UtcNow - startTime).TotalSeconds;
-            float totalSeconds = config.FillDurationMinutes * 60f;
+            float totalSeconds = FillDurationMinutes * 60f;
             return Mathf.Max(0f, totalSeconds - elapsedSeconds);
         }
 
@@ -227,7 +200,7 @@ namespace Garden
             var startTime = DateTime.Parse(vase.fillStartTimeUtc, null,
                 System.Globalization.DateTimeStyles.RoundtripKind);
             var elapsed = (float)(GameTime.UtcNow - startTime).TotalMinutes;
-            return Mathf.Clamp01(elapsed / config.FillDurationMinutes);
+            return Mathf.Clamp01(elapsed / FillDurationMinutes);
         }
     }
 }
