@@ -23,6 +23,15 @@ namespace Garden
             return await Post("/debug/skip-time", JsonUtility.ToJson(new SkipTimeReq { hours = hours }));
         }
 
+        /// <summary>
+        /// Skip time without triggering a full game state re-init.
+        /// Used by time acceleration to avoid expensive re-fetches on every tick.
+        /// </summary>
+        public async Task<bool> SkipTimeQuiet(float hours)
+        {
+            return await PostQuiet("/debug/skip-time", JsonUtility.ToJson(new SkipTimeReqFloat { hours = hours }));
+        }
+
         public async Task<bool> SetCurrency(float? mana = null, int? gems = null)
         {
             // Build JSON manually since JsonUtility doesn't handle nullable
@@ -60,6 +69,37 @@ namespace Garden
 
         public async Task<bool> ClearSave() => await Post("/debug/clear-save", "{}");
 
+        private async Task<bool> PostQuiet(string path, string json)
+        {
+            try
+            {
+                using var req = new UnityWebRequest(ServerBaseUrl + path, "POST");
+                req.timeout = 15;
+                req.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(json));
+                req.downloadHandler = new DownloadHandlerBuffer();
+                req.SetRequestHeader("Content-Type", "application/json");
+                var token = SocialSaveManager.Instance?.Data?.authToken;
+                if (!string.IsNullOrEmpty(token))
+                    req.SetRequestHeader("Authorization", $"Bearer {token}");
+
+                var tcs = new TaskCompletionSource<bool>();
+                var op = req.SendWebRequest();
+                op.completed += _ => tcs.SetResult(true);
+                await tcs.Task;
+
+                if (req.responseCode >= 200 && req.responseCode < 300)
+                    return true;
+
+                Debug.LogWarning($"[DebugService] {path} failed ({req.responseCode}): {req.downloadHandler.text}");
+                return false;
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[DebugService] {path} error: {e.Message}");
+                return false;
+            }
+        }
+
         private async Task<bool> Post(string path, string json)
         {
             try
@@ -96,6 +136,7 @@ namespace Garden
         }
 
         [Serializable] private class SkipTimeReq { public int hours; }
+        [Serializable] private class SkipTimeReqFloat { public float hours; }
         [Serializable] private class GrantSeedsReq { public string seedName; public int count; }
         [Serializable] private class GrantItemsReq { public string itemName; public int count; }
         [Serializable] private class SetFlameLevelReq { public int level; }

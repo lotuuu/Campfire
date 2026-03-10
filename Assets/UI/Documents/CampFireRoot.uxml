@@ -267,6 +267,13 @@
                             <ui:IntegerField name="time-skip-field" value="1" />
                             <ui:Button name="time-skip-button" text="Skip Time" class="preset-btn" />
                         </ui:VisualElement>
+                        <ui:VisualElement class="debug-row">
+                            <ui:Label text="Speed" class="debug-label" />
+                            <ui:Button name="time-scale-1" text="x1" class="preset-btn" />
+                            <ui:Button name="time-scale-2" text="x2" class="preset-btn" />
+                            <ui:Button name="time-scale-5" text="x5" class="preset-btn" />
+                            <ui:Button name="time-scale-100" text="x100" class="preset-btn" />
+                        </ui:VisualElement>
                         <ui:Label name="current-time-label" />
 
                         <ui:Label text="Economy" class="debug-section-header" />

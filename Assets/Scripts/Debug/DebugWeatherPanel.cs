@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -19,6 +20,10 @@ namespace Garden
         private Label windValue;
         private IntegerField timeSkipField;
         private Label currentTimeLabel;
+
+        private Coroutine _timeAccelCoroutine;
+        private float _activeTimeScale = 1f;
+        private static readonly float TickIntervalSeconds = 2f;
 
         public void Initialize(VisualElement root)
         {
@@ -79,6 +84,12 @@ namespace Garden
 
             // Wire time skip
             root.Q<Button>("time-skip-button")?.RegisterCallback<ClickEvent>(_ => SkipTime());
+
+            // Wire time scale buttons
+            root.Q<Button>("time-scale-1")?.RegisterCallback<ClickEvent>(_ => SetTimeScale(1f));
+            root.Q<Button>("time-scale-2")?.RegisterCallback<ClickEvent>(_ => SetTimeScale(2f));
+            root.Q<Button>("time-scale-5")?.RegisterCallback<ClickEvent>(_ => SetTimeScale(5f));
+            root.Q<Button>("time-scale-100")?.RegisterCallback<ClickEvent>(_ => SetTimeScale(100f));
 
             // Wire economy buttons
             root.Q<Button>("set-mana-button")?.RegisterCallback<ClickEvent>(evt =>
@@ -142,7 +153,10 @@ namespace Garden
         private void Update()
         {
             if (currentTimeLabel != null && panel != null && panel.resolvedStyle.display == DisplayStyle.Flex)
-                currentTimeLabel.text = $"{DateTime.Now:yyyy-MM-dd HH:mm:ss}";
+            {
+                var scaleText = GameTime.TimeScale > 1f ? $" (x{GameTime.TimeScale:G0})" : "";
+                currentTimeLabel.text = $"{GameTime.Now:yyyy-MM-dd HH:mm:ss}{scaleText}";
+            }
         }
 
         private void ApplyPreset(float temp, float humidity, float wind, int condIdx, int todIdx, int moonIdx)
@@ -184,6 +198,59 @@ namespace Garden
         {
             int hours = Mathf.Max(1, timeSkipField != null ? timeSkipField.value : 1);
             await DebugService.Instance?.SkipTime(hours);
+        }
+
+        private void SetTimeScale(float scale)
+        {
+            // Stop existing acceleration
+            if (_timeAccelCoroutine != null)
+            {
+                StopCoroutine(_timeAccelCoroutine);
+                _timeAccelCoroutine = null;
+            }
+
+            _activeTimeScale = scale;
+            GameTime.TimeScale = scale;
+
+            if (scale > 1f)
+            {
+                _timeAccelCoroutine = StartCoroutine(TimeAccelerationLoop(scale));
+            }
+            else
+            {
+                // Returning to x1 — sync game state from server
+                GameTime.ResetTimeScale();
+                GameService.Instance?.Initialize();
+            }
+
+            Debug.Log($"[Debug] Time scale set to x{scale:G0}");
+        }
+
+        private IEnumerator TimeAccelerationLoop(float scale)
+        {
+            while (true)
+            {
+                yield return new WaitForSeconds(TickIntervalSeconds);
+
+                // Skip (scale - 1) * interval worth of server time each tick
+                float extraHours = (scale - 1f) * TickIntervalSeconds / 3600f;
+                if (DebugService.Instance != null)
+                    _ = DebugService.Instance.SkipTimeQuiet(extraHours);
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (_timeAccelCoroutine != null)
+            {
+                StopCoroutine(_timeAccelCoroutine);
+                _timeAccelCoroutine = null;
+            }
+            if (_activeTimeScale > 1f)
+            {
+                GameTime.ResetTimeScale();
+                _activeTimeScale = 1f;
+            }
         }
 
         private async void ClearSaveData()

@@ -2,14 +2,14 @@ defmodule CampFireWeb.DebugController do
   use CampFireWeb, :controller
   alias CampFire.Game.Debug
 
-  def skip_time(conn, %{"hours" => hours}) when is_integer(hours) do
+  def skip_time(conn, %{"hours" => hours}) when is_number(hours) do
     uid = conn.assigns.current_player.uid
     case Debug.skip_time(uid, hours) do
       {:ok, _} -> conn |> put_status(200) |> json(%{ok: true, hours: hours})
       {:error, reason} -> conn |> put_status(422) |> json(%{error: inspect(reason)})
     end
   end
-  def skip_time(conn, _), do: conn |> put_status(400) |> json(%{error: "Missing 'hours' (integer)"})
+  def skip_time(conn, _), do: conn |> put_status(400) |> json(%{error: "Missing 'hours' (number)"})
 
   def set_currency(conn, params) do
     uid = conn.assigns.current_player.uid

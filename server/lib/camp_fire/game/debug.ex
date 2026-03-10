@@ -32,7 +32,7 @@ defmodule CampFire.Game.Debug do
   bird check hour, and mana collection timestamp.
   """
   def skip_time(player_uid, hours) when is_number(hours) and hours > 0 do
-    seconds = trunc(hours * 3600)
+    seconds = round(hours * 3600)
 
     Repo.transaction(fn ->
       # Plots: shift plant_time_utc and last_watered_utc for growing plots
