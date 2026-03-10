@@ -183,6 +183,13 @@
     -unity-background-scale-mode: scale-and-crop;
 }
 
+#loading-gate-content {
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: var(--spacing-xl) var(--spacing-xxl);
+    border-radius: 16px;
+    align-items: center;
+}
+
 #loading-gate-title {
     font-size: var(--font-xxl);
     color: var(--color-text-bright);
