@@ -38,6 +38,7 @@ defmodule CampFireWeb.GameController do
         {name,
          %{
            questName: q.quest_name,
+           description: q.description || "",
            durationMinutes: q.duration_minutes,
            requiredFlameLevel: q.required_flame_level,
            rewardRolls: q.reward_rolls,

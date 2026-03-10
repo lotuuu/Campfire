@@ -218,28 +218,28 @@ alias CampFire.Admin.{QuestConfig, GardenConfig, GameConfig}
 
 # Quest configs (from Game.Mallums @quest_configs)
 quests = [
-  %{quest_name: "SwampForage", duration_minutes: 5, required_flame_level: 1, reward_rolls: 2,
+  %{quest_name: "SwampForage", description: "Forage in the nearby swamp for useful seeds.", duration_minutes: 5, required_flame_level: 1, reward_rolls: 2,
     reward_pool: [%{"seed" => "Basil", "weight" => 3, "minCount" => 1, "maxCount" => 2}, %{"seed" => "Chamomile", "weight" => 2, "minCount" => 1, "maxCount" => 2}]},
-  %{quest_name: "MeadowExpedition", duration_minutes: 15, required_flame_level: 2, reward_rolls: 3,
+  %{quest_name: "MeadowExpedition", description: "Explore the meadow for wildflowers.", duration_minutes: 15, required_flame_level: 2, reward_rolls: 3,
     reward_pool: [%{"seed" => "Marigold", "weight" => 3, "minCount" => 1, "maxCount" => 2}, %{"seed" => "Snowdrop", "weight" => 2, "minCount" => 1, "maxCount" => 2}]},
-  %{quest_name: "DeepWoodsTrek", duration_minutes: 60, required_flame_level: 3, reward_rolls: 3,
+  %{quest_name: "DeepWoodsTrek", description: "Trek deep into the woods for rare finds.", duration_minutes: 60, required_flame_level: 3, reward_rolls: 3,
     reward_pool: [%{"seed" => "Mint", "weight" => 3, "minCount" => 1, "maxCount" => 2}, %{"seed" => "Pansy", "weight" => 2, "minCount" => 1, "maxCount" => 1}]},
-  %{quest_name: "HighlandPass", duration_minutes: 120, required_flame_level: 4, reward_rolls: 3,
+  %{quest_name: "HighlandPass", description: "Cross the highland pass to find mountain herbs.", duration_minutes: 120, required_flame_level: 4, reward_rolls: 3,
     reward_pool: [%{"seed" => "Lavender", "weight" => 3, "minCount" => 1, "maxCount" => 2}, %{"seed" => "Marigold", "weight" => 1, "minCount" => 1, "maxCount" => 1}]},
-  %{quest_name: "DeepMarsh", duration_minutes: 240, required_flame_level: 5, reward_rolls: 4,
+  %{quest_name: "DeepMarsh", description: "Navigate the deep marsh for exotic plants.", duration_minutes: 240, required_flame_level: 5, reward_rolls: 4,
     reward_pool: [%{"seed" => "Poppy", "weight" => 3, "minCount" => 1, "maxCount" => 2}, %{"seed" => "Mint", "weight" => 1, "minCount" => 1, "maxCount" => 1}]},
-  %{quest_name: "MountainAscent", duration_minutes: 360, required_flame_level: 6, reward_rolls: 4,
+  %{quest_name: "MountainAscent", description: "Scale the mountain for high-altitude flora.", duration_minutes: 360, required_flame_level: 6, reward_rolls: 4,
     reward_pool: [%{"seed" => "Jasmine", "weight" => 3, "minCount" => 1, "maxCount" => 2}, %{"seed" => "Lavender", "weight" => 1, "minCount" => 1, "maxCount" => 1}]},
-  %{quest_name: "MoonlitPath", duration_minutes: 480, required_flame_level: 7, reward_rolls: 4,
+  %{quest_name: "MoonlitPath", description: "Follow the moonlit path through enchanted woods.", duration_minutes: 480, required_flame_level: 7, reward_rolls: 4,
     reward_pool: [%{"seed" => "Rosemary", "weight" => 3, "minCount" => 1, "maxCount" => 2}, %{"seed" => "Pansy", "weight" => 1, "minCount" => 1, "maxCount" => 1}]},
-  %{quest_name: "AncientGrove", duration_minutes: 720, required_flame_level: 8, reward_rolls: 5,
+  %{quest_name: "AncientGrove", description: "Explore the ancient grove for legendary seeds.", duration_minutes: 720, required_flame_level: 8, reward_rolls: 5,
     reward_pool: [%{"seed" => "Dahlia", "weight" => 3, "minCount" => 1, "maxCount" => 2}, %{"seed" => "Moonflower", "weight" => 1, "minCount" => 1, "maxCount" => 1}, %{"seed" => "Rosemary", "weight" => 1, "minCount" => 1, "maxCount" => 1}]}
 ]
 
 for q <- quests do
   %QuestConfig{}
   |> QuestConfig.changeset(q)
-  |> Repo.insert!(on_conflict: {:replace, [:duration_minutes, :required_flame_level, :reward_rolls, :reward_pool, :updated_at]}, conflict_target: :quest_name)
+  |> Repo.insert!(on_conflict: {:replace, [:description, :duration_minutes, :required_flame_level, :reward_rolls, :reward_pool, :updated_at]}, conflict_target: :quest_name)
 end
 
 # Garden configs
@@ -259,6 +259,7 @@ game_configs = [
   %{key: "flame_config", value: %{
     "max_flame_level" => 12,
     "mana_rates" => [0.5, 0.8, 1.1, 1.4, 1.7, 2.0, 2.3, 2.6, 2.9, 3.2, 3.5, 3.8],
+    "mana_caps" => [300, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 7000, 9000, 12000],
     "entity_caps" => [6, 6, 8, 8, 12, 15, 18, 22, 26, 30, 35, 40],
     "grid_sizes" => [2, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5],
     "upgrade_recipes" => [
@@ -313,6 +314,13 @@ game_configs = [
       %{"manaCost" => 260, "harvestCosts" => [%{"itemName" => "Chamomile_harvest", "count" => 2}]},
       %{"manaCost" => 310, "harvestCosts" => [%{"itemName" => "Lavender_harvest", "count" => 1}, %{"itemName" => "Basil_harvest", "count" => 1}]},
       %{"manaCost" => 370, "harvestCosts" => [%{"itemName" => "Lavender_harvest", "count" => 1}, %{"itemName" => "Chamomile_harvest", "count" => 1}]}
+    ],
+    "garden_costs" => [
+      %{"manaCost" => 550, "harvestCosts" => [%{"itemName" => "Chamomile_harvest", "count" => 3}]},
+      %{"manaCost" => 850, "harvestCosts" => [%{"itemName" => "Lavender_harvest", "count" => 3}]},
+      %{"manaCost" => 1200, "harvestCosts" => [%{"itemName" => "Mint_harvest", "count" => 3}, %{"itemName" => "Chamomile_harvest", "count" => 2}]},
+      %{"manaCost" => 1800, "harvestCosts" => [%{"itemName" => "Lavender_harvest", "count" => 4}, %{"itemName" => "Mint_harvest", "count" => 3}]},
+      %{"manaCost" => 2500, "harvestCosts" => [%{"itemName" => "Poppy_harvest", "count" => 3}, %{"itemName" => "Lavender_harvest", "count" => 4}]}
     ]
   }},
   %{key: "recipe_configs", value: %{

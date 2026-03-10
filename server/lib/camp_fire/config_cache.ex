@@ -75,6 +75,7 @@ defmodule CampFire.ConfigCache do
         {q.quest_name,
          %{
            quest_name: q.quest_name,
+           description: q.description || "",
            duration_minutes: q.duration_minutes,
            required_flame_level: q.required_flame_level,
            reward_rolls: q.reward_rolls,
