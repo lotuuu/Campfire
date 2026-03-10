@@ -206,6 +206,37 @@ namespace Garden
             }
         }
 
+        private void OnApplicationPause(bool paused)
+        {
+            if (paused) ScheduleAllMallumNotifications();
+        }
+
+        private void ScheduleAllMallumNotifications()
+        {
+            var ns = NotificationService.Instance;
+            if (ns == null) return;
+
+            var data = SaveManager.Instance.Data;
+            for (int i = 0; i < data.mallums.Count; i++)
+            {
+                var mallum = data.mallums[i];
+                if (mallum.state == MallumState.OnQuest)
+                {
+                    float remaining = GetQuestRemainingSeconds(mallum);
+                    if (remaining > 0)
+                        ns.ScheduleQuestNotification(i, mallum.assignedQuestName, remaining);
+                }
+                else if (mallum.state == MallumState.FetchingWater && mallum.assignedVaseIndex >= 0)
+                {
+                    float remaining = VaseManager.Instance != null
+                        ? VaseManager.Instance.GetRemainingSeconds(mallum.assignedVaseIndex)
+                        : 0f;
+                    if (remaining > 0)
+                        ns.ScheduleWaterFetchNotification(i, remaining);
+                }
+            }
+        }
+
         public int GetTotalMallumCount()
         {
             return SaveManager.Instance.Data.mallums.Count;

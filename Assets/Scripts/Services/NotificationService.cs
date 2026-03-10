@@ -101,6 +101,7 @@ namespace Garden
         private const int WaterNotificationIdOffset = 10000;
         private const int QuestNotificationIdOffset = 20000;
         private const int WaterFetchNotificationIdOffset = 30000;
+        private const int GardenYieldNotificationIdOffset = 40000;
 
         public void ScheduleWaterNotification(int plotIndex, string seedName, double remainingSeconds)
         {
@@ -244,6 +245,52 @@ namespace Garden
         public void CancelWaterFetchNotification(int mallumIndex)
         {
             int id = mallumIndex + WaterFetchNotificationIdOffset;
+#if UNITY_ANDROID
+            AndroidNotificationCenter.CancelNotification(id);
+#elif UNITY_IOS
+            iOSNotificationCenter.RemoveScheduledNotification(id.ToString());
+#endif
+        }
+
+        public void ScheduleGardenYieldNotification(int gardenIndex, string plantName, double remainingSeconds)
+        {
+            if (remainingSeconds <= 0) return;
+
+            string title = $"Your {plantName} has fruit!";
+            string body = $"Your {plantName} garden has produced a harvest - come collect it!";
+            int id = gardenIndex + GardenYieldNotificationIdOffset;
+
+#if UNITY_ANDROID
+            var notification = new AndroidNotification
+            {
+                Title = title,
+                Text = body,
+                FireTime = System.DateTime.Now.AddSeconds(remainingSeconds),
+                SmallIcon = "icon_0",
+                LargeIcon = "icon_1"
+            };
+            AndroidNotificationCenter.SendNotificationWithExplicitID(notification, AndroidChannelId, id);
+#elif UNITY_IOS
+            var timeTrigger = new iOSNotificationTimeIntervalTrigger
+            {
+                TimeInterval = new System.TimeSpan(0, 0, (int)remainingSeconds),
+                Repeats = false
+            };
+            var iosNotification = new iOSNotification
+            {
+                Identifier = id.ToString(),
+                Title = title,
+                Body = body,
+                ShowInForeground = false,
+                Trigger = timeTrigger
+            };
+            iOSNotificationCenter.ScheduleNotification(iosNotification);
+#endif
+        }
+
+        public void CancelGardenYieldNotification(int gardenIndex)
+        {
+            int id = gardenIndex + GardenYieldNotificationIdOffset;
 #if UNITY_ANDROID
             AndroidNotificationCenter.CancelNotification(id);
 #elif UNITY_IOS

@@ -49,6 +49,50 @@ namespace Garden
             }
         }
 
+        private void OnApplicationPause(bool paused)
+        {
+            if (paused) ScheduleAllGardenNotifications();
+        }
+
+        private void ScheduleAllGardenNotifications()
+        {
+            var ns = NotificationService.Instance;
+            if (ns == null) return;
+
+            var data = SaveManager.Instance.Data;
+            var now = GameTime.UtcNow;
+            for (int i = 0; i < data.gardens.Count; i++)
+            {
+                var garden = data.gardens[i];
+                if (string.IsNullOrEmpty(garden.plantName)) continue;
+
+                var plantData = LoadPlantData(garden.plantName);
+                if (plantData == null) continue;
+
+                if (!garden.mature)
+                {
+                    // Schedule notification for when garden matures
+                    float progress = GetGrowthProgress(garden, plantData.growthDurationHours, now);
+                    if (progress < 1f)
+                    {
+                        double totalSeconds = plantData.growthDurationHours * 3600.0;
+                        double remaining = totalSeconds * (1.0 - progress);
+                        ns.ScheduleGardenYieldNotification(i, plantData.plantName, remaining);
+                    }
+                }
+                else if (!string.IsNullOrEmpty(garden.lastYieldTimeUtc))
+                {
+                    // Schedule notification for next yield
+                    var lastYield = DateTime.Parse(garden.lastYieldTimeUtc, null,
+                        System.Globalization.DateTimeStyles.RoundtripKind);
+                    double elapsed = (now - lastYield).TotalHours;
+                    double remaining = (plantData.yieldIntervalHours - elapsed) * 3600.0;
+                    if (remaining > 0)
+                        ns.ScheduleGardenYieldNotification(i, plantData.plantName, remaining);
+                }
+            }
+        }
+
         private void Update()
         {
             CheckGrowthAndYields();

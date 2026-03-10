@@ -529,8 +529,15 @@ namespace Garden
             var ns = NotificationService.Instance;
             if (ns == null) return;
 
-            ns.CancelAll();
+            // Cancel only plot-specific notifications (plant growth + water cooldown).
+            // Other managers handle their own notifications in OnApplicationPause.
             var data = SaveManager.Instance.Data;
+            for (int i = 0; i < data.plots.Count; i++)
+            {
+                ns.CancelPlantNotification(i);
+                ns.CancelWaterNotification(i);
+            }
+
             for (int i = 0; i < data.plots.Count; i++)
             {
                 var plot = data.plots[i];
