@@ -255,19 +255,16 @@ namespace Garden
 
         private async void ClearSaveData()
         {
-            Debug.Log("[Debug] Clearing save data via server...");
+            Debug.Log("[Debug] Clearing save data...");
             if (DebugService.Instance != null)
             {
                 await DebugService.Instance.ClearSave();
             }
-            else
-            {
-                // Fallback for offline
-                SaveManager.Instance.DeleteSave();
-                SocialSaveManager.Instance?.DeleteSave();
-                UnityEngine.SceneManagement.SceneManager.LoadScene(
-                    UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
-            }
+            // Always delete local save and reload scene to trigger InitializeNewPlayer
+            SaveManager.Instance.DeleteSave();
+            SocialSaveManager.Instance?.DeleteSave();
+            UnityEngine.SceneManagement.SceneManager.LoadScene(
+                UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
         }
     }
 }
