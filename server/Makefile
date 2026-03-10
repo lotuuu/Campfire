@@ -75,6 +75,7 @@ tunnel-stop:
 	@printf 'namespace Garden\n{\n    public static class DevServerConfig\n    {\n        public const string BaseUrl = "http://localhost:4000";\n    }\n}\n' > $(DEV_CONFIG)
 	@echo "DevServerConfig.cs reset to localhost."
 
+GIGALIXIR := $(HOME)/.local/bin/gigalixir
 GIGALIXIR_APP := campfire
 GIGALIXIR_URL := https://campfire.gigalixirapp.com
 DEPLOY_DIR := /tmp/campfire-deploy
@@ -94,7 +95,7 @@ deploy:
 
 # Run Ecto migrations on Gigalixir
 deploy-migrate:
-	gigalixir run mix ecto.migrate -a $(GIGALIXIR_APP)
+	$(GIGALIXIR) run mix ecto.migrate -a $(GIGALIXIR_APP)
 
 # Full deploy: push code then migrate
 deploy-full: deploy deploy-migrate
