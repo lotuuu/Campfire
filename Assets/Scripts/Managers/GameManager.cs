@@ -83,7 +83,7 @@ namespace Garden
             HexGridUtil.Shuffle(positions);
 
             VaseManager.InitializeNewPlayer(data, ConfigService.Instance.VaseConfig.default_capacity);
-            data.vases[0].currentWater = data.vases[0].capacity;
+            data.vases[0].currentWater = 1;
             data.vases[0].state = VaseState.Full;
             data.vases[0].gridX = positions[0].q;
             data.vases[0].gridY = positions[0].r;
@@ -92,7 +92,8 @@ namespace Garden
             data.apothekeGridY = positions[3].r;
             ApothekeManager.Instance.AddSeed("Sprouts", 5);
             ApothekeManager.Instance.AddSeed("Cress", 3);
-            data.items.Add(new InventoryItem { itemName = "Speed_Potion", count = 3 });
+            data.items.Add(new InventoryItem { itemName = "Speed_Potion", count = 2 });
+            data.items.Add(new InventoryItem { itemName = "Energy_Drink", count = 2 });
             // No starting Mallum House — player buys first one after growing seeds
             SaveManager.Instance.Save();
         }
