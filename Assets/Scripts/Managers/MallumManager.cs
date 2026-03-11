@@ -318,29 +318,29 @@ namespace Garden
             return count;
         }
 
-        private const string SpeedPotionItem = "Speed_Potion";
+        private const string EnergyDrinkItem = "Energy_Drink";
 
-        public bool CanSpeedUpQuest()
+        public bool CanUseEnergyDrink()
         {
             if (CurrencyManager.FreeMode) return true;
-            var item = SaveManager.Instance.Data.items.Find(i => i.itemName == SpeedPotionItem);
+            var item = SaveManager.Instance.Data.items.Find(i => i.itemName == EnergyDrinkItem);
             return item != null && item.count > 0;
         }
 
-        public int GetSpeedPotionCount()
+        public int GetEnergyDrinkCount()
         {
-            var item = SaveManager.Instance.Data.items.Find(i => i.itemName == SpeedPotionItem);
+            var item = SaveManager.Instance.Data.items.Find(i => i.itemName == EnergyDrinkItem);
             return item?.count ?? 0;
         }
 
-        public bool ConsumeSpeedPotion()
+        private bool ConsumeEnergyDrink()
         {
             if (CurrencyManager.FreeMode) return true;
             var data = SaveManager.Instance.Data;
-            var potion = data.items.Find(i => i.itemName == SpeedPotionItem);
-            if (potion == null || potion.count <= 0) return false;
-            potion.count--;
-            if (potion.count <= 0) data.items.Remove(potion);
+            var drink = data.items.Find(i => i.itemName == EnergyDrinkItem);
+            if (drink == null || drink.count <= 0) return false;
+            drink.count--;
+            if (drink.count <= 0) data.items.Remove(drink);
             SaveManager.Instance.Save();
             return true;
         }
@@ -352,14 +352,7 @@ namespace Garden
             var mallum = data.mallums[mallumIndex];
             if (mallum.state != MallumState.OnQuest) return false;
 
-            // Consume Speed Potion
-            var potion = data.items.Find(i => i.itemName == SpeedPotionItem);
-            if (!CurrencyManager.FreeMode)
-            {
-                if (potion == null || potion.count <= 0) return false;
-                potion.count--;
-                if (potion.count <= 0) data.items.Remove(potion);
-            }
+            if (!ConsumeEnergyDrink()) return false;
 
             int serverId = mallum.serverId;
             CompleteQuest(mallum);
@@ -367,11 +360,31 @@ namespace Garden
             SaveManager.Instance.Save();
             OnMallumsChanged?.Invoke();
 
-            // Notify server
             if (GameService.Instance != null && GameService.Instance.IsOnline && serverId > 0)
             {
                 _ = GameService.Instance.SpeedUpQuest(serverId);
             }
+
+            return true;
+        }
+
+        public bool SpeedUpWaterFetch(int mallumIndex)
+        {
+            var data = SaveManager.Instance.Data;
+            if (mallumIndex < 0 || mallumIndex >= data.mallums.Count) return false;
+            var mallum = data.mallums[mallumIndex];
+            if (mallum.state != MallumState.FetchingWater) return false;
+
+            if (!ConsumeEnergyDrink()) return false;
+
+            int vaseIndex = mallum.assignedVaseIndex;
+            if (vaseIndex >= 0 && vaseIndex < data.vases.Count)
+                VaseManager.Instance.InstantFinish(vaseIndex);
+
+            FreeMallumFromWater(mallum);
+            NotificationService.Instance?.CancelWaterFetchNotification(mallumIndex);
+            SaveManager.Instance.Save();
+            OnMallumsChanged?.Invoke();
 
             return true;
         }
