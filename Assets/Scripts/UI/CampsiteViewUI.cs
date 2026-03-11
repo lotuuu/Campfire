@@ -33,11 +33,13 @@ namespace Garden
         private static readonly CustomStyleProperty<Color> s_HexBorder = new("--hex-border");
 
         // Mode state machine
-        private enum CampsiteMode { Normal, Placing, Watering, Visiting, Moving }
+        private enum CampsiteMode { Normal, Placing, Watering, Visiting, Moving, Tutorial }
         private CampsiteMode mode;
         private CampBuildingType pendingBuildingType;
         private int wateringVaseIndex = -1;
         private Button modeCancelBtn;
+        private int tutorialTargetQ = int.MinValue;
+        private int tutorialTargetR = int.MinValue;
 
         // Drag-move state
         private IVisualElementScheduledItem longPressTimer;
@@ -359,6 +361,15 @@ namespace Garden
                             }
                         }
 
+                        // Tutorial mode: highlight target hex, dim everything else
+                        if (mode == CampsiteMode.Tutorial)
+                        {
+                            if (q == tutorialTargetQ && r == tutorialTargetR)
+                                cell.AddToClassList("grid-cell--tutorial-target");
+                            else
+                                cell.AddToClassList("grid-cell--dimmed");
+                        }
+
                         int idx = info.index;
                         CampBuildingType cellType = info.type;
 
@@ -390,6 +401,8 @@ namespace Garden
                         if (mode == CampsiteMode.Placing)
                             cell.AddToClassList("grid-cell--placeable");
                         else if (mode == CampsiteMode.Watering)
+                            cell.AddToClassList("grid-cell--dimmed");
+                        else if (mode == CampsiteMode.Tutorial)
                             cell.AddToClassList("grid-cell--dimmed");
 
                         cell.RegisterCallback<ClickEvent>(evt =>
@@ -660,6 +673,14 @@ namespace Garden
 
             if (mode == CampsiteMode.Placing) return;
 
+            // Tutorial mode: only allow tapping the highlighted target cell
+            if (mode == CampsiteMode.Tutorial)
+            {
+                if (gridX != tutorialTargetQ || gridY != tutorialTargetR) return;
+                // Let the tap through to normal handling below
+                mode = CampsiteMode.Normal;
+            }
+
             if (type == CampBuildingType.Apotheke)
             {
                 OnApothekeTapped?.Invoke();
@@ -677,6 +698,8 @@ namespace Garden
 
         private void OnEmptyCellTapped(int gridX, int gridY)
         {
+            if (mode == CampsiteMode.Tutorial) return;
+
             if (mode == CampsiteMode.Placing)
             {
                 bool success = false;
@@ -847,11 +870,33 @@ namespace Garden
             mode = CampsiteMode.Normal;
             pendingBuildingType = CampBuildingType.None;
             wateringVaseIndex = -1;
+            tutorialTargetQ = int.MinValue;
+            tutorialTargetR = int.MinValue;
             if (modeCancelBtn != null)
             {
                 modeCancelBtn.RemoveFromHierarchy();
                 modeCancelBtn = null;
             }
+            RebuildGrid();
+        }
+
+        // ── Tutorial Highlight Mode ──
+
+        public void EnterTutorialHighlight(int q, int r)
+        {
+            tutorialTargetQ = q;
+            tutorialTargetR = r;
+            mode = CampsiteMode.Tutorial;
+            CloseInteractionPanel();
+            RebuildGrid();
+        }
+
+        public void ExitTutorialHighlight()
+        {
+            if (mode != CampsiteMode.Tutorial) return;
+            tutorialTargetQ = int.MinValue;
+            tutorialTargetR = int.MinValue;
+            mode = CampsiteMode.Normal;
             RebuildGrid();
         }
 
@@ -1492,7 +1537,7 @@ namespace Garden
             // Seed icon + yield row
             var yieldRow = new VisualElement();
             yieldRow.AddToClassList("harvest-yield-row");
-            var seedSprite = SpriteService.Instance?.GetSprite($"seeds/{SeedToSpriteKey(result.seedName)}/icon");
+            var seedSprite = SpriteService.Instance?.GetSprite($"items/seeds/{SeedToSpriteKey(result.seedName)}/icon");
             if (seedSprite != null)
             {
                 var iconEl = new VisualElement();

@@ -20,15 +20,24 @@
     white-space: normal;
 }
 
-/* Highlight for tutorial targets — golden hex tint, pulsed via C# class toggle */
+/* Tutorial target hex — golden tint like watering targets but warm */
+.grid-cell--tutorial-target {
+    --hex-fill: rgba(255, 200, 60, 0.2);
+    --hex-border: rgba(255, 200, 60, 0.6);
+    -unity-background-image-tint-color: rgba(255, 235, 190, 1);
+}
+
+/* Highlight for non-hex UI elements (buttons etc) — pulsed via C# class toggle */
 .tutorial-highlight {
-    --hex-fill: rgba(255, 200, 60, 0.25);
-    --hex-border: rgba(255, 200, 60, 0.7);
-    -unity-background-image-tint-color: rgba(255, 230, 170, 1);
+    border-color: rgba(255, 200, 60, 0.9);
+    border-width: 3px;
+    transition-property: border-color, border-width;
+    transition-duration: 0.4s;
 }
 
 .tutorial-highlight-dim {
-    --hex-fill: rgba(255, 200, 60, 0.1);
-    --hex-border: rgba(255, 200, 60, 0.3);
-    -unity-background-image-tint-color: rgba(240, 220, 190, 1);
+    border-color: rgba(255, 200, 60, 0.3);
+    border-width: 2px;
+    transition-property: border-color, border-width;
+    transition-duration: 0.4s;
 }

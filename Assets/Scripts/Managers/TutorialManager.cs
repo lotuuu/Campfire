@@ -94,6 +94,7 @@ namespace Garden
 
             if (step >= StepComplete)
             {
+                ClearAllHighlights();
                 tutorialUI?.HideAll();
                 return;
             }
@@ -124,7 +125,7 @@ namespace Garden
                     // Player watered the plant
                     if (plotIndex < data.plots.Count && data.plots[plotIndex].waterCount > 0)
                     {
-                        tutorialUI?.ClearHighlight();
+                        ClearAllHighlights();
                         AdvanceTo(StepHarvestFirst);
                     }
                     break;
@@ -229,7 +230,7 @@ namespace Garden
 
         private void ShowHintForStep(int step)
         {
-            tutorialUI?.ClearHighlight();
+            ClearAllHighlights();
 
             switch (step)
             {
@@ -284,7 +285,7 @@ namespace Garden
 
         private void ShowDialogue(string speaker, List<string> lines, System.Action onComplete)
         {
-            tutorialUI?.ClearHighlight();
+            ClearAllHighlights();
             tutorialUI?.HideHint();
             dialogueUI?.Show(speaker, lines, onComplete);
         }
@@ -298,7 +299,12 @@ namespace Garden
         }
 
         // --- Highlight helpers ---
-        // Hex cells have no name attribute; use CampsiteViewUI.GetCellElement(q, r).
+
+        private void ClearAllHighlights()
+        {
+            tutorialUI?.ClearHighlight();
+            campsiteView?.ExitTutorialHighlight();
+        }
 
         private void HighlightHexCell(int plotIndex)
         {
@@ -306,16 +312,13 @@ namespace Garden
             var data = SaveManager.Instance.Data;
             if (plotIndex < 0 || plotIndex >= data.plots.Count) return;
             var plot = data.plots[plotIndex];
-            var cell = campsiteView.GetCellElement(plot.gridX, plot.gridY);
-            tutorialUI?.HighlightElement(cell);
+            campsiteView.EnterTutorialHighlight(plot.gridX, plot.gridY);
         }
 
         private void HighlightFlameHex()
         {
-            // Flame is always at center hex (0, 0)
             if (campsiteView == null) return;
-            var cell = campsiteView.GetCellElement(0, 0);
-            tutorialUI?.HighlightElement(cell);
+            campsiteView.EnterTutorialHighlight(0, 0);
         }
 
         // --- Check for skipped steps on PlotChanged ---
