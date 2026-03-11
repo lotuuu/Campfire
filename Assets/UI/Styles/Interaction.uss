@@ -305,21 +305,24 @@
     color: rgb(120, 100, 75);
 }
 
-/* ── Build card scroll (horizontal card row in popups) ── */
+/* ── Build card grid (2-column wrapping layout in popups) ── */
 
-.build-card-scroll {
-    margin-top: 8px;
-    align-self: stretch;
-}
-
-.build-card-scroll .unity-scroll-view__content-container {
+.build-grid {
     flex-direction: row;
-    padding: 4px;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-self: stretch;
+    margin-top: 8px;
 }
 
-.build-card-scroll .build-card {
-    width: 200px;
+.build-grid > * {
+    width: 48%;
     flex-shrink: 0;
+    margin: 1%;
+}
+
+.build-grid .build-card {
+    width: 100%;
 }
 
 /* ── Water Subscribe Bell ── */

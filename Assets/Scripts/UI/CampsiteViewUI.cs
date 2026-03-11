@@ -710,10 +710,8 @@ namespace Garden
             int max = FlameManager.Instance.MaxEntities;
             interactionTitle.text = $"Build ({current}/{max})";
 
-            var scroll = new ScrollView(ScrollViewMode.Horizontal);
-            scroll.AddToClassList("build-card-scroll");
-            scroll.verticalScrollerVisibility = ScrollerVisibility.Hidden;
-            scroll.horizontalScrollerVisibility = ScrollerVisibility.Auto;
+            var grid = new VisualElement();
+            grid.AddToClassList("build-grid");
 
             string capText = $"{current}/{max}";
 
@@ -726,7 +724,7 @@ namespace Garden
                     bool canAffordPlot = canPlace
                         && CurrencyManager.Instance.CanAffordMana(plotCost.manaCost)
                         && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, plotCost.harvestCosts);
-                    scroll.Add(BuildCardHelper.CreateBuildCard(
+                    grid.Add(BuildCardHelper.CreateBuildCard(
                         "Plot", "Grow seeds", "ui/buildings/plot", null,
                         BuildCardHelper.FromBuildingCost(plotCost), capText,
                         canAffordPlot, canPlace, () =>
@@ -746,7 +744,7 @@ namespace Garden
                     bool canAffordVase = canPlace
                         && CurrencyManager.Instance.CanAffordMana(vaseCost.manaCost)
                         && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, vaseCost.harvestCosts);
-                    scroll.Add(BuildCardHelper.CreateBuildCard(
+                    grid.Add(BuildCardHelper.CreateBuildCard(
                         "Vase", "Stores water", "ui/buildings/vase", null,
                         BuildCardHelper.FromBuildingCost(vaseCost), capText,
                         canAffordVase, canPlace, () =>
@@ -766,7 +764,7 @@ namespace Garden
                     bool canAffordHouse = canPlace
                         && CurrencyManager.Instance.CanAffordMana(cost.manaCost)
                         && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, cost.harvestCosts);
-                    scroll.Add(BuildCardHelper.CreateBuildCard(
+                    grid.Add(BuildCardHelper.CreateBuildCard(
                         "House", "Houses 1 Mallum", "ui/buildings/house", null,
                         BuildCardHelper.FromBuildingCost(cost), capText,
                         canAffordHouse, canPlace, () =>
@@ -780,24 +778,35 @@ namespace Garden
             // Garden
             if (GardenManager.Instance != null)
             {
-                var gardenCost = GardenManager.Instance.GetNextGardenCost();
-                if (gardenCost != null)
+                bool gardenUnlocked = FlameManager.Instance.Level >= GardenManager.GardenUnlockLevel;
+                if (gardenUnlocked)
                 {
-                    bool canAffordGarden = canPlace
-                        && CurrencyManager.Instance.CanAffordMana(gardenCost.manaCost)
-                        && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, gardenCost.harvestCosts);
-                    scroll.Add(BuildCardHelper.CreateBuildCard(
-                        "Garden", "Grow fruit trees", "ui/buildings/garden", null,
-                        BuildCardHelper.FromBuildingCost(gardenCost), capText,
-                        canAffordGarden, canPlace, () =>
-                        {
-                            if (GardenManager.Instance.CraftEmptyGarden(gridX, gridY))
-                                CloseInteractionPanel();
-                        }));
+                    var gardenCost = GardenManager.Instance.GetNextGardenCost();
+                    if (gardenCost != null)
+                    {
+                        bool canAffordGarden = canPlace
+                            && CurrencyManager.Instance.CanAffordMana(gardenCost.manaCost)
+                            && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, gardenCost.harvestCosts);
+                        grid.Add(BuildCardHelper.CreateBuildCard(
+                            "Garden", "Grow fruit trees", "ui/buildings/garden", null,
+                            BuildCardHelper.FromBuildingCost(gardenCost), capText,
+                            canAffordGarden, canPlace, () =>
+                            {
+                                if (GardenManager.Instance.CraftEmptyGarden(gridX, gridY))
+                                    CloseInteractionPanel();
+                            }));
+                    }
+                }
+                else
+                {
+                    grid.Add(BuildCardHelper.CreateBuildCard(
+                        "Garden", $"Unlocks at Fire Lv.{GardenManager.GardenUnlockLevel}",
+                        "ui/buildings/garden", null,
+                        null, capText, false, false, null));
                 }
             }
 
-            interactionBody.Add(scroll);
+            interactionBody.Add(grid);
 
             if (!canPlace)
             {
@@ -1296,10 +1305,8 @@ namespace Garden
                 ? $"{FlameManager.Instance.CurrentEntityCount}/{FlameManager.Instance.MaxEntities}"
                 : "";
 
-            var scroll = new ScrollView(ScrollViewMode.Horizontal);
-            scroll.AddToClassList("build-card-scroll");
-            scroll.verticalScrollerVisibility = ScrollerVisibility.Hidden;
-            scroll.horizontalScrollerVisibility = ScrollerVisibility.Auto;
+            var grid = new VisualElement();
+            grid.AddToClassList("build-grid");
 
             // Plot
             if (PlotManager.Instance != null && FlameManager.Instance != null)
@@ -1308,7 +1315,7 @@ namespace Garden
                 bool canAfford = canPlaceEntity && plotCost != null
                     && CurrencyManager.Instance.CanAffordMana(plotCost.manaCost)
                     && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, plotCost.harvestCosts);
-                scroll.Add(BuildCardHelper.CreateBuildCard(
+                grid.Add(BuildCardHelper.CreateBuildCard(
                     "Plot", "Grow seeds", "ui/buildings/plot", null,
                     BuildCardHelper.FromBuildingCost(plotCost), capText,
                     canAfford, canPlaceEntity, () =>
@@ -1325,7 +1332,7 @@ namespace Garden
                 bool canAfford = canPlaceEntity && vaseCost != null
                     && CurrencyManager.Instance.CanAffordMana(vaseCost.manaCost)
                     && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, vaseCost.harvestCosts);
-                scroll.Add(BuildCardHelper.CreateBuildCard(
+                grid.Add(BuildCardHelper.CreateBuildCard(
                     "Vase", "Stores water", "ui/buildings/vase", null,
                     BuildCardHelper.FromBuildingCost(vaseCost), capText,
                     canAfford, canPlaceEntity, () =>
@@ -1344,7 +1351,7 @@ namespace Garden
                     bool canAfford = canPlaceEntity
                         && CurrencyManager.Instance.CanAffordMana(nextCost.manaCost)
                         && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, nextCost.harvestCosts);
-                    scroll.Add(BuildCardHelper.CreateBuildCard(
+                    grid.Add(BuildCardHelper.CreateBuildCard(
                         "House", "Houses 1 Mallum", "ui/buildings/house", null,
                         BuildCardHelper.FromBuildingCost(nextCost), capText,
                         canAfford, canPlaceEntity, () =>
@@ -1356,26 +1363,37 @@ namespace Garden
             }
 
             // Garden
-            if (GardenManager.Instance != null)
+            if (GardenManager.Instance != null && FlameManager.Instance != null)
             {
-                var gardenCost = GardenManager.Instance.GetNextGardenCost();
-                if (gardenCost != null)
+                bool gardenUnlocked = FlameManager.Instance.Level >= GardenManager.GardenUnlockLevel;
+                if (gardenUnlocked)
                 {
-                    bool canAfford = canPlaceEntity
-                        && CurrencyManager.Instance.CanAffordMana(gardenCost.manaCost)
-                        && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, gardenCost.harvestCosts);
-                    scroll.Add(BuildCardHelper.CreateBuildCard(
-                        "Garden", "Grow fruit trees", "ui/buildings/garden", null,
-                        BuildCardHelper.FromBuildingCost(gardenCost), capText,
-                        canAfford, canPlaceEntity, () =>
-                        {
-                            CloseInteractionPanel();
-                            EnterPlacementMode(CampBuildingType.Garden);
-                        }));
+                    var gardenCost = GardenManager.Instance.GetNextGardenCost();
+                    if (gardenCost != null)
+                    {
+                        bool canAfford = canPlaceEntity
+                            && CurrencyManager.Instance.CanAffordMana(gardenCost.manaCost)
+                            && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, gardenCost.harvestCosts);
+                        grid.Add(BuildCardHelper.CreateBuildCard(
+                            "Garden", "Grow fruit trees", "ui/buildings/garden", null,
+                            BuildCardHelper.FromBuildingCost(gardenCost), capText,
+                            canAfford, canPlaceEntity, () =>
+                            {
+                                CloseInteractionPanel();
+                                EnterPlacementMode(CampBuildingType.Garden);
+                            }));
+                    }
+                }
+                else
+                {
+                    grid.Add(BuildCardHelper.CreateBuildCard(
+                        "Garden", $"Unlocks at Fire Lv.{GardenManager.GardenUnlockLevel}",
+                        "ui/buildings/garden", null,
+                        null, capText, false, false, null));
                 }
             }
 
-            interactionBody.Add(scroll);
+            interactionBody.Add(grid);
         }
 
         private void ShowPlotInteraction(int index)
