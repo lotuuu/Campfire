@@ -130,9 +130,8 @@ defmodule RecipeHelper do
 end
 
 seed_configs = [
-  %{seed_name: "Sprouts", growth_duration_hours: 0.00833, min_drops: 1, max_drops: 3, tier: 0, recipe: %{
-    "humidity" => RecipeHelper.axis(40, 80, 20, 1),
-    "waterings" => RecipeHelper.axis(1, 1, 1, 0.5)
+  %{seed_name: "Sprouts", growth_duration_hours: 0.00278, min_drops: 1, max_drops: 3, tier: 0, recipe: %{
+    "waterings" => RecipeHelper.axis(1, 1, 1, 1)
   }},
   %{seed_name: "Cress", growth_duration_hours: 0.08333, min_drops: 1, max_drops: 3, tier: 0, recipe: %{
     "heat" => RecipeHelper.axis(10, 25, 15, 1),
@@ -295,7 +294,7 @@ game_configs = [
   %{key: "building_cost_config", value: %{
     "plot_costs" => [
       %{"manaCost" => 150, "harvestCosts" => [%{"itemName" => "Sprouts_harvest", "count" => 1}]},
-      %{"manaCost" => 200, "harvestCosts" => [%{"itemName" => "Basil_harvest", "count" => 1}]},
+      %{"manaCost" => 200, "harvestCosts" => [%{"itemName" => "Cress_harvest", "count" => 1}]},
       %{"manaCost" => 260, "harvestCosts" => [%{"itemName" => "Basil_harvest", "count" => 2}]},
       %{"manaCost" => 330, "harvestCosts" => [%{"itemName" => "Chamomile_harvest", "count" => 1}]},
       %{"manaCost" => 420, "harvestCosts" => [%{"itemName" => "Chamomile_harvest", "count" => 1}]},
