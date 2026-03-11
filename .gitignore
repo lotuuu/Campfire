@@ -44,3 +44,4 @@ crashlytics-build.properties
 
 # Server runtime
 server/.ngrok.pid
+.superpowers/
