@@ -185,7 +185,7 @@ namespace Garden
 
             // Try seed icon
             string key = SpriteService.SeedToSpriteKey(seedName);
-            var sprite = SpriteService.Instance?.GetSprite($"items/seeds/{key}/icon");
+            var sprite = SpriteService.Instance?.GetSprite($"items/{key}/seed");
             if (sprite != null) return sprite;
 
             // Fallback: try garden plant icon

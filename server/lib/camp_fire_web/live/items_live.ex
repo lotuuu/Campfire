@@ -143,7 +143,7 @@ defmodule CampFireWeb.ItemsLive do
     # Upload icon if provided
     consume_uploaded_entries(socket, :icon, fn %{path: path}, _entry ->
       seed = socket.assigns.editing
-      key = "items/seeds/#{String.downcase(seed.seed_name)}/icon"
+      key = "items/#{String.downcase(seed.seed_name)}/seed"
       data = File.read!(path)
       CampFire.Sprites.upload_sprite(key, data)
       {:ok, key}
@@ -517,7 +517,7 @@ defmodule CampFireWeb.ItemsLive do
           <div class="flex items-center gap-4 mb-4">
             <div class="w-16 h-16 bg-gray-100 rounded border flex items-center justify-center overflow-hidden">
               <img
-                src={CampFire.Sprites.sprite_url("items/seeds/#{String.downcase(@editing.seed_name)}/icon")}
+                src={CampFire.Sprites.sprite_url("items/#{String.downcase(@editing.seed_name)}/seed")}
                 class="w-14 h-14 object-contain"
                 onerror="this.parentElement.innerHTML='<span class=\'text-xs text-gray-400\'>No icon</span>'"
               />
@@ -587,7 +587,7 @@ defmodule CampFireWeb.ItemsLive do
           <%= for seed <- Enum.sort_by(@seeds, & &1.growth_duration_hours) do %>
             <tr class="hover:bg-gray-50">
               <td class="px-4 py-3">
-                <img src={CampFire.Sprites.sprite_url("items/seeds/#{String.downcase(seed.seed_name)}/icon")}
+                <img src={CampFire.Sprites.sprite_url("items/#{String.downcase(seed.seed_name)}/seed")}
                   class="w-8 h-8 object-contain" onerror="this.style.display='none'" />
               </td>
               <td class="px-4 py-3 font-medium">{seed.seed_name}</td>

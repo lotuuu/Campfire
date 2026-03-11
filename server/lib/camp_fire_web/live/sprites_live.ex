@@ -203,6 +203,21 @@ defmodule CampFireWeb.SpritesLive do
             </details>
           <% end %>
 
+          <%= if category == "items" do %>
+            <details class="mb-4 text-sm text-gray-500 border border-gray-200 rounded-lg p-3">
+              <summary class="cursor-pointer font-medium text-gray-600">Naming guide</summary>
+              <div class="mt-2 space-y-1.5">
+                <p>Items are grouped by plant name. Each plant can have a seed, harvest, and pigment sprite.</p>
+                <div class="grid grid-cols-2 gap-x-6 gap-y-1 mt-2 font-mono text-xs">
+                  <div class="font-semibold col-span-2 text-gray-600 text-sm mt-1">Per-plant sprites</div>
+                  <div>{"{plant}"}/seed</div><div class="text-gray-400">Seed icon (e.g. basil/seed)</div>
+                  <div>{"{plant}"}/harvest</div><div class="text-gray-400">Harvest drop (e.g. basil/harvest)</div>
+                  <div>{"{plant}"}/pigment</div><div class="text-gray-400">Pigment item (e.g. basil/pigment)</div>
+                </div>
+              </div>
+            </details>
+          <% end %>
+
           <%= if @upload_category == category do %>
             <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
               <form phx-submit="save_upload" phx-change="update_new_key" class="flex items-end gap-3">

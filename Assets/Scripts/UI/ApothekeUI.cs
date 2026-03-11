@@ -91,7 +91,7 @@ namespace Garden
             icon.AddToClassList("seed-icon");
             if (seedData != null)
             {
-                var sprite = SpriteService.Instance?.GetSprite($"items/seeds/{SpriteService.SeedToSpriteKey(seedData.seedName)}/icon");
+                var sprite = SpriteService.Instance?.GetSprite($"items/{SpriteService.SeedToSpriteKey(seedData.seedName)}/seed");
                 if (sprite != null)
                     icon.style.backgroundImage = new StyleBackground(sprite);
             }

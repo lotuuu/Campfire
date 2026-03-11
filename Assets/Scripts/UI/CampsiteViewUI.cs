@@ -1537,7 +1537,7 @@ namespace Garden
             // Seed icon + yield row
             var yieldRow = new VisualElement();
             yieldRow.AddToClassList("harvest-yield-row");
-            var seedSprite = SpriteService.Instance?.GetSprite($"items/seeds/{SeedToSpriteKey(result.seedName)}/icon");
+            var seedSprite = SpriteService.Instance?.GetSprite($"items/{SeedToSpriteKey(result.seedName)}/seed");
             if (seedSprite != null)
             {
                 var iconEl = new VisualElement();
