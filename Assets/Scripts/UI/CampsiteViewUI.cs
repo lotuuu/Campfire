@@ -1280,11 +1280,11 @@ namespace Garden
             interactionTitle.text = $"Spark of Ara";
 
             var levelLabel = new Label($"Level {FlameManager.Instance.Level}");
-            levelLabel.AddToClassList("interaction-info");
+            levelLabel.AddToClassList("flame-level-badge");
             interactionBody.Add(levelLabel);
 
-            var manaLabel = new Label($"{FlameManager.Instance.ManaPerSecond:F1} Mana per second");
-            manaLabel.AddToClassList("interaction-info");
+            var manaLabel = new Label($"{FlameManager.Instance.ManaPerSecond:F1} Mana / sec");
+            manaLabel.AddToClassList("flame-mana-rate");
             interactionBody.Add(manaLabel);
 
             if (FlameManager.Instance.Level >= ConfigService.Instance.FlameConfig.MaxLevel)
@@ -1348,15 +1348,38 @@ namespace Garden
 
         private void AddFlameCraftItems()
         {
-            var buildHeader = new Label("BUILD");
-            buildHeader.AddToClassList("upgrade-cost-header");
-            buildHeader.style.marginTop = 16;
-            interactionBody.Add(buildHeader);
+            // ── Section divider ──
+            var divider = new VisualElement();
+            divider.AddToClassList("flame-section-divider");
+            interactionBody.Add(divider);
+
+            // ── Build header with entity cap ──
+            var headerRow = new VisualElement();
+            headerRow.AddToClassList("flame-build-header");
+
+            var buildLabel = new Label("BUILD");
+            buildLabel.AddToClassList("upgrade-cost-header");
+            headerRow.Add(buildLabel);
 
             bool canPlaceEntity = FlameManager.Instance != null && FlameManager.Instance.CanPlaceEntity;
-            string capText = FlameManager.Instance != null
-                ? $"{FlameManager.Instance.CurrentEntityCount}/{FlameManager.Instance.MaxEntities}"
-                : "";
+
+            if (FlameManager.Instance != null)
+            {
+                int current = FlameManager.Instance.CurrentEntityCount;
+                int max = FlameManager.Instance.MaxEntities;
+
+                var capBadge = new VisualElement();
+                capBadge.AddToClassList("flame-cap-badge");
+                if (!canPlaceEntity) capBadge.AddToClassList("flame-cap-badge--full");
+
+                var capLabel = new Label($"{current}/{max}");
+                capLabel.AddToClassList("flame-cap-label");
+                capBadge.Add(capLabel);
+
+                headerRow.Add(capBadge);
+            }
+
+            interactionBody.Add(headerRow);
 
             var grid = new VisualElement();
             grid.AddToClassList("build-grid");
@@ -1370,7 +1393,7 @@ namespace Garden
                     && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, plotCost.harvestCosts);
                 grid.Add(BuildCardHelper.CreateBuildCard(
                     "Plot", "Grow seeds", "ui/buildings/plot", null,
-                    BuildCardHelper.FromBuildingCost(plotCost), capText,
+                    BuildCardHelper.FromBuildingCost(plotCost), null,
                     canAfford, canPlaceEntity, () =>
                     {
                         CloseInteractionPanel();
@@ -1387,7 +1410,7 @@ namespace Garden
                     && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, vaseCost.harvestCosts);
                 grid.Add(BuildCardHelper.CreateBuildCard(
                     "Vase", "Stores water", "ui/buildings/vase", null,
-                    BuildCardHelper.FromBuildingCost(vaseCost), capText,
+                    BuildCardHelper.FromBuildingCost(vaseCost), null,
                     canAfford, canPlaceEntity, () =>
                     {
                         CloseInteractionPanel();
@@ -1406,7 +1429,7 @@ namespace Garden
                         && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, nextCost.harvestCosts);
                     grid.Add(BuildCardHelper.CreateBuildCard(
                         "House", "Houses 1 Mallum", "ui/buildings/house", null,
-                        BuildCardHelper.FromBuildingCost(nextCost), capText,
+                        BuildCardHelper.FromBuildingCost(nextCost), null,
                         canAfford, canPlaceEntity, () =>
                         {
                             CloseInteractionPanel();
@@ -1429,7 +1452,7 @@ namespace Garden
                             && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, gardenCost.harvestCosts);
                         grid.Add(BuildCardHelper.CreateBuildCard(
                             "Garden", "Grow fruit trees", "ui/buildings/garden", null,
-                            BuildCardHelper.FromBuildingCost(gardenCost), capText,
+                            BuildCardHelper.FromBuildingCost(gardenCost), null,
                             canAfford, canPlaceEntity, () =>
                             {
                                 CloseInteractionPanel();
@@ -1442,7 +1465,7 @@ namespace Garden
                     grid.Add(BuildCardHelper.CreateBuildCard(
                         "Garden", $"Unlocks at Fire Lv.{GardenManager.GardenUnlockLevel}",
                         "ui/buildings/garden", null,
-                        null, capText, false, false, null));
+                        null, null, false, false, null));
                 }
             }
 
@@ -1804,7 +1827,8 @@ namespace Garden
                         {
                             VaseManager.Instance.SendToCollect(index);
                         }
-                        CloseInteractionPanel();
+                        RebuildGrid();
+                        ShowInteraction(CampBuildingType.Vase, index);
                     }) { text = $"Send Mallum ({available}/{total})" };
                     collectBtn.SetEnabled(available > 0);
                     collectBtn.AddToClassList("interaction-btn-primary");
@@ -1835,8 +1859,7 @@ namespace Garden
                         if (MallumManager.Instance != null && capturedMallumIdx >= 0 && MallumManager.Instance.SpeedUpWaterFetch(capturedMallumIdx))
                         {
                             RebuildGrid();
-                            ShowVaseInteraction(index);
-                            ShowInteractionPanel();
+                            ShowInteraction(CampBuildingType.Vase, index);
                         }
                     }) { text = $"Finish Now ({vaseDrinkCount} drinks)" };
                     finishVaseBtn.SetEnabled((vaseDrinkCount > 0 && fetchingMallumIndex >= 0) || CurrencyManager.FreeMode);

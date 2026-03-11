@@ -249,14 +249,24 @@ namespace Garden
 
                 case StepSpeedUpQuest:
                 {
-                    // Quest was sped up and rewards collected — mallum back to Idle
+                    // Hide hint as soon as quest is sped up (QuestComplete),
+                    // but wait for rewards to be collected (Idle) before showing next dialogue
                     bool anyOnQuest = false;
+                    bool anyQuestComplete = false;
                     foreach (var m in data.mallums)
                     {
-                        if (m.state == MallumState.OnQuest || m.state == MallumState.QuestComplete)
-                        { anyOnQuest = true; break; }
+                        if (m.state == MallumState.OnQuest)
+                            anyOnQuest = true;
+                        if (m.state == MallumState.QuestComplete)
+                            anyQuestComplete = true;
                     }
-                    if (!anyOnQuest)
+                    if (anyQuestComplete && !anyOnQuest)
+                    {
+                        // Quest sped up — hide hint while reward reveal is showing
+                        tutorialUI?.HideHint();
+                        ClearAllHighlights();
+                    }
+                    if (!anyOnQuest && !anyQuestComplete)
                     {
                         ShowDialogue("Spark of Ara", new List<string> {
                             "Quests reward you with rare seeds and items.",
@@ -302,9 +312,8 @@ namespace Garden
                     HighlightHexCell(0);
                     break;
                 case StepWaterFirst:
-                    // Re-pause growth on resume so plant doesn't mature before watering
-                    if (PlotManager.Instance != null)
-                        PlotManager.Instance.GrowthPaused = true;
+                    // On resume, restart the delayed pause coroutine
+                    StartCoroutine(DelayedGrowthPause(8f));
                     tutorialUI?.ShowHint("Water your plant for a better harvest");
                     HighlightVaseHex(0);
                     break;
@@ -366,7 +375,7 @@ namespace Garden
                     }
                     if (stillOnQuest)
                     {
-                        tutorialUI?.ShowHint("Use an Energy Drink to speed up the quest", centered: true);
+                        tutorialUI?.ShowHint("Use an Energy Drink to speed up the quest");
                         tutorialUI?.HighlightElementByClass("quest-speedup-btn");
                     }
                     else

@@ -184,6 +184,7 @@ namespace Garden
                             MallumManager.Instance.SpeedUpQuest(mallumIndex);
                             var mallumData = SaveManager.Instance.Data.mallums[mallumIndex];
                             var rewards = new List<RewardEntry>(mallumData.pendingRewards);
+                            FindFirstObjectByType<CampFireUI>()?.CloseOverlay();
                             RewardRevealUI.Instance?.Show("Quest Complete!", rewards, () =>
                             {
                                 MallumManager.Instance.CollectQuestRewards(mallumIndex);
