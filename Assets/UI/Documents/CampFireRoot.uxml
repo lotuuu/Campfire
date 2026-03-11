@@ -51,8 +51,8 @@
 
             <!-- Resources row with debug button -->
             <ui:VisualElement name="resource-bar">
+                <ui:Button name="btn-settings" class="debug-btn settings-icon-btn" />
                 <ui:Button name="btn-debug" text="DEBUG" class="debug-btn" />
-                <ui:Button name="btn-settings" text="SET" class="debug-btn" />
                 <ui:VisualElement style="flex-grow: 1;" />
                 <ui:VisualElement class="resource-item">
                     <ui:VisualElement name="mana-icon" class="resource-icon" />

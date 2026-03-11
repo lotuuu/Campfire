@@ -139,7 +139,12 @@ namespace Garden
             // Wire settings button
             var settingsBtn = root.Q<Button>("btn-settings");
             if (settingsBtn != null)
+            {
+                var gearTex = SpriteService.Instance?.GetTexture("gear");
+                if (gearTex != null)
+                    settingsBtn.style.backgroundImage = new StyleBackground(gearTex);
                 settingsBtn.clicked += () => OpenOverlay("Settings", settingsPanel);
+            }
 
             // Wire debug button (editor + development builds)
             var debugBtn = root.Q<Button>("btn-debug");
