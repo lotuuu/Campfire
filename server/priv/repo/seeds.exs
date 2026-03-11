@@ -135,7 +135,8 @@ seed_configs = [
   }},
   %{seed_name: "Cress", growth_duration_hours: 0.08333, min_drops: 1, max_drops: 3, tier: 0, recipe: %{
     "heat" => RecipeHelper.axis(10, 25, 15, 1),
-    "humidity" => RecipeHelper.axis(50, 85, 15, 1)
+    "humidity" => RecipeHelper.axis(50, 85, 15, 1),
+    "waterings" => RecipeHelper.axis(1, 1, 1, 1)
   }},
   %{seed_name: "Basil", growth_duration_hours: 1.0, min_drops: 1, max_drops: 4, tier: 1, recipe: %{
     "heat" => RecipeHelper.axis(20, 30, 10, 1),
