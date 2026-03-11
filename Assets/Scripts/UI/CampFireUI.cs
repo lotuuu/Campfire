@@ -28,6 +28,7 @@ namespace Garden
 
         private SettingsUI settingsUI;
         private TutorialUI tutorialUI;
+        private RewardRevealUI rewardRevealUI;
 
         private VisualElement overlayContainer;
         private VisualElement overlayBackdrop;
@@ -98,6 +99,8 @@ namespace Garden
 
             tutorialUI = GetComponent<TutorialUI>();
             tutorialUI?.Initialize(root);
+            rewardRevealUI = GetComponent<RewardRevealUI>();
+            rewardRevealUI?.Initialize(root);
 
             // Overlay setup
             overlayContainer = root.Q("overlay-container");

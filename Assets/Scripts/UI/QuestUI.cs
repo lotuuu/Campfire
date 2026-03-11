@@ -182,7 +182,13 @@ namespace Garden
                         actionBtn.clicked += () =>
                         {
                             MallumManager.Instance.SpeedUpQuest(mallumIndex);
-                            Refresh();
+                            var mallumData = SaveManager.Instance.Data.mallums[mallumIndex];
+                            var rewards = new List<RewardEntry>(mallumData.pendingRewards);
+                            RewardRevealUI.Instance?.Show("Quest Complete!", rewards, () =>
+                            {
+                                MallumManager.Instance.CollectQuestRewards(mallumIndex);
+                                Refresh();
+                            });
                         };
                         break;
 
@@ -215,8 +221,12 @@ namespace Garden
                         actionBtn.AddToClassList("quest-collect-btn");
                         actionBtn.clicked += () =>
                         {
-                            MallumManager.Instance.CollectQuestRewards(mallumIndex);
-                            Refresh();
+                            var rewards = new List<RewardEntry>(mallum.pendingRewards);
+                            RewardRevealUI.Instance?.Show("Quest Complete!", rewards, () =>
+                            {
+                                MallumManager.Instance.CollectQuestRewards(mallumIndex);
+                                Refresh();
+                            });
                         };
                         break;
                 }

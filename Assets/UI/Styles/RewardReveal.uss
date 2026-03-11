@@ -1,0 +1,134 @@
+/* RewardReveal.uss — full-screen reward reveal overlay */
+
+#reward-reveal-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.85);
+    align-items: center;
+    justify-content: center;
+    display: none;
+    opacity: 0;
+    transition-property: opacity;
+    transition-duration: 200ms;
+}
+
+#reward-reveal-overlay.reward-reveal--visible {
+    opacity: 1;
+}
+
+#reward-reveal-title {
+    font-size: var(--font-xl);
+    color: var(--color-text-accent);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    margin-bottom: var(--spacing-xl);
+}
+
+#reward-reveal-cards {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 0 var(--spacing-lg);
+}
+
+.reward-card {
+    width: 150px;
+    height: 200px;
+    margin: var(--spacing-sm);
+    border-radius: var(--radius-md);
+    background-color: rgba(20, 14, 8, 0.95);
+    align-items: center;
+    justify-content: center;
+    border-width: 2px;
+    border-color: rgba(255, 230, 170, 0.8);
+    scale: 0;
+    transition-property: scale;
+    transition-duration: 300ms;
+    transition-timing-function: ease-out;
+}
+
+.reward-card.reward-card--visible {
+    scale: 1;
+}
+
+/* Tier border colors */
+.reward-card--tier0 { border-color: rgba(255, 230, 170, 0.8); }
+.reward-card--tier1 { border-color: rgba(80, 190, 100, 0.8); }
+.reward-card--tier2 { border-color: rgba(80, 150, 220, 0.8); }
+.reward-card--tier3 { border-color: rgba(170, 100, 220, 0.8); }
+.reward-card--tier4 { border-color: rgba(255, 200, 60, 0.9); }
+
+.reward-card-glow {
+    position: absolute;
+    left: -10px;
+    top: -10px;
+    right: -10px;
+    bottom: -10px;
+    border-radius: var(--radius-lg);
+    border-width: 2px;
+    border-color: rgba(255, 230, 170, 0.4);
+    scale: 1.2;
+    opacity: 0;
+    transition-property: scale, opacity;
+    transition-duration: 400ms;
+    transition-timing-function: ease-out;
+}
+
+.reward-card--visible > .reward-card-glow {
+    scale: 1;
+    opacity: 1;
+}
+
+/* Tier glow colors */
+.reward-card--tier0 > .reward-card-glow { border-color: rgba(255, 230, 170, 0.4); }
+.reward-card--tier1 > .reward-card-glow { border-color: rgba(80, 190, 100, 0.4); }
+.reward-card--tier2 > .reward-card-glow { border-color: rgba(80, 150, 220, 0.4); }
+.reward-card--tier3 > .reward-card-glow { border-color: rgba(170, 100, 220, 0.4); }
+.reward-card--tier4 > .reward-card-glow { border-color: rgba(255, 200, 60, 0.5); }
+
+.reward-card-sprite {
+    width: 80px;
+    height: 80px;
+    -unity-background-scale-mode: scale-to-fit;
+    margin-bottom: var(--spacing-xs);
+}
+
+.reward-card-name {
+    font-size: var(--font-sm);
+    color: var(--color-text);
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
+.reward-card-count {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    font-size: var(--font-sm);
+    color: var(--color-text-bright);
+    -unity-font-style: bold;
+}
+
+#reward-reveal-collect {
+    margin-top: var(--spacing-xl);
+    padding: var(--spacing-sm) var(--spacing-xl);
+    background-color: var(--color-button-bg);
+    border-radius: var(--radius-md);
+    border-width: 2px;
+    border-color: var(--color-border-accent);
+    font-size: var(--font-md);
+    color: var(--color-text-accent);
+    -unity-font-style: bold;
+}
+
+#reward-reveal-collect:hover {
+    background-color: var(--color-button-bg-hover);
+}
+
+#reward-reveal-collect:active {
+    background-color: var(--color-button-bg-active);
+}

@@ -17,6 +17,7 @@
     <Style src="project://database/Assets/UI/Styles/Dialogue.uss" />
     <Style src="project://database/Assets/UI/Styles/Visitor.uss" />
     <Style src="project://database/Assets/UI/Styles/Tutorial.uss" />
+    <Style src="project://database/Assets/UI/Styles/RewardReveal.uss" />
 
     <!-- Root container -->
     <ui:VisualElement name="camp-root">
@@ -340,6 +341,13 @@
                 <ui:Label name="tutorial-hint-speaker" text="" />
                 <ui:Label name="tutorial-hint-text" text="" />
             </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Reward reveal overlay -->
+        <ui:VisualElement name="reward-reveal-overlay" style="display: none;">
+            <ui:Label name="reward-reveal-title" text="" />
+            <ui:VisualElement name="reward-reveal-cards" />
+            <ui:Button name="reward-reveal-collect" text="Collect" />
         </ui:VisualElement>
 
         <!-- Dialogue overlay (VN-style) -->
