@@ -14,14 +14,16 @@ Tests are Unity EditMode tests in `Assets/Tests/EditMode/`. Run via:
 
 No external test runner or CI pipeline exists. The test assembly (`Garden.Tests.EditMode.asmdef`) references the `Garden` assembly and uses NUnit.
 
+**Test patterns**: Tests call `public static` helper methods on managers (no MonoBehaviour needed). Typical flow: `new SaveData()` → populate fields → call static helper → `Assert`. Server JSON responses are deserialized with `JsonUtility` for integration-style tests.
+
 ## Architecture
 
 ### Singleton Pattern
 
 All managers and services are MonoBehaviour singletons with duplicate-destroy guards in `Awake()`. They are **scene-bound** (no `DontDestroyOnLoad`). Access via `ClassName.Instance`.
 
-- **Services** (`Scripts/Services/`): `WeatherService`, `SaveManager`, `SocialSaveManager`, `SocialService`, `CurrencyManager`, `NotificationService`, `ConfigService`, `EconomyService`, `GameService`, `SpriteService`
-- **Managers** (`Scripts/Managers/`): `FlameManager`, `PlotManager`, `VaseManager`, `GardenManager`, `ApothekeManager`, `MallumManager`, `GameManager`, `VisitorManager`, `BirdManager`, `SkinManager`
+- **Services** (`Scripts/Services/`): `WeatherService`, `SaveManager`, `SocialSaveManager`, `SocialService`, `CurrencyManager`, `NotificationService`, `ConfigService`, `EconomyService`, `GameService`, `SpriteService`, `AudioManager`, `DeepLinkService`
+- **Managers** (`Scripts/Managers/`): `FlameManager`, `PlotManager`, `VaseManager`, `GardenManager`, `ApothekeManager`, `MallumManager`, `GameManager`, `VisitorManager`, `BirdManager`, `SkinManager`, `TutorialManager`
 
 ### Resources (Economy)
 
@@ -79,6 +81,12 @@ Remaining ScriptableObjects (not server-driven):
 
 **GameManager**: Init and new-player setup (50 mana, 5 gems, 1 vase, 1 plot, 5 Sprouts + 3 Cress seeds, initial Mallums).
 
+**TutorialManager**: Flow-driven 13-step tutorial (Welcome → Plant → Water → Harvest → Build House → ... → Complete). Progress stored in `SaveData.tutorialStep`. Uses event-based step transitions (OnPlotChanged, OnHarvested, etc.) plus `Update()` polling for verification steps. Sets `PlotManager.GrowthPaused = true` during early steps to give the player time to water before growth starts.
+
+**AudioManager**: Music source (looped) + 4-slot SFX pool (round-robin). Loads clips from `SoundLibrary.asset` with pitch randomization. Uses Unity AudioMixer with "Music" and "SFX" groups. Volume persisted in SaveData as `musicVolume`/`sfxVolume` (0–1).
+
+**DeepLinkService**: Captures invite codes from deep-linked URLs (`Application.deepLinkActivated`). Fires `OnInviteCodeReceived`; waits for SocialService sign-in before processing.
+
 ### Server-Authoritative Services
 
 The game is online-only with server-authoritative economy. Three services communicate with the Phoenix backend:
@@ -115,7 +123,11 @@ The campsite uses a hex grid with flat-top layout. `HexGridUtil.HexToPixel(q, r,
 3. **On device**: requests GPS → calls OpenWeatherMap every 15 min → enriches with moon phase + calendar events → fires `OnWeatherUpdated`
 4. Weather affects plot growth via `GrowthRecipe` — snapshots are recorded during growth and evaluated at harvest for quality score
 
-`GameTime` wraps `DateTime` with a debug offset — all plant timers use `GameTime.UtcNow`.
+`GameTime` wraps `DateTime` with a debug offset and `TimeScale` property for debug time acceleration — all plant timers use `GameTime.UtcNow`. Calendar events (equinoxes, lunar eclipses) are hardcoded in `CalendarEvents.cs` through 2028.
+
+### JSON Parsing
+
+`MiniJson` (in `Utils/`) is a lightweight public-domain JSON parser for `Dictionary`/`List`/primitives. Complements `JsonUtility` (which requires `[Serializable]` classes) and is used for flexible config/response parsing.
 
 ### Save System
 
@@ -139,7 +151,7 @@ An Elixir/Phoenix backend lives in `server/` (routes: `/auth`, `/friends`, `/vil
 - Bearer token auth via custom Plug; ETS rate limiting via Hammer
 - `SocialSaveManager` stores `SocialData` to a separate `social.json` file
 - `SocialService` auto-registers new players via `POST /auth/register` on first launch (no explicit sign-in); auth uses Bearer token stored in `social.json`
-- In editor, server URL is `localhost:4000`; in builds uses `DevServerConfig.BaseUrl`
+- **`ServerConfig`** static utility manages multiple server endpoints. `ServerConfig.Select(serverId)` reloads the entire scene — not a hot-swap. Each server has separate auth token and save data via `SavePrefix` pattern. All services read `ServerConfig.BaseUrl`
 - `SaveManager.Flush()` pushes a village snapshot on every save
 
 ### UI Toolkit Architecture
@@ -149,7 +161,7 @@ An Elixir/Phoenix backend lives in `server/` (routes: `/auth`, `/friends`, `/vil
 - **Single campsite view** with slide-up overlay panels (Apotheke, Letters, Build/Craft)
 - **Top bar**: weather display + resource counters (mana, water, gems)
 - **Bottom nav**: buttons opening overlay panels
-- Sub-controllers: `WeatherBarUI`, `ResourceDisplayUI`, `BottomNavUI`, `CampsiteViewUI`, `ApothekeUI`, `BuildUI`, `LettersUI`, `QuestUI`, `QuestButtonUI`, `SafeAreaController`, `DialogueUI`, `VisitorUI`
+- Sub-controllers: `WeatherBarUI`, `ResourceDisplayUI`, `BottomNavUI`, `CampsiteViewUI`, `ApothekeUI`, `BuildUI`, `LettersUI`, `QuestUI`, `QuestButtonUI`, `SafeAreaController`, `DialogueUI`, `VisitorUI`, `TutorialUI`, `SettingsUI`
 - All controllers are MonoBehaviours on the same GameObject, initialized via `Initialize(VisualElement root)` where they cache element refs with `root.Q<>()`
 - Dynamic list items use `VisualTreeAsset.CloneTree()` from templates in `Assets/Resources/UI/Templates/`
 - Stylesheets in `Assets/UI/Styles/`; `Variables.uss` defines shared CSS custom properties
@@ -166,6 +178,12 @@ An Elixir/Phoenix backend lives in `server/` (routes: `/auth`, `/friends`, `/vil
 
 **Entity cap is shared**: Plots, vases, and gardens all share a single entity cap from `ConfigService.Instance.FlameConfig.GetMaxEntities(level)`. There is no separate plot cap.
 
+**Tutorial pauses growth**: `TutorialManager` sets `PlotManager.GrowthPaused = true` during early tutorial steps. If growth isn't starting for a new player, check tutorial state first.
+
+**Server switching reloads scene**: `ServerConfig.Select()` triggers a full scene reload. All singletons reinitialize — not a hot-swap. Each server has isolated auth/save data.
+
+**Audio SFX pool is 4 slots**: Only 4 concurrent SFX sources with round-robin. Overlapping sounds steal slots from oldest playing clip.
+
 ## Key File Locations
 
 - Runtime scripts: `Assets/Scripts/{Data,Services,Managers,UI,Utils,Debug}/`
@@ -180,6 +198,14 @@ An Elixir/Phoenix backend lives in `server/` (routes: `/auth`, `/friends`, `/vil
 - Scene: `Assets/Scenes/Garden.unity`
 - Server sprites: `server/priv/static/assets/sprites/` (served at `/assets/sprites/{key}.png`)
 - Social backend: `server/` (Elixir/Phoenix, Docker for Postgres)
+- Secrets: `Assets/Resources/Config/secrets.json` (gitignored, contains `openWeatherMapApiKey`)
+
+## Server Deployment
+
+Hosted on Gigalixir at `https://campfire.gigalixirapp.com`. Run from `server/`:
+- `make deploy` — push code to Gigalixir (rsyncs + force-pushes since Gigalixir doesn't support Git LFS)
+- `make deploy-migrate` — run Ecto migrations on remote
+- `make deploy-full` — both: deploy + migrate
 
 ## Unity Development
 
