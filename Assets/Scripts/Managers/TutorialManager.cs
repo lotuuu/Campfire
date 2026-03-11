@@ -17,14 +17,15 @@ namespace Garden
         private const int StepWaterFirst = 2;
         private const int StepHarvestFirst = 3;
         private const int StepExplainRecipes = 4;
-        private const int StepPlantAgainAndFetchWater = 5;
-        private const int StepWateringOutcome = 6;
-        private const int StepBuildHouse = 7;
-        private const int StepSendOnQuest = 8;
-        private const int StepPlantCressSpeedPotion = 9;
-        private const int StepBuildSecondPlot = 10;
-        private const int StepUpgradeFlame = 11;
-        private const int StepComplete = 12;
+        private const int StepPlantAgain = 5;
+        private const int StepFetchWater = 6;
+        private const int StepWateringOutcome = 7;
+        private const int StepBuildHouse = 8;
+        private const int StepSendOnQuest = 9;
+        private const int StepPlantCressSpeedPotion = 10;
+        private const int StepBuildSecondPlot = 11;
+        private const int StepUpgradeFlame = 12;
+        private const int StepComplete = 13;
 
         public bool IsComplete => CurrentStep >= StepComplete;
         public int CurrentStep => SaveManager.Instance.Data.tutorialStep;
@@ -146,6 +147,14 @@ namespace Garden
                         HighlightHexCell(0);
                     }
                     break;
+
+                case StepPlantAgain:
+                    // Player planted a second seed
+                    if (plotIndex < data.plots.Count && data.plots[plotIndex].state == PlotState.Growing)
+                    {
+                        AdvanceTo(StepFetchWater);
+                    }
+                    break;
             }
         }
 
@@ -160,10 +169,10 @@ namespace Garden
                         $"You harvested {result.drops} {result.seedName}!",
                         "Your harvest was better because you watered it.",
                         "Each seed has a recipe. Follow it for higher yields."
-                    }, () => AdvanceTo(StepPlantAgainAndFetchWater));
+                    }, () => AdvanceTo(StepPlantAgain));
                     break;
 
-                case StepPlantAgainAndFetchWater:
+                case StepFetchWater:
                     // Second harvest — check if they managed to water
                     if (result.waterCount > 0)
                     {
@@ -203,6 +212,19 @@ namespace Garden
 
             switch (CurrentStep)
             {
+                case StepFetchWater:
+                    // Mallum started fetching — clear vase highlight, show waiting hint
+                    foreach (var m in data.mallums)
+                    {
+                        if (m.state == MallumState.FetchingWater)
+                        {
+                            ClearAllHighlights();
+                            tutorialUI?.ShowHint("Your Mallum is fetching water. Use an Energy Drink to speed it up!");
+                            return;
+                        }
+                    }
+                    break;
+
                 case StepBuildHouse:
                     // Check if a mallum house was built
                     if (data.mallumHouses.Count > 0)
@@ -279,12 +301,32 @@ namespace Garden
                 }
                 case StepExplainRecipes:
                     // Dialogue-only step — auto-skip on resume
-                    AdvanceTo(StepPlantAgainAndFetchWater);
+                    AdvanceTo(StepPlantAgain);
                     break;
-                case StepPlantAgainAndFetchWater:
-                    tutorialUI?.ShowHint("Plant another seed. Send your Mallum to fetch water.");
-                    HighlightHexCell(0); // plot
+                case StepPlantAgain:
+                    tutorialUI?.ShowHint("Plant another seed");
+                    HighlightHexCell(0);
                     break;
+                case StepFetchWater:
+                {
+                    // Check if mallum is already fetching (resume case)
+                    bool alreadyFetching = false;
+                    foreach (var m in SaveManager.Instance.Data.mallums)
+                    {
+                        if (m.state == MallumState.FetchingWater)
+                        { alreadyFetching = true; break; }
+                    }
+                    if (alreadyFetching)
+                    {
+                        tutorialUI?.ShowHint("Your Mallum is fetching water. Use an Energy Drink to speed it up!");
+                    }
+                    else
+                    {
+                        tutorialUI?.ShowHint("Send your Mallum to fetch water");
+                        HighlightVaseHex(0);
+                    }
+                    break;
+                }
                 case StepWateringOutcome:
                     // Dialogue-only step — auto-skip on resume
                     AdvanceTo(StepBuildHouse);
@@ -344,6 +386,15 @@ namespace Garden
             if (plotIndex < 0 || plotIndex >= data.plots.Count) return;
             var plot = data.plots[plotIndex];
             campsiteView.EnterTutorialHighlight(plot.gridX, plot.gridY);
+        }
+
+        private void HighlightVaseHex(int vaseIndex)
+        {
+            if (campsiteView == null) return;
+            var data = SaveManager.Instance.Data;
+            if (vaseIndex < 0 || vaseIndex >= data.vases.Count) return;
+            var vase = data.vases[vaseIndex];
+            campsiteView.EnterTutorialHighlight(vase.gridX, vase.gridY);
         }
 
         private void HighlightFlameHex()
