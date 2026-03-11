@@ -198,3 +198,5 @@ When the user reports a specific bug and indicates they already know the cause, 
 For git commits, split changes into logical atomic commits by feature/fix area. When asked to 'commit', check for unrelated changes and offer to split them.
 
 When implementing a plan or feature, always generate ALL required artifacts (code, asset files, audio files, prefab wiring) in one pass. Do not stop at just writing code and wait for the user to say 'do it' for the rest.
+
+Always use Opus for all subagents — never downgrade to Sonnet or Haiku regardless of task complexity. Override any skill guidance about model selection.
