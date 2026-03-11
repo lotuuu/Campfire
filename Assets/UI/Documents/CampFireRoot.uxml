@@ -336,7 +336,7 @@
         </ui:VisualElement>
 
         <!-- Tutorial hint bar — same structure as dialogue, no portrait -->
-        <ui:VisualElement name="tutorial-hint-bar" style="display: none;">
+        <ui:VisualElement name="tutorial-hint-bar" picking-mode="Ignore" style="display: none;">
             <ui:VisualElement name="tutorial-hint-box">
                 <ui:Label name="tutorial-hint-speaker" text="" />
                 <ui:Label name="tutorial-hint-text" text="" />

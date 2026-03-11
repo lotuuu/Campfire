@@ -21,23 +21,25 @@
 }
 
 #dialogue-box {
-    background-color: rgba(20, 14, 8, 0.95);
-    border-top-width: 2px;
-    border-color: rgba(220, 180, 80, 0.5);
-    padding: var(--spacing-lg) var(--spacing-lg);
-    padding-bottom: var(--spacing-xl);
-    min-height: 500px;
+    background-color: var(--color-bg-panel);
+    border-top-width: 3px;
+    border-bottom-width: 2px;
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-color: var(--color-border-accent);
+    border-bottom-color: var(--color-empty);
+    padding: var(--spacing-md) var(--spacing-lg);
 }
 
 #dialogue-speaker {
-    font-size: var(--font-lg);
+    font-size: var(--font-xl);
     color: var(--color-text-accent);
     -unity-font-style: bold;
     margin-bottom: var(--spacing-xs);
 }
 
 #dialogue-text {
-    font-size: var(--font-md);
+    font-size: var(--font-lg);
     color: var(--color-text);
     white-space: normal;
     margin-bottom: var(--spacing-md);

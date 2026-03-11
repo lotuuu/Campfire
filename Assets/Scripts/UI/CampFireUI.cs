@@ -443,6 +443,7 @@ namespace Garden
             overlayTitle.text = title;
             panel.style.display = DisplayStyle.Flex;
             overlayContainer.style.display = DisplayStyle.Flex;
+            overlayContainer.BringToFront();
         }
 
         public void CloseOverlay()

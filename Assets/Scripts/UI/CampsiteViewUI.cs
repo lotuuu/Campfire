@@ -8,6 +8,7 @@ namespace Garden
 {
     public class CampsiteViewUI : MonoBehaviour
     {
+        private VisualElement campRoot;
         private VisualElement viewport;
         private VisualElement canvas;
         private VisualElement interactionBackdrop;
@@ -81,6 +82,7 @@ namespace Garden
 
         public void Initialize(VisualElement root)
         {
+            campRoot = root;
             viewport = root.Q("campsite-viewport");
             canvas = root.Q("campsite-canvas");
             interactionBackdrop = root.Q("interaction-backdrop");
@@ -431,7 +433,7 @@ namespace Garden
                 modeCancelBtn = new Button(ExitMode) { text = label2 };
                 modeCancelBtn.name = "placement-cancel";
                 modeCancelBtn.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());
-                viewport.Add(modeCancelBtn);
+                campRoot.Add(modeCancelBtn);
             }
 
             if (needsRecenter)
