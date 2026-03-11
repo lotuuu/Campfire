@@ -29,6 +29,7 @@ namespace Garden
         public string lastBirdCheckHourUtc;
         public float musicVolume = 1f;
         public float sfxVolume = 1f;
+        public int tutorialStep;
     }
 
     [Serializable]
