@@ -5,10 +5,15 @@ namespace Garden
 {
     public class TutorialUI : MonoBehaviour
     {
-        private VisualElement hintBar;
+        private VisualElement hintBox;
         private Label hintSpeaker;
         private Label hintText;
+        private VisualElement hintCentered;
+        private Label hintCenteredSpeaker;
+        private Label hintCenteredText;
+        private VisualElement bottomNav;
         private VisualElement root;
+        private bool isCentered;
 
         // Highlight pulse state
         private VisualElement currentHighlight;
@@ -22,19 +27,29 @@ namespace Garden
         public void Initialize(VisualElement rootElement)
         {
             root = rootElement;
-            hintBar = root.Q("tutorial-hint-bar");
+            hintBox = root.Q("tutorial-hint-box");
             hintSpeaker = root.Q<Label>("tutorial-hint-speaker");
             hintText = root.Q<Label>("tutorial-hint-text");
+            hintCentered = root.Q("tutorial-hint-centered");
+            hintCenteredSpeaker = root.Q<Label>("tutorial-hint-centered-speaker");
+            hintCenteredText = root.Q<Label>("tutorial-hint-centered-text");
+            bottomNav = root.Q("bottom-nav");
         }
 
         private void Update()
         {
-            // Retry deferred highlight
-            if (pendingHighlightClass != null && currentHighlight == null)
+            // Retry deferred highlight — switch to it once the element appears
+            if (pendingHighlightClass != null)
             {
                 var element = root.Q(className: pendingHighlightClass);
                 if (element != null)
                 {
+                    // Clear previous highlight if any
+                    if (currentHighlight != null)
+                    {
+                        currentHighlight.RemoveFromClassList("tutorial-highlight");
+                        currentHighlight.RemoveFromClassList("tutorial-highlight-dim");
+                    }
                     pendingHighlightClass = null;
                     currentHighlight = element;
                     pulseBright = true;
@@ -65,17 +80,36 @@ namespace Garden
 
         public void ShowHint(string text, string speaker = "Spark of Ara", bool centered = false)
         {
-            if (hintBar == null) return;
-            if (hintSpeaker != null) hintSpeaker.text = speaker;
-            hintText.text = text;
-            hintBar.EnableInClassList("tutorial-hint--centered", centered);
-            hintBar.style.display = DisplayStyle.Flex;
+            HideHint();
+            isCentered = centered;
+
+            if (centered)
+            {
+                if (hintCentered == null) return;
+                if (hintCenteredSpeaker != null) hintCenteredSpeaker.text = speaker;
+                if (hintCenteredText != null) hintCenteredText.text = text;
+                hintCentered.style.display = DisplayStyle.Flex;
+            }
+            else
+            {
+                if (hintBox == null) return;
+                if (hintSpeaker != null) hintSpeaker.text = speaker;
+                if (hintText != null) hintText.text = text;
+                hintBox.style.display = DisplayStyle.Flex;
+                hintBox.BringToFront();
+                if (bottomNav != null) bottomNav.style.display = DisplayStyle.None;
+            }
         }
 
         public void HideHint()
         {
-            if (hintBar != null)
-                hintBar.style.display = DisplayStyle.None;
+            if (hintBox != null)
+                hintBox.style.display = DisplayStyle.None;
+            if (hintCentered != null)
+                hintCentered.style.display = DisplayStyle.None;
+            if (bottomNav != null)
+                bottomNav.style.display = DisplayStyle.Flex;
+            isCentered = false;
         }
 
         public void HighlightElementByClass(string className)
@@ -92,6 +126,15 @@ namespace Garden
             pulseBright = true;
             pulseTimer = 0f;
             element.AddToClassList("tutorial-highlight");
+        }
+
+        /// <summary>
+        /// Queue a class-based highlight that activates when the element appears,
+        /// replacing whatever is currently highlighted at that point.
+        /// </summary>
+        public void DeferHighlightByClass(string className)
+        {
+            pendingHighlightClass = className;
         }
 
         public void HighlightElement(string elementName)

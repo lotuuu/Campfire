@@ -1,5 +1,6 @@
-/* Dialogue.uss — VN-style dialogue overlay */
+/* Dialogue.uss — VN-style dialogue */
 
+/* Dim backdrop + portrait (absolute overlay) */
 #dialogue-overlay {
     position: absolute;
     left: 0;
@@ -12,7 +13,7 @@
 
 #dialogue-speaker-portrait {
     position: absolute;
-    bottom: 310px;
+    bottom: 250px;
     right: -5%;
     width: 55%;
     height: 40%;
@@ -20,33 +21,39 @@
     scale: -1 1;
 }
 
+/* Dialogue box — flow element that replaces bottom-nav */
 #dialogue-box {
     background-color: var(--color-bg-panel);
     border-top-width: 3px;
-    border-bottom-width: 2px;
-    border-left-width: 0;
-    border-right-width: 0;
     border-top-color: var(--color-border-accent);
-    border-bottom-color: var(--color-empty);
-    padding: var(--spacing-md) var(--spacing-lg);
+    padding: var(--spacing-md);
+    height: var(--bottom-bar-height);
+    justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden;
 }
 
 #dialogue-speaker {
-    font-size: var(--font-xl);
+    font-size: var(--font-lg);
     color: var(--color-text-accent);
     -unity-font-style: bold;
-    margin-bottom: var(--spacing-xs);
+    margin-bottom: var(--spacing-xxs);
 }
 
 #dialogue-text {
-    font-size: var(--font-lg);
+    font-size: var(--font-md);
     color: var(--color-text);
     white-space: normal;
-    margin-bottom: var(--spacing-md);
 }
 
 #dialogue-tap-hint {
     font-size: var(--font-sm);
     color: var(--color-text-dim);
     -unity-text-align: lower-right;
+}
+
+/* Above-nav variant: dialogue sits above the menu bar */
+.dialogue-overlay--above-nav {
+    background-color: rgba(0, 0, 0, 0.4);
+    padding-bottom: var(--bottom-bar-height);
 }

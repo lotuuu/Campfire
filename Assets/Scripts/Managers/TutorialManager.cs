@@ -12,6 +12,8 @@ namespace Garden
         private DialogueUI dialogueUI;
         private CampsiteViewUI campsiteView;
         private bool initialized;
+        private int highlightQ = int.MinValue;
+        private int highlightR = int.MinValue;
 
         // Flow: Welcome → Plant → Water → Harvest → Build House → Plant Again → Fetch Water → Quest → Speed Up Quest → Cress → Second Plot → Upgrade → Complete
         private const int StepWelcome = 0;
@@ -361,8 +363,12 @@ namespace Garden
                     break;
                 }
                 case StepSendOnQuest:
-                    tutorialUI?.ShowHint("Send a Mallum on a quest to earn rewards", centered: true);
-                    tutorialUI?.HighlightElement("btn-quest");
+                    ShowDialogue("Spark of Ara", new List<string> {
+                        "Send a Mallum on a quest to earn rewards!"
+                    }, () => {
+                        tutorialUI?.HighlightElement("btn-quest");
+                        tutorialUI?.DeferHighlightByClass("quest-send-btn");
+                    }, aboveNav: true);
                     break;
                 case StepSpeedUpQuest:
                 {
@@ -404,13 +410,13 @@ namespace Garden
 
         private Texture2D _portraitCache;
 
-        private void ShowDialogue(string speaker, List<string> lines, System.Action onComplete)
+        private void ShowDialogue(string speaker, List<string> lines, System.Action onComplete, bool aboveNav = false)
         {
             ClearAllHighlights();
             tutorialUI?.HideHint();
             if (_portraitCache == null)
                 _portraitCache = SpriteService.Instance?.GetTexture("portraits/spark_of_ara");
-            dialogueUI?.Show(speaker, lines, onComplete, _portraitCache);
+            dialogueUI?.Show(speaker, lines, onComplete, aboveNav ? null : _portraitCache, aboveNav);
         }
 
         private void ShowWelcome()
@@ -427,6 +433,13 @@ namespace Garden
         {
             tutorialUI?.ClearHighlight();
             campsiteView?.ExitTutorialHighlight();
+            highlightQ = int.MinValue;
+            highlightR = int.MinValue;
+        }
+
+        private bool IsHighlightingCell(int q, int r)
+        {
+            return highlightQ == q && highlightR == r;
         }
 
         private void HighlightHexCell(int plotIndex)
@@ -435,6 +448,8 @@ namespace Garden
             var data = SaveManager.Instance.Data;
             if (plotIndex < 0 || plotIndex >= data.plots.Count) return;
             var plot = data.plots[plotIndex];
+            highlightQ = plot.gridX;
+            highlightR = plot.gridY;
             campsiteView.EnterTutorialHighlight(plot.gridX, plot.gridY);
         }
 
@@ -444,12 +459,16 @@ namespace Garden
             var data = SaveManager.Instance.Data;
             if (vaseIndex < 0 || vaseIndex >= data.vases.Count) return;
             var vase = data.vases[vaseIndex];
+            highlightQ = vase.gridX;
+            highlightR = vase.gridY;
             campsiteView.EnterTutorialHighlight(vase.gridX, vase.gridY);
         }
 
         private void HighlightFlameHex()
         {
             if (campsiteView == null) return;
+            highlightQ = 0;
+            highlightR = 0;
             campsiteView.EnterTutorialHighlight(0, 0);
         }
 
@@ -461,6 +480,22 @@ namespace Garden
             var data = SaveManager.Instance.Data;
             switch (CurrentStep)
             {
+                case StepFetchWater:
+                    // If the plot matured without watering, switch highlight to the plot
+                    if (data.plots.Count > 0 && data.plots[0].state == PlotState.Mature)
+                    {
+                        var plot = data.plots[0];
+                        if (!IsHighlightingCell(plot.gridX, plot.gridY))
+                        {
+                            string hint = plot.waterCount > 0
+                                ? "Your plant is ready! Tap to harvest"
+                                : "Your crop grew before you could water it. Harvest it now!";
+                            tutorialUI?.ShowHint(hint);
+                            ClearAllHighlights();
+                            HighlightHexCell(0);
+                        }
+                    }
+                    break;
                 case StepBuildHouse:
                     if (data.mallumHouses.Count > 0)
                     {

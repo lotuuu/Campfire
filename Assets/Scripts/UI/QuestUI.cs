@@ -293,6 +293,7 @@ namespace Garden
 
                 var capturedQuest = quest;
                 actionBtn.text = available > 0 ? "Send Mallum" : "No Mallums Idle";
+                actionBtn.AddToClassList("quest-send-btn");
                 actionBtn.SetEnabled(available > 0);
                 actionBtn.clicked += () =>
                 {

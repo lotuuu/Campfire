@@ -9,24 +9,37 @@ namespace Garden
     {
         private VisualElement overlay;
         private VisualElement portraitElement;
+        private VisualElement dialogueBox;
         private Label speakerLabel;
         private Label textLabel;
         private Label tapHint;
+        private VisualElement bottomNav;
 
         private List<string> lines;
         private string speaker;
         private int currentIndex;
         private Action onComplete;
+        private bool _aboveNav;
 
         public void Initialize(VisualElement root)
         {
             overlay = root.Q("dialogue-overlay");
             portraitElement = root.Q("dialogue-speaker-portrait");
+            dialogueBox = root.Q("dialogue-box");
             speakerLabel = root.Q<Label>("dialogue-speaker");
             textLabel = root.Q<Label>("dialogue-text");
             tapHint = root.Q<Label>("dialogue-tap-hint");
+            bottomNav = root.Q("bottom-nav");
 
+            // Tap anywhere on the dim backdrop to advance
             overlay?.RegisterCallback<ClickEvent>(evt =>
+            {
+                evt.StopPropagation();
+                Advance();
+            });
+
+            // Tap on the dialogue box to advance
+            dialogueBox?.RegisterCallback<ClickEvent>(evt =>
             {
                 evt.StopPropagation();
                 Advance();
@@ -35,7 +48,7 @@ namespace Garden
             Hide();
         }
 
-        public void Show(string speakerName, List<string> dialogueLines, Action onDialogueComplete, Texture2D portrait = null)
+        public void Show(string speakerName, List<string> dialogueLines, Action onDialogueComplete, Texture2D portrait = null, bool aboveNav = false)
         {
             if (dialogueLines == null || dialogueLines.Count == 0)
             {
@@ -47,11 +60,12 @@ namespace Garden
             lines = dialogueLines;
             currentIndex = 0;
             onComplete = onDialogueComplete;
+            _aboveNav = aboveNav;
 
             if (speakerLabel != null) speakerLabel.text = speaker;
             if (portraitElement != null)
             {
-                if (portrait != null)
+                if (portrait != null && !aboveNav)
                 {
                     portraitElement.style.backgroundImage = new StyleBackground(portrait);
                     portraitElement.style.display = DisplayStyle.Flex;
@@ -63,14 +77,34 @@ namespace Garden
             }
             ShowCurrentLine();
 
-            if (overlay != null) overlay.style.display = DisplayStyle.Flex;
+            if (overlay != null)
+            {
+                overlay.style.display = DisplayStyle.Flex;
+                if (aboveNav)
+                    overlay.AddToClassList("dialogue-overlay--above-nav");
+                else
+                    overlay.RemoveFromClassList("dialogue-overlay--above-nav");
+            }
+            if (dialogueBox != null)
+            {
+                dialogueBox.style.display = DisplayStyle.Flex;
+                dialogueBox.BringToFront();
+            }
+            if (!aboveNav && bottomNav != null) bottomNav.style.display = DisplayStyle.None;
         }
 
         public void Hide()
         {
             if (overlay != null && overlay.style.display != DisplayStyle.None)
                 AudioManager.Instance?.PlaySFX("ui_panel_close");
-            if (overlay != null) overlay.style.display = DisplayStyle.None;
+            if (overlay != null)
+            {
+                overlay.style.display = DisplayStyle.None;
+                overlay.RemoveFromClassList("dialogue-overlay--above-nav");
+            }
+            if (dialogueBox != null) dialogueBox.style.display = DisplayStyle.None;
+            if (bottomNav != null) bottomNav.style.display = DisplayStyle.Flex;
+            _aboveNav = false;
         }
 
         private void Advance()
