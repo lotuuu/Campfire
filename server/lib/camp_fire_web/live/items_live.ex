@@ -143,7 +143,7 @@ defmodule CampFireWeb.ItemsLive do
     # Upload icon if provided
     consume_uploaded_entries(socket, :icon, fn %{path: path}, _entry ->
       seed = socket.assigns.editing
-      key = "seeds/#{String.downcase(seed.seed_name)}/icon"
+      key = "items/seeds/#{String.downcase(seed.seed_name)}/icon"
       data = File.read!(path)
       CampFire.Sprites.upload_sprite(key, data)
       {:ok, key}
@@ -517,7 +517,7 @@ defmodule CampFireWeb.ItemsLive do
           <div class="flex items-center gap-4 mb-4">
             <div class="w-16 h-16 bg-gray-100 rounded border flex items-center justify-center overflow-hidden">
               <img
-                src={CampFire.Sprites.sprite_url("seeds/#{String.downcase(@editing.seed_name)}/icon")}
+                src={CampFire.Sprites.sprite_url("items/seeds/#{String.downcase(@editing.seed_name)}/icon")}
                 class="w-14 h-14 object-contain"
                 onerror="this.parentElement.innerHTML='<span class=\'text-xs text-gray-400\'>No icon</span>'"
               />
@@ -587,7 +587,7 @@ defmodule CampFireWeb.ItemsLive do
           <%= for seed <- Enum.sort_by(@seeds, & &1.growth_duration_hours) do %>
             <tr class="hover:bg-gray-50">
               <td class="px-4 py-3">
-                <img src={CampFire.Sprites.sprite_url("seeds/#{String.downcase(seed.seed_name)}/icon")}
+                <img src={CampFire.Sprites.sprite_url("items/seeds/#{String.downcase(seed.seed_name)}/icon")}
                   class="w-8 h-8 object-contain" onerror="this.style.display='none'" />
               </td>
               <td class="px-4 py-3 font-medium">{seed.seed_name}</td>
@@ -678,7 +678,7 @@ defmodule CampFireWeb.ItemsLive do
                               data-field="item_name"
                               data-event="update_ingredient"
                               class="w-full border rounded px-2 py-1 text-sm"
-                              placeholder="e.g. Basil_harvest"
+                              placeholder="e.g. Basil"
                             />
                           </td>
                           <td class="px-3 py-2">
@@ -801,7 +801,7 @@ defmodule CampFireWeb.ItemsLive do
               <div>
                 <label class="block text-sm font-medium text-gray-700">Cost Item</label>
                 <input type="text" name="cost_item_name" value={@skin_form[:cost_item_name]}
-                  class="mt-1 block w-full border rounded px-3 py-2" placeholder="e.g. Basil_pigment" />
+                  class="mt-1 block w-full border rounded px-3 py-2" placeholder="e.g. Basil_Pigment" />
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700">Cost Quantity</label>

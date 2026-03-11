@@ -19,9 +19,9 @@ defmodule CampFire.Game.VasesTest do
     economy = Economy.get_economy(player.uid)
     economy |> Ecto.Changeset.change(mana: 1000.0) |> Repo.update!()
     # Give harvest items for vase crafting
-    Economy.upsert_item(player.uid, "Cress_harvest", 10)
-    Economy.upsert_item(player.uid, "Basil_harvest", 10)
-    Economy.upsert_item(player.uid, "Chamomile_harvest", 10)
+    Economy.upsert_item(player.uid, "Cress", 10)
+    Economy.upsert_item(player.uid, "Basil", 10)
+    Economy.upsert_item(player.uid, "Chamomile", 10)
     # init_economy creates 2 starter mallums, grab the first idle one
     [mallum | _] = Mallums.list_mallums(player.uid)
     {player, mallum}
@@ -43,9 +43,9 @@ defmodule CampFire.Game.VasesTest do
       # Started with 1000, 2nd vase (index 1) costs 120
       assert economy.mana == 880.0
 
-      # 2nd vase costs 2 Basil_harvest
-      items = Economy.list_items(player.uid)
-      basil_h = Enum.find(items, &(&1.item_name == "Basil_harvest"))
+      # 2nd vase costs 2 Basil
+      inventory = Economy.list_inventory(player.uid)
+      basil_h = Enum.find(inventory, &(&1.item_name == "Basil"))
       assert basil_h.count == 8
     end
 
@@ -59,9 +59,9 @@ defmodule CampFire.Game.VasesTest do
       # 1000 - 120 (index 1) - 150 (index 2) = 730
       assert economy.mana == 730.0
 
-      # 3rd vase (index 2) costs 1 Chamomile_harvest
-      items = Economy.list_items(player.uid)
-      chamomile_h = Enum.find(items, &(&1.item_name == "Chamomile_harvest"))
+      # 3rd vase (index 2) costs 1 Chamomile
+      inventory = Economy.list_inventory(player.uid)
+      chamomile_h = Enum.find(inventory, &(&1.item_name == "Chamomile"))
       assert chamomile_h.count == 9
     end
 
@@ -72,7 +72,7 @@ defmodule CampFire.Game.VasesTest do
       player = register_player()
       {:ok, _economy} = Economy.init_economy(player.uid)
       # Default 50 mana, 2nd vase (index 1) costs 120
-      Economy.upsert_item(player.uid, "Basil_harvest", 10)
+      Economy.upsert_item(player.uid, "Basil", 10)
 
       {:error, :insufficient_mana} = Vases.craft_vase(player.uid, 2, 0)
     end

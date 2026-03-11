@@ -114,15 +114,15 @@ defmodule CampFire.TestHelpers do
   def seed_recipe_configs do
     recipes = %{
       "Fertilizer" => %{
-        "ingredients" => [%{"item_name" => "Basil_harvest", "count" => 2}],
+        "ingredients" => [%{"item_name" => "Basil", "count" => 2}],
         "result_item" => "Fertilizer",
         "result_quantity" => 1,
         "category" => "consumable"
       },
       "Speed_Potion" => %{
         "ingredients" => [
-          %{"item_name" => "Mint_harvest", "count" => 2},
-          %{"item_name" => "Chamomile_harvest", "count" => 1}
+          %{"item_name" => "Mint", "count" => 2},
+          %{"item_name" => "Chamomile", "count" => 1}
         ],
         "result_item" => "Speed_Potion",
         "result_quantity" => 1,
@@ -135,10 +135,10 @@ defmodule CampFire.TestHelpers do
 
   def seed_skin_configs do
     configs = %{
-      "GreenPlot" => %{"building_type" => "plot", "cost_item_name" => "Basil_harvest", "cost_quantity" => 3},
-      "BluePlot" => %{"building_type" => "plot", "cost_item_name" => "Chamomile_harvest", "cost_quantity" => 2},
-      "FancyVase" => %{"building_type" => "vase", "cost_item_name" => "Basil_harvest", "cost_quantity" => 2},
-      "CozyHouse" => %{"building_type" => "mallum_house", "cost_item_name" => "Basil_harvest", "cost_quantity" => 5}
+      "GreenPlot" => %{"building_type" => "plot", "cost_item_name" => "Basil", "cost_quantity" => 3},
+      "BluePlot" => %{"building_type" => "plot", "cost_item_name" => "Chamomile", "cost_quantity" => 2},
+      "FancyVase" => %{"building_type" => "vase", "cost_item_name" => "Basil", "cost_quantity" => 2},
+      "CozyHouse" => %{"building_type" => "mallum_house", "cost_item_name" => "Basil", "cost_quantity" => 5}
     }
 
     :ets.insert(:config_cache, {"skin_configs", configs})

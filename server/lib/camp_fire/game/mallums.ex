@@ -117,9 +117,9 @@ defmodule CampFire.Game.Mallums do
 
       Repo.transaction(fn ->
         Enum.each(rewards, fn reward ->
-          seed_name = reward["seed_name"]
+          seed_name = reward["seed_name"] <> "_Seed"
           count = reward["count"]
-          Economy.upsert_seed(player_uid, seed_name, count)
+          Economy.upsert_item(player_uid, seed_name, count)
         end)
 
         mallum

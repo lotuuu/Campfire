@@ -116,8 +116,6 @@ defmodule CampFireWeb.Router do
     post "/spend-gems", EconomyController, :spend_gems
     post "/add-gems", EconomyController, :add_gems
     post "/upgrade-flame", EconomyController, :upgrade_flame
-    post "/add-seeds", EconomyController, :add_seeds
-    post "/spend-seeds", EconomyController, :spend_seeds
     post "/add-items", EconomyController, :add_items
     post "/spend-items", EconomyController, :spend_items
   end

@@ -85,7 +85,7 @@ defmodule CampFire.Game.Plots do
          true <- Map.has_key?(seed_configs, seed_name) || {:error, :unknown_seed},
          true <- plot.state == "empty" || {:error, :plot_not_empty} do
       Repo.transaction(fn ->
-        case Economy.spend_seed(player_uid, seed_name, 1, opts) do
+        case Economy.spend_item(player_uid, seed_name <> "_Seed", 1, opts) do
           {:error, reason} ->
             Repo.rollback(reason)
 
@@ -173,7 +173,7 @@ defmodule CampFire.Game.Plots do
           require Logger
           Logger.warning("Harvest with zero snapshots: player=#{player_uid} plot=#{plot_id} seed=#{plot.seed_name}")
         end
-        item_name = "#{plot.seed_name}_harvest"
+        item_name = plot.seed_name
 
         Economy.upsert_item(player_uid, item_name, drops)
 

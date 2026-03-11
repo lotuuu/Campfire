@@ -10,7 +10,7 @@ defmodule CampFire.Admin do
   alias CampFire.Repo
   alias CampFire.Admin.{QuestConfig, GardenConfig, GameConfig}
   alias CampFire.Game.{SeedConfig, PlayerPlot, PlayerVase, PlayerGarden, PlayerMallum, WeatherCache}
-  alias CampFire.Economy.{PlayerEconomy, PlayerSeed, PlayerItem}
+  alias CampFire.Economy.{PlayerEconomy, PlayerInventory}
   alias CampFire.Accounts.Player
   alias CampFire.Visitors.{VisitorTemplate, VisitorSchedule}
 
@@ -249,8 +249,7 @@ defmodule CampFire.Admin do
         %{
           player: player,
           economy: Repo.get(PlayerEconomy, uid),
-          seeds: Repo.all(from s in PlayerSeed, where: s.player_uid == ^uid),
-          items: Repo.all(from i in PlayerItem, where: i.player_uid == ^uid),
+          inventory: Repo.all(from i in PlayerInventory, where: i.player_uid == ^uid),
           plots: Repo.all(from p in PlayerPlot, where: p.player_uid == ^uid),
           vases: Repo.all(from v in PlayerVase, where: v.player_uid == ^uid),
           gardens: Repo.all(from g in PlayerGarden, where: g.player_uid == ^uid),

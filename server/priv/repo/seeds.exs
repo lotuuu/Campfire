@@ -262,17 +262,17 @@ game_configs = [
     "entity_caps" => [6, 6, 8, 8, 12, 15, 18, 22, 26, 30, 35, 40],
     "grid_sizes" => [2, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5],
     "upgrade_recipes" => [
-      %{"ingredients" => [%{"itemName" => "Sprouts_harvest", "count" => 1}]},
-      %{"ingredients" => [%{"itemName" => "Sprouts_harvest", "count" => 5}, %{"itemName" => "Cress_harvest", "count" => 2}]},
-      %{"ingredients" => [%{"itemName" => "Basil_harvest", "count" => 3}]},
-      %{"ingredients" => [%{"itemName" => "Chamomile_harvest", "count" => 5}]},
-      %{"ingredients" => [%{"itemName" => "Marigold_harvest", "count" => 12}, %{"itemName" => "Snowdrop_harvest", "count" => 8}, %{"itemName" => "Basil_harvest", "count" => 8}]},
-      %{"ingredients" => [%{"itemName" => "Mint_harvest", "count" => 8}, %{"itemName" => "Pansy_harvest", "count" => 4}, %{"itemName" => "Chamomile_harvest", "count" => 8}]},
-      %{"ingredients" => [%{"itemName" => "Lavender_harvest", "count" => 22}, %{"itemName" => "Snowdrop_harvest", "count" => 24}, %{"itemName" => "Basil_harvest", "count" => 18}]},
-      %{"ingredients" => [%{"itemName" => "Poppy_harvest", "count" => 35}, %{"itemName" => "Pansy_harvest", "count" => 30}, %{"itemName" => "Marigold_harvest", "count" => 50}]},
-      %{"ingredients" => [%{"itemName" => "Jasmine_harvest", "count" => 60}, %{"itemName" => "Lavender_harvest", "count" => 50}, %{"itemName" => "Poppy_harvest", "count" => 60}]},
-      %{"ingredients" => [%{"itemName" => "Rosemary_harvest", "count" => 50}, %{"itemName" => "Jasmine_harvest", "count" => 60}, %{"itemName" => "Lavender_harvest", "count" => 55}, %{"itemName" => "Snowdrop_harvest", "count" => 40}]},
-      %{"ingredients" => [%{"itemName" => "Dahlia_harvest", "count" => 50}, %{"itemName" => "Moonflower_harvest", "count" => 30}, %{"itemName" => "Rosemary_harvest", "count" => 60}, %{"itemName" => "Poppy_harvest", "count" => 80}, %{"itemName" => "Basil_harvest", "count" => 50}]}
+      %{"ingredients" => [%{"itemName" => "Sprouts", "count" => 1}]},
+      %{"ingredients" => [%{"itemName" => "Sprouts", "count" => 5}, %{"itemName" => "Cress", "count" => 2}]},
+      %{"ingredients" => [%{"itemName" => "Basil", "count" => 3}]},
+      %{"ingredients" => [%{"itemName" => "Chamomile", "count" => 5}]},
+      %{"ingredients" => [%{"itemName" => "Marigold", "count" => 12}, %{"itemName" => "Snowdrop", "count" => 8}, %{"itemName" => "Basil", "count" => 8}]},
+      %{"ingredients" => [%{"itemName" => "Mint", "count" => 8}, %{"itemName" => "Pansy", "count" => 4}, %{"itemName" => "Chamomile", "count" => 8}]},
+      %{"ingredients" => [%{"itemName" => "Lavender", "count" => 22}, %{"itemName" => "Snowdrop", "count" => 24}, %{"itemName" => "Basil", "count" => 18}]},
+      %{"ingredients" => [%{"itemName" => "Poppy", "count" => 35}, %{"itemName" => "Pansy", "count" => 30}, %{"itemName" => "Marigold", "count" => 50}]},
+      %{"ingredients" => [%{"itemName" => "Jasmine", "count" => 60}, %{"itemName" => "Lavender", "count" => 50}, %{"itemName" => "Poppy", "count" => 60}]},
+      %{"ingredients" => [%{"itemName" => "Rosemary", "count" => 50}, %{"itemName" => "Jasmine", "count" => 60}, %{"itemName" => "Lavender", "count" => 55}, %{"itemName" => "Snowdrop", "count" => 40}]},
+      %{"ingredients" => [%{"itemName" => "Dahlia", "count" => 50}, %{"itemName" => "Moonflower", "count" => 30}, %{"itemName" => "Rosemary", "count" => 60}, %{"itemName" => "Poppy", "count" => 80}, %{"itemName" => "Basil", "count" => 50}]}
     ]
   }},
   %{key: "vase_config", value: %{
@@ -285,62 +285,62 @@ game_configs = [
   %{key: "mallum_house_config", value: %{
     "mallums_per_house" => 1,
     "house_costs" => [
-      %{"mana" => 75, "harvests" => [%{"item" => "Sprouts_harvest", "count" => 2}]},
-      %{"mana" => 30, "harvests" => [%{"item" => "Basil_harvest", "count" => 2}]},
-      %{"mana" => 60, "harvests" => [%{"item" => "Lavender_harvest", "count" => 3}]},
-      %{"mana" => 100, "harvests" => [%{"item" => "Chamomile_harvest", "count" => 2}, %{"item" => "Mint_harvest", "count" => 2}]}
+      %{"mana" => 75, "harvests" => [%{"item" => "Sprouts", "count" => 2}]},
+      %{"mana" => 30, "harvests" => [%{"item" => "Basil", "count" => 2}]},
+      %{"mana" => 60, "harvests" => [%{"item" => "Lavender", "count" => 3}]},
+      %{"mana" => 100, "harvests" => [%{"item" => "Chamomile", "count" => 2}, %{"item" => "Mint", "count" => 2}]}
     ]
   }},
   %{key: "building_cost_config", value: %{
     "plot_costs" => [
-      %{"manaCost" => 150, "harvestCosts" => [%{"itemName" => "Sprouts_harvest", "count" => 1}]},
-      %{"manaCost" => 200, "harvestCosts" => [%{"itemName" => "Cress_harvest", "count" => 1}]},
-      %{"manaCost" => 260, "harvestCosts" => [%{"itemName" => "Basil_harvest", "count" => 2}]},
-      %{"manaCost" => 330, "harvestCosts" => [%{"itemName" => "Chamomile_harvest", "count" => 1}]},
-      %{"manaCost" => 420, "harvestCosts" => [%{"itemName" => "Chamomile_harvest", "count" => 1}]},
-      %{"manaCost" => 520, "harvestCosts" => [%{"itemName" => "Chamomile_harvest", "count" => 1}, %{"itemName" => "Basil_harvest", "count" => 1}]},
-      %{"manaCost" => 640, "harvestCosts" => [%{"itemName" => "Chamomile_harvest", "count" => 2}]},
-      %{"manaCost" => 780, "harvestCosts" => [%{"itemName" => "Lavender_harvest", "count" => 1}, %{"itemName" => "Chamomile_harvest", "count" => 1}]},
-      %{"manaCost" => 940, "harvestCosts" => [%{"itemName" => "Mint_harvest", "count" => 1}, %{"itemName" => "Lavender_harvest", "count" => 1}]},
-      %{"manaCost" => 1120, "harvestCosts" => [%{"itemName" => "Mint_harvest", "count" => 2}, %{"itemName" => "Chamomile_harvest", "count" => 1}]}
+      %{"manaCost" => 150, "harvestCosts" => [%{"itemName" => "Sprouts", "count" => 1}]},
+      %{"manaCost" => 200, "harvestCosts" => [%{"itemName" => "Cress", "count" => 1}]},
+      %{"manaCost" => 260, "harvestCosts" => [%{"itemName" => "Basil", "count" => 2}]},
+      %{"manaCost" => 330, "harvestCosts" => [%{"itemName" => "Chamomile", "count" => 1}]},
+      %{"manaCost" => 420, "harvestCosts" => [%{"itemName" => "Chamomile", "count" => 1}]},
+      %{"manaCost" => 520, "harvestCosts" => [%{"itemName" => "Chamomile", "count" => 1}, %{"itemName" => "Basil", "count" => 1}]},
+      %{"manaCost" => 640, "harvestCosts" => [%{"itemName" => "Chamomile", "count" => 2}]},
+      %{"manaCost" => 780, "harvestCosts" => [%{"itemName" => "Lavender", "count" => 1}, %{"itemName" => "Chamomile", "count" => 1}]},
+      %{"manaCost" => 940, "harvestCosts" => [%{"itemName" => "Mint", "count" => 1}, %{"itemName" => "Lavender", "count" => 1}]},
+      %{"manaCost" => 1120, "harvestCosts" => [%{"itemName" => "Mint", "count" => 2}, %{"itemName" => "Chamomile", "count" => 1}]}
     ],
     "vase_costs" => [
-      %{"manaCost" => 100, "harvestCosts" => [%{"itemName" => "Cress_harvest", "count" => 1}]},
-      %{"manaCost" => 120, "harvestCosts" => [%{"itemName" => "Basil_harvest", "count" => 2}]},
-      %{"manaCost" => 150, "harvestCosts" => [%{"itemName" => "Chamomile_harvest", "count" => 1}]},
-      %{"manaCost" => 180, "harvestCosts" => [%{"itemName" => "Chamomile_harvest", "count" => 1}]},
-      %{"manaCost" => 220, "harvestCosts" => [%{"itemName" => "Chamomile_harvest", "count" => 1}, %{"itemName" => "Basil_harvest", "count" => 1}]},
-      %{"manaCost" => 260, "harvestCosts" => [%{"itemName" => "Chamomile_harvest", "count" => 2}]},
-      %{"manaCost" => 310, "harvestCosts" => [%{"itemName" => "Lavender_harvest", "count" => 1}, %{"itemName" => "Basil_harvest", "count" => 1}]},
-      %{"manaCost" => 370, "harvestCosts" => [%{"itemName" => "Lavender_harvest", "count" => 1}, %{"itemName" => "Chamomile_harvest", "count" => 1}]}
+      %{"manaCost" => 100, "harvestCosts" => [%{"itemName" => "Cress", "count" => 1}]},
+      %{"manaCost" => 120, "harvestCosts" => [%{"itemName" => "Basil", "count" => 2}]},
+      %{"manaCost" => 150, "harvestCosts" => [%{"itemName" => "Chamomile", "count" => 1}]},
+      %{"manaCost" => 180, "harvestCosts" => [%{"itemName" => "Chamomile", "count" => 1}]},
+      %{"manaCost" => 220, "harvestCosts" => [%{"itemName" => "Chamomile", "count" => 1}, %{"itemName" => "Basil", "count" => 1}]},
+      %{"manaCost" => 260, "harvestCosts" => [%{"itemName" => "Chamomile", "count" => 2}]},
+      %{"manaCost" => 310, "harvestCosts" => [%{"itemName" => "Lavender", "count" => 1}, %{"itemName" => "Basil", "count" => 1}]},
+      %{"manaCost" => 370, "harvestCosts" => [%{"itemName" => "Lavender", "count" => 1}, %{"itemName" => "Chamomile", "count" => 1}]}
     ],
     "garden_costs" => [
-      %{"manaCost" => 550, "harvestCosts" => [%{"itemName" => "Chamomile_harvest", "count" => 3}]},
-      %{"manaCost" => 850, "harvestCosts" => [%{"itemName" => "Lavender_harvest", "count" => 3}]},
-      %{"manaCost" => 1200, "harvestCosts" => [%{"itemName" => "Mint_harvest", "count" => 3}, %{"itemName" => "Chamomile_harvest", "count" => 2}]},
-      %{"manaCost" => 1800, "harvestCosts" => [%{"itemName" => "Lavender_harvest", "count" => 4}, %{"itemName" => "Mint_harvest", "count" => 3}]},
-      %{"manaCost" => 2500, "harvestCosts" => [%{"itemName" => "Poppy_harvest", "count" => 3}, %{"itemName" => "Lavender_harvest", "count" => 4}]}
+      %{"manaCost" => 550, "harvestCosts" => [%{"itemName" => "Chamomile", "count" => 3}]},
+      %{"manaCost" => 850, "harvestCosts" => [%{"itemName" => "Lavender", "count" => 3}]},
+      %{"manaCost" => 1200, "harvestCosts" => [%{"itemName" => "Mint", "count" => 3}, %{"itemName" => "Chamomile", "count" => 2}]},
+      %{"manaCost" => 1800, "harvestCosts" => [%{"itemName" => "Lavender", "count" => 4}, %{"itemName" => "Mint", "count" => 3}]},
+      %{"manaCost" => 2500, "harvestCosts" => [%{"itemName" => "Poppy", "count" => 3}, %{"itemName" => "Lavender", "count" => 4}]}
     ]
   }},
   %{key: "recipe_configs", value: %{
-    "Basil_Pigment" => %{"ingredients" => [%{"item_name" => "Basil_harvest", "count" => 3}], "result_item" => "Basil_pigment", "result_quantity" => 1, "category" => "Pigment"},
-    "Chamomile_Pigment" => %{"ingredients" => [%{"item_name" => "Chamomile_harvest", "count" => 3}], "result_item" => "Chamomile_pigment", "result_quantity" => 1, "category" => "Pigment"},
-    "Dahlia_Pigment" => %{"ingredients" => [%{"item_name" => "Dahlia_harvest", "count" => 3}], "result_item" => "Dahlia_pigment", "result_quantity" => 1, "category" => "Pigment"},
-    "Jasmine_Pigment" => %{"ingredients" => [%{"item_name" => "Jasmine_harvest", "count" => 3}], "result_item" => "Jasmine_pigment", "result_quantity" => 1, "category" => "Pigment"},
-    "Lavender_Pigment" => %{"ingredients" => [%{"item_name" => "Lavender_harvest", "count" => 3}], "result_item" => "Lavender_pigment", "result_quantity" => 1, "category" => "Pigment"},
-    "Marigold_Pigment" => %{"ingredients" => [%{"item_name" => "Marigold_harvest", "count" => 3}], "result_item" => "Marigold_pigment", "result_quantity" => 1, "category" => "Pigment"},
-    "Mint_Pigment" => %{"ingredients" => [%{"item_name" => "Mint_harvest", "count" => 3}], "result_item" => "Mint_pigment", "result_quantity" => 1, "category" => "Pigment"},
-    "Moonflower_Pigment" => %{"ingredients" => [%{"item_name" => "Moonflower_harvest", "count" => 3}], "result_item" => "Moonflower_pigment", "result_quantity" => 1, "category" => "Pigment"},
-    "Pansy_Pigment" => %{"ingredients" => [%{"item_name" => "Pansy_harvest", "count" => 3}], "result_item" => "Pansy_pigment", "result_quantity" => 1, "category" => "Pigment"},
-    "Poppy_Pigment" => %{"ingredients" => [%{"item_name" => "Poppy_harvest", "count" => 3}], "result_item" => "Poppy_pigment", "result_quantity" => 1, "category" => "Pigment"},
-    "Rosemary_Pigment" => %{"ingredients" => [%{"item_name" => "Rosemary_harvest", "count" => 3}], "result_item" => "Rosemary_pigment", "result_quantity" => 1, "category" => "Pigment"},
-    "Snowdrop_Pigment" => %{"ingredients" => [%{"item_name" => "Snowdrop_harvest", "count" => 3}], "result_item" => "Snowdrop_pigment", "result_quantity" => 1, "category" => "Pigment"},
-    "Speed_Potion" => %{"ingredients" => [%{"item_name" => "Mint_harvest", "count" => 4}, %{"item_name" => "Chamomile_harvest", "count" => 3}], "result_item" => "Speed_Potion", "result_quantity" => 1, "category" => "Potion"},
+    "Basil_Pigment" => %{"ingredients" => [%{"item_name" => "Basil", "count" => 3}], "result_item" => "Basil_Pigment", "result_quantity" => 1, "category" => "Pigment"},
+    "Chamomile_Pigment" => %{"ingredients" => [%{"item_name" => "Chamomile", "count" => 3}], "result_item" => "Chamomile_Pigment", "result_quantity" => 1, "category" => "Pigment"},
+    "Dahlia_Pigment" => %{"ingredients" => [%{"item_name" => "Dahlia", "count" => 3}], "result_item" => "Dahlia_Pigment", "result_quantity" => 1, "category" => "Pigment"},
+    "Jasmine_Pigment" => %{"ingredients" => [%{"item_name" => "Jasmine", "count" => 3}], "result_item" => "Jasmine_Pigment", "result_quantity" => 1, "category" => "Pigment"},
+    "Lavender_Pigment" => %{"ingredients" => [%{"item_name" => "Lavender", "count" => 3}], "result_item" => "Lavender_Pigment", "result_quantity" => 1, "category" => "Pigment"},
+    "Marigold_Pigment" => %{"ingredients" => [%{"item_name" => "Marigold", "count" => 3}], "result_item" => "Marigold_Pigment", "result_quantity" => 1, "category" => "Pigment"},
+    "Mint_Pigment" => %{"ingredients" => [%{"item_name" => "Mint", "count" => 3}], "result_item" => "Mint_Pigment", "result_quantity" => 1, "category" => "Pigment"},
+    "Moonflower_Pigment" => %{"ingredients" => [%{"item_name" => "Moonflower", "count" => 3}], "result_item" => "Moonflower_Pigment", "result_quantity" => 1, "category" => "Pigment"},
+    "Pansy_Pigment" => %{"ingredients" => [%{"item_name" => "Pansy", "count" => 3}], "result_item" => "Pansy_Pigment", "result_quantity" => 1, "category" => "Pigment"},
+    "Poppy_Pigment" => %{"ingredients" => [%{"item_name" => "Poppy", "count" => 3}], "result_item" => "Poppy_Pigment", "result_quantity" => 1, "category" => "Pigment"},
+    "Rosemary_Pigment" => %{"ingredients" => [%{"item_name" => "Rosemary", "count" => 3}], "result_item" => "Rosemary_Pigment", "result_quantity" => 1, "category" => "Pigment"},
+    "Snowdrop_Pigment" => %{"ingredients" => [%{"item_name" => "Snowdrop", "count" => 3}], "result_item" => "Snowdrop_Pigment", "result_quantity" => 1, "category" => "Pigment"},
+    "Speed_Potion" => %{"ingredients" => [%{"item_name" => "Mint", "count" => 4}, %{"item_name" => "Chamomile", "count" => 3}], "result_item" => "Speed_Potion", "result_quantity" => 1, "category" => "Potion"},
     "Fertilizer" => %{"ingredients" => [%{"item_name" => "Berry", "count" => 3}, %{"item_name" => "Acorn", "count" => 1}], "result_item" => "Fertilizer", "result_quantity" => 1, "category" => "Material"}
   }},
   %{key: "skin_configs", value:
     Enum.reduce(~w(Basil Chamomile Dahlia Jasmine Lavender Marigold Mint Moonflower Pansy Poppy Rosemary Snowdrop), %{}, fn plant, acc ->
-      pigment = "#{plant}_pigment"
+      pigment = "#{plant}_Pigment"
       acc
       |> Map.put("#{plant}_plot", %{"building_type" => "plot", "cost_item_name" => pigment, "cost_quantity" => 1})
       |> Map.put("#{plant}_vase", %{"building_type" => "vase", "cost_item_name" => pigment, "cost_quantity" => 1})

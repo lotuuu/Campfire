@@ -14,16 +14,15 @@ defmodule CampFire.EconomyTest do
       assert economy.last_mana_collect_utc
     end
 
-    test "creates starting seeds and items" do
+    test "creates starting inventory" do
       player = register_player()
       {:ok, _economy} = Economy.init_economy(player.uid)
 
-      seeds = Economy.list_seeds(player.uid)
-      items = Economy.list_items(player.uid)
+      inventory = Economy.list_inventory(player.uid)
 
-      sprouts = Enum.find(seeds, &(&1.seed_name == "Sprouts"))
-      cress = Enum.find(seeds, &(&1.seed_name == "Cress"))
-      potion = Enum.find(items, &(&1.item_name == "Speed_Potion"))
+      sprouts = Enum.find(inventory, &(&1.item_name == "Sprouts_Seed"))
+      cress = Enum.find(inventory, &(&1.item_name == "Cress_Seed"))
+      potion = Enum.find(inventory, &(&1.item_name == "Speed_Potion"))
 
       assert sprouts.count == 5
       assert cress.count == 3
@@ -89,56 +88,54 @@ defmodule CampFire.EconomyTest do
     end
   end
 
-  describe "seeds" do
-    test "upsert adds to existing" do
+  describe "inventory (unified seeds + items)" do
+    test "upsert adds to existing seed" do
       player = register_player()
       {:ok, _} = Economy.init_economy(player.uid)
-      {:ok, seed} = Economy.upsert_seed(player.uid, "Sprouts", 3)
-      assert seed.count == 8
+      {:ok, item} = Economy.upsert_item(player.uid, "Sprouts_Seed", 3)
+      assert item.count == 8
     end
 
-    test "spend reduces count" do
+    test "spend seed reduces count" do
       player = register_player()
       {:ok, _} = Economy.init_economy(player.uid)
-      {:ok, _} = Economy.spend_seed(player.uid, "Sprouts", 2)
-      seeds = Economy.list_seeds(player.uid)
-      sprouts = Enum.find(seeds, &(&1.seed_name == "Sprouts"))
+      {:ok, _} = Economy.spend_item(player.uid, "Sprouts_Seed", 2)
+      inventory = Economy.list_inventory(player.uid)
+      sprouts = Enum.find(inventory, &(&1.item_name == "Sprouts_Seed"))
       assert sprouts.count == 3
     end
 
     test "spend deletes row when count reaches zero" do
       player = register_player()
       {:ok, _} = Economy.init_economy(player.uid)
-      {:ok, :spent} = Economy.spend_seed(player.uid, "Sprouts", 5)
-      seeds = Economy.list_seeds(player.uid)
-      assert Enum.find(seeds, &(&1.seed_name == "Sprouts")) == nil
+      {:ok, :spent} = Economy.spend_item(player.uid, "Sprouts_Seed", 5)
+      inventory = Economy.list_inventory(player.uid)
+      assert Enum.find(inventory, &(&1.item_name == "Sprouts_Seed")) == nil
     end
 
     test "spend rejects when insufficient" do
       player = register_player()
       {:ok, _} = Economy.init_economy(player.uid)
-      assert {:error, :insufficient_seeds} = Economy.spend_seed(player.uid, "Sprouts", 99)
+      assert {:error, :insufficient_items} = Economy.spend_item(player.uid, "Sprouts_Seed", 99)
     end
-  end
 
-  describe "items" do
-    test "upsert adds to existing" do
+    test "upsert item adds to existing" do
       player = register_player()
       {:ok, _} = Economy.init_economy(player.uid)
       {:ok, item} = Economy.upsert_item(player.uid, "Speed_Potion", 2)
       assert item.count == 5
     end
 
-    test "spend reduces count" do
+    test "spend item reduces count" do
       player = register_player()
       {:ok, _} = Economy.init_economy(player.uid)
       {:ok, _} = Economy.spend_item(player.uid, "Speed_Potion", 1)
-      items = Economy.list_items(player.uid)
-      potion = Enum.find(items, &(&1.item_name == "Speed_Potion"))
+      inventory = Economy.list_inventory(player.uid)
+      potion = Enum.find(inventory, &(&1.item_name == "Speed_Potion"))
       assert potion.count == 2
     end
 
-    test "spend rejects when insufficient" do
+    test "spend item rejects when insufficient" do
       player = register_player()
       {:ok, _} = Economy.init_economy(player.uid)
       assert {:error, :insufficient_items} = Economy.spend_item(player.uid, "Speed_Potion", 99)
@@ -149,16 +146,16 @@ defmodule CampFire.EconomyTest do
     test "consumes items and increments level" do
       player = register_player()
       {:ok, _} = Economy.init_economy(player.uid)
-      {:ok, _} = Economy.upsert_item(player.uid, "Sprouts_harvest", 5)
+      {:ok, _} = Economy.upsert_item(player.uid, "Sprouts", 5)
 
       {:ok, economy} = Economy.upgrade_flame(player.uid, [
-        %{"item_name" => "Sprouts_harvest", "count" => 1}
+        %{"item_name" => "Sprouts", "count" => 1}
       ])
 
       assert economy.flame_level == 2
 
-      items = Economy.list_items(player.uid)
-      sprouts = Enum.find(items, &(&1.item_name == "Sprouts_harvest"))
+      inventory = Economy.list_inventory(player.uid)
+      sprouts = Enum.find(inventory, &(&1.item_name == "Sprouts"))
       assert sprouts.count == 4
     end
 
@@ -166,9 +163,9 @@ defmodule CampFire.EconomyTest do
       player = register_player()
       {:ok, _} = Economy.init_economy(player.uid)
 
-      assert {:error, {:insufficient_items, "Sprouts_harvest"}} =
+      assert {:error, {:insufficient_items, "Sprouts"}} =
                Economy.upgrade_flame(player.uid, [
-                 %{"item_name" => "Sprouts_harvest", "count" => 1}
+                 %{"item_name" => "Sprouts", "count" => 1}
                ])
     end
   end

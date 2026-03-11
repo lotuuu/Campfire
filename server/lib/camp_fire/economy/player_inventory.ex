@@ -1,15 +1,15 @@
-defmodule CampFire.Economy.PlayerItem do
+defmodule CampFire.Economy.PlayerInventory do
   use Ecto.Schema
   import Ecto.Changeset
 
-  schema "player_items" do
+  schema "player_inventory" do
     field :player_uid, :string
     field :item_name, :string
     field :count, :integer
   end
 
-  def changeset(item, attrs) do
-    item
+  def changeset(inventory, attrs) do
+    inventory
     |> cast(attrs, [:player_uid, :item_name, :count])
     |> validate_required([:player_uid, :item_name, :count])
     |> validate_number(:count, greater_than: 0)

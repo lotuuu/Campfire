@@ -121,11 +121,11 @@ defmodule CampFire.Game.MallumsTest do
       assert updated.assigned_quest_name == nil
       assert updated.pending_rewards == []
 
-      # Check seeds were added
-      seeds = Economy.list_seeds(player.uid)
+      # Check seeds were added to inventory (with _Seed suffix)
+      inventory = Economy.list_inventory(player.uid)
 
       Enum.each(rewards, fn reward ->
-        seed = Enum.find(seeds, &(&1.seed_name == reward["seed_name"]))
+        seed = Enum.find(inventory, &(&1.item_name == reward["seed_name"] <> "_Seed"))
         assert seed != nil
         assert seed.count >= reward["count"]
       end)
@@ -151,8 +151,8 @@ defmodule CampFire.Game.MallumsTest do
       assert length(completed.pending_rewards) >= 1
 
       # Speed_Potion should be consumed
-      items = Economy.list_items(player.uid)
-      potion = Enum.find(items, &(&1.item_name == "Speed_Potion"))
+      inventory = Economy.list_inventory(player.uid)
+      potion = Enum.find(inventory, &(&1.item_name == "Speed_Potion"))
       assert potion.count == 2
     end
 

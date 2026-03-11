@@ -1,7 +1,7 @@
 defmodule CampFire.Economy do
   import Ecto.Query
   alias CampFire.Repo
-  alias CampFire.Economy.{PlayerEconomy, PlayerSeed, PlayerItem}
+  alias CampFire.Economy.{PlayerEconomy, PlayerInventory}
 
   @base_mana_per_second 0.5
   @mana_per_level 0.3
@@ -33,8 +33,8 @@ defmodule CampFire.Economy do
     |> Repo.insert()
     |> case do
       {:ok, economy} ->
-        upsert_seed(player_uid, "Sprouts", 5)
-        upsert_seed(player_uid, "Cress", 3)
+        upsert_item(player_uid, "Sprouts_Seed", 5)
+        upsert_item(player_uid, "Cress_Seed", 3)
         upsert_item(player_uid, "Speed_Potion", 3)
         create_starter_buildings(player_uid)
         {:ok, economy}
@@ -48,9 +48,8 @@ defmodule CampFire.Economy do
 
   def get_full_state(player_uid) do
     economy = Repo.get(PlayerEconomy, player_uid)
-    seeds = list_seeds(player_uid)
-    items = list_items(player_uid)
-    {economy, seeds, items}
+    inventory = list_inventory(player_uid)
+    {economy, inventory}
   end
 
   # --- Mana ---
@@ -154,53 +153,14 @@ defmodule CampFire.Economy do
     end)
   end
 
-  # --- Seeds ---
+  # --- Inventory ---
 
-  def list_seeds(player_uid) do
-    from(s in PlayerSeed, where: s.player_uid == ^player_uid) |> Repo.all()
-  end
-
-  def upsert_seed(player_uid, seed_name, count) when is_integer(count) and count > 0 do
-    %PlayerSeed{player_uid: player_uid, seed_name: seed_name, count: count}
-    |> Repo.insert(
-      on_conflict: [inc: [count: count]],
-      conflict_target: [:player_uid, :seed_name],
-      returning: true
-    )
-  end
-
-  def spend_seed(player_uid, seed_name, count, opts \\ []) when is_integer(count) and count > 0 do
-    if opts[:free_mode] do
-      {:ok, :spent}
-    else
-      {updated, _} =
-        from(s in PlayerSeed,
-          where: s.player_uid == ^player_uid and s.seed_name == ^seed_name and s.count >= ^count
-        )
-        |> Repo.update_all(inc: [count: -count])
-
-      if updated == 0 do
-        {:error, :insufficient_seeds}
-      else
-        # Clean up zero-count rows
-        from(s in PlayerSeed,
-          where: s.player_uid == ^player_uid and s.seed_name == ^seed_name and s.count == 0
-        )
-        |> Repo.delete_all()
-
-        {:ok, :spent}
-      end
-    end
-  end
-
-  # --- Items ---
-
-  def list_items(player_uid) do
-    from(i in PlayerItem, where: i.player_uid == ^player_uid) |> Repo.all()
+  def list_inventory(player_uid) do
+    from(i in PlayerInventory, where: i.player_uid == ^player_uid) |> Repo.all()
   end
 
   def upsert_item(player_uid, item_name, count) when is_integer(count) and count > 0 do
-    %PlayerItem{player_uid: player_uid, item_name: item_name, count: count}
+    %PlayerInventory{player_uid: player_uid, item_name: item_name, count: count}
     |> Repo.insert(
       on_conflict: [inc: [count: count]],
       conflict_target: [:player_uid, :item_name],
@@ -213,7 +173,7 @@ defmodule CampFire.Economy do
       {:ok, :spent}
     else
       {updated, _} =
-        from(i in PlayerItem,
+        from(i in PlayerInventory,
           where: i.player_uid == ^player_uid and i.item_name == ^item_name and i.count >= ^count
         )
         |> Repo.update_all(inc: [count: -count])
@@ -222,7 +182,7 @@ defmodule CampFire.Economy do
         {:error, :insufficient_items}
       else
         # Clean up zero-count rows
-        from(i in PlayerItem,
+        from(i in PlayerInventory,
           where: i.player_uid == ^player_uid and i.item_name == ^item_name and i.count == 0
         )
         |> Repo.delete_all()
@@ -324,7 +284,7 @@ defmodule CampFire.Economy do
 
   defp spend_items_in_tx(player_uid, item_name, count) do
     {updated, _} =
-      from(i in PlayerItem,
+      from(i in PlayerInventory,
         where: i.player_uid == ^player_uid and i.item_name == ^item_name and i.count >= ^count
       )
       |> Repo.update_all(inc: [count: -count])
@@ -332,7 +292,7 @@ defmodule CampFire.Economy do
     if updated == 0 do
       {:error, {:insufficient_items, item_name}}
     else
-      from(i in PlayerItem,
+      from(i in PlayerInventory,
         where: i.player_uid == ^player_uid and i.item_name == ^item_name and i.count == 0
       )
       |> Repo.delete_all()

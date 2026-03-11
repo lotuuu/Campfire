@@ -10,8 +10,8 @@ defmodule CampFireWeb.EconomyController do
         conn |> put_status(404) |> json(%{error: "No economy record. Call POST /economy/init first."})
 
       economy ->
-        {_economy, seeds, items} = Economy.get_full_state(player_uid)
-        conn |> put_status(200) |> json(format_state(economy, seeds, items))
+        {_economy, inventory} = Economy.get_full_state(player_uid)
+        conn |> put_status(200) |> json(format_state(economy, inventory))
     end
   end
 
@@ -23,8 +23,8 @@ defmodule CampFireWeb.EconomyController do
     else
       case Economy.init_economy(player_uid) do
         {:ok, economy} ->
-          {_economy, seeds, items} = Economy.get_full_state(player_uid)
-          conn |> put_status(201) |> json(format_state(economy, seeds, items))
+          {_economy, inventory} = Economy.get_full_state(player_uid)
+          conn |> put_status(201) |> json(format_state(economy, inventory))
 
         {:error, _changeset} ->
           conn |> put_status(422) |> json(%{error: "Failed to initialize economy"})
@@ -111,53 +111,17 @@ defmodule CampFireWeb.EconomyController do
     conn |> put_status(400) |> json(%{error: "Missing 'items' array"})
   end
 
-  def add_seeds(conn, %{"seed_name" => name, "count" => count})
-      when is_binary(name) and is_integer(count) and count > 0 do
-    player_uid = conn.assigns.current_player.uid
-
-    case Economy.upsert_seed(player_uid, name, count) do
-      {:ok, _} ->
-        seeds = Economy.list_seeds(player_uid)
-        conn |> put_status(200) |> json(%{seeds: format_seeds(seeds)})
-
-      {:error, _} ->
-        conn |> put_status(422) |> json(%{error: "Failed to add seeds"})
-    end
-  end
-
-  def add_seeds(conn, _params) do
-    conn |> put_status(400) |> json(%{error: "Missing 'seed_name' (string) and 'count' (positive integer)"})
-  end
-
-  def spend_seeds(conn, %{"seed_name" => name, "count" => count} = params)
-      when is_binary(name) and is_integer(count) and count > 0 do
-    player_uid = conn.assigns.current_player.uid
-
-    case Economy.spend_seed(player_uid, name, count, free_mode_opts(params)) do
-      {:ok, _} ->
-        seeds = Economy.list_seeds(player_uid)
-        conn |> put_status(200) |> json(%{seeds: format_seeds(seeds)})
-
-      {:error, :insufficient_seeds} ->
-        conn |> put_status(422) |> json(%{error: "Insufficient seeds: #{name}"})
-    end
-  end
-
-  def spend_seeds(conn, _params) do
-    conn |> put_status(400) |> json(%{error: "Missing 'seed_name' (string) and 'count' (positive integer)"})
-  end
-
   def add_items(conn, %{"item_name" => name, "count" => count})
       when is_binary(name) and is_integer(count) and count > 0 do
     player_uid = conn.assigns.current_player.uid
 
     case Economy.upsert_item(player_uid, name, count) do
       {:ok, _} ->
-        items = Economy.list_items(player_uid)
-        conn |> put_status(200) |> json(%{items: format_items(items)})
+        inventory = Economy.list_inventory(player_uid)
+        conn |> put_status(200) |> json(%{inventory: format_inventory(inventory)})
 
       {:error, _} ->
-        conn |> put_status(422) |> json(%{error: "Failed to add items"})
+        conn |> put_status(422) |> json(%{error: "Failed to add item"})
     end
   end
 
@@ -170,8 +134,8 @@ defmodule CampFireWeb.EconomyController do
 
     case Economy.spend_items(player_uid, items, free_mode_opts(params)) do
       {:ok, _} ->
-        all_items = Economy.list_items(player_uid)
-        conn |> put_status(200) |> json(%{items: format_items(all_items)})
+        inventory = Economy.list_inventory(player_uid)
+        conn |> put_status(200) |> json(%{inventory: format_inventory(inventory)})
 
       {:error, {:insufficient_items, name}} ->
         conn |> put_status(422) |> json(%{error: "Insufficient items: #{name}"})
@@ -186,22 +150,17 @@ defmodule CampFireWeb.EconomyController do
     if params["freeMode"], do: [free_mode: true], else: []
   end
 
-  defp format_state(economy, seeds, items) do
+  defp format_state(economy, inventory) do
     %{
       mana: economy.mana,
       gems: economy.gems,
       flameLevel: economy.flame_level,
       lastManaCollectUtc: DateTime.to_iso8601(economy.last_mana_collect_utc),
-      seeds: format_seeds(seeds),
-      items: format_items(items)
+      inventory: format_inventory(inventory)
     }
   end
 
-  defp format_seeds(seeds) do
-    Enum.map(seeds, fn s -> %{seedName: s.seed_name, count: s.count} end)
-  end
-
-  defp format_items(items) do
-    Enum.map(items, fn i -> %{itemName: i.item_name, count: i.count} end)
+  defp format_inventory(inventory) do
+    Enum.map(inventory, fn i -> %{itemName: i.item_name, count: i.count} end)
   end
 end

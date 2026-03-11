@@ -47,12 +47,12 @@ defmodule CampFire.Game.PlotsTest do
     end
 
     # Give player some Basil seeds
-    {:ok, _} = Economy.upsert_seed(player.uid, "Basil", 5)
+    {:ok, _} = Economy.upsert_item(player.uid, "Basil_Seed", 5)
 
     # Give harvest items needed for plot/vase crafting
-    Economy.upsert_item(player.uid, "Sprouts_harvest", 10)
-    Economy.upsert_item(player.uid, "Basil_harvest", 10)
-    Economy.upsert_item(player.uid, "Cress_harvest", 10)
+    Economy.upsert_item(player.uid, "Sprouts", 10)
+    Economy.upsert_item(player.uid, "Basil", 10)
+    Economy.upsert_item(player.uid, "Cress", 10)
 
     player
   end
@@ -73,8 +73,8 @@ defmodule CampFire.Game.PlotsTest do
       assert economy.mana == 800.0
 
       # 2nd plot costs 1 Basil_harvest
-      items = Economy.list_items(player.uid)
-      basil_h = Enum.find(items, &(&1.item_name == "Basil_harvest"))
+      inventory = Economy.list_inventory(player.uid)
+      basil_h = Enum.find(inventory, &(&1.item_name == "Basil"))
       assert basil_h.count == 9
     end
 
@@ -89,8 +89,8 @@ defmodule CampFire.Game.PlotsTest do
       assert economy.mana == 540.0
 
       # 3rd plot (index 2) costs 2 Basil_harvest, plus the 1 from 2nd plot = 3 total
-      items = Economy.list_items(player.uid)
-      basil_h = Enum.find(items, &(&1.item_name == "Basil_harvest"))
+      inventory = Economy.list_inventory(player.uid)
+      basil_h = Enum.find(inventory, &(&1.item_name == "Basil"))
       assert basil_h.count == 7
     end
 
@@ -147,8 +147,8 @@ defmodule CampFire.Game.PlotsTest do
       {:ok, plot} = Plots.craft_plot(player.uid, 2, 0)
 
       # Sprouts is in seed_configs but the player has none left after init
-      {:ok, _} = Economy.spend_seed(player.uid, "Sprouts", 5)
-      {:error, :insufficient_seeds} = Plots.plant(player.uid, plot.id, "Sprouts")
+      {:ok, _} = Economy.spend_item(player.uid, "Sprouts_Seed", 5)
+      {:error, :insufficient_items} = Plots.plant(player.uid, plot.id, "Sprouts")
     end
   end
 
@@ -200,7 +200,7 @@ defmodule CampFire.Game.PlotsTest do
       })
       |> Repo.insert!()
 
-      {:ok, _} = Economy.upsert_seed(player.uid, "HarvestTest", 1)
+      {:ok, _} = Economy.upsert_item(player.uid, "HarvestTest_Seed", 1)
       {:ok, plot} = Plots.craft_plot(player.uid, 2, 0)
       {:ok, _} = Plots.plant(player.uid, plot.id, "HarvestTest")
 
@@ -228,7 +228,7 @@ defmodule CampFire.Game.PlotsTest do
       })
       |> Repo.insert!()
 
-      {:ok, _} = Economy.upsert_seed(player.uid, "SimpleSeed", 1)
+      {:ok, _} = Economy.upsert_item(player.uid, "SimpleSeed_Seed", 1)
       {:ok, plot} = Plots.craft_plot(player.uid, 2, 0)
       {:ok, _} = Plots.plant(player.uid, plot.id, "SimpleSeed")
       {:ok, _} = Plots.force_mature(plot.id)
@@ -281,7 +281,7 @@ defmodule CampFire.Game.PlotsTest do
       })
       |> Repo.insert!()
 
-      {:ok, _} = Economy.upsert_seed(player.uid, "SlowPlant", 1)
+      {:ok, _} = Economy.upsert_item(player.uid, "SlowPlant_Seed", 1)
       {:ok, plot} = Plots.craft_plot(player.uid, 2, 0)
       {:ok, _} = Plots.plant(player.uid, plot.id, "SlowPlant")
 

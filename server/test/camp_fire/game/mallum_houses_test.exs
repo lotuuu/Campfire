@@ -16,8 +16,8 @@ defmodule CampFire.Game.MallumHousesTest do
     economy |> Ecto.Changeset.change(mana: 5000.0) |> Repo.update!()
 
     # Give harvest items needed for house crafting
-    Economy.upsert_item(player.uid, "Basil_harvest", 20)
-    Economy.upsert_item(player.uid, "Chamomile_harvest", 20)
+    Economy.upsert_item(player.uid, "Basil", 20)
+    Economy.upsert_item(player.uid, "Chamomile", 20)
 
     player
   end
@@ -50,9 +50,9 @@ defmodule CampFire.Game.MallumHousesTest do
       # Started with 5000, 2nd house (index 1) costs 350 mana
       assert economy.mana == 4650.0
 
-      # 2nd house costs 2 Chamomile_harvest
-      items = Economy.list_items(player.uid)
-      chamomile_h = Enum.find(items, &(&1.item_name == "Chamomile_harvest"))
+      # 2nd house costs 2 Chamomile
+      inventory = Economy.list_inventory(player.uid)
+      chamomile_h = Enum.find(inventory, &(&1.item_name == "Chamomile"))
       assert chamomile_h.count == 18
     end
 
@@ -66,8 +66,8 @@ defmodule CampFire.Game.MallumHousesTest do
       # Boost mana and give items
       economy = Economy.get_economy(player.uid)
       economy |> Ecto.Changeset.change(mana: 10000.0) |> Repo.update!()
-      Economy.upsert_item(player.uid, "Basil_harvest", 50)
-      Economy.upsert_item(player.uid, "Chamomile_harvest", 50)
+      Economy.upsert_item(player.uid, "Basil", 50)
+      Economy.upsert_item(player.uid, "Chamomile", 50)
 
       # low_cap at level 1 = 4, init creates 4 entities (plot + vase + house + apotheke)
       {:error, :entity_cap_reached} = MallumHouses.craft_house(player.uid, 2, 0)

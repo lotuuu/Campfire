@@ -9,7 +9,7 @@ defmodule CampFire.Game.Debug do
   import Ecto.Query
   alias CampFire.Repo
   alias CampFire.Economy
-  alias CampFire.Economy.{PlayerEconomy, PlayerSeed, PlayerItem}
+  alias CampFire.Economy.{PlayerEconomy, PlayerInventory}
 
   alias CampFire.Game.{
     PlayerPlot,
@@ -159,9 +159,9 @@ defmodule CampFire.Game.Debug do
 
   # ── Inventory Grants ─────────────────────────────────────────
 
-  @doc "Grant seeds to a player."
+  @doc "Grant seeds to a player. seed_name should include _Seed suffix (e.g. 'Sprouts_Seed')."
   def grant_seeds(player_uid, seed_name, count) when is_integer(count) and count > 0 do
-    Economy.upsert_seed(player_uid, seed_name, count)
+    Economy.upsert_item(player_uid, seed_name, count)
   end
 
   @doc "Grant items to a player."
@@ -275,8 +275,7 @@ defmodule CampFire.Game.Debug do
       from(b in PlayerBird, where: b.player_uid == ^player_uid) |> Repo.delete_all()
       from(h in PlayerMallumHouse, where: h.player_uid == ^player_uid) |> Repo.delete_all()
       from(a in PlayerApotheke, where: a.player_uid == ^player_uid) |> Repo.delete_all()
-      from(s in PlayerSeed, where: s.player_uid == ^player_uid) |> Repo.delete_all()
-      from(i in PlayerItem, where: i.player_uid == ^player_uid) |> Repo.delete_all()
+      from(i in PlayerInventory, where: i.player_uid == ^player_uid) |> Repo.delete_all()
       from(e in PlayerEconomy, where: e.player_uid == ^player_uid) |> Repo.delete_all()
       from(s in PlayerState, where: s.player_uid == ^player_uid) |> Repo.delete_all()
 

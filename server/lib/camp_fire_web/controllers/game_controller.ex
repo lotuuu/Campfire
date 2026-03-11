@@ -120,9 +120,9 @@ defmodule CampFireWeb.GameController do
     apotheke = Repo.get_by(PlayerApotheke, player_uid: uid) ||
       Repo.insert!(%PlayerApotheke{player_uid: uid, grid_x: 1, grid_y: 0})
 
-    {economy, seeds, items} =
+    {economy, inventory} =
       case Economy.get_economy(uid) do
-        nil -> {nil, [], []}
+        nil -> {nil, []}
         _eco -> Economy.get_full_state(uid)
       end
 
@@ -149,8 +149,7 @@ defmodule CampFireWeb.GameController do
           gems: economy.gems,
           flameLevel: economy.flame_level,
           lastManaCollectUtc: DateTime.to_iso8601(economy.last_mana_collect_utc),
-          seeds: Enum.map(seeds, fn s -> %{seedName: s.seed_name, count: s.count} end),
-          items: Enum.map(items, fn i -> %{itemName: i.item_name, count: i.count} end)
+          inventory: Enum.map(inventory, fn i -> %{itemName: i.item_name, count: i.count} end)
         }
       else
         nil

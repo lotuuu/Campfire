@@ -142,8 +142,8 @@ defmodule CampFire.Game.BirdsTest do
       assert Birds.list_birds(player.uid) == []
 
       # Seeds should be in inventory
-      seeds = Economy.list_seeds(player.uid)
-      basil = Enum.find(seeds, &(&1.seed_name == "Basil"))
+      inventory = Economy.list_inventory(player.uid)
+      basil = Enum.find(inventory, &(&1.item_name == "Basil_Seed"))
       assert basil != nil
       assert basil.count >= 3
     end

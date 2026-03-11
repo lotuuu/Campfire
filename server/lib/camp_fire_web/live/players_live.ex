@@ -224,37 +224,20 @@ defmodule CampFireWeb.PlayersLive do
           <% end %>
         </div>
 
-        <%!-- Seeds --%>
+        <%!-- Inventory --%>
         <div class="bg-white border rounded-lg p-4">
-          <h3 class="font-semibold text-lg mb-3">Seeds</h3>
-          <%= if @detail.seeds != [] do %>
-            <table class="w-full text-sm">
-              <thead><tr><th class="text-left text-gray-500">Seed</th><th class="text-left text-gray-500">Count</th></tr></thead>
-              <tbody>
-                <%= for s <- @detail.seeds do %>
-                  <tr><td>{s.seed_name}</td><td>{s.count}</td></tr>
-                <% end %>
-              </tbody>
-            </table>
-          <% else %>
-            <p class="text-gray-400 text-sm">No seeds</p>
-          <% end %>
-        </div>
-
-        <%!-- Items --%>
-        <div class="bg-white border rounded-lg p-4">
-          <h3 class="font-semibold text-lg mb-3">Items</h3>
-          <%= if @detail.items != [] do %>
+          <h3 class="font-semibold text-lg mb-3">Inventory</h3>
+          <%= if @detail.inventory != [] do %>
             <table class="w-full text-sm">
               <thead><tr><th class="text-left text-gray-500">Item</th><th class="text-left text-gray-500">Count</th></tr></thead>
               <tbody>
-                <%= for i <- @detail.items do %>
+                <%= for i <- @detail.inventory do %>
                   <tr><td>{i.item_name}</td><td>{i.count}</td></tr>
                 <% end %>
               </tbody>
             </table>
           <% else %>
-            <p class="text-gray-400 text-sm">No items</p>
+            <p class="text-gray-400 text-sm">No inventory</p>
           <% end %>
         </div>
 

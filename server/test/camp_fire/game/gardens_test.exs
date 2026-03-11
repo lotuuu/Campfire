@@ -73,8 +73,8 @@ defmodule CampFire.Game.GardensTest do
       assert result.amount == 3
 
       # Check item was added to inventory
-      items = Economy.list_items(player.uid)
-      berry = Enum.find(items, &(&1.item_name == "Berry"))
+      inventory = Economy.list_inventory(player.uid)
+      berry = Enum.find(inventory, &(&1.item_name == "Berry"))
       assert berry != nil
       assert berry.count == 3
     end

@@ -37,12 +37,12 @@ defmodule CampFireWeb.GameControllerTest do
     # Boost mana and provide harvest items for crafting
     economy = Economy.get_economy(player.uid)
     economy |> Ecto.Changeset.change(mana: 2000.0) |> Repo.update!()
-    Economy.upsert_item(player.uid, "Sprouts_harvest", 10)
-    Economy.upsert_item(player.uid, "Basil_harvest", 10)
-    Economy.upsert_item(player.uid, "Cress_harvest", 10)
-    Economy.upsert_item(player.uid, "Chamomile_harvest", 10)
+    Economy.upsert_item(player.uid, "Sprouts", 10)
+    Economy.upsert_item(player.uid, "Basil", 10)
+    Economy.upsert_item(player.uid, "Cress", 10)
+    Economy.upsert_item(player.uid, "Chamomile", 10)
 
-    {:ok, _} = Economy.upsert_seed(player.uid, "Basil", 5)
+    {:ok, _} = Economy.upsert_item(player.uid, "Basil_Seed", 5)
 
     {player, authed_conn(conn, player)}
   end
@@ -141,7 +141,7 @@ defmodule CampFireWeb.GameControllerTest do
       # Harvest
       conn5 = build_conn() |> authed_conn(player) |> post("/game/plot/harvest", %{plotId: plot_id})
       harvest = json_response(conn5, 200)
-      assert harvest["itemName"] == "Basil_harvest"
+      assert harvest["itemName"] == "Basil"
       assert harvest["drops"] >= 1
       assert harvest["score"] >= 0.0
     end
@@ -296,7 +296,7 @@ defmodule CampFireWeb.GameControllerTest do
     test "crafts recipe and returns result", %{conn: conn} do
       {player, conn} = setup_player(conn)
       seed_recipe_configs()
-      Economy.upsert_item(player.uid, "Basil_harvest", 5)
+      Economy.upsert_item(player.uid, "Basil", 5)
       conn = post(conn, "/game/apotheke/craft", %{recipeName: "Fertilizer"})
       body = json_response(conn, 200)
       assert body["resultItem"] == "Fertilizer"
@@ -316,7 +316,7 @@ defmodule CampFireWeb.GameControllerTest do
     test "unlocks and applies skin", %{conn: conn} do
       {player, conn} = setup_player(conn)
       seed_skin_configs()
-      Economy.upsert_item(player.uid, "Basil_harvest", 10)
+      Economy.upsert_item(player.uid, "Basil", 10)
       houses = MallumHouses.list_houses(player.uid)
       house = List.first(houses)
       conn = post(conn, "/game/mallum-house/set-skin", %{houseId: house.id, skinName: "CozyHouse"})
