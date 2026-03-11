@@ -155,6 +155,22 @@ defmodule CampFireWeb.SpritesLive do
             </button>
           </div>
 
+          <%= if category == "portraits" do %>
+            <details class="mb-4 text-sm text-gray-500 border border-gray-200 rounded-lg p-3">
+              <summary class="cursor-pointer font-medium text-gray-600">Naming guide</summary>
+              <div class="mt-2 space-y-1.5">
+                <p>Each visitor has a <code class="bg-gray-100 px-1 rounded">portrait_id</code> set in the Visitors admin. The sprite key is <code class="bg-gray-100 px-1 rounded">portraits/{"{portrait_id}"}</code>.</p>
+                <div class="grid grid-cols-2 gap-x-6 gap-y-1 mt-2 font-mono text-xs">
+                  <div class="font-semibold col-span-2 text-gray-600 text-sm mt-1">Current visitors</div>
+                  <div>thorn</div><div class="text-gray-400">Thorn (merchant)</div>
+                  <div>willow</div><div class="text-gray-400">Willow (gifter)</div>
+                  <div>ember</div><div class="text-gray-400">Ember (quester)</div>
+                </div>
+                <p class="mt-2">Use lowercase names matching the visitor's <code class="bg-gray-100 px-1 rounded">portrait_id</code>. Add new portraits here when creating new visitor templates.</p>
+              </div>
+            </details>
+          <% end %>
+
           <%= if category == "hex" do %>
             <details class="mb-4 text-sm text-gray-500 border border-gray-200 rounded-lg p-3">
               <summary class="cursor-pointer font-medium text-gray-600">Naming guide</summary>

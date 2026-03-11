@@ -2,10 +2,14 @@ defmodule CampFireWeb.VisitorsLive do
   use CampFireWeb, :live_view
 
   alias CampFire.Admin
+  alias CampFire.Sprites
+
+  @max_file_size 5_000_000
 
   def mount(_params, _session, socket) do
     {:ok,
-     assign(socket,
+     socket
+     |> assign(
        active_tab: :visitors,
        sub_tab: :templates,
        visitors: Admin.list_visitors(),
@@ -16,6 +20,11 @@ defmodule CampFireWeb.VisitorsLive do
        offer_pool_json: "[]",
        gift_pool_json: "[]",
        quest_pool_json: "[]"
+     )
+     |> allow_upload(:portrait,
+       accept: ~w(.png),
+       max_file_size: @max_file_size,
+       max_entries: 1
      )}
   end
 
@@ -99,6 +108,16 @@ defmodule CampFireWeb.VisitorsLive do
         |> Map.put("offer_pool", offer)
         |> Map.put("gift_pool", gift)
         |> Map.put("quest_pool", quest)
+
+      # Upload portrait sprite if a file was provided
+      portrait_id = Map.get(attrs, "portrait_id", "")
+
+      if portrait_id != "" && socket.assigns.uploads.portrait.entries != [] do
+        consume_uploaded_entries(socket, :portrait, fn %{path: path}, _entry ->
+          Sprites.upload_sprite("portraits/#{portrait_id}", File.read!(path))
+          {:ok, portrait_id}
+        end)
+      end
 
       case Admin.update_visitor(visitor, attrs) do
         {:ok, _} ->
@@ -195,6 +214,19 @@ defmodule CampFireWeb.VisitorsLive do
                 <div>
                   <label class="block text-sm font-medium text-gray-700">Portrait ID</label>
                   <input type="text" name="visitor[portrait_id]" value={@form[:portrait_id].value} class="mt-1 block w-full border rounded px-3 py-2" />
+                  <div class="mt-2 flex items-center gap-3">
+                    <%= if @form[:portrait_id].value && @form[:portrait_id].value != "" do %>
+                      <img
+                        src={Sprites.sprite_url("portraits/#{@form[:portrait_id].value}") <> "?v=#{System.os_time(:second)}"}
+                        class="w-16 h-16 object-contain bg-gray-100 rounded border"
+                        onerror="this.style.display='none'"
+                      />
+                    <% end %>
+                    <div class="flex-1">
+                      <label class="block text-xs text-gray-500 mb-1">Upload portrait PNG</label>
+                      <.live_file_input upload={@uploads.portrait} class="text-xs" />
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -257,6 +289,7 @@ defmodule CampFireWeb.VisitorsLive do
         <table class="w-full bg-white border rounded-lg">
           <thead class="bg-gray-50">
             <tr>
+              <th class="px-4 py-3 text-left text-sm font-medium text-gray-500"></th>
               <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Visitor ID</th>
               <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Name</th>
               <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Type</th>
@@ -268,6 +301,15 @@ defmodule CampFireWeb.VisitorsLive do
           <tbody class="divide-y">
             <%= for v <- @visitors do %>
               <tr class="hover:bg-gray-50">
+                <td class="px-4 py-3">
+                  <%= if v.portrait_id && v.portrait_id != "" do %>
+                    <img
+                      src={Sprites.sprite_url("portraits/#{v.portrait_id}") <> "?v=#{System.os_time(:second)}"}
+                      class="w-10 h-10 object-contain bg-gray-100 rounded"
+                      onerror="this.style.display='none'"
+                    />
+                  <% end %>
+                </td>
                 <td class="px-4 py-3 font-mono text-sm">{v.visitor_id}</td>
                 <td class="px-4 py-3 font-medium">{v.name}</td>
                 <td class="px-4 py-3">{v.type}</td>
