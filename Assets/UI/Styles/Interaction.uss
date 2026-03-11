@@ -238,6 +238,66 @@
     border-color: rgba(140, 200, 70, 0.6);
 }
 
+/* ── Flame Level & Mana ── */
+
+.flame-level-badge {
+    font-size: var(--font-lg);
+    color: rgb(255, 200, 100);
+    -unity-font-style: bold;
+    -unity-text-align: upper-center;
+    margin-bottom: var(--spacing-xxs);
+}
+
+.flame-mana-rate {
+    font-size: var(--font-sm);
+    color: rgb(180, 160, 130);
+    -unity-text-align: upper-center;
+    margin-bottom: var(--spacing-sm);
+}
+
+/* ── Flame Section Divider ── */
+
+.flame-section-divider {
+    align-self: stretch;
+    height: 1px;
+    background-color: rgba(180, 120, 60, 0.25);
+    margin-top: var(--spacing-md);
+    margin-bottom: var(--spacing-xs);
+}
+
+/* ── Flame Build Header (label + cap badge) ── */
+
+.flame-build-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    align-self: stretch;
+    margin-bottom: var(--spacing-xs);
+    padding: 0 var(--spacing-xs);
+}
+
+.flame-cap-badge {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(80, 60, 25, 0.5);
+    border-radius: 12px;
+    padding: 4px 12px;
+}
+
+.flame-cap-badge--full {
+    background-color: rgba(160, 60, 30, 0.35);
+}
+
+.flame-cap-label {
+    font-size: var(--font-xs);
+    color: rgb(200, 170, 110);
+    -unity-font-style: bold;
+}
+
+.flame-cap-badge--full .flame-cap-label {
+    color: rgb(220, 100, 80);
+}
+
 /* ── Upgrade Cost List (flame) ── */
 
 .upgrade-cost-list {

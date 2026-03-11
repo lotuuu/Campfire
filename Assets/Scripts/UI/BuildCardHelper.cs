@@ -80,9 +80,15 @@ namespace Garden
                 }
             }
 
-            // Cap badge
+            // Cap badge — hide when not provided (flame menu shows cap once above grid)
             var capLabel = tree.Q<Label>(className: "build-card__cap");
-            if (capLabel != null) capLabel.text = capText;
+            if (capLabel != null)
+            {
+                if (string.IsNullOrEmpty(capText))
+                    capLabel.style.display = DisplayStyle.None;
+                else
+                    capLabel.text = capText;
+            }
 
             // Enabled state & click
             bool enabled = canAfford && canPlace;

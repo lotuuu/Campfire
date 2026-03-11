@@ -744,8 +744,6 @@ namespace Garden
             var grid = new VisualElement();
             grid.AddToClassList("build-grid");
 
-            string capText = $"{current}/{max}";
-
             // Plot
             if (PlotManager.Instance != null)
             {
@@ -757,7 +755,7 @@ namespace Garden
                         && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, plotCost.harvestCosts);
                     grid.Add(BuildCardHelper.CreateBuildCard(
                         "Plot", "Grow seeds", "ui/buildings/plot", null,
-                        BuildCardHelper.FromBuildingCost(plotCost), capText,
+                        BuildCardHelper.FromBuildingCost(plotCost), null,
                         canAffordPlot, canPlace, () =>
                         {
                             if (PlotManager.Instance.CraftPlot(gridX, gridY))
@@ -777,7 +775,7 @@ namespace Garden
                         && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, vaseCost.harvestCosts);
                     grid.Add(BuildCardHelper.CreateBuildCard(
                         "Vase", "Stores water", "ui/buildings/vase", null,
-                        BuildCardHelper.FromBuildingCost(vaseCost), capText,
+                        BuildCardHelper.FromBuildingCost(vaseCost), null,
                         canAffordVase, canPlace, () =>
                         {
                             if (VaseManager.Instance.CraftVase(gridX, gridY))
@@ -797,7 +795,7 @@ namespace Garden
                         && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, cost.harvestCosts);
                     grid.Add(BuildCardHelper.CreateBuildCard(
                         "House", "Houses 1 Mallum", "ui/buildings/house", null,
-                        BuildCardHelper.FromBuildingCost(cost), capText,
+                        BuildCardHelper.FromBuildingCost(cost), null,
                         canAffordHouse, canPlace, () =>
                         {
                             if (MallumManager.Instance.CraftMallumHouse(gridX, gridY))
@@ -820,7 +818,7 @@ namespace Garden
                             && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, gardenCost.harvestCosts);
                         grid.Add(BuildCardHelper.CreateBuildCard(
                             "Garden", "Grow fruit trees", "ui/buildings/garden", null,
-                            BuildCardHelper.FromBuildingCost(gardenCost), capText,
+                            BuildCardHelper.FromBuildingCost(gardenCost), null,
                             canAffordGarden, canPlace, () =>
                             {
                                 if (GardenManager.Instance.CraftEmptyGarden(gridX, gridY))
@@ -833,7 +831,7 @@ namespace Garden
                     grid.Add(BuildCardHelper.CreateBuildCard(
                         "Garden", $"Unlocks at Fire Lv.{GardenManager.GardenUnlockLevel}",
                         "ui/buildings/garden", null,
-                        null, capText, false, false, null));
+                        null, null, false, false, null));
                 }
             }
 
