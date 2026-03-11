@@ -49,6 +49,12 @@ namespace Garden
         private VisualElement dragGhost;
         private float gridOffsetX, gridOffsetY;
         private readonly Dictionary<(int, int), VisualElement> cellLookup = new();
+
+        public VisualElement GetCellElement(int q, int r)
+        {
+            return cellLookup.TryGetValue((q, r), out var cell) ? cell : null;
+        }
+
         private int dragPointerId = -1;
         private const float LongPressMs = 400f;
         private const float LongPressMoveThreshold = 10f;
