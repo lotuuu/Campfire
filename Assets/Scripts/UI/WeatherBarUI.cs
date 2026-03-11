@@ -363,11 +363,11 @@ namespace Garden
             if (tex != null && humidityIconEl != null)
                 humidityIconEl.style.backgroundImage = tex;
 
-            tex = SpriteService.Instance.GetTexture("ui/weather-temp");
-            if (tex != null && tempIconEl != null)
-                tempIconEl.style.backgroundImage = tex;
+            var tex2 = SpriteService.Instance.GetTexture("ui/weather-temp");
+            if (tex2 != null && tempIconEl != null)
+                tempIconEl.style.backgroundImage = tex2;
 
-            iconsLoaded = true;
+            iconsLoaded = tex != null && tex2 != null;
         }
     }
 }

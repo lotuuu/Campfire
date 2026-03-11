@@ -37,6 +37,10 @@ namespace Garden
         private VisualElement questsPanel;
         private VisualElement settingsPanel;
 
+        // Deferred icon loading
+        private Button settingsBtn;
+        private bool _settingsIconLoaded;
+
         // Loading gate
         private VisualElement loadingGate;
         private Label loadingGateTitle;
@@ -137,12 +141,10 @@ namespace Garden
             }
 
             // Wire settings button
-            var settingsBtn = root.Q<Button>("btn-settings");
+            settingsBtn = root.Q<Button>("btn-settings");
             if (settingsBtn != null)
             {
-                var gearTex = SpriteService.Instance?.GetTexture("gear");
-                if (gearTex != null)
-                    settingsBtn.style.backgroundImage = new StyleBackground(gearTex);
+                TryLoadSettingsIcon();
                 settingsBtn.clicked += () => OpenOverlay("Settings", settingsPanel);
             }
 
@@ -304,6 +306,20 @@ namespace Garden
             }
 
             UpdateLoadingGate();
+        }
+
+        private void Update()
+        {
+            TryLoadSettingsIcon();
+        }
+
+        private void TryLoadSettingsIcon()
+        {
+            if (_settingsIconLoaded || settingsBtn == null) return;
+            var gearTex = SpriteService.Instance?.GetTexture("gear");
+            if (gearTex == null) return;
+            settingsBtn.style.backgroundImage = new StyleBackground(gearTex);
+            _settingsIconLoaded = true;
         }
 
         private void UpdateQuestBadge()
