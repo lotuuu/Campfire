@@ -16,6 +16,7 @@
     <Style src="project://database/Assets/UI/Styles/Merchant.uss" />
     <Style src="project://database/Assets/UI/Styles/Dialogue.uss" />
     <Style src="project://database/Assets/UI/Styles/Visitor.uss" />
+    <Style src="project://database/Assets/UI/Styles/Tutorial.uss" />
 
     <!-- Root container -->
     <ui:VisualElement name="camp-root">
@@ -94,6 +95,11 @@
                 <ui:VisualElement name="nav-icon-mail" class="nav-btn-icon" />
                 <ui:Label name="nav-social-badge" class="nav-btn-badge" text="0" />
             </ui:Button>
+        </ui:VisualElement>
+
+        <!-- Tutorial hint bar -->
+        <ui:VisualElement name="tutorial-hint-bar" style="display: none;">
+            <ui:Label name="tutorial-hint-text" text="" />
         </ui:VisualElement>
 
         <!-- (Quest button moved to bottom nav) -->
