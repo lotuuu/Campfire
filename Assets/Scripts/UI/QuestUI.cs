@@ -140,7 +140,15 @@ namespace Garden
                         progressFill.style.width = new StyleLength(new Length(waterProgress * 100f, LengthUnit.Percent));
                         progressText.text = $"{Mathf.RoundToInt(waterProgress * 100)}%";
                         timerLabel.style.display = DisplayStyle.None;
-                        actionBtn.style.display = DisplayStyle.None;
+                        int waterDrinkCount = MallumManager.Instance.GetEnergyDrinkCount();
+                        actionBtn.text = waterDrinkCount > 0 ? $"Speed Up ({waterDrinkCount})" : "Speed Up";
+                        actionBtn.AddToClassList("quest-speedup-btn");
+                        actionBtn.SetEnabled(waterDrinkCount > 0);
+                        actionBtn.clicked += () =>
+                        {
+                            MallumManager.Instance.SpeedUpWaterFetch(mallumIndex);
+                            Refresh();
+                        };
                         break;
 
                     case MallumState.OnQuest:
@@ -159,10 +167,10 @@ namespace Garden
                         progressText.text = $"{Mathf.RoundToInt(progress * 100)}%";
                         timerLabel.style.display = DisplayStyle.None;
 
-                        int potionCount = MallumManager.Instance.GetSpeedPotionCount();
-                        actionBtn.text = potionCount > 0 ? $"Speed Up ({potionCount})" : "Speed Up";
+                        int drinkCount = MallumManager.Instance.GetEnergyDrinkCount();
+                        actionBtn.text = drinkCount > 0 ? $"Speed Up ({drinkCount})" : "Speed Up";
                         actionBtn.AddToClassList("quest-speedup-btn");
-                        actionBtn.SetEnabled(potionCount > 0);
+                        actionBtn.SetEnabled(drinkCount > 0);
                         actionBtn.clicked += () =>
                         {
                             MallumManager.Instance.SpeedUpQuest(mallumIndex);
