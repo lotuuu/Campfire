@@ -1428,12 +1428,11 @@ namespace Garden
 
                     AddGrowthRecipeSection(plot.seedName);
 
-                    int plotPotionCount = MallumManager.Instance != null ? MallumManager.Instance.GetSpeedPotionCount() : 0;
+                    int plotPotionCount = PlotManager.Instance != null ? PlotManager.Instance.GetSpeedPotionCount() : 0;
                     var finishBtn = new Button(() =>
                     {
-                        if (MallumManager.Instance != null && MallumManager.Instance.ConsumeSpeedPotion())
+                        if (PlotManager.Instance != null && PlotManager.Instance.SpeedUpGrowth(index))
                         {
-                            PlotManager.Instance.InstantFinish(index);
                             suppressRebuild = true;
                             var result = PlotManager.Instance.Harvest(index);
                             suppressRebuild = false;
@@ -1771,18 +1770,28 @@ namespace Garden
                     fillingLabel.AddToClassList("interaction-info");
                     interactionBody.Add(fillingLabel);
 
-                    int vasePotionCount = MallumManager.Instance != null ? MallumManager.Instance.GetSpeedPotionCount() : 0;
+                    int vaseDrinkCount = MallumManager.Instance != null ? MallumManager.Instance.GetEnergyDrinkCount() : 0;
+                    int fetchingMallumIndex = -1;
+                    if (MallumManager.Instance != null)
+                    {
+                        var mallums = SaveManager.Instance.Data.mallums;
+                        for (int mi = 0; mi < mallums.Count; mi++)
+                        {
+                            if (mallums[mi].state == MallumState.FetchingWater && mallums[mi].assignedVaseIndex == index)
+                            { fetchingMallumIndex = mi; break; }
+                        }
+                    }
+                    int capturedMallumIdx = fetchingMallumIndex;
                     var finishVaseBtn = new Button(() =>
                     {
-                        if (MallumManager.Instance != null && MallumManager.Instance.ConsumeSpeedPotion())
+                        if (MallumManager.Instance != null && capturedMallumIdx >= 0 && MallumManager.Instance.SpeedUpWaterFetch(capturedMallumIdx))
                         {
-                            VaseManager.Instance.InstantFinish(index);
                             RebuildGrid();
                             ShowVaseInteraction(index);
                             ShowInteractionPanel();
                         }
-                    }) { text = $"Finish Now ({vasePotionCount} potions)" };
-                    finishVaseBtn.SetEnabled(vasePotionCount > 0 || CurrencyManager.FreeMode);
+                    }) { text = $"Finish Now ({vaseDrinkCount} drinks)" };
+                    finishVaseBtn.SetEnabled((vaseDrinkCount > 0 && fetchingMallumIndex >= 0) || CurrencyManager.FreeMode);
                     finishVaseBtn.AddToClassList("interaction-btn-primary");
                     interactionActions.Add(finishVaseBtn);
                     break;
