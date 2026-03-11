@@ -550,6 +550,16 @@ namespace Garden
             if (quest != null)
                 mallum.pendingRewards = RollRewards(quest.rewardPool, quest.rewardRolls);
 
+            // During tutorial, guarantee at least 1 Cress seed so the player can proceed
+            if (TutorialManager.Instance != null && !TutorialManager.Instance.IsComplete)
+            {
+                bool hasCress = false;
+                foreach (var r in mallum.pendingRewards)
+                    if (r.seedName == "Cress") { hasCress = true; break; }
+                if (!hasCress)
+                    mallum.pendingRewards.Add(new RewardEntry { seedName = "Cress", count = 1 });
+            }
+
             mallum.state = MallumState.QuestComplete;
             mallum.startTimeUtc = null;
         }

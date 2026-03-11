@@ -13,7 +13,7 @@ namespace Garden
         private CampsiteViewUI campsiteView;
         private bool initialized;
 
-        // New flow: Welcome → Plant → Water → Harvest → Build House → Plant Again → Fetch Water → Quest → Cress → Second Plot → Upgrade → Complete
+        // Flow: Welcome → Plant → Water → Harvest → Build House → Plant Again → Fetch Water → Quest → Speed Up Quest → Cress → Second Plot → Upgrade → Complete
         private const int StepWelcome = 0;
         private const int StepPlantFirst = 1;
         private const int StepWaterFirst = 2;
@@ -22,10 +22,11 @@ namespace Garden
         private const int StepPlantAgain = 5;
         private const int StepFetchWater = 6;
         private const int StepSendOnQuest = 7;
-        private const int StepPlantCressSpeedPotion = 8;
-        private const int StepBuildSecondPlot = 9;
-        private const int StepUpgradeFlame = 10;
-        private const int StepComplete = 11;
+        private const int StepSpeedUpQuest = 8;
+        private const int StepPlantCressSpeedPotion = 9;
+        private const int StepBuildSecondPlot = 10;
+        private const int StepUpgradeFlame = 11;
+        private const int StepComplete = 12;
 
         public bool IsComplete => CurrentStep >= StepComplete;
         public int CurrentStep => SaveManager.Instance.Data.tutorialStep;
@@ -240,13 +241,30 @@ namespace Garden
                     {
                         if (m.state == MallumState.OnQuest)
                         {
-                            ShowDialogue("Spark of Ara", new List<string> {
-                                "Quests reward you with rare seeds and items."
-                            }, () => AdvanceTo(StepPlantCressSpeedPotion));
+                            AdvanceTo(StepSpeedUpQuest);
                             return;
                         }
                     }
                     break;
+
+                case StepSpeedUpQuest:
+                {
+                    // Quest was sped up and rewards collected — mallum back to Idle
+                    bool anyOnQuest = false;
+                    foreach (var m in data.mallums)
+                    {
+                        if (m.state == MallumState.OnQuest || m.state == MallumState.QuestComplete)
+                        { anyOnQuest = true; break; }
+                    }
+                    if (!anyOnQuest)
+                    {
+                        ShowDialogue("Spark of Ara", new List<string> {
+                            "Quests reward you with rare seeds and items.",
+                            "Use those seeds to expand your camp!"
+                        }, () => AdvanceTo(StepPlantCressSpeedPotion));
+                    }
+                    break;
+                }
             }
         }
 
@@ -337,6 +355,27 @@ namespace Garden
                     tutorialUI?.ShowHint("Send a Mallum on a quest to earn rewards");
                     tutorialUI?.HighlightElement("btn-quest");
                     break;
+                case StepSpeedUpQuest:
+                {
+                    // Check if quest already completed (resume case)
+                    bool stillOnQuest = false;
+                    foreach (var m in SaveManager.Instance.Data.mallums)
+                    {
+                        if (m.state == MallumState.OnQuest || m.state == MallumState.QuestComplete)
+                        { stillOnQuest = true; break; }
+                    }
+                    if (stillOnQuest)
+                    {
+                        tutorialUI?.ShowHint("Use an Energy Drink to speed up the quest");
+                        tutorialUI?.HighlightElement("btn-quest");
+                    }
+                    else
+                    {
+                        // Already collected — auto-advance
+                        AdvanceTo(StepPlantCressSpeedPotion);
+                    }
+                    break;
+                }
                 case StepPlantCressSpeedPotion:
                     tutorialUI?.ShowHint("Plant Cress and use a Speed Potion to grow it faster");
                     HighlightHexCell(0);
