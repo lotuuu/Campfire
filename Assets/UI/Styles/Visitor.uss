@@ -1,0 +1,186 @@
+/* Visitor.uss — Dedicated visitor modal */
+
+#visitor-modal {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+#visitor-modal-backdrop {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+#visitor-modal-card {
+    width: 85%;
+    max-height: 80%;
+    background-color: var(--color-bg-panel);
+    border-radius: var(--radius-lg);
+    border-width: 1px;
+    border-color: rgba(180, 120, 60, 0.3);
+    flex-direction: column;
+    overflow: hidden;
+}
+
+#visitor-modal-close {
+    position: absolute;
+    top: var(--spacing-sm);
+    right: var(--spacing-sm);
+    width: 80px;
+    height: 80px;
+    background-color: rgba(60, 40, 20, 0.6);
+    background-image: url("project://database/Assets/ThirdParty/icons/lorc-cross-mark.png");
+    -unity-background-image-tint-color: rgb(200, 120, 100);
+    -unity-background-scale-mode: scale-to-fit;
+    border-width: 1px;
+    border-color: rgba(140, 100, 50, 0.3);
+    border-radius: 40px;
+    padding: 16px;
+}
+
+#visitor-modal-close:hover {
+    background-color: rgba(80, 50, 25, 0.7);
+    border-color: rgba(180, 120, 60, 0.5);
+}
+
+#visitor-modal-header {
+    background-color: rgba(60, 40, 15, 0.5);
+    padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-md);
+    align-items: center;
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(180, 120, 60, 0.15);
+}
+
+#visitor-modal-portrait {
+    width: 120px;
+    height: 120px;
+    border-radius: 60px;
+    border-width: 2px;
+    border-color: var(--color-border-accent);
+    background-color: var(--color-bg-slot);
+    -unity-background-scale-mode: scale-to-fit;
+    margin-bottom: var(--spacing-sm);
+}
+
+#visitor-modal-name {
+    font-size: var(--font-xl);
+    color: rgb(230, 210, 180);
+    -unity-font-style: bold;
+    margin-bottom: var(--spacing-xs);
+}
+
+#visitor-modal-flavor {
+    font-size: var(--font-sm);
+    color: var(--color-text-dim);
+    -unity-font-style: italic;
+    -unity-text-align: upper-center;
+    white-space: normal;
+    padding: 0 var(--spacing-md);
+}
+
+#visitor-modal-content {
+    padding: var(--spacing-lg);
+    flex-grow: 1;
+}
+
+/* Gift card */
+.visitor-gift-card {
+    background-color: var(--color-bg-slot);
+    border-width: 1px;
+    border-color: var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-md);
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.visitor-gift-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: var(--radius-sm);
+    background-color: rgba(100, 180, 240, 0.15);
+    -unity-background-scale-mode: scale-to-fit;
+    margin-right: var(--spacing-md);
+}
+
+.visitor-gift-icon--seed {
+    background-color: rgba(100, 200, 100, 0.15);
+}
+
+.visitor-gift-icon--item {
+    background-color: rgba(200, 150, 80, 0.15);
+}
+
+.visitor-gift-name {
+    font-size: var(--font-md);
+    color: var(--color-text-bright);
+    -unity-font-style: bold;
+    margin-bottom: var(--spacing-xxs);
+}
+
+.visitor-gift-desc {
+    font-size: var(--font-sm);
+    color: var(--color-text-dim);
+}
+
+.visitor-gift-claimed {
+    font-size: var(--font-md);
+    color: var(--color-text-dim);
+    -unity-text-align: upper-center;
+    padding: var(--spacing-md);
+}
+
+/* Quest info */
+.visitor-quest-info {
+    background-color: var(--color-bg-slot);
+    border-width: 1px;
+    border-color: var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.visitor-quest-label {
+    font-size: var(--font-sm);
+    color: var(--color-text-dim);
+    margin-bottom: var(--spacing-xxs);
+}
+
+.visitor-quest-value {
+    font-size: var(--font-md);
+    color: var(--color-text-bright);
+    -unity-font-style: bold;
+}
+
+/* Shared action button for visitor modal */
+.visitor-action-btn {
+    padding: var(--spacing-sm) var(--spacing-md);
+    background-color: var(--color-button-bg);
+    border-radius: var(--radius-sm);
+    border-width: 1px;
+    border-color: var(--color-border-accent);
+    color: var(--color-text-bright);
+    font-size: var(--font-md);
+    -unity-font-style: bold;
+    margin-top: var(--spacing-sm);
+}
+
+.visitor-action-btn:hover {
+    background-color: var(--color-button-bg-hover);
+}
+
+.visitor-action-btn:disabled {
+    background-color: var(--color-button-bg-disabled);
+    color: var(--color-text-dim);
+    border-color: var(--color-border);
+}
