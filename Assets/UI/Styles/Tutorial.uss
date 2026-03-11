@@ -25,14 +25,10 @@
     --hex-fill: rgba(255, 200, 60, 0.25);
     --hex-border: rgba(255, 200, 60, 0.7);
     -unity-background-image-tint-color: rgba(255, 230, 170, 1);
-    transition-property: --hex-fill, --hex-border, -unity-background-image-tint-color;
-    transition-duration: 0.4s;
 }
 
 .tutorial-highlight-dim {
     --hex-fill: rgba(255, 200, 60, 0.1);
     --hex-border: rgba(255, 200, 60, 0.3);
     -unity-background-image-tint-color: rgba(240, 220, 190, 1);
-    transition-property: --hex-fill, --hex-border, -unity-background-image-tint-color;
-    transition-duration: 0.4s;
 }
