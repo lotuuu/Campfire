@@ -29,6 +29,9 @@
     font-size: var(--font-xl);
     color: var(--color-text-bright);
     -unity-font-style: bold;
+    flex-shrink: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .icon-btn {

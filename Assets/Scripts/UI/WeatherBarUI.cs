@@ -92,20 +92,20 @@ namespace Garden
         {
             if (playerName == null) return;
             var name = SocialSaveManager.Instance?.Data?.displayName;
-            playerName.text = TruncateName(name) + "'s Campfire";
+            playerName.text = TruncateName(name) + "'s Camp";
         }
 
         private void OnDisplayNameUpdated(string newName)
         {
             if (playerName != null)
-                playerName.text = TruncateName(newName) + "'s Campfire";
+                playerName.text = TruncateName(newName) + "'s Camp";
         }
 
         public void SetVisitingName(string friendName)
         {
             if (playerName == null) return;
             if (friendName != null)
-                playerName.text = TruncateName(friendName) + "'s Campfire";
+                playerName.text = TruncateName(friendName) + "'s Camp";
             else
                 UpdatePlayerName();
         }
