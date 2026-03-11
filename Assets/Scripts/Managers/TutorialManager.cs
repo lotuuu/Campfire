@@ -369,7 +369,7 @@ namespace Garden
                     {
                         tutorialUI?.HighlightElement("btn-quest");
                         tutorialUI?.DeferHighlightByClass("quest-send-btn");
-                    }, aboveNav: true);
+                    });
                     break;
                 case StepSpeedUpQuest:
                     {
@@ -411,13 +411,13 @@ namespace Garden
 
         private Texture2D _portraitCache;
 
-        private void ShowDialogue(string speaker, List<string> lines, System.Action onComplete, bool aboveNav = false)
+        private void ShowDialogue(string speaker, List<string> lines, System.Action onComplete)
         {
             ClearAllHighlights();
             tutorialUI?.HideHint();
             if (_portraitCache == null)
                 _portraitCache = SpriteService.Instance?.GetTexture("portraits/spark_of_ara");
-            dialogueUI?.Show(speaker, lines, onComplete, aboveNav ? null : _portraitCache, aboveNav);
+            dialogueUI?.Show(speaker, lines, onComplete, _portraitCache);
         }
 
         private void ShowWelcome()

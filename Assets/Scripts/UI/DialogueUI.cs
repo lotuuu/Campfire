@@ -19,7 +19,6 @@ namespace Garden
         private string speaker;
         private int currentIndex;
         private Action onComplete;
-        private bool _aboveNav;
 
         public void Initialize(VisualElement root)
         {
@@ -48,7 +47,7 @@ namespace Garden
             Hide();
         }
 
-        public void Show(string speakerName, List<string> dialogueLines, Action onDialogueComplete, Texture2D portrait = null, bool aboveNav = false)
+        public void Show(string speakerName, List<string> dialogueLines, Action onDialogueComplete, Texture2D portrait = null)
         {
             if (dialogueLines == null || dialogueLines.Count == 0)
             {
@@ -60,12 +59,11 @@ namespace Garden
             lines = dialogueLines;
             currentIndex = 0;
             onComplete = onDialogueComplete;
-            _aboveNav = aboveNav;
 
             if (speakerLabel != null) speakerLabel.text = speaker;
             if (portraitElement != null)
             {
-                if (portrait != null && !aboveNav)
+                if (portrait != null)
                 {
                     portraitElement.style.backgroundImage = new StyleBackground(portrait);
                     portraitElement.style.display = DisplayStyle.Flex;
@@ -77,34 +75,22 @@ namespace Garden
             }
             ShowCurrentLine();
 
-            if (overlay != null)
-            {
-                overlay.style.display = DisplayStyle.Flex;
-                if (aboveNav)
-                    overlay.AddToClassList("dialogue-overlay--above-nav");
-                else
-                    overlay.RemoveFromClassList("dialogue-overlay--above-nav");
-            }
+            if (overlay != null) overlay.style.display = DisplayStyle.Flex;
             if (dialogueBox != null)
             {
                 dialogueBox.style.display = DisplayStyle.Flex;
                 dialogueBox.BringToFront();
             }
-            if (!aboveNav && bottomNav != null) bottomNav.style.display = DisplayStyle.None;
+            if (bottomNav != null) bottomNav.style.display = DisplayStyle.None;
         }
 
         public void Hide()
         {
             if (overlay != null && overlay.style.display != DisplayStyle.None)
                 AudioManager.Instance?.PlaySFX("ui_panel_close");
-            if (overlay != null)
-            {
-                overlay.style.display = DisplayStyle.None;
-                overlay.RemoveFromClassList("dialogue-overlay--above-nav");
-            }
+            if (overlay != null) overlay.style.display = DisplayStyle.None;
             if (dialogueBox != null) dialogueBox.style.display = DisplayStyle.None;
             if (bottomNav != null) bottomNav.style.display = DisplayStyle.Flex;
-            _aboveNav = false;
         }
 
         private void Advance()

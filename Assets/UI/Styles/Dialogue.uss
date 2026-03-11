@@ -52,9 +52,3 @@
     right: var(--spacing-lg);
     bottom: var(--spacing-md);
 }
-
-/* Above-nav variant: dialogue sits above the menu bar */
-.dialogue-overlay--above-nav {
-    background-color: rgba(0, 0, 0, 0.4);
-    padding-bottom: 248px;
-}
