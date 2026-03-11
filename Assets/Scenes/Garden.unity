@@ -937,6 +937,7 @@ GameObject:
   - component: {fileID: 1564428254}
   - component: {fileID: 1564428256}
   - component: {fileID: 1564428255}
+  - component: {fileID: 1564428257}
   m_Layer: 0
   m_Name: --- UI ---
   m_TagString: Untagged
@@ -1186,6 +1187,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b47d6fbdf17949a7aebe97c8ff42298, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Garden::Garden.TutorialManager
+--- !u!114 &1564428257
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1564428222}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 588dc803948d046a685e653093c287ed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Garden::Garden.RewardRevealUI
 --- !u!1 &1877059791
 GameObject:
   m_ObjectHideFlags: 0
