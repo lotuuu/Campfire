@@ -15,6 +15,7 @@
     <Style src="project://database/Assets/UI/Styles/Quest.uss" />
     <Style src="project://database/Assets/UI/Styles/Merchant.uss" />
     <Style src="project://database/Assets/UI/Styles/Dialogue.uss" />
+    <Style src="project://database/Assets/UI/Styles/Visitor.uss" />
 
     <!-- Root container -->
     <ui:VisualElement name="camp-root">
@@ -201,23 +202,6 @@
                         <ui:VisualElement name="quest-locked-section" />
                     </ui:VisualElement>
 
-                    <!-- visitor-panel -->
-                    <ui:VisualElement name="visitor-panel">
-                        <ui:Label name="visitor-flavor" class="merchant-flavor" />
-                        <ui:VisualElement name="visitor-merchant-section">
-                            <ui:VisualElement name="visitor-offer-list" />
-                        </ui:VisualElement>
-                        <ui:VisualElement name="visitor-gifter-section">
-                            <ui:Label name="visitor-gift-text" class="gift-text" />
-                            <ui:Button name="visitor-claim-gift-btn" text="Accept Gift" class="action-button" />
-                        </ui:VisualElement>
-                        <ui:VisualElement name="visitor-quester-section">
-                            <ui:Label name="visitor-quest-text" class="quest-text" />
-                            <ui:Button name="visitor-accept-quest-btn" text="Accept Quest" class="action-button" />
-                            <ui:Button name="visitor-turnin-quest-btn" text="Turn In" class="action-button" />
-                        </ui:VisualElement>
-                    </ui:VisualElement>
-
                     <!-- Settings panel -->
                     <ui:VisualElement name="settings-panel">
                         <ui:VisualElement class="debug-row">
@@ -356,6 +340,46 @@
                 <ui:Label name="dialogue-speaker" text="" />
                 <ui:Label name="dialogue-text" text="" />
                 <ui:Label name="dialogue-tap-hint" text="Tap to continue" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Visitor modal (centered card) -->
+        <ui:VisualElement name="visitor-modal">
+            <ui:VisualElement name="visitor-modal-backdrop" />
+            <ui:VisualElement name="visitor-modal-card">
+                <ui:Button name="visitor-modal-close" />
+                <ui:VisualElement name="visitor-modal-header">
+                    <ui:VisualElement name="visitor-modal-portrait" />
+                    <ui:Label name="visitor-modal-name" text="" />
+                    <ui:Label name="visitor-modal-flavor" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement name="visitor-modal-content">
+                    <!-- Gifter section -->
+                    <ui:VisualElement name="visitor-gifter-section">
+                        <ui:VisualElement class="visitor-gift-card">
+                            <ui:VisualElement name="visitor-gift-icon" class="visitor-gift-icon" />
+                            <ui:VisualElement style="flex-grow: 1;">
+                                <ui:Label name="visitor-gift-name" class="visitor-gift-name" />
+                                <ui:Label name="visitor-gift-desc" class="visitor-gift-desc" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                        <ui:Label name="visitor-gift-claimed-text" class="visitor-gift-claimed" />
+                        <ui:Button name="visitor-claim-gift-btn" text="Accept Gift" class="visitor-action-btn" />
+                    </ui:VisualElement>
+                    <!-- Merchant section -->
+                    <ui:VisualElement name="visitor-merchant-section">
+                        <ui:VisualElement name="visitor-offer-list" />
+                    </ui:VisualElement>
+                    <!-- Quester section -->
+                    <ui:VisualElement name="visitor-quester-section">
+                        <ui:VisualElement name="visitor-quest-info-card" class="visitor-quest-info">
+                            <ui:Label name="visitor-quest-label" class="visitor-quest-label" />
+                            <ui:Label name="visitor-quest-value" class="visitor-quest-value" />
+                        </ui:VisualElement>
+                        <ui:Button name="visitor-accept-quest-btn" text="Accept Quest" class="visitor-action-btn" />
+                        <ui:Button name="visitor-turnin-quest-btn" text="Turn In" class="visitor-action-btn" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
 
