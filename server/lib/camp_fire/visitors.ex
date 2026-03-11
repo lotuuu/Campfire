@@ -4,6 +4,8 @@ defmodule CampFire.Visitors do
   alias CampFire.Visitors.{VisitorTemplate, VisitorSchedule, VisitorQuest}
   alias CampFire.Villages
 
+  @generic_portraits ~w(visitor_1 visitor_2 visitor_3 visitor_4 visitor_5 visitor_6)
+
   def get_tonight_visitor(uid) do
     today = Date.utc_today()
     visit_number = increment_visit_count(uid, today)
@@ -187,11 +189,13 @@ defmodule CampFire.Visitors do
   end
 
   defp build_visitor_payload(template) do
+    portrait = resolve_portrait(template.portrait_id, template.visitor_id)
+
     base = %{
       visitor_type: template.type,
       visitor_id: template.visitor_id,
       name: template.name,
-      portrait_id: template.portrait_id,
+      portrait_id: portrait,
       dialogue: roll_dialogue(template.dialogue_pool)
     }
 
@@ -201,6 +205,15 @@ defmodule CampFire.Visitors do
       "quester" -> Map.put(base, :quest, roll_quest(template.quest_pool))
       _ -> base
     end
+  end
+
+  defp resolve_portrait(portrait_id, _visitor_id)
+       when is_binary(portrait_id) and portrait_id != "",
+       do: portrait_id
+
+  defp resolve_portrait(_nil_or_empty, visitor_id) do
+    index = :erlang.phash2(visitor_id, length(@generic_portraits))
+    Enum.at(@generic_portraits, index)
   end
 
   defp roll_dialogue(pool) when is_list(pool) and length(pool) > 0 do
