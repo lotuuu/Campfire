@@ -21,22 +21,28 @@ defmodule CampFire.Economy do
 
   def init_economy(player_uid) do
     now = DateTime.utc_now() |> DateTime.truncate(:second)
+    npc = CampFire.ConfigCache.get("new_player_config") || %{}
 
     %PlayerEconomy{}
     |> PlayerEconomy.changeset(%{
       player_uid: player_uid,
-      mana: 50.0,
-      gems: 5,
+      mana: (npc["mana"] || 50) * 1.0,
+      gems: npc["gems"] || 5,
       flame_level: 1,
       last_mana_collect_utc: now
     })
     |> Repo.insert()
     |> case do
       {:ok, economy} ->
-        upsert_item(player_uid, "Sprouts_Seed", 5)
-        upsert_item(player_uid, "Cress_Seed", 3)
-        upsert_item(player_uid, "Speed_Potion", 3)
-        create_starter_buildings(player_uid)
+        for seed <- npc["seeds"] || [] do
+          upsert_item(player_uid, "#{seed["name"]}_Seed", seed["count"])
+        end
+
+        for item <- npc["items"] || [] do
+          upsert_item(player_uid, item["name"], item["count"])
+        end
+
+        create_starter_buildings(player_uid, npc)
         {:ok, economy}
 
       {:error, changeset} ->
@@ -207,13 +213,13 @@ defmodule CampFire.Economy do
     end
   end
 
-  defp create_starter_buildings(player_uid) do
-    alias CampFire.Game.{PlayerPlot, PlayerVase, PlayerMallum, PlayerMallumHouse, PlayerApotheke}
+  defp create_starter_buildings(player_uid, npc) do
+    alias CampFire.Game.{PlayerPlot, PlayerVase, PlayerApotheke}
 
-    # Pick 4 random distinct hex positions (excluding flame at 0,0)
+    # Pick 3 random distinct hex positions (excluding flame at 0,0)
     grid_radius = starter_grid_radius()
-    positions = non_center_hex_positions(grid_radius) |> Enum.shuffle() |> Enum.take(4)
-    [plot_pos, vase_pos, house_pos, apotheke_pos] = positions
+    positions = non_center_hex_positions(grid_radius) |> Enum.shuffle() |> Enum.take(3)
+    [plot_pos, vase_pos, apotheke_pos] = positions
 
     %PlayerPlot{}
     |> PlayerPlot.changeset(%{
@@ -226,23 +232,17 @@ defmodule CampFire.Economy do
 
     vase_config = CampFire.ConfigCache.get("vase_config")
     vase_capacity = (vase_config && vase_config["default_capacity"]) || 5
+    starting_water = npc["starting_water"] || 1
+    vase_state = if starting_water > 0, do: "full", else: "empty"
 
     %PlayerVase{}
     |> PlayerVase.changeset(%{
       player_uid: player_uid,
-      state: "full",
+      state: vase_state,
       capacity: vase_capacity,
-      current_water: vase_capacity,
+      current_water: starting_water,
       grid_x: elem(vase_pos, 0),
       grid_y: elem(vase_pos, 1)
-    })
-    |> Repo.insert!()
-
-    %PlayerMallumHouse{}
-    |> PlayerMallumHouse.changeset(%{
-      player_uid: player_uid,
-      grid_x: elem(house_pos, 0),
-      grid_y: elem(house_pos, 1)
     })
     |> Repo.insert!()
 
@@ -253,18 +253,6 @@ defmodule CampFire.Economy do
       grid_y: elem(apotheke_pos, 1)
     })
     |> Repo.insert!()
-
-    mallum_house_config = CampFire.ConfigCache.get("mallum_house_config")
-    mallums_per_house = (mallum_house_config && mallum_house_config["mallums_per_house"]) || 2
-
-    for _ <- 1..mallums_per_house do
-      %PlayerMallum{}
-      |> PlayerMallum.changeset(%{
-        player_uid: player_uid,
-        state: "idle"
-      })
-      |> Repo.insert!()
-    end
   end
 
   defp starter_grid_radius do
