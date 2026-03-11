@@ -640,6 +640,7 @@ namespace Garden
             {
                 if (item is not Dictionary<string, object> d) continue;
                 var cost = new BuildingCost();
+
                 if (d.TryGetValue("manaCost", out var mc))
                     cost.manaCost = mc is double dd ? (float)dd : mc is long ll ? ll : 0f;
 

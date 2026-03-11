@@ -285,10 +285,10 @@ game_configs = [
   %{key: "mallum_house_config", value: %{
     "mallums_per_house" => 1,
     "house_costs" => [
-      %{"mana" => 30, "harvests" => [%{"item" => "Sprouts", "count" => 1}]},
-      %{"mana" => 30, "harvests" => [%{"item" => "Basil", "count" => 2}]},
-      %{"mana" => 60, "harvests" => [%{"item" => "Lavender", "count" => 3}]},
-      %{"mana" => 100, "harvests" => [%{"item" => "Chamomile", "count" => 2}, %{"item" => "Mint", "count" => 2}]}
+      %{"manaCost" => 30, "harvestCosts" => [%{"itemName" => "Sprouts", "count" => 1}]},
+      %{"manaCost" => 30, "harvestCosts" => [%{"itemName" => "Basil", "count" => 2}]},
+      %{"manaCost" => 60, "harvestCosts" => [%{"itemName" => "Lavender", "count" => 3}]},
+      %{"manaCost" => 100, "harvestCosts" => [%{"itemName" => "Chamomile", "count" => 2}, %{"itemName" => "Mint", "count" => 2}]}
     ]
   }},
   %{key: "building_cost_config", value: %{
