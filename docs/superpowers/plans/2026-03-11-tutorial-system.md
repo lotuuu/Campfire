@@ -25,6 +25,7 @@
 - `Assets/Scripts/UI/QuestUI.cs` — Update speed-up button to use Energy Drink count/label
 - `Assets/Scripts/Managers/GameManager.cs` — Adjust starting items (2 Energy Drinks, 2 Speed Potions, vase with 1 water)
 - `Assets/UI/Documents/CampFireRoot.uxml` — Add hint bar element + Tutorial.uss stylesheet link
+- `Assets/Scripts/UI/CampsiteViewUI.cs` — Expose `GetCellElement(int q, int r)` for tutorial highlights
 - `Assets/Scripts/UI/CampFireUI.cs` — Initialize TutorialUI, wire TutorialManager startup after loading gate
 
 ---
@@ -183,7 +184,7 @@ public bool SpeedUpWaterFetch(int mallumIndex)
 
     int vaseIndex = mallum.assignedVaseIndex;
     if (vaseIndex >= 0 && vaseIndex < data.vases.Count)
-        VaseManager.Instance.InstantFill(vaseIndex);
+        VaseManager.Instance.InstantFinish(vaseIndex);
 
     FreeMallumFromWater(mallum);
     NotificationService.Instance?.CancelWaterFetchNotification(mallumIndex);
@@ -194,28 +195,16 @@ public bool SpeedUpWaterFetch(int mallumIndex)
 }
 ```
 
-- [ ] **Step 4: Check VaseManager has InstantFill — add if missing**
+Note: Uses existing `VaseManager.InstantFinish()` (line 81) which sets vase to Full, clears fill timer, and notifies server. The vase must be in `Filling` state, which is guaranteed since we only call this when the mallum is `FetchingWater` (which means `SendToCollect` was already called, setting the vase to `Filling`).
 
-Read `Assets/Scripts/Managers/VaseManager.cs` and check if `InstantFill(int vaseIndex)` exists. If not, add it as a public method that sets the vase to Full with max water:
+- [ ] **Step 4: Remove dead Speed Potion methods**
 
-```csharp
-public void InstantFill(int vaseIndex)
-{
-    var data = SaveManager.Instance.Data;
-    if (vaseIndex < 0 || vaseIndex >= data.vases.Count) return;
-    var vase = data.vases[vaseIndex];
-    vase.currentWater = vase.capacity;
-    vase.state = VaseState.Full;
-    vase.fillStartTimeUtc = null;
-    SaveManager.Instance.Save();
-    OnVasesChanged?.Invoke();
-}
-```
+Remove the now-unused methods from MallumManager: `CanSpeedUpQuest()`, `GetSpeedPotionCount()`, `ConsumeSpeedPotion()`, and the `SpeedPotionItem` constant. These are replaced by the Energy Drink equivalents. Find them by name (they are near `SpeedUpQuest`).
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add Assets/Scripts/Managers/MallumManager.cs Assets/Scripts/Managers/VaseManager.cs
+git add Assets/Scripts/Managers/MallumManager.cs
 git commit -m "feat(items): add Energy Drink for mallum speedup, replace Speed Potion in quests"
 ```
 
@@ -236,10 +225,10 @@ public bool SpeedUpGrowth(int plotIndex)
     var plot = data.plots[plotIndex];
     if (plot.state != PlotState.Growing) return false;
 
-    // Consume Speed Potion
-    var potion = data.items.Find(i => i.itemName == "Speed_Potion");
+    // Check potion availability first
     if (!CurrencyManager.FreeMode)
     {
+        var potion = data.items.Find(i => i.itemName == "Speed_Potion");
         if (potion == null || potion.count <= 0) return false;
         potion.count--;
         if (potion.count <= 0) data.items.Remove(potion);
@@ -248,7 +237,7 @@ public bool SpeedUpGrowth(int plotIndex)
     return InstantFinish(plotIndex);
 }
 
-public static int GetSpeedPotionCount()
+public int GetSpeedPotionCount()
 {
     var item = SaveManager.Instance.Data.items.Find(i => i.itemName == "Speed_Potion");
     return item?.count ?? 0;
@@ -390,45 +379,7 @@ git commit -m "feat(tutorial): adjust new player starting items for tutorial flo
 
 - [ ] **Step 1: Create the stylesheet**
 
-```css
-/* Tutorial hint bar */
-#tutorial-hint-bar {
-    position: absolute;
-    bottom: 80px;
-    left: 0;
-    right: 0;
-    padding: 8px 16px;
-    background-color: rgba(0, 0, 0, 0.75);
-    align-items: center;
-    justify-content: center;
-    flex-direction: row;
-}
-
-#tutorial-hint-text {
-    color: rgb(255, 255, 255);
-    font-size: 14px;
-    -unity-text-align: middle-center;
-    white-space: normal;
-}
-
-/* Pulsing highlight for tutorial targets */
-@keyframes tutorial-pulse {
-    0% { border-color: rgba(255, 200, 60, 0.3); border-width: 2px; }
-    50% { border-color: rgba(255, 200, 60, 1.0); border-width: 3px; }
-    100% { border-color: rgba(255, 200, 60, 0.3); border-width: 2px; }
-}
-
-.tutorial-highlight {
-    border-color: rgba(255, 200, 60, 0.8);
-    border-width: 3px;
-    transition-property: border-color, border-width;
-    transition-duration: 0.8s;
-}
-```
-
-Note: Unity UI Toolkit does NOT support `@keyframes`. We'll implement the pulse via C# toggling a class on a timer. The `.tutorial-highlight` class provides the visual styling; TutorialUI will toggle between two visual states.
-
-Actually, let's simplify — just use a solid highlight class:
+Unity UI Toolkit does not support `@keyframes`. The pulse effect is implemented via C# class toggling in TutorialUI (alternates between `.tutorial-highlight` and `.tutorial-highlight-dim` on a timer).
 
 ```css
 /* Tutorial hint bar */
@@ -451,15 +402,19 @@ Actually, let's simplify — just use a solid highlight class:
     white-space: normal;
 }
 
-/* Highlight for tutorial targets — golden glow border */
+/* Highlight for tutorial targets — golden glow border, pulsed via C# class toggle */
 .tutorial-highlight {
     border-color: rgba(255, 200, 60, 0.9);
     border-width: 3px;
+    transition-property: border-color, border-width;
+    transition-duration: 0.4s;
 }
 
 .tutorial-highlight-dim {
     border-color: rgba(255, 200, 60, 0.3);
     border-width: 2px;
+    transition-property: border-color, border-width;
+    transition-duration: 0.4s;
 }
 ```
 
@@ -619,7 +574,32 @@ git commit -m "feat(tutorial): add TutorialUI controller for hint bar and highli
 
 ## Chunk 4: Tutorial Manager & Wiring
 
-### Task 10: TutorialManager — Core state machine
+### Task 10a: Expose hex cell lookup on CampsiteViewUI
+
+**Files:**
+- Modify: `Assets/Scripts/UI/CampsiteViewUI.cs`
+
+Hex cells are stored in a private `cellLookup` dictionary keyed by `(q, r)` coordinates (line 51). Cells have no `name` attribute, so TutorialUI can't find them via `root.Q()`. We need to expose a public accessor.
+
+- [ ] **Step 1: Add public accessor**
+
+After line 51 (`private readonly Dictionary<(int, int), VisualElement> cellLookup = new();`), add:
+
+```csharp
+public VisualElement GetCellElement(int q, int r)
+{
+    return cellLookup.TryGetValue((q, r), out var cell) ? cell : null;
+}
+```
+
+- [ ] **Step 2: Commit**
+
+```bash
+git add Assets/Scripts/UI/CampsiteViewUI.cs
+git commit -m "feat(tutorial): expose GetCellElement on CampsiteViewUI for tutorial highlights"
+```
+
+### Task 10b: TutorialManager — Core state machine
 
 **Files:**
 - Create: `Assets/Scripts/Managers/TutorialManager.cs`
@@ -640,10 +620,8 @@ namespace Garden
 
         private TutorialUI tutorialUI;
         private DialogueUI dialogueUI;
+        private CampsiteViewUI campsiteView;
         private bool initialized;
-
-        // Track whether the second harvest was watered (for step 6 branching)
-        private int secondPlantWaterCount;
 
         private const int StepWelcome = 0;
         private const int StepPlantFirst = 1;
@@ -668,10 +646,11 @@ namespace Garden
             Instance = this;
         }
 
-        public void Initialize(TutorialUI ui, DialogueUI dialogue)
+        public void Initialize(TutorialUI ui, DialogueUI dialogue, CampsiteViewUI campsite)
         {
             tutorialUI = ui;
             dialogueUI = dialogue;
+            campsiteView = campsite;
 
             if (IsComplete)
             {
@@ -779,9 +758,7 @@ namespace Garden
 
                 case StepPlantAgainAndFetchWater:
                     // Second harvest — check if they managed to water
-                    secondPlantWaterCount = result.waterCount;
-                    AdvanceTo(StepWateringOutcome);
-                    if (secondPlantWaterCount > 0)
+                    if (result.waterCount > 0)
                     {
                         ShowDialogue("Spark of Ara", new List<string> {
                             "Nice work getting the water in time!"
@@ -869,23 +846,31 @@ namespace Garden
             {
                 case StepPlantFirst:
                     tutorialUI?.ShowHint("Tap your plot to plant a seed");
-                    HighlightFirstPlot();
+                    HighlightHexCell(0);
                     break;
                 case StepWaterFirst:
                     tutorialUI?.ShowHint("Water your plant for a better harvest");
-                    HighlightFirstPlot();
+                    HighlightHexCell(0);
                     break;
                 case StepHarvestFirst:
                     tutorialUI?.ShowHint("Your plant is ready! Tap to harvest");
-                    HighlightFirstPlot();
+                    HighlightHexCell(0);
+                    break;
+                case StepExplainRecipes:
+                    // Dialogue-only step — auto-skip on resume
+                    AdvanceTo(StepPlantAgainAndFetchWater);
                     break;
                 case StepPlantAgainAndFetchWater:
                     tutorialUI?.ShowHint("Plant another seed. Send your Mallum to fetch water.");
-                    HighlightFirstPlot();
+                    HighlightHexCell(0); // plot
+                    break;
+                case StepWateringOutcome:
+                    // Dialogue-only step — auto-skip on resume
+                    AdvanceTo(StepBuildHouse);
                     break;
                 case StepBuildHouse:
                     tutorialUI?.ShowHint("Build a Mallum House to get more helpers");
-                    HighlightBuildButton();
+                    HighlightFlameHex();
                     break;
                 case StepSendOnQuest:
                     tutorialUI?.ShowHint("Send a Mallum on a quest to earn rewards");
@@ -893,15 +878,15 @@ namespace Garden
                     break;
                 case StepPlantCressSpeedPotion:
                     tutorialUI?.ShowHint("Plant Cress and use a Speed Potion to grow it faster");
-                    HighlightFirstPlot();
+                    HighlightHexCell(0);
                     break;
                 case StepBuildSecondPlot:
                     tutorialUI?.ShowHint("Build another plot to grow more");
-                    HighlightBuildButton();
+                    HighlightFlameHex();
                     break;
                 case StepUpgradeFlame:
                     tutorialUI?.ShowHint("Collect harvests and upgrade your flame");
-                    HighlightBuildButton();
+                    HighlightFlameHex();
                     break;
             }
         }
@@ -924,24 +909,24 @@ namespace Garden
         }
 
         // --- Highlight helpers ---
+        // Hex cells have no name attribute; use CampsiteViewUI.GetCellElement(q, r).
 
-        private void HighlightFirstPlot()
+        private void HighlightHexCell(int plotIndex)
         {
-            // Find the first plot's grid cell in the campsite view
+            if (campsiteView == null) return;
             var data = SaveManager.Instance.Data;
-            if (data.plots.Count > 0)
-            {
-                var plot = data.plots[0];
-                var cellName = $"hex-{plot.gridX}-{plot.gridY}";
-                tutorialUI?.HighlightElement(cellName);
-            }
+            if (plotIndex < 0 || plotIndex >= data.plots.Count) return;
+            var plot = data.plots[plotIndex];
+            var cell = campsiteView.GetCellElement(plot.gridX, plot.gridY);
+            tutorialUI?.HighlightElement(cell);
         }
 
-        private void HighlightBuildButton()
+        private void HighlightFlameHex()
         {
-            // The build panel is opened via the flame hex tap in campsite view.
-            // Highlight the flame (center hex).
-            tutorialUI?.HighlightElement("hex-0-0");
+            // Flame is always at center hex (0, 0)
+            if (campsiteView == null) return;
+            var cell = campsiteView.GetCellElement(0, 0);
+            tutorialUI?.HighlightElement(cell);
         }
 
         // --- Check for skipped steps on PlotChanged ---
@@ -1003,7 +988,7 @@ In the `UpdateLoadingGate()` method, after line 407 (`UpdateQuestBadge();`), bef
 ```csharp
                 // Start tutorial after all services are ready
                 if (TutorialManager.Instance != null && dialogueUI != null && tutorialUI != null)
-                    TutorialManager.Instance.Initialize(tutorialUI, dialogueUI);
+                    TutorialManager.Instance.Initialize(tutorialUI, dialogueUI, campsiteView);
 ```
 
 - [ ] **Step 4: Commit**
