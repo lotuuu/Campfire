@@ -11,11 +11,14 @@ namespace Garden
         private bool isDragging;
         private Vector2 dragStart;
         private Vector2 panOffset;
-        private Vector2 centeredOffset;
-        private bool panEnabledX;
-        private bool panEnabledY;
         private const float DragThreshold = 20f;
         private float dragDistance;
+
+        // Stored from CenterOnPoint — used to recompute bounds dynamically
+        private float focusPtX;
+        private float focusPtY;
+        private float storedCanvasW;
+        private float storedCanvasH;
 
         public bool WasDragged { get; private set; }
         public bool SuppressMove { get; set; }
@@ -33,34 +36,37 @@ namespace Garden
 
         public void CenterOnPoint(float focusX, float focusY, float canvasWidth, float canvasHeight)
         {
-            float vpWidth = viewport.resolvedStyle.width;
-            float vpHeight = viewport.resolvedStyle.height;
+            focusPtX = focusX;
+            focusPtY = focusY;
+            storedCanvasW = canvasWidth;
+            storedCanvasH = canvasHeight;
 
-            if (float.IsNaN(vpWidth) || vpWidth <= 0)
-            {
-                vpWidth = 400f;
-                vpHeight = 800f;
-            }
+            var (vpW, vpH) = GetViewportSize();
 
-            // Pan so that (focusX, focusY) on the canvas is at the viewport center
-            centeredOffset = new Vector2(
-                vpWidth / 2f - focusX,
-                vpHeight / 2f - focusY
+            panOffset = new Vector2(
+                vpW / 2f - focusX,
+                vpH / 2f - focusY
             );
-
-            // Only enable panning on axes where canvas exceeds viewport
-            panEnabledX = canvasWidth > vpWidth;
-            panEnabledY = canvasHeight > vpHeight;
-
-            panOffset = centeredOffset;
+            ClampPan();
             ApplyPan();
         }
 
         private int activePointerId = -1;
 
+        private (float w, float h) GetViewportSize()
+        {
+            float w = viewport.resolvedStyle.width;
+            float h = viewport.resolvedStyle.height;
+            if (float.IsNaN(w) || w <= 0) { w = 400f; h = 800f; }
+            return (w, h);
+        }
+
         private void OnPointerDown(PointerDownEvent evt)
         {
-            if (!panEnabledX && !panEnabledY) return;
+            var (vpW, vpH) = GetViewportSize();
+            bool canPanX = storedCanvasW > vpW;
+            bool canPanY = storedCanvasH > vpH;
+            if (!canPanX && !canPanY) return;
 
             isDragging = true;
             WasDragged = false;
@@ -80,8 +86,9 @@ namespace Garden
             dragStart = evt.position;
             dragDistance += delta.magnitude;
 
-            if (panEnabledX) panOffset.x += delta.x;
-            if (panEnabledY) panOffset.y += delta.y;
+            var (vpW, vpH) = GetViewportSize();
+            if (storedCanvasW > vpW) panOffset.x += delta.x;
+            if (storedCanvasH > vpH) panOffset.y += delta.y;
 
             ClampPan();
             ApplyPan();
@@ -117,32 +124,28 @@ namespace Garden
 
         private void ClampPan()
         {
-            float canvasW = canvas.resolvedStyle.width;
-            float canvasH = canvas.resolvedStyle.height;
-            float vpW = viewport.resolvedStyle.width;
-            float vpH = viewport.resolvedStyle.height;
-
-            if (float.IsNaN(canvasW) || float.IsNaN(vpW)) return;
+            var (vpW, vpH) = GetViewportSize();
+            if (storedCanvasW <= 0) return;
 
             // On each axis: if canvas fits, lock to centered. Otherwise clamp so edges stay visible.
-            if (!panEnabledX)
+            if (storedCanvasW <= vpW)
             {
-                panOffset.x = centeredOffset.x;
+                panOffset.x = vpW / 2f - focusPtX;
             }
             else
             {
-                float minX = vpW - canvasW;
+                float minX = vpW - storedCanvasW;
                 float maxX = 0f;
                 panOffset.x = Mathf.Clamp(panOffset.x, minX, maxX);
             }
 
-            if (!panEnabledY)
+            if (storedCanvasH <= vpH)
             {
-                panOffset.y = centeredOffset.y;
+                panOffset.y = vpH / 2f - focusPtY;
             }
             else
             {
-                float minY = vpH - canvasH;
+                float minY = vpH - storedCanvasH;
                 float maxY = 0f;
                 panOffset.y = Mathf.Clamp(panOffset.y, minY, maxY);
             }
