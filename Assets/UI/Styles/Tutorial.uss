@@ -1,42 +1,56 @@
-/* Tutorial hint bar — identical to #dialogue-overlay, minus the portrait */
-#tutorial-hint-bar {
-    position: absolute;
-    left: 0;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0);
-    justify-content: flex-end;
-}
-
-/* Centered variant — hint box in middle of screen */
-#tutorial-hint-bar.tutorial-hint--centered {
-    justify-content: center;
-}
-
+/* Tutorial hint box — flow element that replaces bottom-nav */
 #tutorial-hint-box {
     background-color: var(--color-bg-panel);
     border-top-width: 3px;
-    border-bottom-width: 2px;
-    border-left-width: 0;
-    border-right-width: 0;
     border-top-color: var(--color-border-accent);
-    border-bottom-color: var(--color-empty);
-    padding: var(--spacing-md) var(--spacing-lg);
+    padding: var(--spacing-md);
+    height: var(--bottom-bar-height);
+    justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden;
 }
 
 #tutorial-hint-speaker {
-    font-size: var(--font-xl);
+    font-size: var(--font-lg);
     color: var(--color-text-accent);
     -unity-font-style: bold;
-    margin-bottom: var(--spacing-xs);
+    margin-bottom: var(--spacing-xxs);
 }
 
 #tutorial-hint-text {
-    font-size: var(--font-lg);
+    font-size: var(--font-md);
     color: var(--color-text);
     white-space: normal;
-    margin-bottom: var(--spacing-md);
+}
+
+/* Tutorial centered hint — floating in middle of screen */
+#tutorial-hint-centered {
+    position: absolute;
+    left: var(--spacing-lg);
+    right: var(--spacing-lg);
+    top: 50%;
+    translate: 0 -50%;
+    background-color: var(--color-bg-panel);
+    border-width: 3px;
+    border-color: var(--color-border-accent);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md) var(--spacing-lg);
+    justify-content: center;
+    align-items: center;
+}
+
+#tutorial-hint-centered-speaker {
+    font-size: var(--font-lg);
+    color: var(--color-text-accent);
+    -unity-font-style: bold;
+    margin-bottom: var(--spacing-xxs);
+}
+
+#tutorial-hint-centered-text {
+    font-size: var(--font-md);
+    color: var(--color-text);
+    white-space: normal;
+    -unity-text-align: middle-center;
 }
 
 /* Tutorial target hex — golden tint like watering targets but warm */

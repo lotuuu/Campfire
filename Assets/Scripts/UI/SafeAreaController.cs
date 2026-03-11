@@ -41,6 +41,21 @@ namespace Garden
                 bottomNav.style.marginBottom = -bottomBleed;
                 bottomNav.style.paddingBottom = bottomBleed;
             }
+
+            // Same treatment for tutorial hint and dialogue boxes
+            var tutorialHintBox = root.Q("tutorial-hint-box");
+            if (tutorialHintBox != null)
+            {
+                tutorialHintBox.style.marginBottom = -bottomBleed;
+                tutorialHintBox.style.paddingBottom = bottomBleed;
+            }
+
+            var dialogueBox = root.Q("dialogue-box");
+            if (dialogueBox != null)
+            {
+                dialogueBox.style.marginBottom = -bottomBleed;
+                dialogueBox.style.paddingBottom = bottomBleed;
+            }
         }
     }
 }
