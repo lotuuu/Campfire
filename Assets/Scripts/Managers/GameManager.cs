@@ -90,8 +90,7 @@ namespace Garden
             data.plots.Add(new PlotSave { state = PlotState.Empty, gridX = positions[1].q, gridY = positions[1].r });
             data.apothekeGridX = positions[3].q;
             data.apothekeGridY = positions[3].r;
-            ApothekeManager.Instance.AddSeed("Sprouts", 5);
-            ApothekeManager.Instance.AddSeed("Cress", 3);
+            ApothekeManager.Instance.AddSeed("Sprouts", 2);
             data.inventory.Add(new InventoryItem { itemName = "Speed_Potion", count = 2 });
             data.inventory.Add(new InventoryItem { itemName = "Energy_Drink", count = 2 });
             // No starting Mallum House — player buys first one after growing seeds
