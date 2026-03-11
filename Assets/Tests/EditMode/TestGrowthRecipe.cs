@@ -125,12 +125,13 @@ namespace Garden.Tests
         }
 
         [Test]
-        public void Evaluate_ZeroSnapshots_Returns1()
+        public void Evaluate_ZeroSnapshots_Returns0()
         {
+            // With active weather axes but no snapshots, score is 0 (no data collected)
             var recipe = new GrowthRecipe { useHeat = true };
             var snapshots = new GrowthSnapshots { snapshotCount = 0 };
             float score = recipe.Evaluate(snapshots, 0);
-            Assert.AreEqual(1f, score, 0.001f);
+            Assert.AreEqual(0f, score, 0.001f);
         }
 
         [Test]
