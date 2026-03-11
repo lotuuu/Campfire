@@ -229,55 +229,58 @@ defmodule CampFireWeb.SpritesLive do
             </div>
           <% end %>
 
-          <div class="grid grid-cols-6 gap-3">
-            <%= for sprite <- sprites do %>
-              <div class="bg-white border rounded-lg p-3 text-center group relative">
-                <img
-                  src={"#{Sprites.sprite_url(sprite.key)}?v=#{sprite.hash}"}
-                  class="w-16 h-16 mx-auto mb-2 object-contain bg-gray-100 rounded"
-                  onerror="this.style.display='none'"
-                />
-                <div class="text-xs text-gray-600 truncate" title={sprite.key}>
-                  {sprite.key |> String.split("/", parts: 2) |> List.last()}
-                </div>
-                <div class="text-xs text-gray-400">{format_size(sprite.size)}</div>
-                <div class="absolute top-1 right-1 hidden group-hover:flex gap-1">
-                  <button
-                    phx-click="start_edit"
-                    phx-value-key={sprite.key}
-                    class="text-xs bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded hover:bg-blue-200"
-                    title="Edit"
-                  >E</button>
-                  <button
-                    phx-click="delete_sprite"
-                    phx-value-key={sprite.key}
-                    data-confirm={"Delete sprite '#{sprite.key}'?"}
-                    class="text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded hover:bg-red-200"
-                    title="Delete"
-                  >X</button>
-                </div>
-
-                <%= if @edit_key == sprite.key do %>
-                  <div class="mt-2 border-t pt-2">
-                    <form phx-submit="save_edit" phx-change="update_edit" class="space-y-1.5">
-                      <input type="text" name="name" value={@edit_name}
-                        class="text-xs border rounded px-1.5 py-0.5 w-full" />
-                      <.live_file_input upload={@uploads.sprite} class="text-xs w-full" />
-                      <div class="flex gap-1 justify-center">
-                        <button type="submit" class="text-xs bg-blue-600 text-white px-2 py-0.5 rounded">Save</button>
-                        <button type="button" phx-click="cancel_upload" class="text-xs text-gray-500">Cancel</button>
-                      </div>
-                      <%= for entry <- @uploads.sprite.entries do %>
-                        <%= for err <- upload_errors(@uploads.sprite, entry) do %>
-                          <p class="text-red-600 text-xs mt-1"><%= upload_error_to_string(err) %></p>
-                        <% end %>
-                      <% end %>
-                    </form>
+          <% groups = group_by_depth(sprites, category) %>
+          <%= for {group_name, content} <- groups do %>
+            <%= case content do %>
+              <% {:sprites, group_sprites} -> %>
+                <%= if group_name == "" do %>
+                  <div class="grid grid-cols-6 gap-3 mb-4">
+                    <%= for sprite <- group_sprites do %>
+                      <.sprite_card sprite={sprite} edit_key={@edit_key} edit_name={@edit_name} uploads={@uploads} />
+                    <% end %>
                   </div>
+                <% else %>
+                  <details class="mb-4 border border-gray-100 rounded-lg" open>
+                    <summary class="cursor-pointer px-3 py-2 bg-gray-50 rounded-t-lg text-sm font-medium text-gray-700 hover:bg-gray-100">
+                      {group_name} <span class="text-gray-400 font-normal">({length(group_sprites)})</span>
+                    </summary>
+                    <div class="grid grid-cols-6 gap-3 p-3">
+                      <%= for sprite <- group_sprites do %>
+                        <.sprite_card sprite={sprite} edit_key={@edit_key} edit_name={@edit_name} uploads={@uploads} />
+                      <% end %>
+                    </div>
+                  </details>
                 <% end %>
-              </div>
+              <% {:subgroups, subgroups} -> %>
+                <details class="mb-4 border border-gray-200 rounded-lg" open>
+                  <summary class="cursor-pointer px-3 py-2 bg-gray-50 rounded-t-lg text-sm font-semibold text-gray-700 hover:bg-gray-100">
+                    {group_name} <span class="text-gray-400 font-normal">({subgroups |> Enum.flat_map(fn {_, s} -> s end) |> length()})</span>
+                  </summary>
+                  <div class="p-3 space-y-3">
+                    <%= for {sub_name, sub_sprites} <- subgroups do %>
+                      <%= if sub_name == "" do %>
+                        <div class="grid grid-cols-6 gap-3">
+                          <%= for sprite <- sub_sprites do %>
+                            <.sprite_card sprite={sprite} edit_key={@edit_key} edit_name={@edit_name} uploads={@uploads} />
+                          <% end %>
+                        </div>
+                      <% else %>
+                        <details class="border border-gray-100 rounded-lg" open>
+                          <summary class="cursor-pointer px-3 py-1.5 bg-gray-50/50 rounded-t-lg text-xs font-medium text-gray-600 hover:bg-gray-100">
+                            {sub_name} <span class="text-gray-400 font-normal">({length(sub_sprites)})</span>
+                          </summary>
+                          <div class="grid grid-cols-6 gap-3 p-3">
+                            <%= for sprite <- sub_sprites do %>
+                              <.sprite_card sprite={sprite} edit_key={@edit_key} edit_name={@edit_name} uploads={@uploads} />
+                            <% end %>
+                          </div>
+                        </details>
+                      <% end %>
+                    <% end %>
+                  </div>
+                </details>
             <% end %>
-          </div>
+          <% end %>
         </div>
       <% end %>
 
@@ -286,6 +289,101 @@ defmodule CampFireWeb.SpritesLive do
       <% end %>
     </div>
     """
+  end
+
+  defp sprite_card(assigns) do
+    ~H"""
+    <div class="bg-white border rounded-lg p-3 text-center group relative">
+      <img
+        src={"#{Sprites.sprite_url(@sprite.key)}?v=#{@sprite.hash}"}
+        class="w-16 h-16 mx-auto mb-2 object-contain bg-gray-100 rounded"
+        onerror="this.style.display='none'"
+      />
+      <div class="text-xs text-gray-600 truncate" title={@sprite.key}>
+        {leaf_name(@sprite.key)}
+      </div>
+      <div class="text-xs text-gray-400">{format_size(@sprite.size)}</div>
+      <div class="absolute top-1 right-1 hidden group-hover:flex gap-1">
+        <button
+          phx-click="start_edit"
+          phx-value-key={@sprite.key}
+          class="text-xs bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded hover:bg-blue-200"
+          title="Edit"
+        >E</button>
+        <button
+          phx-click="delete_sprite"
+          phx-value-key={@sprite.key}
+          data-confirm={"Delete sprite '#{@sprite.key}'?"}
+          class="text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded hover:bg-red-200"
+          title="Delete"
+        >X</button>
+      </div>
+
+      <%= if @edit_key == @sprite.key do %>
+        <div class="mt-2 border-t pt-2">
+          <form phx-submit="save_edit" phx-change="update_edit" class="space-y-1.5">
+            <input type="text" name="name" value={@edit_name}
+              class="text-xs border rounded px-1.5 py-0.5 w-full" />
+            <.live_file_input upload={@uploads.sprite} class="text-xs w-full" />
+            <div class="flex gap-1 justify-center">
+              <button type="submit" class="text-xs bg-blue-600 text-white px-2 py-0.5 rounded">Save</button>
+              <button type="button" phx-click="cancel_upload" class="text-xs text-gray-500">Cancel</button>
+            </div>
+            <%= for entry <- @uploads.sprite.entries do %>
+              <%= for err <- upload_errors(@uploads.sprite, entry) do %>
+                <p class="text-red-600 text-xs mt-1"><%= upload_error_to_string(err) %></p>
+              <% end %>
+            <% end %>
+          </form>
+        </div>
+      <% end %>
+    </div>
+    """
+  end
+
+  # Groups sprites into a two-level hierarchy within a category.
+  # Returns [{group_name, {:sprites, list}} | {group_name, {:subgroups, [{sub, list}]}}]
+  # e.g. for hex: "" -> top-level sprites, "plot" -> subgroups (basil, chamomile, ...), "vase" -> sprites
+  defp group_by_depth(sprites, category) do
+    # Split each sprite's path after category into segments
+    by_first = Enum.group_by(sprites, fn sprite ->
+      rest = String.replace_prefix(sprite.key, category <> "/", "")
+      parts = String.split(rest, "/")
+      if length(parts) > 1, do: hd(parts), else: ""
+    end)
+
+    by_first
+    |> Enum.sort_by(fn {"", _} -> {0, ""}; {name, _} -> {1, name} end)
+    |> Enum.map(fn {group_name, group_sprites} ->
+      if group_name == "" do
+        {group_name, {:sprites, group_sprites}}
+      else
+        # Check if any sprites have deeper nesting (3+ segments after category)
+        has_sub = Enum.any?(group_sprites, fn s ->
+          rest = String.replace_prefix(s.key, "#{category}/#{group_name}/", "")
+          length(String.split(rest, "/")) > 1
+        end)
+
+        if has_sub do
+          subs =
+            group_sprites
+            |> Enum.group_by(fn s ->
+              rest = String.replace_prefix(s.key, "#{category}/#{group_name}/", "")
+              parts = String.split(rest, "/")
+              if length(parts) > 1, do: hd(parts), else: ""
+            end)
+            |> Enum.sort_by(fn {"", _} -> {0, ""}; {n, _} -> {1, n} end)
+
+          {group_name, {:subgroups, subs}}
+        else
+          {group_name, {:sprites, group_sprites}}
+        end
+      end
+    end)
+  end
+
+  defp leaf_name(key) do
+    key |> String.split("/") |> List.last()
   end
 
   defp format_size(bytes) when bytes < 1024, do: "#{bytes} B"
