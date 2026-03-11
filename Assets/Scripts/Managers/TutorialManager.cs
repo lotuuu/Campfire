@@ -356,11 +356,15 @@ namespace Garden
 
         // --- Dialogue helper ---
 
+        private Texture2D _portraitCache;
+
         private void ShowDialogue(string speaker, List<string> lines, System.Action onComplete)
         {
             ClearAllHighlights();
             tutorialUI?.HideHint();
-            dialogueUI?.Show(speaker, lines, onComplete);
+            if (_portraitCache == null)
+                _portraitCache = SpriteService.Instance?.GetTexture("portraits/spark_of_ara");
+            dialogueUI?.Show(speaker, lines, onComplete, _portraitCache);
         }
 
         private void ShowWelcome()
