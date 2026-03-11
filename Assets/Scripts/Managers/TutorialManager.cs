@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,20 +13,19 @@ namespace Garden
         private CampsiteViewUI campsiteView;
         private bool initialized;
 
+        // New flow: Welcome → Plant → Water → Harvest → Build House → Plant Again → Fetch Water → Quest → Cress → Second Plot → Upgrade → Complete
         private const int StepWelcome = 0;
         private const int StepPlantFirst = 1;
         private const int StepWaterFirst = 2;
         private const int StepHarvestFirst = 3;
-        private const int StepExplainRecipes = 4;
+        private const int StepBuildHouse = 4;
         private const int StepPlantAgain = 5;
         private const int StepFetchWater = 6;
-        private const int StepWateringOutcome = 7;
-        private const int StepBuildHouse = 8;
-        private const int StepSendOnQuest = 9;
-        private const int StepPlantCressSpeedPotion = 10;
-        private const int StepBuildSecondPlot = 11;
-        private const int StepUpgradeFlame = 12;
-        private const int StepComplete = 13;
+        private const int StepSendOnQuest = 7;
+        private const int StepPlantCressSpeedPotion = 8;
+        private const int StepBuildSecondPlot = 9;
+        private const int StepUpgradeFlame = 10;
+        private const int StepComplete = 11;
 
         public bool IsComplete => CurrentStep >= StepComplete;
         public int CurrentStep => SaveManager.Instance.Data.tutorialStep;
@@ -116,9 +116,8 @@ namespace Garden
                     // Player planted a seed
                     if (plotIndex < data.plots.Count && data.plots[plotIndex].state == PlotState.Growing)
                     {
-                        // Pause growth so the player has time to water
-                        if (PlotManager.Instance != null)
-                            PlotManager.Instance.GrowthPaused = true;
+                        // Pause growth after 8s so the player has time to water
+                        StartCoroutine(DelayedGrowthPause(8f));
 
                         ShowDialogue("Spark of Ara", new List<string> {
                             "Your seed is planted and growing!"
@@ -169,7 +168,7 @@ namespace Garden
                         $"You harvested {result.drops} {result.seedName}!",
                         "Your harvest was better because you watered it.",
                         "Each seed has a recipe. Follow it for higher yields."
-                    }, () => AdvanceTo(StepPlantAgain));
+                    }, () => AdvanceTo(StepBuildHouse));
                     break;
 
                 case StepFetchWater:
@@ -178,14 +177,14 @@ namespace Garden
                     {
                         ShowDialogue("Spark of Ara", new List<string> {
                             "Nice work getting the water in time!"
-                        }, () => AdvanceTo(StepBuildHouse));
+                        }, () => AdvanceTo(StepSendOnQuest));
                     }
                     else
                     {
                         ShowDialogue("Spark of Ara", new List<string> {
                             "Without watering, you got less harvest.",
                             "Try to follow the recipe next time."
-                        }, () => AdvanceTo(StepBuildHouse));
+                        }, () => AdvanceTo(StepSendOnQuest));
                     }
                     break;
 
@@ -212,6 +211,16 @@ namespace Garden
 
             switch (CurrentStep)
             {
+                case StepBuildHouse:
+                    // Check if a mallum house was built
+                    if (data.mallumHouses.Count > 0)
+                    {
+                        ShowDialogue("Spark of Ara", new List<string> {
+                            "Your Mallum can fetch water and go on quests!"
+                        }, () => AdvanceTo(StepPlantAgain));
+                    }
+                    break;
+
                 case StepFetchWater:
                     // Mallum started fetching — clear vase highlight, show waiting hint
                     foreach (var m in data.mallums)
@@ -222,16 +231,6 @@ namespace Garden
                             tutorialUI?.ShowHint("Your Mallum is fetching water. Use an Energy Drink to speed it up!");
                             return;
                         }
-                    }
-                    break;
-
-                case StepBuildHouse:
-                    // Check if a mallum house was built
-                    if (data.mallumHouses.Count > 0)
-                    {
-                        ShowDialogue("Spark of Ara", new List<string> {
-                            "More Mallums means more water and more quests!"
-                        }, () => AdvanceTo(StepSendOnQuest));
                     }
                     break;
 
@@ -265,6 +264,13 @@ namespace Garden
             }
         }
 
+        private IEnumerator DelayedGrowthPause(float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            if (PlotManager.Instance != null && CurrentStep <= StepWaterFirst)
+                PlotManager.Instance.GrowthPaused = true;
+        }
+
         // --- Hint display per step ---
 
         private void ShowHintForStep(int step)
@@ -282,7 +288,7 @@ namespace Garden
                     if (PlotManager.Instance != null)
                         PlotManager.Instance.GrowthPaused = true;
                     tutorialUI?.ShowHint("Water your plant for a better harvest");
-                    HighlightHexCell(0);
+                    HighlightVaseHex(0);
                     break;
                 case StepHarvestFirst:
                 {
@@ -299,9 +305,9 @@ namespace Garden
                     }
                     break;
                 }
-                case StepExplainRecipes:
-                    // Dialogue-only step — auto-skip on resume
-                    AdvanceTo(StepPlantAgain);
+                case StepBuildHouse:
+                    tutorialUI?.ShowHint("Build a Mallum House to get a helper");
+                    HighlightFlameHex();
                     break;
                 case StepPlantAgain:
                     tutorialUI?.ShowHint("Plant another seed");
@@ -327,14 +333,6 @@ namespace Garden
                     }
                     break;
                 }
-                case StepWateringOutcome:
-                    // Dialogue-only step — auto-skip on resume
-                    AdvanceTo(StepBuildHouse);
-                    break;
-                case StepBuildHouse:
-                    tutorialUI?.ShowHint("Build a Mallum House to get more helpers");
-                    HighlightFlameHex();
-                    break;
                 case StepSendOnQuest:
                     tutorialUI?.ShowHint("Send a Mallum on a quest to earn rewards");
                     tutorialUI?.HighlightElement("btn-quest");
@@ -407,8 +405,7 @@ namespace Garden
             campsiteView.EnterTutorialHighlight(0, 0);
         }
 
-        // --- Check for skipped steps on PlotChanged ---
-        // If player is on StepBuildSecondPlot and already has 2+ plots, auto-advance
+        // --- Auto-advance checks for poll-based steps ---
         private void Update()
         {
             if (!initialized || IsComplete) return;
@@ -416,6 +413,14 @@ namespace Garden
             var data = SaveManager.Instance.Data;
             switch (CurrentStep)
             {
+                case StepBuildHouse:
+                    if (data.mallumHouses.Count > 0)
+                    {
+                        ShowDialogue("Spark of Ara", new List<string> {
+                            "Your Mallum can fetch water and go on quests!"
+                        }, () => AdvanceTo(StepPlantAgain));
+                    }
+                    break;
                 case StepBuildSecondPlot:
                     if (data.plots.Count >= 2)
                         AdvanceTo(StepUpgradeFlame);

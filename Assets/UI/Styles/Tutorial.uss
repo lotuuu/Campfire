@@ -14,7 +14,7 @@
 
 #tutorial-hint-text {
     color: rgb(255, 230, 170);
-    font-size: 24px;
+    font-size: var(--font-md);
     -unity-text-align: middle-center;
     -unity-font-style: bold;
     white-space: normal;

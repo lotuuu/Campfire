@@ -12,10 +12,10 @@
 
 #dialogue-speaker-portrait {
     position: absolute;
-    bottom: 440px;
+    bottom: 310px;
     right: -5%;
-    width: 65%;
-    height: 60%;
+    width: 55%;
+    height: 40%;
     -unity-background-scale-mode: scale-to-fit;
     scale: -1 1;
 }
