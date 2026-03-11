@@ -93,13 +93,7 @@ namespace Garden
             ApothekeManager.Instance.AddSeed("Sprouts", 5);
             ApothekeManager.Instance.AddSeed("Cress", 3);
             data.items.Add(new InventoryItem { itemName = "Speed_Potion", count = 3 });
-            // Start with 1 Mallum House
-            data.mallumHouses.Add(new MallumHouseSave { gridX = positions[2].q, gridY = positions[2].r });
-            if (MallumManager.Instance != null)
-            {
-                int maxMallums = ConfigService.Instance.MallumHouseConfig.GetMaxMallums(data.mallumHouses.Count);
-                MallumManager.EnsureMallumCount(data.mallums, maxMallums);
-            }
+            // No starting Mallum House — player buys first one after growing seeds
             SaveManager.Instance.Save();
         }
     }
