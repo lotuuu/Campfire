@@ -94,6 +94,10 @@ defmodule CampFireWeb.VisitorsLive do
     end
   end
 
+  def handle_event("validate", _params, socket) do
+    {:noreply, socket}
+  end
+
   def handle_event("save", %{"visitor" => params}, socket) do
     visitor = socket.assigns.editing
 
@@ -185,7 +189,7 @@ defmodule CampFireWeb.VisitorsLive do
         <%= if @editing do %>
           <div class="bg-white border rounded-lg p-6 mb-6">
             <h3 class="text-lg font-semibold mb-4">Edit: {@editing.name}</h3>
-            <.form for={@form} phx-submit="save" class="space-y-4">
+            <.form for={@form} phx-submit="save" phx-change="validate" class="space-y-4">
               <div class="grid grid-cols-3 gap-4">
                 <div>
                   <label class="block text-sm font-medium text-gray-700">Visitor ID</label>
