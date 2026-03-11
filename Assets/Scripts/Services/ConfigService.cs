@@ -265,14 +265,6 @@ namespace Garden
             }
         }
 
-        public Dictionary<string, object> BuildingCostConfig
-        {
-            get
-            {
-                // Legacy: returns null; managers should use GetPlotCost/GetVaseCost/GetGardenCost instead
-                return null;
-            }
-        }
 
         // ── Building Cost Accessors ──
 
@@ -514,6 +506,16 @@ namespace Garden
                         }
                     }
                 }
+
+                // Building costs (inside flame config)
+                if (flame.TryGetValue("plot_costs", out var pcObj) && pcObj is List<object> plotCosts)
+                    _buildingCosts["plot_costs"] = ParseBuildingCostList(plotCosts);
+
+                if (flame.TryGetValue("vase_costs", out var vcObj) && vcObj is List<object> vaseCosts)
+                    _buildingCosts["vase_costs"] = ParseBuildingCostList(vaseCosts);
+
+                if (flame.TryGetValue("garden_costs", out var gcObj) && gcObj is List<object> gardenCosts)
+                    _buildingCosts["garden_costs"] = ParseBuildingCostList(gardenCosts);
             }
 
             // Vase config
@@ -539,19 +541,6 @@ namespace Garden
                 {
                     _mallumHouseConfig.houseCosts = ParseBuildingCostList(costs);
                 }
-            }
-
-            // Building cost config
-            if (root.TryGetValue("buildingCostConfig", out var buildObj) && buildObj is Dictionary<string, object> build)
-            {
-                if (build.TryGetValue("plot_costs", out var pcObj) && pcObj is List<object> plotCosts)
-                    _buildingCosts["plot_costs"] = ParseBuildingCostList(plotCosts);
-
-                if (build.TryGetValue("vase_costs", out var vcObj) && vcObj is List<object> vaseCosts)
-                    _buildingCosts["vase_costs"] = ParseBuildingCostList(vaseCosts);
-
-                if (build.TryGetValue("garden_costs", out var gcObj) && gcObj is List<object> gardenCosts)
-                    _buildingCosts["garden_costs"] = ParseBuildingCostList(gardenCosts);
             }
 
             // New player config

@@ -21,7 +21,7 @@ defmodule CampFire.Game.Vases do
   end
 
   defp get_vase_cost(vase_count) do
-    case CampFire.ConfigCache.get("building_cost_config") do
+    case CampFire.ConfigCache.get("flame_config") do
       nil -> nil
       config ->
         costs = config["vase_costs"]

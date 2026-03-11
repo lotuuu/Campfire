@@ -30,7 +30,7 @@ defmodule CampFire.Game.Plots do
   end
 
   defp get_plot_cost(plot_count) do
-    case CampFire.ConfigCache.get("building_cost_config") do
+    case CampFire.ConfigCache.get("flame_config") do
       nil -> nil
       config ->
         costs = config["plot_costs"]

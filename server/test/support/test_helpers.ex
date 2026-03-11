@@ -36,7 +36,12 @@ defmodule CampFire.TestHelpers do
       ]
     }
 
-    :ets.insert(:config_cache, {"building_cost_config", config})
+    # Merge building costs into flame_config (building_cost_config was merged into flame_config)
+    existing = case :ets.lookup(:config_cache, "flame_config") do
+      [{"flame_config", val}] -> val
+      _ -> %{}
+    end
+    :ets.insert(:config_cache, {"flame_config", Map.merge(existing, config)})
   end
 
   def seed_garden_configs do

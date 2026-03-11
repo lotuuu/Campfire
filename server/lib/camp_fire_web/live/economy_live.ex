@@ -3,7 +3,7 @@ defmodule CampFireWeb.EconomyLive do
 
   alias CampFire.Admin
 
-  @known_keys ~w(flame_config vase_config mallum_house_config building_cost_config)
+  @known_keys ~w(flame_config vase_config mallum_house_config)
 
   def mount(_params, _session, socket) do
     {:ok,
@@ -117,7 +117,10 @@ defmodule CampFireWeb.EconomyLive do
       "garden_costs" => garden_costs
     }
 
-    save_config("building_cost_config", value, socket)
+    # Merge building costs into the existing flame_config
+    existing = CampFire.ConfigCache.get("flame_config") || %{}
+    merged = Map.merge(existing, value)
+    save_config("flame_config", merged, socket)
   end
 
   # Add/remove rows for flame config
@@ -416,7 +419,6 @@ defmodule CampFireWeb.EconomyLive do
       "flame_config" -> render_flame_display(assigns)
       "vase_config" -> render_vase_display(assigns)
       "mallum_house_config" -> render_mallum_display(assigns)
-      "building_cost_config" -> render_building_cost_display(assigns)
       _ -> render_json_display(assigns)
     end
   end
@@ -561,43 +563,6 @@ defmodule CampFireWeb.EconomyLive do
     """
   end
 
-  defp render_building_cost_display(assigns) do
-    v = assigns.config.value
-    assigns = assign(assigns, plot_costs: v["plot_costs"] || [], vase_costs: v["vase_costs"] || [], garden_costs: v["garden_costs"] || [])
-
-    ~H"""
-    <div class="mt-3 space-y-4">
-      <%= for {label, costs} <- [{"Plot Costs", @plot_costs}, {"Vase Costs", @vase_costs}, {"Garden Costs", @garden_costs}] do %>
-        <div>
-          <h4 class="text-sm font-semibold text-gray-700 mb-1">{label}</h4>
-          <table class="w-full text-sm">
-            <thead><tr class="bg-gray-50">
-              <th class="px-3 py-2 text-left text-gray-500">#</th>
-              <th class="px-3 py-2 text-left text-gray-500">Mana</th>
-              <th class="px-3 py-2 text-left text-gray-500">Harvest Requirements</th>
-            </tr></thead>
-            <tbody class="divide-y">
-              <%= for {cost, i} <- Enum.with_index(costs) do %>
-                <tr>
-                  <td class="px-3 py-1.5 font-medium">{i + 1}</td>
-                  <td class="px-3 py-1.5">{cost["manaCost"]}</td>
-                  <td class="px-3 py-1.5">
-                    <%= for h <- cost["harvestCosts"] || [] do %>
-                      <span class="inline-block bg-amber-100 text-amber-800 rounded px-2 py-0.5 text-xs mr-1">
-                        {h["count"]}x {h["itemName"]}
-                      </span>
-                    <% end %>
-                  </td>
-                </tr>
-              <% end %>
-            </tbody>
-          </table>
-        </div>
-      <% end %>
-    </div>
-    """
-  end
-
   defp render_json_display(assigns) do
     ~H"""
     <pre class="mt-2 text-sm text-gray-600 bg-gray-50 rounded p-3 max-h-48 overflow-auto font-mono leading-relaxed">{Jason.encode!(@config.value, pretty: true)}</pre>
@@ -613,7 +578,6 @@ defmodule CampFireWeb.EconomyLive do
       "flame_config" -> render_flame_editor(assigns)
       "vase_config" -> render_vase_editor(assigns)
       "mallum_house_config" -> render_mallum_editor(assigns)
-      "building_cost_config" -> render_building_cost_editor(assigns)
       _ -> render_json_editor(assigns)
     end
   end
@@ -827,58 +791,6 @@ defmodule CampFireWeb.EconomyLive do
           <% end %>
         </div>
       </div>
-
-      <div class="flex gap-2">
-        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Save</button>
-        <button type="button" phx-click="cancel" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Cancel</button>
-      </div>
-    </form>
-    """
-  end
-
-  defp render_building_cost_editor(assigns) do
-    d = assigns.edit_data
-    assigns = assign(assigns, plot_costs: d["plot_costs"] || [], vase_costs: d["vase_costs"] || [], garden_costs: d["garden_costs"] || [])
-
-    ~H"""
-    <form phx-submit="save_building_cost" class="mt-3 space-y-4">
-      <%= for {type, label, costs} <- [{"plot", "Plot Costs", @plot_costs}, {"vase", "Vase Costs", @vase_costs}, {"garden", "Garden Costs", @garden_costs}] do %>
-        <div>
-          <div class="flex justify-between items-center mb-2">
-            <label class="text-sm font-semibold text-gray-700">{label}</label>
-            <button type="button" phx-click="add_building_cost" phx-value-type={type} class="text-sm text-green-600 hover:underline">+ Add</button>
-          </div>
-          <div class="space-y-3">
-            <%= for {cost, i} <- Enum.with_index(costs) do %>
-              <div class="border rounded p-3 bg-gray-50">
-                <div class="flex justify-between items-center mb-2">
-                  <span class="text-sm font-medium text-gray-700">#{i + 1}</span>
-                  <button type="button" phx-click="remove_building_cost" phx-value-type={type} phx-value-index={i} class="text-red-500 hover:text-red-700 text-xs">Remove</button>
-                </div>
-                <div class="flex gap-3 items-end mb-2">
-                  <div class="w-32">
-                    <label class="block text-xs text-gray-500">Mana Cost</label>
-                    <input type="number" name={"#{type}_cost[#{i}][manaCost]"} value={cost["manaCost"]} class="w-full border rounded px-2 py-1 text-sm" />
-                  </div>
-                  <button type="button" phx-click="add_building_harvest" phx-value-type={type} phx-value-cost-index={i} class="text-xs text-green-600 hover:underline">+ Harvest Req</button>
-                </div>
-                <%= if (cost["harvestCosts"] || []) != [] do %>
-                  <div class="space-y-1 ml-4">
-                    <%= for {h, j} <- Enum.with_index(cost["harvestCosts"] || []) do %>
-                      <div class="flex gap-2 items-center">
-                        <input type="text" name={"#{type}_cost[#{i}][harvest][#{j}][itemName]"} value={h["itemName"]} placeholder="item_name" class="border rounded px-2 py-1 text-sm w-40" />
-                        <span class="text-gray-400 text-xs">x</span>
-                        <input type="number" name={"#{type}_cost[#{i}][harvest][#{j}][count]"} value={h["count"]} class="border rounded px-2 py-1 text-sm w-16" />
-                        <button type="button" phx-click="remove_building_harvest" phx-value-type={type} phx-value-cost-index={i} phx-value-harvest-index={j} class="text-red-500 hover:text-red-700 text-xs">X</button>
-                      </div>
-                    <% end %>
-                  </div>
-                <% end %>
-              </div>
-            <% end %>
-          </div>
-        </div>
-      <% end %>
 
       <div class="flex gap-2">
         <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Save</button>
