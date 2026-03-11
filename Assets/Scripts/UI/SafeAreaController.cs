@@ -42,7 +42,7 @@ namespace Garden
                 bottomNav.style.paddingBottom = bottomBleed;
             }
 
-            // Same treatment for tutorial hint and dialogue boxes
+            // Same bleed treatment for tutorial hint and dialogue boxes
             var tutorialHintBox = root.Q("tutorial-hint-box");
             if (tutorialHintBox != null)
             {
@@ -55,6 +55,26 @@ namespace Garden
             {
                 dialogueBox.style.marginBottom = -bottomBleed;
                 dialogueBox.style.paddingBottom = bottomBleed;
+            }
+
+            // After layout, measure the nav bar's actual height and apply it
+            // to hint/dialogue boxes so they match exactly.
+            if (bottomNav != null)
+            {
+                EventCallback<GeometryChangedEvent> onLayout = null;
+                onLayout = evt =>
+                {
+                    float navHeight = bottomNav.resolvedStyle.height;
+                    if (navHeight <= 0) return;
+
+                    if (tutorialHintBox != null)
+                        tutorialHintBox.style.height = navHeight;
+                    if (dialogueBox != null)
+                        dialogueBox.style.height = navHeight;
+
+                    bottomNav.UnregisterCallback(onLayout);
+                };
+                bottomNav.RegisterCallback(onLayout);
             }
         }
     }

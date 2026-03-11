@@ -26,18 +26,16 @@
     background-color: var(--color-bg-panel);
     border-top-width: 3px;
     border-top-color: var(--color-border-accent);
-    padding: var(--spacing-md);
-    height: var(--bottom-bar-height);
+    padding: var(--spacing-md) var(--spacing-lg);
     justify-content: center;
     flex-shrink: 0;
-    overflow: hidden;
 }
 
 #dialogue-speaker {
     font-size: var(--font-lg);
     color: var(--color-text-accent);
     -unity-font-style: bold;
-    margin-bottom: var(--spacing-xxs);
+    margin-bottom: var(--spacing-xs);
 }
 
 #dialogue-text {
@@ -47,13 +45,16 @@
 }
 
 #dialogue-tap-hint {
-    font-size: var(--font-sm);
+    font-size: var(--font-xs);
     color: var(--color-text-dim);
     -unity-text-align: lower-right;
+    position: absolute;
+    right: var(--spacing-lg);
+    bottom: var(--spacing-md);
 }
 
 /* Above-nav variant: dialogue sits above the menu bar */
 .dialogue-overlay--above-nav {
     background-color: rgba(0, 0, 0, 0.4);
-    padding-bottom: var(--bottom-bar-height);
+    padding-bottom: 248px;
 }

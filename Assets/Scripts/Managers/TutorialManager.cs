@@ -250,33 +250,33 @@ namespace Garden
                     break;
 
                 case StepSpeedUpQuest:
-                {
-                    // Hide hint as soon as quest is sped up (QuestComplete),
-                    // but wait for rewards to be collected (Idle) before showing next dialogue
-                    bool anyOnQuest = false;
-                    bool anyQuestComplete = false;
-                    foreach (var m in data.mallums)
                     {
-                        if (m.state == MallumState.OnQuest)
-                            anyOnQuest = true;
-                        if (m.state == MallumState.QuestComplete)
-                            anyQuestComplete = true;
-                    }
-                    if (anyQuestComplete && !anyOnQuest)
-                    {
-                        // Quest sped up — hide hint while reward reveal is showing
-                        tutorialUI?.HideHint();
-                        ClearAllHighlights();
-                    }
-                    if (!anyOnQuest && !anyQuestComplete)
-                    {
-                        ShowDialogue("Spark of Ara", new List<string> {
+                        // Hide hint as soon as quest is sped up (QuestComplete),
+                        // but wait for rewards to be collected (Idle) before showing next dialogue
+                        bool anyOnQuest = false;
+                        bool anyQuestComplete = false;
+                        foreach (var m in data.mallums)
+                        {
+                            if (m.state == MallumState.OnQuest)
+                                anyOnQuest = true;
+                            if (m.state == MallumState.QuestComplete)
+                                anyQuestComplete = true;
+                        }
+                        if (anyQuestComplete && !anyOnQuest)
+                        {
+                            // Quest sped up — hide hint while reward reveal is showing
+                            tutorialUI?.HideHint();
+                            ClearAllHighlights();
+                        }
+                        if (!anyOnQuest && !anyQuestComplete)
+                        {
+                            ShowDialogue("Spark of Ara", new List<string> {
                             "Quests reward you with rare seeds and items.",
                             "Use those seeds to expand your camp!"
                         }, () => AdvanceTo(StepPlantCressSpeedPotion));
+                        }
+                        break;
                     }
-                    break;
-                }
             }
         }
 
@@ -320,20 +320,20 @@ namespace Garden
                     HighlightVaseHex(0);
                     break;
                 case StepHarvestFirst:
-                {
-                    // Check if plant is already mature (e.g. on resume)
-                    var plots = SaveManager.Instance.Data.plots;
-                    if (plots.Count > 0 && plots[0].state == PlotState.Mature)
                     {
-                        tutorialUI?.ShowHint("Your plant is ready! Tap to harvest");
-                        HighlightHexCell(0);
+                        // Check if plant is already mature (e.g. on resume)
+                        var plots = SaveManager.Instance.Data.plots;
+                        if (plots.Count > 0 && plots[0].state == PlotState.Mature)
+                        {
+                            tutorialUI?.ShowHint("Your plant is ready! Tap to harvest");
+                            HighlightHexCell(0);
+                        }
+                        else
+                        {
+                            tutorialUI?.ShowHint("Your plant is growing...");
+                        }
+                        break;
                     }
-                    else
-                    {
-                        tutorialUI?.ShowHint("Your plant is growing...");
-                    }
-                    break;
-                }
                 case StepBuildHouse:
                     tutorialUI?.ShowHint("Build a Mallum House to get a helper");
                     HighlightFlameHex();
@@ -343,60 +343,61 @@ namespace Garden
                     HighlightHexCell(0);
                     break;
                 case StepFetchWater:
-                {
-                    // Check if mallum is already fetching (resume case)
-                    bool alreadyFetching = false;
-                    foreach (var m in SaveManager.Instance.Data.mallums)
                     {
-                        if (m.state == MallumState.FetchingWater)
-                        { alreadyFetching = true; break; }
+                        // Check if mallum is already fetching (resume case)
+                        bool alreadyFetching = false;
+                        foreach (var m in SaveManager.Instance.Data.mallums)
+                        {
+                            if (m.state == MallumState.FetchingWater)
+                            { alreadyFetching = true; break; }
+                        }
+                        if (alreadyFetching)
+                        {
+                            tutorialUI?.ShowHint("Your Mallum is fetching water. Use an Energy Drink to speed it up!");
+                        }
+                        else
+                        {
+                            tutorialUI?.ShowHint("Send your Mallum to fetch water");
+                            HighlightVaseHex(0);
+                        }
+                        break;
                     }
-                    if (alreadyFetching)
-                    {
-                        tutorialUI?.ShowHint("Your Mallum is fetching water. Use an Energy Drink to speed it up!");
-                    }
-                    else
-                    {
-                        tutorialUI?.ShowHint("Send your Mallum to fetch water");
-                        HighlightVaseHex(0);
-                    }
-                    break;
-                }
                 case StepSendOnQuest:
                     ShowDialogue("Spark of Ara", new List<string> {
                         "Send a Mallum on a quest to earn rewards!"
-                    }, () => {
+                    }, () =>
+                    {
                         tutorialUI?.HighlightElement("btn-quest");
                         tutorialUI?.DeferHighlightByClass("quest-send-btn");
                     }, aboveNav: true);
                     break;
                 case StepSpeedUpQuest:
-                {
-                    // Check if quest already completed (resume case)
-                    bool stillOnQuest = false;
-                    foreach (var m in SaveManager.Instance.Data.mallums)
                     {
-                        if (m.state == MallumState.OnQuest || m.state == MallumState.QuestComplete)
-                        { stillOnQuest = true; break; }
+                        // Check if quest already completed (resume case)
+                        bool stillOnQuest = false;
+                        foreach (var m in SaveManager.Instance.Data.mallums)
+                        {
+                            if (m.state == MallumState.OnQuest || m.state == MallumState.QuestComplete)
+                            { stillOnQuest = true; break; }
+                        }
+                        if (stillOnQuest)
+                        {
+                            tutorialUI?.ShowHint("Use an Energy Drink to speed up the quest");
+                            tutorialUI?.HighlightElementByClass("quest-speedup-btn");
+                        }
+                        else
+                        {
+                            // Already collected — auto-advance
+                            AdvanceTo(StepPlantCressSpeedPotion);
+                        }
+                        break;
                     }
-                    if (stillOnQuest)
-                    {
-                        tutorialUI?.ShowHint("Use an Energy Drink to speed up the quest");
-                        tutorialUI?.HighlightElementByClass("quest-speedup-btn");
-                    }
-                    else
-                    {
-                        // Already collected — auto-advance
-                        AdvanceTo(StepPlantCressSpeedPotion);
-                    }
-                    break;
-                }
                 case StepPlantCressSpeedPotion:
                     tutorialUI?.ShowHint("Plant Cress and use a Speed Potion to grow it faster");
                     HighlightHexCell(0);
                     break;
                 case StepBuildSecondPlot:
-                    tutorialUI?.ShowHint("Build another plot to grow more");
+                    tutorialUI?.ShowHint("Build another plot to grow more seeds!");
                     HighlightFlameHex();
                     break;
                 case StepUpgradeFlame:

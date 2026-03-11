@@ -8,8 +8,6 @@
     border-top-width: 3px;
     border-top-color: rgb(214, 154, 53);
     padding: var(--spacing-md);
-    height: var(--bottom-bar-height);
-    overflow: hidden;
 }
 
 .nav-btn {
