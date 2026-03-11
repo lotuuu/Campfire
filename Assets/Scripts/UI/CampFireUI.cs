@@ -324,7 +324,7 @@ namespace Garden
         private void TryLoadSettingsIcon()
         {
             if (_settingsIconLoaded || settingsBtn == null) return;
-            var gearTex = SpriteService.Instance?.GetTexture("gear");
+            var gearTex = SpriteService.Instance?.GetTexture("ui/gear");
             if (gearTex == null) return;
             settingsBtn.style.backgroundImage = new StyleBackground(gearTex);
             _settingsIconLoaded = true;
