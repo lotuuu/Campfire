@@ -1,34 +1,38 @@
 /* Tutorial hint bar */
 #tutorial-hint-bar {
     position: absolute;
-    bottom: 80px;
-    left: 0;
-    right: 0;
-    padding: 8px 16px;
-    background-color: rgba(0, 0, 0, 0.75);
+    bottom: 90px;
+    left: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    background-color: rgba(0, 0, 0, 0.8);
+    border-radius: 12px;
     align-items: center;
     justify-content: center;
     flex-direction: row;
 }
 
 #tutorial-hint-text {
-    color: rgb(255, 255, 255);
-    font-size: 14px;
+    color: rgb(255, 230, 170);
+    font-size: 24px;
     -unity-text-align: middle-center;
+    -unity-font-style: bold;
     white-space: normal;
 }
 
-/* Highlight for tutorial targets — golden glow border, pulsed via C# class toggle */
+/* Highlight for tutorial targets — golden hex tint, pulsed via C# class toggle */
 .tutorial-highlight {
-    border-color: rgba(255, 200, 60, 0.9);
-    border-width: 3px;
-    transition-property: border-color, border-width;
+    --hex-fill: rgba(255, 200, 60, 0.25);
+    --hex-border: rgba(255, 200, 60, 0.7);
+    -unity-background-image-tint-color: rgba(255, 230, 170, 1);
+    transition-property: --hex-fill, --hex-border, -unity-background-image-tint-color;
     transition-duration: 0.4s;
 }
 
 .tutorial-highlight-dim {
-    border-color: rgba(255, 200, 60, 0.3);
-    border-width: 2px;
-    transition-property: border-color, border-width;
+    --hex-fill: rgba(255, 200, 60, 0.1);
+    --hex-border: rgba(255, 200, 60, 0.3);
+    -unity-background-image-tint-color: rgba(240, 220, 190, 1);
+    transition-property: --hex-fill, --hex-border, -unity-background-image-tint-color;
     transition-duration: 0.4s;
 }
