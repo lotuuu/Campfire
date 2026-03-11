@@ -50,8 +50,9 @@ namespace Garden
             BuildAvailableSection();
             BuildLockedSection();
 
+            // Must defer scroll restore — layout needs a frame after Clear()+rebuild
             if (overlayBody != null)
-                overlayBody.scrollOffset = savedOffset;
+                overlayBody.schedule.Execute(() => overlayBody.scrollOffset = savedOffset);
         }
 
         private void UpdateMallumStatus()
