@@ -102,8 +102,39 @@ namespace Garden
             ScheduleAllPlantNotifications();
         }
 
+        /// When true, growth timers are frozen (tutorial uses this to let the player water in time).
+        public bool GrowthPaused { get; set; }
+        private DateTime? _lastPauseTime;
+
         private void Update()
         {
+            if (GrowthPaused)
+            {
+                // Push all plantTimeUtc forward so elapsed time stays frozen
+                var now = GameTime.UtcNow;
+                if (_lastPauseTime.HasValue)
+                {
+                    var delta = now - _lastPauseTime.Value;
+                    if (delta.TotalSeconds > 0)
+                    {
+                        var data = SaveManager.Instance.Data;
+                        foreach (var plot in data.plots)
+                        {
+                            if (plot.state == PlotState.Growing && !string.IsNullOrEmpty(plot.plantTimeUtc))
+                            {
+                                var pt = DateTime.Parse(plot.plantTimeUtc, null, System.Globalization.DateTimeStyles.RoundtripKind);
+                                plot.plantTimeUtc = (pt + delta).ToString("o");
+                            }
+                        }
+                    }
+                }
+                _lastPauseTime = now;
+                return;
+            }
+
+            if (_lastPauseTime.HasValue)
+                _lastPauseTime = null;
+
             CheckGrowthCompletion();
         }
 

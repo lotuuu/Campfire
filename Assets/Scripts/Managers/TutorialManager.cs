@@ -115,6 +115,10 @@ namespace Garden
                     // Player planted a seed
                     if (plotIndex < data.plots.Count && data.plots[plotIndex].state == PlotState.Growing)
                     {
+                        // Pause growth so the player has time to water
+                        if (PlotManager.Instance != null)
+                            PlotManager.Instance.GrowthPaused = true;
+
                         ShowDialogue("Spark of Ara", new List<string> {
                             "Your seed is planted and growing!"
                         }, () => AdvanceTo(StepWaterFirst));
@@ -125,8 +129,21 @@ namespace Garden
                     // Player watered the plant
                     if (plotIndex < data.plots.Count && data.plots[plotIndex].waterCount > 0)
                     {
+                        // Resume growth now that watering is done
+                        if (PlotManager.Instance != null)
+                            PlotManager.Instance.GrowthPaused = false;
+
                         ClearAllHighlights();
                         AdvanceTo(StepHarvestFirst);
+                    }
+                    break;
+
+                case StepHarvestFirst:
+                    // Wait for the plant to actually mature before showing harvest hint
+                    if (plotIndex < data.plots.Count && data.plots[plotIndex].state == PlotState.Mature)
+                    {
+                        tutorialUI?.ShowHint("Your plant is ready! Tap to harvest");
+                        HighlightHexCell(0);
                     }
                     break;
             }
@@ -239,13 +256,27 @@ namespace Garden
                     HighlightHexCell(0);
                     break;
                 case StepWaterFirst:
+                    // Re-pause growth on resume so plant doesn't mature before watering
+                    if (PlotManager.Instance != null)
+                        PlotManager.Instance.GrowthPaused = true;
                     tutorialUI?.ShowHint("Water your plant for a better harvest");
                     HighlightHexCell(0);
                     break;
                 case StepHarvestFirst:
-                    tutorialUI?.ShowHint("Your plant is ready! Tap to harvest");
-                    HighlightHexCell(0);
+                {
+                    // Check if plant is already mature (e.g. on resume)
+                    var plots = SaveManager.Instance.Data.plots;
+                    if (plots.Count > 0 && plots[0].state == PlotState.Mature)
+                    {
+                        tutorialUI?.ShowHint("Your plant is ready! Tap to harvest");
+                        HighlightHexCell(0);
+                    }
+                    else
+                    {
+                        tutorialUI?.ShowHint("Your plant is growing...");
+                    }
                     break;
+                }
                 case StepExplainRecipes:
                     // Dialogue-only step — auto-skip on resume
                     AdvanceTo(StepPlantAgainAndFetchWater);
