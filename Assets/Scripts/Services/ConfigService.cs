@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
+using Debug = UnityEngine.Debug;
 
 namespace Garden
 {
@@ -141,8 +143,12 @@ namespace Garden
             Instance = this;
         }
 
+        private const long SlowStepMs = 500;
+
         public async Task<bool> FetchConfigs()
         {
+            var totalSw = Stopwatch.StartNew();
+
             try
             {
                 var url = ServerBaseUrl + "/game/configs";
@@ -157,20 +163,28 @@ namespace Garden
                 op.completed += _ => tcs.SetResult(true);
                 await tcs.Task;
 
+                var networkMs = totalSw.ElapsedMilliseconds;
+                if (networkMs > SlowStepMs)
+                    Debug.LogWarning($"[INIT SLOW] GET /game/configs network took {networkMs}ms");
+
                 if (req.responseCode != 200)
                 {
                     Debug.LogWarning($"ConfigService: fetch failed (HTTP {req.responseCode})");
                     return false;
                 }
 
+                var parseSw = Stopwatch.StartNew();
                 ParseResponse(req.downloadHandler.text);
+                if (parseSw.ElapsedMilliseconds > SlowStepMs)
+                    Debug.LogWarning($"[INIT SLOW] ConfigService.ParseResponse took {parseSw.ElapsedMilliseconds}ms");
+
                 if (_seedConfigs.Count == 0)
                 {
                     Debug.LogWarning("ConfigService: response missing seeds section, treating as failed.");
                     return false;
                 }
                 IsLoaded = true;
-                Debug.Log($"ConfigService: loaded {_seedConfigs.Count} seeds, {_questConfigs.Count} quests, {_gardenConfigs.Count} gardens");
+                Debug.Log($"[INIT] ConfigService.FetchConfigs total: {totalSw.ElapsedMilliseconds}ms ({_seedConfigs.Count} seeds, {_questConfigs.Count} quests, {_gardenConfigs.Count} gardens, {_spriteManifest.Count} sprites in manifest)");
                 return true;
             }
             catch (Exception e)

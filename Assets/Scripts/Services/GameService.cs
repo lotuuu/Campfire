@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
+using Debug = UnityEngine.Debug;
 
 namespace Garden
 {
@@ -27,16 +29,26 @@ namespace Garden
 
         // ── Initialization ──
 
+        private const long SlowStepMs = 500;
+
         public async void Initialize()
         {
             if (SocialService.Instance == null || !SocialService.Instance.IsSignedIn) return;
 
+            var totalSw = Stopwatch.StartNew();
+
             try
             {
+                var sw = Stopwatch.StartNew();
+
                 // Fetch server configs before game state
                 if (ConfigService.Instance != null)
                 {
                     var configLoaded = await ConfigService.Instance.FetchConfigs();
+                    if (sw.ElapsedMilliseconds > SlowStepMs)
+                        Debug.LogWarning($"[INIT SLOW] ConfigService.FetchConfigs took {sw.ElapsedMilliseconds}ms");
+                    sw.Restart();
+
                     if (!configLoaded)
                     {
                         Debug.LogError("GameService: Config fetch failed — server configs are required.");
@@ -51,10 +63,16 @@ namespace Garden
                 if (SpriteService.Instance != null && ConfigService.Instance != null)
                 {
                     await SpriteService.Instance.SyncSprites(ConfigService.Instance.SpriteManifest);
+                    if (sw.ElapsedMilliseconds > SlowStepMs)
+                        Debug.LogWarning($"[INIT SLOW] SpriteService.SyncSprites took {sw.ElapsedMilliseconds}ms");
+                    sw.Restart();
                 }
 
                 using var req = GetAuth("/game/state");
                 await SendAsync(req);
+                if (sw.ElapsedMilliseconds > SlowStepMs)
+                    Debug.LogWarning($"[INIT SLOW] GET /game/state took {sw.ElapsedMilliseconds}ms");
+                sw.Restart();
 
                 if (req.responseCode == 200)
                 {
@@ -68,6 +86,10 @@ namespace Garden
                         return;
                     }
                     ApplyGameState(state);
+                    if (sw.ElapsedMilliseconds > SlowStepMs)
+                        Debug.LogWarning($"[INIT SLOW] ApplyGameState took {sw.ElapsedMilliseconds}ms");
+
+                    Debug.Log($"[INIT] GameService total: {totalSw.ElapsedMilliseconds}ms");
                     IsInitialized = true;
                     IsOnline = true;
                     OnStateLoaded?.Invoke();

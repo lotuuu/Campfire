@@ -1,6 +1,8 @@
+using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
+using Debug = UnityEngine.Debug;
 
 namespace Garden
 {
@@ -53,6 +55,7 @@ namespace Garden
         private bool _economyDone;
         private bool _gameDone;
         private bool _failed;
+        private Stopwatch _initStopwatch;
 
         private void Awake()
         {
@@ -62,6 +65,7 @@ namespace Garden
 
         private void Start()
         {
+            _initStopwatch = Stopwatch.StartNew();
             uiDocument = GetComponentInChildren<UIDocument>();
             root = uiDocument.rootVisualElement;
 
@@ -340,6 +344,7 @@ namespace Garden
             if (WeatherService.Instance != null)
                 WeatherService.Instance.OnWeatherUpdated -= OnWeatherDataReady;
             _weatherDone = true;
+            Debug.Log($"[INIT] Weather ready at {_initStopwatch?.ElapsedMilliseconds ?? 0}ms");
             UpdateLoadingGate();
         }
 
@@ -348,6 +353,7 @@ namespace Garden
             if (SocialService.Instance != null)
                 SocialService.Instance.OnSignedIn -= OnSocialReady;
             _socialDone = true;
+            Debug.Log($"[INIT] Social ready at {_initStopwatch?.ElapsedMilliseconds ?? 0}ms");
             UpdateLoadingGate();
         }
 
@@ -356,6 +362,7 @@ namespace Garden
             if (EconomyService.Instance != null)
                 EconomyService.Instance.OnStateSynced -= OnEconomyReady;
             _economyDone = true;
+            Debug.Log($"[INIT] Economy ready at {_initStopwatch?.ElapsedMilliseconds ?? 0}ms");
             UpdateLoadingGate();
         }
 
@@ -364,6 +371,7 @@ namespace Garden
             if (GameService.Instance != null)
                 GameService.Instance.OnStateLoaded -= OnGameReady;
             _gameDone = true;
+            Debug.Log($"[INIT] Game ready at {_initStopwatch?.ElapsedMilliseconds ?? 0}ms");
             UpdateLoadingGate();
         }
 
@@ -402,6 +410,7 @@ namespace Garden
 
             if (done >= total)
             {
+                Debug.Log($"[INIT] ===== App fully loaded in {_initStopwatch?.ElapsedMilliseconds ?? 0}ms =====");
                 loadingGate.RemoveFromHierarchy();
                 loadingGate = null;
 

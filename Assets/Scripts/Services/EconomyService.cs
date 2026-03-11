@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
+using Debug = UnityEngine.Debug;
 
 namespace Garden
 {
@@ -117,14 +119,21 @@ namespace Garden
             LoadQueue();
         }
 
+        private const long SlowStepMs = 500;
+
         public async void Initialize()
         {
             if (SocialService.Instance == null || !SocialService.Instance.IsSignedIn) return;
 
+            var totalSw = Stopwatch.StartNew();
+
             try
             {
+                var sw = Stopwatch.StartNew();
                 using var getReq = GetAuth("/economy/state");
                 await SendAsync(getReq);
+                if (sw.ElapsedMilliseconds > SlowStepMs)
+                    Debug.LogWarning($"[INIT SLOW] GET /economy/state took {sw.ElapsedMilliseconds}ms");
 
                 if (getReq.responseCode == 200)
                 {
@@ -132,6 +141,7 @@ namespace Garden
                     ApplyServerState(state);
                     IsInitialized = true;
                     IsOnline = true;
+                    Debug.Log($"[INIT] EconomyService total: {totalSw.ElapsedMilliseconds}ms");
                     OnStateSynced?.Invoke();
                     await DrainQueue();
                     return;
@@ -139,8 +149,11 @@ namespace Garden
 
                 if (getReq.responseCode == 404)
                 {
+                    sw.Restart();
                     using var initReq = PostJson("/economy/init", "{}");
                     await SendAsync(initReq);
+                    if (sw.ElapsedMilliseconds > SlowStepMs)
+                        Debug.LogWarning($"[INIT SLOW] POST /economy/init took {sw.ElapsedMilliseconds}ms");
 
                     if (initReq.responseCode == 201)
                     {
@@ -148,6 +161,7 @@ namespace Garden
                         ApplyServerState(state);
                         IsInitialized = true;
                         IsOnline = true;
+                        Debug.Log($"[INIT] EconomyService total: {totalSw.ElapsedMilliseconds}ms");
                         OnStateSynced?.Invoke();
                         ClearQueue();
                         return;

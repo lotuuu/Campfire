@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
+using Debug = UnityEngine.Debug;
 
 namespace Garden
 {
@@ -37,8 +39,12 @@ namespace Garden
             Initialize();
         }
 
+        private const long SlowStepMs = 500;
+
         private async void Initialize()
         {
+            var totalSw = Stopwatch.StartNew();
+
             if (SocialSaveManager.Instance?.Data == null)
             {
                 Debug.LogWarning("SocialService: SocialSaveManager not ready.");
@@ -49,13 +55,20 @@ namespace Garden
 
             if (!string.IsNullOrEmpty(social.uid) && !string.IsNullOrEmpty(social.authToken))
             {
+                var sw = Stopwatch.StartNew();
                 // Validate existing token — DB may have been reset
                 if (await ValidateToken())
                 {
+                    if (sw.ElapsedMilliseconds > SlowStepMs)
+                        Debug.LogWarning($"[INIT SLOW] SocialService.ValidateToken took {sw.ElapsedMilliseconds}ms");
+                    Debug.Log($"[INIT] SocialService total: {totalSw.ElapsedMilliseconds}ms");
                     IsSignedIn = true;
                     OnSignedIn?.Invoke();
                     return;
                 }
+
+                if (sw.ElapsedMilliseconds > SlowStepMs)
+                    Debug.LogWarning($"[INIT SLOW] SocialService.ValidateToken (failed) took {sw.ElapsedMilliseconds}ms");
 
                 // Token is stale, clear and re-register
                 Debug.LogWarning("SocialService: Stored token is invalid, re-registering...");
@@ -65,7 +78,11 @@ namespace Garden
                 SocialSaveManager.Instance.Save();
             }
 
+            var regSw = Stopwatch.StartNew();
             await Register();
+            if (regSw.ElapsedMilliseconds > SlowStepMs)
+                Debug.LogWarning($"[INIT SLOW] SocialService.Register took {regSw.ElapsedMilliseconds}ms");
+            Debug.Log($"[INIT] SocialService total: {totalSw.ElapsedMilliseconds}ms");
         }
 
         private async Task<bool> ValidateToken()

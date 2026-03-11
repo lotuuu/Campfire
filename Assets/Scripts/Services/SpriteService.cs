@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
+using Debug = UnityEngine.Debug;
 
 namespace Garden
 {
@@ -23,12 +25,17 @@ namespace Garden
 
         private static string ServerBaseUrl => ServerConfig.BaseUrl;
 
+        private const long SlowStepMs = 500;
+
         private void Awake()
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
             // Load cached sprites immediately so they're available for the loading screen
+            var sw = Stopwatch.StartNew();
             LoadAllFromCache();
+            if (sw.ElapsedMilliseconds > SlowStepMs)
+                Debug.LogWarning($"[INIT SLOW] SpriteService.LoadAllFromCache (Awake) took {sw.ElapsedMilliseconds}ms ({_textures.Count} sprites)");
         }
 
         // ── Public API ──
@@ -98,6 +105,8 @@ namespace Garden
 
         public async Task<bool> SyncSprites(Dictionary<string, string> serverManifest)
         {
+            var totalSw = Stopwatch.StartNew();
+
             if (serverManifest == null || serverManifest.Count == 0)
             {
                 LoadAllFromCache();
@@ -120,11 +129,18 @@ namespace Garden
                 if (toDownload.Count > 0)
                 {
                     Debug.Log($"SpriteService: downloading {toDownload.Count} sprites...");
+                    var dlSw = Stopwatch.StartNew();
                     await DownloadBatch(toDownload, serverManifest);
+                    if (dlSw.ElapsedMilliseconds > SlowStepMs)
+                        Debug.LogWarning($"[INIT SLOW] SpriteService.DownloadBatch ({toDownload.Count} sprites) took {dlSw.ElapsedMilliseconds}ms");
                 }
 
+                var cacheSw = Stopwatch.StartNew();
                 LoadAllFromCache();
-                Debug.Log($"SpriteService: {_textures.Count} sprites loaded.");
+                if (cacheSw.ElapsedMilliseconds > SlowStepMs)
+                    Debug.LogWarning($"[INIT SLOW] SpriteService.LoadAllFromCache took {cacheSw.ElapsedMilliseconds}ms ({_textures.Count} sprites)");
+
+                Debug.Log($"[INIT] SpriteService.SyncSprites total: {totalSw.ElapsedMilliseconds}ms ({_textures.Count} sprites loaded)");
                 return true;
             }
             catch (Exception e)
