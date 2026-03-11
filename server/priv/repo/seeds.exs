@@ -130,7 +130,7 @@ defmodule RecipeHelper do
 end
 
 seed_configs = [
-  %{seed_name: "Sprouts", growth_duration_hours: 0.00278, min_drops: 1, max_drops: 3, tier: 0, recipe: %{
+  %{seed_name: "Sprouts", growth_duration_hours: 0.00278, min_drops: 1, max_drops: 4, tier: 0, recipe: %{
     "waterings" => RecipeHelper.axis(1, 1, 1, 1)
   }},
   %{seed_name: "Cress", growth_duration_hours: 0.08333, min_drops: 1, max_drops: 3, tier: 0, recipe: %{
@@ -218,7 +218,7 @@ alias CampFire.Admin.{QuestConfig, GardenConfig, GameConfig}
 # Quest configs (from Game.Mallums @quest_configs)
 quests = [
   %{quest_name: "SwampForage", description: "Forage in the nearby swamp for useful seeds.", duration_minutes: 5, required_flame_level: 1, reward_rolls: 2,
-    reward_pool: [%{"seed" => "Basil", "weight" => 3, "minCount" => 1, "maxCount" => 2}, %{"seed" => "Chamomile", "weight" => 2, "minCount" => 1, "maxCount" => 2}]},
+    reward_pool: [%{"seed" => "Cress", "weight" => 4, "minCount" => 1, "maxCount" => 2}, %{"seed" => "Basil", "weight" => 3, "minCount" => 1, "maxCount" => 2}, %{"seed" => "Chamomile", "weight" => 2, "minCount" => 1, "maxCount" => 2}]},
   %{quest_name: "MeadowExpedition", description: "Explore the meadow for wildflowers.", duration_minutes: 15, required_flame_level: 2, reward_rolls: 3,
     reward_pool: [%{"seed" => "Marigold", "weight" => 3, "minCount" => 1, "maxCount" => 2}, %{"seed" => "Snowdrop", "weight" => 2, "minCount" => 1, "maxCount" => 2}]},
   %{quest_name: "DeepWoodsTrek", description: "Trek deep into the woods for rare finds.", duration_minutes: 60, required_flame_level: 3, reward_rolls: 3,
