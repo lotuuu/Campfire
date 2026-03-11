@@ -191,14 +191,14 @@ namespace Garden
                 var rewardText = el.Q<Label>("reward-text");
                 var tradeBtn = el.Q<Button>("trade-btn");
 
-                bool canAfford = VisitorManager.CanAffordOffer(offer, data.items);
+                bool canAfford = VisitorManager.CanAffordOffer(offer, data.inventory);
 
                 if (costsContainer != null)
                 {
                     foreach (var cost in offer.costs)
                     {
-                        string displayName = cost.itemName.Replace("_harvest", "");
-                        var item = data.items.Find(i => i.itemName == cost.itemName);
+                        string displayName = RecipeData.FormatItemName(cost.itemName);
+                        var item = data.inventory.Find(i => i.itemName == cost.itemName);
                         int have = item != null ? item.count : 0;
                         bool enough = have >= cost.count;
 
@@ -218,8 +218,8 @@ namespace Garden
                     var capturedOffer = offer;
                     tradeBtn.clicked += () =>
                     {
-                        if (!VisitorManager.CanAffordOffer(capturedOffer, data.items)) return;
-                        VisitorManager.ExecuteTrade(capturedOffer, data.items, data.seedInventory);
+                        if (!VisitorManager.CanAffordOffer(capturedOffer, data.inventory)) return;
+                        VisitorManager.ExecuteTrade(capturedOffer, data.inventory);
                         SaveManager.Instance.Save();
                         ShowModal(); // refresh
                     };
@@ -234,7 +234,7 @@ namespace Garden
             if (visitor.isReturnVisit)
             {
                 var data = SaveManager.Instance.Data;
-                var item = data.items.Find(i => i.itemName == visitor.requestItem);
+                var item = data.inventory.Find(i => i.itemName == visitor.requestItem);
                 int have = item?.count ?? 0;
 
                 if (questLabel != null) questLabel.text = "Requesting:";

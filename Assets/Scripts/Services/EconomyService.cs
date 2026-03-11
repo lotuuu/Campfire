@@ -27,8 +27,7 @@ namespace Garden
         public int gems;
         public int flameLevel;
         public string lastManaCollectUtc;
-        public List<SeedInventoryEntry> seeds;
-        public List<InventoryItem> items;
+        public List<InventoryItem> inventory;
     }
 
     [Serializable]
@@ -286,18 +285,11 @@ namespace Garden
             data.gems = state.gems;
             data.flameLevel = state.flameLevel;
 
-            data.seedInventory.Clear();
-            if (state.seeds != null)
+            data.inventory.Clear();
+            if (state.inventory != null)
             {
-                foreach (var s in state.seeds)
-                    data.seedInventory.Add(new SeedInventoryEntry { seedName = s.seedName, count = s.count });
-            }
-
-            data.items.Clear();
-            if (state.items != null)
-            {
-                foreach (var i in state.items)
-                    data.items.Add(new InventoryItem { itemName = i.itemName, count = i.count });
+                foreach (var i in state.inventory)
+                    data.inventory.Add(new InventoryItem { itemName = i.itemName, count = i.count });
             }
 
             SaveManager.Instance.Save();

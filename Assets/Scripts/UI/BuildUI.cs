@@ -32,7 +32,7 @@ namespace Garden
                 var plotCost = PlotManager.Instance.GetNextPlotCost();
                 bool canAfford = canPlace && plotCost != null
                     && CurrencyManager.Instance.CanAffordMana(plotCost.manaCost)
-                    && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, plotCost.harvestCosts);
+                    && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, plotCost.harvestCosts);
                 buildList.Add(BuildCardHelper.CreateBuildCard(
                     "Plot", "Grow seeds", "ui/buildings/plot", null,
                     BuildCardHelper.FromBuildingCost(plotCost), capText,
@@ -46,7 +46,7 @@ namespace Garden
                 var vaseCost = VaseManager.Instance.GetNextVaseCost();
                 bool canAfford = canPlace && vaseCost != null
                     && CurrencyManager.Instance.CanAffordMana(vaseCost.manaCost)
-                    && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, vaseCost.harvestCosts);
+                    && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, vaseCost.harvestCosts);
                 buildList.Add(BuildCardHelper.CreateBuildCard(
                     "Vase", "Stores water", "ui/buildings/vase", null,
                     BuildCardHelper.FromBuildingCost(vaseCost), capText,
@@ -62,7 +62,7 @@ namespace Garden
                 {
                     bool canAfford = canPlace
                         && CurrencyManager.Instance.CanAffordMana(nextCost.manaCost)
-                        && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, nextCost.harvestCosts);
+                        && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, nextCost.harvestCosts);
                     buildList.Add(BuildCardHelper.CreateBuildCard(
                         "House", "Houses 1 Mallum", "ui/buildings/house", null,
                         BuildCardHelper.FromBuildingCost(nextCost), capText,
@@ -80,7 +80,7 @@ namespace Garden
                     var gardenCost = GardenManager.Instance.GetNextGardenCost();
                     bool canAfford = canPlace && gardenCost != null
                         && CurrencyManager.Instance.CanAffordMana(gardenCost.manaCost)
-                        && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, gardenCost.harvestCosts);
+                        && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, gardenCost.harvestCosts);
                     buildList.Add(BuildCardHelper.CreateBuildCard(
                         "Garden", "Grow fruit trees", "ui/buildings/garden", null,
                         BuildCardHelper.FromBuildingCost(gardenCost), capText,

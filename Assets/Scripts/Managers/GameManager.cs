@@ -92,8 +92,8 @@ namespace Garden
             data.apothekeGridY = positions[3].r;
             ApothekeManager.Instance.AddSeed("Sprouts", 5);
             ApothekeManager.Instance.AddSeed("Cress", 3);
-            data.items.Add(new InventoryItem { itemName = "Speed_Potion", count = 2 });
-            data.items.Add(new InventoryItem { itemName = "Energy_Drink", count = 2 });
+            data.inventory.Add(new InventoryItem { itemName = "Speed_Potion", count = 2 });
+            data.inventory.Add(new InventoryItem { itemName = "Energy_Drink", count = 2 });
             // No starting Mallum House — player buys first one after growing seeds
             SaveManager.Instance.Save();
         }

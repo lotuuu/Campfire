@@ -18,8 +18,8 @@ namespace Garden
         }
 
         public RecipeData[] AllRecipes => allRecipes;
-        public List<SeedInventoryEntry> Seeds => SaveManager.Instance.Data.seedInventory;
-        public List<InventoryItem> Items => SaveManager.Instance.Data.items;
+        public List<InventoryItem> Seeds => SaveManager.Instance.Data.inventory.FindAll(i => i.itemName.EndsWith("_Seed"));
+        public List<InventoryItem> Items => SaveManager.Instance.Data.inventory;
 
         public bool CanMix(RecipeData recipe)
         {
@@ -27,7 +27,7 @@ namespace Garden
             var data = SaveManager.Instance.Data;
             foreach (var ing in recipe.ingredients)
             {
-                var item = data.items.Find(i => i.itemName == ing.itemName);
+                var item = data.inventory.Find(i => i.itemName == ing.itemName);
                 if (item == null || item.count < ing.quantity) return false;
             }
             return true;
@@ -41,17 +41,17 @@ namespace Garden
             if (!CurrencyManager.FreeMode)
             foreach (var ing in recipe.ingredients)
             {
-                var item = data.items.Find(i => i.itemName == ing.itemName);
+                var item = data.inventory.Find(i => i.itemName == ing.itemName);
                 if (item == null) continue;
                 item.count -= ing.quantity;
-                if (item.count <= 0) data.items.Remove(item);
+                if (item.count <= 0) data.inventory.Remove(item);
             }
 
-            var existing = data.items.Find(i => i.itemName == recipe.result);
+            var existing = data.inventory.Find(i => i.itemName == recipe.result);
             if (existing != null)
                 existing.count += recipe.resultQuantity;
             else
-                data.items.Add(new InventoryItem { itemName = recipe.result, count = recipe.resultQuantity });
+                data.inventory.Add(new InventoryItem { itemName = recipe.result, count = recipe.resultQuantity });
 
             SaveManager.Instance.Save();
             AudioManager.Instance?.PlaySFX("apotheke_mix");
@@ -94,17 +94,29 @@ namespace Garden
             return Mix(recipe);
         }
 
-        public void AddSeed(string seedName, int count = 1)
+        public void AddSeed(string plantName, int count = 1)
         {
+            var itemName = plantName + "_Seed";
             var data = SaveManager.Instance.Data;
-            var entry = data.seedInventory.Find(s => s.seedName == seedName);
+            var entry = data.inventory.Find(i => i.itemName == itemName);
             if (entry != null)
                 entry.count += count;
             else
-                data.seedInventory.Add(new SeedInventoryEntry { seedName = seedName, count = count });
+                data.inventory.Add(new InventoryItem { itemName = itemName, count = count });
             SaveManager.Instance.Save();
-            EconomyService.Instance?.Enqueue("add-seeds",
-                JsonUtility.ToJson(new AddSeedRequest { seed_name = seedName, count = count }));
+            EconomyService.Instance?.Enqueue("add-items",
+                JsonUtility.ToJson(new AddItemRequest { item_name = itemName, count = count }));
+        }
+
+        public void AddItem(string itemName, int count = 1)
+        {
+            var data = SaveManager.Instance.Data;
+            var entry = data.inventory.Find(i => i.itemName == itemName);
+            if (entry != null)
+                entry.count += count;
+            else
+                data.inventory.Add(new InventoryItem { itemName = itemName, count = count });
+            SaveManager.Instance.Save();
         }
     }
 }

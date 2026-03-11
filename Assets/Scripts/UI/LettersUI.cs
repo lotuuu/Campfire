@@ -522,18 +522,18 @@ namespace Garden
             giftPickerInventory?.Clear();
             var data = SaveManager.Instance.Data;
 
-            // Seeds
-            foreach (var seed in data.seedInventory)
-            {
-                if (seed.count <= 0) continue;
-                AddGiftPickerRow("seed", seed.seedName, seed.count, PlotManager.GetSeedDisplayName(seed.seedName));
-            }
-
-            // Items
-            foreach (var item in data.items)
+            foreach (var item in data.inventory)
             {
                 if (item.count <= 0) continue;
-                AddGiftPickerRow("item", item.itemName, item.count);
+                if (item.itemName.EndsWith("_Seed"))
+                {
+                    var plantName = item.itemName[..^5];
+                    AddGiftPickerRow("seed", item.itemName, item.count, PlotManager.GetSeedDisplayName(plantName));
+                }
+                else
+                {
+                    AddGiftPickerRow("item", item.itemName, item.count);
+                }
             }
         }
 

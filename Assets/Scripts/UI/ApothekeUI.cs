@@ -58,7 +58,7 @@ namespace Garden
             if (seedList == null) return;
             seedList.Clear();
 
-            var seeds = SaveManager.Instance?.Data?.seedInventory;
+            var seeds = ApothekeManager.Instance?.Seeds;
             if (seeds == null || seeds.Count == 0)
             {
                 if (inventoryEmpty != null) inventoryEmpty.style.display = DisplayStyle.Flex;
@@ -71,13 +71,14 @@ namespace Garden
                 var entry = seeds[i];
                 if (entry.count <= 0) continue;
 
-                var seedConfig = ConfigService.Instance?.GetSeed(entry.seedName);
+                var plantName = entry.itemName.EndsWith("_Seed") ? entry.itemName[..^5] : entry.itemName;
+                var seedConfig = ConfigService.Instance?.GetSeed(plantName);
                 var card = BuildSeedCard(entry, seedConfig, i);
                 seedList.Add(card);
             }
         }
 
-        private VisualElement BuildSeedCard(SeedInventoryEntry entry, ServerSeedConfig seedData, int index)
+        private VisualElement BuildSeedCard(InventoryItem entry, ServerSeedConfig seedData, int index)
         {
             var card = new VisualElement();
             card.AddToClassList("seed-card");
@@ -90,7 +91,7 @@ namespace Garden
             icon.AddToClassList("seed-icon");
             if (seedData != null)
             {
-                var sprite = SpriteService.Instance?.GetSprite($"seeds/{SpriteService.SeedToSpriteKey(seedData.seedName)}/icon");
+                var sprite = SpriteService.Instance?.GetSprite($"items/seeds/{SpriteService.SeedToSpriteKey(seedData.seedName)}/icon");
                 if (sprite != null)
                     icon.style.backgroundImage = new StyleBackground(sprite);
             }
@@ -98,7 +99,8 @@ namespace Garden
 
             var info = new VisualElement();
             info.AddToClassList("seed-info");
-            var nameLabel = new Label(seedData != null ? seedData.seedName : entry.seedName);
+            var plantName = entry.itemName.EndsWith("_Seed") ? entry.itemName[..^5] : entry.itemName;
+            var nameLabel = new Label(seedData != null ? seedData.seedName : plantName);
             nameLabel.AddToClassList("seed-name");
             info.Add(nameLabel);
             var countLabel = new Label($"x{entry.count}");
@@ -108,7 +110,7 @@ namespace Garden
 
             var outcome = new VisualElement();
             outcome.AddToClassList("seed-outcome");
-            var outcomeName = new Label(entry.seedName);
+            var outcomeName = new Label(plantName);
             outcomeName.AddToClassList("seed-outcome-name");
             outcome.Add(outcomeName);
             header.Add(outcome);
@@ -221,7 +223,7 @@ namespace Garden
             var recipes = ApothekeManager.Instance.AllRecipes;
             if (recipes == null || recipes.Length == 0) return;
 
-            var items = SaveManager.Instance?.Data?.items;
+            var items = SaveManager.Instance?.Data?.inventory;
 
             // Group by category, craftable first within each group
             var grouped = new System.Collections.Generic.SortedDictionary<RecipeCategory,

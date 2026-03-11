@@ -13,8 +13,7 @@ namespace Garden
         public List<VaseSave> vases = new();
         public List<PlotSave> plots = new();
         public List<GardenSave> gardens = new();
-        public List<SeedInventoryEntry> seedInventory = new();
-        public List<InventoryItem> items = new();
+        public List<InventoryItem> inventory = new();
         public VisitorSave currentVisitor;
         public List<ActiveVisitorQuest> activeQuests = new();
         public string lastVisitorFetchDateUtc;
@@ -73,13 +72,6 @@ namespace Garden
         public bool mature;
         public int gridX;
         public int gridY;
-    }
-
-    [Serializable]
-    public class SeedInventoryEntry
-    {
-        public string seedName;
-        public int count;
     }
 
     [Serializable]

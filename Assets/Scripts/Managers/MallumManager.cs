@@ -226,7 +226,7 @@ namespace Garden
             if (!CurrencyManager.Instance.CanAffordMana(cost.manaCost)) return false;
 
             // Check harvests
-            if (!CanAffordHarvests(data.items, cost.harvestCosts)) return false;
+            if (!CanAffordHarvests(data.inventory, cost.harvestCosts)) return false;
 
             // Spend mana
             if (!CurrencyManager.Instance.SpendMana(cost.manaCost)) return false;
@@ -235,10 +235,10 @@ namespace Garden
             if (!CurrencyManager.FreeMode)
             foreach (var hc in cost.harvestCosts)
             {
-                var entry = data.items.Find(i => i.itemName == hc.itemName);
+                var entry = data.inventory.Find(i => i.itemName == hc.itemName);
                 if (entry == null) continue;
                 entry.count -= hc.count;
-                if (entry.count <= 0) data.items.Remove(entry);
+                if (entry.count <= 0) data.inventory.Remove(entry);
             }
 
             // Place house
@@ -323,13 +323,13 @@ namespace Garden
         public bool CanUseEnergyDrink()
         {
             if (CurrencyManager.FreeMode) return true;
-            var item = SaveManager.Instance.Data.items.Find(i => i.itemName == EnergyDrinkItem);
+            var item = SaveManager.Instance.Data.inventory.Find(i => i.itemName == EnergyDrinkItem);
             return item != null && item.count > 0;
         }
 
         public int GetEnergyDrinkCount()
         {
-            var item = SaveManager.Instance.Data.items.Find(i => i.itemName == EnergyDrinkItem);
+            var item = SaveManager.Instance.Data.inventory.Find(i => i.itemName == EnergyDrinkItem);
             return item?.count ?? 0;
         }
 
@@ -337,10 +337,10 @@ namespace Garden
         {
             if (CurrencyManager.FreeMode) return true;
             var data = SaveManager.Instance.Data;
-            var drink = data.items.Find(i => i.itemName == EnergyDrinkItem);
+            var drink = data.inventory.Find(i => i.itemName == EnergyDrinkItem);
             if (drink == null || drink.count <= 0) return false;
             drink.count--;
-            if (drink.count <= 0) data.items.Remove(drink);
+            if (drink.count <= 0) data.inventory.Remove(drink);
             SaveManager.Instance.Save();
             return true;
         }

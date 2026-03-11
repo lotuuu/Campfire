@@ -752,7 +752,7 @@ namespace Garden
                 {
                     bool canAffordPlot = canPlace
                         && CurrencyManager.Instance.CanAffordMana(plotCost.manaCost)
-                        && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, plotCost.harvestCosts);
+                        && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, plotCost.harvestCosts);
                     grid.Add(BuildCardHelper.CreateBuildCard(
                         "Plot", "Grow seeds", "ui/buildings/plot", null,
                         BuildCardHelper.FromBuildingCost(plotCost), capText,
@@ -772,7 +772,7 @@ namespace Garden
                 {
                     bool canAffordVase = canPlace
                         && CurrencyManager.Instance.CanAffordMana(vaseCost.manaCost)
-                        && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, vaseCost.harvestCosts);
+                        && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, vaseCost.harvestCosts);
                     grid.Add(BuildCardHelper.CreateBuildCard(
                         "Vase", "Stores water", "ui/buildings/vase", null,
                         BuildCardHelper.FromBuildingCost(vaseCost), capText,
@@ -792,7 +792,7 @@ namespace Garden
                 {
                     bool canAffordHouse = canPlace
                         && CurrencyManager.Instance.CanAffordMana(cost.manaCost)
-                        && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, cost.harvestCosts);
+                        && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, cost.harvestCosts);
                     grid.Add(BuildCardHelper.CreateBuildCard(
                         "House", "Houses 1 Mallum", "ui/buildings/house", null,
                         BuildCardHelper.FromBuildingCost(cost), capText,
@@ -815,7 +815,7 @@ namespace Garden
                     {
                         bool canAffordGarden = canPlace
                             && CurrencyManager.Instance.CanAffordMana(gardenCost.manaCost)
-                            && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, gardenCost.harvestCosts);
+                            && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, gardenCost.harvestCosts);
                         grid.Add(BuildCardHelper.CreateBuildCard(
                             "Garden", "Grow fruit trees", "ui/buildings/garden", null,
                             BuildCardHelper.FromBuildingCost(gardenCost), capText,
@@ -1303,10 +1303,10 @@ namespace Garden
                     costHeader.AddToClassList("upgrade-cost-header");
                     costList.Add(costHeader);
 
-                    var items = SaveManager.Instance.Data.items;
+                    var items = SaveManager.Instance.Data.inventory;
                     foreach (var ing in recipe.ingredients)
                     {
-                        string displayName = ing.itemName.Replace("_harvest", "");
+                        string displayName = RecipeData.FormatItemName(ing.itemName);
                         var item = items.Find(i => i.itemName == ing.itemName);
                         int have = item != null ? item.count : 0;
                         bool enough = have >= ing.count;
@@ -1365,7 +1365,7 @@ namespace Garden
                 var plotCost = PlotManager.Instance.GetNextPlotCost();
                 bool canAfford = canPlaceEntity && plotCost != null
                     && CurrencyManager.Instance.CanAffordMana(plotCost.manaCost)
-                    && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, plotCost.harvestCosts);
+                    && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, plotCost.harvestCosts);
                 grid.Add(BuildCardHelper.CreateBuildCard(
                     "Plot", "Grow seeds", "ui/buildings/plot", null,
                     BuildCardHelper.FromBuildingCost(plotCost), capText,
@@ -1382,7 +1382,7 @@ namespace Garden
                 var vaseCost = VaseManager.Instance.GetNextVaseCost();
                 bool canAfford = canPlaceEntity && vaseCost != null
                     && CurrencyManager.Instance.CanAffordMana(vaseCost.manaCost)
-                    && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, vaseCost.harvestCosts);
+                    && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, vaseCost.harvestCosts);
                 grid.Add(BuildCardHelper.CreateBuildCard(
                     "Vase", "Stores water", "ui/buildings/vase", null,
                     BuildCardHelper.FromBuildingCost(vaseCost), capText,
@@ -1401,7 +1401,7 @@ namespace Garden
                 {
                     bool canAfford = canPlaceEntity
                         && CurrencyManager.Instance.CanAffordMana(nextCost.manaCost)
-                        && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, nextCost.harvestCosts);
+                        && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, nextCost.harvestCosts);
                     grid.Add(BuildCardHelper.CreateBuildCard(
                         "House", "Houses 1 Mallum", "ui/buildings/house", null,
                         BuildCardHelper.FromBuildingCost(nextCost), capText,
@@ -1424,7 +1424,7 @@ namespace Garden
                     {
                         bool canAfford = canPlaceEntity
                             && CurrencyManager.Instance.CanAffordMana(gardenCost.manaCost)
-                            && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.items, gardenCost.harvestCosts);
+                            && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, gardenCost.harvestCosts);
                         grid.Add(BuildCardHelper.CreateBuildCard(
                             "Garden", "Grow fruit trees", "ui/buildings/garden", null,
                             BuildCardHelper.FromBuildingCost(gardenCost), capText,
@@ -1623,7 +1623,7 @@ namespace Garden
 
         private void BuildSeedPicker(int plotIndex)
         {
-            var inventory = SaveManager.Instance.Data.seedInventory;
+            var seedItems = SaveManager.Instance.Data.inventory.FindAll(i => i.itemName.EndsWith("_Seed"));
 
             var scroll = new ScrollView(ScrollViewMode.Vertical);
             scroll.AddToClassList("seed-picker-scroll");
@@ -1631,11 +1631,12 @@ namespace Garden
             var list = new VisualElement();
             list.AddToClassList("seed-picker-list");
 
-            foreach (var entry in inventory)
+            foreach (var entry in seedItems)
             {
                 if (entry.count <= 0) continue;
 
-                var seedData = ConfigService.Instance?.GetSeed(entry.seedName);
+                var plantName = entry.itemName[..^5]; // strip "_Seed"
+                var seedData = ConfigService.Instance?.GetSeed(plantName);
 
                 var card = new VisualElement();
                 card.AddToClassList("seed-card");
@@ -1643,7 +1644,7 @@ namespace Garden
                 // Header row: name + count
                 var header = new VisualElement();
                 header.AddToClassList("seed-card--header");
-                var nameLabel = new Label(seedData != null ? seedData.seedName : entry.seedName);
+                var nameLabel = new Label(seedData != null ? seedData.seedName : plantName);
                 nameLabel.AddToClassList("seed-card--name");
                 header.Add(nameLabel);
                 var countLabel = new Label($"x{entry.count}");
@@ -1698,7 +1699,7 @@ namespace Garden
                 }
 
                 // Plant button
-                string sName = entry.seedName;
+                string sName = plantName;
                 var plantBtn = new Button(() =>
                 {
                     PlotManager.Instance.Plant(plotIndex, sName);
@@ -2148,7 +2149,7 @@ namespace Garden
             else
             {
                 // Cost row with pigment icon + count
-                var items = SaveManager.Instance.Data.items;
+                var items = SaveManager.Instance.Data.inventory;
                 var pigmentItem = items.Find(i => i.itemName == skin.costItemName);
                 int have = pigmentItem?.count ?? 0;
                 bool canAfford = SkinManager.Instance.CanAffordSkin(skin);

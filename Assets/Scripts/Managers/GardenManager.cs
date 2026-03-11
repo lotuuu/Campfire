@@ -177,9 +177,9 @@ namespace Garden
 
         private static void AddItem(SaveData data, string itemName, int count)
         {
-            var existing = data.items.Find(it => it.itemName == itemName);
+            var existing = data.inventory.Find(it => it.itemName == itemName);
             if (existing != null) existing.count += count;
-            else data.items.Add(new InventoryItem { itemName = itemName, count = count });
+            else data.inventory.Add(new InventoryItem { itemName = itemName, count = count });
         }
 
         // ── Garden Building ──────────────────────────────────────────
@@ -199,17 +199,17 @@ namespace Garden
             if (cost == null) return false;
 
             if (!CurrencyManager.Instance.CanAffordMana(cost.manaCost)) return false;
-            if (!MallumManager.CanAffordHarvests(data.items, cost.harvestCosts)) return false;
+            if (!MallumManager.CanAffordHarvests(data.inventory, cost.harvestCosts)) return false;
 
             CurrencyManager.Instance.SpendMana(cost.manaCost);
 
             if (!CurrencyManager.FreeMode)
             foreach (var hc in cost.harvestCosts)
             {
-                var entry = data.items.Find(i => i.itemName == hc.itemName);
+                var entry = data.inventory.Find(i => i.itemName == hc.itemName);
                 if (entry == null) continue;
                 entry.count -= hc.count;
-                if (entry.count <= 0) data.items.Remove(entry);
+                if (entry.count <= 0) data.inventory.Remove(entry);
             }
 
             data.gardens.Add(new GardenSave

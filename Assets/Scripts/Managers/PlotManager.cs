@@ -154,17 +154,17 @@ namespace Garden
             if (cost == null) return false;
 
             if (!CurrencyManager.Instance.CanAffordMana(cost.manaCost)) return false;
-            if (!MallumManager.CanAffordHarvests(data.items, cost.harvestCosts)) return false;
+            if (!MallumManager.CanAffordHarvests(data.inventory, cost.harvestCosts)) return false;
 
             CurrencyManager.Instance.SpendMana(cost.manaCost);
 
             if (!CurrencyManager.FreeMode)
             foreach (var hc in cost.harvestCosts)
             {
-                var entry = data.items.Find(i => i.itemName == hc.itemName);
+                var entry = data.inventory.Find(i => i.itemName == hc.itemName);
                 if (entry == null) continue;
                 entry.count -= hc.count;
-                if (entry.count <= 0) data.items.Remove(entry);
+                if (entry.count <= 0) data.inventory.Remove(entry);
             }
 
             if (EconomyService.Instance != null && !CurrencyManager.FreeMode
@@ -217,15 +217,20 @@ namespace Garden
             var plot = data.plots[plotIndex];
             if (plot.state != PlotState.Empty) return false;
 
-            var seedEntry = data.seedInventory.Find(s => s.seedName == seedName);
+            var seedItemName = seedName + "_Seed";
+            var seedEntry = data.inventory.Find(i => i.itemName == seedItemName);
             if (!CurrencyManager.FreeMode)
             {
                 if (seedEntry == null || seedEntry.count <= 0) return false;
                 seedEntry.count--;
-                if (seedEntry.count <= 0) data.seedInventory.Remove(seedEntry);
+                if (seedEntry.count <= 0) data.inventory.Remove(seedEntry);
                 if (!(GameService.Instance != null && GameService.Instance.IsOnline))
-                    EconomyService.Instance?.Enqueue("spend-seeds",
-                        JsonUtility.ToJson(new SpendSeedRequest { seed_name = seedName, count = 1, freeMode = CurrencyManager.FreeMode }));
+                    EconomyService.Instance?.Enqueue("spend-items",
+                        JsonUtility.ToJson(new SpendItemsRequest
+                        {
+                            items = new List<SpendItemEntry> { new SpendItemEntry { item_name = seedItemName, count = 1 } },
+                            freeMode = CurrencyManager.FreeMode
+                        }));
             }
 
             plot.seedName = seedName;
@@ -372,10 +377,10 @@ namespace Garden
             plot.state = PlotState.Empty;
 
             // Add items locally as fallback (server response will be authoritative)
-            AddItem(data, seed.seedName + "_harvest", drops);
+            AddItem(data, seed.seedName, drops);
             if (!(GameService.Instance != null && GameService.Instance.IsOnline))
                 EconomyService.Instance?.Enqueue("add-items",
-                    JsonUtility.ToJson(new AddItemRequest { item_name = seed.seedName + "_harvest", count = drops }));
+                    JsonUtility.ToJson(new AddItemRequest { item_name = seed.seedName, count = drops }));
 
             SaveManager.Instance.Save();
 
@@ -432,10 +437,10 @@ namespace Garden
             // Check potion availability first
             if (!CurrencyManager.FreeMode)
             {
-                var potion = data.items.Find(i => i.itemName == "Speed_Potion");
+                var potion = data.inventory.Find(i => i.itemName == "Speed_Potion");
                 if (potion == null || potion.count <= 0) return false;
                 potion.count--;
-                if (potion.count <= 0) data.items.Remove(potion);
+                if (potion.count <= 0) data.inventory.Remove(potion);
             }
 
             return InstantFinish(plotIndex);
@@ -443,7 +448,7 @@ namespace Garden
 
         public int GetSpeedPotionCount()
         {
-            var item = SaveManager.Instance.Data.items.Find(i => i.itemName == "Speed_Potion");
+            var item = SaveManager.Instance.Data.inventory.Find(i => i.itemName == "Speed_Potion");
             return item?.count ?? 0;
         }
 
@@ -572,9 +577,11 @@ namespace Garden
 
         private static void AddItem(SaveData data, string itemName, int count)
         {
-            var existing = data.items.Find(i => i.itemName == itemName);
-            if (existing != null) existing.count += count;
-            else data.items.Add(new InventoryItem { itemName = itemName, count = count });
+            var existing = data.inventory.Find(i => i.itemName == itemName);
+            if (existing != null)
+                existing.count += count;
+            else
+                data.inventory.Add(new InventoryItem { itemName = itemName, count = count });
         }
 
         private static ServerSeedConfig LoadSeed(string seedName)

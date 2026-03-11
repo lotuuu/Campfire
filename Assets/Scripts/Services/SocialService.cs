@@ -499,23 +499,12 @@ namespace Garden
             var data = SaveManager.Instance.Data;
             foreach (var item in items)
             {
-                if (item.type == "seed")
+                var invName = item.type == "seed" ? item.name + "_Seed" : item.name;
+                var entry = data.inventory.Find(i => i.itemName == invName);
+                if (entry != null)
                 {
-                    var entry = data.seedInventory.Find(s => s.seedName == item.name);
-                    if (entry != null)
-                    {
-                        entry.count -= item.count;
-                        if (entry.count <= 0) data.seedInventory.Remove(entry);
-                    }
-                }
-                else
-                {
-                    var entry = data.items.Find(i => i.itemName == item.name);
-                    if (entry != null)
-                    {
-                        entry.count -= item.count;
-                        if (entry.count <= 0) data.items.Remove(entry);
-                    }
+                    entry.count -= item.count;
+                    if (entry.count <= 0) data.inventory.Remove(entry);
                 }
             }
             SaveManager.Instance.Save();
@@ -530,11 +519,11 @@ namespace Garden
                 else
                 {
                     var data = SaveManager.Instance.Data;
-                    var entry = data.items.Find(i => i.itemName == item.name);
+                    var entry = data.inventory.Find(i => i.itemName == item.name);
                     if (entry != null)
                         entry.count += item.count;
                     else
-                        data.items.Add(new InventoryItem { itemName = item.name, count = item.count });
+                        data.inventory.Add(new InventoryItem { itemName = item.name, count = item.count });
                     SaveManager.Instance.Save();
                 }
             }

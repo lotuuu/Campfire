@@ -26,7 +26,7 @@ namespace Garden
         {
             if (string.IsNullOrEmpty(internalName)) return "";
             string name = internalName;
-            if (name.EndsWith("_harvest")) name = name[..^8];
+            if (name.EndsWith("_Seed")) name = name[..^5];
             return name.Replace('_', ' ');
         }
     }

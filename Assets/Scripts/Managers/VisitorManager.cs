@@ -168,50 +168,50 @@ namespace Garden
                     ApothekeManager.Instance?.AddSeed(visitor.giftName, visitor.giftAmount);
                     break;
                 case "item":
-                    var entry = data.items.Find(i => i.itemName == visitor.giftName);
+                    var entry = data.inventory.Find(i => i.itemName == visitor.giftName);
                     if (entry != null)
                         entry.count += visitor.giftAmount;
                     else
-                        data.items.Add(new InventoryItem { itemName = visitor.giftName, count = visitor.giftAmount });
+                        data.inventory.Add(new InventoryItem { itemName = visitor.giftName, count = visitor.giftAmount });
                     break;
             }
 
             visitor.giftClaimed = true;
         }
 
-        public static bool CanAffordOffer(MerchantOfferSave offer, List<InventoryItem> items)
+        public static bool CanAffordOffer(MerchantOfferSave offer, List<InventoryItem> inventory)
         {
             if (CurrencyManager.FreeMode) return true;
             foreach (var cost in offer.costs)
             {
-                var item = items.Find(i => i.itemName == cost.itemName);
+                var item = inventory.Find(i => i.itemName == cost.itemName);
                 if (item == null || item.count < cost.count) return false;
             }
             return true;
         }
 
-        public static void ExecuteTrade(MerchantOfferSave offer, List<InventoryItem> items,
-            List<SeedInventoryEntry> seedInventory)
+        public static void ExecuteTrade(MerchantOfferSave offer, List<InventoryItem> inventory)
         {
             // Consume items
             if (!CurrencyManager.FreeMode)
             {
                 foreach (var cost in offer.costs)
                 {
-                    var item = items.Find(i => i.itemName == cost.itemName);
+                    var item = inventory.Find(i => i.itemName == cost.itemName);
                     if (item == null) continue;
                     item.count -= cost.count;
-                    if (item.count <= 0) items.Remove(item);
+                    if (item.count <= 0) inventory.Remove(item);
                 }
             }
 
-            // Add seeds
-            var entry = seedInventory.Find(s => s.seedName == offer.rewardSeedName);
+            // Add seeds (reward is a plant name, stored with _Seed suffix)
+            var seedItemName = offer.rewardSeedName + "_Seed";
+            var entry = inventory.Find(i => i.itemName == seedItemName);
             if (entry != null)
                 entry.count += offer.rewardCount;
             else
-                seedInventory.Add(new SeedInventoryEntry
-                    { seedName = offer.rewardSeedName, count = offer.rewardCount });
+                inventory.Add(new InventoryItem
+                    { itemName = seedItemName, count = offer.rewardCount });
         }
 
         public static VisitorSave BuildVisitorSave(VisitorResponse response, int gridX, int gridY, string dateUtc)
@@ -403,11 +403,11 @@ namespace Garden
 
             // Consume requested items from player inventory
             var data = SaveManager.Instance.Data;
-            var requestedItem = data.items.Find(i => i.itemName == quest.requestItem);
+            var requestedItem = data.inventory.Find(i => i.itemName == quest.requestItem);
             if (requestedItem != null)
             {
                 requestedItem.count -= quest.requestCount;
-                if (requestedItem.count <= 0) data.items.Remove(requestedItem);
+                if (requestedItem.count <= 0) data.inventory.Remove(requestedItem);
             }
 
             // Apply reward
@@ -420,11 +420,11 @@ namespace Garden
                         ApothekeManager.Instance?.AddSeed(reward.name, reward.count);
                         break;
                     case "item":
-                        var entry = data.items.Find(i => i.itemName == reward.name);
+                        var entry = data.inventory.Find(i => i.itemName == reward.name);
                         if (entry != null)
                             entry.count += reward.count;
                         else
-                            data.items.Add(new InventoryItem { itemName = reward.name, count = reward.count });
+                            data.inventory.Add(new InventoryItem { itemName = reward.name, count = reward.count });
                         break;
                 }
             }

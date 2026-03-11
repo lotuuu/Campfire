@@ -65,15 +65,15 @@ namespace Garden
         {
             var recipe = Config?.GetUpgradeRecipe(Level);
             if (recipe == null) return false;
-            return CanAffordUpgrade(recipe, SaveManager.Instance.Data.items);
+            return CanAffordUpgrade(recipe, SaveManager.Instance.Data.inventory);
         }
 
         public bool UpgradeFlame()
         {
             var recipe = Config?.GetUpgradeRecipe(Level);
             if (recipe == null) return false;
-            if (!CanAffordUpgrade(recipe, SaveManager.Instance.Data.items)) return false;
-            ConsumeIngredients(recipe, SaveManager.Instance.Data.items);
+            if (!CanAffordUpgrade(recipe, SaveManager.Instance.Data.inventory)) return false;
+            ConsumeIngredients(recipe, SaveManager.Instance.Data.inventory);
             SaveManager.Instance.Data.flameLevel++;
             SaveManager.Instance.Save();
             if (EconomyService.Instance != null)
