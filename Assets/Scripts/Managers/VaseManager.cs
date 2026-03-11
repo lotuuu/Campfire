@@ -120,7 +120,8 @@ namespace Garden
 
         public BuildingCost GetNextVaseCost()
         {
-            return ConfigService.Instance?.GetVaseCost(SaveManager.Instance.Data.vases.Count);
+            // Subtract 1 for the free starter vase so cost index is based on purchased vases
+            return ConfigService.Instance?.GetVaseCost(SaveManager.Instance.Data.vases.Count - 1);
         }
 
         public bool CraftVase(int gridX, int gridY)

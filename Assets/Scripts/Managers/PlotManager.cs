@@ -142,7 +142,8 @@ namespace Garden
 
         public BuildingCost GetNextPlotCost()
         {
-            return ConfigService.Instance?.GetPlotCost(SaveManager.Instance.Data.plots.Count);
+            // Subtract 1 for the free starter plot so cost index is based on purchased plots
+            return ConfigService.Instance?.GetPlotCost(SaveManager.Instance.Data.plots.Count - 1);
         }
 
         public bool CraftPlot(int gridX, int gridY)
