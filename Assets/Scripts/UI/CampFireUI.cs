@@ -25,6 +25,7 @@ namespace Garden
         private DialogueUI dialogueUI;
 
         private SettingsUI settingsUI;
+        private TutorialUI tutorialUI;
 
         private VisualElement overlayContainer;
         private VisualElement overlayBackdrop;
@@ -90,6 +91,9 @@ namespace Garden
             dialogueUI?.Initialize(root);
             settingsUI = GetComponent<SettingsUI>();
             settingsUI?.Initialize(root);
+
+            tutorialUI = GetComponent<TutorialUI>();
+            tutorialUI?.Initialize(root);
 
             // Overlay setup
             overlayContainer = root.Q("overlay-container");
@@ -405,6 +409,11 @@ namespace Garden
                 resourceDisplay?.Refresh();
                 campsiteView?.RebuildGrid();
                 UpdateQuestBadge();
+
+                // Start tutorial after all services are ready
+                if (TutorialManager.Instance != null && dialogueUI != null && tutorialUI != null)
+                    TutorialManager.Instance.Initialize(tutorialUI, dialogueUI, campsiteView);
+
                 return;
             }
 
