@@ -72,8 +72,10 @@ namespace Garden
         private void InitializeNewPlayer()
         {
             var data = SaveManager.Instance.Data;
-            data.mana = 50f;
-            data.gems = 5;
+            var npc = ConfigService.Instance?.NewPlayerConfig;
+
+            data.mana = npc?.mana ?? 50f;
+            data.gems = npc?.gems ?? 5;
 
             // Pick 4 random distinct hex positions for starting elements
             int gridRadius = ConfigService.Instance != null
@@ -83,16 +85,29 @@ namespace Garden
             HexGridUtil.Shuffle(positions);
 
             VaseManager.InitializeNewPlayer(data, ConfigService.Instance.VaseConfig.default_capacity);
-            data.vases[0].currentWater = 1;
-            data.vases[0].state = VaseState.Full;
+            int startingWater = npc?.startingWater ?? 1;
+            data.vases[0].currentWater = startingWater;
+            data.vases[0].state = startingWater > 0 ? VaseState.Full : VaseState.Empty;
             data.vases[0].gridX = positions[0].q;
             data.vases[0].gridY = positions[0].r;
             data.plots.Add(new PlotSave { state = PlotState.Empty, gridX = positions[1].q, gridY = positions[1].r });
             data.apothekeGridX = positions[3].q;
             data.apothekeGridY = positions[3].r;
-            ApothekeManager.Instance.AddSeed("Sprouts", 2);
-            data.inventory.Add(new InventoryItem { itemName = "Speed_Potion", count = 2 });
-            data.inventory.Add(new InventoryItem { itemName = "Energy_Drink", count = 2 });
+
+            // Grant starting seeds from config
+            if (npc?.seeds != null)
+            {
+                foreach (var seed in npc.seeds)
+                    ApothekeManager.Instance.AddSeed(seed.name, seed.count);
+            }
+
+            // Grant starting items from config
+            if (npc?.items != null)
+            {
+                foreach (var item in npc.items)
+                    data.inventory.Add(new InventoryItem { itemName = item.name, count = item.count });
+            }
+
             // No starting Mallum House — player buys first one after growing seeds
             SaveManager.Instance.Save();
         }

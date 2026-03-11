@@ -18,6 +18,7 @@ defmodule CampFireWeb.GameController do
     mallum_house_config = ConfigCache.get("mallum_house_config") || %{}
     building_cost_config = ConfigCache.get("building_cost_config") || %{}
     skin_configs = ConfigCache.get("skin_configs") || %{}
+    new_player_config = ConfigCache.get("new_player_config") || %{}
     sprite_manifest = ConfigCache.get("sprite_manifest") || %{}
 
     seeds =
@@ -72,6 +73,7 @@ defmodule CampFireWeb.GameController do
       buildingCostConfig: serialize_game_config(building_cost_config),
       recipes: ConfigCache.get("recipe_configs") || %{},
       skins: skin_configs,
+      newPlayerConfig: serialize_game_config(new_player_config),
       sprites: sprite_manifest
     })
   end

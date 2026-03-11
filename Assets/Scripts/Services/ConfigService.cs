@@ -121,6 +121,23 @@ namespace Garden
         public int GetMaxMallums(int houseCount) => houseCount * mallums_per_house;
     }
 
+    [Serializable]
+    public class NewPlayerItemGrant
+    {
+        public string name;
+        public int count;
+    }
+
+    [Serializable]
+    public class ServerNewPlayerConfig
+    {
+        public float mana;
+        public int gems;
+        public int startingWater;
+        public List<NewPlayerItemGrant> seeds = new();
+        public List<NewPlayerItemGrant> items = new();
+    }
+
     public class ConfigService : MonoBehaviour
     {
         public static ConfigService Instance { get; private set; }
@@ -132,6 +149,7 @@ namespace Garden
         private ServerFlameConfig _flameConfig;
         private ServerVaseConfig _vaseConfig;
         private ServerMallumHouseConfig _mallumHouseConfig;
+        private ServerNewPlayerConfig _newPlayerConfig;
         private Dictionary<string, List<BuildingCost>> _buildingCosts = new();
         private Dictionary<string, string> _spriteManifest = new();
 
@@ -212,6 +230,7 @@ namespace Garden
         public ServerFlameConfig FlameConfig => _flameConfig;
         public ServerVaseConfig VaseConfig => _vaseConfig;
         public ServerMallumHouseConfig MallumHouseConfig => _mallumHouseConfig;
+        public ServerNewPlayerConfig NewPlayerConfig => _newPlayerConfig;
         public Dictionary<string, string> SpriteManifest => _spriteManifest;
 
         // ── Legacy accessors (kept until managers are migrated) ──
@@ -533,6 +552,43 @@ namespace Garden
 
                 if (build.TryGetValue("garden_costs", out var gcObj) && gcObj is List<object> gardenCosts)
                     _buildingCosts["garden_costs"] = ParseBuildingCostList(gardenCosts);
+            }
+
+            // New player config
+            if (root.TryGetValue("newPlayerConfig", out var npObj) && npObj is Dictionary<string, object> np)
+            {
+                _newPlayerConfig = new ServerNewPlayerConfig
+                {
+                    mana = GetFloat(np, "mana"),
+                    gems = (int)GetFloat(np, "gems"),
+                    startingWater = (int)GetFloat(np, "starting_water")
+                };
+
+                if (np.TryGetValue("seeds", out var seedsListObj) && seedsListObj is List<object> seedsList)
+                {
+                    foreach (var item in seedsList)
+                    {
+                        if (item is Dictionary<string, object> d)
+                            _newPlayerConfig.seeds.Add(new NewPlayerItemGrant
+                            {
+                                name = GetString(d, "name"),
+                                count = (int)GetFloat(d, "count")
+                            });
+                    }
+                }
+
+                if (np.TryGetValue("items", out var itemsListObj) && itemsListObj is List<object> itemsList)
+                {
+                    foreach (var item in itemsList)
+                    {
+                        if (item is Dictionary<string, object> d)
+                            _newPlayerConfig.items.Add(new NewPlayerItemGrant
+                            {
+                                name = GetString(d, "name"),
+                                count = (int)GetFloat(d, "count")
+                            });
+                    }
+                }
             }
 
             // Sprite manifest

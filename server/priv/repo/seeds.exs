@@ -322,6 +322,13 @@ game_configs = [
       %{"manaCost" => 2500, "harvestCosts" => [%{"itemName" => "Poppy", "count" => 3}, %{"itemName" => "Lavender", "count" => 4}]}
     ]
   }},
+  %{key: "new_player_config", value: %{
+    "mana" => 50,
+    "gems" => 5,
+    "starting_water" => 1,
+    "seeds" => [%{"name" => "Sprouts", "count" => 2}],
+    "items" => [%{"name" => "Speed_Potion", "count" => 2}, %{"name" => "Energy_Drink", "count" => 2}]
+  }},
   %{key: "recipe_configs", value: %{
     "Basil_Pigment" => %{"ingredients" => [%{"item_name" => "Basil", "count" => 3}], "result_item" => "Basil_Pigment", "result_quantity" => 1, "category" => "Pigment"},
     "Chamomile_Pigment" => %{"ingredients" => [%{"item_name" => "Chamomile", "count" => 3}], "result_item" => "Chamomile_Pigment", "result_quantity" => 1, "category" => "Pigment"},
