@@ -286,7 +286,7 @@ game_configs = [
   %{key: "mallum_house_config", value: %{
     "mallums_per_house" => 1,
     "house_costs" => [
-      %{"mana" => 15, "harvests" => []},
+      %{"mana" => 15, "harvests" => [%{"item" => "Sprouts_harvest", "count" => 2}]},
       %{"mana" => 30, "harvests" => [%{"item" => "Basil_harvest", "count" => 2}]},
       %{"mana" => 60, "harvests" => [%{"item" => "Lavender_harvest", "count" => 3}]},
       %{"mana" => 100, "harvests" => [%{"item" => "Chamomile_harvest", "count" => 2}, %{"item" => "Mint_harvest", "count" => 2}]}

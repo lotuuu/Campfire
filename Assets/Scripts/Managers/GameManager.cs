@@ -75,7 +75,7 @@ namespace Garden
             data.mana = 50f;
             data.gems = 5;
 
-            // Pick 4 random distinct hex positions for starting elements
+            // Pick 3 random distinct hex positions for starting elements
             int gridRadius = ConfigService.Instance != null
                 ? ConfigService.Instance.FlameConfig.GetGridSize(1)
                 : 2;
@@ -88,18 +88,11 @@ namespace Garden
             data.vases[0].gridX = positions[0].q;
             data.vases[0].gridY = positions[0].r;
             data.plots.Add(new PlotSave { state = PlotState.Empty, gridX = positions[1].q, gridY = positions[1].r });
-            data.apothekeGridX = positions[3].q;
-            data.apothekeGridY = positions[3].r;
+            data.apothekeGridX = positions[2].q;
+            data.apothekeGridY = positions[2].r;
             ApothekeManager.Instance.AddSeed("Sprouts", 5);
             ApothekeManager.Instance.AddSeed("Cress", 3);
             data.items.Add(new InventoryItem { itemName = "Speed_Potion", count = 3 });
-            // Start with 1 Mallum House
-            data.mallumHouses.Add(new MallumHouseSave { gridX = positions[2].q, gridY = positions[2].r });
-            if (MallumManager.Instance != null)
-            {
-                int maxMallums = ConfigService.Instance.MallumHouseConfig.GetMaxMallums(data.mallumHouses.Count);
-                MallumManager.EnsureMallumCount(data.mallums, maxMallums);
-            }
             SaveManager.Instance.Save();
         }
     }
