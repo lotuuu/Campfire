@@ -15,8 +15,7 @@ namespace Garden.Tests
             Assert.AreEqual(0, data.vases.Count);
             Assert.AreEqual(0, data.plots.Count);
             Assert.AreEqual(0, data.gardens.Count);
-            Assert.AreEqual(0, data.seedInventory.Count);
-            Assert.AreEqual(0, data.items.Count);
+            Assert.AreEqual(0, data.inventory.Count);
         }
 
         [Test]
@@ -27,19 +26,22 @@ namespace Garden.Tests
                 mana = 123.5f,
                 flameLevel = 3,
             };
-            data.seedInventory.Add(new SeedInventoryEntry { seedName = "Basil", count = 5 });
+            data.inventory.Add(new InventoryItem { itemName = "Basil_Seed", count = 5 });
             data.vases.Add(new VaseSave { capacity = 10, currentWater = 7 });
             data.plots.Add(new PlotSave { seedName = "Basil", waterCount = 2, state = PlotState.Growing });
             data.gardens.Add(new GardenSave { plantName = "Oak", mature = true });
-            data.items.Add(new InventoryItem { itemName = "Acorn", count = 3 });
+            data.inventory.Add(new InventoryItem { itemName = "Acorn", count = 3 });
 
             var json = JsonUtility.ToJson(data);
             var restored = JsonUtility.FromJson<SaveData>(json);
 
             Assert.AreEqual(3, restored.flameLevel);
             Assert.AreEqual(123.5f, restored.mana);
-            Assert.AreEqual(1, restored.seedInventory.Count);
-            Assert.AreEqual("Basil", restored.seedInventory[0].seedName);
+            Assert.AreEqual(2, restored.inventory.Count);
+            Assert.AreEqual("Basil_Seed", restored.inventory[0].itemName);
+            Assert.AreEqual(5, restored.inventory[0].count);
+            Assert.AreEqual("Acorn", restored.inventory[1].itemName);
+            Assert.AreEqual(3, restored.inventory[1].count);
             Assert.AreEqual(1, restored.vases.Count);
             Assert.AreEqual(7, restored.vases[0].currentWater);
             Assert.AreEqual(1, restored.plots.Count);
@@ -47,8 +49,6 @@ namespace Garden.Tests
             Assert.AreEqual(PlotState.Growing, restored.plots[0].state);
             Assert.AreEqual(1, restored.gardens.Count);
             Assert.IsTrue(restored.gardens[0].mature);
-            Assert.AreEqual(1, restored.items.Count);
-            Assert.AreEqual("Acorn", restored.items[0].itemName);
         }
     }
 }

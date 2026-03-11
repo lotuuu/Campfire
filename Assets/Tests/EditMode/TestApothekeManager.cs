@@ -10,8 +10,8 @@ namespace Garden.Tests
         public void Mix_ConsumesIngredients()
         {
             var data = new SaveData();
-            data.items.Add(new InventoryItem { itemName = "RedFlower", count = 5 });
-            data.items.Add(new InventoryItem { itemName = "Water_Essence", count = 3 });
+            data.inventory.Add(new InventoryItem { itemName = "RedFlower", count = 5 });
+            data.inventory.Add(new InventoryItem { itemName = "Water_Essence", count = 3 });
 
             var recipe = ScriptableObject.CreateInstance<RecipeData>();
             recipe.ingredients = new List<IngredientEntry>
@@ -25,23 +25,23 @@ namespace Garden.Tests
             // Simulate mixing
             foreach (var ing in recipe.ingredients)
             {
-                var item = data.items.Find(i => i.itemName == ing.itemName);
+                var item = data.inventory.Find(i => i.itemName == ing.itemName);
                 item.count -= ing.quantity;
             }
-            data.items.Add(new InventoryItem { itemName = recipe.result, count = recipe.resultQuantity });
+            data.inventory.Add(new InventoryItem { itemName = recipe.result, count = recipe.resultQuantity });
 
-            Assert.AreEqual(3, data.items[0].count);
-            Assert.AreEqual(2, data.items[1].count);
-            Assert.AreEqual("Fertilizer", data.items[2].itemName);
+            Assert.AreEqual(3, data.inventory[0].count);
+            Assert.AreEqual(2, data.inventory[1].count);
+            Assert.AreEqual("Fertilizer", data.inventory[2].itemName);
         }
 
         [Test]
         public void Mix_FailsIfMissingIngredients()
         {
             var data = new SaveData();
-            data.items.Add(new InventoryItem { itemName = "RedFlower", count = 1 });
+            data.inventory.Add(new InventoryItem { itemName = "RedFlower", count = 1 });
 
-            var item = data.items.Find(i => i.itemName == "RedFlower");
+            var item = data.inventory.Find(i => i.itemName == "RedFlower");
             Assert.IsFalse(item.count >= 2);
         }
     }

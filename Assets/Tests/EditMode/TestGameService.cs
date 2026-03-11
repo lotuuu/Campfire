@@ -17,7 +17,7 @@ public class TestGameService
     [Test]
     public void HarvestResponse_Deserializes()
     {
-        string json = @"{""score"":0.85,""drops"":3,""itemName"":""Basil_harvest""}";
+        string json = @"{""score"":0.85,""drops"":3,""itemName"":""Basil""}";
         var resp = UnityEngine.JsonUtility.FromJson<HarvestResponse>(json);
         Assert.AreEqual(0.85f, resp.score, 0.01f);
         Assert.AreEqual(3, resp.drops);

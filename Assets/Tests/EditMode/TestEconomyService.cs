@@ -58,10 +58,10 @@ public class TestEconomyService
         {
             items = new System.Collections.Generic.List<SpendItemEntry>
             {
-                new SpendItemEntry { item_name = "Sprouts_harvest", count = 1 }
+                new SpendItemEntry { item_name = "Sprouts", count = 1 }
             }
         };
         string json = UnityEngine.JsonUtility.ToJson(req);
-        Assert.IsTrue(json.Contains("Sprouts_harvest"));
+        Assert.IsTrue(json.Contains("Sprouts"));
     }
 }
