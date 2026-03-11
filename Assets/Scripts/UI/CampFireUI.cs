@@ -35,7 +35,6 @@ namespace Garden
         private VisualElement buildPanel;
         private VisualElement debugPanelElement;
         private VisualElement questsPanel;
-        private VisualElement visitorPanel;
         private VisualElement settingsPanel;
 
         // Loading gate
@@ -98,7 +97,6 @@ namespace Garden
             buildPanel = root.Q("build-panel");
             debugPanelElement = root.Q("debug-panel");
             questsPanel = root.Q("quests-panel");
-            visitorPanel = root.Q("visitor-panel");
             settingsPanel = root.Q("settings-panel");
 
             var closeBtn = root.Q<Button>("overlay-close");
@@ -193,14 +191,12 @@ namespace Garden
                         {
                             visitor.dialogueSeen = true;
                             SaveManager.Instance.Save();
-                            visitorUI?.ShowVisitor();
-                            OpenOverlay(visitor.visitorName, visitorPanel);
+                            visitorUI?.ShowModal();
                         }, portrait);
                     }
                     else
                     {
-                        visitorUI?.ShowVisitor();
-                        OpenOverlay(visitor.visitorName, visitorPanel);
+                        visitorUI?.ShowModal();
                     }
                 };
 
@@ -421,7 +417,6 @@ namespace Garden
             if (buildPanel != null) buildPanel.style.display = DisplayStyle.None;
             if (debugPanelElement != null) debugPanelElement.style.display = DisplayStyle.None;
             if (questsPanel != null) questsPanel.style.display = DisplayStyle.None;
-            if (visitorPanel != null) visitorPanel.style.display = DisplayStyle.None;
             if (settingsPanel != null) settingsPanel.style.display = DisplayStyle.None;
         }
     }

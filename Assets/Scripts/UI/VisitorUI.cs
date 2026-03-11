@@ -6,45 +6,97 @@ namespace Garden
 {
     public class VisitorUI : MonoBehaviour
     {
-        private VisualElement merchantSection, gifterSection, questerSection;
+        // Modal root
+        private VisualElement modal;
+        private VisualElement backdrop;
+        private Button closeBtn;
+
+        // Header
+        private VisualElement portrait;
+        private Label nameLabel;
+        private Label flavorLabel;
+
+        // Gifter
+        private VisualElement gifterSection;
+        private VisualElement giftIcon;
+        private Label giftName;
+        private Label giftDesc;
+        private Label giftClaimedText;
+        private Button claimGiftBtn;
+
+        // Merchant
+        private VisualElement merchantSection;
         private VisualElement offerList;
-        private Label flavorLabel, giftText, questText;
-        private Button claimGiftBtn, acceptQuestBtn, turninQuestBtn;
         private VisualTreeAsset offerTemplate;
+
+        // Quester
+        private VisualElement questerSection;
+        private Label questLabel;
+        private Label questValue;
+        private Button acceptQuestBtn;
+        private Button turninQuestBtn;
 
         public void Initialize(VisualElement root)
         {
-            flavorLabel = root.Q<Label>("visitor-flavor");
-            merchantSection = root.Q("visitor-merchant-section");
+            modal = root.Q("visitor-modal");
+            backdrop = root.Q("visitor-modal-backdrop");
+            closeBtn = root.Q<Button>("visitor-modal-close");
+
+            portrait = root.Q("visitor-modal-portrait");
+            nameLabel = root.Q<Label>("visitor-modal-name");
+            flavorLabel = root.Q<Label>("visitor-modal-flavor");
+
             gifterSection = root.Q("visitor-gifter-section");
-            questerSection = root.Q("visitor-quester-section");
-            offerList = root.Q("visitor-offer-list");
-            giftText = root.Q<Label>("visitor-gift-text");
-            questText = root.Q<Label>("visitor-quest-text");
+            giftIcon = root.Q("visitor-gift-icon");
+            giftName = root.Q<Label>("visitor-gift-name");
+            giftDesc = root.Q<Label>("visitor-gift-desc");
+            giftClaimedText = root.Q<Label>("visitor-gift-claimed-text");
             claimGiftBtn = root.Q<Button>("visitor-claim-gift-btn");
-            acceptQuestBtn = root.Q<Button>("visitor-accept-quest-btn");
-            turninQuestBtn = root.Q<Button>("visitor-turnin-quest-btn");
+
+            merchantSection = root.Q("visitor-merchant-section");
+            offerList = root.Q("visitor-offer-list");
             offerTemplate = Resources.Load<VisualTreeAsset>("UI/Templates/MerchantOfferRow");
 
-            claimGiftBtn?.RegisterCallback<ClickEvent>(evt => OnClaimGift());
-            acceptQuestBtn?.RegisterCallback<ClickEvent>(evt => OnAcceptQuest());
-            turninQuestBtn?.RegisterCallback<ClickEvent>(evt => OnTurninQuest());
+            questerSection = root.Q("visitor-quester-section");
+            questLabel = root.Q<Label>("visitor-quest-label");
+            questValue = root.Q<Label>("visitor-quest-value");
+            acceptQuestBtn = root.Q<Button>("visitor-accept-quest-btn");
+            turninQuestBtn = root.Q<Button>("visitor-turnin-quest-btn");
+
+            backdrop?.RegisterCallback<ClickEvent>(_ => HideModal());
+            closeBtn?.RegisterCallback<ClickEvent>(_ => HideModal());
+            claimGiftBtn?.RegisterCallback<ClickEvent>(_ => OnClaimGift());
+            acceptQuestBtn?.RegisterCallback<ClickEvent>(_ => OnAcceptQuest());
+            turninQuestBtn?.RegisterCallback<ClickEvent>(_ => OnTurninQuest());
+
+            HideModal();
         }
 
-        public void ShowVisitor()
+        public void ShowModal()
         {
             var visitor = SaveManager.Instance?.Data?.currentVisitor;
             if (visitor == null) return;
 
-            // Set flavor text from dialogue (first line or empty)
+            // Header
+            if (nameLabel != null) nameLabel.text = visitor.visitorName ?? "";
             if (flavorLabel != null)
                 flavorLabel.text = visitor.dialogueLines != null && visitor.dialogueLines.Count > 0
                     ? visitor.dialogueLines[0]
                     : "";
 
-            // Hide all sections first
-            SetDisplay(merchantSection, false);
+            // Portrait
+            if (portrait != null)
+            {
+                var tex = SpriteService.Instance?.GetTexture($"portraits/{visitor.portraitId}");
+                if (tex != null)
+                    portrait.style.backgroundImage = new StyleBackground(tex);
+                else
+                    portrait.style.backgroundImage = StyleKeyword.None;
+            }
+
+            // Hide all sections
             SetDisplay(gifterSection, false);
+            SetDisplay(merchantSection, false);
             SetDisplay(questerSection, false);
 
             switch (visitor.type)
@@ -62,13 +114,73 @@ namespace Garden
                     RefreshQuester(visitor);
                     break;
             }
+
+            AudioManager.Instance?.PlaySFX("ui_panel_open");
+            if (modal != null) modal.style.display = DisplayStyle.Flex;
+        }
+
+        public void HideModal()
+        {
+            if (modal != null && modal.style.display != DisplayStyle.None)
+                AudioManager.Instance?.PlaySFX("ui_panel_close");
+            if (modal != null) modal.style.display = DisplayStyle.None;
+        }
+
+        private void RefreshGifter(VisitorSave visitor)
+        {
+            if (visitor.giftClaimed)
+            {
+                SetDisplay(giftIcon?.parent, false);
+                SetDisplay(giftClaimedText, true);
+                if (giftClaimedText != null) giftClaimedText.text = "Gift received! Thank you.";
+                SetDisplay(claimGiftBtn, false);
+            }
+            else
+            {
+                SetDisplay(giftIcon?.parent, true);
+                SetDisplay(giftClaimedText, false);
+                SetDisplay(claimGiftBtn, true);
+
+                // Set icon class based on gift type
+                if (giftIcon != null)
+                {
+                    giftIcon.RemoveFromClassList("visitor-gift-icon--seed");
+                    giftIcon.RemoveFromClassList("visitor-gift-icon--item");
+                    switch (visitor.giftType)
+                    {
+                        case "seed":
+                            giftIcon.AddToClassList("visitor-gift-icon--seed");
+                            break;
+                        case "item":
+                            giftIcon.AddToClassList("visitor-gift-icon--item");
+                            break;
+                    }
+                }
+
+                string itemName = visitor.giftType switch
+                {
+                    "water" => "Water",
+                    "seed" => visitor.giftName ?? "Seeds",
+                    "item" => visitor.giftName ?? "Item",
+                    _ => "Mysterious Gift"
+                };
+
+                if (giftName != null) giftName.text = $"{visitor.giftAmount}x {itemName}";
+                if (giftDesc != null)
+                    giftDesc.text = visitor.giftType switch
+                    {
+                        "water" => "Fills your vases",
+                        "seed" => "Added to your seed pouch",
+                        "item" => "Added to your inventory",
+                        _ => "Something special"
+                    };
+            }
         }
 
         private void RefreshMerchantOffers(VisitorSave visitor)
         {
             offerList?.Clear();
             var data = SaveManager.Instance.Data;
-
             if (visitor.offers == null) return;
 
             foreach (var offer in visitor.offers)
@@ -81,7 +193,6 @@ namespace Garden
 
                 bool canAfford = VisitorManager.CanAffordOffer(offer, data.items);
 
-                // Populate costs
                 if (costsContainer != null)
                 {
                     foreach (var cost in offer.costs)
@@ -98,11 +209,9 @@ namespace Garden
                     }
                 }
 
-                // Reward
                 if (rewardText != null)
                     rewardText.text = $"{offer.rewardCount}x {PlotManager.GetSeedDisplayName(offer.rewardSeedName)}";
 
-                // Trade button
                 if (tradeBtn != null)
                 {
                     tradeBtn.SetEnabled(canAfford);
@@ -112,7 +221,7 @@ namespace Garden
                         if (!VisitorManager.CanAffordOffer(capturedOffer, data.items)) return;
                         VisitorManager.ExecuteTrade(capturedOffer, data.items, data.seedInventory);
                         SaveManager.Instance.Save();
-                        ShowVisitor(); // refresh
+                        ShowModal(); // refresh
                     };
                 }
 
@@ -120,38 +229,16 @@ namespace Garden
             }
         }
 
-        private void RefreshGifter(VisitorSave visitor)
-        {
-            if (visitor.giftClaimed)
-            {
-                if (giftText != null) giftText.text = "You already received this gift.";
-                SetDisplay(claimGiftBtn, false);
-            }
-            else
-            {
-                string desc = visitor.giftType switch
-                {
-                    "water" => $"{visitor.giftAmount} Water",
-                    "seed" => $"{visitor.giftAmount}x {visitor.giftName} seeds",
-                    "item" => $"{visitor.giftAmount}x {visitor.giftName}",
-                    _ => "A mysterious gift"
-                };
-                if (giftText != null) giftText.text = $"Gift: {desc}";
-                SetDisplay(claimGiftBtn, true);
-            }
-        }
-
         private void RefreshQuester(VisitorSave visitor)
         {
             if (visitor.isReturnVisit)
             {
-                // Return visit - show turn-in UI
                 var data = SaveManager.Instance.Data;
                 var item = data.items.Find(i => i.itemName == visitor.requestItem);
                 int have = item?.count ?? 0;
 
-                if (questText != null)
-                    questText.text = $"Requesting: {visitor.requestCount}x {visitor.requestItem}\nYou have: {have}";
+                if (questLabel != null) questLabel.text = "Requesting:";
+                if (questValue != null) questValue.text = $"{visitor.requestCount}x {visitor.requestItem} (you have {have})";
 
                 SetDisplay(acceptQuestBtn, false);
                 bool canTurnIn = have >= visitor.requestCount;
@@ -160,15 +247,15 @@ namespace Garden
             }
             else if (visitor.questFulfilled)
             {
-                if (questText != null) questText.text = "Quest completed! Thank you.";
+                if (questLabel != null) questLabel.text = "";
+                if (questValue != null) questValue.text = "Quest completed! Thank you.";
                 SetDisplay(acceptQuestBtn, false);
                 SetDisplay(turninQuestBtn, false);
             }
             else
             {
-                // Initial visit - show quest details and accept button
-                if (questText != null)
-                    questText.text = $"Request: {visitor.requestCount}x {visitor.requestItem}";
+                if (questLabel != null) questLabel.text = "Request:";
+                if (questValue != null) questValue.text = $"{visitor.requestCount}x {visitor.requestItem}";
                 SetDisplay(acceptQuestBtn, true);
                 SetDisplay(turninQuestBtn, false);
             }
@@ -180,7 +267,7 @@ namespace Garden
             if (data?.currentVisitor == null) return;
             VisitorManager.ApplyGift(data.currentVisitor, data);
             SaveManager.Instance.Save();
-            ShowVisitor(); // refresh
+            ShowModal(); // refresh to show claimed state
         }
 
         private void OnAcceptQuest()
@@ -188,7 +275,7 @@ namespace Garden
             var data = SaveManager.Instance?.Data;
             if (data?.currentVisitor == null) return;
             VisitorManager.Instance?.AcceptQuest(data.currentVisitor);
-            ShowVisitor();
+            ShowModal();
         }
 
         private void OnTurninQuest()
@@ -196,13 +283,12 @@ namespace Garden
             var data = SaveManager.Instance?.Data;
             if (data?.currentVisitor == null) return;
 
-            // Find matching active quest for this visitor
             var quest = data.activeQuests.Find(q => q.visitorId == data.currentVisitor.visitorId);
             if (quest != null)
             {
                 VisitorManager.Instance?.CompleteQuest(quest);
             }
-            ShowVisitor();
+            ShowModal();
         }
 
         private static void SetDisplay(VisualElement el, bool visible)
