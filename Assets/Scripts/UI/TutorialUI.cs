@@ -6,6 +6,7 @@ namespace Garden
     public class TutorialUI : MonoBehaviour
     {
         private VisualElement hintBar;
+        private Label hintSpeaker;
         private Label hintText;
         private VisualElement root;
 
@@ -19,6 +20,7 @@ namespace Garden
         {
             root = rootElement;
             hintBar = root.Q("tutorial-hint-bar");
+            hintSpeaker = root.Q<Label>("tutorial-hint-speaker");
             hintText = root.Q<Label>("tutorial-hint-text");
         }
 
@@ -44,9 +46,10 @@ namespace Garden
             }
         }
 
-        public void ShowHint(string text)
+        public void ShowHint(string text, string speaker = "Spark of Ara")
         {
             if (hintBar == null) return;
+            if (hintSpeaker != null) hintSpeaker.text = speaker;
             hintText.text = text;
             hintBar.style.display = DisplayStyle.Flex;
         }

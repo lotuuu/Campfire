@@ -97,9 +97,12 @@
             </ui:Button>
         </ui:VisualElement>
 
-        <!-- Tutorial hint bar -->
+        <!-- Tutorial hint bar (dialogue-box style, no portrait) -->
         <ui:VisualElement name="tutorial-hint-bar" style="display: none;">
-            <ui:Label name="tutorial-hint-text" text="" />
+            <ui:VisualElement name="tutorial-hint-box">
+                <ui:Label name="tutorial-hint-speaker" text="" />
+                <ui:Label name="tutorial-hint-text" text="" />
+            </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- (Quest button moved to bottom nav) -->

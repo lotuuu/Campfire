@@ -1,22 +1,30 @@
-/* Tutorial hint bar */
+/* Tutorial hint bar — mirrors dialogue-overlay layout, no portrait */
 #tutorial-hint-bar {
     position: absolute;
-    bottom: 90px;
-    left: 20px;
-    right: 20px;
-    padding: 12px 20px;
-    background-color: rgba(0, 0, 0, 0.8);
-    border-radius: 12px;
-    align-items: center;
-    justify-content: center;
-    flex-direction: row;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    justify-content: flex-end;
+}
+
+#tutorial-hint-box {
+    background-color: rgba(20, 14, 8, 0.95);
+    border-top-width: 2px;
+    border-color: rgba(220, 180, 80, 0.5);
+    padding: var(--spacing-lg) var(--spacing-lg);
+    padding-bottom: var(--spacing-xl);
+}
+
+#tutorial-hint-speaker {
+    font-size: var(--font-lg);
+    color: var(--color-text-accent);
+    -unity-font-style: bold;
+    margin-bottom: var(--spacing-xs);
 }
 
 #tutorial-hint-text {
-    color: rgb(255, 230, 170);
     font-size: var(--font-md);
-    -unity-text-align: middle-center;
-    -unity-font-style: bold;
+    color: var(--color-text);
     white-space: normal;
 }
 
