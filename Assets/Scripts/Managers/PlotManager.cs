@@ -391,6 +391,31 @@ namespace Garden
             return true;
         }
 
+        public bool SpeedUpGrowth(int plotIndex)
+        {
+            var data = SaveManager.Instance.Data;
+            if (plotIndex < 0 || plotIndex >= data.plots.Count) return false;
+            var plot = data.plots[plotIndex];
+            if (plot.state != PlotState.Growing) return false;
+
+            // Check potion availability first
+            if (!CurrencyManager.FreeMode)
+            {
+                var potion = data.items.Find(i => i.itemName == "Speed_Potion");
+                if (potion == null || potion.count <= 0) return false;
+                potion.count--;
+                if (potion.count <= 0) data.items.Remove(potion);
+            }
+
+            return InstantFinish(plotIndex);
+        }
+
+        public int GetSpeedPotionCount()
+        {
+            var item = SaveManager.Instance.Data.items.Find(i => i.itemName == "Speed_Potion");
+            return item?.count ?? 0;
+        }
+
         private void OnWeatherUpdated(WeatherData weather)
         {
             var data = SaveManager.Instance.Data;
