@@ -218,6 +218,8 @@ alias CampFire.Admin.{QuestConfig, GardenConfig, GameConfig}
 
 # Quest configs (from Game.Mallums @quest_configs)
 quests = [
+  %{quest_name: "NearbyGathering", description: "Gather seeds from the area around camp.", duration_minutes: 1, required_flame_level: 1, reward_rolls: 2,
+    reward_pool: [%{"seed" => "Sprouts", "weight" => 3, "minCount" => 1, "maxCount" => 2}, %{"seed" => "Cress", "weight" => 3, "minCount" => 1, "maxCount" => 2}]},
   %{quest_name: "SwampForage", description: "Forage in the nearby swamp for useful seeds.", duration_minutes: 5, required_flame_level: 1, reward_rolls: 2,
     reward_pool: [%{"seed" => "Cress", "weight" => 4, "minCount" => 1, "maxCount" => 2}, %{"seed" => "Basil", "weight" => 3, "minCount" => 1, "maxCount" => 2}, %{"seed" => "Chamomile", "weight" => 2, "minCount" => 1, "maxCount" => 2}]},
   %{quest_name: "MeadowExpedition", description: "Explore the meadow for wildflowers.", duration_minutes: 15, required_flame_level: 2, reward_rolls: 3,
@@ -263,7 +265,7 @@ game_configs = [
     "entity_caps" => [6, 6, 8, 8, 12, 15, 18, 22, 26, 30, 35, 40],
     "grid_sizes" => [2, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5],
     "upgrade_recipes" => [
-      %{"ingredients" => [%{"itemName" => "Sprouts", "count" => 1}]},
+      %{"ingredients" => [%{"itemName" => "Sprouts", "count" => 10}]},
       %{"ingredients" => [%{"itemName" => "Sprouts", "count" => 5}, %{"itemName" => "Cress", "count" => 2}]},
       %{"ingredients" => [%{"itemName" => "Basil", "count" => 3}]},
       %{"ingredients" => [%{"itemName" => "Chamomile", "count" => 5}]},
