@@ -16,6 +16,9 @@ namespace Garden
         private bool pulseBright;
         private const float PulseInterval = 0.8f;
 
+        // Deferred highlight — retries until element appears (for dynamically created UI)
+        private string pendingHighlightClass;
+
         public void Initialize(VisualElement rootElement)
         {
             root = rootElement;
@@ -26,6 +29,20 @@ namespace Garden
 
         private void Update()
         {
+            // Retry deferred highlight
+            if (pendingHighlightClass != null && currentHighlight == null)
+            {
+                var element = root.Q(className: pendingHighlightClass);
+                if (element != null)
+                {
+                    pendingHighlightClass = null;
+                    currentHighlight = element;
+                    pulseBright = true;
+                    pulseTimer = 0f;
+                    element.AddToClassList("tutorial-highlight");
+                }
+            }
+
             if (currentHighlight == null) return;
 
             pulseTimer += Time.deltaTime;
@@ -46,11 +63,12 @@ namespace Garden
             }
         }
 
-        public void ShowHint(string text, string speaker = "Spark of Ara")
+        public void ShowHint(string text, string speaker = "Spark of Ara", bool centered = false)
         {
             if (hintBar == null) return;
             if (hintSpeaker != null) hintSpeaker.text = speaker;
             hintText.text = text;
+            hintBar.EnableInClassList("tutorial-hint--centered", centered);
             hintBar.style.display = DisplayStyle.Flex;
         }
 
@@ -58,6 +76,22 @@ namespace Garden
         {
             if (hintBar != null)
                 hintBar.style.display = DisplayStyle.None;
+        }
+
+        public void HighlightElementByClass(string className)
+        {
+            ClearHighlight();
+            var element = root.Q(className: className);
+            if (element == null)
+            {
+                // Element not yet in DOM — defer until it appears
+                pendingHighlightClass = className;
+                return;
+            }
+            currentHighlight = element;
+            pulseBright = true;
+            pulseTimer = 0f;
+            element.AddToClassList("tutorial-highlight");
         }
 
         public void HighlightElement(string elementName)
@@ -83,6 +117,7 @@ namespace Garden
 
         public void ClearHighlight()
         {
+            pendingHighlightClass = null;
             if (currentHighlight != null)
             {
                 currentHighlight.RemoveFromClassList("tutorial-highlight");

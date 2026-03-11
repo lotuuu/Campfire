@@ -352,7 +352,7 @@ namespace Garden
                     break;
                 }
                 case StepSendOnQuest:
-                    tutorialUI?.ShowHint("Send a Mallum on a quest to earn rewards");
+                    tutorialUI?.ShowHint("Send a Mallum on a quest to earn rewards", centered: true);
                     tutorialUI?.HighlightElement("btn-quest");
                     break;
                 case StepSpeedUpQuest:
@@ -366,8 +366,8 @@ namespace Garden
                     }
                     if (stillOnQuest)
                     {
-                        tutorialUI?.ShowHint("Use an Energy Drink to speed up the quest");
-                        tutorialUI?.HighlightElement("btn-quest");
+                        tutorialUI?.ShowHint("Use an Energy Drink to speed up the quest", centered: true);
+                        tutorialUI?.HighlightElementByClass("quest-speedup-btn");
                     }
                     else
                     {

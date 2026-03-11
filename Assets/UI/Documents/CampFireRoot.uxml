@@ -97,14 +97,6 @@
             </ui:Button>
         </ui:VisualElement>
 
-        <!-- Tutorial hint bar (dialogue-box style, no portrait) -->
-        <ui:VisualElement name="tutorial-hint-bar" style="display: none;">
-            <ui:VisualElement name="tutorial-hint-box">
-                <ui:Label name="tutorial-hint-speaker" text="" />
-                <ui:Label name="tutorial-hint-text" text="" />
-            </ui:VisualElement>
-        </ui:VisualElement>
-
         <!-- (Quest button moved to bottom nav) -->
 
         <!-- Overlay container (slide-up panels) -->
@@ -340,6 +332,14 @@
             <ui:Label name="interaction-title" text="" />
             <ui:VisualElement name="interaction-body" />
             <ui:VisualElement name="interaction-actions" />
+        </ui:VisualElement>
+
+        <!-- Tutorial hint bar — same structure as dialogue, no portrait -->
+        <ui:VisualElement name="tutorial-hint-bar" style="display: none;">
+            <ui:VisualElement name="tutorial-hint-box">
+                <ui:Label name="tutorial-hint-speaker" text="" />
+                <ui:Label name="tutorial-hint-text" text="" />
+            </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- Dialogue overlay (VN-style) -->

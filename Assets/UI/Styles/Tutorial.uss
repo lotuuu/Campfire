@@ -1,10 +1,17 @@
-/* Tutorial hint bar — mirrors dialogue-overlay layout, no portrait */
+/* Tutorial hint bar — identical to #dialogue-overlay, minus the portrait */
 #tutorial-hint-bar {
     position: absolute;
     left: 0;
+    top: 0;
     right: 0;
     bottom: 0;
+    background-color: rgba(0, 0, 0, 0.85);
     justify-content: flex-end;
+}
+
+/* Centered variant — hint box in middle of screen */
+#tutorial-hint-bar.tutorial-hint--centered {
+    justify-content: center;
 }
 
 #tutorial-hint-box {
@@ -13,6 +20,7 @@
     border-color: rgba(220, 180, 80, 0.5);
     padding: var(--spacing-lg) var(--spacing-lg);
     padding-bottom: var(--spacing-xl);
+    min-height: 500px;
 }
 
 #tutorial-hint-speaker {
@@ -26,6 +34,7 @@
     font-size: var(--font-md);
     color: var(--color-text);
     white-space: normal;
+    margin-bottom: var(--spacing-md);
 }
 
 /* Tutorial target hex — golden tint like watering targets but warm */
