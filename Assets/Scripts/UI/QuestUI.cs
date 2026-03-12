@@ -18,6 +18,23 @@ namespace Garden
         private float nextTickTime;
         private const float TickInterval = 0.5f;
 
+        // Cached active card elements for in-place timer updates
+        private struct ActiveCardCache
+        {
+            public int mallumIndex;
+            public MallumState state;
+            public Label durationLabel;
+            public VisualElement progressFill;
+            public Label progressText;
+            public Button actionBtn;
+            public Label timerLabel;
+        }
+
+        private readonly List<ActiveCardCache> cachedActiveCards = new();
+
+        // Snapshot of mallum states to detect when a full rebuild is needed
+        private readonly List<MallumState> lastMallumStates = new();
+
         public void Initialize(VisualElement rootElement)
         {
             root = rootElement;
@@ -35,7 +52,70 @@ namespace Garden
             if (questsPanel == null || questsPanel.resolvedStyle.display == DisplayStyle.None) return;
             if (Time.time < nextTickTime) return;
             nextTickTime = Time.time + TickInterval;
-            Refresh();
+
+            if (NeedsRebuild())
+                Refresh();
+            else
+                UpdateTimers();
+        }
+
+        /// <summary>
+        /// Check if mallum states have changed since last build (needs full rebuild).
+        /// </summary>
+        private bool NeedsRebuild()
+        {
+            var data = SaveManager.Instance?.Data;
+            if (data == null) return true;
+
+            if (data.mallums.Count != lastMallumStates.Count) return true;
+            for (int i = 0; i < data.mallums.Count; i++)
+            {
+                if (data.mallums[i].state != lastMallumStates[i]) return true;
+            }
+            return false;
+        }
+
+        private void SnapshotStates()
+        {
+            lastMallumStates.Clear();
+            var data = SaveManager.Instance?.Data;
+            if (data == null) return;
+            for (int i = 0; i < data.mallums.Count; i++)
+                lastMallumStates.Add(data.mallums[i].state);
+        }
+
+        /// <summary>
+        /// Lightweight update — only refresh timer text and progress bars in-place.
+        /// </summary>
+        private void UpdateTimers()
+        {
+            var data = SaveManager.Instance?.Data;
+            if (data == null) return;
+
+            foreach (var cache in cachedActiveCards)
+            {
+                if (cache.mallumIndex >= data.mallums.Count) continue;
+                var mallum = data.mallums[cache.mallumIndex];
+
+                switch (cache.state)
+                {
+                    case MallumState.FetchingWater:
+                        float waterRemaining = VaseManager.Instance.GetRemainingSeconds(mallum.assignedVaseIndex);
+                        float waterProgress = VaseManager.Instance.GetFillProgress(mallum.assignedVaseIndex);
+                        cache.durationLabel.text = FormatTime(waterRemaining);
+                        cache.progressFill.style.width = new StyleLength(new Length(waterProgress * 100f, LengthUnit.Percent));
+                        cache.progressText.text = $"{Mathf.RoundToInt(waterProgress * 100)}%";
+                        break;
+
+                    case MallumState.OnQuest:
+                        float remaining = MallumManager.Instance.GetQuestRemainingSeconds(mallum);
+                        float progress = MallumManager.Instance.GetQuestProgress(mallum);
+                        cache.durationLabel.text = FormatTime(remaining);
+                        cache.progressFill.style.width = new StyleLength(new Length(progress * 100f, LengthUnit.Percent));
+                        cache.progressText.text = $"{Mathf.RoundToInt(progress * 100)}%";
+                        break;
+                }
+            }
         }
 
         public void Refresh()
@@ -49,6 +129,7 @@ namespace Garden
             BuildActiveSection();
             BuildAvailableSection();
             BuildLockedSection();
+            SnapshotStates();
 
             // Must defer scroll restore — layout needs a frame after Clear()+rebuild
             if (questScroll != null)
@@ -62,7 +143,7 @@ namespace Garden
             int available = MallumManager.Instance.GetAvailableMallumCount();
             int total = MallumManager.Instance.GetTotalMallumCount();
 
-            var label = new Label($"Expedition Party   {available} / {total} idle");
+            var label = new Label($"Free Mallums: {available} / {total}");
             label.AddToClassList("quest-mallum-status-label");
             mallumStatusContainer.Add(label);
 
@@ -106,6 +187,7 @@ namespace Garden
         private void BuildActiveSection()
         {
             activeSection.Clear();
+            cachedActiveCards.Clear();
             var data = SaveManager.Instance.Data;
             bool hasActive = false;
 
@@ -158,6 +240,16 @@ namespace Garden
                             MallumManager.Instance.SpeedUpWaterFetch(mallumIndex);
                             Refresh();
                         };
+                        cachedActiveCards.Add(new ActiveCardCache
+                        {
+                            mallumIndex = mallumIndex,
+                            state = MallumState.FetchingWater,
+                            durationLabel = durationLabel,
+                            progressFill = progressFill,
+                            progressText = progressText,
+                            actionBtn = actionBtn,
+                            timerLabel = timerLabel
+                        });
                         break;
 
                     case MallumState.OnQuest:
@@ -192,6 +284,16 @@ namespace Garden
                                 Refresh();
                             });
                         };
+                        cachedActiveCards.Add(new ActiveCardCache
+                        {
+                            mallumIndex = mallumIndex,
+                            state = MallumState.OnQuest,
+                            durationLabel = durationLabel,
+                            progressFill = progressFill,
+                            progressText = progressText,
+                            actionBtn = actionBtn,
+                            timerLabel = timerLabel
+                        });
                         break;
 
                     case MallumState.QuestComplete:
@@ -206,18 +308,6 @@ namespace Garden
 
                         progressContainer.style.display = DisplayStyle.None;
                         timerLabel.style.display = DisplayStyle.None;
-
-                        rewardsContainer.style.display = DisplayStyle.Flex;
-                        foreach (var reward in mallum.pendingRewards)
-                        {
-                            var chip = new VisualElement();
-                            chip.AddToClassList("quest-reward-chip");
-                            chip.AddToClassList("quest-reward-chip--collected");
-                            var chipLabel = new Label($"{PlotManager.GetSeedDisplayName(reward.seedName)} x{reward.count}");
-                            chipLabel.AddToClassList("quest-reward-name");
-                            chip.Add(chipLabel);
-                            rewardList.Add(chip);
-                        }
 
                         actionBtn.text = "Collect Rewards";
                         actionBtn.AddToClassList("quest-collect-btn");
@@ -287,7 +377,19 @@ namespace Garden
                 {
                     var chip = new VisualElement();
                     chip.AddToClassList("quest-reward-chip");
-                    var chipLabel = new Label(!string.IsNullOrEmpty(reward.seedName) ? reward.seedName : "?");
+                    string rewardText;
+                    if (!string.IsNullOrEmpty(reward.seedName))
+                    {
+                        string countStr = reward.minCount == reward.maxCount
+                            ? $"{reward.minCount}"
+                            : $"{reward.minCount}-{reward.maxCount}";
+                        rewardText = $"{countStr} {reward.seedName}";
+                    }
+                    else
+                    {
+                        rewardText = "?";
+                    }
+                    var chipLabel = new Label(rewardText);
                     chipLabel.AddToClassList("quest-reward-name");
                     chip.Add(chipLabel);
                     rewardList.Add(chip);
