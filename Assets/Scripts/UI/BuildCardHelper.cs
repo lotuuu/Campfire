@@ -86,9 +86,13 @@ namespace Garden
             if (capLabel != null)
             {
                 if (string.IsNullOrEmpty(capText))
+                {
                     capLabel.style.display = DisplayStyle.None;
+                }
                 else
-                    capLabel.text = capText;
+                {
+                    capLabel.text = !canPlace ? $"Cap reached {capText}" : capText;
+                }
             }
 
             // Enabled state & click
@@ -99,10 +103,9 @@ namespace Garden
                 if (enabled && onClick != null)
                     card.clicked += onClick;
 
-                if (!enabled)
+                if (!enabled && disabledReason != null)
                 {
-                    string reason = disabledReason ?? (!canPlace ? "Cap reached" : "Can't afford");
-                    var lockedLabel = new Label(reason);
+                    var lockedLabel = new Label(disabledReason);
                     lockedLabel.AddToClassList("build-card__locked-label");
                     card.Add(lockedLabel);
                 }

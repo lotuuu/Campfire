@@ -826,9 +826,10 @@ namespace Garden
                 else
                 {
                     grid.Add(BuildCardHelper.CreateBuildCard(
-                        "Vase", $"Unlocks at Fire Lv.{VaseManager.VaseUnlockLevel}",
+                        "Vase", "Stores water",
                         "ui/buildings/vase", null,
-                        null, null, false, false, null));
+                        null, null, false, false, null,
+                        $"Unlocks at Fire Lv.{VaseManager.VaseUnlockLevel}"));
                 }
             }
 
@@ -879,9 +880,10 @@ namespace Garden
                 else
                 {
                     grid.Add(BuildCardHelper.CreateBuildCard(
-                        "Garden", $"Unlocks at Fire Lv.{GardenManager.GardenUnlockLevel}",
+                        "Garden", "Grow fruit trees",
                         "ui/buildings/garden", null,
-                        null, null, false, false, null));
+                        null, null, false, false, null,
+                        $"Unlocks at Fire Lv.{GardenManager.GardenUnlockLevel}"));
                 }
             }
 
@@ -1469,22 +1471,35 @@ namespace Garden
                     }));
             }
 
-            // Vase
+            // Vase (unlocked at flame level 2)
             if (VaseManager.Instance != null)
             {
                 bool vaseAllowed = allowed == null || allowed.Contains(CampBuildingType.Vase);
-                var vaseCost = VaseManager.Instance.GetNextVaseCost();
-                bool canAfford = vaseAllowed && canPlaceEntity && vaseCost != null
-                    && CurrencyManager.Instance.CanAffordMana(vaseCost.manaCost)
-                    && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, vaseCost.harvestCosts);
-                grid.Add(BuildCardHelper.CreateBuildCard(
-                    "Vase", "Stores water", "ui/buildings/vase", null,
-                    BuildCardHelper.FromBuildingCost(vaseCost), null,
-                    canAfford, vaseAllowed && canPlaceEntity, () =>
-                    {
-                        CloseInteractionPanel();
-                        EnterPlacementMode(CampBuildingType.Vase);
-                    }));
+                bool vaseUnlocked = FlameManager.Instance != null
+                    && FlameManager.Instance.Level >= VaseManager.VaseUnlockLevel;
+                if (vaseUnlocked)
+                {
+                    var vaseCost = VaseManager.Instance.GetNextVaseCost();
+                    bool canAfford = vaseAllowed && canPlaceEntity && vaseCost != null
+                        && CurrencyManager.Instance.CanAffordMana(vaseCost.manaCost)
+                        && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, vaseCost.harvestCosts);
+                    grid.Add(BuildCardHelper.CreateBuildCard(
+                        "Vase", "Stores water", "ui/buildings/vase", null,
+                        BuildCardHelper.FromBuildingCost(vaseCost), null,
+                        canAfford, vaseAllowed && canPlaceEntity, () =>
+                        {
+                            CloseInteractionPanel();
+                            EnterPlacementMode(CampBuildingType.Vase);
+                        }));
+                }
+                else
+                {
+                    grid.Add(BuildCardHelper.CreateBuildCard(
+                        "Vase", "Stores water",
+                        "ui/buildings/vase", null,
+                        null, null, false, false, null,
+                        $"Unlocks at Fire Lv.{VaseManager.VaseUnlockLevel}"));
+                }
             }
 
             // House
@@ -1534,9 +1549,10 @@ namespace Garden
                 else
                 {
                     grid.Add(BuildCardHelper.CreateBuildCard(
-                        "Garden", $"Unlocks at Fire Lv.{GardenManager.GardenUnlockLevel}",
+                        "Garden", "Grow fruit trees",
                         "ui/buildings/garden", null,
-                        null, null, false, false, null));
+                        null, null, false, false, null,
+                        $"Unlocks at Fire Lv.{GardenManager.GardenUnlockLevel}"));
                 }
             }
 
@@ -1569,26 +1585,39 @@ namespace Garden
                         CloseInteractionPanel();
                         EnterPlacementMode(CampBuildingType.Plot);
                     },
-                    !plotAllowed ? "Unavailable" : null));
+                    null));
             }
 
-            // Vase
+            // Vase (unlocked at flame level 2)
             if (VaseManager.Instance != null)
             {
                 bool vaseAllowed = allowed == null || allowed.Contains(CampBuildingType.Vase);
-                var vaseCost = VaseManager.Instance.GetNextVaseCost();
-                bool canAfford = vaseAllowed && canPlaceEntity && vaseCost != null
-                    && CurrencyManager.Instance.CanAffordMana(vaseCost.manaCost)
-                    && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, vaseCost.harvestCosts);
-                flameBuildGrid.Add(BuildCardHelper.CreateBuildCard(
-                    "Vase", "Stores water", "ui/buildings/vase", null,
-                    BuildCardHelper.FromBuildingCost(vaseCost), null,
-                    canAfford, vaseAllowed && canPlaceEntity, () =>
-                    {
-                        CloseInteractionPanel();
-                        EnterPlacementMode(CampBuildingType.Vase);
-                    },
-                    !vaseAllowed ? "Unavailable" : null));
+                bool vaseUnlocked = FlameManager.Instance != null
+                    && FlameManager.Instance.Level >= VaseManager.VaseUnlockLevel;
+                if (vaseUnlocked)
+                {
+                    var vaseCost = VaseManager.Instance.GetNextVaseCost();
+                    bool canAfford = vaseAllowed && canPlaceEntity && vaseCost != null
+                        && CurrencyManager.Instance.CanAffordMana(vaseCost.manaCost)
+                        && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, vaseCost.harvestCosts);
+                    flameBuildGrid.Add(BuildCardHelper.CreateBuildCard(
+                        "Vase", "Stores water", "ui/buildings/vase", null,
+                        BuildCardHelper.FromBuildingCost(vaseCost), null,
+                        canAfford, vaseAllowed && canPlaceEntity, () =>
+                        {
+                            CloseInteractionPanel();
+                            EnterPlacementMode(CampBuildingType.Vase);
+                        },
+                        null));
+                }
+                else
+                {
+                    flameBuildGrid.Add(BuildCardHelper.CreateBuildCard(
+                        "Vase", "Stores water",
+                        "ui/buildings/vase", null,
+                        null, null, false, false, null,
+                        $"Unlocks at Fire Lv.{VaseManager.VaseUnlockLevel}"));
+                }
             }
 
             // House
@@ -1609,7 +1638,7 @@ namespace Garden
                             CloseInteractionPanel();
                             EnterPlacementMode(CampBuildingType.MallumHouse);
                         },
-                        !houseAllowed ? "Unavailable" : null));
+                        null));
                 }
             }
 
@@ -1634,15 +1663,16 @@ namespace Garden
                                 CloseInteractionPanel();
                                 EnterPlacementMode(CampBuildingType.Garden);
                             },
-                            !gardenAllowed ? "Unavailable" : null));
+                            null));
                     }
                 }
                 else
                 {
                     flameBuildGrid.Add(BuildCardHelper.CreateBuildCard(
-                        "Garden", $"Unlocks at Fire Lv.{GardenManager.GardenUnlockLevel}",
+                        "Garden", "Grow fruit trees",
                         "ui/buildings/garden", null,
-                        null, null, false, false, null));
+                        null, null, false, false, null,
+                        $"Unlocks at Fire Lv.{GardenManager.GardenUnlockLevel}"));
                 }
             }
         }

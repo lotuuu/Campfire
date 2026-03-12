@@ -42,7 +42,7 @@ namespace Garden
                     BuildCardHelper.FromBuildingCost(plotCost), capText,
                     canAfford, plotAllowed && canPlace,
                     () => OnRequestPlacement?.Invoke(CampBuildingType.Plot),
-                    !plotAllowed ? "Unavailable" : null));
+                    null));
             }
 
             // Vase (unlocked at flame level 2)
@@ -62,14 +62,15 @@ namespace Garden
                         BuildCardHelper.FromBuildingCost(vaseCost), capText,
                         canAfford, vaseAllowed && canPlace,
                         () => OnRequestPlacement?.Invoke(CampBuildingType.Vase),
-                        !vaseAllowed ? "Unavailable" : null));
+                        null));
                 }
                 else
                 {
                     buildList.Add(BuildCardHelper.CreateBuildCard(
-                        "Vase", $"Unlocks at Fire Lv.{VaseManager.VaseUnlockLevel}",
+                        "Vase", "Stores water",
                         "ui/buildings/vase", null,
-                        null, capText, false, false, null));
+                        null, capText, false, false, null,
+                        $"Unlocks at Fire Lv.{VaseManager.VaseUnlockLevel}"));
                 }
             }
 
@@ -88,7 +89,7 @@ namespace Garden
                         BuildCardHelper.FromBuildingCost(nextCost), capText,
                         canAfford, houseAllowed && canPlace,
                         () => OnRequestPlacement?.Invoke(CampBuildingType.MallumHouse),
-                        !houseAllowed ? "Unavailable" : null));
+                        null));
                 }
             }
 
@@ -108,14 +109,15 @@ namespace Garden
                         BuildCardHelper.FromBuildingCost(gardenCost), capText,
                         canAfford, gardenAllowed && canPlace,
                         () => OnRequestPlacement?.Invoke(CampBuildingType.Garden),
-                        !gardenAllowed ? "Unavailable" : null));
+                        null));
                 }
                 else
                 {
                     buildList.Add(BuildCardHelper.CreateBuildCard(
-                        "Garden", $"Unlocks at Fire Lv.{GardenManager.GardenUnlockLevel}",
+                        "Garden", "Grow fruit trees",
                         "ui/buildings/garden", null,
-                        null, capText, false, false, null));
+                        null, capText, false, false, null,
+                        $"Unlocks at Fire Lv.{GardenManager.GardenUnlockLevel}"));
                 }
             }
 
@@ -131,7 +133,7 @@ namespace Garden
                         FlameManager.Instance.UpgradeFlame();
                         Refresh();
                     },
-                    !flameAllowed ? "Unavailable" : null));
+                    null));
             }
         }
     }
