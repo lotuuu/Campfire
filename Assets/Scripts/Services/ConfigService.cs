@@ -435,7 +435,7 @@ namespace Garden
                                 {
                                     config.rewardPool.Add(new ServerQuestReward
                                     {
-                                        seedName = GetString(r, "seedName"),
+                                        seedName = GetString(r, "seed"),
                                         weight = GetFloat(r, "weight", 1f),
                                         minCount = (int)GetFloat(r, "minCount", 1f),
                                         maxCount = (int)GetFloat(r, "maxCount", 1f)
