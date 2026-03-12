@@ -95,7 +95,7 @@ deploy:
 
 # Run Ecto migrations on Gigalixir
 deploy-migrate:
-	$(GIGALIXIR) run mix ecto.migrate -a $(GIGALIXIR_APP)
+	$(GIGALIXIR) ps:migrate -a $(GIGALIXIR_APP)
 
 # Full deploy: push code then migrate
 deploy-full: deploy deploy-migrate
