@@ -24,6 +24,9 @@ namespace Garden
         // Deferred highlight — retries until element appears (for dynamically created UI)
         private string pendingHighlightClass;
 
+        // Persistent class-based highlight — survives DOM rebuilds
+        private string activeHighlightClass;
+
         public void Initialize(VisualElement rootElement)
         {
             root = rootElement;
@@ -58,7 +61,27 @@ namespace Garden
                 }
             }
 
+            // Re-find element if it was destroyed by a DOM rebuild
+            if (currentHighlight == null && activeHighlightClass != null)
+            {
+                var element = root.Q(className: activeHighlightClass);
+                if (element != null)
+                {
+                    currentHighlight = element;
+                    pulseBright = true;
+                    pulseTimer = 0f;
+                    element.AddToClassList("tutorial-highlight");
+                }
+            }
+
             if (currentHighlight == null) return;
+
+            // Detect detached element (panel of root is null when removed from DOM)
+            if (currentHighlight.panel == null)
+            {
+                currentHighlight = null;
+                return;
+            }
 
             pulseTimer += Time.deltaTime;
             if (pulseTimer >= PulseInterval)
@@ -115,6 +138,7 @@ namespace Garden
         public void HighlightElementByClass(string className)
         {
             ClearHighlight();
+            activeHighlightClass = className;
             var element = root.Q(className: className);
             if (element == null)
             {
@@ -134,12 +158,14 @@ namespace Garden
         /// </summary>
         public void DeferHighlightByClass(string className)
         {
+            activeHighlightClass = className;
             pendingHighlightClass = className;
         }
 
         public void HighlightElement(string elementName)
         {
             ClearHighlight();
+            activeHighlightClass = null;
             var element = root.Q(elementName);
             if (element == null) return;
             currentHighlight = element;
@@ -161,6 +187,7 @@ namespace Garden
         public void ClearHighlight()
         {
             pendingHighlightClass = null;
+            activeHighlightClass = null;
             if (currentHighlight != null)
             {
                 currentHighlight.RemoveFromClassList("tutorial-highlight");
