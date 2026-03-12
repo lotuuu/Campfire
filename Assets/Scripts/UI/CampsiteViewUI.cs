@@ -945,11 +945,13 @@ namespace Garden
 
         public void ExitTutorialHighlight()
         {
-            if (mode != CampsiteMode.Tutorial) return;
+            bool wasHighlighting = tutorialTargetQ != int.MinValue || tutorialTargetR != int.MinValue;
             tutorialTargetQ = int.MinValue;
             tutorialTargetR = int.MinValue;
-            mode = CampsiteMode.Normal;
-            RebuildGrid();
+            if (mode == CampsiteMode.Tutorial)
+                mode = CampsiteMode.Normal;
+            if (wasHighlighting)
+                RebuildGrid();
         }
 
         // ── Visit Mode ──
@@ -1330,13 +1332,6 @@ namespace Garden
 
         private void ShowFlameInteraction()
         {
-            // Notify tutorial — if it handles this step, it closes the panel and shows a dialogue
-            if (TutorialManager.Instance != null && TutorialManager.Instance.OnFlameMenuOpened())
-            {
-                CloseInteractionPanel();
-                return;
-            }
-
             interactionTitle.text = $"Spark of Ara";
 
             var levelLabel = new Label($"Level {FlameManager.Instance.Level}");
@@ -1408,7 +1403,6 @@ namespace Garden
 
             // ── Craft / Build section ──
             AddFlameCraftItems();
-
         }
 
         private void AddFlameCraftItems()
@@ -2467,6 +2461,7 @@ namespace Garden
         private void CloseInteractionPanel()
         {
             AudioManager.Instance?.PlaySFX("ui_panel_close");
+            bool wasFlame = openInteractionType == CampBuildingType.Flame;
             if (interactionBackdrop != null)
                 interactionBackdrop.style.display = DisplayStyle.None;
             if (interactionPanel != null)
@@ -2478,6 +2473,9 @@ namespace Garden
                 interactionTitle.style.display = DisplayStyle.Flex;
             openInteractionType = null;
             flameBuildGrid = null;
+
+            if (wasFlame)
+                TutorialManager.Instance?.OnFlameMenuClosed();
         }
 
         // ── Drag-Move ──

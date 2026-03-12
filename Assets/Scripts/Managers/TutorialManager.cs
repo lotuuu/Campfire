@@ -317,12 +317,11 @@ namespace Garden
         }
 
         /// <summary>
-        /// Called by CampsiteViewUI when the flame interaction panel is opened.
-        /// Returns true if the tutorial handled this event (caller should abort normal flow).
+        /// Called by CampsiteViewUI when the flame interaction panel is closed.
         /// </summary>
-        public bool OnFlameMenuOpened()
+        public void OnFlameMenuClosed()
         {
-            if (!initialized || IsComplete) return false;
+            if (!initialized || IsComplete) return;
 
             if (CurrentStep == StepUpgradeFlame)
             {
@@ -331,9 +330,7 @@ namespace Garden
                     "Collect harvests to gather the ingredients you need.",
                     "You're on your own now. Good luck!"
                 }, () => AdvanceTo(StepComplete));
-                return true;
             }
-            return false;
         }
 
         private IEnumerator DelayedGrowthPause(float delay)
@@ -433,7 +430,7 @@ namespace Garden
                         if (stillOnQuest)
                         {
                             tutorialUI?.ShowHint("Use an Energy Drink to speed up the quest");
-                            tutorialUI?.HighlightElementByClass("quest-speedup-btn");
+                            tutorialUI?.HighlightElementByClass("quest-speedup-btn", "btn-quest");
                         }
                         else
                         {
