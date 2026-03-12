@@ -27,70 +27,66 @@
     padding: var(--spacing-xs);
 }
 
-.seed-card {
+/* Grid container for each category's items */
+.inventory-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-bottom: var(--spacing-xs);
+}
+
+#seed-list .seed-card {
     flex-direction: column;
+    align-items: center;
     background-color: rgba(50, 35, 20, 0.6);
     border-width: 1px;
     border-color: rgba(140, 100, 50, 0.25);
     border-radius: var(--radius-md);
-    padding: var(--spacing-sm);
-    margin-bottom: var(--spacing-xs);
+    padding: var(--spacing-xs);
+    margin: var(--spacing-xxs);
+    width: 31%;
     transition-property: background-color, border-color;
     transition-duration: 0.15s;
 }
 
-.seed-card:hover {
+#seed-list .seed-card:hover {
     background-color: rgba(65, 45, 25, 0.7);
     border-color: rgba(180, 120, 60, 0.4);
 }
 
-.seed-card--expanded {
+#seed-list .seed-card--expanded {
     border-color: rgba(220, 150, 50, 0.4);
 }
 
-.seed-card-header {
-    flex-direction: row;
+#seed-list .seed-card-header {
+    flex-direction: column;
     align-items: center;
 }
 
-.seed-icon {
-    width: 72px;
-    height: 72px;
+#seed-list .seed-icon {
+    width: 96px;
+    height: 96px;
     border-radius: var(--radius-sm);
     background-color: rgba(40, 28, 15, 0.6);
-    margin-right: var(--spacing-sm);
+    margin-bottom: var(--spacing-xxs);
     flex-shrink: 0;
 }
 
-.seed-info {
-    flex-grow: 1;
+#seed-list .seed-info {
     flex-direction: column;
-    justify-content: center;
+    align-items: center;
 }
 
-.seed-name {
-    font-size: var(--font-md);
+#seed-list .seed-name {
+    font-size: var(--font-sm);
     color: rgb(230, 210, 180);
     -unity-font-style: bold;
+    -unity-text-align: middle-center;
 }
 
-.seed-count {
-    font-size: var(--font-sm);
+#seed-list .seed-count {
+    font-size: var(--font-xs);
     color: rgb(170, 145, 110);
     margin-top: var(--spacing-xxs);
-}
-
-.seed-outcome {
-    flex-direction: column;
-    align-items: flex-end;
-    justify-content: center;
-    flex-shrink: 0;
-    margin-left: var(--spacing-sm);
-}
-
-.seed-outcome-name {
-    font-size: var(--font-sm);
-    color: rgb(180, 220, 120);
 }
 
 .seed-card-details {

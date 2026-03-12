@@ -121,6 +121,9 @@ namespace Garden
                 header.AddToClassList("recipe-category-header");
                 seedList.Add(header);
 
+                var grid = new VisualElement();
+                grid.AddToClassList("inventory-grid");
+
                 foreach (var entry in items)
                 {
                     if (cat == InventoryCategory.Seeds)
@@ -128,13 +131,15 @@ namespace Garden
                         var plantName = entry.itemName[..^5];
                         var seedConfig = ConfigService.Instance?.GetSeed(plantName);
                         var card = BuildSeedCard(entry, seedConfig, seedIndex++);
-                        seedList.Add(card);
+                        grid.Add(card);
                     }
                     else
                     {
-                        seedList.Add(BuildItemCard(entry));
+                        grid.Add(BuildItemCard(entry));
                     }
                 }
+
+                seedList.Add(grid);
             }
         }
 
@@ -196,13 +201,6 @@ namespace Garden
             countLabel.AddToClassList("seed-count");
             info.Add(countLabel);
             header.Add(info);
-
-            var outcome = new VisualElement();
-            outcome.AddToClassList("seed-outcome");
-            var outcomeName = new Label(plantName);
-            outcomeName.AddToClassList("seed-outcome-name");
-            outcome.Add(outcomeName);
-            header.Add(outcome);
 
             card.Add(header);
 
