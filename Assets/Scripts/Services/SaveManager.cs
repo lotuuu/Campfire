@@ -96,6 +96,14 @@ namespace Garden
         {
             var data = TryLoadFrom(SavePath) ?? TryLoadFrom(BakPath);
             Data = data ?? new SaveData();
+
+            // If tutorial was never completed, discard the stale local save immediately
+            // so the UI never renders old positions. Server wipe happens later in GameService.
+            if (Data.tutorialStep < TutorialManager.StepComplete && Data.vases.Count > 0)
+            {
+                Debug.Log("[SaveManager] Tutorial incomplete on load — discarding local save");
+                Data = new SaveData();
+            }
         }
 
         private SaveData TryLoadFrom(string path)
