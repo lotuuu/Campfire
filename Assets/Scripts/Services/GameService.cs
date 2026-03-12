@@ -116,11 +116,9 @@ namespace Garden
         {
             var data = SaveManager.Instance.Data;
 
-            // Preserve local-only entities (serverId == 0, not yet synced to server)
-            // so that starter entities from InitializeNewPlayer() survive server sync.
-            var localPlots = data.plots.FindAll(p => p.serverId == 0);
-            var localVases = data.vases.FindAll(v => v.serverId == 0);
-            var localMallums = data.mallums.FindAll(m => m.serverId == 0);
+            // Server is authoritative — do NOT preserve local-only entities (serverId == 0).
+            // Both client and server independently create starter buildings at different
+            // random positions, so preserving local entities causes duplicates.
 
             // Plots
             data.plots.Clear();
@@ -143,13 +141,6 @@ namespace Garden
                     });
                 }
             }
-            // Re-add local-only plots not covered by server data
-            foreach (var lp in localPlots)
-            {
-                bool onServer = data.plots.Exists(p => p.gridX == lp.gridX && p.gridY == lp.gridY);
-                if (!onServer) data.plots.Add(lp);
-            }
-
             // Vases
             data.vases.Clear();
             if (state.vases != null)
@@ -170,14 +161,7 @@ namespace Garden
                     });
                 }
             }
-            foreach (var lv in localVases)
-            {
-                bool onServer = data.vases.Exists(v => v.gridX == lv.gridX && v.gridY == lv.gridY);
-                if (!onServer) data.vases.Add(lv);
-            }
-
-            // Gardens — preserve local-only gardens (serverId == 0)
-            var localGardens = data.gardens.FindAll(g => g.serverId == 0);
+            // Gardens
             data.gardens.Clear();
             if (state.gardens != null)
             {
@@ -195,13 +179,7 @@ namespace Garden
                     });
                 }
             }
-            foreach (var lg in localGardens)
-            {
-                bool onServer = data.gardens.Exists(g => g.gridX == lg.gridX && g.gridY == lg.gridY);
-                if (!onServer) data.gardens.Add(lg);
-            }
-
-            // Mallums — preserve local-only mallums up to house-based max
+            // Mallums
             data.mallums.Clear();
             if (state.mallums != null)
             {
@@ -225,15 +203,7 @@ namespace Garden
                     data.mallums.Add(mallum);
                 }
             }
-            int maxMallums = ConfigService.Instance?.MallumHouseConfig != null
-                ? ConfigService.Instance.MallumHouseConfig.GetMaxMallums(data.mallumHouses.Count)
-                : data.mallumHouses.Count;
-            int slotsAvailable = maxMallums - data.mallums.Count;
-            for (int i = 0; i < Math.Min(localMallums.Count, slotsAvailable); i++)
-                data.mallums.Add(localMallums[i]);
-
             // Mallum Houses
-            var localHouses = data.mallumHouses.FindAll(h => h.serverId == 0);
             data.mallumHouses.Clear();
             if (state.mallumHouses != null)
             {
@@ -249,12 +219,6 @@ namespace Garden
                     });
                 }
             }
-            foreach (var lh in localHouses)
-            {
-                bool onServer = data.mallumHouses.Exists(h => h.gridX == lh.gridX && h.gridY == lh.gridY);
-                if (!onServer) data.mallumHouses.Add(lh);
-            }
-
             // Birds
             data.birds.Clear();
             if (state.birds != null)
