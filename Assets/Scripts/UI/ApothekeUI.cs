@@ -53,29 +53,118 @@ namespace Garden
             else RefreshRecipes();
         }
 
+        private enum InventoryCategory { Seeds, Yields, Pigments, Consumables }
+
+        private static InventoryCategory CategorizeItem(string itemName)
+        {
+            if (itemName.EndsWith("_Seed")) return InventoryCategory.Seeds;
+            if (itemName.EndsWith("_pigment")) return InventoryCategory.Pigments;
+            if (itemName.EndsWith("_Potion") || itemName == "Fertilizer" || itemName.EndsWith("_Energizer"))
+                return InventoryCategory.Consumables;
+            return InventoryCategory.Yields;
+        }
+
+        private static string CategoryLabel(InventoryCategory cat) => cat switch
+        {
+            InventoryCategory.Seeds => "Seeds",
+            InventoryCategory.Yields => "Yields",
+            InventoryCategory.Pigments => "Pigments",
+            InventoryCategory.Consumables => "Potions & Fertilizers",
+            _ => cat.ToString()
+        };
+
+        // Display order for inventory categories
+        private static readonly InventoryCategory[] CategoryOrder =
+        {
+            InventoryCategory.Seeds,
+            InventoryCategory.Yields,
+            InventoryCategory.Pigments,
+            InventoryCategory.Consumables
+        };
+
         private void RefreshSeeds()
         {
             if (seedList == null) return;
             seedList.Clear();
 
-            var seeds = ApothekeManager.Instance?.Seeds;
-            if (seeds == null || seeds.Count == 0)
+            var allItems = ApothekeManager.Instance?.Items;
+            if (allItems == null || allItems.Count == 0)
+            {
+                if (inventoryEmpty != null) inventoryEmpty.style.display = DisplayStyle.Flex;
+                return;
+            }
+
+            var groups = new System.Collections.Generic.Dictionary<InventoryCategory,
+                System.Collections.Generic.List<InventoryItem>>();
+            foreach (var item in allItems)
+            {
+                if (item.count <= 0) continue;
+                var cat = CategorizeItem(item.itemName);
+                if (!groups.ContainsKey(cat))
+                    groups[cat] = new System.Collections.Generic.List<InventoryItem>();
+                groups[cat].Add(item);
+            }
+
+            if (groups.Count == 0)
             {
                 if (inventoryEmpty != null) inventoryEmpty.style.display = DisplayStyle.Flex;
                 return;
             }
             if (inventoryEmpty != null) inventoryEmpty.style.display = DisplayStyle.None;
 
-            for (int i = 0; i < seeds.Count; i++)
+            int seedIndex = 0;
+            foreach (var cat in CategoryOrder)
             {
-                var entry = seeds[i];
-                if (entry.count <= 0) continue;
+                if (!groups.TryGetValue(cat, out var items)) continue;
 
-                var plantName = entry.itemName.EndsWith("_Seed") ? entry.itemName[..^5] : entry.itemName;
-                var seedConfig = ConfigService.Instance?.GetSeed(plantName);
-                var card = BuildSeedCard(entry, seedConfig, i);
-                seedList.Add(card);
+                var header = new Label(CategoryLabel(cat));
+                header.AddToClassList("recipe-category-header");
+                seedList.Add(header);
+
+                foreach (var entry in items)
+                {
+                    if (cat == InventoryCategory.Seeds)
+                    {
+                        var plantName = entry.itemName[..^5];
+                        var seedConfig = ConfigService.Instance?.GetSeed(plantName);
+                        var card = BuildSeedCard(entry, seedConfig, seedIndex++);
+                        seedList.Add(card);
+                    }
+                    else
+                    {
+                        seedList.Add(BuildItemCard(entry));
+                    }
+                }
             }
+        }
+
+        private VisualElement BuildItemCard(InventoryItem entry)
+        {
+            var card = new VisualElement();
+            card.AddToClassList("seed-card");
+
+            var header = new VisualElement();
+            header.AddToClassList("seed-card-header");
+
+            var icon = new VisualElement();
+            icon.AddToClassList("seed-icon");
+            var sprite = SpriteService.Instance?.GetSprite($"items/{entry.itemName.ToLower()}");
+            if (sprite != null)
+                icon.style.backgroundImage = new StyleBackground(sprite);
+            header.Add(icon);
+
+            var info = new VisualElement();
+            info.AddToClassList("seed-info");
+            var nameLabel = new Label(RecipeData.FormatItemName(entry.itemName));
+            nameLabel.AddToClassList("seed-name");
+            info.Add(nameLabel);
+            var countLabel = new Label($"x{entry.count}");
+            countLabel.AddToClassList("seed-count");
+            info.Add(countLabel);
+            header.Add(info);
+
+            card.Add(header);
+            return card;
         }
 
         private VisualElement BuildSeedCard(InventoryItem entry, ServerSeedConfig seedData, int index)
