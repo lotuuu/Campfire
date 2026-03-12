@@ -58,7 +58,7 @@ namespace Garden
 
             AudioManager.Instance?.PlaySFX("ui_panel_open");
 
-            StartCoroutine(RevealCards(rewards));
+            StartCoroutine(RevealCards(MergeRewards(rewards)));
         }
 
         public void Hide()
@@ -76,6 +76,20 @@ namespace Garden
             onCollect = null;
             Hide();
             callback?.Invoke();
+        }
+
+        private static List<RewardEntry> MergeRewards(List<RewardEntry> rewards)
+        {
+            var merged = new List<RewardEntry>();
+            foreach (var r in rewards)
+            {
+                var existing = merged.Find(m => m.seedName == r.seedName);
+                if (existing != null)
+                    existing.count += r.count;
+                else
+                    merged.Add(new RewardEntry { seedName = r.seedName, count = r.count });
+            }
+            return merged;
         }
 
         private IEnumerator RevealCards(List<RewardEntry> rewards)

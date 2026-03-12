@@ -1328,6 +1328,13 @@ namespace Garden
 
         private void ShowFlameInteraction()
         {
+            // Notify tutorial — if it handles this step, it closes the panel and shows a dialogue
+            if (TutorialManager.Instance != null && TutorialManager.Instance.OnFlameMenuOpened())
+            {
+                CloseInteractionPanel();
+                return;
+            }
+
             interactionTitle.text = $"Spark of Ara";
 
             var levelLabel = new Label($"Level {FlameManager.Instance.Level}");
@@ -1390,7 +1397,8 @@ namespace Garden
                 {
                     FlameManager.Instance.UpgradeFlame();
                     CloseInteractionPanel();
-                }) { text = "Level Up" };
+                })
+                { text = "Level Up" };
                 upgradeBtn.SetEnabled(canAfford);
                 upgradeBtn.AddToClassList("upgrade-btn");
                 interactionBody.Add(upgradeBtn);
@@ -1560,7 +1568,8 @@ namespace Garden
                     {
                         CloseInteractionPanel();
                         EnterPlacementMode(CampBuildingType.Plot);
-                    }));
+                    },
+                    !plotAllowed ? "Unavailable" : null));
             }
 
             // Vase
@@ -1578,7 +1587,8 @@ namespace Garden
                     {
                         CloseInteractionPanel();
                         EnterPlacementMode(CampBuildingType.Vase);
-                    }));
+                    },
+                    !vaseAllowed ? "Unavailable" : null));
             }
 
             // House
@@ -1598,7 +1608,8 @@ namespace Garden
                         {
                             CloseInteractionPanel();
                             EnterPlacementMode(CampBuildingType.MallumHouse);
-                        }));
+                        },
+                        !houseAllowed ? "Unavailable" : null));
                 }
             }
 
@@ -1622,7 +1633,8 @@ namespace Garden
                             {
                                 CloseInteractionPanel();
                                 EnterPlacementMode(CampBuildingType.Garden);
-                            }));
+                            },
+                            !gardenAllowed ? "Unavailable" : null));
                     }
                 }
                 else
@@ -1678,7 +1690,8 @@ namespace Garden
                             else
                                 CloseInteractionPanel();
                         }
-                    }) { text = $"Finish Now ({plotPotionCount} potions)" };
+                    })
+                    { text = $"Finish Now ({plotPotionCount} potions)" };
                     finishBtn.SetEnabled(plotPotionCount > 0 || CurrencyManager.FreeMode);
                     finishBtn.AddToClassList("interaction-btn-primary");
                     interactionActions.Add(finishBtn);
@@ -1700,7 +1713,8 @@ namespace Garden
                         }
                         else
                             CloseInteractionPanel();
-                    }) { text = "Harvest" };
+                    })
+                    { text = "Harvest" };
                     harvestBtn.AddToClassList("interaction-btn-primary");
                     interactionActions.Add(harvestBtn);
                     break;
@@ -1892,7 +1906,8 @@ namespace Garden
                 {
                     PlotManager.Instance.Plant(plotIndex, sName);
                     CloseInteractionPanel();
-                }) { text = "Plant" };
+                })
+                { text = "Plant" };
                 plantBtn.AddToClassList("seed-card--plant-btn");
                 card.Add(plantBtn);
 
@@ -1992,7 +2007,8 @@ namespace Garden
                         }
                         RebuildGrid();
                         ShowInteraction(CampBuildingType.Vase, index);
-                    }) { text = $"Send Mallum ({available}/{total})" };
+                    })
+                    { text = $"Send Mallum ({available}/{total})" };
                     collectBtn.SetEnabled(available > 0);
                     collectBtn.AddToClassList("interaction-btn-primary");
                     interactionActions.Add(collectBtn);
@@ -2024,7 +2040,8 @@ namespace Garden
                             RebuildGrid();
                             ShowInteraction(CampBuildingType.Vase, index);
                         }
-                    }) { text = $"Finish Now ({vaseDrinkCount} drinks)" };
+                    })
+                    { text = $"Finish Now ({vaseDrinkCount} drinks)" };
                     finishVaseBtn.SetEnabled((vaseDrinkCount > 0 && fetchingMallumIndex >= 0) || CurrencyManager.FreeMode);
                     finishVaseBtn.AddToClassList("interaction-btn-primary");
                     interactionActions.Add(finishVaseBtn);
@@ -2039,7 +2056,8 @@ namespace Garden
                     var waterBtn = new Button(() =>
                     {
                         EnterWateringMode(index);
-                    }) { text = "Water a plot" };
+                    })
+                    { text = "Water a plot" };
                     waterBtn.AddToClassList("interaction-btn-primary");
                     interactionActions.Add(waterBtn);
                     break;
@@ -2079,13 +2097,14 @@ namespace Garden
                             CloseInteractionPanel();
                             RebuildGrid();
                         }
-                    }) { text = $"{pName} ({desc})" };
+                    })
+                    { text = $"{pName} ({desc})" };
                     btn.AddToClassList("interaction-btn-primary");
                     btn.SetEnabled(canAfford);
                     interactionActions.Add(btn);
                 }
 
-                    return;
+                return;
             }
 
             interactionTitle.text = garden.plantName;
@@ -2300,7 +2319,8 @@ namespace Garden
                     SkinManager.Instance.RemoveSkin(type, index);
                     CloseInteractionPanel();
                     RebuildGrid();
-                }) { text = "Remove Skin" };
+                })
+                { text = "Remove Skin" };
                 interactionActions.Add(removeBtn);
             }
 
@@ -2330,7 +2350,8 @@ namespace Garden
                         CloseInteractionPanel();
                         RebuildGrid();
                     }
-                }) { text = "Paint" };
+                })
+                { text = "Paint" };
                 paintBtn.AddToClassList("skin-action-btn");
                 detailArea.Add(paintBtn);
             }
@@ -2366,7 +2387,8 @@ namespace Garden
                         CloseInteractionPanel();
                         RebuildGrid();
                     }
-                }) { text = "Unlock" };
+                })
+                { text = "Unlock" };
                 unlockBtn.AddToClassList("skin-action-btn");
                 unlockBtn.SetEnabled(canAfford);
                 detailArea.Add(unlockBtn);
@@ -2395,7 +2417,8 @@ namespace Garden
                     BirdManager.Instance?.NotifyBirdCollected(drop);
                 }
                 CloseInteractionPanel();
-            }) { text = "Collect Seeds" };
+            })
+            { text = "Collect Seeds" };
             collectBtn.AddToClassList("interaction-btn-primary");
             interactionActions.Add(collectBtn);
 

@@ -107,7 +107,17 @@ namespace Garden
 
         /// When set to a value < 1, growth freezes once any plot reaches this progress (0-1).
         /// Tutorial uses this to cap growth at 60% during the fetch-water step.
-        public float GrowthCapPercent { get; set; } = 1f;
+        private float _growthCapPercent = 1f;
+        public float GrowthCapPercent
+        {
+            get => _growthCapPercent;
+            set
+            {
+                if (value != _growthCapPercent)
+                    Debug.Log($"[PlotManager] GrowthCapPercent changed {_growthCapPercent:F2} → {value:F2}\n{UnityEngine.StackTraceUtility.ExtractStackTrace()}");
+                _growthCapPercent = value;
+            }
+        }
 
         private DateTime? _lastPauseTime;
 
@@ -568,7 +578,8 @@ namespace Garden
                 if (plot.state != PlotState.Growing) continue;
 
                 // Cap growth at GrowthCapPercent by pushing plantTimeUtc forward
-                if (GrowthCapPercent < 1f && GetGrowthProgress(i) >= GrowthCapPercent)
+                float progress = GetGrowthProgress(i);
+                if (GrowthCapPercent < 1f && progress >= GrowthCapPercent)
                 {
                     var seed = LoadSeed(plot.seedName);
                     if (seed != null && !string.IsNullOrEmpty(plot.plantTimeUtc))
@@ -580,8 +591,9 @@ namespace Garden
                     continue;
                 }
 
-                if (GetGrowthProgress(i) >= 1f)
+                if (progress >= 1f)
                 {
+                    Debug.Log($"[PlotManager] Plot {i} maturing (progress={progress:F3}, cap={GrowthCapPercent:F3}, seed={plot.seedName})");
                     // Backfill a snapshot if weather arrived after planting but before maturity
                     if (plot.snapshots != null && plot.snapshots.snapshotCount == 0
                         && WeatherService.Instance != null && WeatherService.Instance.HasWeather)

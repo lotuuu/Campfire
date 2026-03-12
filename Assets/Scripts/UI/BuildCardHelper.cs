@@ -28,7 +28,8 @@ namespace Garden
         public static VisualElement CreateBuildCard(
             string name, string desc, string iconPath, Sprite spriteIcon,
             List<CostChip> costs, string capText,
-            bool canAfford, bool canPlace, Action onClick)
+            bool canAfford, bool canPlace, Action onClick,
+            string disabledReason = null)
         {
             var tree = CardTemplate.CloneTree();
             var card = tree.Q<Button>(className: "build-card");
@@ -100,7 +101,7 @@ namespace Garden
 
                 if (!enabled)
                 {
-                    string reason = !canPlace ? "Cap reached" : "Can't afford";
+                    string reason = disabledReason ?? (!canPlace ? "Cap reached" : "Can't afford");
                     var lockedLabel = new Label(reason);
                     lockedLabel.AddToClassList("build-card__locked-label");
                     card.Add(lockedLabel);

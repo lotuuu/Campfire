@@ -41,7 +41,8 @@ namespace Garden
                     "Plot", "Grow seeds", "ui/buildings/plot", null,
                     BuildCardHelper.FromBuildingCost(plotCost), capText,
                     canAfford, plotAllowed && canPlace,
-                    () => OnRequestPlacement?.Invoke(CampBuildingType.Plot)));
+                    () => OnRequestPlacement?.Invoke(CampBuildingType.Plot),
+                    !plotAllowed ? "Unavailable" : null));
             }
 
             // Vase (unlocked at flame level 2)
@@ -60,7 +61,8 @@ namespace Garden
                         "Vase", "Stores water", "ui/buildings/vase", null,
                         BuildCardHelper.FromBuildingCost(vaseCost), capText,
                         canAfford, vaseAllowed && canPlace,
-                        () => OnRequestPlacement?.Invoke(CampBuildingType.Vase)));
+                        () => OnRequestPlacement?.Invoke(CampBuildingType.Vase),
+                        !vaseAllowed ? "Unavailable" : null));
                 }
                 else
                 {
@@ -85,7 +87,8 @@ namespace Garden
                         "House", "Houses 1 Mallum", "ui/buildings/house", null,
                         BuildCardHelper.FromBuildingCost(nextCost), capText,
                         canAfford, houseAllowed && canPlace,
-                        () => OnRequestPlacement?.Invoke(CampBuildingType.MallumHouse)));
+                        () => OnRequestPlacement?.Invoke(CampBuildingType.MallumHouse),
+                        !houseAllowed ? "Unavailable" : null));
                 }
             }
 
@@ -104,7 +107,8 @@ namespace Garden
                         "Garden", "Grow fruit trees", "ui/buildings/garden", null,
                         BuildCardHelper.FromBuildingCost(gardenCost), capText,
                         canAfford, gardenAllowed && canPlace,
-                        () => OnRequestPlacement?.Invoke(CampBuildingType.Garden)));
+                        () => OnRequestPlacement?.Invoke(CampBuildingType.Garden),
+                        !gardenAllowed ? "Unavailable" : null));
                 }
                 else
                 {
@@ -126,7 +130,8 @@ namespace Garden
                     {
                         FlameManager.Instance.UpgradeFlame();
                         Refresh();
-                    }));
+                    },
+                    !flameAllowed ? "Unavailable" : null));
             }
         }
     }

@@ -94,8 +94,6 @@ namespace Garden
                 VaseManager.Instance.OnVasesChanged += OnVasesChanged;
             if (MallumManager.Instance != null)
                 MallumManager.Instance.OnMallumsChanged += OnMallumsChanged;
-            if (FlameManager.Instance != null)
-                FlameManager.Instance.OnFlameUpgraded += OnFlameUpgraded;
         }
 
         private void OnDestroy()
@@ -109,8 +107,6 @@ namespace Garden
                 VaseManager.Instance.OnVasesChanged -= OnVasesChanged;
             if (MallumManager.Instance != null)
                 MallumManager.Instance.OnMallumsChanged -= OnMallumsChanged;
-            if (FlameManager.Instance != null)
-                FlameManager.Instance.OnFlameUpgraded -= OnFlameUpgraded;
         }
 
         private void AdvanceTo(int step)
@@ -232,9 +228,19 @@ namespace Garden
         {
             if (!initialized || IsComplete) return;
 
-            // If vase finished filling during fetch-water step, lift the growth cap
+            // If a vase became full during fetch-water step, lift the growth cap
             if (CurrentStep == StepFetchWater && PlotManager.Instance != null)
-                PlotManager.Instance.GrowthCapPercent = 1f;
+            {
+                var vases = SaveManager.Instance.Data.vases;
+                foreach (var v in vases)
+                {
+                    if (v.state == VaseState.Full)
+                    {
+                        PlotManager.Instance.GrowthCapPercent = 1f;
+                        return;
+                    }
+                }
+            }
         }
 
         private void OnMallumsChanged()
@@ -302,8 +308,7 @@ namespace Garden
                         if (!anyOnQuest && !anyQuestComplete)
                         {
                             ShowDialogue("Spark of Ara", new List<string> {
-                            "Quests reward you with rare seeds and items.",
-                            "Use those seeds to expand your camp!"
+                            "Quests reward you with seeds. Use those seeds to expand your camp!"
                         }, () => AdvanceTo(StepPlantCressSpeedPotion));
                         }
                         break;
@@ -311,18 +316,24 @@ namespace Garden
             }
         }
 
-        private void OnFlameUpgraded()
+        /// <summary>
+        /// Called by CampsiteViewUI when the flame interaction panel is opened.
+        /// Returns true if the tutorial handled this event (caller should abort normal flow).
+        /// </summary>
+        public bool OnFlameMenuOpened()
         {
-            if (!initialized || IsComplete) return;
+            if (!initialized || IsComplete) return false;
 
             if (CurrentStep == StepUpgradeFlame)
             {
                 ShowDialogue("Spark of Ara", new List<string> {
-                    "Your flame grows stronger!",
-                    "Your camp can hold more now.",
-                    "You're on your own — good luck!"
+                    "This is where you upgrade your flame.",
+                    "Collect harvests to gather the ingredients you need.",
+                    "You're on your own now. Good luck!"
                 }, () => AdvanceTo(StepComplete));
+                return true;
             }
+            return false;
         }
 
         private IEnumerator DelayedGrowthPause(float delay)
@@ -377,7 +388,10 @@ namespace Garden
                     {
                         // Cap plant growth at 60% so the player has time to fetch water
                         if (PlotManager.Instance != null)
+                        {
                             PlotManager.Instance.GrowthCapPercent = 0.6f;
+                            Debug.Log($"[Tutorial] Set GrowthCapPercent=0.6 (current progress plot0={PlotManager.Instance.GetGrowthProgress(0):F3})");
+                        }
 
                         // Check if mallum is already fetching (resume case)
                         bool alreadyFetching = false;
@@ -400,7 +414,7 @@ namespace Garden
                     }
                 case StepSendOnQuest:
                     ShowDialogue("Spark of Ara", new List<string> {
-                        "Send a Mallum on a quest to earn rewards!"
+                        "Send a Mallum on a quest to get more seeds!"
                     }, () =>
                     {
                         tutorialUI?.HighlightElement("btn-quest");
@@ -429,7 +443,7 @@ namespace Garden
                         break;
                     }
                 case StepPlantCressSpeedPotion:
-                    tutorialUI?.ShowHint("Plant Cress and use a Speed Potion to grow it faster");
+                    tutorialUI?.ShowHint("Plant a Cress and use a Speed Potion to grow it faster. Take a look at the recipe first!");
                     HighlightHexCell(0);
                     break;
                 case StepBuildSecondPlot:
@@ -437,8 +451,9 @@ namespace Garden
                     HighlightFlameHex();
                     break;
                 case StepUpgradeFlame:
-                    tutorialUI?.ShowHint("Collect harvests and upgrade your flame");
-                    HighlightFlameHex();
+                    ShowDialogue("Spark of Ara", new List<string> {
+                        "You're almost ready to be on your own! Open the flame menu."
+                    }, () => HighlightFlameHex());
                     break;
             }
         }
@@ -545,10 +560,6 @@ namespace Garden
                 case StepBuildSecondPlot:
                     if (data.plots.Count >= 2)
                         AdvanceTo(StepUpgradeFlame);
-                    break;
-                case StepUpgradeFlame:
-                    if (data.flameLevel >= 2)
-                        AdvanceTo(StepComplete);
                     break;
             }
         }
