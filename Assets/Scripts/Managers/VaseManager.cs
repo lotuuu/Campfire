@@ -8,6 +8,7 @@ namespace Garden
     public class VaseManager : MonoBehaviour
     {
         public static VaseManager Instance { get; private set; }
+        public const int VaseUnlockLevel = 2;
 
         private float FillDurationMinutes => ConfigService.Instance.VaseConfig.fill_duration_minutes;
         private int BaseCapacity => ConfigService.Instance.VaseConfig.default_capacity;
@@ -128,6 +129,7 @@ namespace Garden
 
         public bool CraftVase(int gridX, int gridY)
         {
+            if (FlameManager.Instance.Level < VaseUnlockLevel) return false;
             if (!FlameManager.Instance.CanPlaceEntity) return false;
 
             var data = SaveManager.Instance.Data;

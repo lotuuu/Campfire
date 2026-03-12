@@ -37,6 +37,14 @@ namespace Garden
             if (GameService.Instance != null)
                 GameService.Instance.OnStateLoaded -= CheckNewPlayer;
 
+            // Reset save if tutorial was not completed — avoids stuck/broken mid-tutorial state
+            var data = SaveManager.Instance.Data;
+            if (data.tutorialStep < TutorialManager.StepComplete && data.vases.Count > 0)
+            {
+                Debug.Log("[GameManager] Tutorial incomplete — resetting save data");
+                SaveManager.Instance.DeleteSave();
+            }
+
             if (SaveManager.Instance.Data.vases.Count == 0)
                 InitializeNewPlayer();
         }

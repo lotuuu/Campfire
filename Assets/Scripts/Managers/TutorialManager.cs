@@ -14,7 +14,7 @@ namespace Garden
         private bool initialized;
         private int highlightQ = int.MinValue;
         private int highlightR = int.MinValue;
-        private bool fetchWaterPaused;
+
 
         // Flow: Welcome → Plant → Water → Harvest → Build House → Plant Again → Fetch Water → Quest → Speed Up Quest → Cress → Second Plot → Upgrade → Complete
         private const int StepWelcome = 0;
@@ -29,7 +29,7 @@ namespace Garden
         private const int StepPlantCressSpeedPotion = 9;
         private const int StepBuildSecondPlot = 10;
         private const int StepUpgradeFlame = 11;
-        private const int StepComplete = 12;
+        public const int StepComplete = 12;
 
         public bool IsComplete => CurrentStep >= StepComplete;
         public int CurrentStep => SaveManager.Instance.Data.tutorialStep;
@@ -115,12 +115,9 @@ namespace Garden
 
         private void AdvanceTo(int step)
         {
-            // Safety: resume time if it was paused by tutorial
-            if (fetchWaterPaused)
-            {
-                fetchWaterPaused = false;
-                GameTime.TimeScale = 1f;
-            }
+            // Clear growth cap if it was set by tutorial
+            if (PlotManager.Instance != null)
+                PlotManager.Instance.GrowthCapPercent = 1f;
 
             SaveManager.Instance.Data.tutorialStep = step;
             SaveManager.Instance.Save();
@@ -198,8 +195,8 @@ namespace Garden
                 case StepHarvestFirst:
                     ShowDialogue("Spark of Ara", new List<string> {
                         $"You harvested {result.drops} {result.seedName}!",
-                        "Your harvest was better because you watered it.",
-                        "Each seed has a recipe. Follow it for higher yields."
+                        "Your harvest was improved because you followed the recipe by watering it.",
+                        "Each seed has a recipe. Follow it for higher yields!"
                     }, () => AdvanceTo(StepBuildHouse));
                     break;
 
@@ -214,8 +211,8 @@ namespace Garden
                     else
                     {
                         ShowDialogue("Spark of Ara", new List<string> {
-                            "Without watering, you got less harvest.",
-                            "Try to follow the recipe next time."
+                            "Without following the recipe, you got less harvest.",
+                            "You'll always earn some rewards, even if you don't follow the recipe at all"
                         }, () => AdvanceTo(StepSendOnQuest));
                     }
                     break;
@@ -254,34 +251,13 @@ namespace Garden
                     break;
 
                 case StepFetchWater:
-                    // Check if mallum finished speed-up (went from FetchingWater → Idle)
-                    if (fetchWaterPaused)
-                    {
-                        bool stillFetching = false;
-                        foreach (var m in data.mallums)
-                        {
-                            if (m.state == MallumState.FetchingWater)
-                            { stillFetching = true; break; }
-                        }
-                        if (!stillFetching)
-                        {
-                            // Speed-up complete — resume time
-                            fetchWaterPaused = false;
-                            GameTime.TimeScale = 1f;
-                            ClearAllHighlights();
-                        }
-                        return;
-                    }
-
-                    // Mallum started fetching — pause time and highlight vase
+                    // Mallum started fetching — show speed-up hint
                     foreach (var m in data.mallums)
                     {
                         if (m.state == MallumState.FetchingWater)
                         {
-                            fetchWaterPaused = true;
-                            GameTime.TimeScale = 0f;
-                            tutorialUI?.ShowHint("Tap your vase and use an Energy Drink to speed it up!");
                             ClearAllHighlights();
+                            tutorialUI?.ShowHint("Tap your vase and use an Energy Drink to speed it up!");
                             HighlightVaseHex(0);
                             return;
                         }
@@ -395,6 +371,10 @@ namespace Garden
                     break;
                 case StepFetchWater:
                     {
+                        // Cap plant growth at 60% so the player has time to fetch water
+                        if (PlotManager.Instance != null)
+                            PlotManager.Instance.GrowthCapPercent = 0.6f;
+
                         // Check if mallum is already fetching (resume case)
                         bool alreadyFetching = false;
                         foreach (var m in SaveManager.Instance.Data.mallums)
@@ -404,8 +384,6 @@ namespace Garden
                         }
                         if (alreadyFetching)
                         {
-                            fetchWaterPaused = true;
-                            GameTime.TimeScale = 0f;
                             tutorialUI?.ShowHint("Tap your vase and use an Energy Drink to speed it up!");
                             HighlightVaseHex(0);
                         }
@@ -537,8 +515,6 @@ namespace Garden
             switch (CurrentStep)
             {
                 case StepFetchWater:
-                    // While time is paused waiting for speed-up, don't switch highlights
-                    if (fetchWaterPaused) break;
                     // If the plot matured without watering, switch highlight to the plot
                     if (data.plots.Count > 0 && data.plots[0].state == PlotState.Mature)
                     {

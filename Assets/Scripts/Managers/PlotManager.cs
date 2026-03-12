@@ -104,6 +104,11 @@ namespace Garden
 
         /// When true, growth timers are frozen (tutorial uses this to let the player water in time).
         public bool GrowthPaused { get; set; }
+
+        /// When set to a value < 1, growth freezes once any plot reaches this progress (0-1).
+        /// Tutorial uses this to cap growth at 60% during the fetch-water step.
+        public float GrowthCapPercent { get; set; } = 1f;
+
         private DateTime? _lastPauseTime;
 
         private void Update()
@@ -561,6 +566,20 @@ namespace Garden
             {
                 var plot = data.plots[i];
                 if (plot.state != PlotState.Growing) continue;
+
+                // Cap growth at GrowthCapPercent by pushing plantTimeUtc forward
+                if (GrowthCapPercent < 1f && GetGrowthProgress(i) >= GrowthCapPercent)
+                {
+                    var seed = LoadSeed(plot.seedName);
+                    if (seed != null && !string.IsNullOrEmpty(plot.plantTimeUtc))
+                    {
+                        // Set plantTimeUtc so elapsed == capPercent * duration exactly
+                        float targetHours = GrowthCapPercent * seed.growthDurationHours;
+                        plot.plantTimeUtc = (GameTime.UtcNow - TimeSpan.FromHours(targetHours)).ToString("o");
+                    }
+                    continue;
+                }
+
                 if (GetGrowthProgress(i) >= 1f)
                 {
                     // Backfill a snapshot if weather arrived after planting but before maturity

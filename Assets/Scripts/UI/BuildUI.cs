@@ -26,72 +26,84 @@ namespace Garden
                 ? $"{FlameManager.Instance.CurrentEntityCount}/{FlameManager.Instance.MaxEntities}"
                 : "";
 
-            // Tutorial filtering: only show allowed building types
+            // Tutorial: disable cards for building types not in allowed set
             var allowed = TutorialManager.Instance?.GetAllowedBuildings();
 
             // Plot
-            if ((allowed == null || allowed.Contains(CampBuildingType.Plot))
-                && PlotManager.Instance != null && FlameManager.Instance != null)
+            if (PlotManager.Instance != null && FlameManager.Instance != null)
             {
+                bool plotAllowed = allowed == null || allowed.Contains(CampBuildingType.Plot);
                 var plotCost = PlotManager.Instance.GetNextPlotCost();
-                bool canAfford = canPlace && plotCost != null
+                bool canAfford = plotAllowed && canPlace && plotCost != null
                     && CurrencyManager.Instance.CanAffordMana(plotCost.manaCost)
                     && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, plotCost.harvestCosts);
                 buildList.Add(BuildCardHelper.CreateBuildCard(
                     "Plot", "Grow seeds", "ui/buildings/plot", null,
                     BuildCardHelper.FromBuildingCost(plotCost), capText,
-                    canAfford, canPlace,
+                    canAfford, plotAllowed && canPlace,
                     () => OnRequestPlacement?.Invoke(CampBuildingType.Plot)));
             }
 
-            // Vase
-            if ((allowed == null || allowed.Contains(CampBuildingType.Vase))
-                && VaseManager.Instance != null)
+            // Vase (unlocked at flame level 2)
+            if (VaseManager.Instance != null)
             {
-                var vaseCost = VaseManager.Instance.GetNextVaseCost();
-                bool canAfford = canPlace && vaseCost != null
-                    && CurrencyManager.Instance.CanAffordMana(vaseCost.manaCost)
-                    && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, vaseCost.harvestCosts);
-                buildList.Add(BuildCardHelper.CreateBuildCard(
-                    "Vase", "Stores water", "ui/buildings/vase", null,
-                    BuildCardHelper.FromBuildingCost(vaseCost), capText,
-                    canAfford, canPlace,
-                    () => OnRequestPlacement?.Invoke(CampBuildingType.Vase)));
+                bool vaseAllowed = allowed == null || allowed.Contains(CampBuildingType.Vase);
+                bool vaseUnlocked = FlameManager.Instance != null
+                    && FlameManager.Instance.Level >= VaseManager.VaseUnlockLevel;
+                if (vaseUnlocked)
+                {
+                    var vaseCost = VaseManager.Instance.GetNextVaseCost();
+                    bool canAfford = vaseAllowed && canPlace && vaseCost != null
+                        && CurrencyManager.Instance.CanAffordMana(vaseCost.manaCost)
+                        && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, vaseCost.harvestCosts);
+                    buildList.Add(BuildCardHelper.CreateBuildCard(
+                        "Vase", "Stores water", "ui/buildings/vase", null,
+                        BuildCardHelper.FromBuildingCost(vaseCost), capText,
+                        canAfford, vaseAllowed && canPlace,
+                        () => OnRequestPlacement?.Invoke(CampBuildingType.Vase)));
+                }
+                else
+                {
+                    buildList.Add(BuildCardHelper.CreateBuildCard(
+                        "Vase", $"Unlocks at Fire Lv.{VaseManager.VaseUnlockLevel}",
+                        "ui/buildings/vase", null,
+                        null, capText, false, false, null));
+                }
             }
 
             // House
-            if ((allowed == null || allowed.Contains(CampBuildingType.MallumHouse))
-                && MallumManager.Instance != null)
+            if (MallumManager.Instance != null)
             {
+                bool houseAllowed = allowed == null || allowed.Contains(CampBuildingType.MallumHouse);
                 var nextCost = MallumManager.Instance.GetNextHouseCost();
                 if (nextCost != null)
                 {
-                    bool canAfford = canPlace
+                    bool canAfford = houseAllowed && canPlace
                         && CurrencyManager.Instance.CanAffordMana(nextCost.manaCost)
                         && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, nextCost.harvestCosts);
                     buildList.Add(BuildCardHelper.CreateBuildCard(
                         "House", "Houses 1 Mallum", "ui/buildings/house", null,
                         BuildCardHelper.FromBuildingCost(nextCost), capText,
-                        canAfford, canPlace,
+                        canAfford, houseAllowed && canPlace,
                         () => OnRequestPlacement?.Invoke(CampBuildingType.MallumHouse)));
                 }
             }
 
             // Garden (unlocked at flame level 4)
-            if ((allowed == null || allowed.Contains(CampBuildingType.Garden))
-                && GardenManager.Instance != null && FlameManager.Instance != null)
+            if (GardenManager.Instance != null && FlameManager.Instance != null)
             {
+                bool gardenAllowed = allowed == null || allowed.Contains(CampBuildingType.Garden);
                 bool gardenUnlocked = FlameManager.Instance.Level >= GardenManager.GardenUnlockLevel;
                 if (gardenUnlocked)
                 {
                     var gardenCost = GardenManager.Instance.GetNextGardenCost();
-                    bool canAfford = canPlace && gardenCost != null
+                    bool canAfford = gardenAllowed && canPlace && gardenCost != null
                         && CurrencyManager.Instance.CanAffordMana(gardenCost.manaCost)
                         && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, gardenCost.harvestCosts);
                     buildList.Add(BuildCardHelper.CreateBuildCard(
                         "Garden", "Grow fruit trees", "ui/buildings/garden", null,
                         BuildCardHelper.FromBuildingCost(gardenCost), capText,
-                        canAfford, canPlace,
+                        canAfford, gardenAllowed && canPlace,
                         () => OnRequestPlacement?.Invoke(CampBuildingType.Garden)));
                 }
                 else
@@ -104,13 +116,13 @@ namespace Garden
             }
 
             // Flame upgrade
-            if ((allowed == null || allowed.Contains(CampBuildingType.Flame))
-                && FlameManager.Instance != null && FlameManager.Instance.CanUpgrade())
+            if (FlameManager.Instance != null && FlameManager.Instance.CanUpgrade())
             {
+                bool flameAllowed = allowed == null || allowed.Contains(CampBuildingType.Flame);
                 var recipe = FlameManager.Instance.GetUpgradeRecipe();
                 buildList.Add(BuildCardHelper.CreateBuildCard(
                     "Upgrade Flame", "Expand your camp", "ui/buildings/flame", null,
-                    BuildCardHelper.FromFlameRecipe(recipe), "", true, true, () =>
+                    BuildCardHelper.FromFlameRecipe(recipe), "", flameAllowed, flameAllowed, () =>
                     {
                         FlameManager.Instance.UpgradeFlame();
                         Refresh();
