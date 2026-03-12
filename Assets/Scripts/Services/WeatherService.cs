@@ -51,7 +51,7 @@ namespace Garden
 
             // Submit location to server so forecast endpoint has lat/lon
             yield return new WaitUntil(() => GameService.Instance != null && GameService.Instance.IsOnline);
-            _ = GameService.Instance.SubmitLocation(latitude, longitude);
+            yield return SubmitLocationAndRetryWeather();
             yield break;
 #else
             Input.location.Start(500f, 500f);
@@ -72,9 +72,9 @@ namespace Garden
                 Debug.Log($"Location acquired: {latitude}, {longitude}");
                 OnLocationResolved?.Invoke(true);
 
-                // Wait for GameService to be online, then submit location to fetch weather
+                // Wait for GameService to be online, then submit location and retry weather if needed
                 yield return new WaitUntil(() => GameService.Instance != null && GameService.Instance.IsOnline);
-                _ = GameService.Instance.SubmitLocation(latitude, longitude);
+                yield return SubmitLocationAndRetryWeather();
             }
             else
             {
@@ -84,6 +84,27 @@ namespace Garden
                 yield return InitializeLocation();
             }
 #endif
+        }
+
+        private IEnumerator SubmitLocationAndRetryWeather()
+        {
+            var task = GameService.Instance.SubmitLocation(latitude, longitude);
+            while (!task.IsCompleted) yield return null;
+
+            // If server hadn't fetched weather yet (all zeros), retry a few times
+            const int maxRetries = 5;
+            for (int i = 0; i < maxRetries && !HasWeather; i++)
+            {
+                yield return new WaitForSeconds(2f);
+                Debug.Log($"[Weather] Retry {i + 1}/{maxRetries} — server weather not ready yet");
+                var weatherTask = GameService.Instance.GetWeather();
+                while (!weatherTask.IsCompleted) yield return null;
+                if (weatherTask.Result != null)
+                    ApplyServerWeather(weatherTask.Result);
+            }
+
+            if (!HasWeather)
+                Debug.LogWarning("[Weather] Server weather unavailable after retries");
         }
 
         public void RetryLocation()
