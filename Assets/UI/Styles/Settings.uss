@@ -14,7 +14,7 @@
 }
 
 /* First section header needs no top margin */
-#settings-panel .settings-section-header:first-child {
+#settings-scroll > .settings-section-header:first-child {
     margin-top: 0;
 }
 
