@@ -377,19 +377,7 @@ namespace Garden
                 {
                     var chip = new VisualElement();
                     chip.AddToClassList("quest-reward-chip");
-                    string rewardText;
-                    if (!string.IsNullOrEmpty(reward.seedName))
-                    {
-                        string countStr = reward.minCount == reward.maxCount
-                            ? $"{reward.minCount}"
-                            : $"{reward.minCount}-{reward.maxCount}";
-                        rewardText = $"{countStr} {reward.seedName}";
-                    }
-                    else
-                    {
-                        rewardText = "?";
-                    }
-                    var chipLabel = new Label(rewardText);
+                    var chipLabel = new Label(!string.IsNullOrEmpty(reward.seedName) ? reward.seedName : "?");
                     chipLabel.AddToClassList("quest-reward-name");
                     chip.Add(chipLabel);
                     rewardList.Add(chip);

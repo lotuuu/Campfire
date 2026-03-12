@@ -131,7 +131,7 @@ namespace Garden
             card.Add(sprite);
 
             // Seed name
-            var nameLabel = new Label(PlotManager.GetSeedDisplayName(reward.seedName));
+            var nameLabel = new Label(PlotManager.GetSeedDisplayName(reward.seedName) + " Seeds");
             nameLabel.AddToClassList("reward-card-name");
             card.Add(nameLabel);
 
