@@ -67,7 +67,7 @@ namespace Garden
                 JsonUtility.ToJson(new SetFlameLevelReq { level = level }));
         }
 
-        public async Task<bool> ClearSave() => await Post("/debug/clear-save", "{}");
+        public async Task<bool> ClearSave() => await PostQuiet("/debug/clear-save", "{}");
 
         public async Task<bool> ReceiveVisitor()
         {
