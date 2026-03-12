@@ -578,8 +578,8 @@ game_configs = [
         }
       ],
       "plot_costs" => [
-        %{"manaCost" => 75, "harvestCosts" => [%{"itemName" => "Sprouts", "count" => 1}]},
-        %{"manaCost" => 200, "harvestCosts" => [%{"itemName" => "Cress", "count" => 1}]},
+        %{"manaCost" => 75, "harvestCosts" => [%{"itemName" => "Cress", "count" => 1}]},
+        %{"manaCost" => 200, "harvestCosts" => [%{"itemName" => "Cress", "count" => 4}]},
         %{"manaCost" => 260, "harvestCosts" => [%{"itemName" => "Basil", "count" => 2}]},
         %{"manaCost" => 330, "harvestCosts" => [%{"itemName" => "Chamomile", "count" => 1}]},
         %{"manaCost" => 420, "harvestCosts" => [%{"itemName" => "Chamomile", "count" => 1}]},
@@ -699,7 +699,7 @@ game_configs = [
   %{
     key: "new_player_config",
     value: %{
-      "mana" => 50,
+      "mana" => 30,
       "gems" => 5,
       "starting_water" => 1,
       "seeds" => [%{"name" => "Sprouts", "count" => 2}],
