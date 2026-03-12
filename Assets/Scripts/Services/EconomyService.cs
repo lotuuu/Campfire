@@ -334,7 +334,7 @@ namespace Garden
             }
         }
 
-        private void ClearQueue()
+        public void ClearQueue()
         {
             _queue.actions.Clear();
             SaveQueue();

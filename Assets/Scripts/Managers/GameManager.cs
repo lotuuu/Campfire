@@ -43,6 +43,7 @@ namespace Garden
             {
                 Debug.Log("[GameManager] Tutorial incomplete — resetting save data");
                 SaveManager.Instance.DeleteSave();
+                EconomyService.Instance?.ClearQueue();
             }
 
             if (SaveManager.Instance.Data.vases.Count == 0)
@@ -102,11 +103,13 @@ namespace Garden
             data.apothekeGridX = positions[2].q;
             data.apothekeGridY = positions[2].r;
 
-            // Grant starting seeds from config
+            // Grant starting seeds from config (add directly to save data, not via
+            // ApothekeManager.AddSeed which enqueues server economy actions — repeated
+            // tutorial resets would accumulate seeds on the server)
             if (npc?.seeds != null)
             {
                 foreach (var seed in npc.seeds)
-                    ApothekeManager.Instance.AddSeed(seed.name, seed.count);
+                    data.inventory.Add(new InventoryItem { itemName = seed.name + "_Seed", count = seed.count });
             }
 
             // Grant starting items from config
