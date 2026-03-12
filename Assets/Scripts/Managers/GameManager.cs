@@ -32,7 +32,7 @@ namespace Garden
                 GameService.Instance.OnStateLoaded += CheckNewPlayer;
         }
 
-        private void CheckNewPlayer()
+        private async void CheckNewPlayer()
         {
             if (GameService.Instance != null)
                 GameService.Instance.OnStateLoaded -= CheckNewPlayer;
@@ -42,6 +42,9 @@ namespace Garden
             if (data.tutorialStep < TutorialManager.StepComplete && data.vases.Count > 0)
             {
                 Debug.Log("[GameManager] Tutorial incomplete — resetting save data");
+                // Clear server state first so old mana/inventory don't sync back
+                if (DebugService.Instance != null)
+                    await DebugService.Instance.ClearSave();
                 SaveManager.Instance.DeleteSave();
                 EconomyService.Instance?.ClearQueue();
             }
