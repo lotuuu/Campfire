@@ -13,7 +13,7 @@ namespace Garden
         private VisualElement availableSection;
         private VisualElement lockedSection;
         private VisualTreeAsset questCardTemplate;
-        private ScrollView overlayBody;
+        private ScrollView questScroll;
 
         private float nextTickTime;
         private const float TickInterval = 0.5f;
@@ -27,7 +27,7 @@ namespace Garden
             availableSection = root.Q("quest-available-section");
             lockedSection = root.Q("quest-locked-section");
             questCardTemplate = Resources.Load<VisualTreeAsset>("UI/Templates/QuestCard");
-            overlayBody = root.Q<ScrollView>("overlay-body");
+            questScroll = root.Q<ScrollView>("quest-scroll");
         }
 
         private void Update()
@@ -43,7 +43,7 @@ namespace Garden
             if (MallumManager.Instance == null) return;
 
             // Preserve scroll position across rebuild
-            var savedOffset = overlayBody?.scrollOffset ?? Vector2.zero;
+            var savedOffset = questScroll?.scrollOffset ?? Vector2.zero;
 
             UpdateMallumStatus();
             BuildActiveSection();
@@ -51,8 +51,8 @@ namespace Garden
             BuildLockedSection();
 
             // Must defer scroll restore — layout needs a frame after Clear()+rebuild
-            if (overlayBody != null)
-                overlayBody.schedule.Execute(() => overlayBody.scrollOffset = savedOffset);
+            if (questScroll != null)
+                questScroll.schedule.Execute(() => questScroll.scrollOffset = savedOffset);
         }
 
         private void UpdateMallumStatus()

@@ -70,17 +70,33 @@
 
 #overlay-body {
     flex-grow: 1;
+    overflow: hidden;
 }
 
-#overlay-body > .unity-scroller--vertical {
+/* Per-panel ScrollViews: hide scrollbars, add bottom padding */
+#build-scroll,
+#quest-scroll,
+#settings-scroll,
+#debug-scroll,
+#seed-list,
+#recipe-list,
+#inbox-list,
+#friends-list,
+#gift-picker-inventory {
+    flex-grow: 1;
+}
+
+#build-scroll > .unity-scroller--vertical,
+#quest-scroll > .unity-scroller--vertical,
+#settings-scroll > .unity-scroller--vertical,
+#debug-scroll > .unity-scroller--vertical {
     display: none;
 }
 
-#overlay-body > .unity-scroller--horizontal {
-    display: none;
-}
-
-#overlay-body .unity-scroll-view__content-container {
+#build-scroll .unity-scroll-view__content-container,
+#quest-scroll .unity-scroll-view__content-container,
+#settings-scroll .unity-scroll-view__content-container,
+#debug-scroll .unity-scroll-view__content-container {
     padding-bottom: var(--spacing-lg);
 }
 
