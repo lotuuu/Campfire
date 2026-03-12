@@ -27,6 +27,9 @@ namespace Garden
         // Persistent class-based highlight — survives DOM rebuilds
         private string activeHighlightClass;
 
+        // Fallback element to highlight when the deferred target is not in the DOM
+        private string fallbackHighlightName;
+
         public void Initialize(VisualElement rootElement)
         {
             root = rootElement;
@@ -80,6 +83,20 @@ namespace Garden
             if (currentHighlight.panel == null)
             {
                 currentHighlight = null;
+
+                // Fall back to the fallback element and re-queue the deferred search
+                if (fallbackHighlightName != null && activeHighlightClass != null)
+                {
+                    pendingHighlightClass = activeHighlightClass;
+                    var fallback = root.Q(fallbackHighlightName);
+                    if (fallback != null)
+                    {
+                        currentHighlight = fallback;
+                        pulseBright = true;
+                        pulseTimer = 0f;
+                        fallback.AddToClassList("tutorial-highlight");
+                    }
+                }
                 return;
             }
 
@@ -135,15 +152,27 @@ namespace Garden
             isCentered = false;
         }
 
-        public void HighlightElementByClass(string className)
+        public void HighlightElementByClass(string className, string fallbackName = null)
         {
             ClearHighlight();
             activeHighlightClass = className;
+            fallbackHighlightName = fallbackName;
             var element = root.Q(className: className);
             if (element == null)
             {
-                // Element not yet in DOM — defer until it appears
+                // Element not yet in DOM — defer until it appears, highlight fallback meanwhile
                 pendingHighlightClass = className;
+                if (fallbackName != null)
+                {
+                    var fallback = root.Q(fallbackName);
+                    if (fallback != null)
+                    {
+                        currentHighlight = fallback;
+                        pulseBright = true;
+                        pulseTimer = 0f;
+                        fallback.AddToClassList("tutorial-highlight");
+                    }
+                }
                 return;
             }
             currentHighlight = element;
@@ -155,9 +184,13 @@ namespace Garden
         /// <summary>
         /// Queue a class-based highlight that activates when the element appears,
         /// replacing whatever is currently highlighted at that point.
+        /// While the deferred target is not visible, the current highlight is preserved as a fallback.
         /// </summary>
         public void DeferHighlightByClass(string className)
         {
+            // Remember the current highlight as fallback (by name) so we can restore it
+            // when the deferred target disappears (e.g. panel closed)
+            fallbackHighlightName = currentHighlight?.name;
             activeHighlightClass = className;
             pendingHighlightClass = className;
         }
@@ -188,6 +221,7 @@ namespace Garden
         {
             pendingHighlightClass = null;
             activeHighlightClass = null;
+            fallbackHighlightName = null;
             if (currentHighlight != null)
             {
                 currentHighlight.RemoveFromClassList("tutorial-highlight");
