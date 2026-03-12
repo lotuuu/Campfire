@@ -79,9 +79,11 @@ namespace Garden
 
             if (currentHighlight == null) return;
 
-            // Detect detached element (panel of root is null when removed from DOM)
-            if (currentHighlight.panel == null)
+            // Detect detached or hidden element (e.g. inside a closed overlay panel)
+            if (currentHighlight.panel == null || IsAncestorHidden(currentHighlight))
             {
+                currentHighlight.RemoveFromClassList("tutorial-highlight");
+                currentHighlight.RemoveFromClassList("tutorial-highlight-dim");
                 currentHighlight = null;
 
                 // Fall back to the fallback element and re-queue the deferred search
@@ -234,6 +236,21 @@ namespace Garden
         {
             HideHint();
             ClearHighlight();
+        }
+
+        /// <summary>
+        /// Check if any ancestor of the element has display:none (element is in tree but invisible).
+        /// </summary>
+        private static bool IsAncestorHidden(VisualElement el)
+        {
+            var current = el.hierarchy.parent;
+            while (current != null)
+            {
+                if (current.resolvedStyle.display == DisplayStyle.None)
+                    return true;
+                current = current.hierarchy.parent;
+            }
+            return false;
         }
     }
 }
