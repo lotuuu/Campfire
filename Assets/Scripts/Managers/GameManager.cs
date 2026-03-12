@@ -32,23 +32,14 @@ namespace Garden
                 GameService.Instance.OnStateLoaded += CheckNewPlayer;
         }
 
-        private async void CheckNewPlayer()
+        private void CheckNewPlayer()
         {
             if (GameService.Instance != null)
                 GameService.Instance.OnStateLoaded -= CheckNewPlayer;
 
-            // Reset save if tutorial was not completed — avoids stuck/broken mid-tutorial state
-            var data = SaveManager.Instance.Data;
-            if (data.tutorialStep < TutorialManager.StepComplete && data.vases.Count > 0)
-            {
-                Debug.Log("[GameManager] Tutorial incomplete — resetting save data");
-                // Clear server state first so old mana/inventory don't sync back
-                if (DebugService.Instance != null)
-                    await DebugService.Instance.ClearSave();
-                SaveManager.Instance.DeleteSave();
-                EconomyService.Instance?.ClearQueue();
-            }
-
+            // Tutorial-incomplete wipe is handled in GameService.Initialize()
+            // before server state is applied (prevents visible position jumps).
+            // By this point, if tutorial was incomplete, save is already wiped.
             if (SaveManager.Instance.Data.vases.Count == 0)
                 InitializeNewPlayer();
         }

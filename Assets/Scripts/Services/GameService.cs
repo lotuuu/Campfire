@@ -85,9 +85,25 @@ namespace Garden
                         OnInitFailed?.Invoke("Failed to parse game state");
                         return;
                     }
-                    ApplyGameState(state);
-                    if (sw.ElapsedMilliseconds > SlowStepMs)
-                        Debug.LogWarning($"[INIT SLOW] ApplyGameState took {sw.ElapsedMilliseconds}ms");
+                    // If tutorial is incomplete, wipe everything and start fresh
+                    // BEFORE applying server state (which would cause visible position jumps)
+                    var localData = SaveManager.Instance.Data;
+                    if (localData.tutorialStep < TutorialManager.StepComplete && localData.vases.Count > 0)
+                    {
+                        Debug.Log("[GameService] Tutorial incomplete — wiping save before applying server state");
+                        if (DebugService.Instance != null)
+                            await DebugService.Instance.ClearSave();
+                        SaveManager.Instance.DeleteSave();
+                        EconomyService.Instance?.ClearQueue();
+                        // Don't apply stale server state — fall through to OnStateLoaded
+                        // which will trigger new player init via CheckNewPlayer
+                    }
+                    else
+                    {
+                        ApplyGameState(state);
+                        if (sw.ElapsedMilliseconds > SlowStepMs)
+                            Debug.LogWarning($"[INIT SLOW] ApplyGameState took {sw.ElapsedMilliseconds}ms");
+                    }
 
                     Debug.Log($"[INIT] GameService total: {totalSw.ElapsedMilliseconds}ms");
                     IsInitialized = true;
