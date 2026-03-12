@@ -114,6 +114,10 @@ namespace Garden
             questsPanel = root.Q("quests-panel");
             settingsPanel = root.Q("settings-panel");
 
+            // Patch all ScrollViews: kill momentum on taps so buttons don't cause drift
+            foreach (var sv in overlayBody.Query<ScrollView>().ToList())
+                PatchTapScrollMomentum(sv);
+
             var closeBtn = root.Q<Button>("overlay-close");
             closeBtn?.RegisterCallback<ClickEvent>(_ => CloseOverlay());
             overlayBackdrop?.RegisterCallback<ClickEvent>(_ => CloseOverlay());
@@ -451,6 +455,26 @@ namespace Garden
             AudioManager.Instance?.PlaySFX("ui_panel_close");
             HideAllPanels();
             overlayContainer.style.display = DisplayStyle.None;
+        }
+
+        /// <summary>
+        /// On taps (pointer barely moved), temporarily zero the deceleration rate
+        /// so the ScrollView doesn't drift from residual touch velocity.
+        /// Drag-scrolling is unaffected because the pointer moves past the threshold.
+        /// </summary>
+        private static void PatchTapScrollMomentum(ScrollView sv)
+        {
+            Vector3 downPos = Vector3.zero;
+            sv.RegisterCallback<PointerDownEvent>(e => downPos = e.position, TrickleDown.TrickleDown);
+            sv.RegisterCallback<PointerUpEvent>(e =>
+            {
+                if (Vector3.Distance(downPos, e.position) < 10f)
+                {
+                    float saved = sv.scrollDecelerationRate;
+                    sv.scrollDecelerationRate = 0f;
+                    sv.schedule.Execute(() => sv.scrollDecelerationRate = saved);
+                }
+            }, TrickleDown.TrickleDown);
         }
 
         private void HideAllPanels()

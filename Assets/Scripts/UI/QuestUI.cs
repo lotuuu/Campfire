@@ -224,6 +224,7 @@ namespace Garden
                         actionBtn.clicked += () =>
                         {
                             var rewards = new List<RewardEntry>(mallum.pendingRewards);
+                            FindFirstObjectByType<CampFireUI>()?.CloseOverlay();
                             RewardRevealUI.Instance?.Show("Quest Complete!", rewards, () =>
                             {
                                 MallumManager.Instance.CollectQuestRewards(mallumIndex);
