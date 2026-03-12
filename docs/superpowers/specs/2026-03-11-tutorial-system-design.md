@@ -69,7 +69,7 @@ Tutorial ends when the player upgrades the flame to level 2.
 - Trigger: Player harvests Cress
 
 **Step 10 — Build Second Plot**
-- Hint: "Build another plot to grow more"
+- Hint: "Build another plot to grow more seeds"
 - Highlight: Build nav button
 - Trigger: Player builds second plot (costs 1 Cress_harvest)
 
