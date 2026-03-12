@@ -21,8 +21,9 @@ Three read-only key-value info rows:
 
 ### 3. DANGER ZONE
 - "Delete Save Data" button styled as danger (red-tinted)
-- On tap: opens `DialogueUI` confirmation with "This will permanently delete your save. Are you sure?"
-- On confirm: wipe save file and reload scene (same pattern as `ServerConfig.Select()`)
+- On tap: inline confirmation — button area swaps to show "Are you sure?" label with Cancel and Delete buttons side by side
+- On confirm: wipe save files (both SaveManager and SocialSaveManager) and reload scene (same pattern as `ServerConfig.Select()`)
+- Note: DialogueUI is a sequential text system without confirm/cancel buttons, so we use inline confirmation instead
 
 ## Visual Style
 
@@ -40,16 +41,16 @@ Clean sections — uppercase section headers with subtle bottom-border dividers.
 | File | Change |
 |------|--------|
 | `Assets/UI/Documents/CampFireRoot.uxml` | Replace debug-row markup in settings-panel with proper section headers, info rows, and delete button |
-| `Assets/Scripts/UI/SettingsUI.cs` | Populate account info rows, wire delete button to DialogueUI confirmation flow |
+| `Assets/Scripts/UI/SettingsUI.cs` | Populate account info rows, wire delete button to inline confirmation flow |
 | `Assets/UI/Styles/Settings.uss` | New stylesheet with all settings-specific styles |
 | `Assets/UI/Styles/Overlay.uss` | No changes needed — `#settings-scroll` already referenced |
 
 ## Delete Save Flow
 
 1. User taps "Delete Save Data"
-2. `DialogueUI` opens: title "Delete Save Data", body "This will permanently delete your save. Are you sure?", buttons Cancel / Delete
-3. Cancel → close dialogue
-4. Delete → wipe save file → reload scene via `SceneManager.LoadScene`
+2. Button area swaps to inline confirmation: "Are you sure?" label + Cancel / Delete buttons side by side
+3. Cancel → swap back to original delete button
+4. Delete → call `SaveManager.Instance.DeleteSave()` + `SocialSaveManager.Instance.DeleteSave()` → reload scene via `SceneManager.LoadScene`
 
 ## What This Does NOT Include
 - No invite code entry
