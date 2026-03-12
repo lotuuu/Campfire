@@ -123,6 +123,7 @@ defmodule CampFireWeb.Router do
   scope "/game", CampFireWeb do
     pipe_through [:api, :authenticated]
     get "/configs", GameController, :get_configs
+    post "/sprites/bundle", SpriteController, :bundle
     get "/state", GameController, :get_state
     put "/state", GameController, :save_state
     get "/plots", GameController, :list_plots

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -155,8 +156,90 @@ namespace Garden
 
         private async Task DownloadBatch(List<string> keys, Dictionary<string, string> serverManifest)
         {
-            const int batchSize = 8;
             var localManifest = LoadLocalManifest();
+
+            // Try bundle download first, fall back to individual downloads
+            if (!await DownloadBundle(keys, serverManifest, localManifest))
+            {
+                Debug.Log("SpriteService: bundle failed, falling back to individual downloads");
+                await DownloadIndividual(keys, serverManifest, localManifest);
+            }
+
+            SaveLocalManifest(localManifest);
+        }
+
+        private async Task<bool> DownloadBundle(List<string> keys, Dictionary<string, string> serverManifest, Dictionary<string, string> localManifest)
+        {
+            var token = SocialSaveManager.Instance?.Data?.authToken;
+            if (string.IsNullOrEmpty(token)) return false;
+
+            var keysJson = new StringBuilder();
+            keysJson.Append("{\"keys\":[");
+            for (int i = 0; i < keys.Count; i++)
+            {
+                if (i > 0) keysJson.Append(",");
+                keysJson.Append($"\"{keys[i]}\"");
+            }
+            keysJson.Append("]}");
+
+            var url = $"{ServerBaseUrl}/game/sprites/bundle";
+            using var req = new UnityWebRequest(url, "POST");
+            var bodyBytes = System.Text.Encoding.UTF8.GetBytes(keysJson.ToString());
+            req.uploadHandler = new UploadHandlerRaw(bodyBytes);
+            req.downloadHandler = new DownloadHandlerBuffer();
+            req.SetRequestHeader("Content-Type", "application/json");
+            req.SetRequestHeader("Authorization", $"Bearer {token}");
+
+            var tcs = new TaskCompletionSource<bool>();
+            var op = req.SendWebRequest();
+            op.completed += _ => tcs.SetResult(true);
+            await tcs.Task;
+
+            if (req.responseCode != 200)
+            {
+                Debug.LogWarning($"SpriteService: bundle request failed (HTTP {req.responseCode})");
+                return false;
+            }
+
+            try
+            {
+                var zipBytes = req.downloadHandler.data;
+                using var zipStream = new System.IO.Compression.ZipArchive(
+                    new MemoryStream(zipBytes), System.IO.Compression.ZipArchiveMode.Read);
+
+                foreach (var entry in zipStream.Entries)
+                {
+                    if (entry.Length == 0) continue;
+
+                    // Entry name is "key.png" — strip .png to get the sprite key
+                    var entryName = entry.FullName;
+                    var key = entryName.EndsWith(".png")
+                        ? entryName.Substring(0, entryName.Length - 4)
+                        : entryName;
+
+                    var filePath = Path.Combine(CacheDir, key.Replace('/', Path.DirectorySeparatorChar) + ".png");
+                    Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+
+                    using var entryStream = entry.Open();
+                    using var fileStream = File.Create(filePath);
+                    entryStream.CopyTo(fileStream);
+
+                    if (serverManifest.TryGetValue(key, out var hash))
+                        localManifest[key] = hash;
+                }
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"SpriteService: failed to extract bundle ({e.Message})");
+                return false;
+            }
+        }
+
+        private async Task DownloadIndividual(List<string> keys, Dictionary<string, string> serverManifest, Dictionary<string, string> localManifest)
+        {
+            const int batchSize = 8;
 
             for (int i = 0; i < keys.Count; i += batchSize)
             {
@@ -168,8 +251,6 @@ namespace Garden
 
                 await Task.WhenAll(tasks);
             }
-
-            SaveLocalManifest(localManifest);
         }
 
         private async Task DownloadOne(string key, string hash, Dictionary<string, string> localManifest)
