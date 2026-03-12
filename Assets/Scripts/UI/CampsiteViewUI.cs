@@ -76,6 +76,11 @@ namespace Garden
         private bool suppressRebuild;
         private bool needsRecenter = true;
 
+        // Interaction panel live-refresh
+        private CampBuildingType? openInteractionType;
+        private VisualElement flameBuildGrid;
+        private float lastAffordCheckTime;
+
         // Events
         public event Action OnApothekeTapped;
         public event Action OnVisitorTapped;
@@ -210,6 +215,14 @@ namespace Garden
                         fill.style.width = new Length(progress * 100f, LengthUnit.Percent);
                     }
                 }
+            }
+
+            // Live-refresh flame build cards so affordability updates as mana ticks
+            if (openInteractionType == CampBuildingType.Flame && flameBuildGrid != null
+                && Time.time - lastAffordCheckTime >= 0.5f)
+            {
+                lastAffordCheckTime = Time.time;
+                RefreshFlameBuildGrid();
             }
         }
 
@@ -693,6 +706,25 @@ namespace Garden
             {
                 OnVisitorTapped?.Invoke();
                 return;
+            }
+
+            // Instant harvest: tap a mature plot to harvest immediately
+            if (type == CampBuildingType.Plot)
+            {
+                var plot = SaveManager.Instance.Data.plots[index];
+                if (plot.state == PlotState.Mature)
+                {
+                    suppressRebuild = true;
+                    var result = PlotManager.Instance.Harvest(index);
+                    suppressRebuild = false;
+                    if (result != null)
+                    {
+                        RebuildGrid();
+                        ShowHarvestResult(result);
+                        ShowInteractionPanel();
+                    }
+                    return;
+                }
             }
 
             ShowInteraction(type, index);
@@ -1247,6 +1279,9 @@ namespace Garden
             interactionPanel.RemoveFromClassList("skin-panel");
             ClearBellIcon();
 
+            openInteractionType = type;
+            flameBuildGrid = null;
+
             switch (type)
             {
                 case CampBuildingType.Flame:
@@ -1388,6 +1423,7 @@ namespace Garden
 
             var grid = new VisualElement();
             grid.AddToClassList("build-grid");
+            flameBuildGrid = grid;
 
             // Plot
             if (PlotManager.Instance != null && FlameManager.Instance != null)
@@ -1475,6 +1511,99 @@ namespace Garden
             }
 
             interactionBody.Add(grid);
+        }
+
+        private void RefreshFlameBuildGrid()
+        {
+            if (flameBuildGrid == null) return;
+            flameBuildGrid.Clear();
+
+            bool canPlaceEntity = FlameManager.Instance != null && FlameManager.Instance.CanPlaceEntity;
+
+            // Plot
+            if (PlotManager.Instance != null && FlameManager.Instance != null)
+            {
+                var plotCost = PlotManager.Instance.GetNextPlotCost();
+                bool canAfford = canPlaceEntity && plotCost != null
+                    && CurrencyManager.Instance.CanAffordMana(plotCost.manaCost)
+                    && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, plotCost.harvestCosts);
+                flameBuildGrid.Add(BuildCardHelper.CreateBuildCard(
+                    "Plot", "Grow seeds", "ui/buildings/plot", null,
+                    BuildCardHelper.FromBuildingCost(plotCost), null,
+                    canAfford, canPlaceEntity, () =>
+                    {
+                        CloseInteractionPanel();
+                        EnterPlacementMode(CampBuildingType.Plot);
+                    }));
+            }
+
+            // Vase
+            if (VaseManager.Instance != null)
+            {
+                var vaseCost = VaseManager.Instance.GetNextVaseCost();
+                bool canAfford = canPlaceEntity && vaseCost != null
+                    && CurrencyManager.Instance.CanAffordMana(vaseCost.manaCost)
+                    && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, vaseCost.harvestCosts);
+                flameBuildGrid.Add(BuildCardHelper.CreateBuildCard(
+                    "Vase", "Stores water", "ui/buildings/vase", null,
+                    BuildCardHelper.FromBuildingCost(vaseCost), null,
+                    canAfford, canPlaceEntity, () =>
+                    {
+                        CloseInteractionPanel();
+                        EnterPlacementMode(CampBuildingType.Vase);
+                    }));
+            }
+
+            // House
+            if (MallumManager.Instance != null)
+            {
+                var nextCost = MallumManager.Instance.GetNextHouseCost();
+                if (nextCost != null)
+                {
+                    bool canAfford = canPlaceEntity
+                        && CurrencyManager.Instance.CanAffordMana(nextCost.manaCost)
+                        && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, nextCost.harvestCosts);
+                    flameBuildGrid.Add(BuildCardHelper.CreateBuildCard(
+                        "House", "Houses 1 Mallum", "ui/buildings/house", null,
+                        BuildCardHelper.FromBuildingCost(nextCost), null,
+                        canAfford, canPlaceEntity, () =>
+                        {
+                            CloseInteractionPanel();
+                            EnterPlacementMode(CampBuildingType.MallumHouse);
+                        }));
+                }
+            }
+
+            // Garden
+            if (GardenManager.Instance != null && FlameManager.Instance != null)
+            {
+                bool gardenUnlocked = FlameManager.Instance.Level >= GardenManager.GardenUnlockLevel;
+                if (gardenUnlocked)
+                {
+                    var gardenCost = GardenManager.Instance.GetNextGardenCost();
+                    if (gardenCost != null)
+                    {
+                        bool canAfford = canPlaceEntity
+                            && CurrencyManager.Instance.CanAffordMana(gardenCost.manaCost)
+                            && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, gardenCost.harvestCosts);
+                        flameBuildGrid.Add(BuildCardHelper.CreateBuildCard(
+                            "Garden", "Grow fruit trees", "ui/buildings/garden", null,
+                            BuildCardHelper.FromBuildingCost(gardenCost), null,
+                            canAfford, canPlaceEntity, () =>
+                            {
+                                CloseInteractionPanel();
+                                EnterPlacementMode(CampBuildingType.Garden);
+                            }));
+                    }
+                }
+                else
+                {
+                    flameBuildGrid.Add(BuildCardHelper.CreateBuildCard(
+                        "Garden", $"Unlocks at Fire Lv.{GardenManager.GardenUnlockLevel}",
+                        "ui/buildings/garden", null,
+                        null, null, false, false, null));
+                }
+            }
         }
 
         private void ShowPlotInteraction(int index)
@@ -2265,6 +2394,8 @@ namespace Garden
             }
             if (interactionTitle != null)
                 interactionTitle.style.display = DisplayStyle.Flex;
+            openInteractionType = null;
+            flameBuildGrid = null;
         }
 
         // ── Drag-Move ──
