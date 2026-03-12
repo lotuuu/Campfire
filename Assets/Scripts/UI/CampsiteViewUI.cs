@@ -1864,7 +1864,12 @@ namespace Garden
                 var plantName = entry.itemName[..^5]; // strip "_Seed"
                 var seedData = ConfigService.Instance?.GetSeed(plantName);
 
-                var card = new VisualElement();
+                string sName = plantName;
+                var card = new Button(() =>
+                {
+                    PlotManager.Instance.Plant(plotIndex, sName);
+                    CloseInteractionPanel();
+                });
                 card.AddToClassList("seed-card");
 
                 // Header row: name + count
@@ -1923,17 +1928,6 @@ namespace Garden
                             card.Add(tags);
                     }
                 }
-
-                // Plant button
-                string sName = plantName;
-                var plantBtn = new Button(() =>
-                {
-                    PlotManager.Instance.Plant(plotIndex, sName);
-                    CloseInteractionPanel();
-                })
-                { text = "Plant" };
-                plantBtn.AddToClassList("seed-card--plant-btn");
-                card.Add(plantBtn);
 
                 list.Add(card);
             }
