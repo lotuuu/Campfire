@@ -578,7 +578,7 @@ game_configs = [
         }
       ],
       "plot_costs" => [
-        %{"manaCost" => 150, "harvestCosts" => [%{"itemName" => "Sprouts", "count" => 1}]},
+        %{"manaCost" => 75, "harvestCosts" => [%{"itemName" => "Sprouts", "count" => 1}]},
         %{"manaCost" => 200, "harvestCosts" => [%{"itemName" => "Cress", "count" => 1}]},
         %{"manaCost" => 260, "harvestCosts" => [%{"itemName" => "Basil", "count" => 2}]},
         %{"manaCost" => 330, "harvestCosts" => [%{"itemName" => "Chamomile", "count" => 1}]},
