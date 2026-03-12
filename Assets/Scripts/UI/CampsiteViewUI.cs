@@ -744,8 +744,12 @@ namespace Garden
             var grid = new VisualElement();
             grid.AddToClassList("build-grid");
 
+            // Tutorial filtering: only show allowed building types
+            var allowed = TutorialManager.Instance?.GetAllowedBuildings();
+
             // Plot
-            if (PlotManager.Instance != null)
+            if ((allowed == null || allowed.Contains(CampBuildingType.Plot))
+                && PlotManager.Instance != null)
             {
                 var plotCost = PlotManager.Instance.GetNextPlotCost();
                 if (plotCost != null)
@@ -765,7 +769,8 @@ namespace Garden
             }
 
             // Vase
-            if (VaseManager.Instance != null)
+            if ((allowed == null || allowed.Contains(CampBuildingType.Vase))
+                && VaseManager.Instance != null)
             {
                 var vaseCost = VaseManager.Instance.GetNextVaseCost();
                 if (vaseCost != null)
@@ -785,7 +790,8 @@ namespace Garden
             }
 
             // House
-            if (MallumManager.Instance != null)
+            if ((allowed == null || allowed.Contains(CampBuildingType.MallumHouse))
+                && MallumManager.Instance != null)
             {
                 var cost = MallumManager.Instance.GetNextHouseCost();
                 if (cost != null)
@@ -805,7 +811,8 @@ namespace Garden
             }
 
             // Garden
-            if (GardenManager.Instance != null)
+            if ((allowed == null || allowed.Contains(CampBuildingType.Garden))
+                && GardenManager.Instance != null)
             {
                 bool gardenUnlocked = FlameManager.Instance.Level >= GardenManager.GardenUnlockLevel;
                 if (gardenUnlocked)

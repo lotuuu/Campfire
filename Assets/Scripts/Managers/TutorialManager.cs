@@ -33,6 +33,27 @@ namespace Garden
         public bool IsComplete => CurrentStep >= StepComplete;
         public int CurrentStep => SaveManager.Instance.Data.tutorialStep;
 
+        /// <summary>
+        /// Returns the set of building types allowed at the current tutorial step.
+        /// Returns null when the tutorial is complete (no filtering).
+        /// </summary>
+        public HashSet<CampBuildingType> GetAllowedBuildings()
+        {
+            if (IsComplete) return null; // no restriction
+
+            switch (CurrentStep)
+            {
+                case StepBuildHouse:
+                    return new HashSet<CampBuildingType> { CampBuildingType.MallumHouse };
+                case StepBuildSecondPlot:
+                    return new HashSet<CampBuildingType> { CampBuildingType.Plot };
+                case StepUpgradeFlame:
+                    return new HashSet<CampBuildingType> { CampBuildingType.Flame };
+                default:
+                    return new HashSet<CampBuildingType>(); // empty — no building allowed
+            }
+        }
+
         private void Awake()
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }

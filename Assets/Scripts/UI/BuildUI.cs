@@ -26,8 +26,12 @@ namespace Garden
                 ? $"{FlameManager.Instance.CurrentEntityCount}/{FlameManager.Instance.MaxEntities}"
                 : "";
 
+            // Tutorial filtering: only show allowed building types
+            var allowed = TutorialManager.Instance?.GetAllowedBuildings();
+
             // Plot
-            if (PlotManager.Instance != null && FlameManager.Instance != null)
+            if ((allowed == null || allowed.Contains(CampBuildingType.Plot))
+                && PlotManager.Instance != null && FlameManager.Instance != null)
             {
                 var plotCost = PlotManager.Instance.GetNextPlotCost();
                 bool canAfford = canPlace && plotCost != null
@@ -41,7 +45,8 @@ namespace Garden
             }
 
             // Vase
-            if (VaseManager.Instance != null)
+            if ((allowed == null || allowed.Contains(CampBuildingType.Vase))
+                && VaseManager.Instance != null)
             {
                 var vaseCost = VaseManager.Instance.GetNextVaseCost();
                 bool canAfford = canPlace && vaseCost != null
@@ -55,7 +60,8 @@ namespace Garden
             }
 
             // House
-            if (MallumManager.Instance != null)
+            if ((allowed == null || allowed.Contains(CampBuildingType.MallumHouse))
+                && MallumManager.Instance != null)
             {
                 var nextCost = MallumManager.Instance.GetNextHouseCost();
                 if (nextCost != null)
@@ -72,7 +78,8 @@ namespace Garden
             }
 
             // Garden (unlocked at flame level 4)
-            if (GardenManager.Instance != null && FlameManager.Instance != null)
+            if ((allowed == null || allowed.Contains(CampBuildingType.Garden))
+                && GardenManager.Instance != null && FlameManager.Instance != null)
             {
                 bool gardenUnlocked = FlameManager.Instance.Level >= GardenManager.GardenUnlockLevel;
                 if (gardenUnlocked)
@@ -97,7 +104,8 @@ namespace Garden
             }
 
             // Flame upgrade
-            if (FlameManager.Instance != null && FlameManager.Instance.CanUpgrade())
+            if ((allowed == null || allowed.Contains(CampBuildingType.Flame))
+                && FlameManager.Instance != null && FlameManager.Instance.CanUpgrade())
             {
                 var recipe = FlameManager.Instance.GetUpgradeRecipe();
                 buildList.Add(BuildCardHelper.CreateBuildCard(
