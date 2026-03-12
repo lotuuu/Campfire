@@ -800,24 +800,35 @@ namespace Garden
                 }
             }
 
-            // Vase
+            // Vase (unlocked at flame level 2)
             if ((allowed == null || allowed.Contains(CampBuildingType.Vase))
                 && VaseManager.Instance != null)
             {
-                var vaseCost = VaseManager.Instance.GetNextVaseCost();
-                if (vaseCost != null)
+                bool vaseUnlocked = FlameManager.Instance.Level >= VaseManager.VaseUnlockLevel;
+                if (vaseUnlocked)
                 {
-                    bool canAffordVase = canPlace
-                        && CurrencyManager.Instance.CanAffordMana(vaseCost.manaCost)
-                        && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, vaseCost.harvestCosts);
+                    var vaseCost = VaseManager.Instance.GetNextVaseCost();
+                    if (vaseCost != null)
+                    {
+                        bool canAffordVase = canPlace
+                            && CurrencyManager.Instance.CanAffordMana(vaseCost.manaCost)
+                            && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, vaseCost.harvestCosts);
+                        grid.Add(BuildCardHelper.CreateBuildCard(
+                            "Vase", "Stores water", "ui/buildings/vase", null,
+                            BuildCardHelper.FromBuildingCost(vaseCost), null,
+                            canAffordVase, canPlace, () =>
+                            {
+                                if (VaseManager.Instance.CraftVase(gridX, gridY))
+                                    CloseInteractionPanel();
+                            }));
+                    }
+                }
+                else
+                {
                     grid.Add(BuildCardHelper.CreateBuildCard(
-                        "Vase", "Stores water", "ui/buildings/vase", null,
-                        BuildCardHelper.FromBuildingCost(vaseCost), null,
-                        canAffordVase, canPlace, () =>
-                        {
-                            if (VaseManager.Instance.CraftVase(gridX, gridY))
-                                CloseInteractionPanel();
-                        }));
+                        "Vase", $"Unlocks at Fire Lv.{VaseManager.VaseUnlockLevel}",
+                        "ui/buildings/vase", null,
+                        null, null, false, false, null));
                 }
             }
 
@@ -1327,13 +1338,20 @@ namespace Garden
             manaLabel.AddToClassList("flame-mana-rate");
             interactionBody.Add(manaLabel);
 
+            // Tutorial filtering: only show upgrade when Flame is allowed
+            var flameAllowed = TutorialManager.Instance?.GetAllowedBuildings();
+            bool showUpgrade = flameAllowed == null || flameAllowed.Contains(CampBuildingType.Flame);
+
             if (FlameManager.Instance.Level >= ConfigService.Instance.FlameConfig.MaxLevel)
             {
-                var maxLabel = new Label("Max level reached");
-                maxLabel.AddToClassList("interaction-info");
-                interactionBody.Add(maxLabel);
+                if (showUpgrade)
+                {
+                    var maxLabel = new Label("Max level reached");
+                    maxLabel.AddToClassList("interaction-info");
+                    interactionBody.Add(maxLabel);
+                }
             }
-            else
+            else if (showUpgrade)
             {
                 var recipe = FlameManager.Instance.GetUpgradeRecipe();
                 if (recipe != null && recipe.ingredients.Count > 0)
@@ -1425,8 +1443,12 @@ namespace Garden
             grid.AddToClassList("build-grid");
             flameBuildGrid = grid;
 
+            // Tutorial filtering
+            var allowed = TutorialManager.Instance?.GetAllowedBuildings();
+
             // Plot
-            if (PlotManager.Instance != null && FlameManager.Instance != null)
+            if ((allowed == null || allowed.Contains(CampBuildingType.Plot))
+                && PlotManager.Instance != null && FlameManager.Instance != null)
             {
                 var plotCost = PlotManager.Instance.GetNextPlotCost();
                 bool canAfford = canPlaceEntity && plotCost != null
@@ -1443,7 +1465,8 @@ namespace Garden
             }
 
             // Vase
-            if (VaseManager.Instance != null)
+            if ((allowed == null || allowed.Contains(CampBuildingType.Vase))
+                && VaseManager.Instance != null)
             {
                 var vaseCost = VaseManager.Instance.GetNextVaseCost();
                 bool canAfford = canPlaceEntity && vaseCost != null
@@ -1460,7 +1483,8 @@ namespace Garden
             }
 
             // House
-            if (MallumManager.Instance != null)
+            if ((allowed == null || allowed.Contains(CampBuildingType.MallumHouse))
+                && MallumManager.Instance != null)
             {
                 var nextCost = MallumManager.Instance.GetNextHouseCost();
                 if (nextCost != null)
@@ -1480,7 +1504,8 @@ namespace Garden
             }
 
             // Garden
-            if (GardenManager.Instance != null && FlameManager.Instance != null)
+            if ((allowed == null || allowed.Contains(CampBuildingType.Garden))
+                && GardenManager.Instance != null && FlameManager.Instance != null)
             {
                 bool gardenUnlocked = FlameManager.Instance.Level >= GardenManager.GardenUnlockLevel;
                 if (gardenUnlocked)
@@ -1520,8 +1545,12 @@ namespace Garden
 
             bool canPlaceEntity = FlameManager.Instance != null && FlameManager.Instance.CanPlaceEntity;
 
+            // Tutorial filtering
+            var allowed = TutorialManager.Instance?.GetAllowedBuildings();
+
             // Plot
-            if (PlotManager.Instance != null && FlameManager.Instance != null)
+            if ((allowed == null || allowed.Contains(CampBuildingType.Plot))
+                && PlotManager.Instance != null && FlameManager.Instance != null)
             {
                 var plotCost = PlotManager.Instance.GetNextPlotCost();
                 bool canAfford = canPlaceEntity && plotCost != null
@@ -1538,7 +1567,8 @@ namespace Garden
             }
 
             // Vase
-            if (VaseManager.Instance != null)
+            if ((allowed == null || allowed.Contains(CampBuildingType.Vase))
+                && VaseManager.Instance != null)
             {
                 var vaseCost = VaseManager.Instance.GetNextVaseCost();
                 bool canAfford = canPlaceEntity && vaseCost != null
@@ -1555,7 +1585,8 @@ namespace Garden
             }
 
             // House
-            if (MallumManager.Instance != null)
+            if ((allowed == null || allowed.Contains(CampBuildingType.MallumHouse))
+                && MallumManager.Instance != null)
             {
                 var nextCost = MallumManager.Instance.GetNextHouseCost();
                 if (nextCost != null)
@@ -1575,7 +1606,8 @@ namespace Garden
             }
 
             // Garden
-            if (GardenManager.Instance != null && FlameManager.Instance != null)
+            if ((allowed == null || allowed.Contains(CampBuildingType.Garden))
+                && GardenManager.Instance != null && FlameManager.Instance != null)
             {
                 bool gardenUnlocked = FlameManager.Instance.Level >= GardenManager.GardenUnlockLevel;
                 if (gardenUnlocked)

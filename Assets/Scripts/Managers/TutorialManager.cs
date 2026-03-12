@@ -14,6 +14,7 @@ namespace Garden
         private bool initialized;
         private int highlightQ = int.MinValue;
         private int highlightR = int.MinValue;
+        private bool fetchWaterPaused;
 
         // Flow: Welcome → Plant → Water → Harvest → Build House → Plant Again → Fetch Water → Quest → Speed Up Quest → Cress → Second Plot → Upgrade → Complete
         private const int StepWelcome = 0;
@@ -114,6 +115,13 @@ namespace Garden
 
         private void AdvanceTo(int step)
         {
+            // Safety: resume time if it was paused by tutorial
+            if (fetchWaterPaused)
+            {
+                fetchWaterPaused = false;
+                GameTime.TimeScale = 1f;
+            }
+
             SaveManager.Instance.Data.tutorialStep = step;
             SaveManager.Instance.Save();
 
@@ -246,13 +254,35 @@ namespace Garden
                     break;
 
                 case StepFetchWater:
-                    // Mallum started fetching — clear vase highlight, show waiting hint
+                    // Check if mallum finished speed-up (went from FetchingWater → Idle)
+                    if (fetchWaterPaused)
+                    {
+                        bool stillFetching = false;
+                        foreach (var m in data.mallums)
+                        {
+                            if (m.state == MallumState.FetchingWater)
+                            { stillFetching = true; break; }
+                        }
+                        if (!stillFetching)
+                        {
+                            // Speed-up complete — resume time
+                            fetchWaterPaused = false;
+                            GameTime.TimeScale = 1f;
+                            ClearAllHighlights();
+                        }
+                        return;
+                    }
+
+                    // Mallum started fetching — pause time and highlight vase
                     foreach (var m in data.mallums)
                     {
                         if (m.state == MallumState.FetchingWater)
                         {
+                            fetchWaterPaused = true;
+                            GameTime.TimeScale = 0f;
+                            tutorialUI?.ShowHint("Tap your vase and use an Energy Drink to speed it up!");
                             ClearAllHighlights();
-                            tutorialUI?.ShowHint("Your Mallum is fetching water. Use an Energy Drink to speed it up!");
+                            HighlightVaseHex(0);
                             return;
                         }
                     }
@@ -374,7 +404,10 @@ namespace Garden
                         }
                         if (alreadyFetching)
                         {
-                            tutorialUI?.ShowHint("Your Mallum is fetching water. Use an Energy Drink to speed it up!");
+                            fetchWaterPaused = true;
+                            GameTime.TimeScale = 0f;
+                            tutorialUI?.ShowHint("Tap your vase and use an Energy Drink to speed it up!");
+                            HighlightVaseHex(0);
                         }
                         else
                         {
@@ -504,6 +537,8 @@ namespace Garden
             switch (CurrentStep)
             {
                 case StepFetchWater:
+                    // While time is paused waiting for speed-up, don't switch highlights
+                    if (fetchWaterPaused) break;
                     // If the plot matured without watering, switch highlight to the plot
                     if (data.plots.Count > 0 && data.plots[0].state == PlotState.Mature)
                     {
