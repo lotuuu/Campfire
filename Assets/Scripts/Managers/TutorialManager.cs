@@ -230,7 +230,11 @@ namespace Garden
 
         private void OnVasesChanged()
         {
-            // Not directly used for step transitions, but could highlight vase state
+            if (!initialized || IsComplete) return;
+
+            // If vase finished filling during fetch-water step, lift the growth cap
+            if (CurrentStep == StepFetchWater && PlotManager.Instance != null)
+                PlotManager.Instance.GrowthCapPercent = 1f;
         }
 
         private void OnMallumsChanged()
