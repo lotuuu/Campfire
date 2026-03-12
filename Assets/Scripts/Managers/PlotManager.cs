@@ -108,6 +108,7 @@ namespace Garden
 
         private void Update()
         {
+            if (SaveManager.Instance?.Data == null || ConfigService.Instance == null) return;
             if (GrowthPaused)
             {
                 // Push all plantTimeUtc forward so elapsed time stays frozen

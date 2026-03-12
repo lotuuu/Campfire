@@ -45,6 +45,8 @@ namespace Garden
 
         private void CheckFillCompletion()
         {
+            if (SaveManager.Instance == null || SaveManager.Instance.Data == null) return;
+            if (ConfigService.Instance?.VaseConfig == null) return;
             var data = SaveManager.Instance.Data;
             bool changed = false;
             foreach (var vase in data.vases)

@@ -44,6 +44,7 @@ namespace Garden
         private void Update()
         {
             if (Config == null) return;
+            if (SaveManager.Instance?.Data == null) return;
 
             SaveManager.Instance.Data.mana = AccumulateMana(
                 SaveManager.Instance.Data.mana, ManaPerSecond, Time.deltaTime, ManaCap);

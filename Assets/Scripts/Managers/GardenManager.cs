@@ -136,6 +136,7 @@ namespace Garden
 
         private void CheckGrowthAndYields()
         {
+            if (SaveManager.Instance?.Data == null || ConfigService.Instance == null) return;
             var data = SaveManager.Instance.Data;
             bool changed = false;
             var now = GameTime.UtcNow;

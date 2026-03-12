@@ -477,6 +477,7 @@ namespace Garden
         private void Update()
         {
             if (!initialized || IsComplete) return;
+            if (SaveManager.Instance?.Data == null) return;
 
             var data = SaveManager.Instance.Data;
             switch (CurrentStep)

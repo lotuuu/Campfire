@@ -31,6 +31,7 @@ namespace Garden
 
         private void Update()
         {
+            if (SaveManager.Instance?.Data == null) return;
             var data = SaveManager.Instance.Data;
             bool changed = false;
 
