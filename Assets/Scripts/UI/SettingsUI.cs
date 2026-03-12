@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
 namespace Garden
@@ -10,8 +11,18 @@ namespace Garden
         private Label _musicValue;
         private Label _sfxValue;
 
+        private Label _playerIdLabel;
+        private Label _serverLabel;
+        private Label _versionLabel;
+
+        private Button _deleteBtn;
+        private VisualElement _confirmRow;
+        private Button _confirmCancel;
+        private Button _confirmDelete;
+
         public void Initialize(VisualElement root)
         {
+            // Audio
             _musicSlider = root.Q<Slider>("music-slider");
             _sfxSlider = root.Q<Slider>("sfx-slider");
             _musicValue = root.Q<Label>("music-value");
@@ -49,6 +60,41 @@ namespace Garden
                     SaveManager.Instance.Save();
                 }
             });
+
+            // Account info
+            _playerIdLabel = root.Q<Label>("settings-player-id");
+            _serverLabel = root.Q<Label>("settings-server");
+            _versionLabel = root.Q<Label>("settings-version");
+
+            var socialData = SocialSaveManager.Instance?.Data;
+            _playerIdLabel.text = !string.IsNullOrEmpty(socialData?.uid) ? socialData.uid : "---";
+            _serverLabel.text = ServerConfig.Current.name;
+            _versionLabel.text = Application.version;
+
+            // Delete save
+            _deleteBtn = root.Q<Button>("settings-delete-btn");
+            _confirmRow = root.Q<VisualElement>("settings-confirm-row");
+            _confirmCancel = root.Q<Button>("settings-confirm-cancel");
+            _confirmDelete = root.Q<Button>("settings-confirm-delete");
+
+            _deleteBtn.clicked += () =>
+            {
+                _deleteBtn.style.display = DisplayStyle.None;
+                _confirmRow.style.display = DisplayStyle.Flex;
+            };
+
+            _confirmCancel.clicked += () =>
+            {
+                _confirmRow.style.display = DisplayStyle.None;
+                _deleteBtn.style.display = DisplayStyle.Flex;
+            };
+
+            _confirmDelete.clicked += () =>
+            {
+                SaveManager.Instance?.DeleteSave();
+                SocialSaveManager.Instance?.DeleteSave();
+                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            };
         }
     }
 }
