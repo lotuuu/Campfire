@@ -1332,6 +1332,7 @@ namespace Garden
 
         private void ShowFlameInteraction()
         {
+            TutorialManager.Instance?.OnFlameMenuOpened();
             interactionTitle.text = $"Spark of Ara";
 
             var levelLabel = new Label($"Level {FlameManager.Instance.Level}");
@@ -1760,15 +1761,17 @@ namespace Garden
 
             interactionTitle.text = "Harvested!";
 
-            // Seed icon + yield row
+            // Harvest icon + yield row
             var yieldRow = new VisualElement();
             yieldRow.AddToClassList("harvest-yield-row");
-            var seedSprite = SpriteService.Instance?.GetSprite($"items/{SeedToSpriteKey(result.seedName)}/seed");
-            if (seedSprite != null)
+            string harvestKey = SeedToSpriteKey(result.seedName);
+            var harvestSprite = SpriteService.Instance?.GetSprite($"items/{harvestKey}/harvest")
+                ?? SpriteService.Instance?.GetSprite($"items/{harvestKey}/seed");
+            if (harvestSprite != null)
             {
                 var iconEl = new VisualElement();
                 iconEl.AddToClassList("harvest-seed-icon");
-                iconEl.style.backgroundImage = new StyleBackground(seedSprite);
+                iconEl.style.backgroundImage = new StyleBackground(harvestSprite);
                 yieldRow.Add(iconEl);
             }
             var yieldLabel = new Label($"{PlotManager.GetSeedDisplayName(result.seedName)} x{result.drops}");
@@ -1872,29 +1875,54 @@ namespace Garden
                 });
                 card.AddToClassList("seed-card");
 
-                // Header row: name + count
-                var header = new VisualElement();
-                header.AddToClassList("seed-card--header");
+                // Tier accent — left border color
+                card.style.borderLeftColor = GetTierColor(seedData?.tier ?? 1);
+
+                // Hero seed icon
+                string spriteKey = seedData != null
+                    ? SpriteService.SeedToSpriteKey(seedData.seedName)
+                    : plantName.ToLower();
+
+                var seedIcon = new VisualElement();
+                seedIcon.AddToClassList("seed-card--icon");
+                var seedSprite = SpriteService.Instance?.GetSprite($"items/{spriteKey}/seed");
+                if (seedSprite != null)
+                    seedIcon.style.backgroundImage = new StyleBackground(seedSprite);
+                card.Add(seedIcon);
+
+                // Info column
+                var info = new VisualElement();
+                info.AddToClassList("seed-card--info");
+
+                // Title row: name + stats + count
+                var titleRow = new VisualElement();
+                titleRow.AddToClassList("seed-card--title-row");
                 var nameLabel = new Label(seedData != null ? seedData.seedName : plantName);
                 nameLabel.AddToClassList("seed-card--name");
-                header.Add(nameLabel);
-                var countLabel = new Label($"x{entry.count}");
-                countLabel.AddToClassList("seed-card--count");
-                header.Add(countLabel);
-                card.Add(header);
+                titleRow.Add(nameLabel);
 
-                // Stats row: growth time + drops
+                var rightGroup = new VisualElement();
+                rightGroup.AddToClassList("seed-card--right-group");
+
                 if (seedData != null)
                 {
-                    var stats = new VisualElement();
-                    stats.AddToClassList("seed-card--stats");
+                    string growthStr = TimeUtils.FormatDurationHours(seedData.growthDurationHours);
+                    var statsLabel = new Label($"{growthStr} | {seedData.minDrops}-{seedData.maxDrops} drops");
+                    statsLabel.AddToClassList("seed-card--stats-line");
+                    rightGroup.Add(statsLabel);
+                }
 
-                    AddSeedStat(stats, "Growth", TimeUtils.FormatDurationHours(seedData.growthDurationHours));
-                    AddSeedStat(stats, "Drops", $"{seedData.minDrops}-{seedData.maxDrops}");
+                var countLabel = new Label($"x{entry.count}");
+                countLabel.AddToClassList("seed-card--count");
+                rightGroup.Add(countLabel);
 
-                    card.Add(stats);
+                titleRow.Add(rightGroup);
+                info.Add(titleRow);
 
-                    // Recipe tags (compact weather preferences)
+                if (seedData != null)
+                {
+
+                    // Recipe tags (no header)
                     if (seedData.recipe != null)
                     {
                         var tags = new VisualElement();
@@ -1925,10 +1953,11 @@ namespace Garden
                         }
 
                         if (tags.childCount > 0)
-                            card.Add(tags);
+                            info.Add(tags);
                     }
                 }
 
+                card.Add(info);
                 list.Add(card);
             }
 
@@ -1936,17 +1965,16 @@ namespace Garden
             interactionBody.Add(scroll);
         }
 
-        private static void AddSeedStat(VisualElement container, string label, string value)
+        private static Color GetTierColor(int tier)
         {
-            var stat = new VisualElement();
-            stat.AddToClassList("seed-card--stat");
-            var l = new Label(label);
-            l.AddToClassList("seed-card--stat-label");
-            stat.Add(l);
-            var v = new Label(value);
-            v.AddToClassList("seed-card--stat-value");
-            stat.Add(v);
-            container.Add(stat);
+            return tier switch
+            {
+                1 => new Color(0.45f, 0.6f, 0.3f, 0.8f),   // green — common
+                2 => new Color(0.3f, 0.5f, 0.65f, 0.8f),   // blue — uncommon
+                3 => new Color(0.6f, 0.4f, 0.7f, 0.8f),    // purple — rare
+                4 => new Color(0.8f, 0.65f, 0.2f, 0.8f),   // gold — legendary
+                _ => new Color(0.45f, 0.6f, 0.3f, 0.8f),
+            };
         }
 
         private static void AddRecipeTag(VisualElement container, string text)
@@ -2455,7 +2483,6 @@ namespace Garden
         private void CloseInteractionPanel()
         {
             AudioManager.Instance?.PlaySFX("ui_panel_close");
-            bool wasFlame = openInteractionType == CampBuildingType.Flame;
             if (interactionBackdrop != null)
                 interactionBackdrop.style.display = DisplayStyle.None;
             if (interactionPanel != null)
@@ -2468,8 +2495,6 @@ namespace Garden
             openInteractionType = null;
             flameBuildGrid = null;
 
-            if (wasFlame)
-                TutorialManager.Instance?.OnFlameMenuClosed();
         }
 
         // ── Drag-Move ──

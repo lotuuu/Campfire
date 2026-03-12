@@ -143,12 +143,14 @@
 }
 
 .seed-card {
-    flex-direction: column;
+    flex-direction: row;
+    align-items: stretch;
     background-color: rgba(50, 35, 18, 0.7);
     border-width: 1px;
     border-color: rgba(140, 100, 50, 0.3);
+    border-left-width: 6px;
     border-radius: var(--radius-md);
-    padding: var(--spacing-sm);
+    padding: 0;
     margin-bottom: var(--spacing-xs);
     transition-property: background-color, border-color;
     transition-duration: 0.15s;
@@ -159,11 +161,34 @@
     border-color: rgba(200, 140, 50, 0.5);
 }
 
-.seed-card--header {
+/* Hero seed icon area */
+.seed-card--icon {
+    width: 120px;
+    height: 120px;
+    border-radius: 12px;
+    background-color: rgba(40, 28, 15, 0.6);
+    border-width: 1px;
+    border-color: rgba(180, 130, 60, 0.25);
+    margin: var(--spacing-xs);
+    margin-left: var(--spacing-sm);
+    flex-shrink: 0;
+    align-self: center;
+}
+
+/* Right-side info column */
+.seed-card--info {
+    flex-grow: 1;
+    flex-direction: column;
+    justify-content: center;
+    padding: var(--spacing-sm);
+    padding-left: var(--spacing-sm);
+}
+
+/* Top row: name + stats + count */
+.seed-card--title-row {
     flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--spacing-xs);
+    align-items: baseline;
+    margin-bottom: 4px;
 }
 
 .seed-card--name {
@@ -172,52 +197,41 @@
     -unity-font-style: bold;
 }
 
+.seed-card--right-group {
+    flex-grow: 1;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: baseline;
+}
+
+.seed-card--stats-line {
+    font-size: 18px;
+    color: rgb(140, 125, 95);
+    margin-right: var(--spacing-xs);
+}
+
 .seed-card--count {
-    font-size: var(--font-sm);
-    color: rgb(180, 160, 120);
-}
-
-.seed-card--stats {
-    flex-direction: row;
-    flex-wrap: wrap;
-    margin-bottom: var(--spacing-xs);
-}
-
-.seed-card--stat {
-    flex-direction: row;
-    align-items: center;
-    margin-right: var(--spacing-md);
-    margin-bottom: var(--spacing-xxs);
-}
-
-.seed-card--stat-label {
-    font-size: 22px;
-    color: rgb(140, 120, 90);
-    margin-right: var(--spacing-xxs);
-}
-
-.seed-card--stat-value {
-    font-size: 22px;
-    color: rgb(200, 180, 140);
+    font-size: var(--font-xs);
+    color: rgb(160, 140, 100);
     -unity-font-style: bold;
 }
 
+/* Recipe tags row (no header) */
 .seed-card--recipe-tags {
     flex-direction: row;
     flex-wrap: wrap;
-    margin-bottom: var(--spacing-sm);
 }
 
 .seed-card--tag {
     background-color: rgba(100, 75, 35, 0.5);
     border-radius: 6px;
-    padding: 4px 10px;
+    padding: 3px 8px;
     margin-right: 6px;
     margin-bottom: 4px;
 }
 
 .seed-card--tag Label {
-    font-size: 20px;
+    font-size: 18px;
     color: rgb(200, 170, 110);
 }
 
