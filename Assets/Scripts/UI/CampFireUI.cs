@@ -51,12 +51,20 @@ namespace Garden
         private Label loadingStatus;
         private VisualElement loadingBarTrack;
         private VisualElement loadingBarFill;
+        private VisualElement loadingServices;
+        private Label loadingElapsed;
+        private Label loadingStall;
         private bool _weatherDone;
         private bool _socialDone;
         private bool _economyDone;
         private bool _gameDone;
         private bool _failed;
         private Stopwatch _initStopwatch;
+        private float _lastProgressTime;
+        private int _lastDoneCount;
+
+        // Service row labels (icon labels for updating status)
+        private Label _iconSocial, _iconEconomy, _iconGame, _iconWeather;
 
         private void Awake()
         {
@@ -228,6 +236,15 @@ namespace Garden
             loadingStatus = root.Q<Label>("loading-gate-status");
             loadingBarTrack = root.Q("loading-gate-bar-track");
             loadingBarFill = root.Q("loading-gate-bar-fill");
+            loadingServices = root.Q("loading-gate-services");
+            loadingElapsed = root.Q<Label>("loading-gate-elapsed");
+            loadingStall = root.Q<Label>("loading-gate-stall");
+
+            // Build per-service status rows
+            _iconSocial = AddServiceRow(loadingServices, "Social");
+            _iconEconomy = AddServiceRow(loadingServices, "Economy");
+            _iconGame = AddServiceRow(loadingServices, "Game state");
+            _iconWeather = AddServiceRow(loadingServices, "Weather");
 
             // Server selector — populate buttons (shown on failure or in editor/debug)
             var serverSelector = root.Q("server-selector");
@@ -326,6 +343,7 @@ namespace Garden
         private void Update()
         {
             TryLoadSettingsIcon();
+            UpdateLoadingElapsed();
         }
 
         private void TryLoadSettingsIcon()
@@ -335,6 +353,80 @@ namespace Garden
             if (gearTex == null) return;
             settingsBtn.style.backgroundImage = new StyleBackground(gearTex);
             _settingsIconLoaded = true;
+        }
+
+        private static Label AddServiceRow(VisualElement container, string name)
+        {
+            var row = new VisualElement();
+            row.AddToClassList("loading-service-row");
+            var icon = new Label("-");
+            icon.AddToClassList("loading-service-icon");
+            icon.AddToClassList("loading-service-icon--waiting");
+            var label = new Label(name);
+            label.AddToClassList("loading-service-name");
+            row.Add(icon);
+            row.Add(label);
+            container.Add(row);
+            return icon;
+        }
+
+        private static void SetServiceIcon(Label icon, string status)
+        {
+            icon.RemoveFromClassList("loading-service-icon--done");
+            icon.RemoveFromClassList("loading-service-icon--waiting");
+            icon.RemoveFromClassList("loading-service-icon--failed");
+
+            switch (status)
+            {
+                case "done":
+                    icon.text = "OK";
+                    icon.AddToClassList("loading-service-icon--done");
+                    break;
+                case "failed":
+                    icon.text = "X";
+                    icon.AddToClassList("loading-service-icon--failed");
+                    break;
+                default:
+                    icon.text = "-";
+                    icon.AddToClassList("loading-service-icon--waiting");
+                    break;
+            }
+        }
+
+        private void UpdateLoadingElapsed()
+        {
+            if (loadingGate == null || _initStopwatch == null) return;
+
+            float elapsed = _initStopwatch.ElapsedMilliseconds / 1000f;
+
+            // Show elapsed time after 10 seconds
+            if (elapsed >= 10f && loadingElapsed != null)
+            {
+                loadingElapsed.style.display = DisplayStyle.Flex;
+                loadingElapsed.text = $"{elapsed:F0}s elapsed";
+            }
+
+            // Show service detail rows after 5 seconds so user can see what's stuck
+            if (elapsed >= 5f && loadingServices != null)
+                loadingServices.style.display = DisplayStyle.Flex;
+
+            // Stall warning after 20 seconds of no progress
+            if (elapsed >= 20f && loadingStall != null)
+            {
+                loadingStall.style.display = DisplayStyle.Flex;
+                string stuck = GetStuckServices();
+                loadingStall.text = $"Stalled on: {stuck}";
+            }
+        }
+
+        private string GetStuckServices()
+        {
+            var parts = new System.Collections.Generic.List<string>();
+            if (!_socialDone) parts.Add("Social");
+            if (!_economyDone) parts.Add("Economy");
+            if (!_gameDone) parts.Add("Game state");
+            if (!_weatherDone) parts.Add("Weather");
+            return parts.Count > 0 ? string.Join(", ", parts) : "unknown";
         }
 
         private void UpdateQuestBadge()
@@ -387,10 +479,24 @@ namespace Garden
             if (_failed) return;
             _failed = true;
 
+            Debug.LogError($"[INIT] Service failed: {reason}");
+
             if (loadingGate == null) return;
             loadingGateTitle.text = "Connection Failed";
             loadingStatus.text = reason;
             loadingBarTrack.style.display = DisplayStyle.None;
+
+            // Update service icons to reflect failure
+            SetServiceIcon(_iconSocial, _socialDone ? "done" : "failed");
+            SetServiceIcon(_iconEconomy, _economyDone ? "done" : "failed");
+            SetServiceIcon(_iconGame, _gameDone ? "done" : "failed");
+            SetServiceIcon(_iconWeather, _weatherDone ? "done" : "failed");
+            if (loadingServices != null)
+                loadingServices.style.display = DisplayStyle.Flex;
+
+            // Hide stall/elapsed — failure message is sufficient
+            if (loadingStall != null) loadingStall.style.display = DisplayStyle.None;
+            if (loadingElapsed != null) loadingElapsed.style.display = DisplayStyle.None;
 
             // Show server selector so the user can switch servers
             var serverSelector = loadingGate.Q("server-selector");
@@ -408,10 +514,23 @@ namespace Garden
         {
             if (loadingGate == null || _failed) return;
 
+            // Update per-service icons
+            SetServiceIcon(_iconSocial, _socialDone ? "done" : "waiting");
+            SetServiceIcon(_iconEconomy, _economyDone ? "done" : "waiting");
+            SetServiceIcon(_iconGame, _gameDone ? "done" : "waiting");
+            SetServiceIcon(_iconWeather, _weatherDone ? "done" : "waiting");
+
             int done = (_socialDone ? 1 : 0) + (_economyDone ? 1 : 0)
                      + (_gameDone ? 1 : 0) + (_weatherDone ? 1 : 0);
             const int total = 4;
             float pct = (float)done / total;
+
+            // Track progress for stall detection
+            if (done > _lastDoneCount)
+            {
+                _lastDoneCount = done;
+                _lastProgressTime = _initStopwatch?.ElapsedMilliseconds / 1000f ?? 0f;
+            }
 
             loadingBarFill.style.width = Length.Percent(pct * 100f);
 

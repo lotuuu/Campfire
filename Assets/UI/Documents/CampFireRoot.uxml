@@ -429,6 +429,9 @@
                 <ui:VisualElement name="loading-gate-bar-track">
                     <ui:VisualElement name="loading-gate-bar-fill" />
                 </ui:VisualElement>
+                <ui:VisualElement name="loading-gate-services" />
+                <ui:Label name="loading-gate-elapsed" />
+                <ui:Label name="loading-gate-stall" />
                 <ui:VisualElement name="server-selector" />
             </ui:VisualElement>
         </ui:VisualElement>

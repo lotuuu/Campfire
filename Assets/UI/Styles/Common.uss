@@ -222,6 +222,61 @@
     transition-duration: 300ms;
 }
 
+/* Per-service status rows */
+#loading-gate-services {
+    margin-top: var(--spacing-md);
+    align-items: flex-start;
+    display: none;
+}
+
+.loading-service-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 2px;
+}
+
+.loading-service-icon {
+    font-size: var(--font-sm);
+    width: 18px;
+    -unity-text-align: middle-center;
+    margin-right: 4px;
+}
+
+.loading-service-icon--done {
+    color: rgb(100, 200, 100);
+}
+
+.loading-service-icon--waiting {
+    color: var(--color-text-dim);
+}
+
+.loading-service-icon--failed {
+    color: rgb(220, 80, 80);
+}
+
+.loading-service-name {
+    font-size: var(--font-sm);
+    color: var(--color-text-dim);
+}
+
+#loading-gate-elapsed {
+    font-size: var(--font-xs);
+    color: var(--color-text-dim);
+    margin-top: var(--spacing-sm);
+    -unity-text-align: middle-center;
+    display: none;
+}
+
+#loading-gate-stall {
+    font-size: var(--font-sm);
+    color: rgb(220, 180, 60);
+    margin-top: var(--spacing-xs);
+    -unity-text-align: middle-center;
+    white-space: normal;
+    max-width: 260px;
+    display: none;
+}
+
 /* Server selector on loading gate — hidden until failure or editor/debug */
 #server-selector {
     flex-direction: row;
