@@ -446,6 +446,24 @@ namespace Garden
             return null;
         }
 
+        public async Task<HarvestResponse> HarvestPreview(int plotId)
+        {
+            if (!IsOnline) return null;
+            try
+            {
+                var body = JsonUtility.ToJson(new HarvestRequest { plotId = plotId });
+                using var req = PostJson("/game/plot/harvest-preview", body);
+                await SendAsync(req);
+
+                if (req.responseCode >= 200 && req.responseCode < 300)
+                    return JsonUtility.FromJson<HarvestResponse>(req.downloadHandler.text);
+
+                Debug.LogWarning($"GameService: HarvestPreview failed (HTTP {req.responseCode}): {req.downloadHandler.text}");
+            }
+            catch (Exception e) { Debug.LogWarning($"GameService: HarvestPreview failed: {e.Message}"); }
+            return null;
+        }
+
         public async Task<HarvestResponse> Harvest(int plotId)
         {
             if (!IsOnline) return null;

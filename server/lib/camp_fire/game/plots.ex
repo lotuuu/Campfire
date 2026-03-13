@@ -207,7 +207,34 @@ defmodule CampFire.Game.Plots do
     end
   end
 
+  # --- Harvest Preview ---
+
+  @doc """
+  Returns the harvest result (score, drops, item key) without actually harvesting.
+  Runs check_maturity first to ensure server-side state is up to date.
+  """
+  def harvest_preview(player_uid, plot_id) do
+    check_maturity(plot_id)
+
+    with %PlayerPlot{} = plot <- Repo.get(PlayerPlot, plot_id),
+         true <- plot.player_uid == player_uid || {:error, :not_owned},
+         true <- plot.state == "mature" || {:error, {:not_mature, plot.state}} do
+      seed_config = CampFire.Game.get_seed_config_by_item_id!(plot.seed_item_id)
+      score = GrowthRecipe.evaluate(seed_config.recipe, plot.snapshots, plot.water_count)
+      drops = GrowthRecipe.calculate_drops(score, seed_config.min_drops, seed_config.max_drops)
+
+      {:ok, %{score: score, drops: drops, harvest_item_key: seed_config.harvest_item_key}}
+    else
+      nil -> {:error, :not_found}
+      {:error, _} = err -> err
+    end
+  end
+
   # --- Maturity Check ---
+
+  # Server matures plots 4 seconds early so the client (which detects maturity
+  # based on its own timer) can pre-fetch harvest results before the player taps.
+  @maturity_buffer_seconds 4
 
   def check_maturity(plot_id) do
     case Repo.get(PlayerPlot, plot_id) do
@@ -220,7 +247,7 @@ defmodule CampFire.Game.Plots do
 
           now = DateTime.utc_now() |> DateTime.truncate(:second)
           elapsed_seconds = DateTime.diff(now, plot.plant_time_utc, :second)
-          required_seconds = trunc(seed_config.growth_duration_hours * 3600)
+          required_seconds = max(trunc(seed_config.growth_duration_hours * 3600) - @maturity_buffer_seconds, 0)
 
           if elapsed_seconds >= required_seconds do
             plot

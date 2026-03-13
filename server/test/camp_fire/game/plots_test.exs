@@ -230,6 +230,37 @@ defmodule CampFire.Game.PlotsTest do
     end
   end
 
+  describe "harvest_preview/2" do
+    test "returns score and drops without modifying plot state" do
+      player = setup_player()
+      [pos1 | _] = free_positions(player.uid)
+
+      {:ok, _} = Economy.upsert_item(player.uid, "harvesttest_seed", 1)
+      {:ok, plot} = Plots.craft_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:ok, _} = Plots.plant(player.uid, plot.id, "harvesttest")
+      {:ok, _} = Plots.force_mature(plot.id)
+
+      {:ok, preview} = Plots.harvest_preview(player.uid, plot.id)
+
+      assert preview.harvest_item_key == "harvesttest"
+      assert preview.drops >= 2 and preview.drops <= 8
+      assert preview.score == 1.0
+
+      # Plot should still be mature (not reset)
+      still_mature = Repo.get!(PlayerPlot, plot.id)
+      assert still_mature.state == "mature"
+    end
+
+    test "fails when not mature" do
+      player = setup_player()
+      [pos1 | _] = free_positions(player.uid)
+      {:ok, plot} = Plots.craft_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:ok, _} = Plots.plant(player.uid, plot.id, "basil")
+
+      {:error, {:not_mature, "growing"}} = Plots.harvest_preview(player.uid, plot.id)
+    end
+  end
+
   describe "check_maturity/1" do
     test "transitions growing to mature when time elapsed" do
       player = setup_player()

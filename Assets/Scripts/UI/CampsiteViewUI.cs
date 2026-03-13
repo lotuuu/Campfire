@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -715,15 +716,7 @@ namespace Garden
                 var plot = SaveManager.Instance.Data.plots[index];
                 if (plot.state == PlotState.Mature)
                 {
-                    suppressRebuild = true;
-                    var result = PlotManager.Instance.Harvest(index);
-                    suppressRebuild = false;
-                    if (result != null)
-                    {
-                        RebuildGrid();
-                        ShowHarvestResult(result);
-                        ShowInteractionPanel();
-                    }
+                    _ = HarvestAndShow(index);
                     return;
                 }
             }
@@ -1700,23 +1693,7 @@ namespace Garden
                     AddGrowthRecipeSection(plot.seedItemKey);
 
                     int plotPotionCount = PlotManager.Instance != null ? PlotManager.Instance.GetSpeedItemCount() : 0;
-                    var finishBtn = new Button(() =>
-                    {
-                        if (PlotManager.Instance != null && PlotManager.Instance.SpeedUpGrowth(index))
-                        {
-                            suppressRebuild = true;
-                            var result = PlotManager.Instance.Harvest(index);
-                            suppressRebuild = false;
-                            if (result != null)
-                            {
-                                RebuildGrid();
-                                ShowHarvestResult(result);
-                                ShowInteractionPanel();
-                            }
-                            else
-                                CloseInteractionPanel();
-                        }
-                    })
+                    var finishBtn = new Button(() => _ = SpeedUpAndHarvest(index))
                     { text = $"Finish Now ({plotPotionCount} potions)" };
                     finishBtn.SetEnabled(plotPotionCount > 0 || CurrencyManager.FreeMode);
                     finishBtn.AddToClassList("interaction-btn-primary");
@@ -1728,17 +1705,7 @@ namespace Garden
                     AddGrowthRecipeSection(plot.seedItemKey);
                     var harvestBtn = new Button(() =>
                     {
-                        suppressRebuild = true;
-                        var result = PlotManager.Instance.Harvest(index);
-                        suppressRebuild = false;
-                        if (result != null)
-                        {
-                            RebuildGrid();
-                            ShowHarvestResult(result);
-                            ShowInteractionPanel();
-                        }
-                        else
-                            CloseInteractionPanel();
+                        _ = HarvestAndShow(index);
                     })
                     { text = "Harvest" };
                     harvestBtn.AddToClassList("interaction-btn-primary");
@@ -1752,6 +1719,65 @@ namespace Garden
                 interactionActions.Add(paintBtn);
             }
 
+        }
+
+        private async Task SpeedUpAndHarvest(int plotIndex)
+        {
+            if (PlotManager.Instance == null) return;
+
+            // Show loading — speed-up + harvest both need server
+            interactionBody.Clear();
+            interactionActions.Clear();
+            interactionTitle.text = "Finishing...";
+            ShowInteractionPanel();
+
+            bool success = await PlotManager.Instance.SpeedUpGrowth(plotIndex);
+            if (!success)
+            {
+                CloseInteractionPanel();
+                return;
+            }
+
+            await HarvestAndShow(plotIndex);
+        }
+
+        private async Task HarvestAndShow(int plotIndex)
+        {
+            // Show loading state if no cached preview (server call will block)
+            var plot = SaveManager.Instance.Data.plots[plotIndex];
+            bool hasCachedPreview = plot.cachedHarvestPreview != null;
+            if (!hasCachedPreview)
+            {
+                interactionBody.Clear();
+                interactionActions.Clear();
+                interactionTitle.text = "Harvesting...";
+                ShowInteractionPanel();
+            }
+
+            suppressRebuild = true;
+            var result = await PlotManager.Instance.Harvest(plotIndex);
+            suppressRebuild = false;
+
+            if (result != null)
+            {
+                RebuildGrid();
+                ShowHarvestResult(result);
+                ShowInteractionPanel();
+            }
+            else
+            {
+                // Server unreachable — show waiting state
+                interactionBody.Clear();
+                interactionActions.Clear();
+                interactionTitle.text = "Waiting for server...";
+                ShowInteractionPanel();
+
+                // Block until we can resync
+                if (GameService.Instance != null)
+                    await GameService.Instance.ResyncFullState();
+                RebuildGrid();
+                CloseInteractionPanel();
+            }
         }
 
         private void ShowHarvestResult(HarvestResult result)

@@ -61,6 +61,9 @@ namespace Garden
         public bool subscribeWater;
         public string skinName;
         public List<string> unlockedSkins = new();
+
+        // Transient — pre-fetched from server, not saved to disk
+        [NonSerialized] public HarvestResponse cachedHarvestPreview;
     }
 
     [Serializable]

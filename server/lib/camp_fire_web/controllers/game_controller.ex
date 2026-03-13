@@ -279,6 +279,22 @@ defmodule CampFireWeb.GameController do
     conn |> put_status(400) |> json(%{error: "Missing 'plotId' and 'vaseId'"})
   end
 
+  def harvest_preview(conn, %{"plotId" => plot_id}) do
+    uid = conn.assigns.current_player.uid
+
+    case Plots.harvest_preview(uid, plot_id) do
+      {:ok, %{score: score, drops: drops, harvest_item_key: harvest_item_key}} ->
+        conn |> put_status(200) |> json(%{score: score, drops: drops, itemKey: harvest_item_key})
+
+      {:error, reason} ->
+        conn |> put_status(422) |> json(%{error: format_error(reason)})
+    end
+  end
+
+  def harvest_preview(conn, _params) do
+    conn |> put_status(400) |> json(%{error: "Missing 'plotId'"})
+  end
+
   def harvest_plot(conn, %{"plotId" => plot_id}) do
     uid = conn.assigns.current_player.uid
 

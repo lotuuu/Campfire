@@ -312,6 +312,9 @@ namespace Garden
                 NotificationService.Instance?.ScheduleWaterNotification(plotIndex, plot.seedItemKey, cooldownSeconds);
             }
 
+            // Invalidate cached harvest preview — water count changed
+            plot.cachedHarvestPreview = null;
+
             SaveManager.Instance.Save();
             OnPlotChanged?.Invoke(plotIndex);
             AudioManager.Instance?.PlaySFX("plot_water");
@@ -359,7 +362,13 @@ namespace Garden
             return Mathf.Max(0f, totalSeconds - elapsedSeconds);
         }
 
-        public HarvestResult Harvest(int plotIndex)
+        /// <summary>
+        /// Harvests a mature plot. Returns null if plot isn't mature.
+        /// Uses cached server preview if available; otherwise blocks on server harvest.
+        /// Returns a task that completes with the harvest result, or null on failure
+        /// (in which case a loading screen should be shown by the caller until reconnect).
+        /// </summary>
+        public async Task<HarvestResult> Harvest(int plotIndex)
         {
             var data = SaveManager.Instance.Data;
             if (plotIndex < 0 || plotIndex >= data.plots.Count) return null;
@@ -369,36 +378,38 @@ namespace Garden
             var seed = LoadSeed(plot.seedItemKey);
             if (seed == null) return null;
 
-            // Fallback: use current weather if no snapshots were recorded during growth
-            if ((plot.snapshots == null || plot.snapshots.snapshotCount == 0)
-                && WeatherService.Instance != null && WeatherService.Instance.HasWeather)
+            int serverId = plot.serverId;
+
+            // Get server-authoritative harvest result
+            HarvestResponse serverResult = plot.cachedHarvestPreview;
+            bool usedCachedPreview = serverResult != null;
+            plot.cachedHarvestPreview = null;
+
+            if (serverResult == null && GameService.Instance != null && GameService.Instance.IsOnline && serverId > 0)
             {
-                if (plot.snapshots == null) plot.snapshots = new GrowthSnapshots();
-                plot.snapshots.RecordSnapshot(WeatherService.Instance.CurrentWeather);
+                // No cached preview — must block on server harvest (which also executes it)
+                serverResult = await GameService.Instance.Harvest(serverId);
             }
 
-            // Local fallback calculation — randomized drops scaled by quality
-            float score = 1f;
-            if (seed.recipe != null)
-                score = seed.recipe.Evaluate(plot.snapshots ?? new GrowthSnapshots(), plot.waterCount);
-            int drops = CalculateDrops(score, seed.minDrops, seed.maxDrops);
+            if (serverResult == null)
+            {
+                // Server unreachable — caller should show loading/reconnect screen
+                return null;
+            }
 
-            // Use the harvest item key from config (what the plant yields)
-            string harvestItemKey = seed.harvest_item_key;
-
+            // Build result from server response + local recipe data for UI breakdown
             var result = new HarvestResult
             {
                 seedItemKey = seed.item_key,
-                harvestItemKey = harvestItemKey,
-                drops = drops,
-                recipeScore = score,
+                harvestItemKey = serverResult.itemKey,
+                drops = serverResult.drops,
+                recipeScore = serverResult.score,
                 snapshots = plot.snapshots ?? new GrowthSnapshots(),
                 waterCount = plot.waterCount,
                 recipe = seed.recipe
             };
 
-            int serverId = plot.serverId;
-
+            // Reset plot locally
             plot.seedItemKey = null;
             plot.plantTimeUtc = null;
             plot.waterCount = 0;
@@ -406,12 +417,8 @@ namespace Garden
             plot.lastWateredUtc = null;
             plot.state = PlotState.Empty;
 
-            // Add items locally as fallback (server response will be authoritative)
-            AddItem(data, harvestItemKey, drops);
-            if (!(GameService.Instance != null && GameService.Instance.IsOnline))
-                EconomyService.Instance?.Enqueue("add-items",
-                    JsonUtility.ToJson(new AddItemRequest { item_key = harvestItemKey, count = drops }));
-
+            // Add server-authoritative items to inventory
+            AddItem(data, serverResult.itemKey, serverResult.drops);
             SaveManager.Instance.Save();
 
             OnPlotChanged?.Invoke(plotIndex);
@@ -421,35 +428,35 @@ namespace Garden
             NotificationService.Instance?.CancelPlantNotification(plotIndex);
             NotificationService.Instance?.CancelWaterNotification(plotIndex);
 
-            // Notify server for authoritative harvest
-            if (GameService.Instance != null && GameService.Instance.IsOnline && serverId > 0)
+            // If we used a cached preview, still need to execute the actual harvest on the server
+            if (usedCachedPreview && serverId > 0 && GameService.Instance != null && GameService.Instance.IsOnline)
             {
-                _ = NotifyServerHarvest(serverId, result);
+                _ = ExecuteServerHarvest(serverId, result);
             }
 
             return result;
         }
 
-        private async Task NotifyServerHarvest(int serverId, HarvestResult localResult)
+        /// <summary>
+        /// Sends the real harvest to the server (when we used a cached preview).
+        /// If the server returns different drops, adjusts inventory to match.
+        /// </summary>
+        private async Task ExecuteServerHarvest(int serverId, HarvestResult previewResult)
         {
             var resp = await GameService.Instance.Harvest(serverId);
             if (resp != null)
             {
-                var data = SaveManager.Instance.Data;
-                if (!string.IsNullOrEmpty(resp.itemKey) && resp.drops > 0)
+                // Server drops should match preview, but correct if they differ
+                if (!string.IsNullOrEmpty(resp.itemKey) && resp.drops != previewResult.drops)
                 {
+                    var data = SaveManager.Instance.Data;
                     var entry = data.inventory.Find(i => i.itemKey == resp.itemKey);
                     if (entry != null)
                     {
-                        // Server drops may differ from local estimate — adjust delta
-                        int localDrops = localResult.drops;
-                        int delta = resp.drops - localDrops;
-                        if (delta != 0)
-                        {
-                            entry.count += delta;
-                            if (entry.count <= 0) data.inventory.Remove(entry);
-                            SaveManager.Instance.Save();
-                        }
+                        int delta = resp.drops - previewResult.drops;
+                        entry.count += delta;
+                        if (entry.count <= 0) data.inventory.Remove(entry);
+                        SaveManager.Instance.Save();
                     }
                 }
             }
@@ -459,7 +466,22 @@ namespace Garden
             }
         }
 
-        public bool InstantFinish(int plotIndex)
+        private async Task FetchHarvestPreview(int plotIndex, PlotSave plot)
+        {
+            var resp = await GameService.Instance.HarvestPreview(plot.serverId);
+            if (resp != null)
+            {
+                // Only cache if plot is still mature (hasn't been harvested already)
+                var data = SaveManager.Instance.Data;
+                if (plotIndex < data.plots.Count && data.plots[plotIndex] == plot
+                    && plot.state == PlotState.Mature)
+                {
+                    plot.cachedHarvestPreview = resp;
+                }
+            }
+        }
+
+        public async Task<bool> InstantFinish(int plotIndex)
         {
             var data = SaveManager.Instance.Data;
             if (plotIndex < 0 || plotIndex >= data.plots.Count) return false;
@@ -469,14 +491,14 @@ namespace Garden
             SaveManager.Instance.Save();
             OnPlotChanged?.Invoke(plotIndex);
 
-            // Notify server
+            // Await server instant finish so the plot is mature server-side before harvest
             if (GameService.Instance != null && GameService.Instance.IsOnline && plot.serverId > 0)
-                _ = NotifyServerOrResync(GameService.Instance.InstantFinishPlot(plot.serverId));
+                await NotifyServerOrResync(GameService.Instance.InstantFinishPlot(plot.serverId));
 
             return true;
         }
 
-        public bool SpeedUpGrowth(int plotIndex)
+        public async Task<bool> SpeedUpGrowth(int plotIndex)
         {
             var data = SaveManager.Instance.Data;
             if (plotIndex < 0 || plotIndex >= data.plots.Count) return false;
@@ -493,7 +515,7 @@ namespace Garden
                 if (potion.count <= 0) data.inventory.Remove(potion);
             }
 
-            return InstantFinish(plotIndex);
+            return await InstantFinish(plotIndex);
         }
 
         public int GetSpeedItemCount()
@@ -637,6 +659,10 @@ namespace Garden
                     plot.state = PlotState.Mature;
                     changed = true;
                     OnPlotChanged?.Invoke(i);
+
+                    // Pre-fetch harvest preview from server so it's ready when the player taps
+                    if (plot.serverId > 0 && GameService.Instance != null && GameService.Instance.IsOnline)
+                        _ = FetchHarvestPreview(i, plot);
                 }
             }
             if (changed) SaveManager.Instance.Save();
