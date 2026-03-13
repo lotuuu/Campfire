@@ -78,7 +78,7 @@ namespace Garden
     [Serializable]
     public class InventoryItem
     {
-        public string itemName;
+        public string itemKey;
         public int count;
     }
 }

@@ -57,7 +57,7 @@ namespace Garden
     [Serializable]
     public class TradeCost
     {
-        public string itemName;
+        public string itemKey;
         public int count;
     }
 

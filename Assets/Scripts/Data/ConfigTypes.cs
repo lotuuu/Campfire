@@ -6,7 +6,7 @@ namespace Garden
     [Serializable]
     public class FlameIngredient
     {
-        public string itemName;
+        public string itemKey;
         public int count;
     }
 
@@ -19,7 +19,7 @@ namespace Garden
     [Serializable]
     public class HarvestCost
     {
-        public string itemName;
+        public string itemKey;
         public int count;
     }
 

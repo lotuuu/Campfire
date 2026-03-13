@@ -72,7 +72,7 @@ namespace Garden
     [Serializable]
     public class ServerReward
     {
-        public string seed_name;
+        public string item_key;
         public int count;
     }
 
@@ -165,7 +165,7 @@ namespace Garden
     [Serializable] public class BirdCollectResponse { public string seedName; public int seedCount; }
     [Serializable] public class HouseSkinRequest { public int houseId; public string skinName; }
     [Serializable] public class LocationRequest { public float lat; public float lon; }
-    [Serializable] public class HarvestResponse { public float score; public int drops; public string itemName; }
+    [Serializable] public class HarvestResponse { public float score; public int drops; public string itemKey; }
     [Serializable] public class UpgradeFlameResponse { public int flameLevel; }
     [Serializable] public class CollectGardenResponse { public ServerGarden garden; public string yieldItem; public int yieldAmount; }
     [Serializable] public class CollectQuestResponse { public ServerMallum mallum; public List<ServerReward> rewards; }

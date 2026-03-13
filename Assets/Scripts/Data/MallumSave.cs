@@ -25,7 +25,7 @@ namespace Garden
     [Serializable]
     public class RewardEntry
     {
-        public string seedName;
+        public string itemKey;
         public int count;
     }
 }

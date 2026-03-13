@@ -22,10 +22,17 @@ namespace Garden
         [Header("Category")]
         public RecipeCategory category;
 
-        public static string FormatItemName(string internalName)
+        public static string FormatItemName(string key)
         {
-            if (string.IsNullOrEmpty(internalName)) return "";
-            string name = internalName;
+            if (string.IsNullOrEmpty(key)) return "";
+            // Try server-authoritative display name first
+            if (ConfigService.Instance != null)
+            {
+                var displayName = ConfigService.Instance.GetItemDisplayName(key);
+                if (displayName != key) return displayName;
+            }
+            // Fallback: format the raw key
+            string name = key;
             if (name.EndsWith("_Seed")) name = name[..^5];
             return name.Replace('_', ' ');
         }
@@ -34,7 +41,7 @@ namespace Garden
     [Serializable]
     public class IngredientEntry
     {
-        public string itemName;
+        public string itemKey;
         public int quantity;
     }
 }
