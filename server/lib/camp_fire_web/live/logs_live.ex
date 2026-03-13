@@ -20,6 +20,10 @@ defmodule CampFireWeb.LogsLive do
      )}
   end
 
+  def handle_info(:logs_cleared, socket) do
+    {:noreply, assign(socket, entries: [])}
+  end
+
   def handle_info({:new_log_entry, entry}, socket) do
     if not socket.assigns.paused and matches_filters?(entry, socket.assigns.filters) do
       entries = socket.assigns.entries ++ [entry]
@@ -51,6 +55,11 @@ defmodule CampFireWeb.LogsLive do
 
   def handle_event("toggle_pause", _params, socket) do
     {:noreply, assign(socket, paused: not socket.assigns.paused)}
+  end
+
+  def handle_event("clear_logs", _params, socket) do
+    DebugLog.clear()
+    {:noreply, socket}
   end
 
   defp blank_to_nil(""), do: nil
@@ -88,6 +97,9 @@ defmodule CampFireWeb.LogsLive do
           </button>
           <button phx-click="clear_filters" class="px-3 py-1 rounded text-sm bg-gray-100 text-gray-600 hover:bg-gray-200">
             Clear Filters
+          </button>
+          <button phx-click="clear_logs" data-confirm="Clear all log entries?" class="px-3 py-1 rounded text-sm bg-red-100 text-red-700 hover:bg-red-200">
+            Clear Logs
           </button>
         </div>
       </div>

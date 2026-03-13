@@ -69,6 +69,11 @@ defmodule CampFire.DebugLog do
     |> Enum.sort_by(& &1.id, :desc)
   end
 
+  @doc "Clear all log entries."
+  def clear do
+    GenServer.cast(__MODULE__, :clear)
+  end
+
   @doc "Returns the PubSub topic for debug log broadcasts."
   def topic, do: @pubsub_topic
 
@@ -105,6 +110,13 @@ defmodule CampFire.DebugLog do
     Phoenix.PubSub.broadcast(CampFire.PubSub, @pubsub_topic, {:new_log_entry, entry})
 
     {:noreply, %{state | counter: next_id}}
+  end
+
+  @impl true
+  def handle_cast(:clear, state) do
+    :ets.delete_all_objects(@table)
+    Phoenix.PubSub.broadcast(CampFire.PubSub, @pubsub_topic, :logs_cleared)
+    {:noreply, %{state | counter: 0}}
   end
 
   # --- Private helpers ---
