@@ -576,7 +576,7 @@ namespace Garden
                     TrySetHexSprite(cell, "hex/bird");
                     var bird = SaveManager.Instance.Data.birds[index];
                     if (label != null) label.text = "Bird";
-                    if (status != null) status.text = $"{bird.seedCount}x {PlotManager.GetSeedDisplayName(bird.seedName)}";
+                    if (status != null) status.text = $"{bird.itemCount}x {ConfigService.Instance.GetItemDisplayName(bird.itemKey)}";
                     break;
 
                 case CampBuildingType.Visitor:
@@ -1369,8 +1369,8 @@ namespace Garden
                     var items = SaveManager.Instance.Data.inventory;
                     foreach (var ing in recipe.ingredients)
                     {
-                        string displayName = RecipeData.FormatItemName(ing.itemName);
-                        var item = items.Find(i => i.itemName == ing.itemName);
+                        string displayName = ConfigService.Instance.GetItemDisplayName(ing.itemKey);
+                        var item = items.Find(i => i.itemKey == ing.itemKey);
                         int have = item != null ? item.count : 0;
                         bool enough = have >= ing.count;
 
@@ -1769,9 +1769,8 @@ namespace Garden
             // Harvest icon + yield row
             var yieldRow = new VisualElement();
             yieldRow.AddToClassList("harvest-yield-row");
-            string harvestKey = SeedToSpriteKey(result.seedName);
-            var harvestSprite = SpriteService.Instance?.GetSprite($"items/{harvestKey}/harvest")
-                ?? SpriteService.Instance?.GetSprite($"items/{harvestKey}/seed");
+            string harvestSpriteKey = SpriteService.ItemToSpriteKey(result.harvestItemKey);
+            var harvestSprite = harvestSpriteKey != null ? SpriteService.Instance?.GetSprite(harvestSpriteKey) : null;
             if (harvestSprite != null)
             {
                 var iconEl = new VisualElement();
@@ -1779,7 +1778,7 @@ namespace Garden
                 iconEl.style.backgroundImage = new StyleBackground(harvestSprite);
                 yieldRow.Add(iconEl);
             }
-            var yieldLabel = new Label($"{PlotManager.GetSeedDisplayName(result.seedName)} x{result.drops}");
+            var yieldLabel = new Label($"{ConfigService.Instance.GetItemDisplayName(result.harvestItemKey)} x{result.drops}");
             yieldLabel.AddToClassList("harvest-yield-label");
             yieldRow.Add(yieldLabel);
             interactionBody.Add(yieldRow);
@@ -1857,11 +1856,12 @@ namespace Garden
 
         private void BuildSeedPicker(int plotIndex)
         {
-            var seedItems = SaveManager.Instance.Data.inventory.FindAll(i => i.itemName.EndsWith("_Seed"));
+            var seedItems = SaveManager.Instance.Data.inventory.FindAll(i =>
+                ConfigService.Instance?.GetItem(i.itemKey)?.category == "seed");
             seedItems.Sort((a, b) =>
             {
-                var sa = ConfigService.Instance?.GetSeed(a.itemName[..^5]);
-                var sb = ConfigService.Instance?.GetSeed(b.itemName[..^5]);
+                var sa = ConfigService.Instance?.GetSeed(SpriteService.SeedToSpriteKey(a.itemKey));
+                var sb = ConfigService.Instance?.GetSeed(SpriteService.SeedToSpriteKey(b.itemKey));
                 int tierCmp = (sa?.tier ?? 99).CompareTo(sb?.tier ?? 99);
                 if (tierCmp != 0) return tierCmp;
                 return (sa?.growthDurationHours ?? 99f).CompareTo(sb?.growthDurationHours ?? 99f);
@@ -1877,7 +1877,7 @@ namespace Garden
             {
                 if (entry.count <= 0) continue;
 
-                var plantName = entry.itemName[..^5]; // strip "_Seed"
+                var plantName = SpriteService.SeedToSpriteKey(entry.itemKey); // "basil_seed" → "basil"
                 var seedData = ConfigService.Instance?.GetSeed(plantName);
 
                 string sName = plantName;
@@ -1893,8 +1893,8 @@ namespace Garden
 
                 // Hero seed icon
                 string spriteKey = seedData != null
-                    ? SpriteService.SeedToSpriteKey(seedData.seedName)
-                    : plantName.ToLower();
+                    ? SpriteService.SeedToSpriteKey(seedData.item_key)
+                    : plantName;
 
                 var seedIcon = new VisualElement();
                 seedIcon.AddToClassList("seed-card--icon");
@@ -1910,7 +1910,7 @@ namespace Garden
                 // Title row: name + stats + count
                 var titleRow = new VisualElement();
                 titleRow.AddToClassList("seed-card--title-row");
-                var nameLabel = new Label(seedData != null ? seedData.seedName : plantName);
+                var nameLabel = new Label(seedData != null ? ConfigService.Instance.GetItemDisplayName(seedData.item_key) : plantName);
                 nameLabel.AddToClassList("seed-card--name");
                 titleRow.Add(nameLabel);
 
@@ -2080,7 +2080,7 @@ namespace Garden
                     fillingLabel.AddToClassList("interaction-info");
                     interactionBody.Add(fillingLabel);
 
-                    int vaseDrinkCount = MallumManager.Instance != null ? MallumManager.Instance.GetQuestSpeedItemCount() : 0;
+                    int vaseDrinkCount = MallumManager.Instance != null ? MallumManager.Instance.GetVaseSpeedItemCount() : 0;
                     int fetchingMallumIndex = -1;
                     if (MallumManager.Instance != null)
                     {
@@ -2418,7 +2418,7 @@ namespace Garden
             {
                 // Cost row with pigment icon + count
                 var items = SaveManager.Instance.Data.inventory;
-                var pigmentItem = items.Find(i => i.itemName == skin.costItemName);
+                var pigmentItem = items.Find(i => i.itemKey == skin.costItemName);
                 int have = pigmentItem?.count ?? 0;
                 bool canAfford = SkinManager.Instance.CanAffordSkin(skin);
 
@@ -2462,7 +2462,7 @@ namespace Garden
             var bird = data.birds[index];
             interactionTitle.text = "Bird";
 
-            var info = new Label($"A bird has brought you {bird.seedCount}x {PlotManager.GetSeedDisplayName(bird.seedName)}!");
+            var info = new Label($"A bird has brought you {bird.itemCount}x {ConfigService.Instance.GetItemDisplayName(bird.itemKey)}!");
             info.AddToClassList("interaction-info");
             interactionBody.Add(info);
 
@@ -2471,7 +2471,7 @@ namespace Garden
                 var drop = BirdManager.CollectBird(data, index);
                 if (drop != null)
                 {
-                    ApothekeManager.Instance?.AddSeed(drop.seedName, drop.seedCount);
+                    ApothekeManager.Instance?.AddItem(drop.itemKey, drop.itemCount);
                     SaveManager.Instance.Save();
                     BirdManager.Instance?.NotifyBirdCollected(drop);
                 }

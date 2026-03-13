@@ -248,7 +248,7 @@ namespace Garden
                         progressFill.style.width = new StyleLength(new Length(waterProgress * 100f, LengthUnit.Percent));
                         progressText.text = $"{Mathf.RoundToInt(waterProgress * 100)}%";
                         timerLabel.style.display = DisplayStyle.None;
-                        int waterDrinkCount = MallumManager.Instance.GetQuestSpeedItemCount();
+                        int waterDrinkCount = MallumManager.Instance.GetVaseSpeedItemCount();
                         actionBtn.text = waterDrinkCount > 0 ? $"Speed Up ({waterDrinkCount})" : "Speed Up";
                         actionBtn.AddToClassList("quest-speedup-btn");
                         actionBtn.SetEnabled(waterDrinkCount > 0);
@@ -388,8 +388,8 @@ namespace Garden
                 {
                     var chip = new VisualElement();
                     chip.AddToClassList("quest-reward-chip");
-                    bool discovered = !string.IsNullOrEmpty(reward.seedName) && ApothekeManager.IsSeedDiscovered(reward.seedName);
-                    var chipLabel = new Label(discovered ? reward.seedName : "???");
+                    bool discovered = !string.IsNullOrEmpty(reward.itemKey) && ApothekeManager.IsSeedDiscovered(reward.itemKey);
+                    var chipLabel = new Label(discovered ? ConfigService.Instance.GetItemDisplayName(reward.itemKey) : "???");
                     chipLabel.AddToClassList("quest-reward-name");
                     if (!discovered) chip.AddToClassList("quest-reward-chip--unknown");
                     chip.Add(chipLabel);

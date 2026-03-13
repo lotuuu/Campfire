@@ -197,8 +197,8 @@ namespace Garden
                 {
                     foreach (var cost in offer.costs)
                     {
-                        string displayName = RecipeData.FormatItemName(cost.itemName);
-                        var item = data.inventory.Find(i => i.itemName == cost.itemName);
+                        string displayName = ConfigService.Instance.GetItemDisplayName(cost.itemKey);
+                        var item = data.inventory.Find(i => i.itemKey == cost.itemKey);
                         int have = item != null ? item.count : 0;
                         bool enough = have >= cost.count;
 
@@ -210,7 +210,7 @@ namespace Garden
                 }
 
                 if (rewardText != null)
-                    rewardText.text = $"{offer.rewardCount}x {PlotManager.GetSeedDisplayName(offer.rewardSeedName)}";
+                    rewardText.text = $"{offer.rewardCount}x {ConfigService.Instance.GetItemDisplayName(offer.rewardItemKey)}";
 
                 if (tradeBtn != null)
                 {
@@ -234,7 +234,7 @@ namespace Garden
             if (visitor.isReturnVisit)
             {
                 var data = SaveManager.Instance.Data;
-                var item = data.inventory.Find(i => i.itemName == visitor.requestItem);
+                var item = data.inventory.Find(i => i.itemKey == visitor.requestItem);
                 int have = item?.count ?? 0;
 
                 if (questLabel != null) questLabel.text = "Requesting:";

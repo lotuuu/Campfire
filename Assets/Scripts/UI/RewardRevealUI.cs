@@ -83,11 +83,11 @@ namespace Garden
             var merged = new List<RewardEntry>();
             foreach (var r in rewards)
             {
-                var existing = merged.Find(m => m.seedName == r.seedName);
+                var existing = merged.Find(m => m.itemKey == r.itemKey);
                 if (existing != null)
                     existing.count += r.count;
                 else
-                    merged.Add(new RewardEntry { seedName = r.seedName, count = r.count });
+                    merged.Add(new RewardEntry { itemKey = r.itemKey, count = r.count });
             }
             return merged;
         }
@@ -109,7 +109,9 @@ namespace Garden
 
         private VisualElement BuildCard(RewardEntry reward)
         {
-            int tier = ConfigService.Instance?.GetSeed(reward.seedName)?.tier ?? 0;
+            // Look up tier: reward.itemKey might be a seed key like "basil_seed"
+            string plantName = SpriteService.SeedToSpriteKey(reward.itemKey);
+            int tier = ConfigService.Instance?.GetSeed(plantName)?.tier ?? 0;
             string tierClass = $"reward-card--tier{Mathf.Min(tier, 4)}";
 
             var card = new VisualElement();
@@ -121,17 +123,17 @@ namespace Garden
             glow.AddToClassList("reward-card-glow");
             card.Add(glow);
 
-            // Seed sprite
+            // Item sprite
             var sprite = new VisualElement();
             sprite.AddToClassList("reward-card-sprite");
-            string spriteKey = $"items/{SpriteService.SeedToSpriteKey(reward.seedName)}/seed";
-            var tex = SpriteService.Instance?.GetTexture(spriteKey);
+            string spriteKey = SpriteService.ItemToSpriteKey(reward.itemKey);
+            var tex = spriteKey != null ? SpriteService.Instance?.GetTexture(spriteKey) : null;
             if (tex != null)
                 sprite.style.backgroundImage = new StyleBackground(tex);
             card.Add(sprite);
 
-            // Seed name
-            var nameLabel = new Label(PlotManager.GetSeedDisplayName(reward.seedName) + " Seeds");
+            // Item name
+            var nameLabel = new Label(ConfigService.Instance.GetItemDisplayName(reward.itemKey));
             nameLabel.AddToClassList("reward-card-name");
             card.Add(nameLabel);
 

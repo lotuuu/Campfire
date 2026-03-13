@@ -132,7 +132,7 @@ namespace Garden
             {
                 chips.Add(new CostChip
                 {
-                    icon = LoadHarvestIcon(hc.itemName),
+                    icon = LoadHarvestIcon(hc.itemKey),
                     amount = $"{hc.count}"
                 });
             }
@@ -176,7 +176,7 @@ namespace Garden
             {
                 chips.Add(new CostChip
                 {
-                    icon = LoadHarvestIcon(ing.itemName),
+                    icon = LoadHarvestIcon(ing.itemKey),
                     amount = $"{ing.count}"
                 });
             }
@@ -189,9 +189,9 @@ namespace Garden
             return SpriteService.Instance?.GetSprite("ui/resource-mana");
         }
 
-        private static Sprite LoadHarvestIcon(string itemName)
+        private static Sprite LoadHarvestIcon(string itemKey)
         {
-            string key = SpriteService.ItemToSpriteKey(itemName);
+            string key = SpriteService.ItemToSpriteKey(itemKey);
             if (key != null)
             {
                 var sprite = SpriteService.Instance?.GetSprite(key);
@@ -199,7 +199,7 @@ namespace Garden
             }
 
             // Fallback: try garden plant icon
-            string slug = SpriteService.SeedToSpriteKey(itemName);
+            string slug = SpriteService.SeedToSpriteKey(itemKey);
             return SpriteService.Instance?.GetSprite($"gardens/{slug}/icon");
         }
     }

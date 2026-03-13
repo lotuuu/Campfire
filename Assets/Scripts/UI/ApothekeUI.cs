@@ -55,13 +55,17 @@ namespace Garden
 
         private enum InventoryCategory { Seeds, Yields, Pigments, Consumables }
 
-        private static InventoryCategory CategorizeItem(string itemName)
+        private static InventoryCategory CategorizeItem(string itemKey)
         {
-            if (itemName.EndsWith("_Seed")) return InventoryCategory.Seeds;
-            if (itemName.EndsWith("_pigment")) return InventoryCategory.Pigments;
-            if (itemName.EndsWith("_Potion") || itemName.EndsWith("_Drink") || itemName == "Fertilizer" || itemName.EndsWith("_Energizer"))
-                return InventoryCategory.Consumables;
-            return InventoryCategory.Yields;
+            var config = ConfigService.Instance?.GetItem(itemKey);
+            if (config == null) return InventoryCategory.Yields;
+            return config.category switch
+            {
+                "seed" => InventoryCategory.Seeds,
+                "pigment" => InventoryCategory.Pigments,
+                "potion" or "consumable" or "material" => InventoryCategory.Consumables,
+                _ => InventoryCategory.Yields
+            };
         }
 
         private static string CategoryLabel(InventoryCategory cat) => cat switch
@@ -99,7 +103,7 @@ namespace Garden
             foreach (var item in allItems)
             {
                 if (item.count <= 0) continue;
-                var cat = CategorizeItem(item.itemName);
+                var cat = CategorizeItem(item.itemKey);
                 if (!groups.ContainsKey(cat))
                     groups[cat] = new System.Collections.Generic.List<InventoryItem>();
                 groups[cat].Add(item);
@@ -117,8 +121,8 @@ namespace Garden
             {
                 seedGroup.Sort((a, b) =>
                 {
-                    var sa = ConfigService.Instance?.GetSeed(a.itemName[..^5]);
-                    var sb = ConfigService.Instance?.GetSeed(b.itemName[..^5]);
+                    var sa = ConfigService.Instance?.GetSeed(SpriteService.SeedToSpriteKey(a.itemKey));
+                    var sb = ConfigService.Instance?.GetSeed(SpriteService.SeedToSpriteKey(b.itemKey));
                     int tierCmp = (sa?.tier ?? 99).CompareTo(sb?.tier ?? 99);
                     if (tierCmp != 0) return tierCmp;
                     return (sa?.growthDurationHours ?? 99f).CompareTo(sb?.growthDurationHours ?? 99f);
@@ -141,7 +145,7 @@ namespace Garden
                 {
                     if (cat == InventoryCategory.Seeds)
                     {
-                        var plantName = entry.itemName[..^5];
+                        var plantName = SpriteService.SeedToSpriteKey(entry.itemKey);
                         var seedConfig = ConfigService.Instance?.GetSeed(plantName);
                         var card = BuildSeedCard(entry, seedConfig, seedIndex++);
                         grid.Add(card);
@@ -166,14 +170,14 @@ namespace Garden
 
             var icon = new VisualElement();
             icon.AddToClassList("seed-icon");
-            var sprite = SpriteService.Instance?.GetSprite(SpriteService.ItemToSpriteKey(entry.itemName));
+            var sprite = SpriteService.Instance?.GetSprite(SpriteService.ItemToSpriteKey(entry.itemKey));
             if (sprite != null)
                 icon.style.backgroundImage = new StyleBackground(sprite);
             header.Add(icon);
 
             var info = new VisualElement();
             info.AddToClassList("seed-info");
-            var nameLabel = new Label(RecipeData.FormatItemName(entry.itemName));
+            var nameLabel = new Label(ConfigService.Instance.GetItemDisplayName(entry.itemKey));
             nameLabel.AddToClassList("seed-name");
             info.Add(nameLabel);
             var countLabel = new Label($"x{entry.count}");
@@ -198,7 +202,7 @@ namespace Garden
             icon.AddToClassList("seed-icon");
             if (seedData != null)
             {
-                var sprite = SpriteService.Instance?.GetSprite($"items/{SpriteService.SeedToSpriteKey(seedData.seedName)}/seed");
+                var sprite = SpriteService.Instance?.GetSprite(SpriteService.ItemToSpriteKey(entry.itemKey));
                 if (sprite != null)
                     icon.style.backgroundImage = new StyleBackground(sprite);
             }
@@ -206,8 +210,7 @@ namespace Garden
 
             var info = new VisualElement();
             info.AddToClassList("seed-info");
-            var plantName = entry.itemName.EndsWith("_Seed") ? entry.itemName[..^5] : entry.itemName;
-            var nameLabel = new Label(seedData != null ? seedData.seedName : plantName);
+            var nameLabel = new Label(ConfigService.Instance.GetItemDisplayName(entry.itemKey));
             nameLabel.AddToClassList("seed-name");
             info.Add(nameLabel);
             var countLabel = new Label($"x{entry.count}");
@@ -409,14 +412,14 @@ namespace Garden
                 var row = new VisualElement();
                 row.AddToClassList("recipe-ingredient-row");
 
-                var ingName = new Label(RecipeData.FormatItemName(ing.itemName));
+                var ingName = new Label(ConfigService.Instance.GetItemDisplayName(ing.itemKey));
                 ingName.AddToClassList("recipe-ingredient-name");
                 row.Add(ingName);
 
                 int owned = 0;
                 if (items != null)
                 {
-                    var item = items.Find(i => i.itemName == ing.itemName);
+                    var item = items.Find(i => i.itemKey == ing.itemKey);
                     if (item != null) owned = item.count;
                 }
                 bool satisfied = owned >= ing.quantity;
@@ -437,7 +440,7 @@ namespace Garden
             var resultLbl = new Label("Makes:");
             resultLbl.AddToClassList("recipe-result-label");
             resultRow.Add(resultLbl);
-            var resultName = new Label($"{recipe.resultQuantity}x {RecipeData.FormatItemName(recipe.result)}");
+            var resultName = new Label($"{recipe.resultQuantity}x {ConfigService.Instance.GetItemDisplayName(recipe.result)}");
             resultName.AddToClassList("recipe-result-name");
             resultRow.Add(resultName);
             details.Add(resultRow);

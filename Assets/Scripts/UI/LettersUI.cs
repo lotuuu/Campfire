@@ -525,14 +525,15 @@ namespace Garden
             foreach (var item in data.inventory)
             {
                 if (item.count <= 0) continue;
-                if (item.itemName.EndsWith("_Seed"))
+                var itemConfig = ConfigService.Instance?.GetItem(item.itemKey);
+                string displayName = ConfigService.Instance.GetItemDisplayName(item.itemKey);
+                if (itemConfig?.category == "seed")
                 {
-                    var plantName = item.itemName[..^5];
-                    AddGiftPickerRow("seed", item.itemName, item.count, PlotManager.GetSeedDisplayName(plantName));
+                    AddGiftPickerRow("seed", item.itemKey, item.count, displayName);
                 }
                 else
                 {
-                    AddGiftPickerRow("item", item.itemName, item.count);
+                    AddGiftPickerRow("item", item.itemKey, item.count, displayName);
                 }
             }
         }
