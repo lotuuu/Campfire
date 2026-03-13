@@ -97,6 +97,13 @@ namespace Garden
             var data = TryLoadFrom(SavePath) ?? TryLoadFrom(BakPath);
             Data = data ?? new SaveData();
 
+            // Version gate: old saves use incompatible item keys — reset to fresh save
+            if (Data.version < 2)
+            {
+                Debug.Log("[SaveManager] Save version too old, resetting to fresh save");
+                Data = new SaveData();
+            }
+
             // If tutorial was never completed, discard the stale local save immediately
             // so the UI never renders old positions. Server wipe happens later in GameService.
             if (Data.tutorialStep < TutorialManager.StepComplete && Data.vases.Count > 0)

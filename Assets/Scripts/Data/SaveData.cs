@@ -6,7 +6,7 @@ namespace Garden
     [Serializable]
     public class SaveData
     {
-        public int version = 1;
+        public int version = 2;
         public float mana;
         public int gems;
         public int flameLevel = 1;
