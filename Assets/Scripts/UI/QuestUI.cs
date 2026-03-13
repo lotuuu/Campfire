@@ -327,13 +327,7 @@ namespace Garden
                 activeSection.Add(card);
             }
 
-            if (!hasActive)
-            {
-                var empty = new Label("All Mallums idle - send them on a quest!");
-                empty.AddToClassList("quest-empty-text");
-                activeSection.Add(empty);
-            }
-            else
+            if (hasActive)
             {
                 activeSection.Insert(0, MakeSectionHeader("Active", true));
             }
