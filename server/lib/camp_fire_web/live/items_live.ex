@@ -65,7 +65,7 @@ defmodule CampFireWeb.ItemsLive do
       recipe ->
         ingredients =
           Enum.map(recipe["ingredients"] || [], fn ing ->
-            %{item_name: ing["item_name"] || "", count: to_string(ing["count"] || 1)}
+            %{item_key: ing["itemKey"] || "", count: to_string(ing["count"] || 1)}
           end)
 
         assign(socket,
@@ -86,7 +86,7 @@ defmodule CampFireWeb.ItemsLive do
           skin_form: %{
             name: name,
             building_type: skin["building_type"] || "plot",
-            cost_item_name: skin["cost_item_name"] || "",
+            cost_item_key: skin["cost_item_key"] || "",
             cost_quantity: to_string(skin["cost_quantity"] || 1)
           }
         )
@@ -240,9 +240,9 @@ defmodule CampFireWeb.ItemsLive do
 
     ingredients =
       Enum.map(socket.assigns.ingredients, fn ing ->
-        %{"item_name" => ing.item_name, "count" => parse_int(ing.count)}
+        %{"itemKey" => ing.item_key, "count" => parse_int(ing.count)}
       end)
-      |> Enum.reject(fn ing -> ing["item_name"] == "" end)
+      |> Enum.reject(fn ing -> ing["itemKey"] == "" end)
 
     recipe = %{
       "ingredients" => ingredients,
@@ -290,7 +290,7 @@ defmodule CampFireWeb.ItemsLive do
   end
 
   def handle_event("add_ingredient", _params, socket) do
-    ingredients = socket.assigns.ingredients ++ [%{item_name: "", count: "1"}]
+    ingredients = socket.assigns.ingredients ++ [%{item_key: "", count: "1"}]
     {:noreply, assign(socket, ingredients: ingredients)}
   end
 
@@ -320,7 +320,7 @@ defmodule CampFireWeb.ItemsLive do
 
     skin = %{
       "building_type" => "plot",
-      "cost_item_name" => "",
+      "cost_item_key" => "",
       "cost_quantity" => 1
     }
 
@@ -352,7 +352,7 @@ defmodule CampFireWeb.ItemsLive do
 
     skin = %{
       "building_type" => params["building_type"] || "plot",
-      "cost_item_name" => String.trim(params["cost_item_name"] || ""),
+      "cost_item_key" => String.trim(params["cost_item_key"] || ""),
       "cost_quantity" => parse_int(params["cost_quantity"] || "1")
     }
 
@@ -670,12 +670,12 @@ defmodule CampFireWeb.ItemsLive do
                         <tr class="hover:bg-gray-50">
                           <td class="px-3 py-2">
                             <input
-                              id={"ing-#{idx}-item_name"}
+                              id={"ing-#{idx}-item_key"}
                               type="text"
-                              value={ing.item_name}
+                              value={ing.item_key}
                               phx-hook="RewardInput"
                               data-index={idx}
-                              data-field="item_name"
+                              data-field="item_key"
                               data-event="update_ingredient"
                               class="w-full border rounded px-2 py-1 text-sm"
                               placeholder="e.g. Basil"
@@ -732,7 +732,7 @@ defmodule CampFireWeb.ItemsLive do
               <td class="px-4 py-3 text-sm text-gray-500">
                 <%= for ing <- recipe["ingredients"] || [] do %>
                   <span class="inline-block bg-gray-100 rounded px-2 py-0.5 mr-1 mb-1">
-                    {ing["item_name"]} x{ing["count"]}
+                    {ing["itemKey"]} x{ing["count"]}
                   </span>
                 <% end %>
               </td>
@@ -800,7 +800,7 @@ defmodule CampFireWeb.ItemsLive do
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700">Cost Item</label>
-                <input type="text" name="cost_item_name" value={@skin_form[:cost_item_name]}
+                <input type="text" name="cost_item_key" value={@skin_form[:cost_item_key]}
                   class="mt-1 block w-full border rounded px-3 py-2" placeholder="e.g. Basil_Pigment" />
               </div>
               <div>
@@ -839,7 +839,7 @@ defmodule CampFireWeb.ItemsLive do
               </td>
               <td class="px-4 py-3 font-medium">{name}</td>
               <td class="px-4 py-3 text-sm">{skin["building_type"]}</td>
-              <td class="px-4 py-3 text-sm text-gray-500">{skin["cost_item_name"]} x{skin["cost_quantity"]}</td>
+              <td class="px-4 py-3 text-sm text-gray-500">{skin["cost_item_key"]} x{skin["cost_quantity"]}</td>
               <td class="px-4 py-3">
                 <button phx-click="edit_skin" phx-value-name={name} class="text-blue-600 hover:underline">Edit</button>
               </td>

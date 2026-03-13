@@ -48,9 +48,9 @@ defmodule CampFireWeb.EconomyLive do
           (recipe_params["ingredient"] || %{})
           |> Enum.sort_by(fn {k, _} -> parse_int(k) end)
           |> Enum.map(fn {_i, ing} ->
-            %{"itemName" => ing["itemName"], "count" => parse_int(ing["count"])}
+            %{"itemKey" => ing["itemKey"], "count" => parse_int(ing["count"])}
           end)
-          |> Enum.reject(fn ing -> ing["itemName"] == "" or ing["itemName"] == nil end)
+          |> Enum.reject(fn ing -> ing["itemKey"] == "" or ing["itemKey"] == nil end)
 
         %{"ingredients" => ingredients}
       end)
@@ -91,9 +91,9 @@ defmodule CampFireWeb.EconomyLive do
           (cost_params["harvest"] || %{})
           |> Enum.sort_by(fn {k, _} -> parse_int(k) end)
           |> Enum.map(fn {_i, h} ->
-            %{"itemName" => h["item"], "count" => parse_int(h["count"])}
+            %{"itemKey" => h["item"], "count" => parse_int(h["count"])}
           end)
-          |> Enum.reject(fn h -> h["itemName"] == "" or h["itemName"] == nil end)
+          |> Enum.reject(fn h -> h["itemKey"] == "" or h["itemKey"] == nil end)
 
         %{"manaCost" => parse_int(cost_params["mana"]), "harvestCosts" => harvestCosts}
       end)
@@ -153,7 +153,7 @@ defmodule CampFireWeb.EconomyLive do
     data = socket.assigns.edit_data
     recipes = data["upgrade_recipes"] || []
     recipe = Enum.at(recipes, i)
-    ingredients = (recipe["ingredients"] || []) ++ [%{"itemName" => "", "count" => 1}]
+    ingredients = (recipe["ingredients"] || []) ++ [%{"itemKey" => "", "count" => 1}]
     recipe = Map.put(recipe, "ingredients", ingredients)
     recipes = List.replace_at(recipes, i, recipe)
     {:noreply, assign(socket, edit_data: Map.put(data, "upgrade_recipes", recipes))}
@@ -208,7 +208,7 @@ defmodule CampFireWeb.EconomyLive do
     data = socket.assigns.edit_data
     costs = data["house_costs"] || []
     house = Enum.at(costs, i)
-    harvests = (house["harvestCosts"] || []) ++ [%{"itemName" => "", "count" => 1}]
+    harvests = (house["harvestCosts"] || []) ++ [%{"itemKey" => "", "count" => 1}]
     house = Map.put(house, "harvestCosts", harvests)
     costs = List.replace_at(costs, i, house)
     {:noreply, assign(socket, edit_data: Map.put(data, "house_costs", costs))}
@@ -248,7 +248,7 @@ defmodule CampFireWeb.EconomyLive do
     key = type <> "_costs"
     costs = data[key] || []
     entry = Enum.at(costs, i)
-    harvests = (entry["harvestCosts"] || []) ++ [%{"itemName" => "", "count" => 1}]
+    harvests = (entry["harvestCosts"] || []) ++ [%{"itemKey" => "", "count" => 1}]
     entry = Map.put(entry, "harvestCosts", harvests)
     costs = List.replace_at(costs, i, entry)
     {:noreply, assign(socket, edit_data: Map.put(data, key, costs))}
@@ -343,9 +343,9 @@ defmodule CampFireWeb.EconomyLive do
         (cost_params["harvest"] || %{})
         |> Enum.sort_by(fn {k, _} -> parse_int(k) end)
         |> Enum.map(fn {_i, h} ->
-          %{"itemName" => h["itemName"], "count" => parse_int(h["count"])}
+          %{"itemKey" => h["itemKey"], "count" => parse_int(h["count"])}
         end)
-        |> Enum.reject(fn h -> h["itemName"] == "" or h["itemName"] == nil end)
+        |> Enum.reject(fn h -> h["itemKey"] == "" or h["itemKey"] == nil end)
 
       %{"manaCost" => parse_int(cost_params["manaCost"]), "harvestCosts" => harvests}
     end)
@@ -466,7 +466,7 @@ defmodule CampFireWeb.EconomyLive do
                   <%= if recipe && recipe["ingredients"] != [] do %>
                     <%= for ing <- recipe["ingredients"] || [] do %>
                       <span class="inline-block bg-purple-100 text-purple-800 rounded px-2 py-0.5 text-xs mr-1">
-                        {ing["count"]}x {ing["itemName"]}
+                        {ing["count"]}x {ing["itemKey"]}
                       </span>
                     <% end %>
                   <% else %>
@@ -550,7 +550,7 @@ defmodule CampFireWeb.EconomyLive do
                 <% else %>
                   <%= for h <- cost["harvestCosts"] do %>
                     <span class="inline-block bg-amber-100 text-amber-800 rounded px-2 py-0.5 text-xs mr-1">
-                      {h["count"]}x {h["itemName"]}
+                      {h["count"]}x {h["itemKey"]}
                     </span>
                   <% end %>
                 <% end %>
@@ -639,7 +639,7 @@ defmodule CampFireWeb.EconomyLive do
                     <div class="space-y-1">
                       <%= for {ing, j} <- Enum.with_index(ingredients) do %>
                         <div class="flex gap-1 items-center">
-                          <input type="text" name={"recipe[#{i - 1}][ingredient][#{j}][itemName]"} value={ing["itemName"]} placeholder="item" class="border rounded px-1 py-0.5 text-xs w-24" />
+                          <input type="text" name={"recipe[#{i - 1}][ingredient][#{j}][itemKey]"} value={ing["itemKey"]} placeholder="item_key" class="border rounded px-1 py-0.5 text-xs w-24" />
                           <span class="text-gray-400 text-xs">x</span>
                           <input type="number" name={"recipe[#{i - 1}][ingredient][#{j}][count]"} value={ing["count"]} class="border rounded px-1 py-0.5 text-xs w-14" />
                           <button type="button" phx-click="remove_recipe_ingredient" phx-value-recipe-index={i - 1} phx-value-ingredient-index={j} class="text-red-500 hover:text-red-700 text-xs">X</button>
@@ -779,7 +779,7 @@ defmodule CampFireWeb.EconomyLive do
                 <div class="space-y-1 ml-4">
                   <%= for {h, j} <- Enum.with_index(cost["harvestCosts"] || []) do %>
                     <div class="flex gap-2 items-center">
-                      <input type="text" name={"house_cost[#{i}][harvest][#{j}][item]"} value={h["itemName"]} placeholder="item_name" class="border rounded px-2 py-1 text-sm w-40" />
+                      <input type="text" name={"house_cost[#{i}][harvest][#{j}][item]"} value={h["itemKey"]} placeholder="item_key" class="border rounded px-2 py-1 text-sm w-40" />
                       <span class="text-gray-400 text-xs">x</span>
                       <input type="number" name={"house_cost[#{i}][harvest][#{j}][count]"} value={h["count"]} class="border rounded px-2 py-1 text-sm w-16" />
                       <button type="button" phx-click="remove_harvest" phx-value-house-index={i} phx-value-harvest-index={j} class="text-red-500 hover:text-red-700 text-xs">X</button>
