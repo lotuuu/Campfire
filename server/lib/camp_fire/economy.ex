@@ -43,12 +43,8 @@ defmodule CampFire.Economy do
     |> Repo.insert()
     |> case do
       {:ok, economy} ->
-        for seed <- npc["seeds"] || [] do
-          upsert_item(player_uid, "#{seed["name"]}_Seed", seed["count"])
-        end
-
         for item <- npc["items"] || [] do
-          upsert_item(player_uid, item["name"], item["count"])
+          upsert_item(player_uid, item["itemKey"], item["count"])
         end
 
         create_starter_buildings(player_uid, npc)
@@ -153,7 +149,7 @@ defmodule CampFire.Economy do
       end
 
       unless opts[:free_mode] do
-        Enum.each(required_items, fn %{"item_name" => name, "count" => count} ->
+        Enum.each(required_items, fn %{"itemKey" => name, "count" => count} ->
           case spend_items_in_tx(player_uid, name, count) do
             :ok -> :ok
             {:error, reason} -> Repo.rollback(reason)
@@ -177,22 +173,22 @@ defmodule CampFire.Economy do
     from(i in PlayerInventory, where: i.player_uid == ^player_uid) |> Repo.all()
   end
 
-  def upsert_item(player_uid, item_name, count) when is_integer(count) and count > 0 do
-    %PlayerInventory{player_uid: player_uid, item_name: item_name, count: count}
+  def upsert_item(player_uid, item_key, count) when is_integer(count) and count > 0 do
+    %PlayerInventory{player_uid: player_uid, item_key: item_key, count: count}
     |> Repo.insert(
       on_conflict: [inc: [count: count]],
-      conflict_target: [:player_uid, :item_name],
+      conflict_target: [:player_uid, :item_key],
       returning: true
     )
   end
 
-  def spend_item(player_uid, item_name, count, opts \\ []) when is_integer(count) and count > 0 do
+  def spend_item(player_uid, item_key, count, opts \\ []) when is_integer(count) and count > 0 do
     if opts[:free_mode] do
       {:ok, :spent}
     else
       {updated, _} =
         from(i in PlayerInventory,
-          where: i.player_uid == ^player_uid and i.item_name == ^item_name and i.count >= ^count
+          where: i.player_uid == ^player_uid and i.item_key == ^item_key and i.count >= ^count
         )
         |> Repo.update_all(inc: [count: -count])
 
@@ -201,7 +197,7 @@ defmodule CampFire.Economy do
       else
         # Clean up zero-count rows
         from(i in PlayerInventory,
-          where: i.player_uid == ^player_uid and i.item_name == ^item_name and i.count == 0
+          where: i.player_uid == ^player_uid and i.item_key == ^item_key and i.count == 0
         )
         |> Repo.delete_all()
 
@@ -215,7 +211,7 @@ defmodule CampFire.Economy do
       {:ok, nil}
     else
       Repo.transaction(fn ->
-        Enum.each(items, fn %{"item_name" => name, "count" => count} ->
+        Enum.each(items, fn %{"itemKey" => name, "count" => count} ->
           case spend_items_in_tx(player_uid, name, count) do
             :ok -> :ok
             {:error, reason} -> Repo.rollback(reason)
@@ -282,18 +278,18 @@ defmodule CampFire.Economy do
         do: {q, r}
   end
 
-  defp spend_items_in_tx(player_uid, item_name, count) do
+  defp spend_items_in_tx(player_uid, item_key, count) do
     {updated, _} =
       from(i in PlayerInventory,
-        where: i.player_uid == ^player_uid and i.item_name == ^item_name and i.count >= ^count
+        where: i.player_uid == ^player_uid and i.item_key == ^item_key and i.count >= ^count
       )
       |> Repo.update_all(inc: [count: -count])
 
     if updated == 0 do
-      {:error, {:insufficient_items, item_name}}
+      {:error, {:insufficient_items, item_key}}
     else
       from(i in PlayerInventory,
-        where: i.player_uid == ^player_uid and i.item_name == ^item_name and i.count == 0
+        where: i.player_uid == ^player_uid and i.item_key == ^item_key and i.count == 0
       )
       |> Repo.delete_all()
 
