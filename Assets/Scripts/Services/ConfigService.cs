@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -12,9 +13,19 @@ namespace Garden
     // ── Server response DTOs (JsonUtility-compatible) ──
 
     [Serializable]
+    public class ItemConfig
+    {
+        public string displayName;
+        public string category;
+        public string spriteKey;
+    }
+
+    [Serializable]
     public class ServerSeedConfig
     {
         public string seedName;
+        public string item_key;
+        public string harvest_item_key;
         public float growthDurationHours;
         public int minDrops;
         public int maxDrops;
@@ -26,7 +37,7 @@ namespace Garden
     [Serializable]
     public class ServerQuestReward
     {
-        public string seedName;
+        public string itemKey;
         public float weight = 1f;
         public int minCount = 1;
         public int maxCount = 1;
@@ -139,7 +150,7 @@ namespace Garden
     [Serializable]
     public class NewPlayerItemGrant
     {
-        public string name;
+        public string itemKey;
         public int count;
     }
 
@@ -169,6 +180,25 @@ namespace Garden
         private ServerNewPlayerConfig _newPlayerConfig;
         private Dictionary<string, List<BuildingCost>> _buildingCosts = new();
         private Dictionary<string, string> _spriteManifest = new();
+
+        public Dictionary<string, ItemConfig> Items { get; private set; } = new();
+
+        public ItemConfig GetItem(string itemKey)
+        {
+            return Items.TryGetValue(itemKey, out var config) ? config : null;
+        }
+
+        public string GetItemDisplayName(string itemKey)
+        {
+            if (Items.TryGetValue(itemKey, out var config))
+                return config.displayName;
+            return itemKey; // fallback to raw key
+        }
+
+        public List<KeyValuePair<string, ItemConfig>> GetItemsByCategory(string category)
+        {
+            return Items.Where(kv => kv.Value.category == category).ToList();
+        }
 
         private static string ServerBaseUrl => ServerConfig.BaseUrl;
 
@@ -415,6 +445,8 @@ namespace Garden
                         var config = new ServerSeedConfig
                         {
                             seedName = GetString(seedMap, "seedName"),
+                            item_key = GetString(seedMap, "item_key"),
+                            harvest_item_key = GetString(seedMap, "harvest_item_key"),
                             growthDurationHours = GetFloat(seedMap, "growthDurationHours"),
                             minDrops = (int)GetFloat(seedMap, "minDrops"),
                             maxDrops = (int)GetFloat(seedMap, "maxDrops"),
@@ -454,7 +486,7 @@ namespace Garden
                                 {
                                     config.rewardPool.Add(new ServerQuestReward
                                     {
-                                        seedName = GetString(r, "seed"),
+                                        itemKey = GetString(r, "itemKey"),
                                         weight = GetFloat(r, "weight", 1f),
                                         minCount = (int)GetFloat(r, "minCount", 1f),
                                         maxCount = (int)GetFloat(r, "maxCount", 1f)
@@ -516,7 +548,7 @@ namespace Garden
                                 {
                                     recipe.ingredients.Add(new FlameIngredient
                                     {
-                                        itemName = GetString(d, "itemName"),
+                                        itemKey = GetString(d, "itemKey"),
                                         count = (int)GetFloat(d, "count")
                                     });
                                 }
@@ -601,7 +633,7 @@ namespace Garden
                         if (item is Dictionary<string, object> d)
                             _newPlayerConfig.seeds.Add(new NewPlayerItemGrant
                             {
-                                name = GetString(d, "name"),
+                                itemKey = GetString(d, "itemKey"),
                                 count = (int)GetFloat(d, "count")
                             });
                     }
@@ -614,7 +646,7 @@ namespace Garden
                         if (item is Dictionary<string, object> d)
                             _newPlayerConfig.items.Add(new NewPlayerItemGrant
                             {
-                                name = GetString(d, "name"),
+                                itemKey = GetString(d, "itemKey"),
                                 count = (int)GetFloat(d, "count")
                             });
                     }
@@ -629,6 +661,24 @@ namespace Garden
                 {
                     if (kv.Value is string hash)
                         _spriteManifest[kv.Key] = hash;
+                }
+            }
+
+            // Items
+            if (root.TryGetValue("items", out var itemsObj) && itemsObj is Dictionary<string, object> itemsDict)
+            {
+                Items = new Dictionary<string, ItemConfig>();
+                foreach (var kv in itemsDict)
+                {
+                    if (kv.Value is Dictionary<string, object> itemData)
+                    {
+                        Items[kv.Key] = new ItemConfig
+                        {
+                            displayName = itemData.TryGetValue("displayName", out var dn) ? dn as string : kv.Key,
+                            category = itemData.TryGetValue("category", out var cat) ? cat as string : "harvest",
+                            spriteKey = itemData.TryGetValue("spriteKey", out var sk) ? sk as string : null
+                        };
+                    }
                 }
             }
         }
@@ -679,10 +729,10 @@ namespace Garden
                     foreach (var hc in hcList)
                     {
                         if (hc is not Dictionary<string, object> hd) continue;
-                        string itemName = hd.TryGetValue("itemName", out var n) && n is string s ? s : null;
+                        string itemKey = hd.TryGetValue("itemKey", out var n) && n is string s ? s : null;
                         int count = hd.TryGetValue("count", out var c) ? (c is double cd ? (int)cd : c is long cl ? (int)cl : 0) : 0;
-                        if (itemName != null)
-                            cost.harvestCosts.Add(new HarvestCost { itemName = itemName, count = count });
+                        if (itemKey != null)
+                            cost.harvestCosts.Add(new HarvestCost { itemKey = itemKey, count = count });
                     }
                 }
                 result.Add(cost);
