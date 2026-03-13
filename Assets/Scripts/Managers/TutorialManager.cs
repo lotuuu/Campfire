@@ -267,7 +267,7 @@ namespace Garden
                         if (m.state == MallumState.FetchingWater)
                         {
                             ClearAllHighlights();
-                            tutorialUI?.ShowHint("Tap your vase and use an Energy Drink to speed it up!");
+                            tutorialUI?.ShowHint("Use an Energy Drink to speed it up!");
                             HighlightVaseHex(0);
                             return;
                         }
