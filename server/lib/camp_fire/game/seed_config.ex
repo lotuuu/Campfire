@@ -9,12 +9,14 @@ defmodule CampFire.Game.SeedConfig do
     field :max_drops, :integer
     field :tier, :integer, default: 1
     field :recipe, :map, default: %{}
+    field :item_key, :string
+    field :harvest_item_key, :string
     timestamps(type: :utc_datetime)
   end
 
   def changeset(config, attrs) do
     config
-    |> cast(attrs, [:seed_name, :growth_duration_hours, :min_drops, :max_drops, :tier, :recipe])
+    |> cast(attrs, [:seed_name, :growth_duration_hours, :min_drops, :max_drops, :tier, :recipe, :item_key, :harvest_item_key])
     |> validate_required([:seed_name, :growth_duration_hours, :min_drops, :max_drops])
     |> validate_number(:growth_duration_hours, greater_than: 0)
     |> validate_number(:min_drops, greater_than: 0)
