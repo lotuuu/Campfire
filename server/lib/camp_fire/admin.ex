@@ -10,7 +10,7 @@ defmodule CampFire.Admin do
   alias CampFire.Repo
   alias CampFire.Admin.{QuestConfig, GardenConfig, GameConfig}
   alias CampFire.Game.{SeedConfig, PlayerPlot, PlayerVase, PlayerGarden, PlayerMallum, WeatherCache}
-  alias CampFire.Economy.{PlayerEconomy, PlayerInventory}
+  alias CampFire.Economy.PlayerEconomy
   alias CampFire.Accounts.Player
   alias CampFire.Visitors.{VisitorTemplate, VisitorSchedule}
 
