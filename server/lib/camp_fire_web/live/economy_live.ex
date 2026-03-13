@@ -70,8 +70,8 @@ defmodule CampFireWeb.EconomyLive do
   def handle_event("save_vase", params, socket) do
     value = %{
       "default_capacity" => parse_int(params["default_capacity"]),
-      "craft_cost" => parse_int(params["craft_cost"]),
-      "fill_seconds_per_unit" => parse_int(params["fill_seconds_per_unit"]),
+      "craft_cost_mana" => parse_int(params["craft_cost_mana"]),
+      "fill_duration_minutes" => parse_int(params["fill_duration_minutes"]),
       "capacity_tiers" => parse_int_list(params, "capacity_tier"),
       # First entry is a hidden 0 for the base tier — drop it
       "upgrade_costs" => parse_int_list(params, "upgrade_cost") |> Enum.drop(1)
@@ -488,8 +488,8 @@ defmodule CampFireWeb.EconomyLive do
     assigns =
       assign(assigns,
         default_cap: v["default_capacity"],
-        craft_cost: v["craft_cost"],
-        fill_rate: v["fill_seconds_per_unit"],
+        craft_cost_mana: v["craft_cost_mana"],
+        fill_duration: v["fill_duration_minutes"],
         tiers: v["capacity_tiers"] || [],
         costs: v["upgrade_costs"] || []
       )
@@ -498,8 +498,8 @@ defmodule CampFireWeb.EconomyLive do
     <div class="mt-3 space-y-3">
       <div class="grid grid-cols-3 gap-4 text-sm">
         <div><span class="text-gray-500">Default Capacity:</span> <span class="font-medium">{@default_cap}</span></div>
-        <div><span class="text-gray-500">Craft Cost:</span> <span class="font-medium">{@craft_cost} mana</span></div>
-        <div><span class="text-gray-500">Fill Rate:</span> <span class="font-medium">{@fill_rate}s/unit</span></div>
+        <div><span class="text-gray-500">Craft Cost:</span> <span class="font-medium">{@craft_cost_mana} mana</span></div>
+        <div><span class="text-gray-500">Fill Duration:</span> <span class="font-medium">{@fill_duration} min</span></div>
       </div>
       <table class="w-full text-sm">
         <thead><tr class="bg-gray-50">
@@ -674,8 +674,8 @@ defmodule CampFireWeb.EconomyLive do
     assigns =
       assign(assigns,
         default_cap: d["default_capacity"],
-        craft_cost: d["craft_cost"],
-        fill_rate: d["fill_seconds_per_unit"],
+        craft_cost_mana: d["craft_cost_mana"],
+        fill_duration: d["fill_duration_minutes"],
         tiers: tiers,
         costs: costs
       )
@@ -689,11 +689,11 @@ defmodule CampFireWeb.EconomyLive do
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700">Craft Cost (mana)</label>
-          <input type="number" name="craft_cost" value={@craft_cost} class="mt-1 w-full border rounded px-3 py-2" />
+          <input type="number" name="craft_cost_mana" value={@craft_cost_mana} class="mt-1 w-full border rounded px-3 py-2" />
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700">Fill Rate (s/unit)</label>
-          <input type="number" name="fill_seconds_per_unit" value={@fill_rate} class="mt-1 w-full border rounded px-3 py-2" />
+          <label class="block text-sm font-medium text-gray-700">Fill Duration (minutes)</label>
+          <input type="number" name="fill_duration_minutes" value={@fill_duration} class="mt-1 w-full border rounded px-3 py-2" />
         </div>
       </div>
 
