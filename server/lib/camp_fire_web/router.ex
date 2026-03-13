@@ -13,6 +13,7 @@ defmodule CampFireWeb.Router do
   pipeline :api do
     plug :accepts, ["json"]
     plug CampFireWeb.Plugs.RateLimit, max: 100, window_ms: 60_000
+    plug CampFireWeb.Plugs.DebugLogErrors
   end
 
   pipeline :auth_rate_limit do
