@@ -165,9 +165,11 @@ defmodule CampFire.Game.Plots do
   # --- Harvest ---
 
   def harvest(player_uid, plot_id) do
+    check_maturity(plot_id)
+
     with %PlayerPlot{} = plot <- Repo.get(PlayerPlot, plot_id),
          true <- plot.player_uid == player_uid || {:error, :not_owned},
-         true <- plot.state == "mature" || {:error, :not_mature} do
+         true <- plot.state == "mature" || {:error, {:not_mature, plot.state}} do
       Repo.transaction(fn ->
         seed_config = CampFire.Game.get_seed_config_by_item_id!(plot.seed_item_id)
 
@@ -217,9 +219,10 @@ defmodule CampFire.Game.Plots do
           seed_config = CampFire.Game.get_seed_config_by_item_id!(plot.seed_item_id)
 
           now = DateTime.utc_now() |> DateTime.truncate(:second)
-          elapsed_hours = DateTime.diff(now, plot.plant_time_utc, :second) / 3600.0
+          elapsed_seconds = DateTime.diff(now, plot.plant_time_utc, :second)
+          required_seconds = trunc(seed_config.growth_duration_hours * 3600)
 
-          if elapsed_hours >= seed_config.growth_duration_hours do
+          if elapsed_seconds >= required_seconds do
             plot
             |> PlayerPlot.changeset(%{state: "mature"})
             |> Repo.update()

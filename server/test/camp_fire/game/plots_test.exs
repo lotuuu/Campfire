@@ -226,7 +226,7 @@ defmodule CampFire.Game.PlotsTest do
       {:ok, plot} = Plots.craft_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
       {:ok, _} = Plots.plant(player.uid, plot.id, "basil")
 
-      {:error, :not_mature} = Plots.harvest(player.uid, plot.id)
+      {:error, {:not_mature, "growing"}} = Plots.harvest(player.uid, plot.id)
     end
   end
 

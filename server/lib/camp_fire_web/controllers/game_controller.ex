@@ -282,9 +282,6 @@ defmodule CampFireWeb.GameController do
   def harvest_plot(conn, %{"plotId" => plot_id}) do
     uid = conn.assigns.current_player.uid
 
-    # Lazy eval maturity first
-    Plots.check_maturity(plot_id)
-
     case Plots.harvest(uid, plot_id) do
       {:ok, %{score: score, drops: drops, harvest_item_key: harvest_item_key}} ->
         conn |> put_status(200) |> json(%{score: score, drops: drops, itemKey: harvest_item_key})
@@ -842,5 +839,6 @@ defmodule CampFireWeb.GameController do
   defp format_error(reason) when is_atom(reason), do: Atom.to_string(reason)
   defp format_error(reason) when is_binary(reason), do: reason
   defp format_error({:insufficient_items, name}), do: "Insufficient items: #{name}"
+  defp format_error({:not_mature, actual_state}), do: "not_mature (server state: #{actual_state})"
   defp format_error(reason), do: inspect(reason)
 end
