@@ -5,9 +5,11 @@ defmodule CampFire.Game.GardensTest do
   alias CampFire.Economy
 
   defp setup_player(_context \\ %{}) do
+    seed_items()
     seed_garden_configs()
     seed_flame_config()
     seed_mallum_house_config()
+    seed_new_player_config()
     player = register_player()
     {:ok, _economy} = Economy.init_economy(player.uid)
     player
@@ -69,12 +71,12 @@ defmodule CampFire.Game.GardensTest do
       {:ok, result} = Gardens.check_and_collect(player.uid, garden.id)
 
       assert result.status == :collected
-      assert result.item == "Berry"
+      assert result.item == "berry"
       assert result.amount == 3
 
       # Check item was added to inventory
       inventory = Economy.list_inventory(player.uid)
-      berry = Enum.find(inventory, &(&1.item_name == "Berry"))
+      berry = Enum.find(inventory, &(&1.item_key == "berry"))
       assert berry != nil
       assert berry.count == 3
     end

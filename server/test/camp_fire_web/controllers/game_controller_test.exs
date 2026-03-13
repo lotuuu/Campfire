@@ -16,33 +16,37 @@ defmodule CampFireWeb.GameControllerTest do
         growth_duration_hours: 0.001,
         min_drops: 1,
         max_drops: 4,
-        recipe: %{}
+        recipe: %{},
+        item_key: "basil_seed",
+        harvest_item_key: "basil"
       })
       |> Repo.insert!()
     end
   end
 
   defp setup_player(conn) do
+    seed_items()
     seed_mallum_house_config()
+    seed_new_player_config()
     player = register_player()
     {:ok, _economy} = Economy.init_economy(player.uid)
 
     ensure_seed_config()
     seed_quest_configs()
-    seed_building_costs()
     seed_garden_configs()
     seed_flame_config()
+    seed_building_costs()
     seed_seed_configs()
 
     # Boost mana and provide harvest items for crafting
     economy = Economy.get_economy(player.uid)
     economy |> Ecto.Changeset.change(mana: 2000.0) |> Repo.update!()
-    Economy.upsert_item(player.uid, "Sprouts", 10)
-    Economy.upsert_item(player.uid, "Basil", 10)
-    Economy.upsert_item(player.uid, "Cress", 10)
-    Economy.upsert_item(player.uid, "Chamomile", 10)
+    Economy.upsert_item(player.uid, "sprouts", 10)
+    Economy.upsert_item(player.uid, "basil", 10)
+    Economy.upsert_item(player.uid, "cress", 10)
+    Economy.upsert_item(player.uid, "chamomile", 10)
 
-    {:ok, _} = Economy.upsert_item(player.uid, "Basil_Seed", 5)
+    {:ok, _} = Economy.upsert_item(player.uid, "basil_seed", 5)
 
     {player, authed_conn(conn, player)}
   end
@@ -141,7 +145,7 @@ defmodule CampFireWeb.GameControllerTest do
       # Harvest
       conn5 = build_conn() |> authed_conn(player) |> post("/game/plot/harvest", %{plotId: plot_id})
       harvest = json_response(conn5, 200)
-      assert harvest["itemName"] == "Basil"
+      assert harvest["itemKey"] == "basil"
       assert harvest["drops"] >= 1
       assert harvest["score"] >= 0.0
     end
@@ -218,8 +222,11 @@ defmodule CampFireWeb.GameControllerTest do
   end
 
   describe "POST /game/quest/speed-up" do
-    test "with Speed_Potion completes quest", %{conn: conn} do
+    test "with energy_drink completes quest", %{conn: conn} do
       {player, conn} = setup_player(conn)
+
+      # Give player energy_drinks for speed-up
+      Economy.upsert_item(player.uid, "energy_drink", 3)
 
       # Start quest
       conn1 = post(conn, "/game/quest/start", %{questName: "SwampForage"})
@@ -284,10 +291,14 @@ defmodule CampFireWeb.GameControllerTest do
   describe "POST /game/bird/collect" do
     test "collects bird and returns reward", %{conn: conn} do
       {player, conn} = setup_player(conn)
+
+      # Need a SeedConfig with item_key for collect_bird to work
+      # (ensure_seed_config already creates Basil with item_key)
+
       {:ok, bird} = Birds.insert_bird(player.uid, 2, 0, "Basil", 2)
       conn = post(conn, "/game/bird/collect", %{birdId: bird.id})
       body = json_response(conn, 200)
-      assert body["seedName"] == "Basil"
+      assert body["itemKey"] == "basil_seed"
       assert body["seedCount"] == 2
     end
   end
@@ -296,10 +307,10 @@ defmodule CampFireWeb.GameControllerTest do
     test "crafts recipe and returns result", %{conn: conn} do
       {player, conn} = setup_player(conn)
       seed_recipe_configs()
-      Economy.upsert_item(player.uid, "Basil", 5)
-      conn = post(conn, "/game/apotheke/craft", %{recipeName: "Fertilizer"})
+      Economy.upsert_item(player.uid, "basil", 5)
+      conn = post(conn, "/game/apotheke/craft", %{recipeName: "fertilizer"})
       body = json_response(conn, 200)
-      assert body["resultItem"] == "Fertilizer"
+      assert body["resultItem"] == "fertilizer"
       assert body["resultQuantity"] == 1
     end
 
@@ -316,7 +327,7 @@ defmodule CampFireWeb.GameControllerTest do
     test "unlocks and applies skin", %{conn: conn} do
       {player, conn} = setup_player(conn)
       seed_skin_configs()
-      Economy.upsert_item(player.uid, "Basil", 10)
+      Economy.upsert_item(player.uid, "basil", 10)
       houses = MallumHouses.list_houses(player.uid)
       house = List.first(houses)
       conn = post(conn, "/game/mallum-house/set-skin", %{houseId: house.id, skinName: "CozyHouse"})

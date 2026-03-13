@@ -16,14 +16,16 @@ defmodule CampFire.Game.PlotsTest do
 
   # init_economy creates 1 starter plot + 1 starter vase + 1 mallum house + 2 mallums
   # So the first craft_plot in tests is actually the 2nd plot (index 1):
-  #   plot_costs[1] = 200 mana + 1 Basil_harvest
-  # The 3rd plot (index 2) = 260 mana + 2 Basil_harvest
+  #   plot_costs[1] = 200 mana + 1 basil
+  # The 3rd plot (index 2) = 260 mana + 2 basil
 
   defp setup_player(_context \\ %{}) do
-    seed_building_costs()
+    seed_items()
     seed_flame_config()
+    seed_building_costs()
     seed_seed_configs()
     seed_mallum_house_config()
+    seed_new_player_config()
     player = register_player()
     {:ok, _economy} = Economy.init_economy(player.uid)
 
@@ -41,18 +43,20 @@ defmodule CampFire.Game.PlotsTest do
         growth_duration_hours: 0.001,
         min_drops: 1,
         max_drops: 4,
-        recipe: @basil_recipe
+        recipe: @basil_recipe,
+        item_key: "basil_seed",
+        harvest_item_key: "basil"
       })
       |> Repo.insert!()
     end
 
     # Give player some Basil seeds
-    {:ok, _} = Economy.upsert_item(player.uid, "Basil_Seed", 5)
+    {:ok, _} = Economy.upsert_item(player.uid, "basil_seed", 5)
 
     # Give harvest items needed for plot/vase crafting
-    Economy.upsert_item(player.uid, "Sprouts", 10)
-    Economy.upsert_item(player.uid, "Basil", 10)
-    Economy.upsert_item(player.uid, "Cress", 10)
+    Economy.upsert_item(player.uid, "sprouts", 10)
+    Economy.upsert_item(player.uid, "basil", 10)
+    Economy.upsert_item(player.uid, "cress", 10)
 
     player
   end
@@ -69,13 +73,12 @@ defmodule CampFire.Game.PlotsTest do
       assert plot.player_uid == player.uid
 
       economy = Economy.get_economy(player.uid)
-      # Started with 1000, 2nd plot (index 1) costs 200 mana
-      assert economy.mana == 800.0
+      # Started with 1000, cost index 0 (after starter) = 150 mana + 1 sprouts
+      assert economy.mana == 850.0
 
-      # 2nd plot costs 1 Basil_harvest
       inventory = Economy.list_inventory(player.uid)
-      basil_h = Enum.find(inventory, &(&1.item_name == "Basil"))
-      assert basil_h.count == 9
+      sprouts_h = Enum.find(inventory, &(&1.item_key == "sprouts"))
+      assert sprouts_h.count == 9
     end
 
     test "escalates cost for subsequent plots" do
@@ -85,36 +88,40 @@ defmodule CampFire.Game.PlotsTest do
       {:ok, _} = Plots.craft_plot(player.uid, 0, 1)
 
       economy = Economy.get_economy(player.uid)
-      # 1000 - 200 (index 1) - 260 (index 2) = 540
-      assert economy.mana == 540.0
+      # 1000 - 150 (index 0) - 200 (index 1) = 650
+      assert economy.mana == 650.0
 
-      # 3rd plot (index 2) costs 2 Basil_harvest, plus the 1 from 2nd plot = 3 total
+      # index 0 costs 1 sprouts, index 1 costs 1 basil = total 1 basil spent
       inventory = Economy.list_inventory(player.uid)
-      basil_h = Enum.find(inventory, &(&1.item_name == "Basil"))
-      assert basil_h.count == 7
+      basil_h = Enum.find(inventory, &(&1.item_key == "basil"))
+      assert basil_h.count == 9
     end
 
     test "fails with insufficient mana" do
-      seed_building_costs()
+      seed_items()
       seed_flame_config()
+      seed_building_costs()
       seed_mallum_house_config()
+      seed_new_player_config()
       player = register_player()
       {:ok, _economy} = Economy.init_economy(player.uid)
       # Default 50 mana, 2nd plot (index 1) costs 200
-      Economy.upsert_item(player.uid, "Basil_harvest", 10)
+      Economy.upsert_item(player.uid, "basil", 10)
 
       {:error, :insufficient_mana} = Plots.craft_plot(player.uid, 2, 0)
     end
 
     test "fails with insufficient harvest items" do
-      seed_building_costs()
+      seed_items()
       seed_flame_config()
+      seed_building_costs()
       seed_mallum_house_config()
+      seed_new_player_config()
       player = register_player()
       {:ok, _economy} = Economy.init_economy(player.uid)
       economy = Economy.get_economy(player.uid)
       economy |> Ecto.Changeset.change(mana: 1000.0) |> Repo.update!()
-      # No Basil_harvest given — 2nd plot (index 1) needs 1 Basil_harvest
+      # No basil given — 2nd plot (index 1) needs 1 basil
 
       {:error, :insufficient_items} = Plots.craft_plot(player.uid, 2, 0)
     end
@@ -147,7 +154,7 @@ defmodule CampFire.Game.PlotsTest do
       {:ok, plot} = Plots.craft_plot(player.uid, 2, 0)
 
       # Sprouts is in seed_configs but the player has none left after init
-      {:ok, _} = Economy.spend_item(player.uid, "Sprouts_Seed", 5)
+      {:ok, _} = Economy.spend_item(player.uid, "sprouts_seed", 5)
       {:error, :insufficient_items} = Plots.plant(player.uid, plot.id, "Sprouts")
     end
   end
@@ -196,11 +203,13 @@ defmodule CampFire.Game.PlotsTest do
         growth_duration_hours: 0.001,
         min_drops: 2,
         max_drops: 8,
-        recipe: %{}
+        recipe: %{},
+        item_key: "harvesttest_seed",
+        harvest_item_key: "harvesttest"
       })
       |> Repo.insert!()
 
-      {:ok, _} = Economy.upsert_item(player.uid, "HarvestTest_Seed", 1)
+      {:ok, _} = Economy.upsert_item(player.uid, "harvesttest_seed", 1)
       {:ok, plot} = Plots.craft_plot(player.uid, 2, 0)
       {:ok, _} = Plots.plant(player.uid, plot.id, "HarvestTest")
 
@@ -209,7 +218,7 @@ defmodule CampFire.Game.PlotsTest do
 
       {:ok, result} = Plots.harvest(player.uid, plot.id)
 
-      assert result.item_name == "HarvestTest_harvest"
+      assert result.harvest_item_key == "harvesttest"
       assert result.drops >= 2 and result.drops <= 8
       assert result.score == 1.0
     end
@@ -224,11 +233,13 @@ defmodule CampFire.Game.PlotsTest do
         growth_duration_hours: 0.001,
         min_drops: 2,
         max_drops: 6,
-        recipe: %{}
+        recipe: %{},
+        item_key: "simpleseed_seed",
+        harvest_item_key: "simpleseed"
       })
       |> Repo.insert!()
 
-      {:ok, _} = Economy.upsert_item(player.uid, "SimpleSeed_Seed", 1)
+      {:ok, _} = Economy.upsert_item(player.uid, "simpleseed_seed", 1)
       {:ok, plot} = Plots.craft_plot(player.uid, 2, 0)
       {:ok, _} = Plots.plant(player.uid, plot.id, "SimpleSeed")
       {:ok, _} = Plots.force_mature(plot.id)
@@ -277,11 +288,13 @@ defmodule CampFire.Game.PlotsTest do
         growth_duration_hours: 9999.0,
         min_drops: 1,
         max_drops: 3,
-        recipe: %{}
+        recipe: %{},
+        item_key: "slowplant_seed",
+        harvest_item_key: "slowplant"
       })
       |> Repo.insert!()
 
-      {:ok, _} = Economy.upsert_item(player.uid, "SlowPlant_Seed", 1)
+      {:ok, _} = Economy.upsert_item(player.uid, "slowplant_seed", 1)
       {:ok, plot} = Plots.craft_plot(player.uid, 2, 0)
       {:ok, _} = Plots.plant(player.uid, plot.id, "SlowPlant")
 
@@ -326,20 +339,22 @@ defmodule CampFire.Game.PlotsTest do
 
   describe "craft_plot/3 grid validation" do
     test "rejects when entity cap reached" do
+      seed_items()
       seed_building_costs()
       seed_flame_config_with_low_cap()
       seed_seed_configs()
       seed_mallum_house_config()
+      seed_new_player_config()
       player = register_player()
       {:ok, _economy} = Economy.init_economy(player.uid)
 
       # Boost mana and give harvest items
       economy = Economy.get_economy(player.uid)
       economy |> Ecto.Changeset.change(mana: 10000.0) |> Repo.update!()
-      Economy.upsert_item(player.uid, "Sprouts_harvest", 50)
-      Economy.upsert_item(player.uid, "Basil_harvest", 50)
-      Economy.upsert_item(player.uid, "Chamomile_harvest", 50)
-      Economy.upsert_item(player.uid, "Cress_harvest", 50)
+      Economy.upsert_item(player.uid, "sprouts", 50)
+      Economy.upsert_item(player.uid, "basil", 50)
+      Economy.upsert_item(player.uid, "chamomile", 50)
+      Economy.upsert_item(player.uid, "cress", 50)
 
       # low_cap at level 1 = 4, init_economy creates 1 plot + 1 vase + 1 house = 3 entities + 1 apotheke = 4
       # So the next craft should fail
@@ -380,8 +395,8 @@ defmodule CampFire.Game.PlotsTest do
       # Give player2 resources
       economy2 = Economy.get_economy(player2.uid)
       economy2 |> Ecto.Changeset.change(mana: 1000.0) |> Repo.update!()
-      Economy.upsert_item(player2.uid, "Basil_harvest", 10)
-      Economy.upsert_item(player2.uid, "Cress_harvest", 10)
+      Economy.upsert_item(player2.uid, "basil", 10)
+      Economy.upsert_item(player2.uid, "cress", 10)
 
       # Create and plant on player1's plot
       {:ok, plot} = Plots.craft_plot(player1.uid, 2, 0)

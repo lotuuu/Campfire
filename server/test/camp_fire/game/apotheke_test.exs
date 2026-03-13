@@ -6,10 +6,12 @@ defmodule CampFire.Game.ApothekeTest do
   alias CampFire.Economy
 
   defp setup_player do
-    seed_building_costs()
+    seed_items()
     seed_flame_config()
+    seed_building_costs()
     seed_mallum_house_config()
     seed_recipe_configs()
+    seed_new_player_config()
     player = register_player()
     {:ok, _} = Economy.init_economy(player.uid)
     player
@@ -18,18 +20,18 @@ defmodule CampFire.Game.ApothekeTest do
   describe "craft/2" do
     test "consumes ingredients and produces result" do
       player = setup_player()
-      Economy.upsert_item(player.uid, "Basil", 5)
+      Economy.upsert_item(player.uid, "basil", 5)
 
-      {:ok, result} = Apotheke.craft(player.uid, "Fertilizer")
+      {:ok, result} = Apotheke.craft(player.uid, "fertilizer")
 
-      assert result.result_item == "Fertilizer"
+      assert result.result_item == "fertilizer"
       assert result.result_quantity == 1
 
       inventory = Economy.list_inventory(player.uid)
-      basil = Enum.find(inventory, fn i -> i.item_name == "Basil" end)
+      basil = Enum.find(inventory, fn i -> i.item_key == "basil" end)
       assert basil.count == 3
 
-      fert = Enum.find(inventory, fn i -> i.item_name == "Fertilizer" end)
+      fert = Enum.find(inventory, fn i -> i.item_key == "fertilizer" end)
       assert fert.count == 1
     end
 
@@ -40,37 +42,37 @@ defmodule CampFire.Game.ApothekeTest do
 
     test "rejects insufficient ingredients" do
       player = setup_player()
-      assert {:error, _} = Apotheke.craft(player.uid, "Fertilizer")
+      assert {:error, _} = Apotheke.craft(player.uid, "fertilizer")
     end
 
     test "multi-ingredient recipe works" do
       player = setup_player()
-      Economy.upsert_item(player.uid, "Mint", 3)
-      Economy.upsert_item(player.uid, "Chamomile", 2)
+      Economy.upsert_item(player.uid, "mint", 3)
+      Economy.upsert_item(player.uid, "chamomile", 2)
 
-      {:ok, result} = Apotheke.craft(player.uid, "Speed_Potion")
+      {:ok, result} = Apotheke.craft(player.uid, "speed_potion")
 
-      assert result.result_item == "Speed_Potion"
+      assert result.result_item == "speed_potion"
       assert result.result_quantity == 1
 
       inventory = Economy.list_inventory(player.uid)
-      mint = Enum.find(inventory, fn i -> i.item_name == "Mint" end)
+      mint = Enum.find(inventory, fn i -> i.item_key == "mint" end)
       assert mint.count == 1
 
-      cham = Enum.find(inventory, fn i -> i.item_name == "Chamomile" end)
+      cham = Enum.find(inventory, fn i -> i.item_key == "chamomile" end)
       assert cham.count == 1
     end
 
     test "rolls back on partial ingredient failure" do
       player = setup_player()
-      # Give Mint but not Chamomile for Speed_Potion
-      Economy.upsert_item(player.uid, "Mint", 5)
+      # Give Mint but not Chamomile for speed_potion
+      Economy.upsert_item(player.uid, "mint", 5)
 
-      assert {:error, _} = Apotheke.craft(player.uid, "Speed_Potion")
+      assert {:error, _} = Apotheke.craft(player.uid, "speed_potion")
 
       # Mint should not have been spent (transaction rolled back)
       inventory = Economy.list_inventory(player.uid)
-      mint = Enum.find(inventory, fn i -> i.item_name == "Mint" end)
+      mint = Enum.find(inventory, fn i -> i.item_key == "mint" end)
       assert mint.count == 5
     end
   end

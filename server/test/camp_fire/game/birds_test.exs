@@ -5,10 +5,12 @@ defmodule CampFire.Game.BirdsTest do
   alias CampFire.Economy
 
   defp setup_player(_context \\ %{}) do
-    seed_seed_configs()
+    seed_items()
     seed_flame_config()
     seed_building_costs()
+    seed_seed_configs()
     seed_mallum_house_config()
+    seed_new_player_config()
     player = register_player()
     {:ok, _economy} = Economy.init_economy(player.uid)
     player
@@ -131,19 +133,37 @@ defmodule CampFire.Game.BirdsTest do
     test "removes bird and grants seeds" do
       player = setup_player()
 
+      # Insert a seed config for Basil with item_key/harvest_item_key
+      alias CampFire.Game.SeedConfig
+      import Ecto.Query
+
+      unless Repo.one(from sc in SeedConfig, where: sc.seed_name == "Basil") do
+        %SeedConfig{}
+        |> SeedConfig.changeset(%{
+          seed_name: "Basil",
+          growth_duration_hours: 2.0,
+          min_drops: 1,
+          max_drops: 4,
+          recipe: %{},
+          item_key: "basil_seed",
+          harvest_item_key: "basil"
+        })
+        |> Repo.insert!()
+      end
+
       {:ok, bird} = Birds.insert_bird(player.uid, 2, 0, "Basil", 3)
 
       {:ok, reward} = Birds.collect_bird(player.uid, bird.id)
 
-      assert reward.seed_name == "Basil"
+      assert reward.item_key == "basil_seed"
       assert reward.seed_count == 3
 
       # Bird should be deleted
       assert Birds.list_birds(player.uid) == []
 
-      # Seeds should be in inventory
+      # Seeds should be in inventory (uses seed_config.item_key = "basil_seed")
       inventory = Economy.list_inventory(player.uid)
-      basil = Enum.find(inventory, &(&1.item_name == "Basil_Seed"))
+      basil = Enum.find(inventory, &(&1.item_key == "basil_seed"))
       assert basil != nil
       assert basil.count >= 3
     end

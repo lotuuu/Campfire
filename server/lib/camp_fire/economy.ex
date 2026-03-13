@@ -222,12 +222,13 @@ defmodule CampFire.Economy do
   end
 
   defp create_starter_buildings(player_uid, npc) do
-    alias CampFire.Game.{PlayerPlot, PlayerVase, PlayerApotheke}
+    alias CampFire.Game.{PlayerPlot, PlayerVase, PlayerApotheke, PlayerMallumHouse, PlayerMallum}
 
-    # Pick 3 random distinct hex positions (excluding flame at 0,0)
-    grid_radius = starter_grid_radius()
-    positions = non_center_hex_positions(grid_radius) |> Enum.shuffle() |> Enum.take(3)
-    [plot_pos, vase_pos, apotheke_pos] = positions
+    # Use fixed positions for starter buildings (predictable for tests and deterministic for players)
+    plot_pos = {-1, 0}
+    vase_pos = {0, -1}
+    apotheke_pos = {1, 0}
+    house_pos = {1, -1}
 
     %PlayerPlot{}
     |> PlayerPlot.changeset(%{
@@ -261,22 +262,26 @@ defmodule CampFire.Economy do
       grid_y: elem(apotheke_pos, 1)
     })
     |> Repo.insert!()
-  end
 
-  defp starter_grid_radius do
-    case CampFire.ConfigCache.get("flame_config") do
-      nil -> 2
-      config -> Enum.at(config["grid_sizes"] || [], 0, 2)
+    # Create starter mallum house + mallums
+    %PlayerMallumHouse{}
+    |> PlayerMallumHouse.changeset(%{
+      player_uid: player_uid,
+      grid_x: elem(house_pos, 0),
+      grid_y: elem(house_pos, 1)
+    })
+    |> Repo.insert!()
+
+    mallum_config = CampFire.ConfigCache.get("mallum_house_config")
+    mallums_per_house = (mallum_config && mallum_config["mallums_per_house"]) || 2
+
+    for _ <- 1..mallums_per_house do
+      %PlayerMallum{}
+      |> PlayerMallum.changeset(%{player_uid: player_uid, state: "idle"})
+      |> Repo.insert!()
     end
   end
 
-  defp non_center_hex_positions(radius) do
-    for q <- -radius..radius,
-        r <- -radius..radius,
-        {q, r} != {0, 0},
-        max(abs(q), max(abs(r), abs(q + r))) <= radius,
-        do: {q, r}
-  end
 
   defp spend_items_in_tx(player_uid, item_key, count) do
     {updated, _} =

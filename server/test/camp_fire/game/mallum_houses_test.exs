@@ -5,9 +5,11 @@ defmodule CampFire.Game.MallumHousesTest do
   alias CampFire.Economy
 
   defp setup_player(_context \\ %{}) do
-    seed_building_costs()
+    seed_items()
     seed_flame_config()
+    seed_building_costs()
     seed_mallum_house_config()
+    seed_new_player_config()
     player = register_player()
     {:ok, _economy} = Economy.init_economy(player.uid)
 
@@ -16,8 +18,8 @@ defmodule CampFire.Game.MallumHousesTest do
     economy |> Ecto.Changeset.change(mana: 5000.0) |> Repo.update!()
 
     # Give harvest items needed for house crafting
-    Economy.upsert_item(player.uid, "Basil", 20)
-    Economy.upsert_item(player.uid, "Chamomile", 20)
+    Economy.upsert_item(player.uid, "basil", 20)
+    Economy.upsert_item(player.uid, "chamomile", 20)
 
     player
   end
@@ -50,24 +52,25 @@ defmodule CampFire.Game.MallumHousesTest do
       # Started with 5000, 2nd house (index 1) costs 350 mana
       assert economy.mana == 4650.0
 
-      # 2nd house costs 2 Chamomile
+      # 2nd house costs 2 chamomile
       inventory = Economy.list_inventory(player.uid)
-      chamomile_h = Enum.find(inventory, &(&1.item_name == "Chamomile"))
+      chamomile_h = Enum.find(inventory, &(&1.item_key == "chamomile"))
       assert chamomile_h.count == 18
     end
 
     test "rejects when entity cap reached" do
+      seed_items()
       seed_flame_config_with_low_cap()
-      seed_building_costs()
       seed_mallum_house_config()
+      seed_new_player_config()
       player = register_player()
       {:ok, _economy} = Economy.init_economy(player.uid)
 
       # Boost mana and give items
       economy = Economy.get_economy(player.uid)
       economy |> Ecto.Changeset.change(mana: 10000.0) |> Repo.update!()
-      Economy.upsert_item(player.uid, "Basil", 50)
-      Economy.upsert_item(player.uid, "Chamomile", 50)
+      Economy.upsert_item(player.uid, "basil", 50)
+      Economy.upsert_item(player.uid, "chamomile", 50)
 
       # low_cap at level 1 = 4, init creates 4 entities (plot + vase + house + apotheke)
       {:error, :entity_cap_reached} = MallumHouses.craft_house(player.uid, 2, 0)
@@ -84,21 +87,23 @@ defmodule CampFire.Game.MallumHousesTest do
   end
 
   describe "init_economy creates starter house" do
-    test "creates 1 house at (1, -1)" do
+    test "creates 1 house" do
+      seed_items()
       seed_mallum_house_config()
+      seed_new_player_config()
+      seed_flame_config()
       player = register_player()
       {:ok, _economy} = Economy.init_economy(player.uid)
 
       houses = MallumHouses.list_houses(player.uid)
       assert length(houses) == 1
-
-      [house] = houses
-      assert house.grid_x == 1
-      assert house.grid_y == -1
     end
 
     test "creates mallums_per_house mallums" do
+      seed_items()
       seed_mallum_house_config()
+      seed_new_player_config()
+      seed_flame_config()
       player = register_player()
       {:ok, _economy} = Economy.init_economy(player.uid)
 

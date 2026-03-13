@@ -5,8 +5,10 @@ defmodule CampFire.Game.MallumsTest do
   alias CampFire.Economy
 
   setup do
+    seed_items()
     seed_quest_configs()
     seed_mallum_house_config()
+    seed_new_player_config()
     :ok
   end
 
@@ -77,9 +79,9 @@ defmodule CampFire.Game.MallumsTest do
       assert is_list(completed.pending_rewards)
       assert length(completed.pending_rewards) >= 1
 
-      # Each reward should have seed_name and count
+      # Each reward should have item_key and count
       Enum.each(completed.pending_rewards, fn reward ->
-        assert is_binary(reward["seed_name"])
+        assert is_binary(reward["item_key"])
         assert is_integer(reward["count"])
         assert reward["count"] >= 1
       end)
@@ -121,13 +123,13 @@ defmodule CampFire.Game.MallumsTest do
       assert updated.assigned_quest_name == nil
       assert updated.pending_rewards == []
 
-      # Check seeds were added to inventory (with _Seed suffix)
+      # Check seeds were added to inventory (reward item_key is directly the item_key)
       inventory = Economy.list_inventory(player.uid)
 
       Enum.each(rewards, fn reward ->
-        seed = Enum.find(inventory, &(&1.item_name == reward["seed_name"] <> "_Seed"))
-        assert seed != nil
-        assert seed.count >= reward["count"]
+        item = Enum.find(inventory, &(&1.item_key == reward["item_key"]))
+        assert item != nil
+        assert item.count >= reward["count"]
       end)
     end
 
@@ -139,29 +141,37 @@ defmodule CampFire.Game.MallumsTest do
   end
 
   describe "speed_up_quest/2" do
-    test "consumes Speed_Potion and completes quest" do
+    test "consumes energy_drink and completes quest" do
       {player, _mallum} = setup_player()
       {:ok, quest_mallum} = Mallums.send_on_quest(player.uid, "SwampForage")
 
-      # Player starts with 3 Speed_Potions from init_economy
+      # Player starts with 3 speed_potions and 3 energy_drinks from init_economy
+      # speed_up uses quest_speed_item which is "energy_drink"
+      # But our new_player_config gives energy_drink? No, let me check...
+      # Actually seed_new_player_config gives: speed_potion x3, but quest_speed_item is energy_drink
+      # We need to give the player energy_drinks
+      Economy.upsert_item(player.uid, "energy_drink", 3)
+
       {:ok, completed} = Mallums.speed_up_quest(player.uid, quest_mallum.id)
 
       assert completed.state == "quest_complete"
       assert is_list(completed.pending_rewards)
       assert length(completed.pending_rewards) >= 1
 
-      # Speed_Potion should be consumed
+      # energy_drink should be consumed (had 3, used 1 = 2)
       inventory = Economy.list_inventory(player.uid)
-      potion = Enum.find(inventory, &(&1.item_name == "Speed_Potion"))
-      assert potion.count == 2
+      drink = Enum.find(inventory, &(&1.item_key == "energy_drink"))
+      assert drink.count == 2
     end
 
-    test "fails without Speed_Potion" do
+    test "fails without energy_drink" do
       {player, _mallum} = setup_player()
       {:ok, quest_mallum} = Mallums.send_on_quest(player.uid, "SwampForage")
 
-      # Spend all Speed_Potions
-      {:ok, _} = Economy.spend_item(player.uid, "Speed_Potion", 3)
+      # Spend all energy_drinks if any exist
+      inventory = Economy.list_inventory(player.uid)
+      drink = Enum.find(inventory, &(&1.item_key == "energy_drink"))
+      if drink, do: Economy.spend_item(player.uid, "energy_drink", drink.count)
 
       {:error, :insufficient_items} = Mallums.speed_up_quest(player.uid, quest_mallum.id)
     end
@@ -181,7 +191,7 @@ defmodule CampFire.Game.MallumsTest do
       assert length(rewards) == config.reward_rolls
 
       Enum.each(rewards, fn reward ->
-        assert is_binary(reward["seed_name"])
+        assert is_binary(reward["item_key"])
         assert is_integer(reward["count"])
         assert reward["count"] >= 1
       end)

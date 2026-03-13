@@ -5,12 +5,32 @@ defmodule CampFire.Game.GridValidationTest do
   alias CampFire.Economy
 
   defp setup_player(_context \\ %{}) do
+    seed_items()
     seed_flame_config()
     seed_building_costs()
     seed_mallum_house_config()
+    seed_new_player_config()
     player = register_player()
     {:ok, _economy} = Economy.init_economy(player.uid)
     player
+  end
+
+  defp occupied_positions(player_uid) do
+    plots = CampFire.Game.Plots.list_plots(player_uid)
+    vases = CampFire.Game.Vases.list_vases(player_uid)
+    houses = CampFire.Game.MallumHouses.list_houses(player_uid)
+
+    apotheke =
+      case CampFire.Repo.get_by(CampFire.Game.PlayerApotheke, player_uid: player_uid) do
+        nil -> []
+        a -> [{a.grid_x, a.grid_y}]
+      end
+
+    Enum.map(plots, &{&1.grid_x, &1.grid_y}) ++
+      Enum.map(vases, &{&1.grid_x, &1.grid_y}) ++
+      Enum.map(houses, &{&1.grid_x, &1.grid_y}) ++
+      apotheke ++
+      [{0, 0}]
   end
 
   describe "hex_distance/2" do
@@ -45,48 +65,44 @@ defmodule CampFire.Game.GridValidationTest do
                GridValidation.validate_grid_placement(player.uid, 0, 0)
     end
 
-    test "rejects hex with existing plot" do
-      # init_economy creates a plot at (-1, 0)
+    test "rejects hex with existing entity" do
       player = setup_player()
 
-      assert {:error, :hex_occupied} =
-               GridValidation.validate_grid_placement(player.uid, -1, 0)
-    end
+      # All occupied positions should be rejected
+      occupied = occupied_positions(player.uid)
+      # init_economy creates plot, vase, apotheke, house + flame = at least 5 occupied
+      assert length(occupied) >= 5
 
-    test "rejects hex with existing vase" do
-      # init_economy creates a vase at (0, -1)
-      player = setup_player()
-
-      assert {:error, :hex_occupied} =
-               GridValidation.validate_grid_placement(player.uid, 0, -1)
-    end
-
-    test "rejects apotheke default position (1, 0)" do
-      player = setup_player()
-
-      assert {:error, :hex_occupied} =
-               GridValidation.validate_grid_placement(player.uid, 1, 0)
-    end
-
-    test "rejects hex with existing mallum house" do
-      # init_economy creates a mallum house at (1, -1)
-      player = setup_player()
-
-      assert {:error, :hex_occupied} =
-               GridValidation.validate_grid_placement(player.uid, 1, -1)
+      Enum.each(occupied, fn {q, r} ->
+        assert {:error, :hex_occupied} =
+                 GridValidation.validate_grid_placement(player.uid, q, r),
+               "Expected hex (#{q}, #{r}) to be occupied"
+      end)
     end
 
     test "accepts valid empty hex within radius" do
       player = setup_player()
 
-      # Grid radius at level 1 is 2, so (1, 1) has distance max(1, 1, 2) = 2 — within bounds
-      assert :ok = GridValidation.validate_grid_placement(player.uid, 1, 1)
+      occupied = occupied_positions(player.uid)
+
+      # Find a free hex within radius
+      free =
+        for q <- -2..2,
+            r <- -2..2,
+            max(abs(q), max(abs(r), abs(q + r))) <= 2,
+            {q, r} not in occupied,
+            do: {q, r}
+
+      assert length(free) > 0
+
+      {q, r} = List.first(free)
+      assert :ok = GridValidation.validate_grid_placement(player.uid, q, r)
     end
   end
 
   describe "check_entity_cap/1" do
     test "allows when under cap" do
-      # Default flame_config has cap=5 at level 1
+      # Default flame_config has cap=8 at level 1
       # init_economy creates: 1 plot + 1 vase + 1 house + 1 apotheke = 4 entities
       player = setup_player()
 
@@ -96,9 +112,11 @@ defmodule CampFire.Game.GridValidationTest do
     test "rejects when at cap" do
       # Low cap config has cap=4 at level 1
       # init_economy creates: 1 plot + 1 vase + 1 house + 1 apotheke = 4 entities (exactly at cap)
+      seed_items()
       seed_flame_config_with_low_cap()
       seed_building_costs()
       seed_mallum_house_config()
+      seed_new_player_config()
       player = register_player()
       {:ok, _economy} = Economy.init_economy(player.uid)
 
@@ -118,13 +136,11 @@ defmodule CampFire.Game.GridValidationTest do
       player = setup_player()
 
       free = GridValidation.get_free_tiles(player.uid)
+      occupied = occupied_positions(player.uid)
 
-      # Flame at (0,0), plot at (-1,0), vase at (0,-1), apotheke at (1,0), house at (1,-1)
-      refute {0, 0} in free
-      refute {-1, 0} in free
-      refute {0, -1} in free
-      refute {1, 0} in free
-      refute {1, -1} in free
+      Enum.each(occupied, fn pos ->
+        refute pos in free, "Occupied hex #{inspect(pos)} should not be in free tiles"
+      end)
     end
 
     test "all returned tiles are within grid radius" do

@@ -3,6 +3,14 @@ defmodule CampFireWeb.EconomyControllerTest do
   import CampFire.TestHelpers
   alias CampFire.Economy
 
+  setup do
+    seed_items()
+    seed_new_player_config()
+    seed_flame_config()
+    seed_mallum_house_config()
+    :ok
+  end
+
   describe "GET /economy/state" do
     test "returns 404 when not initialized", %{conn: conn} do
       player = register_player()
@@ -28,8 +36,7 @@ defmodule CampFireWeb.EconomyControllerTest do
       assert body["mana"] == 50.0
       assert body["gems"] == 5
       assert body["flameLevel"] == 1
-      assert is_list(body["seeds"])
-      assert is_list(body["items"])
+      assert is_list(body["inventory"])
     end
   end
 
@@ -46,8 +53,9 @@ defmodule CampFireWeb.EconomyControllerTest do
       assert body["mana"] == 50.0
       assert body["gems"] == 5
       assert body["flameLevel"] == 1
-      assert length(body["seeds"]) == 2
-      assert length(body["items"]) == 1
+      assert is_list(body["inventory"])
+      # 3 distinct items: sprouts_seed, cress_seed, speed_potion
+      assert length(body["inventory"]) == 3
     end
 
     test "rejects double init", %{conn: conn} do
@@ -90,27 +98,27 @@ defmodule CampFireWeb.EconomyControllerTest do
     end
   end
 
-  describe "POST /economy/add-seeds and spend-seeds" do
-    test "adds and spends seeds", %{conn: conn} do
+  describe "POST /economy/add-items and spend-items" do
+    test "adds and spends items", %{conn: conn} do
       player = register_player()
       Economy.init_economy(player.uid)
 
       conn1 =
         conn
         |> authed_conn(player)
-        |> post("/economy/add-seeds", %{seed_name: "Basil", count: 5})
+        |> post("/economy/add-items", %{item_key: "basil_seed", count: 5})
 
       body = json_response(conn1, 200)
-      basil = Enum.find(body["seeds"], &(&1["seedName"] == "Basil"))
+      basil = Enum.find(body["inventory"], &(&1["itemKey"] == "basil_seed"))
       assert basil["count"] == 5
 
       conn2 =
         build_conn()
         |> authed_conn(player)
-        |> post("/economy/spend-seeds", %{seed_name: "Basil", count: 2})
+        |> post("/economy/spend-items", %{items: [%{itemKey: "basil_seed", count: 2}]})
 
       body = json_response(conn2, 200)
-      basil = Enum.find(body["seeds"], &(&1["seedName"] == "Basil"))
+      basil = Enum.find(body["inventory"], &(&1["itemKey"] == "basil_seed"))
       assert basil["count"] == 3
     end
   end
@@ -119,12 +127,12 @@ defmodule CampFireWeb.EconomyControllerTest do
     test "upgrades flame level", %{conn: conn} do
       player = register_player()
       Economy.init_economy(player.uid)
-      Economy.upsert_item(player.uid, "Sprouts_harvest", 5)
+      Economy.upsert_item(player.uid, "sprouts", 5)
 
       conn =
         conn
         |> authed_conn(player)
-        |> post("/economy/upgrade-flame", %{items: [%{item_name: "Sprouts_harvest", count: 1}]})
+        |> post("/economy/upgrade-flame", %{items: [%{itemKey: "sprouts", count: 1}]})
 
       body = json_response(conn, 200)
       assert body["flameLevel"] == 2

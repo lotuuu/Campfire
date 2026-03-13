@@ -6,22 +6,24 @@ defmodule CampFire.Game.VasesTest do
 
   # init_economy creates 1 starter vase + 1 starter plot + 1 mallum house + 2 mallums
   # So the first craft_vase in tests is the 2nd vase (index 1):
-  #   vase_costs[1] = 120 mana + 2 Basil_harvest
-  # The 3rd vase (index 2) = 150 mana + 1 Chamomile_harvest
+  #   vase_costs[1] = 120 mana + 2 basil
+  # The 3rd vase (index 2) = 150 mana + 1 chamomile
 
   defp setup_player(_context \\ %{}) do
-    seed_building_costs()
+    seed_items()
     seed_flame_config()
+    seed_building_costs()
     seed_mallum_house_config()
+    seed_new_player_config()
     player = register_player()
     {:ok, _economy} = Economy.init_economy(player.uid)
     # Boost mana for crafting tests
     economy = Economy.get_economy(player.uid)
     economy |> Ecto.Changeset.change(mana: 1000.0) |> Repo.update!()
     # Give harvest items for vase crafting
-    Economy.upsert_item(player.uid, "Cress", 10)
-    Economy.upsert_item(player.uid, "Basil", 10)
-    Economy.upsert_item(player.uid, "Chamomile", 10)
+    Economy.upsert_item(player.uid, "cress", 10)
+    Economy.upsert_item(player.uid, "basil", 10)
+    Economy.upsert_item(player.uid, "chamomile", 10)
     # init_economy creates 2 starter mallums, grab the first idle one
     [mallum | _] = Mallums.list_mallums(player.uid)
     {player, mallum}
@@ -40,13 +42,12 @@ defmodule CampFire.Game.VasesTest do
       assert vase.grid_y == 0
 
       economy = Economy.get_economy(player.uid)
-      # Started with 1000, 2nd vase (index 1) costs 120
-      assert economy.mana == 880.0
+      # Started with 1000, cost index 0 (after starter) = 100 mana + 1 cress
+      assert economy.mana == 900.0
 
-      # 2nd vase costs 2 Basil
       inventory = Economy.list_inventory(player.uid)
-      basil_h = Enum.find(inventory, &(&1.item_name == "Basil"))
-      assert basil_h.count == 8
+      cress_h = Enum.find(inventory, &(&1.item_key == "cress"))
+      assert cress_h.count == 9
     end
 
     test "escalates cost for subsequent vases" do
@@ -56,36 +57,40 @@ defmodule CampFire.Game.VasesTest do
       {:ok, _} = Vases.craft_vase(player.uid, 0, 1)
 
       economy = Economy.get_economy(player.uid)
-      # 1000 - 120 (index 1) - 150 (index 2) = 730
-      assert economy.mana == 730.0
+      # 1000 - 100 (index 0) - 120 (index 1) = 780
+      assert economy.mana == 780.0
 
-      # 3rd vase (index 2) costs 1 Chamomile
+      # index 1 costs 2 basil
       inventory = Economy.list_inventory(player.uid)
-      chamomile_h = Enum.find(inventory, &(&1.item_name == "Chamomile"))
-      assert chamomile_h.count == 9
+      basil_h = Enum.find(inventory, &(&1.item_key == "basil"))
+      assert basil_h.count == 8
     end
 
     test "fails with insufficient mana" do
-      seed_building_costs()
+      seed_items()
       seed_flame_config()
+      seed_building_costs()
       seed_mallum_house_config()
+      seed_new_player_config()
       player = register_player()
       {:ok, _economy} = Economy.init_economy(player.uid)
       # Default 50 mana, 2nd vase (index 1) costs 120
-      Economy.upsert_item(player.uid, "Basil", 10)
+      Economy.upsert_item(player.uid, "basil", 10)
 
       {:error, :insufficient_mana} = Vases.craft_vase(player.uid, 2, 0)
     end
 
     test "fails with insufficient harvest items" do
-      seed_building_costs()
+      seed_items()
       seed_flame_config()
+      seed_building_costs()
       seed_mallum_house_config()
+      seed_new_player_config()
       player = register_player()
       {:ok, _economy} = Economy.init_economy(player.uid)
       economy = Economy.get_economy(player.uid)
       economy |> Ecto.Changeset.change(mana: 1000.0) |> Repo.update!()
-      # No Basil_harvest given — 2nd vase (index 1) needs 2 Basil_harvest
+      # No basil given — 2nd vase (index 1) needs 2 basil
 
       {:error, :insufficient_items} = Vases.craft_vase(player.uid, 2, 0)
     end
@@ -235,18 +240,20 @@ defmodule CampFire.Game.VasesTest do
 
   describe "craft_vase/3 grid validation" do
     test "rejects when entity cap reached" do
+      seed_items()
       seed_building_costs()
       seed_flame_config_with_low_cap()
       seed_mallum_house_config()
+      seed_new_player_config()
       player = register_player()
       {:ok, _economy} = Economy.init_economy(player.uid)
 
       # Boost mana and give harvest items
       economy = Economy.get_economy(player.uid)
       economy |> Ecto.Changeset.change(mana: 10000.0) |> Repo.update!()
-      Economy.upsert_item(player.uid, "Cress_harvest", 50)
-      Economy.upsert_item(player.uid, "Basil_harvest", 50)
-      Economy.upsert_item(player.uid, "Chamomile_harvest", 50)
+      Economy.upsert_item(player.uid, "cress", 50)
+      Economy.upsert_item(player.uid, "basil", 50)
+      Economy.upsert_item(player.uid, "chamomile", 50)
 
       # low_cap at level 1 = 4, init_economy creates 1 plot + 1 vase + 1 house = 3 + 1 apotheke = 4
       {:error, :entity_cap_reached} = Vases.craft_vase(player.uid, -1, -1)

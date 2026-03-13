@@ -4,6 +4,11 @@ defmodule CampFireWeb.GiftControllerTest do
   alias CampFire.Social
 
   setup %{conn: conn} do
+    seed_items()
+    seed_new_player_config()
+    seed_flame_config()
+    seed_mallum_house_config()
+
     player = register_player()
     friend = register_player()
 
@@ -22,10 +27,10 @@ defmodule CampFireWeb.GiftControllerTest do
 
   test "send and claim gift flow", %{conn: conn, player: player, friend: friend} do
     # Give sender an item to gift
-    CampFire.Economy.upsert_item(player.uid, "Basil_harvest", 1)
+    CampFire.Economy.upsert_item(player.uid, "basil", 1)
 
     # Send gift
-    conn1 = post(conn, "/gifts/send", %{toUid: friend.uid, items: [%{item_name: "Basil_harvest", count: 1}]})
+    conn1 = post(conn, "/gifts/send", %{toUid: friend.uid, items: [%{itemKey: "basil", count: 1}]})
     body = json_response(conn1, 201)
     assert body["giftId"]
 
@@ -42,7 +47,7 @@ defmodule CampFireWeb.GiftControllerTest do
 
   test "cannot send to non-friend", %{conn: conn} do
     stranger = register_player()
-    conn = post(conn, "/gifts/send", %{toUid: stranger.uid, items: [%{item_name: "Basil_harvest", count: 1}]})
+    conn = post(conn, "/gifts/send", %{toUid: stranger.uid, items: [%{itemKey: "basil", count: 1}]})
     assert json_response(conn, 403)
   end
 end

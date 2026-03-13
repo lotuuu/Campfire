@@ -1,19 +1,82 @@
 defmodule CampFire.TestHelpers do
   alias CampFire.Accounts
+  alias CampFire.Repo
+  alias CampFire.Game.Item
 
   def register_player do
     {:ok, player} = Accounts.register_player()
     player
   end
 
+  @doc """
+  Seeds the items table with all known item keys so FK constraints pass.
+  Must be called before any Economy.upsert_item / init_economy call.
+  """
+  def seed_items do
+    plants = ~w(sprouts cress basil chamomile marigold snowdrop mint lavender pansy poppy jasmine rosemary dahlia moonflower)
+
+    items =
+      Enum.map(plants, fn p ->
+        %{item_key: "#{p}_seed", display_name: "#{String.capitalize(p)} Seed", category: "seed"}
+      end) ++
+      Enum.map(plants, fn p ->
+        %{item_key: p, display_name: String.capitalize(p), category: "harvest"}
+      end) ++
+      [
+        %{item_key: "berry", display_name: "Berry", category: "harvest"},
+        %{item_key: "acorn", display_name: "Acorn", category: "harvest"}
+      ] ++
+      ((plants -- ~w(sprouts cress)) |> Enum.map(fn p ->
+        %{item_key: "#{p}_pigment", display_name: "#{String.capitalize(p)} Pigment", category: "pigment"}
+      end)) ++
+      [
+        %{item_key: "speed_potion", display_name: "Speed Potion", category: "potion"},
+        %{item_key: "fertilizer", display_name: "Fertilizer", category: "material"},
+        %{item_key: "energy_drink", display_name: "Energy Drink", category: "consumable"},
+        # Test-only items for seeds that don't exist in production
+        %{item_key: "harvesttest_seed", display_name: "HarvestTest Seed", category: "seed"},
+        %{item_key: "harvesttest", display_name: "HarvestTest", category: "harvest"},
+        %{item_key: "simpleseed_seed", display_name: "SimpleSeed Seed", category: "seed"},
+        %{item_key: "simpleseed", display_name: "SimpleSeed", category: "harvest"},
+        %{item_key: "slowplant_seed", display_name: "SlowPlant Seed", category: "seed"},
+        %{item_key: "slowplant", display_name: "SlowPlant", category: "harvest"},
+        %{item_key: "rareseed_seed", display_name: "RareSeed Seed", category: "seed"},
+        %{item_key: "rareseed", display_name: "RareSeed", category: "harvest"}
+      ]
+
+    now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
+
+    entries =
+      Enum.map(items, fn item ->
+        Map.merge(item, %{inserted_at: now, updated_at: now})
+      end)
+
+    Repo.insert_all(Item, entries, on_conflict: :nothing, conflict_target: :item_key)
+  end
+
+  def seed_new_player_config do
+    config = %{
+      "mana" => 50,
+      "gems" => 5,
+      "starting_water" => 1,
+      "items" => [
+        %{"itemKey" => "sprouts_seed", "count" => 5},
+        %{"itemKey" => "cress_seed", "count" => 3},
+        %{"itemKey" => "speed_potion", "count" => 3}
+      ]
+    }
+
+    :ets.insert(:config_cache, {"new_player_config", config})
+  end
+
   def seed_quest_configs do
     quests = [
       {"SwampForage", %{quest_name: "SwampForage", duration_minutes: 5, required_flame_level: 1, reward_rolls: 2,
-        reward_pool: [%{"seed_name" => "Basil", "weight" => 3, "min" => 1, "max" => 2}, %{"seed_name" => "Chamomile", "weight" => 2, "min" => 1, "max" => 2}]}},
+        reward_pool: [%{"itemKey" => "basil_seed", "weight" => 3, "min" => 1, "max" => 2}, %{"itemKey" => "chamomile_seed", "weight" => 2, "min" => 1, "max" => 2}]}},
       {"MeadowExpedition", %{quest_name: "MeadowExpedition", duration_minutes: 15, required_flame_level: 2, reward_rolls: 3,
-        reward_pool: [%{"seed_name" => "Marigold", "weight" => 3, "min" => 1, "max" => 2}, %{"seed_name" => "Snowdrop", "weight" => 2, "min" => 1, "max" => 2}]}},
+        reward_pool: [%{"itemKey" => "marigold_seed", "weight" => 3, "min" => 1, "max" => 2}, %{"itemKey" => "snowdrop_seed", "weight" => 2, "min" => 1, "max" => 2}]}},
       {"DeepWoodsTrek", %{quest_name: "DeepWoodsTrek", duration_minutes: 60, required_flame_level: 3, reward_rolls: 3,
-        reward_pool: [%{"seed_name" => "Mint", "weight" => 3, "min" => 1, "max" => 2}, %{"seed_name" => "Pansy", "weight" => 2, "min" => 1, "max" => 1}]}}
+        reward_pool: [%{"itemKey" => "mint_seed", "weight" => 3, "min" => 1, "max" => 2}, %{"itemKey" => "pansy_seed", "weight" => 2, "min" => 1, "max" => 1}]}}
     ]
 
     # Write directly to ETS since ConfigCache GenServer can't see the test sandbox
@@ -24,15 +87,15 @@ defmodule CampFire.TestHelpers do
   def seed_building_costs do
     config = %{
       "plot_costs" => [
-        %{"manaCost" => 150, "harvestCosts" => [%{"itemName" => "Sprouts_harvest", "count" => 1}]},
-        %{"manaCost" => 200, "harvestCosts" => [%{"itemName" => "Basil_harvest", "count" => 1}]},
-        %{"manaCost" => 260, "harvestCosts" => [%{"itemName" => "Basil_harvest", "count" => 2}]},
-        %{"manaCost" => 330, "harvestCosts" => [%{"itemName" => "Chamomile_harvest", "count" => 1}]}
+        %{"manaCost" => 150, "harvestCosts" => [%{"itemKey" => "sprouts", "count" => 1}]},
+        %{"manaCost" => 200, "harvestCosts" => [%{"itemKey" => "basil", "count" => 1}]},
+        %{"manaCost" => 260, "harvestCosts" => [%{"itemKey" => "basil", "count" => 2}]},
+        %{"manaCost" => 330, "harvestCosts" => [%{"itemKey" => "chamomile", "count" => 1}]}
       ],
       "vase_costs" => [
-        %{"manaCost" => 100, "harvestCosts" => [%{"itemName" => "Cress_harvest", "count" => 1}]},
-        %{"manaCost" => 120, "harvestCosts" => [%{"itemName" => "Basil_harvest", "count" => 2}]},
-        %{"manaCost" => 150, "harvestCosts" => [%{"itemName" => "Chamomile_harvest", "count" => 1}]}
+        %{"manaCost" => 100, "harvestCosts" => [%{"itemKey" => "cress", "count" => 1}]},
+        %{"manaCost" => 120, "harvestCosts" => [%{"itemKey" => "basil", "count" => 2}]},
+        %{"manaCost" => 150, "harvestCosts" => [%{"itemKey" => "chamomile", "count" => 1}]}
       ]
     }
 
@@ -48,14 +111,14 @@ defmodule CampFire.TestHelpers do
     configs = %{
       "BerryBush" => %{
         "growth_duration_hours" => 24.0,
-        "yield_item" => "Berry",
+        "yield_item" => "berry",
         "yield_amount" => 3,
         "yield_interval_hours" => 12.0,
         "mana_cost" => 30.0
       },
       "Oak" => %{
         "growth_duration_hours" => 48.0,
-        "yield_item" => "Acorn",
+        "yield_item" => "acorn",
         "yield_amount" => 2,
         "yield_interval_hours" => 24.0,
         "mana_cost" => 50.0
@@ -67,9 +130,9 @@ defmodule CampFire.TestHelpers do
 
   def seed_flame_config do
     config = %{
-      "base_mana_per_second" => 0.5,
-      "mana_per_level" => 0.3,
       "max_flame_level" => 12,
+      "mana_rates" => [0.5, 1, 1.5, 2, 3, 4, 5, 7.5, 10, 12.5, 15, 20],
+      "mana_caps" => [99999, 99999, 99999, 99999, 99999, 99999, 99999, 99999, 99999, 99999, 99999, 99999],
       "entity_caps" => [8, 10, 13, 16, 20, 24, 28, 32, 36, 40, 45, 50],
       "grid_sizes" => [2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7],
       "upgrade_recipes" => []
@@ -80,9 +143,9 @@ defmodule CampFire.TestHelpers do
 
   def seed_flame_config_with_low_cap do
     config = %{
-      "base_mana_per_second" => 0.5,
-      "mana_per_level" => 0.3,
       "max_flame_level" => 12,
+      "mana_rates" => [0.5, 1, 1.5, 2, 3, 4, 5, 7.5, 10, 12.5, 15, 20],
+      "mana_caps" => [99999, 99999, 99999, 99999, 99999, 99999, 99999, 99999, 99999, 99999, 99999, 99999],
       "entity_caps" => [4, 5, 7, 10, 13, 16, 20, 24, 28, 32, 36, 40],
       "grid_sizes" => [2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7],
       "upgrade_recipes" => []
@@ -107,9 +170,10 @@ defmodule CampFire.TestHelpers do
   def seed_mallum_house_config do
     config = %{
       "mallums_per_house" => 2,
+      "quest_speed_item" => "energy_drink",
       "house_costs" => [
-        %{"manaCost" => 200, "harvestCosts" => [%{"itemName" => "Basil_harvest", "count" => 1}]},
-        %{"manaCost" => 350, "harvestCosts" => [%{"itemName" => "Chamomile_harvest", "count" => 2}]}
+        %{"manaCost" => 200, "harvestCosts" => [%{"itemKey" => "basil", "count" => 1}]},
+        %{"manaCost" => 350, "harvestCosts" => [%{"itemKey" => "chamomile", "count" => 2}]}
       ]
     }
 
@@ -118,18 +182,18 @@ defmodule CampFire.TestHelpers do
 
   def seed_recipe_configs do
     recipes = %{
-      "Fertilizer" => %{
-        "ingredients" => [%{"item_name" => "Basil", "count" => 2}],
-        "result_item" => "Fertilizer",
+      "fertilizer" => %{
+        "ingredients" => [%{"itemKey" => "basil", "count" => 2}],
+        "result_item" => "fertilizer",
         "result_quantity" => 1,
         "category" => "consumable"
       },
-      "Speed_Potion" => %{
+      "speed_potion" => %{
         "ingredients" => [
-          %{"item_name" => "Mint", "count" => 2},
-          %{"item_name" => "Chamomile", "count" => 1}
+          %{"itemKey" => "mint", "count" => 2},
+          %{"itemKey" => "chamomile", "count" => 1}
         ],
-        "result_item" => "Speed_Potion",
+        "result_item" => "speed_potion",
         "result_quantity" => 1,
         "category" => "consumable"
       }
@@ -140,13 +204,21 @@ defmodule CampFire.TestHelpers do
 
   def seed_skin_configs do
     configs = %{
-      "GreenPlot" => %{"building_type" => "plot", "cost_item_name" => "Basil", "cost_quantity" => 3},
-      "BluePlot" => %{"building_type" => "plot", "cost_item_name" => "Chamomile", "cost_quantity" => 2},
-      "FancyVase" => %{"building_type" => "vase", "cost_item_name" => "Basil", "cost_quantity" => 2},
-      "CozyHouse" => %{"building_type" => "mallum_house", "cost_item_name" => "Basil", "cost_quantity" => 5}
+      "GreenPlot" => %{"building_type" => "plot", "cost_item_key" => "basil", "cost_quantity" => 3},
+      "BluePlot" => %{"building_type" => "plot", "cost_item_key" => "chamomile", "cost_quantity" => 2},
+      "FancyVase" => %{"building_type" => "vase", "cost_item_key" => "basil", "cost_quantity" => 2},
+      "CozyHouse" => %{"building_type" => "mallum_house", "cost_item_key" => "basil", "cost_quantity" => 5}
     }
 
     :ets.insert(:config_cache, {"skin_configs", configs})
+  end
+
+  @doc """
+  Returns a list of free hex positions for the given player.
+  Useful when tests need to craft at a position not already occupied by starter buildings.
+  """
+  def free_positions(player_uid) do
+    CampFire.Game.GridValidation.get_free_tiles(player_uid)
   end
 
   def auth_header(player) do
