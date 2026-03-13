@@ -317,9 +317,9 @@ namespace Garden
         }
 
         /// <summary>
-        /// Called by CampsiteViewUI when the flame interaction panel is closed.
+        /// Called by CampsiteViewUI when the flame interaction panel is opened.
         /// </summary>
-        public void OnFlameMenuClosed()
+        public void OnFlameMenuOpened()
         {
             if (!initialized || IsComplete) return;
 
