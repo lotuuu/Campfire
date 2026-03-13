@@ -174,5 +174,6 @@ defmodule CampFireWeb.Router do
     post "/mature-plots", DebugController, :mature_plots
     post "/set-flame-level", DebugController, :set_flame_level
     post "/clear-save", DebugController, :clear_save
+    post "/log", DebugController, :log
   end
 end

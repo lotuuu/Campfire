@@ -80,4 +80,28 @@ defmodule CampFireWeb.DebugController do
       {:error, reason} -> conn |> put_status(422) |> json(%{error: inspect(reason)})
     end
   end
+
+  def log(conn, %{"message" => message} = params) do
+    uid = conn.assigns.current_player.uid
+
+    level =
+      case params["level"] do
+        "warning" -> :warning
+        "info" -> :info
+        _ -> :error
+      end
+
+    CampFire.DebugLog.log(%{
+      level: level,
+      source: :client,
+      category: params["category"] || "client",
+      message: message,
+      player_uid: uid,
+      metadata: params["metadata"] || %{}
+    })
+
+    conn |> put_status(200) |> json(%{ok: true})
+  end
+
+  def log(conn, _), do: conn |> put_status(400) |> json(%{error: "Missing 'message'"})
 end
