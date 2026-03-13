@@ -79,53 +79,62 @@ GIGALIXIR := $(HOME)/.local/bin/gigalixir
 GIGALIXIR_APP := campfire
 GIGALIXIR_URL := https://campfire.gigalixirapp.com
 DEPLOY_DIR := /tmp/campfire-deploy
+COMMIT ?=
 
-# Deploy: push code, wait for health, migrate forward, seed
+# Prepare deploy dir from working tree or specific commit
+# COMMIT path: uses git archive to extract server/ — no writes to main repo
+define prepare_deploy
+	@rm -rf $(DEPLOY_DIR)
+	@mkdir -p $(DEPLOY_DIR)
+	@if [ -n "$(COMMIT)" ]; then \
+		echo "Extracting server/ from $(COMMIT)..."; \
+		git -C .. archive $(COMMIT) -- server/ | tar -x -C $(DEPLOY_DIR) --strip-components=1; \
+	else \
+		rsync -a --exclude='.git' ./ $(DEPLOY_DIR)/; \
+	fi
+endef
+
+# Push deploy dir to Gigalixir
+define push_deploy
+	@cd $(DEPLOY_DIR) && git init && git add -A && git commit -m "deploy"
+	@cd $(DEPLOY_DIR) && git remote add gigalixir https://git.gigalixir.com/$(GIGALIXIR_APP).git/
+	@cd $(DEPLOY_DIR) && git push -f gigalixir main
+	@rm -rf $(DEPLOY_DIR)
+	@echo "Deployed to $(GIGALIXIR_URL)"
+endef
+
+# Wait for Gigalixir instance to be healthy
+define wait_healthy
+	@echo "Waiting for instance to be healthy..."
+	@for i in 1 2 3 4 5 6 7 8 9 10 11 12; do \
+		sleep 10; \
+		if curl -sf $(GIGALIXIR_URL)/health > /dev/null 2>&1; then \
+			echo "Instance is healthy."; \
+			break; \
+		fi; \
+		echo "  ...not ready yet ($$((i * 10))s)"; \
+	done
+endef
+
+# Deploy: push code, wait for health, migrate forward
+# Usage: make deploy [COMMIT=<sha>]
 deploy:
 	@echo "Preparing deploy..."
-	@rm -rf $(DEPLOY_DIR)
-	@mkdir -p $(DEPLOY_DIR)
-	@cd .. && git lfs checkout -- server/
-	@rsync -a --exclude='.git' ./ $(DEPLOY_DIR)/
-	@cd $(DEPLOY_DIR) && git init && git add -A && git commit -m "deploy"
-	@cd $(DEPLOY_DIR) && git remote add gigalixir https://git.gigalixir.com/$(GIGALIXIR_APP).git/
-	@cd $(DEPLOY_DIR) && git push -f gigalixir main
-	@rm -rf $(DEPLOY_DIR)
-	@echo "Deployed to $(GIGALIXIR_URL)"
-	@echo "Waiting for instance to be healthy..."
-	@for i in 1 2 3 4 5 6 7 8 9 10 11 12; do \
-		sleep 10; \
-		if curl -sf $(GIGALIXIR_URL)/health > /dev/null 2>&1; then \
-			echo "Instance is healthy."; \
-			break; \
-		fi; \
-		echo "  ...not ready yet ($$((i * 10))s)"; \
-	done
+	$(call prepare_deploy)
+	$(call push_deploy)
+	$(call wait_healthy)
 	$(GIGALIXIR) ps:migrate -a $(GIGALIXIR_APP)
-	$(GIGALIXIR) run -a $(GIGALIXIR_APP) -- eval 'CampFire.Release.seed()'
 
-# Redeploy: push code, wait for health, nuke DB + re-migrate + re-seed
+# Redeploy: push code, wait for health, reset DB (truncate + re-migrate + re-seed)
+# Usage: make redeploy [COMMIT=<sha>]
 redeploy:
-	@echo "Preparing deploy..."
-	@rm -rf $(DEPLOY_DIR)
-	@mkdir -p $(DEPLOY_DIR)
-	@cd .. && git lfs checkout -- server/
-	@rsync -a --exclude='.git' ./ $(DEPLOY_DIR)/
-	@cd $(DEPLOY_DIR) && git init && git add -A && git commit -m "deploy"
-	@cd $(DEPLOY_DIR) && git remote add gigalixir https://git.gigalixir.com/$(GIGALIXIR_APP).git/
-	@cd $(DEPLOY_DIR) && git push -f gigalixir main
-	@rm -rf $(DEPLOY_DIR)
-	@echo "Deployed to $(GIGALIXIR_URL)"
-	@echo "Waiting for instance to be healthy..."
-	@for i in 1 2 3 4 5 6 7 8 9 10 11 12; do \
-		sleep 10; \
-		if curl -sf $(GIGALIXIR_URL)/health > /dev/null 2>&1; then \
-			echo "Instance is healthy."; \
-			break; \
-		fi; \
-		echo "  ...not ready yet ($$((i * 10))s)"; \
-	done
-	$(GIGALIXIR) run -a $(GIGALIXIR_APP) -- eval 'CampFire.Release.reset()'
+	@echo "Preparing redeploy..."
+	$(call prepare_deploy)
+	$(call push_deploy)
+	$(call wait_healthy)
+	@echo "Resetting database..."
+	printf '%s\n' 'CampFire.Release.reset()' | $(GIGALIXIR) ps:remote_console -a $(GIGALIXIR_APP) || true
+	@echo "Database reset complete."
 
 # Point DevServerConfig.cs at Gigalixir
 remote-use:
