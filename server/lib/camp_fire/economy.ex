@@ -98,6 +98,9 @@ defmodule CampFire.Economy do
         economy -> {:ok, economy}
       end
     else
+      # Flush accumulated passive mana into the stored value before spending
+      collect_mana(player_uid)
+
       {count, results} =
         from(e in PlayerEconomy,
           where: e.player_uid == ^player_uid and e.mana >= ^amount,

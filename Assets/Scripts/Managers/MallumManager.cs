@@ -64,7 +64,7 @@ namespace Garden
                         // Notify server
                         if (GameService.Instance != null && GameService.Instance.IsOnline && mallum.serverId > 0)
                         {
-                            _ = GameService.Instance.CheckQuest(mallum.serverId);
+                            _ = NotifyServerOrResync(GameService.Instance.CheckQuest(mallum.serverId));
                         }
                     }
                 }
@@ -173,7 +173,7 @@ namespace Garden
             // Notify server
             if (GameService.Instance != null && GameService.Instance.IsOnline)
             {
-                _ = GameService.Instance.StartQuest(quest.questName);
+                _ = NotifyServerOrResync(GameService.Instance.StartQuest(quest.questName));
             }
 
             return true;
@@ -207,10 +207,9 @@ namespace Garden
 
         private async Task NotifyServerCollectQuest(int mallumServerId)
         {
-            // Fire-and-forget — server records the collection.
-            // Do NOT call SyncFromServer() here as it creates race conditions
-            // that overwrite pending local changes with stale server state.
-            await GameService.Instance.CollectQuest(mallumServerId);
+            var result = await GameService.Instance.CollectQuest(mallumServerId);
+            if (result == null)
+                await GameService.Instance.ResyncFullState();
         }
 
         public bool CraftMallumHouse(int gridX, int gridY)
@@ -265,13 +264,16 @@ namespace Garden
             if (result != null)
             {
                 var data = SaveManager.Instance.Data;
-                // Find the house we just created at these coordinates and set its serverId
                 var house = data.mallumHouses.Find(h => h.gridX == gridX && h.gridY == gridY && h.serverId == 0);
                 if (house != null)
                 {
                     house.serverId = result.id;
                     SaveManager.Instance.Save();
                 }
+            }
+            else
+            {
+                await GameService.Instance.ResyncFullState();
             }
         }
 
@@ -317,26 +319,27 @@ namespace Garden
             return count;
         }
 
-        private const string EnergyDrinkItem = "Energy_Drink";
+        private static string QuestSpeedItem =>
+            ConfigService.Instance.MallumHouseConfig.quest_speed_item;
 
-        public bool CanUseEnergyDrink()
+        public bool CanUseQuestSpeedItem()
         {
             if (CurrencyManager.FreeMode) return true;
-            var item = SaveManager.Instance.Data.inventory.Find(i => i.itemName == EnergyDrinkItem);
+            var item = SaveManager.Instance.Data.inventory.Find(i => i.itemName == QuestSpeedItem);
             return item != null && item.count > 0;
         }
 
-        public int GetEnergyDrinkCount()
+        public int GetQuestSpeedItemCount()
         {
-            var item = SaveManager.Instance.Data.inventory.Find(i => i.itemName == EnergyDrinkItem);
+            var item = SaveManager.Instance.Data.inventory.Find(i => i.itemName == QuestSpeedItem);
             return item?.count ?? 0;
         }
 
-        private bool ConsumeEnergyDrink()
+        private bool ConsumeQuestSpeedItem()
         {
             if (CurrencyManager.FreeMode) return true;
             var data = SaveManager.Instance.Data;
-            var drink = data.inventory.Find(i => i.itemName == EnergyDrinkItem);
+            var drink = data.inventory.Find(i => i.itemName == QuestSpeedItem);
             if (drink == null || drink.count <= 0) return false;
             drink.count--;
             if (drink.count <= 0) data.inventory.Remove(drink);
@@ -351,7 +354,7 @@ namespace Garden
             var mallum = data.mallums[mallumIndex];
             if (mallum.state != MallumState.OnQuest) return false;
 
-            if (!ConsumeEnergyDrink()) return false;
+            if (!ConsumeQuestSpeedItem()) return false;
 
             int serverId = mallum.serverId;
             CompleteQuest(mallum);
@@ -361,7 +364,7 @@ namespace Garden
 
             if (GameService.Instance != null && GameService.Instance.IsOnline && serverId > 0)
             {
-                _ = GameService.Instance.SpeedUpQuest(serverId);
+                _ = NotifyServerOrResync(GameService.Instance.SpeedUpQuest(serverId));
             }
 
             return true;
@@ -374,7 +377,7 @@ namespace Garden
             var mallum = data.mallums[mallumIndex];
             if (mallum.state != MallumState.FetchingWater) return false;
 
-            if (!ConsumeEnergyDrink()) return false;
+            if (!ConsumeQuestSpeedItem()) return false;
 
             int vaseIndex = mallum.assignedVaseIndex;
             if (vaseIndex >= 0 && vaseIndex < data.vases.Count)
@@ -420,6 +423,13 @@ namespace Garden
         private ServerQuestConfig FindQuest(string questName)
         {
             return ConfigService.Instance?.GetQuest(questName);
+        }
+
+        private static async Task NotifyServerOrResync<T>(Task<T> serverCall)
+        {
+            var result = await serverCall;
+            if (result == null)
+                await GameService.Instance.ResyncFullState();
         }
 
         // --- Static helpers (testable without MonoBehaviour) ---

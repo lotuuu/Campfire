@@ -675,13 +675,15 @@ game_configs = [
       "default_capacity" => 5,
       "fill_duration_minutes" => 5,
       "capacity_tiers" => [5, 8, 12, 20],
-      "upgrade_costs" => [400, 1000, 2000]
+      "upgrade_costs" => [400, 1000, 2000],
+      "speed_item" => "Energy_Drink"
     }
   },
   %{
     key: "mallum_house_config",
     value: %{
       "mallums_per_house" => 1,
+      "quest_speed_item" => "Energy_Drink",
       "house_costs" => [
         %{"manaCost" => 10, "harvestCosts" => [%{"itemName" => "Sprouts", "count" => 1}]},
         %{"manaCost" => 100, "harvestCosts" => [%{"itemName" => "Basil", "count" => 2}]},
@@ -709,7 +711,8 @@ game_configs = [
       "water_cooldown_seconds" => 7200,
       "rain_water_cooldown_seconds" => 21600,
       "rain_trigger_minutes" => 15,
-      "drop_spread_factor" => 0.3
+      "drop_spread_factor" => 0.3,
+      "speed_item" => "Speed_Potion"
     }
   },
   %{

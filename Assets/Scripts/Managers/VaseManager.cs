@@ -69,7 +69,7 @@ namespace Garden
                     // Notify server
                     if (GameService.Instance != null && GameService.Instance.IsOnline && vase.serverId > 0)
                     {
-                        _ = GameService.Instance.CheckVase(vase.serverId);
+                        _ = NotifyServerOrResync(GameService.Instance.CheckVase(vase.serverId));
                     }
                 }
             }
@@ -95,7 +95,7 @@ namespace Garden
 
             // Notify server
             if (GameService.Instance != null && GameService.Instance.IsOnline && vase.serverId > 0)
-                _ = GameService.Instance.InstantFinishVase(vase.serverId);
+                _ = NotifyServerOrResync(GameService.Instance.InstantFinishVase(vase.serverId));
 
             return true;
         }
@@ -115,10 +115,17 @@ namespace Garden
             // Notify server
             if (GameService.Instance != null && GameService.Instance.IsOnline && vase.serverId > 0)
             {
-                _ = GameService.Instance.FillVase(vase.serverId);
+                _ = NotifyServerOrResync(GameService.Instance.FillVase(vase.serverId));
             }
 
             return true;
+        }
+
+        private static async Task NotifyServerOrResync<T>(Task<T> serverCall)
+        {
+            var result = await serverCall;
+            if (result == null)
+                await GameService.Instance.ResyncFullState();
         }
 
         public BuildingCost GetNextVaseCost()
@@ -176,6 +183,10 @@ namespace Garden
                     data.vases[vaseIndex].serverId = result.id;
                     SaveManager.Instance.Save();
                 }
+            }
+            else
+            {
+                await GameService.Instance.ResyncFullState();
             }
         }
 

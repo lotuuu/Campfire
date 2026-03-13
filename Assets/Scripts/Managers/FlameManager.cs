@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Garden
@@ -85,7 +86,7 @@ namespace Garden
 
             if (GameService.Instance != null && GameService.Instance.IsOnline)
             {
-                _ = GameService.Instance.UpgradeFlame(items, CurrencyManager.FreeMode);
+                _ = NotifyServerOrResync(GameService.Instance.UpgradeFlame(items, CurrencyManager.FreeMode));
             }
             else if (EconomyService.Instance != null)
             {
@@ -96,6 +97,13 @@ namespace Garden
             OnFlameUpgraded?.Invoke();
             AudioManager.Instance?.PlaySFX("flame_upgrade");
             return true;
+        }
+
+        private static async Task NotifyServerOrResync<T>(Task<T> serverCall)
+        {
+            var result = await serverCall;
+            if (result == null)
+                await GameService.Instance.ResyncFullState();
         }
 
         public static bool CanAffordUpgrade(FlameUpgradeRecipe recipe, List<InventoryItem> items)

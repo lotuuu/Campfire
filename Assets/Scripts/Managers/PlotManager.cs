@@ -228,6 +228,10 @@ namespace Garden
                     SaveManager.Instance.Save();
                 }
             }
+            else
+            {
+                await GameService.Instance.ResyncFullState();
+            }
         }
 
         public bool Plant(int plotIndex, string seedName)
@@ -275,7 +279,7 @@ namespace Garden
             // Notify server
             if (GameService.Instance != null && GameService.Instance.IsOnline && plot.serverId > 0)
             {
-                _ = GameService.Instance.PlantSeed(plot.serverId, seedName);
+                _ = NotifyServerOrResync(GameService.Instance.PlantSeed(plot.serverId, seedName));
             }
 
             return true;
@@ -313,7 +317,7 @@ namespace Garden
             // Notify server with the vase that actually supplied the water
             if (GameService.Instance != null && GameService.Instance.IsOnline && plot.serverId > 0
                 && sourceVaseServerId > 0)
-                _ = GameService.Instance.WaterPlot(plot.serverId, sourceVaseServerId);
+                _ = NotifyServerOrResync(GameService.Instance.WaterPlot(plot.serverId, sourceVaseServerId));
 
             return true;
         }
@@ -425,9 +429,6 @@ namespace Garden
             var resp = await GameService.Instance.Harvest(serverId);
             if (resp != null)
             {
-                // Apply harvest drops from server response directly — do NOT call
-                // SyncFromServer() here as it creates race conditions that overwrite
-                // pending local changes (flame upgrades, other harvests) with stale state.
                 var data = SaveManager.Instance.Data;
                 if (!string.IsNullOrEmpty(resp.itemName) && resp.drops > 0)
                 {
@@ -446,6 +447,10 @@ namespace Garden
                     }
                 }
             }
+            else
+            {
+                await GameService.Instance.ResyncFullState();
+            }
         }
 
         public bool InstantFinish(int plotIndex)
@@ -460,7 +465,7 @@ namespace Garden
 
             // Notify server
             if (GameService.Instance != null && GameService.Instance.IsOnline && plot.serverId > 0)
-                _ = GameService.Instance.InstantFinishPlot(plot.serverId);
+                _ = NotifyServerOrResync(GameService.Instance.InstantFinishPlot(plot.serverId));
 
             return true;
         }
@@ -472,10 +477,11 @@ namespace Garden
             var plot = data.plots[plotIndex];
             if (plot.state != PlotState.Growing) return false;
 
-            // Check potion availability first
+            // Check speed item availability
+            string speedItem = ConfigService.Instance.PlotConfig.speed_item;
             if (!CurrencyManager.FreeMode)
             {
-                var potion = data.inventory.Find(i => i.itemName == "Speed_Potion");
+                var potion = data.inventory.Find(i => i.itemName == speedItem);
                 if (potion == null || potion.count <= 0) return false;
                 potion.count--;
                 if (potion.count <= 0) data.inventory.Remove(potion);
@@ -484,9 +490,10 @@ namespace Garden
             return InstantFinish(plotIndex);
         }
 
-        public int GetSpeedPotionCount()
+        public int GetSpeedItemCount()
         {
-            var item = SaveManager.Instance.Data.inventory.Find(i => i.itemName == "Speed_Potion");
+            string speedItem = ConfigService.Instance.PlotConfig.speed_item;
+            var item = SaveManager.Instance.Data.inventory.Find(i => i.itemName == speedItem);
             return item?.count ?? 0;
         }
 
@@ -636,6 +643,13 @@ namespace Garden
                 existing.count += count;
             else
                 data.inventory.Add(new InventoryItem { itemName = itemName, count = count });
+        }
+
+        private static async Task NotifyServerOrResync<T>(Task<T> serverCall)
+        {
+            var result = await serverCall;
+            if (result == null)
+                await GameService.Instance.ResyncFullState();
         }
 
         private static ServerSeedConfig LoadSeed(string seedName)

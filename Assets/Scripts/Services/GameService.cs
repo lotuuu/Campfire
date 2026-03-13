@@ -21,10 +21,61 @@ namespace Garden
 
         private static string ServerBaseUrl => ServerConfig.BaseUrl;
 
+        private bool _resyncPending;
+
         private void Awake()
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
+        }
+
+        // ── Resync ──
+
+        /// <summary>
+        /// Re-fetches full game state from the server and applies it, correcting any
+        /// client/server divergence. Debounced — multiple calls within a frame collapse
+        /// into a single resync.
+        /// </summary>
+        public async Task ResyncFullState()
+        {
+            if (_resyncPending) return;
+            _resyncPending = true;
+
+            // Yield one frame so multiple failures in the same frame coalesce
+            await Task.Yield();
+
+            _resyncPending = false;
+
+            if (!IsOnline) return;
+
+            try
+            {
+                // Collect mana before fetching state so server mana is up-to-date
+                if (EconomyService.Instance != null && EconomyService.Instance.IsOnline)
+                    await EconomyService.Instance.CollectMana();
+
+                using var req = GetAuth("/game/state");
+                await SendAsync(req);
+
+                if (req.responseCode == 200)
+                {
+                    var state = JsonUtility.FromJson<GameStateResponse>(req.downloadHandler.text);
+                    if (state != null)
+                    {
+                        ApplyGameState(state);
+                        Debug.Log("[GameService] Resync complete — applied server state");
+                        OnStateLoaded?.Invoke();
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning($"[GameService] Resync failed (HTTP {req.responseCode})");
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[GameService] Resync failed: {e.Message}");
+            }
         }
 
         // ── Initialization ──

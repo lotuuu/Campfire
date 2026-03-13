@@ -105,12 +105,14 @@ namespace Garden
         public float craft_cost_mana;
         public int default_capacity;
         public float fill_duration_minutes;
+        public string speed_item;
     }
 
     [Serializable]
     public class ServerMallumHouseConfig
     {
         public int mallums_per_house;
+        public string quest_speed_item;
         public List<BuildingCost> houseCosts = new();
 
         public int MallumsPerHouse => mallums_per_house;
@@ -131,6 +133,7 @@ namespace Garden
         public int rain_water_cooldown_seconds;
         public int rain_trigger_minutes;
         public float drop_spread_factor;
+        public string speed_item;
     }
 
     [Serializable]

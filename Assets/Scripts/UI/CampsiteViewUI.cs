@@ -1699,7 +1699,7 @@ namespace Garden
 
                     AddGrowthRecipeSection(plot.seedName);
 
-                    int plotPotionCount = PlotManager.Instance != null ? PlotManager.Instance.GetSpeedPotionCount() : 0;
+                    int plotPotionCount = PlotManager.Instance != null ? PlotManager.Instance.GetSpeedItemCount() : 0;
                     var finishBtn = new Button(() =>
                     {
                         if (PlotManager.Instance != null && PlotManager.Instance.SpeedUpGrowth(index))
@@ -2080,7 +2080,7 @@ namespace Garden
                     fillingLabel.AddToClassList("interaction-info");
                     interactionBody.Add(fillingLabel);
 
-                    int vaseDrinkCount = MallumManager.Instance != null ? MallumManager.Instance.GetEnergyDrinkCount() : 0;
+                    int vaseDrinkCount = MallumManager.Instance != null ? MallumManager.Instance.GetQuestSpeedItemCount() : 0;
                     int fetchingMallumIndex = -1;
                     if (MallumManager.Instance != null)
                     {

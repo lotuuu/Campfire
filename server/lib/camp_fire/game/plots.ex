@@ -46,7 +46,8 @@ defmodule CampFire.Game.Plots do
   def craft_plot(player_uid, grid_x, grid_y, opts \\ []) do
     with :ok <- GridValidation.check_entity_cap(player_uid, opts),
          :ok <- GridValidation.validate_grid_placement(player_uid, grid_x, grid_y) do
-      plot_count = count_plots(player_uid)
+      # Subtract 1 for the free starter plot so cost index is based on purchased plots
+      plot_count = max(count_plots(player_uid) - 1, 0)
 
       case get_plot_cost(plot_count) do
         nil -> {:error, :config_not_loaded}
@@ -275,11 +276,17 @@ defmodule CampFire.Game.Plots do
 
   # --- Instant Finish ---
 
+  defp speed_item do
+    config = CampFire.ConfigCache.get("plot_config") ||
+      raise "plot_config not loaded in ConfigCache"
+    config["speed_item"]
+  end
+
   def instant_finish(player_uid, plot_id) do
     with %PlayerPlot{} = plot <- Repo.get(PlayerPlot, plot_id),
          true <- plot.player_uid == player_uid || {:error, :not_owned},
          true <- plot.state == "growing" || {:error, :not_growing},
-         {:ok, _} <- CampFire.Economy.spend_item(player_uid, "Speed_Potion", 1) do
+         {:ok, _} <- CampFire.Economy.spend_item(player_uid, speed_item(), 1) do
       plot
       |> PlayerPlot.changeset(%{state: "mature"})
       |> Repo.update()

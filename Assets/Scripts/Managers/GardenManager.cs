@@ -93,7 +93,7 @@ namespace Garden
             // Notify server
             if (GameService.Instance != null && GameService.Instance.IsOnline)
             {
-                _ = GameService.Instance.PlantGarden(plantName, garden.gridX, garden.gridY);
+                _ = NotifyServerOrResync(GameService.Instance.PlantGarden(plantName, garden.gridX, garden.gridY));
             }
 
             return true;
@@ -168,12 +168,19 @@ namespace Garden
                     // Notify server
                     if (GameService.Instance != null && GameService.Instance.IsOnline && garden.serverId > 0)
                     {
-                        _ = GameService.Instance.CollectGarden(garden.serverId);
+                        _ = NotifyServerOrResync(GameService.Instance.CollectGarden(garden.serverId));
                     }
                 }
             }
 
             if (changed) SaveManager.Instance.Save();
+        }
+
+        private static async Task NotifyServerOrResync<T>(Task<T> serverCall)
+        {
+            var result = await serverCall;
+            if (result == null)
+                await GameService.Instance.ResyncFullState();
         }
 
         private static void AddItem(SaveData data, string itemName, int count)

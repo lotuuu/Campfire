@@ -41,7 +41,8 @@ defmodule CampFire.Game.Vases do
   def craft_vase(player_uid, grid_x, grid_y, opts \\ []) do
     with :ok <- GridValidation.check_entity_cap(player_uid, opts),
          :ok <- GridValidation.validate_grid_placement(player_uid, grid_x, grid_y) do
-      vase_count = count_vases(player_uid)
+      # Subtract 1 for the free starter vase so cost index is based on purchased vases
+      vase_count = max(count_vases(player_uid) - 1, 0)
 
       case get_vase_cost(vase_count) do
         nil -> {:error, :config_not_loaded}
@@ -138,7 +139,7 @@ defmodule CampFire.Game.Vases do
     with %PlayerVase{} = vase <- Repo.get(PlayerVase, vase_id),
          true <- vase.player_uid == player_uid || {:error, :not_owned},
          true <- vase.state == "filling" || {:error, :not_filling},
-         {:ok, _} <- Economy.spend_item(player_uid, "Speed_Potion", 1) do
+         {:ok, _} <- Economy.spend_item(player_uid, vase_config!()["speed_item"], 1) do
       # Free the mallum assigned to this vase
       free_mallum_for_vase(player_uid, vase_id)
 

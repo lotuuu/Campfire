@@ -143,7 +143,8 @@ defmodule CampFire.Game.Mallums do
     with %PlayerMallum{} = mallum <- Repo.get(PlayerMallum, mallum_id),
          true <- mallum.player_uid == player_uid || {:error, :not_owned},
          true <- mallum.state == "on_quest" || {:error, :not_on_quest} do
-      case Economy.spend_item(player_uid, "Speed_Potion", 1) do
+      quest_speed_item = (CampFire.ConfigCache.get("mallum_house_config") || raise "mallum_house_config not loaded")["quest_speed_item"]
+      case Economy.spend_item(player_uid, quest_speed_item, 1) do
         {:error, reason} ->
           {:error, reason}
 
