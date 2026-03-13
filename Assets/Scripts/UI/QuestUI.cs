@@ -122,8 +122,18 @@ namespace Garden
         {
             if (MallumManager.Instance == null) return;
 
-            // Preserve scroll position across rebuild
-            var savedOffset = questScroll?.scrollOffset ?? Vector2.zero;
+            // Pin the content container's height so the ScrollView never sees it shrink
+            // during Clear()+rebuild — this prevents the scroll offset from being clamped
+            // to 0, which causes the visible "snap" jump.
+            float savedOffset = 0f;
+            float pinnedHeight = 0f;
+            if (questScroll != null)
+            {
+                savedOffset = questScroll.scrollOffset.y;
+                pinnedHeight = questScroll.contentContainer.resolvedStyle.height;
+                if (pinnedHeight > 0)
+                    questScroll.contentContainer.style.minHeight = pinnedHeight;
+            }
 
             UpdateMallumStatus();
             BuildActiveSection();
@@ -131,13 +141,14 @@ namespace Garden
             BuildLockedSection();
             SnapshotStates();
 
-            // Restore scroll after layout resolves — GeometryChangedEvent fires once the
-            // content container has been measured, so the offset won't get clamped to 0.
+            // After rebuild, release the height pin and restore scroll position once
+            // the new content has been laid out.
             if (questScroll != null)
             {
                 questScroll.contentContainer.RegisterCallbackOnce<GeometryChangedEvent>(evt =>
                 {
-                    questScroll.scrollOffset = savedOffset;
+                    questScroll.contentContainer.style.minHeight = StyleKeyword.Null;
+                    questScroll.scrollOffset = new Vector2(0, savedOffset);
                 });
             }
         }
