@@ -683,11 +683,11 @@ game_configs = [
     value: %{
       "mallums_per_house" => 1,
       "house_costs" => [
-        %{"manaCost" => 30, "harvestCosts" => [%{"itemName" => "Sprouts", "count" => 1}]},
-        %{"manaCost" => 30, "harvestCosts" => [%{"itemName" => "Basil", "count" => 2}]},
-        %{"manaCost" => 60, "harvestCosts" => [%{"itemName" => "Lavender", "count" => 3}]},
+        %{"manaCost" => 10, "harvestCosts" => [%{"itemName" => "Sprouts", "count" => 1}]},
+        %{"manaCost" => 100, "harvestCosts" => [%{"itemName" => "Basil", "count" => 2}]},
+        %{"manaCost" => 500, "harvestCosts" => [%{"itemName" => "Lavender", "count" => 3}]},
         %{
-          "manaCost" => 100,
+          "manaCost" => 1000,
           "harvestCosts" => [
             %{"itemName" => "Chamomile", "count" => 2},
             %{"itemName" => "Mint", "count" => 2}
@@ -699,7 +699,7 @@ game_configs = [
   %{
     key: "new_player_config",
     value: %{
-      "mana" => 30,
+      "mana" => 40,
       "gems" => 5,
       "starting_water" => 1,
       "seeds" => [%{"name" => "Sprouts", "count" => 2}],
