@@ -578,7 +578,7 @@ game_configs = [
         }
       ],
       "plot_costs" => [
-        %{"manaCost" => 75, "harvestCosts" => [%{"itemName" => "Cress", "count" => 1}]},
+        %{"manaCost" => 60, "harvestCosts" => [%{"itemName" => "Cress", "count" => 1}]},
         %{"manaCost" => 200, "harvestCosts" => [%{"itemName" => "Cress", "count" => 4}]},
         %{"manaCost" => 260, "harvestCosts" => [%{"itemName" => "Basil", "count" => 2}]},
         %{"manaCost" => 330, "harvestCosts" => [%{"itemName" => "Chamomile", "count" => 1}]},
@@ -673,9 +673,9 @@ game_configs = [
     value: %{
       "craft_cost_mana" => 100,
       "default_capacity" => 5,
-      "fill_duration_minutes" => 30,
+      "fill_duration_minutes" => 5,
       "capacity_tiers" => [5, 8, 12, 20],
-      "upgrade_costs" => [75, 200, 500]
+      "upgrade_costs" => [400, 1000, 2000]
     }
   },
   %{
