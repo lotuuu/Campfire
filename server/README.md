@@ -1,31 +1,38 @@
 # CampFire Server
 
+Elixir/Phoenix backend for Camp Fire. Provides game config, economy, social features, sprites, and admin dashboard.
+
 ## Local Development
 
-  * `make setup` — start DB (Docker), install deps, create + migrate + seed
-  * `make dev` — start Phoenix server (port 4000)
-  * `make psql` — open psql shell
-  * `make tunnel` / `make tunnel-stop` — ngrok tunnel for device testing
-
-Visit [`localhost:4000`](http://localhost:4000) from your browser.
-
-## Deploying to Gigalixir
-
-The app is hosted on Gigalixir at `https://campfire.gigalixirapp.com`.
-
 ```bash
-make deploy          # push code to Gigalixir
-make deploy-migrate  # run Ecto migrations on remote
-make deploy-full     # both: deploy + migrate
+make setup    # start Postgres (Docker), install deps, create + migrate + seed
+make dev      # start Phoenix server with ngrok tunnel (port 4000)
+make start    # start Phoenix server without tunnel
+make test     # run tests
+make psql     # open psql shell
 ```
 
-**How deploy works**: Since Gigalixir doesn't support Git LFS, `make deploy` rsyncs the server directory to a temp folder (dereferencing LFS pointers into real files), creates a fresh git repo, and force-pushes to Gigalixir.
+Admin dashboard at `localhost:4000/admin`.
 
-If you only changed code (no new migrations), `make deploy` alone is sufficient.
+## Deployment
 
-### First-time setup
+Hosted on Gigalixir at `https://campfire.gigalixirapp.com`.
 
-1. Install the Gigalixir CLI: `pip install gigalixir`
+```bash
+make deploy              # push code, wait for new version, migrate forward
+make redeploy            # push code, wait for new version, reset DB + re-migrate + re-seed
+make deploy COMMIT=abc   # deploy a specific commit (no working tree changes)
+make redeploy COMMIT=abc # redeploy a specific commit
+```
+
+`deploy` is for normal releases — pushes code, waits for the new version to be confirmed live (polls `gigalixir ps` for matching sha), then runs migrations forward.
+
+`redeploy` is for fresh DB rebuilds — same push + wait, then runs `CampFire.Release.reset()` via `ps:remote_console` (synchronous SSH) which drops all tables, re-migrates, and re-seeds. ConfigCache also auto-seeds on boot if game configs are empty.
+
+`COMMIT=<sha>` uses `git archive` to extract the server directory from a specific commit, so the local working tree is never touched.
+
+### First-time Gigalixir setup
+
+1. Install the CLI: `pip install gigalixir`
 2. Log in: `gigalixir login`
-3. Deploy: `make deploy-full`
-4. Run seeds (if needed): connect via `gigalixir ps:remote_console` or run locally against the remote DB
+3. Deploy: `make deploy`
