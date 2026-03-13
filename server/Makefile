@@ -95,11 +95,11 @@ deploy:
 
 # Run Ecto migrations on Gigalixir
 deploy-migrate:
-	$(GIGALIXIR) ps:migrate -a $(GIGALIXIR_APP)
+	$(GIGALIXIR) run -a $(GIGALIXIR_APP) -- eval 'CampFire.Release.migrate()'
 
 # Run seeds on Gigalixir
 deploy-seed:
-	$(GIGALIXIR) ps:run -a $(GIGALIXIR_APP) -- eval 'Code.eval_file("priv/repo/seeds.exs")'
+	$(GIGALIXIR) run -a $(GIGALIXIR_APP) -- eval 'CampFire.Release.seed()'
 
 # Full deploy: push code, migrate, then seed
 deploy-full: deploy deploy-migrate deploy-seed
