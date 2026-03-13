@@ -297,8 +297,8 @@ namespace Garden
                         serverId = sb.id,
                         gridX = sb.gridX,
                         gridY = sb.gridY,
-                        seedName = sb.seedName,
-                        seedCount = sb.seedCount
+                        itemKey = sb.itemKey,
+                        itemCount = sb.itemCount
                     });
                 }
             }

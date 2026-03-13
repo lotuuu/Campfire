@@ -183,11 +183,11 @@ namespace Garden
                 await GameService.Instance.ResyncFullState();
         }
 
-        private static void AddItem(SaveData data, string itemName, int count)
+        private static void AddItem(SaveData data, string itemKey, int count)
         {
-            var existing = data.inventory.Find(it => it.itemName == itemName);
+            var existing = data.inventory.Find(it => it.itemKey == itemKey);
             if (existing != null) existing.count += count;
-            else data.inventory.Add(new InventoryItem { itemName = itemName, count = count });
+            else data.inventory.Add(new InventoryItem { itemKey = itemKey, count = count });
         }
 
         // ── Garden Building ──────────────────────────────────────────
@@ -214,7 +214,7 @@ namespace Garden
             if (!CurrencyManager.FreeMode)
             foreach (var hc in cost.harvestCosts)
             {
-                var entry = data.inventory.Find(i => i.itemName == hc.itemName);
+                var entry = data.inventory.Find(i => i.itemKey == hc.itemKey);
                 if (entry == null) continue;
                 entry.count -= hc.count;
                 if (entry.count <= 0) data.inventory.Remove(entry);

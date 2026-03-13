@@ -82,7 +82,7 @@ namespace Garden
             // Build items list for server
             var items = new List<SpendItemEntry>();
             foreach (var ing in recipe.ingredients)
-                items.Add(new SpendItemEntry { item_name = ing.itemName, count = ing.count });
+                items.Add(new SpendItemEntry { item_key = ing.itemKey, count = ing.count });
 
             if (GameService.Instance != null && GameService.Instance.IsOnline)
             {
@@ -111,7 +111,7 @@ namespace Garden
             if (CurrencyManager.FreeMode) return true;
             foreach (var ingredient in recipe.ingredients)
             {
-                var item = items.Find(i => i.itemName == ingredient.itemName);
+                var item = items.Find(i => i.itemKey == ingredient.itemKey);
                 if (item == null || item.count < ingredient.count)
                     return false;
             }
@@ -123,7 +123,7 @@ namespace Garden
             if (CurrencyManager.FreeMode) return;
             foreach (var ingredient in recipe.ingredients)
             {
-                var item = items.Find(i => i.itemName == ingredient.itemName);
+                var item = items.Find(i => i.itemKey == ingredient.itemKey);
                 item.count -= ingredient.count;
             }
         }

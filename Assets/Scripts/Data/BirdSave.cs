@@ -8,7 +8,7 @@ namespace Garden
         public int serverId;
         public int gridX;
         public int gridY;
-        public string seedName;
-        public int seedCount;
+        public string itemKey;
+        public int itemCount;
     }
 }

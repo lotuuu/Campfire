@@ -65,7 +65,7 @@ namespace Garden
     public class MerchantOfferSave
     {
         public List<TradeCost> costs = new();
-        public string rewardSeedName;
+        public string rewardItemKey;
         public int rewardCount;
     }
 }

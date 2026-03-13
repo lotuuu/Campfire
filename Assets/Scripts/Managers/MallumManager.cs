@@ -190,7 +190,7 @@ namespace Garden
             var rewards = CollectRewards(mallum);
 
             foreach (var r in rewards)
-                ApothekeManager.Instance.AddSeed(r.seedName, r.count);
+                ApothekeManager.Instance.AddItem(r.itemKey, r.count);
 
             SaveManager.Instance.Save();
             OnMallumsChanged?.Invoke();
@@ -233,7 +233,7 @@ namespace Garden
             if (!CurrencyManager.FreeMode)
             foreach (var hc in cost.harvestCosts)
             {
-                var entry = data.inventory.Find(i => i.itemName == hc.itemName);
+                var entry = data.inventory.Find(i => i.itemKey == hc.itemKey);
                 if (entry == null) continue;
                 entry.count -= hc.count;
                 if (entry.count <= 0) data.inventory.Remove(entry);
@@ -322,16 +322,19 @@ namespace Garden
         private static string QuestSpeedItem =>
             ConfigService.Instance.MallumHouseConfig.quest_speed_item;
 
+        private static string VaseSpeedItem =>
+            ConfigService.Instance.VaseConfig.speed_item;
+
         public bool CanUseQuestSpeedItem()
         {
             if (CurrencyManager.FreeMode) return true;
-            var item = SaveManager.Instance.Data.inventory.Find(i => i.itemName == QuestSpeedItem);
+            var item = SaveManager.Instance.Data.inventory.Find(i => i.itemKey == QuestSpeedItem);
             return item != null && item.count > 0;
         }
 
         public int GetQuestSpeedItemCount()
         {
-            var item = SaveManager.Instance.Data.inventory.Find(i => i.itemName == QuestSpeedItem);
+            var item = SaveManager.Instance.Data.inventory.Find(i => i.itemKey == QuestSpeedItem);
             return item?.count ?? 0;
         }
 
@@ -339,7 +342,32 @@ namespace Garden
         {
             if (CurrencyManager.FreeMode) return true;
             var data = SaveManager.Instance.Data;
-            var drink = data.inventory.Find(i => i.itemName == QuestSpeedItem);
+            var drink = data.inventory.Find(i => i.itemKey == QuestSpeedItem);
+            if (drink == null || drink.count <= 0) return false;
+            drink.count--;
+            if (drink.count <= 0) data.inventory.Remove(drink);
+            SaveManager.Instance.Save();
+            return true;
+        }
+
+        public bool CanUseVaseSpeedItem()
+        {
+            if (CurrencyManager.FreeMode) return true;
+            var item = SaveManager.Instance.Data.inventory.Find(i => i.itemKey == VaseSpeedItem);
+            return item != null && item.count > 0;
+        }
+
+        public int GetVaseSpeedItemCount()
+        {
+            var item = SaveManager.Instance.Data.inventory.Find(i => i.itemKey == VaseSpeedItem);
+            return item?.count ?? 0;
+        }
+
+        private bool ConsumeVaseSpeedItem()
+        {
+            if (CurrencyManager.FreeMode) return true;
+            var data = SaveManager.Instance.Data;
+            var drink = data.inventory.Find(i => i.itemKey == VaseSpeedItem);
             if (drink == null || drink.count <= 0) return false;
             drink.count--;
             if (drink.count <= 0) data.inventory.Remove(drink);
@@ -377,7 +405,7 @@ namespace Garden
             var mallum = data.mallums[mallumIndex];
             if (mallum.state != MallumState.FetchingWater) return false;
 
-            if (!ConsumeQuestSpeedItem()) return false;
+            if (!ConsumeVaseSpeedItem()) return false;
 
             int vaseIndex = mallum.assignedVaseIndex;
             if (vaseIndex >= 0 && vaseIndex < data.vases.Count)
@@ -439,7 +467,7 @@ namespace Garden
             if (CurrencyManager.FreeMode) return true;
             foreach (var hc in harvestCosts)
             {
-                var entry = items.Find(i => i.itemName == hc.itemName);
+                var entry = items.Find(i => i.itemKey == hc.itemKey);
                 if (entry == null || entry.count < hc.count) return false;
             }
             return true;
@@ -496,7 +524,7 @@ namespace Garden
             float totalWeight = 0f;
             foreach (var r in pool)
             {
-                if (!string.IsNullOrEmpty(r.seedName))
+                if (!string.IsNullOrEmpty(r.itemKey))
                     totalWeight += r.weight;
             }
 
@@ -508,14 +536,14 @@ namespace Garden
                 float cumulative = 0f;
                 foreach (var r in pool)
                 {
-                    if (string.IsNullOrEmpty(r.seedName)) continue;
+                    if (string.IsNullOrEmpty(r.itemKey)) continue;
                     cumulative += r.weight;
                     if (roll < cumulative)
                     {
                         int count = UnityEngine.Random.Range(r.minCount, r.maxCount + 1);
                         rewards.Add(new RewardEntry
                         {
-                            seedName = r.seedName,
+                            itemKey = r.itemKey,
                             count = count
                         });
                         break;
@@ -562,11 +590,15 @@ namespace Garden
             // During tutorial, guarantee at least 1 Cress seed so the player can proceed
             if (TutorialManager.Instance != null && !TutorialManager.Instance.IsComplete)
             {
+                // Look up the item key for cress seeds from config
+                var cressSeed = ConfigService.Instance?.GetSeed("Cress");
+                string cressItemKey = cressSeed?.item_key ?? "cress_seed";
+
                 bool hasCress = false;
                 foreach (var r in mallum.pendingRewards)
-                    if (r.seedName == "Cress") { hasCress = true; break; }
+                    if (r.itemKey == cressItemKey) { hasCress = true; break; }
                 if (!hasCress)
-                    mallum.pendingRewards.Add(new RewardEntry { seedName = "Cress", count = 1 });
+                    mallum.pendingRewards.Add(new RewardEntry { itemKey = cressItemKey, count = 1 });
             }
 
             mallum.state = MallumState.QuestComplete;

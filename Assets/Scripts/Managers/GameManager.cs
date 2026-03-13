@@ -98,14 +98,14 @@ namespace Garden
             data.apothekeGridY = positions[2].r;
 
             // Grant starting seeds from config (add directly to save data, not via
-            // ApothekeManager.AddSeed which enqueues server economy actions — repeated
+            // ApothekeManager.AddItem which enqueues server economy actions — repeated
             // tutorial resets would accumulate seeds on the server)
             if (npc?.seeds != null)
             {
                 foreach (var seed in npc.seeds)
                 {
-                    data.inventory.Add(new InventoryItem { itemName = seed.name + "_Seed", count = seed.count });
-                    ApothekeManager.DiscoverSeed(data, seed.name);
+                    data.inventory.Add(new InventoryItem { itemKey = seed.itemKey, count = seed.count });
+                    ApothekeManager.DiscoverSeed(data, seed.itemKey);
                 }
             }
 
@@ -113,7 +113,7 @@ namespace Garden
             if (npc?.items != null)
             {
                 foreach (var item in npc.items)
-                    data.inventory.Add(new InventoryItem { itemName = item.name, count = item.count });
+                    data.inventory.Add(new InventoryItem { itemKey = item.itemKey, count = item.count });
             }
 
             // No starting Mallum House — player buys first one after growing seeds

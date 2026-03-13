@@ -80,8 +80,8 @@ namespace Garden
                             serverId = bird.id,
                             gridX = bird.gridX,
                             gridY = bird.gridY,
-                            seedName = bird.seedName,
-                            seedCount = bird.seedCount
+                            itemKey = bird.itemKey,
+                            itemCount = bird.itemCount
                         });
                     }
                     SaveManager.Instance.Save();
@@ -111,7 +111,7 @@ namespace Garden
                 if (reward == null) return null;
 
                 data.birds.RemoveAt(birdIndex);
-                ApothekeManager.Instance.AddSeed(reward.seedName, reward.seedCount);
+                ApothekeManager.Instance.AddItem(reward.itemKey, reward.itemCount);
                 SaveManager.Instance.Save();
                 OnBirdCollected?.Invoke(bird);
                 AudioManager.Instance?.PlaySFX("bird_collect");
@@ -122,7 +122,7 @@ namespace Garden
             var collected = CollectBird(data, birdIndex);
             if (collected != null)
             {
-                ApothekeManager.Instance.AddSeed(collected.seedName, collected.seedCount);
+                ApothekeManager.Instance.AddItem(collected.itemKey, collected.itemCount);
                 SaveManager.Instance.Save();
                 NotifyBirdCollected(collected);
                 AudioManager.Instance?.PlaySFX("bird_collect");
@@ -212,8 +212,8 @@ namespace Garden
 
             return new BirdSave
             {
-                seedName = seed.seedName,
-                seedCount = quantity
+                itemKey = seed.item_key,
+                itemCount = quantity
             };
         }
 

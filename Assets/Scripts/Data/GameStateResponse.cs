@@ -146,8 +146,8 @@ namespace Garden
         public int id;
         public int gridX;
         public int gridY;
-        public string seedName;
-        public int seedCount;
+        public string itemKey;
+        public int itemCount;
     }
 
     [Serializable]
@@ -162,7 +162,7 @@ namespace Garden
     [Serializable] public class ApothekeCraftRequest { public string recipeName; public bool freeMode; }
     [Serializable] public class ApothekeCraftResponse { public string resultItem; public int resultQuantity; }
     [Serializable] public class BirdCheckResponse { public List<ServerBird> newBirds; }
-    [Serializable] public class BirdCollectResponse { public string seedName; public int seedCount; }
+    [Serializable] public class BirdCollectResponse { public string itemKey; public int itemCount; }
     [Serializable] public class HouseSkinRequest { public int houseId; public string skinName; }
     [Serializable] public class LocationRequest { public float lat; public float lon; }
     [Serializable] public class HarvestResponse { public float score; public int drops; public string itemKey; }

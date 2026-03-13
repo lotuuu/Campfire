@@ -165,14 +165,8 @@ namespace Garden
                     }
                     break;
                 case "seed":
-                    ApothekeManager.Instance?.AddSeed(visitor.giftName, visitor.giftAmount);
-                    break;
                 case "item":
-                    var entry = data.inventory.Find(i => i.itemName == visitor.giftName);
-                    if (entry != null)
-                        entry.count += visitor.giftAmount;
-                    else
-                        data.inventory.Add(new InventoryItem { itemName = visitor.giftName, count = visitor.giftAmount });
+                    ApothekeManager.Instance?.AddItem(visitor.giftName, visitor.giftAmount);
                     break;
             }
 
@@ -184,7 +178,7 @@ namespace Garden
             if (CurrencyManager.FreeMode) return true;
             foreach (var cost in offer.costs)
             {
-                var item = inventory.Find(i => i.itemName == cost.itemName);
+                var item = inventory.Find(i => i.itemKey == cost.itemKey);
                 if (item == null || item.count < cost.count) return false;
             }
             return true;
@@ -197,21 +191,20 @@ namespace Garden
             {
                 foreach (var cost in offer.costs)
                 {
-                    var item = inventory.Find(i => i.itemName == cost.itemName);
+                    var item = inventory.Find(i => i.itemKey == cost.itemKey);
                     if (item == null) continue;
                     item.count -= cost.count;
                     if (item.count <= 0) inventory.Remove(item);
                 }
             }
 
-            // Add seeds (reward is a plant name, stored with _Seed suffix)
-            var seedItemName = offer.rewardSeedName + "_Seed";
-            var entry = inventory.Find(i => i.itemName == seedItemName);
+            // Add reward item
+            var entry = inventory.Find(i => i.itemKey == offer.rewardItemKey);
             if (entry != null)
                 entry.count += offer.rewardCount;
             else
                 inventory.Add(new InventoryItem
-                    { itemName = seedItemName, count = offer.rewardCount });
+                    { itemKey = offer.rewardItemKey, count = offer.rewardCount });
         }
 
         public static VisitorSave BuildVisitorSave(VisitorResponse response, int gridX, int gridY, string dateUtc)
@@ -253,7 +246,7 @@ namespace Garden
                 {
                     var offerSave = new MerchantOfferSave
                     {
-                        rewardSeedName = offer.rewardSeedName,
+                        rewardItemKey = offer.rewardItemKey,
                         rewardCount = offer.rewardCount
                     };
                     if (offer.costs != null)
@@ -403,7 +396,7 @@ namespace Garden
 
             // Consume requested items from player inventory
             var data = SaveManager.Instance.Data;
-            var requestedItem = data.inventory.Find(i => i.itemName == quest.requestItem);
+            var requestedItem = data.inventory.Find(i => i.itemKey == quest.requestItem);
             if (requestedItem != null)
             {
                 requestedItem.count -= quest.requestCount;
@@ -414,19 +407,7 @@ namespace Garden
             var reward = JsonUtility.FromJson<QuestReward>(quest.rewardJson);
             if (reward != null)
             {
-                switch (reward.type)
-                {
-                    case "seed":
-                        ApothekeManager.Instance?.AddSeed(reward.name, reward.count);
-                        break;
-                    case "item":
-                        var entry = data.inventory.Find(i => i.itemName == reward.name);
-                        if (entry != null)
-                            entry.count += reward.count;
-                        else
-                            data.inventory.Add(new InventoryItem { itemName = reward.name, count = reward.count });
-                        break;
-                }
+                ApothekeManager.Instance?.AddItem(reward.name, reward.count);
             }
 
             // Remove from active quests
@@ -454,7 +435,7 @@ namespace Garden
         public class OfferResponse
         {
             public List<TradeCost> costs;
-            public string rewardSeedName;
+            public string rewardItemKey;
             public int rewardCount;
         }
 
