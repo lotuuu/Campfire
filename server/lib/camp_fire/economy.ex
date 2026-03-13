@@ -22,6 +22,12 @@ defmodule CampFire.Economy do
     Enum.at(caps, index)
   end
 
+  # --- Item ID Resolution (centralized) ---
+
+  defp resolve_item_id!(item_key) when is_binary(item_key) do
+    CampFire.Game.resolve_item_id!(item_key)
+  end
+
   # --- Init ---
 
   def get_economy(player_uid) do
@@ -94,7 +100,6 @@ defmodule CampFire.Economy do
         economy -> {:ok, economy}
       end
     else
-      # Flush accumulated passive mana into the stored value before spending
       collect_mana(player_uid)
 
       {count, results} =
@@ -149,8 +154,8 @@ defmodule CampFire.Economy do
       end
 
       unless opts[:free_mode] do
-        Enum.each(required_items, fn %{"itemKey" => name, "count" => count} ->
-          case spend_items_in_tx(player_uid, name, count) do
+        Enum.each(required_items, fn %{"itemKey" => item_key, "count" => count} ->
+          case spend_items_in_tx(player_uid, item_key, count) do
             :ok -> :ok
             {:error, reason} -> Repo.rollback(reason)
           end
@@ -169,35 +174,46 @@ defmodule CampFire.Economy do
 
   # --- Inventory ---
 
+  @doc "List inventory for a player, returning item_key strings (resolved from item_id)."
   def list_inventory(player_uid) do
-    from(i in PlayerInventory, where: i.player_uid == ^player_uid) |> Repo.all()
+    from(i in PlayerInventory,
+      join: item in CampFire.Game.Item, on: item.id == i.item_id,
+      where: i.player_uid == ^player_uid,
+      select: %{item_key: item.item_key, count: i.count}
+    )
+    |> Repo.all()
   end
 
-  def upsert_item(player_uid, item_key, count) when is_integer(count) and count > 0 do
-    %PlayerInventory{player_uid: player_uid, item_key: item_key, count: count}
+  @doc "Add items to a player's inventory. Accepts item_key string, resolves to item_id internally."
+  def upsert_item(player_uid, item_key, count) when is_binary(item_key) and is_integer(count) and count > 0 do
+    item_id = resolve_item_id!(item_key)
+
+    %PlayerInventory{player_uid: player_uid, item_id: item_id, count: count}
     |> Repo.insert(
       on_conflict: [inc: [count: count]],
-      conflict_target: [:player_uid, :item_key],
+      conflict_target: [:player_uid, :item_id],
       returning: true
     )
   end
 
-  def spend_item(player_uid, item_key, count, opts \\ []) when is_integer(count) and count > 0 do
+  @doc "Spend items from a player's inventory. Accepts item_key string."
+  def spend_item(player_uid, item_key, count, opts \\ []) when is_binary(item_key) and is_integer(count) and count > 0 do
     if opts[:free_mode] do
       {:ok, :spent}
     else
+      item_id = resolve_item_id!(item_key)
+
       {updated, _} =
         from(i in PlayerInventory,
-          where: i.player_uid == ^player_uid and i.item_key == ^item_key and i.count >= ^count
+          where: i.player_uid == ^player_uid and i.item_id == ^item_id and i.count >= ^count
         )
         |> Repo.update_all(inc: [count: -count])
 
       if updated == 0 do
         {:error, :insufficient_items}
       else
-        # Clean up zero-count rows
         from(i in PlayerInventory,
-          where: i.player_uid == ^player_uid and i.item_key == ^item_key and i.count == 0
+          where: i.player_uid == ^player_uid and i.item_id == ^item_id and i.count == 0
         )
         |> Repo.delete_all()
 
@@ -211,8 +227,8 @@ defmodule CampFire.Economy do
       {:ok, nil}
     else
       Repo.transaction(fn ->
-        Enum.each(items, fn %{"itemKey" => name, "count" => count} ->
-          case spend_items_in_tx(player_uid, name, count) do
+        Enum.each(items, fn %{"itemKey" => item_key, "count" => count} ->
+          case spend_items_in_tx(player_uid, item_key, count) do
             :ok -> :ok
             {:error, reason} -> Repo.rollback(reason)
           end
@@ -222,13 +238,12 @@ defmodule CampFire.Economy do
   end
 
   defp create_starter_buildings(player_uid, npc) do
-    alias CampFire.Game.{PlayerPlot, PlayerVase, PlayerApotheke, PlayerMallumHouse, PlayerMallum}
+    alias CampFire.Game.{PlayerPlot, PlayerVase, PlayerApotheke}
 
-    # Use fixed positions for starter buildings (predictable for tests and deterministic for players)
-    plot_pos = {-1, 0}
-    vase_pos = {0, -1}
-    apotheke_pos = {1, 0}
-    house_pos = {1, -1}
+    # Pick 3 random distinct hex positions (excluding flame at 0,0)
+    grid_radius = starter_grid_radius()
+    positions = non_center_hex_positions(grid_radius) |> Enum.shuffle() |> Enum.take(3)
+    [plot_pos, vase_pos, apotheke_pos] = positions
 
     %PlayerPlot{}
     |> PlayerPlot.changeset(%{
@@ -262,31 +277,29 @@ defmodule CampFire.Economy do
       grid_y: elem(apotheke_pos, 1)
     })
     |> Repo.insert!()
+  end
 
-    # Create starter mallum house + mallums
-    %PlayerMallumHouse{}
-    |> PlayerMallumHouse.changeset(%{
-      player_uid: player_uid,
-      grid_x: elem(house_pos, 0),
-      grid_y: elem(house_pos, 1)
-    })
-    |> Repo.insert!()
-
-    mallum_config = CampFire.ConfigCache.get("mallum_house_config")
-    mallums_per_house = (mallum_config && mallum_config["mallums_per_house"]) || 2
-
-    for _ <- 1..mallums_per_house do
-      %PlayerMallum{}
-      |> PlayerMallum.changeset(%{player_uid: player_uid, state: "idle"})
-      |> Repo.insert!()
+  defp starter_grid_radius do
+    case CampFire.ConfigCache.get("flame_config") do
+      nil -> 2
+      config -> Enum.at(config["grid_sizes"] || [], 0, 2)
     end
   end
 
+  defp non_center_hex_positions(radius) do
+    for q <- -radius..radius,
+        r <- -radius..radius,
+        {q, r} != {0, 0},
+        max(abs(q), max(abs(r), abs(q + r))) <= radius,
+        do: {q, r}
+  end
 
   defp spend_items_in_tx(player_uid, item_key, count) do
+    item_id = resolve_item_id!(item_key)
+
     {updated, _} =
       from(i in PlayerInventory,
-        where: i.player_uid == ^player_uid and i.item_key == ^item_key and i.count >= ^count
+        where: i.player_uid == ^player_uid and i.item_id == ^item_id and i.count >= ^count
       )
       |> Repo.update_all(inc: [count: -count])
 
@@ -294,7 +307,7 @@ defmodule CampFire.Economy do
       {:error, {:insufficient_items, item_key}}
     else
       from(i in PlayerInventory,
-        where: i.player_uid == ^player_uid and i.item_key == ^item_key and i.count == 0
+        where: i.player_uid == ^player_uid and i.item_id == ^item_id and i.count == 0
       )
       |> Repo.delete_all()
 

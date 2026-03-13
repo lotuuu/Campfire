@@ -1,7 +1,7 @@
 defmodule CampFire.Game.BirdsTest do
   use CampFire.DataCase
   import CampFire.TestHelpers
-  alias CampFire.Game.{Birds, PlayerState, GridValidation}
+  alias CampFire.Game.{Birds, PlayerState, GridValidation, Item}
   alias CampFire.Economy
 
   defp setup_player(_context \\ %{}) do
@@ -14,6 +14,13 @@ defmodule CampFire.Game.BirdsTest do
     player = register_player()
     {:ok, _economy} = Economy.init_economy(player.uid)
     player
+  end
+
+  defp resolve_item_id!(item_key) do
+    case Repo.get_by(Item, item_key: item_key) do
+      nil -> raise "Item #{item_key} not found"
+      item -> item.id
+    end
   end
 
   defp set_last_check_hour(player_uid, %DateTime{} = hour) do
@@ -60,7 +67,7 @@ defmodule CampFire.Game.BirdsTest do
         assert bird.player_uid == player.uid
         assert is_integer(bird.grid_x)
         assert is_integer(bird.grid_y)
-        assert is_binary(bird.seed_name)
+        assert is_integer(bird.seed_item_id)
         assert bird.seed_count >= 1
       end)
 
@@ -99,10 +106,17 @@ defmodule CampFire.Game.BirdsTest do
       player = setup_player()
 
       # Override seed configs: tier 0 seeds + one tier 5 seed that should be excluded at level 1
+      sprouts_item_id = resolve_item_id!("sprouts_seed")
+      cress_item_id = resolve_item_id!("cress_seed")
+      rareseed_item_id = resolve_item_id!("rareseed_seed")
+
       configs = %{
-        "Sprouts" => %{"growth_duration_hours" => 0.5, "min_drops" => 1, "max_drops" => 3, "tier" => 0, "recipe" => %{}},
-        "Cress" => %{"growth_duration_hours" => 1.0, "min_drops" => 1, "max_drops" => 3, "tier" => 0, "recipe" => %{}},
-        "RareSeed" => %{"growth_duration_hours" => 10.0, "min_drops" => 3, "max_drops" => 10, "tier" => 5, "recipe" => %{}}
+        "sprouts" => %{item_id: sprouts_item_id, item_key: "sprouts_seed", harvest_item_key: "sprouts",
+          growth_duration_hours: 0.5, min_drops: 1, max_drops: 3, tier: 0, recipe: %{}},
+        "cress" => %{item_id: cress_item_id, item_key: "cress_seed", harvest_item_key: "cress",
+          growth_duration_hours: 1.0, min_drops: 1, max_drops: 3, tier: 0, recipe: %{}},
+        "rareseed" => %{item_id: rareseed_item_id, item_key: "rareseed_seed", harvest_item_key: "rareseed",
+          growth_duration_hours: 10.0, min_drops: 3, max_drops: 10, tier: 5, recipe: %{}}
       }
 
       :ets.insert(:config_cache, {"seed_configs", configs})
@@ -121,10 +135,10 @@ defmodule CampFire.Game.BirdsTest do
       # At flame_level=1, only tier 0 and tier 1 seeds should appear
       # RareSeed (tier 5) should never appear
       Enum.each(new_birds, fn bird ->
-        refute bird.seed_name == "RareSeed",
+        refute bird.seed_item_id == rareseed_item_id,
                "Tier 5 seed should not spawn at flame level 1"
 
-        assert bird.seed_name in ["Sprouts", "Cress"]
+        assert bird.seed_item_id in [sprouts_item_id, cress_item_id]
       end)
     end
   end
@@ -133,25 +147,8 @@ defmodule CampFire.Game.BirdsTest do
     test "removes bird and grants seeds" do
       player = setup_player()
 
-      # Insert a seed config for Basil with item_key/harvest_item_key
-      alias CampFire.Game.SeedConfig
-      import Ecto.Query
-
-      unless Repo.one(from sc in SeedConfig, where: sc.seed_name == "Basil") do
-        %SeedConfig{}
-        |> SeedConfig.changeset(%{
-          seed_name: "Basil",
-          growth_duration_hours: 2.0,
-          min_drops: 1,
-          max_drops: 4,
-          recipe: %{},
-          item_key: "basil_seed",
-          harvest_item_key: "basil"
-        })
-        |> Repo.insert!()
-      end
-
-      {:ok, bird} = Birds.insert_bird(player.uid, 2, 0, "Basil", 3)
+      basil_seed_item_id = resolve_item_id!("basil_seed")
+      {:ok, bird} = Birds.insert_bird(player.uid, 2, 0, basil_seed_item_id, 3)
 
       {:ok, reward} = Birds.collect_bird(player.uid, bird.id)
 
@@ -161,7 +158,7 @@ defmodule CampFire.Game.BirdsTest do
       # Bird should be deleted
       assert Birds.list_birds(player.uid) == []
 
-      # Seeds should be in inventory (uses seed_config.item_key = "basil_seed")
+      # Seeds should be in inventory
       inventory = Economy.list_inventory(player.uid)
       basil = Enum.find(inventory, &(&1.item_key == "basil_seed"))
       assert basil != nil
@@ -172,7 +169,8 @@ defmodule CampFire.Game.BirdsTest do
       player1 = setup_player()
       player2 = setup_player()
 
-      {:ok, bird} = Birds.insert_bird(player1.uid, 2, 0, "Basil", 2)
+      basil_seed_item_id = resolve_item_id!("basil_seed")
+      {:ok, bird} = Birds.insert_bird(player1.uid, 2, 0, basil_seed_item_id, 2)
 
       {:error, :not_owner} = Birds.collect_bird(player2.uid, bird.id)
 

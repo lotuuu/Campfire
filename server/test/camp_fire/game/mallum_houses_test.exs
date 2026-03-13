@@ -27,35 +27,37 @@ defmodule CampFire.Game.MallumHousesTest do
   describe "craft_house/3" do
     test "creates house and spawns mallums" do
       player = setup_player()
+      [pos1 | _] = free_positions(player.uid)
 
-      # init_economy creates 1 house with 2 mallums
+      # init_economy creates no house/mallums
       initial_mallums = length(Mallums.list_mallums(player.uid))
-      assert initial_mallums == 2
+      assert initial_mallums == 0
 
-      {:ok, house} = MallumHouses.craft_house(player.uid, 2, 0)
+      {:ok, house} = MallumHouses.craft_house(player.uid, elem(pos1, 0), elem(pos1, 1))
 
-      assert house.grid_x == 2
-      assert house.grid_y == 0
+      assert house.grid_x == elem(pos1, 0)
+      assert house.grid_y == elem(pos1, 1)
       assert house.player_uid == player.uid
 
-      # After crafting 2nd house: target = 2 * 2 = 4 mallums, had 2, so 2 more spawned
+      # After crafting 1st house: target = 1 * 2 = 2 mallums, had 0, so 2 spawned
       updated_mallums = length(Mallums.list_mallums(player.uid))
-      assert updated_mallums == 4
+      assert updated_mallums == 2
     end
 
     test "spends mana and items" do
       player = setup_player()
+      [pos1 | _] = free_positions(player.uid)
 
-      {:ok, _house} = MallumHouses.craft_house(player.uid, 2, 0)
+      {:ok, _house} = MallumHouses.craft_house(player.uid, elem(pos1, 0), elem(pos1, 1))
 
       economy = Economy.get_economy(player.uid)
-      # Started with 5000, 2nd house (index 1) costs 350 mana
-      assert economy.mana == 4650.0
+      # Started with 5000, 1st house (index 0) costs 200 mana
+      assert economy.mana == 4800.0
 
-      # 2nd house costs 2 chamomile
+      # 1st house costs 1 basil
       inventory = Economy.list_inventory(player.uid)
-      chamomile_h = Enum.find(inventory, &(&1.item_key == "chamomile"))
-      assert chamomile_h.count == 18
+      basil_h = Enum.find(inventory, &(&1.item_key == "basil"))
+      assert basil_h.count == 19
     end
 
     test "rejects when entity cap reached" do
@@ -72,43 +74,21 @@ defmodule CampFire.Game.MallumHousesTest do
       Economy.upsert_item(player.uid, "basil", 50)
       Economy.upsert_item(player.uid, "chamomile", 50)
 
-      # low_cap at level 1 = 4, init creates 4 entities (plot + vase + house + apotheke)
-      {:error, :entity_cap_reached} = MallumHouses.craft_house(player.uid, 2, 0)
+      # low_cap at level 1 = 4, init creates 3 entities (plot + vase + apotheke)
+      # So we can craft 1 more, then the next should fail
+      [pos1, pos2 | _] = free_positions(player.uid)
+      {:ok, _} = MallumHouses.craft_house(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:error, :entity_cap_reached} = MallumHouses.craft_house(player.uid, elem(pos2, 0), elem(pos2, 1))
     end
 
     test "rejects occupied hex" do
       player = setup_player()
+      [pos1 | _] = free_positions(player.uid)
 
-      {:ok, _house} = MallumHouses.craft_house(player.uid, 2, 0)
+      {:ok, _house} = MallumHouses.craft_house(player.uid, elem(pos1, 0), elem(pos1, 1))
 
       # Try to place another house at the same hex
-      {:error, :hex_occupied} = MallumHouses.craft_house(player.uid, 2, 0)
-    end
-  end
-
-  describe "init_economy creates starter house" do
-    test "creates 1 house" do
-      seed_items()
-      seed_mallum_house_config()
-      seed_new_player_config()
-      seed_flame_config()
-      player = register_player()
-      {:ok, _economy} = Economy.init_economy(player.uid)
-
-      houses = MallumHouses.list_houses(player.uid)
-      assert length(houses) == 1
-    end
-
-    test "creates mallums_per_house mallums" do
-      seed_items()
-      seed_mallum_house_config()
-      seed_new_player_config()
-      seed_flame_config()
-      player = register_player()
-      {:ok, _economy} = Economy.init_economy(player.uid)
-
-      mallums = Mallums.list_mallums(player.uid)
-      assert length(mallums) == 2
+      {:error, :hex_occupied} = MallumHouses.craft_house(player.uid, elem(pos1, 0), elem(pos1, 1))
     end
   end
 end

@@ -22,12 +22,12 @@ defmodule CampFireWeb.DebugController do
     end
   end
 
-  def grant_seeds(conn, %{"seedName" => name, "count" => count}) when is_integer(count) do
+  def grant_seeds(conn, %{"itemKey" => key, "count" => count}) when is_integer(count) do
     uid = conn.assigns.current_player.uid
-    Debug.grant_seeds(uid, name, count)
+    Debug.grant_seeds(uid, key, count)
     conn |> put_status(200) |> json(%{ok: true})
   end
-  def grant_seeds(conn, _), do: conn |> put_status(400) |> json(%{error: "Missing 'seedName' and 'count'"})
+  def grant_seeds(conn, _), do: conn |> put_status(400) |> json(%{error: "Missing 'itemKey' and 'count'"})
 
   def grant_items(conn, %{"itemKey" => key, "count" => count}) when is_integer(count) do
     uid = conn.assigns.current_player.uid

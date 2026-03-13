@@ -1,7 +1,7 @@
 defmodule CampFire.Game.Plots do
   import Ecto.Query
   alias CampFire.Repo
-  alias CampFire.Game.{PlayerPlot, PlayerVase, SeedConfig, GrowthRecipe, GridValidation}
+  alias CampFire.Game.{PlayerPlot, PlayerVase, GrowthRecipe, GridValidation}
   alias CampFire.Economy
 
   defp water_cooldown_seconds do
@@ -82,14 +82,14 @@ defmodule CampFire.Game.Plots do
 
   # --- Plant ---
 
-  def plant(player_uid, plot_id, seed_name, opts \\ []) do
+  def plant(player_uid, plot_id, plant_key, opts \\ []) do
     seed_configs = CampFire.ConfigCache.get("seed_configs") || %{}
 
     with %PlayerPlot{} = plot <- Repo.get(PlayerPlot, plot_id),
          true <- plot.player_uid == player_uid || {:error, :not_owned},
-         true <- Map.has_key?(seed_configs, seed_name) || {:error, :unknown_seed},
+         true <- Map.has_key?(seed_configs, plant_key) || {:error, :unknown_seed},
          true <- plot.state == "empty" || {:error, :plot_not_empty} do
-      seed_config = CampFire.Game.get_seed_config!(seed_name)
+      seed_config = CampFire.Game.get_seed_config!(plant_key)
 
       Repo.transaction(fn ->
         case Economy.spend_item(player_uid, seed_config.item_key, 1, opts) do
@@ -101,7 +101,7 @@ defmodule CampFire.Game.Plots do
 
             plot
             |> PlayerPlot.changeset(%{
-              seed_name: seed_name,
+              seed_item_id: seed_config.item_id,
               state: "growing",
               plant_time_utc: now,
               water_count: 0,
@@ -169,8 +169,7 @@ defmodule CampFire.Game.Plots do
          true <- plot.player_uid == player_uid || {:error, :not_owned},
          true <- plot.state == "mature" || {:error, :not_mature} do
       Repo.transaction(fn ->
-        seed_config =
-          Repo.one!(from sc in SeedConfig, where: sc.seed_name == ^plot.seed_name)
+        seed_config = CampFire.Game.get_seed_config_by_item_id!(plot.seed_item_id)
 
         score = GrowthRecipe.evaluate(seed_config.recipe, plot.snapshots, plot.water_count)
         drops = GrowthRecipe.calculate_drops(score, seed_config.min_drops, seed_config.max_drops)
@@ -178,7 +177,7 @@ defmodule CampFire.Game.Plots do
         snapshot_count = get_in(plot.snapshots || %{}, [Access.key("snapshot_count", 0)])
         if snapshot_count == 0 do
           require Logger
-          Logger.warning("Harvest with zero snapshots: player=#{player_uid} plot=#{plot_id} seed=#{plot.seed_name}")
+          Logger.warning("Harvest with zero snapshots: player=#{player_uid} plot=#{plot_id} seed_item_id=#{plot.seed_item_id}")
         end
         harvest_item_key = seed_config.harvest_item_key
 
@@ -187,7 +186,7 @@ defmodule CampFire.Game.Plots do
         plot
         |> PlayerPlot.changeset(%{
           state: "empty",
-          seed_name: nil,
+          seed_item_id: nil,
           plant_time_utc: nil,
           water_count: 0,
           last_watered_utc: nil,
@@ -212,8 +211,7 @@ defmodule CampFire.Game.Plots do
 
       plot ->
         if plot.state == "growing" do
-          seed_config =
-            Repo.one!(from sc in SeedConfig, where: sc.seed_name == ^plot.seed_name)
+          seed_config = CampFire.Game.get_seed_config_by_item_id!(plot.seed_item_id)
 
           now = DateTime.utc_now() |> DateTime.truncate(:second)
           elapsed_hours = DateTime.diff(now, plot.plant_time_utc, :second) / 3600.0

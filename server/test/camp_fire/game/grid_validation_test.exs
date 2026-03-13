@@ -70,8 +70,8 @@ defmodule CampFire.Game.GridValidationTest do
 
       # All occupied positions should be rejected
       occupied = occupied_positions(player.uid)
-      # init_economy creates plot, vase, apotheke, house + flame = at least 5 occupied
-      assert length(occupied) >= 5
+      # init_economy creates plot, vase, apotheke + flame = at least 4 occupied
+      assert length(occupied) >= 4
 
       Enum.each(occupied, fn {q, r} ->
         assert {:error, :hex_occupied} =
@@ -103,7 +103,7 @@ defmodule CampFire.Game.GridValidationTest do
   describe "check_entity_cap/1" do
     test "allows when under cap" do
       # Default flame_config has cap=8 at level 1
-      # init_economy creates: 1 plot + 1 vase + 1 house + 1 apotheke = 4 entities
+      # init_economy creates: 1 plot + 1 vase + 1 apotheke = 3 entities
       player = setup_player()
 
       assert :ok = GridValidation.check_entity_cap(player.uid)
@@ -111,7 +111,8 @@ defmodule CampFire.Game.GridValidationTest do
 
     test "rejects when at cap" do
       # Low cap config has cap=4 at level 1
-      # init_economy creates: 1 plot + 1 vase + 1 house + 1 apotheke = 4 entities (exactly at cap)
+      # init_economy creates: 1 plot + 1 vase + 1 apotheke = 3 entities
+      # Need to craft 1 more to reach cap, then check should fail
       seed_items()
       seed_flame_config_with_low_cap()
       seed_building_costs()
@@ -119,6 +120,15 @@ defmodule CampFire.Game.GridValidationTest do
       seed_new_player_config()
       player = register_player()
       {:ok, _economy} = Economy.init_economy(player.uid)
+
+      # Boost mana and give items to craft one more entity
+      economy = Economy.get_economy(player.uid)
+      economy |> Ecto.Changeset.change(mana: 10000.0) |> Repo.update!()
+      Economy.upsert_item(player.uid, "basil", 50)
+      Economy.upsert_item(player.uid, "sprouts", 50)
+
+      [pos1 | _] = free_positions(player.uid)
+      {:ok, _} = CampFire.Game.Plots.craft_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
 
       assert {:error, :entity_cap_reached} = GridValidation.check_entity_cap(player.uid)
     end

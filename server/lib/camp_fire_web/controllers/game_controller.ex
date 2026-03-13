@@ -22,13 +22,18 @@ defmodule CampFireWeb.GameController do
     new_player_config = ConfigCache.get("new_player_config") || %{}
     sprite_manifest = ConfigCache.get("sprite_manifest") || %{}
 
-    items = ConfigCache.get("items") || %{}
+    items_raw = ConfigCache.get("items") || %{}
+
+    # Strip integer "id" from items — internal only, API uses item_key as key
+    items =
+      Map.new(items_raw, fn {key, val} ->
+        {key, Map.drop(val, ["id"])}
+      end)
 
     seeds =
       Map.new(seed_configs, fn {name, s} ->
         {name,
          %{
-           seedName: s.seed_name,
            growthDurationHours: s.growth_duration_hours,
            minDrops: s.min_drops,
            maxDrops: s.max_drops,
@@ -229,21 +234,33 @@ defmodule CampFireWeb.GameController do
     conn |> put_status(400) |> json(%{error: "Missing 'gridX' and 'gridY'"})
   end
 
-  def plant_seed(conn, %{"plotId" => plot_id, "seedName" => seed_name} = params) do
+  def plant_seed(conn, %{"plotId" => plot_id, "seedItemKey" => seed_item_key} = params) do
     uid = conn.assigns.current_player.uid
     opts = free_mode_opts(params)
 
-    case Plots.plant(uid, plot_id, seed_name, opts) do
-      {:ok, plot} ->
-        conn |> put_status(200) |> json(serialize_plot(plot))
+    # Resolve the seed item_key to a plant_key (harvest_item_key) via seed_configs
+    seed_configs = ConfigCache.get("seed_configs") || %{}
 
-      {:error, reason} ->
-        conn |> put_status(422) |> json(%{error: format_error(reason)})
+    plant_key =
+      Enum.find_value(seed_configs, fn {harvest_key, sc} ->
+        if sc.item_key == seed_item_key, do: harvest_key
+      end)
+
+    if plant_key do
+      case Plots.plant(uid, plot_id, plant_key, opts) do
+        {:ok, plot} ->
+          conn |> put_status(200) |> json(serialize_plot(plot))
+
+        {:error, reason} ->
+          conn |> put_status(422) |> json(%{error: format_error(reason)})
+      end
+    else
+      conn |> put_status(422) |> json(%{error: "Unknown seed: #{seed_item_key}"})
     end
   end
 
   def plant_seed(conn, _params) do
-    conn |> put_status(400) |> json(%{error: "Missing 'plotId' and 'seedName'"})
+    conn |> put_status(400) |> json(%{error: "Missing 'plotId' and 'seedItemKey'"})
   end
 
   def water_plot(conn, %{"plotId" => plot_id, "vaseId" => vase_id}) do
@@ -589,7 +606,7 @@ defmodule CampFireWeb.GameController do
 
     case Birds.collect_bird(uid, bird_id) do
       {:ok, reward} ->
-        conn |> put_status(200) |> json(%{itemKey: reward.item_key, seedCount: reward.seed_count})
+        conn |> put_status(200) |> json(%{itemKey: reward.item_key, itemCount: reward.seed_count})
 
       {:error, reason} ->
         conn |> put_status(422) |> json(%{error: format_error(reason)})
@@ -734,9 +751,15 @@ defmodule CampFireWeb.GameController do
   # ── Serializers ─────────────────────────────────────────────
 
   defp serialize_plot(plot) do
+    seed_item_key =
+      case plot.seed_item_id do
+        nil -> nil
+        id -> CampFire.Game.resolve_item_key!(id)
+      end
+
     %{
       id: plot.id,
-      seedName: plot.seed_name,
+      seedItemKey: seed_item_key,
       state: plot.state,
       plantTimeUtc: format_datetime(plot.plant_time_utc),
       waterCount: plot.water_count,
@@ -797,12 +820,14 @@ defmodule CampFireWeb.GameController do
   end
 
   defp serialize_bird(bird) do
+    item_key = CampFire.Game.resolve_item_key!(bird.seed_item_id)
+
     %{
       id: bird.id,
       gridX: bird.grid_x,
       gridY: bird.grid_y,
-      seedName: bird.seed_name,
-      seedCount: bird.seed_count,
+      itemKey: item_key,
+      itemCount: bird.seed_count,
       spawnedAtUtc: format_datetime(bird.spawned_at_utc)
     }
   end

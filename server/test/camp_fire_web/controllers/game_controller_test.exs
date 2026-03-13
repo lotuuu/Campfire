@@ -2,27 +2,8 @@ defmodule CampFireWeb.GameControllerTest do
   use CampFireWeb.ConnCase
   import CampFire.TestHelpers
   alias CampFire.Economy
-  alias CampFire.Game.{Vases, Plots, Birds, MallumHouses}
+  alias CampFire.Game.{Vases, Plots, Birds, MallumHouses, Item}
   alias CampFire.Repo
-
-  defp ensure_seed_config do
-    alias CampFire.Game.SeedConfig
-    import Ecto.Query
-
-    unless Repo.one(from sc in SeedConfig, where: sc.seed_name == "Basil") do
-      %SeedConfig{}
-      |> SeedConfig.changeset(%{
-        seed_name: "Basil",
-        growth_duration_hours: 0.001,
-        min_drops: 1,
-        max_drops: 4,
-        recipe: %{},
-        item_key: "basil_seed",
-        harvest_item_key: "basil"
-      })
-      |> Repo.insert!()
-    end
-  end
 
   defp setup_player(conn) do
     seed_items()
@@ -31,7 +12,6 @@ defmodule CampFireWeb.GameControllerTest do
     player = register_player()
     {:ok, _economy} = Economy.init_economy(player.uid)
 
-    ensure_seed_config()
     seed_quest_configs()
     seed_garden_configs()
     seed_flame_config()
@@ -98,14 +78,15 @@ defmodule CampFireWeb.GameControllerTest do
 
   describe "POST /game/plot/craft" do
     test "returns 201 with plot", %{conn: conn} do
-      {_player, conn} = setup_player(conn)
+      {player, conn} = setup_player(conn)
+      [pos1 | _] = free_positions(player.uid)
 
-      conn = post(conn, "/game/plot/craft", %{gridX: 2, gridY: 0})
+      conn = post(conn, "/game/plot/craft", %{gridX: elem(pos1, 0), gridY: elem(pos1, 1)})
       body = json_response(conn, 201)
 
       assert body["state"] == "empty"
-      assert body["gridX"] == 2
-      assert body["gridY"] == 0
+      assert body["gridX"] == elem(pos1, 0)
+      assert body["gridY"] == elem(pos1, 1)
       assert body["id"] != nil
     end
   end
@@ -113,26 +94,30 @@ defmodule CampFireWeb.GameControllerTest do
   describe "full plot lifecycle" do
     test "craft -> plant -> water -> harvest", %{conn: conn} do
       {player, conn} = setup_player(conn)
+      [pos1, pos2, pos3 | _] = free_positions(player.uid)
 
       # Craft plot
-      conn1 = post(conn, "/game/plot/craft", %{gridX: 2, gridY: 0})
+      conn1 = post(conn, "/game/plot/craft", %{gridX: elem(pos1, 0), gridY: elem(pos1, 1)})
       plot = json_response(conn1, 201)
       plot_id = plot["id"]
       assert plot["state"] == "empty"
 
+      # Create mallum house so we have mallums for fill (not needed for water, but for fill endpoint)
+      {:ok, _house} = MallumHouses.craft_house(player.uid, elem(pos2, 0), elem(pos2, 1), [free_mode: true])
+
       # Craft vase and fill it with water
-      conn2 = build_conn() |> authed_conn(player) |> post("/game/vase/craft", %{gridX: 0, gridY: 2})
+      conn2 = build_conn() |> authed_conn(player) |> post("/game/vase/craft", %{gridX: elem(pos3, 0), gridY: elem(pos3, 1)})
       vase = json_response(conn2, 201)
       vase_id = vase["id"]
 
       # Directly set water on vase for testing
       {:ok, _} = Vases.set_water(vase_id, 5)
 
-      # Plant seed
-      conn3 = build_conn() |> authed_conn(player) |> post("/game/plot/plant", %{plotId: plot_id, seedName: "Basil"})
+      # Plant seed (seedItemKey is the seed's item_key)
+      conn3 = build_conn() |> authed_conn(player) |> post("/game/plot/plant", %{plotId: plot_id, seedItemKey: "basil_seed"})
       planted = json_response(conn3, 200)
       assert planted["state"] == "growing"
-      assert planted["seedName"] == "Basil"
+      assert planted["seedItemKey"] == "basil_seed"
 
       # Water plot
       conn4 = build_conn() |> authed_conn(player) |> post("/game/plot/water", %{plotId: plot_id, vaseId: vase_id})
@@ -153,9 +138,10 @@ defmodule CampFireWeb.GameControllerTest do
 
   describe "POST /game/vase/craft" do
     test "returns 201", %{conn: conn} do
-      {_player, conn} = setup_player(conn)
+      {player, conn} = setup_player(conn)
+      [pos1 | _] = free_positions(player.uid)
 
-      conn = post(conn, "/game/vase/craft", %{gridX: 2, gridY: 0})
+      conn = post(conn, "/game/vase/craft", %{gridX: elem(pos1, 0), gridY: elem(pos1, 1)})
       body = json_response(conn, 201)
 
       assert body["state"] == "empty"
@@ -168,8 +154,12 @@ defmodule CampFireWeb.GameControllerTest do
     test "starts filling", %{conn: conn} do
       {player, conn} = setup_player(conn)
 
+      # Create mallum house so we have mallums
+      [pos1, pos2 | _] = free_positions(player.uid)
+      {:ok, _house} = MallumHouses.craft_house(player.uid, elem(pos1, 0), elem(pos1, 1), [free_mode: true])
+
       # Craft vase
-      conn1 = post(conn, "/game/vase/craft", %{gridX: 2, gridY: 0})
+      conn1 = post(conn, "/game/vase/craft", %{gridX: elem(pos2, 0), gridY: elem(pos2, 1)})
       vase = json_response(conn1, 201)
 
       # Start fill
@@ -183,9 +173,10 @@ defmodule CampFireWeb.GameControllerTest do
 
   describe "POST /game/garden/plant" do
     test "returns 201", %{conn: conn} do
-      {_player, conn} = setup_player(conn)
+      {player, conn} = setup_player(conn)
+      [pos1 | _] = free_positions(player.uid)
 
-      conn = post(conn, "/game/garden/plant", %{plantName: "BerryBush", gridX: 2, gridY: 0})
+      conn = post(conn, "/game/garden/plant", %{plantName: "BerryBush", gridX: elem(pos1, 0), gridY: elem(pos1, 1)})
       body = json_response(conn, 201)
 
       assert body["plantName"] == "BerryBush"
@@ -194,16 +185,21 @@ defmodule CampFireWeb.GameControllerTest do
     end
 
     test "fails with unknown plant", %{conn: conn} do
-      {_player, conn} = setup_player(conn)
+      {player, conn} = setup_player(conn)
+      [pos1 | _] = free_positions(player.uid)
 
-      conn = post(conn, "/game/garden/plant", %{plantName: "FakeTree", gridX: 0, gridY: 2})
+      conn = post(conn, "/game/garden/plant", %{plantName: "FakeTree", gridX: elem(pos1, 0), gridY: elem(pos1, 1)})
       assert json_response(conn, 422)["error"] =~ "unknown_plant"
     end
   end
 
   describe "POST /game/quest/start" do
     test "starts quest", %{conn: conn} do
-      {_player, conn} = setup_player(conn)
+      {player, conn} = setup_player(conn)
+
+      # Create mallum house so we have mallums for quests
+      [pos1 | _] = free_positions(player.uid)
+      {:ok, _house} = MallumHouses.craft_house(player.uid, elem(pos1, 0), elem(pos1, 1), [free_mode: true])
 
       conn = post(conn, "/game/quest/start", %{questName: "SwampForage"})
       body = json_response(conn, 200)
@@ -214,7 +210,11 @@ defmodule CampFireWeb.GameControllerTest do
     end
 
     test "fails with insufficient flame level", %{conn: conn} do
-      {_player, conn} = setup_player(conn)
+      {player, conn} = setup_player(conn)
+
+      # Create mallum house so we have mallums
+      [pos1 | _] = free_positions(player.uid)
+      {:ok, _house} = MallumHouses.craft_house(player.uid, elem(pos1, 0), elem(pos1, 1), [free_mode: true])
 
       conn = post(conn, "/game/quest/start", %{questName: "MeadowExpedition"})
       assert json_response(conn, 422)["error"] =~ "insufficient_flame_level"
@@ -224,6 +224,10 @@ defmodule CampFireWeb.GameControllerTest do
   describe "POST /game/quest/speed-up" do
     test "with energy_drink completes quest", %{conn: conn} do
       {player, conn} = setup_player(conn)
+
+      # Create mallum house so we have mallums
+      [pos1 | _] = free_positions(player.uid)
+      {:ok, _house} = MallumHouses.craft_house(player.uid, elem(pos1, 0), elem(pos1, 1), [free_mode: true])
 
       # Give player energy_drinks for speed-up
       Economy.upsert_item(player.uid, "energy_drink", 3)
@@ -269,11 +273,13 @@ defmodule CampFireWeb.GameControllerTest do
 
   describe "POST /game/mallum-house/craft" do
     test "creates house and returns serialized response", %{conn: conn} do
-      {_player, conn} = setup_player(conn)
-      conn = post(conn, "/game/mallum-house/craft", %{gridX: 2, gridY: 0})
+      {player, conn} = setup_player(conn)
+      [pos1 | _] = free_positions(player.uid)
+
+      conn = post(conn, "/game/mallum-house/craft", %{gridX: elem(pos1, 0), gridY: elem(pos1, 1)})
       body = json_response(conn, 201)
-      assert body["gridX"] == 2
-      assert body["gridY"] == 0
+      assert body["gridX"] == elem(pos1, 0)
+      assert body["gridY"] == elem(pos1, 1)
       assert body["id"] != nil
     end
   end
@@ -292,14 +298,12 @@ defmodule CampFireWeb.GameControllerTest do
     test "collects bird and returns reward", %{conn: conn} do
       {player, conn} = setup_player(conn)
 
-      # Need a SeedConfig with item_key for collect_bird to work
-      # (ensure_seed_config already creates Basil with item_key)
-
-      {:ok, bird} = Birds.insert_bird(player.uid, 2, 0, "Basil", 2)
+      basil_seed_item_id = Repo.get_by!(Item, item_key: "basil_seed").id
+      {:ok, bird} = Birds.insert_bird(player.uid, 2, 0, basil_seed_item_id, 2)
       conn = post(conn, "/game/bird/collect", %{birdId: bird.id})
       body = json_response(conn, 200)
       assert body["itemKey"] == "basil_seed"
-      assert body["seedCount"] == 2
+      assert body["itemCount"] == 2
     end
   end
 
@@ -328,6 +332,11 @@ defmodule CampFireWeb.GameControllerTest do
       {player, conn} = setup_player(conn)
       seed_skin_configs()
       Economy.upsert_item(player.uid, "basil", 10)
+
+      # Create a house first since init no longer creates one
+      [pos1 | _] = free_positions(player.uid)
+      {:ok, _house} = MallumHouses.craft_house(player.uid, elem(pos1, 0), elem(pos1, 1), [free_mode: true])
+
       houses = MallumHouses.list_houses(player.uid)
       house = List.first(houses)
       conn = post(conn, "/game/mallum-house/set-skin", %{houseId: house.id, skinName: "CozyHouse"})
@@ -338,9 +347,16 @@ defmodule CampFireWeb.GameControllerTest do
 
   describe "entity cap validation" do
     test "craft_plot returns error when at cap", %{conn: conn} do
-      {_player, conn} = setup_player(conn)
+      {player, conn} = setup_player(conn)
       seed_flame_config_with_low_cap()
-      conn = post(conn, "/game/plot/craft", %{gridX: 2, gridY: 0})
+      seed_building_costs()
+
+      # low_cap at level 1 = 4, init creates 3 entities
+      # Need to craft 1 more to reach cap
+      [pos1, pos2 | _] = free_positions(player.uid)
+      {:ok, _} = Plots.craft_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
+
+      conn = post(conn, "/game/plot/craft", %{gridX: elem(pos2, 0), gridY: elem(pos2, 1)})
       body = json_response(conn, 422)
       assert body["error"] =~ "entity_cap"
     end

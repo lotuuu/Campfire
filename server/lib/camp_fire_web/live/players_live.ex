@@ -257,7 +257,7 @@ defmodule CampFireWeb.PlayersLive do
                   <tr>
                     <td>({p.grid_x},{p.grid_y})</td>
                     <td>{p.state}</td>
-                    <td>{p.seed_name || "-"}</td>
+                    <td>{if p.seed_item_id, do: CampFire.Game.resolve_item_key!(p.seed_item_id), else: "-"}</td>
                     <td>{p.water_count}</td>
                   </tr>
                 <% end %>

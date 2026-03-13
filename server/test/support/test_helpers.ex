@@ -155,16 +155,49 @@ defmodule CampFire.TestHelpers do
   end
 
   def seed_seed_configs do
+    # Resolve item IDs from the items table (must call seed_items first)
+    resolve_id = fn key ->
+      case Repo.get_by(Item, item_key: key) do
+        nil -> raise "Item #{key} not found — call seed_items() before seed_seed_configs()"
+        item -> item.id
+      end
+    end
+
+    make_config = fn harvest_key, seed_key, opts ->
+      %{
+        item_id: resolve_id.(seed_key),
+        item_key: seed_key,
+        harvest_item_id: resolve_id.(harvest_key),
+        harvest_item_key: harvest_key,
+        growth_duration_hours: opts[:growth_hours],
+        min_drops: opts[:min_drops],
+        max_drops: opts[:max_drops],
+        tier: opts[:tier] || 0,
+        recipe: opts[:recipe] || %{}
+      }
+    end
+
     configs = %{
-      "Basil" => %{"growth_duration_hours" => 2.0, "min_drops" => 1, "max_drops" => 4, "tier" => 1, "recipe" => %{}},
-      "Sprouts" => %{"growth_duration_hours" => 0.5, "min_drops" => 1, "max_drops" => 3, "tier" => 0, "recipe" => %{}},
-      "Cress" => %{"growth_duration_hours" => 1.0, "min_drops" => 1, "max_drops" => 3, "tier" => 0, "recipe" => %{}},
-      "HarvestTest" => %{"growth_duration_hours" => 0.001, "min_drops" => 2, "max_drops" => 8, "tier" => 0, "recipe" => %{}},
-      "SimpleSeed" => %{"growth_duration_hours" => 0.001, "min_drops" => 2, "max_drops" => 6, "tier" => 0, "recipe" => %{}},
-      "SlowPlant" => %{"growth_duration_hours" => 9999.0, "min_drops" => 1, "max_drops" => 3, "tier" => 0, "recipe" => %{}}
+      "basil" => make_config.("basil", "basil_seed", growth_hours: 2.0, min_drops: 1, max_drops: 4, tier: 1),
+      "sprouts" => make_config.("sprouts", "sprouts_seed", growth_hours: 0.5, min_drops: 1, max_drops: 3, tier: 0),
+      "cress" => make_config.("cress", "cress_seed", growth_hours: 1.0, min_drops: 1, max_drops: 3, tier: 0),
+      "harvesttest" => make_config.("harvesttest", "harvesttest_seed", growth_hours: 0.001, min_drops: 2, max_drops: 8, tier: 0),
+      "simpleseed" => make_config.("simpleseed", "simpleseed_seed", growth_hours: 0.001, min_drops: 2, max_drops: 6, tier: 0),
+      "slowplant" => make_config.("slowplant", "slowplant_seed", growth_hours: 9999.0, min_drops: 1, max_drops: 3, tier: 0)
     }
 
     :ets.insert(:config_cache, {"seed_configs", configs})
+
+    # Also seed by item_id for harvest/maturity lookups
+    by_item_id = Map.new(configs, fn {_k, v} -> {v.item_id, v} end)
+    :ets.insert(:config_cache, {"seed_configs_by_item_id", by_item_id})
+
+    # Also seed item_key_to_id and item_id_to_key resolution maps
+    items = Repo.all(Item)
+    item_key_to_id = Map.new(items, fn i -> {i.item_key, i.id} end)
+    item_id_to_key = Map.new(items, fn i -> {i.id, i.item_key} end)
+    :ets.insert(:config_cache, {"item_key_to_id", item_key_to_id})
+    :ets.insert(:config_cache, {"item_id_to_key", item_id_to_key})
   end
 
   def seed_mallum_house_config do

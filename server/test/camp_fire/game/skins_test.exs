@@ -1,7 +1,7 @@
 defmodule CampFire.Game.SkinsTest do
   use CampFire.DataCase, async: true
 
-  alias CampFire.Game.Skins
+  alias CampFire.Game.{Skins, MallumHouses}
   alias CampFire.Economy
   import CampFire.TestHelpers
 
@@ -100,7 +100,11 @@ defmodule CampFire.Game.SkinsTest do
 
   describe "apply_skin/4 on mallum houses" do
     test "unlocks and applies skin on mallum house", %{uid: uid} do
-      [house | _] = CampFire.Game.MallumHouses.list_houses(uid)
+      # init_economy no longer creates a house, so create one explicitly
+      [house_pos | _] = free_positions(uid)
+      {:ok, _house} = MallumHouses.craft_house(uid, elem(house_pos, 0), elem(house_pos, 1), [free_mode: true])
+
+      [house | _] = MallumHouses.list_houses(uid)
       Economy.upsert_item(uid, "basil", 10)
 
       assert {:ok, updated} = Skins.apply_skin(uid, :mallum_house, house.id, "CozyHouse")

@@ -1,7 +1,7 @@
 defmodule CampFire.Game.MallumsTest do
   use CampFire.DataCase
   import CampFire.TestHelpers
-  alias CampFire.Game.{Mallums, PlayerMallum}
+  alias CampFire.Game.{Mallums, MallumHouses, PlayerMallum}
   alias CampFire.Economy
 
   setup do
@@ -9,13 +9,18 @@ defmodule CampFire.Game.MallumsTest do
     seed_quest_configs()
     seed_mallum_house_config()
     seed_new_player_config()
+    seed_flame_config()
     :ok
   end
 
   defp setup_player(_context \\ %{}) do
     player = register_player()
     {:ok, _economy} = Economy.init_economy(player.uid)
-    # init_economy creates 2 starter mallums (mallums_per_house=2)
+
+    # init_economy no longer creates a house/mallums, so create one explicitly
+    [house_pos | _] = free_positions(player.uid)
+    {:ok, _house} = MallumHouses.craft_house(player.uid, elem(house_pos, 0), elem(house_pos, 1), [free_mode: true])
+    # craft_house spawns mallums_per_house (2) mallums
     [mallum | _] = Mallums.list_mallums(player.uid)
     {player, mallum}
   end
@@ -145,11 +150,7 @@ defmodule CampFire.Game.MallumsTest do
       {player, _mallum} = setup_player()
       {:ok, quest_mallum} = Mallums.send_on_quest(player.uid, "SwampForage")
 
-      # Player starts with 3 speed_potions and 3 energy_drinks from init_economy
-      # speed_up uses quest_speed_item which is "energy_drink"
-      # But our new_player_config gives energy_drink? No, let me check...
-      # Actually seed_new_player_config gives: speed_potion x3, but quest_speed_item is energy_drink
-      # We need to give the player energy_drinks
+      # Give the player energy_drinks
       Economy.upsert_item(player.uid, "energy_drink", 3)
 
       {:ok, completed} = Mallums.speed_up_quest(player.uid, quest_mallum.id)

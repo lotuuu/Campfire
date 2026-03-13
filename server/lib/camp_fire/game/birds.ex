@@ -81,7 +81,7 @@ defmodule CampFire.Game.Birds do
   @doc """
   Collect a bird: validate ownership, delete bird, grant seeds.
 
-  Returns `{:ok, %{seed_name: ..., seed_count: ...}}` or `{:error, reason}`.
+  Returns `{:ok, %{item_key: ..., seed_count: ...}}` or `{:error, reason}`.
   """
   def collect_bird(player_uid, bird_id) do
     case Repo.get(PlayerBird, bird_id) do
@@ -94,8 +94,7 @@ defmodule CampFire.Game.Birds do
         else
           Repo.transaction(fn ->
             Repo.delete!(bird)
-            # Birds store seed_name (e.g. "Sprouts"), look up the seed item_key
-            seed_config = CampFire.Game.get_seed_config!(bird.seed_name)
+            seed_config = CampFire.Game.get_seed_config_by_item_id!(bird.seed_item_id)
             Economy.upsert_item(player_uid, seed_config.item_key, bird.seed_count)
             %{item_key: seed_config.item_key, seed_count: bird.seed_count}
           end)
@@ -104,7 +103,7 @@ defmodule CampFire.Game.Birds do
   end
 
   @doc "Insert a bird record (used by check_spawns and tests)."
-  def insert_bird(player_uid, gx, gy, seed_name, seed_count) do
+  def insert_bird(player_uid, gx, gy, seed_item_id, seed_count) do
     now = DateTime.utc_now() |> DateTime.truncate(:second)
 
     %PlayerBird{}
@@ -112,7 +111,7 @@ defmodule CampFire.Game.Birds do
       player_uid: player_uid,
       grid_x: gx,
       grid_y: gy,
-      seed_name: seed_name,
+      seed_item_id: seed_item_id,
       seed_count: seed_count,
       spawned_at_utc: now
     })
@@ -147,8 +146,8 @@ defmodule CampFire.Game.Birds do
         nil ->
           :no_seed
 
-        {seed_name, seed_count} ->
-          {:ok, bird} = do_insert_bird(player_uid, gx, gy, seed_name, seed_count)
+        {seed_item_id, seed_count} ->
+          {:ok, bird} = do_insert_bird(player_uid, gx, gy, seed_item_id, seed_count)
           {:ok, bird}
       end
     end
@@ -167,17 +166,17 @@ defmodule CampFire.Game.Birds do
     if eligible == [] do
       nil
     else
-      {seed_name, config} = Enum.random(eligible)
+      {_harvest_key, config} = Enum.random(eligible)
       tier = config["tier"] || Map.get(config, :tier, 0)
       base = max(1, flame_level - tier + 1)
       low = max(1, base - 1)
       high = base + 1
       seed_count = Enum.random(low..high)
-      {seed_name, seed_count}
+      {config.item_id, seed_count}
     end
   end
 
-  defp do_insert_bird(player_uid, gx, gy, seed_name, seed_count) do
+  defp do_insert_bird(player_uid, gx, gy, seed_item_id, seed_count) do
     now = DateTime.utc_now() |> DateTime.truncate(:second)
 
     %PlayerBird{}
@@ -185,7 +184,7 @@ defmodule CampFire.Game.Birds do
       player_uid: player_uid,
       grid_x: gx,
       grid_y: gy,
-      seed_name: seed_name,
+      seed_item_id: seed_item_id,
       seed_count: seed_count,
       spawned_at_utc: now
     })

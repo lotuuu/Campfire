@@ -6,16 +6,6 @@ alias CampFire.Visitors.{VisitorTemplate, VisitorSchedule}
 
 alias CampFire.Game.Item
 
-# Helper: assert item exists in DB, return key (for use in configs below)
-defmodule ItemHelper do
-  def item!(key) do
-    case CampFire.Repo.get(CampFire.Game.Item, key) do
-      nil -> raise "Item '#{key}' not found — seed items before configs"
-      item -> item.item_key
-    end
-  end
-end
-
 plants = ~w(sprouts cress basil chamomile marigold snowdrop mint lavender pansy poppy jasmine rosemary dahlia moonflower)
 
 items =
@@ -54,6 +44,25 @@ for item <- items do
 end
 
 IO.puts("Items seeded: #{length(items)}")
+
+# Build lookup map: item_key string -> %Item{} struct (with integer .id)
+items_by_key = Item |> Repo.all() |> Map.new(fn i -> {i.item_key, i} end)
+
+# Helper: look up integer ID by item_key string
+item_id! = fn key ->
+  case Map.get(items_by_key, key) do
+    nil -> raise "Item '#{key}' not found — seed items before configs"
+    item -> item.id
+  end
+end
+
+# Helper: return item_key string (for use in config JSON values)
+item_key! = fn key ->
+  case Map.get(items_by_key, key) do
+    nil -> raise "Item '#{key}' not found — seed items before configs"
+    item -> item.item_key
+  end
+end
 
 # --- Visitor Templates ---
 
@@ -225,9 +234,8 @@ end
 
 seed_configs = [
   %{
-    seed_name: "Sprouts",
-    item_key: ItemHelper.item!("sprouts_seed"),
-    harvest_item_key: ItemHelper.item!("sprouts"),
+    item_id: item_id!.("sprouts_seed"),
+    harvest_item_id: item_id!.("sprouts"),
     growth_duration_hours: 0.00278,
     min_drops: 1,
     max_drops: 4,
@@ -237,9 +245,8 @@ seed_configs = [
     }
   },
   %{
-    seed_name: "Cress",
-    item_key: ItemHelper.item!("cress_seed"),
-    harvest_item_key: ItemHelper.item!("cress"),
+    item_id: item_id!.("cress_seed"),
+    harvest_item_id: item_id!.("cress"),
     growth_duration_hours: 0.08333,
     min_drops: 1,
     max_drops: 3,
@@ -251,9 +258,8 @@ seed_configs = [
     }
   },
   %{
-    seed_name: "Basil",
-    item_key: ItemHelper.item!("basil_seed"),
-    harvest_item_key: ItemHelper.item!("basil"),
+    item_id: item_id!.("basil_seed"),
+    harvest_item_id: item_id!.("basil"),
     growth_duration_hours: 1.0,
     min_drops: 1,
     max_drops: 4,
@@ -264,9 +270,8 @@ seed_configs = [
     }
   },
   %{
-    seed_name: "Chamomile",
-    item_key: ItemHelper.item!("chamomile_seed"),
-    harvest_item_key: ItemHelper.item!("chamomile"),
+    item_id: item_id!.("chamomile_seed"),
+    harvest_item_id: item_id!.("chamomile"),
     growth_duration_hours: 1.5,
     min_drops: 2,
     max_drops: 5,
@@ -277,9 +282,8 @@ seed_configs = [
     }
   },
   %{
-    seed_name: "Marigold",
-    item_key: ItemHelper.item!("marigold_seed"),
-    harvest_item_key: ItemHelper.item!("marigold"),
+    item_id: item_id!.("marigold_seed"),
+    harvest_item_id: item_id!.("marigold"),
     growth_duration_hours: 2.0,
     min_drops: 2,
     max_drops: 6,
@@ -291,9 +295,8 @@ seed_configs = [
     }
   },
   %{
-    seed_name: "Snowdrop",
-    item_key: ItemHelper.item!("snowdrop_seed"),
-    harvest_item_key: ItemHelper.item!("snowdrop"),
+    item_id: item_id!.("snowdrop_seed"),
+    harvest_item_id: item_id!.("snowdrop"),
     growth_duration_hours: 2.5,
     min_drops: 2,
     max_drops: 6,
@@ -305,9 +308,8 @@ seed_configs = [
     }
   },
   %{
-    seed_name: "Mint",
-    item_key: ItemHelper.item!("mint_seed"),
-    harvest_item_key: ItemHelper.item!("mint"),
+    item_id: item_id!.("mint_seed"),
+    harvest_item_id: item_id!.("mint"),
     growth_duration_hours: 3.0,
     min_drops: 2,
     max_drops: 8,
@@ -319,9 +321,8 @@ seed_configs = [
     }
   },
   %{
-    seed_name: "Lavender",
-    item_key: ItemHelper.item!("lavender_seed"),
-    harvest_item_key: ItemHelper.item!("lavender"),
+    item_id: item_id!.("lavender_seed"),
+    harvest_item_id: item_id!.("lavender"),
     growth_duration_hours: 5.0,
     min_drops: 2,
     max_drops: 9,
@@ -333,9 +334,8 @@ seed_configs = [
     }
   },
   %{
-    seed_name: "Pansy",
-    item_key: ItemHelper.item!("pansy_seed"),
-    harvest_item_key: ItemHelper.item!("pansy"),
+    item_id: item_id!.("pansy_seed"),
+    harvest_item_id: item_id!.("pansy"),
     growth_duration_hours: 6.0,
     min_drops: 2,
     max_drops: 8,
@@ -347,9 +347,8 @@ seed_configs = [
     }
   },
   %{
-    seed_name: "Poppy",
-    item_key: ItemHelper.item!("poppy_seed"),
-    harvest_item_key: ItemHelper.item!("poppy"),
+    item_id: item_id!.("poppy_seed"),
+    harvest_item_id: item_id!.("poppy"),
     growth_duration_hours: 8.0,
     min_drops: 3,
     max_drops: 10,
@@ -361,9 +360,8 @@ seed_configs = [
     }
   },
   %{
-    seed_name: "Jasmine",
-    item_key: ItemHelper.item!("jasmine_seed"),
-    harvest_item_key: ItemHelper.item!("jasmine"),
+    item_id: item_id!.("jasmine_seed"),
+    harvest_item_id: item_id!.("jasmine"),
     growth_duration_hours: 12.0,
     min_drops: 3,
     max_drops: 12,
@@ -375,9 +373,8 @@ seed_configs = [
     }
   },
   %{
-    seed_name: "Rosemary",
-    item_key: ItemHelper.item!("rosemary_seed"),
-    harvest_item_key: ItemHelper.item!("rosemary"),
+    item_id: item_id!.("rosemary_seed"),
+    harvest_item_id: item_id!.("rosemary"),
     growth_duration_hours: 18.0,
     min_drops: 3,
     max_drops: 14,
@@ -389,9 +386,8 @@ seed_configs = [
     }
   },
   %{
-    seed_name: "Dahlia",
-    item_key: ItemHelper.item!("dahlia_seed"),
-    harvest_item_key: ItemHelper.item!("dahlia"),
+    item_id: item_id!.("dahlia_seed"),
+    harvest_item_id: item_id!.("dahlia"),
     growth_duration_hours: 30.0,
     min_drops: 4,
     max_drops: 16,
@@ -404,9 +400,8 @@ seed_configs = [
     }
   },
   %{
-    seed_name: "Moonflower",
-    item_key: ItemHelper.item!("moonflower_seed"),
-    harvest_item_key: ItemHelper.item!("moonflower"),
+    item_id: item_id!.("moonflower_seed"),
+    harvest_item_id: item_id!.("moonflower"),
     growth_duration_hours: 48.0,
     min_drops: 5,
     max_drops: 20,
@@ -419,14 +414,14 @@ seed_configs = [
   }
 ]
 
-replace_fields = [:growth_duration_hours, :min_drops, :max_drops, :tier, :recipe, :item_key, :harvest_item_key, :updated_at]
+replace_fields = [:growth_duration_hours, :min_drops, :max_drops, :tier, :recipe, :harvest_item_id, :updated_at]
 
 for config <- seed_configs do
   %SeedConfig{}
   |> SeedConfig.changeset(config)
   |> Repo.insert!(
     on_conflict: {:replace, replace_fields},
-    conflict_target: :seed_name
+    conflict_target: :item_id
   )
 end
 
@@ -598,154 +593,154 @@ game_configs = [
       "entity_caps" => [5, 6, 7, 9, 12, 15, 18, 22, 26, 30, 35, 40],
       "grid_sizes" => [2, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5],
       "upgrade_recipes" => [
-        %{"ingredients" => [%{"itemKey" => ItemHelper.item!("sprouts"), "count" => 10}]},
+        %{"ingredients" => [%{"itemKey" => item_key!.("sprouts"), "count" => 10}]},
         %{
           "ingredients" => [
-            %{"itemKey" => ItemHelper.item!("sprouts"), "count" => 30},
-            %{"itemKey" => ItemHelper.item!("cress"), "count" => 5}
+            %{"itemKey" => item_key!.("sprouts"), "count" => 30},
+            %{"itemKey" => item_key!.("cress"), "count" => 5}
           ]
         },
-        %{"ingredients" => [%{"itemKey" => ItemHelper.item!("basil"), "count" => 5}]},
-        %{"ingredients" => [%{"itemKey" => ItemHelper.item!("chamomile"), "count" => 5}]},
+        %{"ingredients" => [%{"itemKey" => item_key!.("basil"), "count" => 5}]},
+        %{"ingredients" => [%{"itemKey" => item_key!.("chamomile"), "count" => 5}]},
         %{
           "ingredients" => [
-            %{"itemKey" => ItemHelper.item!("marigold"), "count" => 12},
-            %{"itemKey" => ItemHelper.item!("snowdrop"), "count" => 8},
-            %{"itemKey" => ItemHelper.item!("basil"), "count" => 8}
-          ]
-        },
-        %{
-          "ingredients" => [
-            %{"itemKey" => ItemHelper.item!("mint"), "count" => 8},
-            %{"itemKey" => ItemHelper.item!("pansy"), "count" => 4},
-            %{"itemKey" => ItemHelper.item!("chamomile"), "count" => 8}
+            %{"itemKey" => item_key!.("marigold"), "count" => 12},
+            %{"itemKey" => item_key!.("snowdrop"), "count" => 8},
+            %{"itemKey" => item_key!.("basil"), "count" => 8}
           ]
         },
         %{
           "ingredients" => [
-            %{"itemKey" => ItemHelper.item!("lavender"), "count" => 22},
-            %{"itemKey" => ItemHelper.item!("snowdrop"), "count" => 24},
-            %{"itemKey" => ItemHelper.item!("basil"), "count" => 18}
+            %{"itemKey" => item_key!.("mint"), "count" => 8},
+            %{"itemKey" => item_key!.("pansy"), "count" => 4},
+            %{"itemKey" => item_key!.("chamomile"), "count" => 8}
           ]
         },
         %{
           "ingredients" => [
-            %{"itemKey" => ItemHelper.item!("poppy"), "count" => 35},
-            %{"itemKey" => ItemHelper.item!("pansy"), "count" => 30},
-            %{"itemKey" => ItemHelper.item!("marigold"), "count" => 50}
+            %{"itemKey" => item_key!.("lavender"), "count" => 22},
+            %{"itemKey" => item_key!.("snowdrop"), "count" => 24},
+            %{"itemKey" => item_key!.("basil"), "count" => 18}
           ]
         },
         %{
           "ingredients" => [
-            %{"itemKey" => ItemHelper.item!("jasmine"), "count" => 60},
-            %{"itemKey" => ItemHelper.item!("lavender"), "count" => 50},
-            %{"itemKey" => ItemHelper.item!("poppy"), "count" => 60}
+            %{"itemKey" => item_key!.("poppy"), "count" => 35},
+            %{"itemKey" => item_key!.("pansy"), "count" => 30},
+            %{"itemKey" => item_key!.("marigold"), "count" => 50}
           ]
         },
         %{
           "ingredients" => [
-            %{"itemKey" => ItemHelper.item!("rosemary"), "count" => 50},
-            %{"itemKey" => ItemHelper.item!("jasmine"), "count" => 60},
-            %{"itemKey" => ItemHelper.item!("lavender"), "count" => 55},
-            %{"itemKey" => ItemHelper.item!("snowdrop"), "count" => 40}
+            %{"itemKey" => item_key!.("jasmine"), "count" => 60},
+            %{"itemKey" => item_key!.("lavender"), "count" => 50},
+            %{"itemKey" => item_key!.("poppy"), "count" => 60}
           ]
         },
         %{
           "ingredients" => [
-            %{"itemKey" => ItemHelper.item!("dahlia"), "count" => 50},
-            %{"itemKey" => ItemHelper.item!("moonflower"), "count" => 30},
-            %{"itemKey" => ItemHelper.item!("rosemary"), "count" => 60},
-            %{"itemKey" => ItemHelper.item!("poppy"), "count" => 80},
-            %{"itemKey" => ItemHelper.item!("basil"), "count" => 50}
+            %{"itemKey" => item_key!.("rosemary"), "count" => 50},
+            %{"itemKey" => item_key!.("jasmine"), "count" => 60},
+            %{"itemKey" => item_key!.("lavender"), "count" => 55},
+            %{"itemKey" => item_key!.("snowdrop"), "count" => 40}
+          ]
+        },
+        %{
+          "ingredients" => [
+            %{"itemKey" => item_key!.("dahlia"), "count" => 50},
+            %{"itemKey" => item_key!.("moonflower"), "count" => 30},
+            %{"itemKey" => item_key!.("rosemary"), "count" => 60},
+            %{"itemKey" => item_key!.("poppy"), "count" => 80},
+            %{"itemKey" => item_key!.("basil"), "count" => 50}
           ]
         }
       ],
       "plot_costs" => [
-        %{"manaCost" => 50, "harvestCosts" => [%{"itemKey" => ItemHelper.item!("cress"), "count" => 1}]},
-        %{"manaCost" => 200, "harvestCosts" => [%{"itemKey" => ItemHelper.item!("cress"), "count" => 4}]},
-        %{"manaCost" => 260, "harvestCosts" => [%{"itemKey" => ItemHelper.item!("basil"), "count" => 2}]},
-        %{"manaCost" => 330, "harvestCosts" => [%{"itemKey" => ItemHelper.item!("chamomile"), "count" => 1}]},
-        %{"manaCost" => 420, "harvestCosts" => [%{"itemKey" => ItemHelper.item!("chamomile"), "count" => 1}]},
+        %{"manaCost" => 50, "harvestCosts" => [%{"itemKey" => item_key!.("cress"), "count" => 1}]},
+        %{"manaCost" => 200, "harvestCosts" => [%{"itemKey" => item_key!.("cress"), "count" => 4}]},
+        %{"manaCost" => 260, "harvestCosts" => [%{"itemKey" => item_key!.("basil"), "count" => 2}]},
+        %{"manaCost" => 330, "harvestCosts" => [%{"itemKey" => item_key!.("chamomile"), "count" => 1}]},
+        %{"manaCost" => 420, "harvestCosts" => [%{"itemKey" => item_key!.("chamomile"), "count" => 1}]},
         %{
           "manaCost" => 520,
           "harvestCosts" => [
-            %{"itemKey" => ItemHelper.item!("chamomile"), "count" => 1},
-            %{"itemKey" => ItemHelper.item!("basil"), "count" => 1}
+            %{"itemKey" => item_key!.("chamomile"), "count" => 1},
+            %{"itemKey" => item_key!.("basil"), "count" => 1}
           ]
         },
-        %{"manaCost" => 640, "harvestCosts" => [%{"itemKey" => ItemHelper.item!("chamomile"), "count" => 2}]},
+        %{"manaCost" => 640, "harvestCosts" => [%{"itemKey" => item_key!.("chamomile"), "count" => 2}]},
         %{
           "manaCost" => 780,
           "harvestCosts" => [
-            %{"itemKey" => ItemHelper.item!("lavender"), "count" => 1},
-            %{"itemKey" => ItemHelper.item!("chamomile"), "count" => 1}
+            %{"itemKey" => item_key!.("lavender"), "count" => 1},
+            %{"itemKey" => item_key!.("chamomile"), "count" => 1}
           ]
         },
         %{
           "manaCost" => 940,
           "harvestCosts" => [
-            %{"itemKey" => ItemHelper.item!("mint"), "count" => 1},
-            %{"itemKey" => ItemHelper.item!("lavender"), "count" => 1}
+            %{"itemKey" => item_key!.("mint"), "count" => 1},
+            %{"itemKey" => item_key!.("lavender"), "count" => 1}
           ]
         },
         %{
           "manaCost" => 1120,
           "harvestCosts" => [
-            %{"itemKey" => ItemHelper.item!("mint"), "count" => 2},
-            %{"itemKey" => ItemHelper.item!("chamomile"), "count" => 1}
+            %{"itemKey" => item_key!.("mint"), "count" => 2},
+            %{"itemKey" => item_key!.("chamomile"), "count" => 1}
           ]
         }
       ],
       "vase_costs" => [
-        %{"manaCost" => 100, "harvestCosts" => [%{"itemKey" => ItemHelper.item!("cress"), "count" => 1}]},
-        %{"manaCost" => 120, "harvestCosts" => [%{"itemKey" => ItemHelper.item!("basil"), "count" => 2}]},
-        %{"manaCost" => 150, "harvestCosts" => [%{"itemKey" => ItemHelper.item!("chamomile"), "count" => 1}]},
-        %{"manaCost" => 180, "harvestCosts" => [%{"itemKey" => ItemHelper.item!("chamomile"), "count" => 1}]},
+        %{"manaCost" => 100, "harvestCosts" => [%{"itemKey" => item_key!.("cress"), "count" => 1}]},
+        %{"manaCost" => 120, "harvestCosts" => [%{"itemKey" => item_key!.("basil"), "count" => 2}]},
+        %{"manaCost" => 150, "harvestCosts" => [%{"itemKey" => item_key!.("chamomile"), "count" => 1}]},
+        %{"manaCost" => 180, "harvestCosts" => [%{"itemKey" => item_key!.("chamomile"), "count" => 1}]},
         %{
           "manaCost" => 220,
           "harvestCosts" => [
-            %{"itemKey" => ItemHelper.item!("chamomile"), "count" => 1},
-            %{"itemKey" => ItemHelper.item!("basil"), "count" => 1}
+            %{"itemKey" => item_key!.("chamomile"), "count" => 1},
+            %{"itemKey" => item_key!.("basil"), "count" => 1}
           ]
         },
-        %{"manaCost" => 260, "harvestCosts" => [%{"itemKey" => ItemHelper.item!("chamomile"), "count" => 2}]},
+        %{"manaCost" => 260, "harvestCosts" => [%{"itemKey" => item_key!.("chamomile"), "count" => 2}]},
         %{
           "manaCost" => 310,
           "harvestCosts" => [
-            %{"itemKey" => ItemHelper.item!("lavender"), "count" => 1},
-            %{"itemKey" => ItemHelper.item!("basil"), "count" => 1}
+            %{"itemKey" => item_key!.("lavender"), "count" => 1},
+            %{"itemKey" => item_key!.("basil"), "count" => 1}
           ]
         },
         %{
           "manaCost" => 370,
           "harvestCosts" => [
-            %{"itemKey" => ItemHelper.item!("lavender"), "count" => 1},
-            %{"itemKey" => ItemHelper.item!("chamomile"), "count" => 1}
+            %{"itemKey" => item_key!.("lavender"), "count" => 1},
+            %{"itemKey" => item_key!.("chamomile"), "count" => 1}
           ]
         }
       ],
       "garden_costs" => [
-        %{"manaCost" => 550, "harvestCosts" => [%{"itemKey" => ItemHelper.item!("chamomile"), "count" => 3}]},
-        %{"manaCost" => 850, "harvestCosts" => [%{"itemKey" => ItemHelper.item!("lavender"), "count" => 3}]},
+        %{"manaCost" => 550, "harvestCosts" => [%{"itemKey" => item_key!.("chamomile"), "count" => 3}]},
+        %{"manaCost" => 850, "harvestCosts" => [%{"itemKey" => item_key!.("lavender"), "count" => 3}]},
         %{
           "manaCost" => 1200,
           "harvestCosts" => [
-            %{"itemKey" => ItemHelper.item!("mint"), "count" => 3},
-            %{"itemKey" => ItemHelper.item!("chamomile"), "count" => 2}
+            %{"itemKey" => item_key!.("mint"), "count" => 3},
+            %{"itemKey" => item_key!.("chamomile"), "count" => 2}
           ]
         },
         %{
           "manaCost" => 1800,
           "harvestCosts" => [
-            %{"itemKey" => ItemHelper.item!("lavender"), "count" => 4},
-            %{"itemKey" => ItemHelper.item!("mint"), "count" => 3}
+            %{"itemKey" => item_key!.("lavender"), "count" => 4},
+            %{"itemKey" => item_key!.("mint"), "count" => 3}
           ]
         },
         %{
           "manaCost" => 2500,
           "harvestCosts" => [
-            %{"itemKey" => ItemHelper.item!("poppy"), "count" => 3},
-            %{"itemKey" => ItemHelper.item!("lavender"), "count" => 4}
+            %{"itemKey" => item_key!.("poppy"), "count" => 3},
+            %{"itemKey" => item_key!.("lavender"), "count" => 4}
           ]
         }
       ]
@@ -759,23 +754,23 @@ game_configs = [
       "fill_duration_minutes" => 5,
       "capacity_tiers" => [5, 8, 12, 20],
       "upgrade_costs" => [400, 1000, 2000],
-      "speed_item" => ItemHelper.item!("energy_drink")
+      "speed_item" => item_key!.("energy_drink")
     }
   },
   %{
     key: "mallum_house_config",
     value: %{
       "mallums_per_house" => 1,
-      "quest_speed_item" => ItemHelper.item!("energy_drink"),
+      "quest_speed_item" => item_key!.("energy_drink"),
       "house_costs" => [
-        %{"manaCost" => 10, "harvestCosts" => [%{"itemKey" => ItemHelper.item!("sprouts"), "count" => 1}]},
-        %{"manaCost" => 100, "harvestCosts" => [%{"itemKey" => ItemHelper.item!("basil"), "count" => 2}]},
-        %{"manaCost" => 500, "harvestCosts" => [%{"itemKey" => ItemHelper.item!("lavender"), "count" => 3}]},
+        %{"manaCost" => 10, "harvestCosts" => [%{"itemKey" => item_key!.("sprouts"), "count" => 1}]},
+        %{"manaCost" => 100, "harvestCosts" => [%{"itemKey" => item_key!.("basil"), "count" => 2}]},
+        %{"manaCost" => 500, "harvestCosts" => [%{"itemKey" => item_key!.("lavender"), "count" => 3}]},
         %{
           "manaCost" => 1000,
           "harvestCosts" => [
-            %{"itemKey" => ItemHelper.item!("chamomile"), "count" => 2},
-            %{"itemKey" => ItemHelper.item!("mint"), "count" => 2}
+            %{"itemKey" => item_key!.("chamomile"), "count" => 2},
+            %{"itemKey" => item_key!.("mint"), "count" => 2}
           ]
         }
       ]
@@ -795,7 +790,7 @@ game_configs = [
       "rain_water_cooldown_seconds" => 21600,
       "rain_trigger_minutes" => 15,
       "drop_spread_factor" => 0.3,
-      "speed_item" => ItemHelper.item!("speed_potion")
+      "speed_item" => item_key!.("speed_potion")
     }
   },
   %{
@@ -805,9 +800,9 @@ game_configs = [
       "gems" => 5,
       "starting_water" => 1,
       "items" => [
-        %{"itemKey" => ItemHelper.item!("sprouts_seed"), "count" => 2},
-        %{"itemKey" => ItemHelper.item!("speed_potion"), "count" => 3},
-        %{"itemKey" => ItemHelper.item!("energy_drink"), "count" => 2}
+        %{"itemKey" => item_key!.("sprouts_seed"), "count" => 2},
+        %{"itemKey" => item_key!.("speed_potion"), "count" => 3},
+        %{"itemKey" => item_key!.("energy_drink"), "count" => 2}
       ]
     }
   },
@@ -815,92 +810,92 @@ game_configs = [
     key: "recipe_configs",
     value: %{
       "basil_pigment" => %{
-        "ingredients" => [%{"itemKey" => ItemHelper.item!("basil"), "count" => 3}],
-        "result_item" => ItemHelper.item!("basil_pigment"),
+        "ingredients" => [%{"itemKey" => item_key!.("basil"), "count" => 3}],
+        "result_item" => item_key!.("basil_pigment"),
         "result_quantity" => 1,
         "category" => "Pigment"
       },
       "chamomile_pigment" => %{
-        "ingredients" => [%{"itemKey" => ItemHelper.item!("chamomile"), "count" => 3}],
-        "result_item" => ItemHelper.item!("chamomile_pigment"),
+        "ingredients" => [%{"itemKey" => item_key!.("chamomile"), "count" => 3}],
+        "result_item" => item_key!.("chamomile_pigment"),
         "result_quantity" => 1,
         "category" => "Pigment"
       },
       "dahlia_pigment" => %{
-        "ingredients" => [%{"itemKey" => ItemHelper.item!("dahlia"), "count" => 3}],
-        "result_item" => ItemHelper.item!("dahlia_pigment"),
+        "ingredients" => [%{"itemKey" => item_key!.("dahlia"), "count" => 3}],
+        "result_item" => item_key!.("dahlia_pigment"),
         "result_quantity" => 1,
         "category" => "Pigment"
       },
       "jasmine_pigment" => %{
-        "ingredients" => [%{"itemKey" => ItemHelper.item!("jasmine"), "count" => 3}],
-        "result_item" => ItemHelper.item!("jasmine_pigment"),
+        "ingredients" => [%{"itemKey" => item_key!.("jasmine"), "count" => 3}],
+        "result_item" => item_key!.("jasmine_pigment"),
         "result_quantity" => 1,
         "category" => "Pigment"
       },
       "lavender_pigment" => %{
-        "ingredients" => [%{"itemKey" => ItemHelper.item!("lavender"), "count" => 3}],
-        "result_item" => ItemHelper.item!("lavender_pigment"),
+        "ingredients" => [%{"itemKey" => item_key!.("lavender"), "count" => 3}],
+        "result_item" => item_key!.("lavender_pigment"),
         "result_quantity" => 1,
         "category" => "Pigment"
       },
       "marigold_pigment" => %{
-        "ingredients" => [%{"itemKey" => ItemHelper.item!("marigold"), "count" => 3}],
-        "result_item" => ItemHelper.item!("marigold_pigment"),
+        "ingredients" => [%{"itemKey" => item_key!.("marigold"), "count" => 3}],
+        "result_item" => item_key!.("marigold_pigment"),
         "result_quantity" => 1,
         "category" => "Pigment"
       },
       "mint_pigment" => %{
-        "ingredients" => [%{"itemKey" => ItemHelper.item!("mint"), "count" => 3}],
-        "result_item" => ItemHelper.item!("mint_pigment"),
+        "ingredients" => [%{"itemKey" => item_key!.("mint"), "count" => 3}],
+        "result_item" => item_key!.("mint_pigment"),
         "result_quantity" => 1,
         "category" => "Pigment"
       },
       "moonflower_pigment" => %{
-        "ingredients" => [%{"itemKey" => ItemHelper.item!("moonflower"), "count" => 3}],
-        "result_item" => ItemHelper.item!("moonflower_pigment"),
+        "ingredients" => [%{"itemKey" => item_key!.("moonflower"), "count" => 3}],
+        "result_item" => item_key!.("moonflower_pigment"),
         "result_quantity" => 1,
         "category" => "Pigment"
       },
       "pansy_pigment" => %{
-        "ingredients" => [%{"itemKey" => ItemHelper.item!("pansy"), "count" => 3}],
-        "result_item" => ItemHelper.item!("pansy_pigment"),
+        "ingredients" => [%{"itemKey" => item_key!.("pansy"), "count" => 3}],
+        "result_item" => item_key!.("pansy_pigment"),
         "result_quantity" => 1,
         "category" => "Pigment"
       },
       "poppy_pigment" => %{
-        "ingredients" => [%{"itemKey" => ItemHelper.item!("poppy"), "count" => 3}],
-        "result_item" => ItemHelper.item!("poppy_pigment"),
+        "ingredients" => [%{"itemKey" => item_key!.("poppy"), "count" => 3}],
+        "result_item" => item_key!.("poppy_pigment"),
         "result_quantity" => 1,
         "category" => "Pigment"
       },
       "rosemary_pigment" => %{
-        "ingredients" => [%{"itemKey" => ItemHelper.item!("rosemary"), "count" => 3}],
-        "result_item" => ItemHelper.item!("rosemary_pigment"),
+        "ingredients" => [%{"itemKey" => item_key!.("rosemary"), "count" => 3}],
+        "result_item" => item_key!.("rosemary_pigment"),
         "result_quantity" => 1,
         "category" => "Pigment"
       },
       "snowdrop_pigment" => %{
-        "ingredients" => [%{"itemKey" => ItemHelper.item!("snowdrop"), "count" => 3}],
-        "result_item" => ItemHelper.item!("snowdrop_pigment"),
+        "ingredients" => [%{"itemKey" => item_key!.("snowdrop"), "count" => 3}],
+        "result_item" => item_key!.("snowdrop_pigment"),
         "result_quantity" => 1,
         "category" => "Pigment"
       },
       "speed_potion" => %{
         "ingredients" => [
-          %{"itemKey" => ItemHelper.item!("mint"), "count" => 4},
-          %{"itemKey" => ItemHelper.item!("chamomile"), "count" => 3}
+          %{"itemKey" => item_key!.("mint"), "count" => 4},
+          %{"itemKey" => item_key!.("chamomile"), "count" => 3}
         ],
-        "result_item" => ItemHelper.item!("speed_potion"),
+        "result_item" => item_key!.("speed_potion"),
         "result_quantity" => 1,
         "category" => "Potion"
       },
       "fertilizer" => %{
         "ingredients" => [
-          %{"itemKey" => ItemHelper.item!("berry"), "count" => 3},
-          %{"itemKey" => ItemHelper.item!("acorn"), "count" => 1}
+          %{"itemKey" => item_key!.("berry"), "count" => 3},
+          %{"itemKey" => item_key!.("acorn"), "count" => 1}
         ],
-        "result_item" => ItemHelper.item!("fertilizer"),
+        "result_item" => item_key!.("fertilizer"),
         "result_quantity" => 1,
         "category" => "Material"
       }
@@ -918,17 +913,17 @@ game_configs = [
           acc
           |> Map.put("#{plant}_plot", %{
             "building_type" => "plot",
-            "cost_item_key" => ItemHelper.item!(pigment),
+            "cost_item_key" => item_key!.(pigment),
             "cost_quantity" => 1
           })
           |> Map.put("#{plant}_vase", %{
             "building_type" => "vase",
-            "cost_item_key" => ItemHelper.item!(pigment),
+            "cost_item_key" => item_key!.(pigment),
             "cost_quantity" => 1
           })
           |> Map.put("#{plant}_house", %{
             "building_type" => "mallum_house",
-            "cost_item_key" => ItemHelper.item!(pigment),
+            "cost_item_key" => item_key!.(pigment),
             "cost_quantity" => 1
           })
         end

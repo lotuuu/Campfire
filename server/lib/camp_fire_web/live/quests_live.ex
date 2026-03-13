@@ -5,7 +5,7 @@ defmodule CampFireWeb.QuestsLive do
   alias CampFire.Admin.QuestConfig
 
   def mount(_params, _session, socket) do
-    seed_names = Admin.list_seeds() |> Enum.map(& &1.seed_name) |> Enum.sort()
+    seed_names = Admin.list_seeds() |> Enum.map(& &1.item.item_key) |> Enum.sort()
     {:ok,
      socket
      |> assign(active_tab: :quests, quests: Admin.list_quests(), seed_names: seed_names)

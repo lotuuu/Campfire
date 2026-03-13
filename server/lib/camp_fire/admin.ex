@@ -19,10 +19,16 @@ defmodule CampFire.Admin do
   # ---------------------------------------------------------------------------
 
   def list_seeds do
-    Repo.all(from s in SeedConfig, order_by: s.seed_name)
+    Repo.all(
+      from s in SeedConfig,
+        join: item in CampFire.Game.Item, on: item.id == s.item_id,
+        join: harvest_item in CampFire.Game.Item, on: harvest_item.id == s.harvest_item_id,
+        order_by: item.item_key,
+        preload: [:item, :harvest_item]
+    )
   end
 
-  def get_seed!(id), do: Repo.get!(SeedConfig, id)
+  def get_seed!(id), do: Repo.get!(SeedConfig, id) |> Repo.preload([:item, :harvest_item])
 
   def create_seed(attrs) do
     %SeedConfig{}
@@ -249,7 +255,7 @@ defmodule CampFire.Admin do
         %{
           player: player,
           economy: Repo.get(PlayerEconomy, uid),
-          inventory: Repo.all(from i in PlayerInventory, where: i.player_uid == ^uid),
+          inventory: CampFire.Economy.list_inventory(uid),
           plots: Repo.all(from p in PlayerPlot, where: p.player_uid == ^uid),
           vases: Repo.all(from v in PlayerVase, where: v.player_uid == ^uid),
           gardens: Repo.all(from g in PlayerGarden, where: g.player_uid == ^uid),

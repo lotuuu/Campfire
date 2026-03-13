@@ -14,7 +14,7 @@ defmodule CampFireWeb.ItemsLive do
        active_tab: :items,
        sub_tab: :seeds,
        seeds: Admin.list_seeds(),
-       seed_names: Admin.list_seeds() |> Enum.map(& &1.seed_name) |> Enum.sort(),
+       seed_names: Admin.list_seeds() |> Enum.map(& &1.item.item_key) |> Enum.sort(),
        recipes: Admin.list_recipes(),
        skins: Admin.list_skins(),
        editing: nil,
@@ -121,20 +121,41 @@ defmodule CampFireWeb.ItemsLive do
   end
 
   def handle_event("new_seed", _params, socket) do
-    case Admin.create_seed(%{
-           seed_name: "NewSeed_#{System.unique_integer([:positive])}",
-           growth_duration_hours: 1.0,
-           min_drops: 1,
-           max_drops: 3,
-           recipe: %{}
-         }) do
-      {:ok, seed} ->
+    alias CampFire.Game.Item
+    alias CampFire.Repo
+
+    suffix = System.unique_integer([:positive])
+    seed_key = "new_seed_#{suffix}"
+    harvest_key = "new_harvest_#{suffix}"
+
+    Repo.transaction(fn ->
+      {:ok, seed_item} =
+        %Item{}
+        |> Item.changeset(%{item_key: seed_key, display_name: "New Seed #{suffix}", category: "seed"})
+        |> Repo.insert()
+
+      {:ok, harvest_item} =
+        %Item{}
+        |> Item.changeset(%{item_key: harvest_key, display_name: "New Harvest #{suffix}", category: "harvest"})
+        |> Repo.insert()
+
+      Admin.create_seed(%{
+        item_id: seed_item.id,
+        harvest_item_id: harvest_item.id,
+        growth_duration_hours: 1.0,
+        min_drops: 1,
+        max_drops: 3,
+        recipe: %{}
+      })
+    end)
+    |> case do
+      {:ok, {:ok, seed}} ->
         {:noreply,
          socket
          |> refresh_seeds()
          |> push_patch(to: "/admin/items/seeds/#{seed.id}/edit")}
 
-      {:error, _changeset} ->
+      _ ->
         {:noreply, put_flash(socket, :error, "Failed to create seed")}
     end
   end
@@ -143,7 +164,8 @@ defmodule CampFireWeb.ItemsLive do
     # Upload icon if provided
     consume_uploaded_entries(socket, :icon, fn %{path: path}, _entry ->
       seed = socket.assigns.editing
-      key = "items/#{String.downcase(seed.seed_name)}/seed"
+      item_key = seed.item.item_key
+      key = "items/#{String.downcase(item_key)}/seed"
       data = File.read!(path)
       CampFire.Sprites.upload_sprite(key, data)
       {:ok, key}
@@ -407,7 +429,7 @@ defmodule CampFireWeb.ItemsLive do
     seeds = Admin.list_seeds()
     assign(socket,
       seeds: seeds,
-      seed_names: Enum.map(seeds, & &1.seed_name) |> Enum.sort()
+      seed_names: Enum.map(seeds, & &1.item.item_key) |> Enum.sort()
     )
   end
 
@@ -513,11 +535,11 @@ defmodule CampFireWeb.ItemsLive do
 
       <%= if @editing do %>
         <div class="bg-white border rounded-lg p-6 mb-6">
-          <h3 class="text-lg font-semibold mb-4">Edit: {@editing.seed_name}</h3>
+          <h3 class="text-lg font-semibold mb-4">Edit: {@editing.item.item_key}</h3>
           <div class="flex items-center gap-4 mb-4">
             <div class="w-16 h-16 bg-gray-100 rounded border flex items-center justify-center overflow-hidden">
               <img
-                src={CampFire.Sprites.sprite_url("items/#{String.downcase(@editing.seed_name)}/seed")}
+                src={CampFire.Sprites.sprite_url("items/#{String.downcase(@editing.item.item_key)}/seed")}
                 class="w-14 h-14 object-contain"
                 onerror="this.parentElement.innerHTML='<span class=\'text-xs text-gray-400\'>No icon</span>'"
               />
@@ -530,9 +552,14 @@ defmodule CampFireWeb.ItemsLive do
           <.form for={@form} phx-submit="save_seed" class="space-y-4">
             <div class="grid grid-cols-2 gap-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700">Seed Name</label>
-                <input type="text" name="seed_config[seed_name]" value={@form[:seed_name].value}
-                  class="mt-1 block w-full border rounded px-3 py-2" />
+                <label class="block text-sm font-medium text-gray-700">Seed Item Key</label>
+                <input type="text" value={@editing.item.item_key} disabled
+                  class="mt-1 block w-full border rounded px-3 py-2 bg-gray-100 text-gray-500" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Harvest Item Key</label>
+                <input type="text" value={@editing.harvest_item.item_key} disabled
+                  class="mt-1 block w-full border rounded px-3 py-2 bg-gray-100 text-gray-500" />
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700">Growth Duration (hours)</label>
@@ -576,7 +603,8 @@ defmodule CampFireWeb.ItemsLive do
         <thead class="bg-gray-50">
           <tr>
             <th class="px-4 py-3 w-12"></th>
-            <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Seed Name</th>
+            <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Seed Item</th>
+            <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Harvest Item</th>
             <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Growth Time</th>
             <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Drops</th>
             <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Recipe</th>
@@ -587,10 +615,11 @@ defmodule CampFireWeb.ItemsLive do
           <%= for seed <- Enum.sort_by(@seeds, & &1.growth_duration_hours) do %>
             <tr class="hover:bg-gray-50">
               <td class="px-4 py-3">
-                <img src={CampFire.Sprites.sprite_url("items/#{String.downcase(seed.seed_name)}/seed")}
+                <img src={CampFire.Sprites.sprite_url("items/#{String.downcase(seed.item.item_key)}/seed")}
                   class="w-8 h-8 object-contain" onerror="this.style.display='none'" />
               </td>
-              <td class="px-4 py-3 font-medium">{seed.seed_name}</td>
+              <td class="px-4 py-3 font-medium">{seed.item.item_key}</td>
+              <td class="px-4 py-3 text-sm text-gray-500">{seed.harvest_item.item_key}</td>
               <td class="px-4 py-3">{format_duration(seed.growth_duration_hours)}</td>
               <td class="px-4 py-3">{seed.min_drops}-{seed.max_drops}</td>
               <td class="px-4 py-3 text-sm text-gray-500">{recipe_summary(seed.recipe)}</td>
