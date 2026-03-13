@@ -4,7 +4,11 @@ defmodule CampFire.Game.Plots do
   alias CampFire.Game.{PlayerPlot, PlayerVase, SeedConfig, GrowthRecipe, GridValidation}
   alias CampFire.Economy
 
-  @water_cooldown_seconds 7200
+  defp water_cooldown_seconds do
+    config = CampFire.ConfigCache.get("plot_config") ||
+      raise "plot_config not loaded in ConfigCache"
+    config["water_cooldown_seconds"]
+  end
 
   @empty_snapshots %{
     "temperatures" => [],
@@ -130,7 +134,7 @@ defmodule CampFire.Game.Plots do
           {:error, :not_growing}
 
         plot.last_watered_utc != nil and
-            DateTime.diff(now, plot.last_watered_utc, :second) < @water_cooldown_seconds ->
+            DateTime.diff(now, plot.last_watered_utc, :second) < water_cooldown_seconds() ->
           {:error, :water_cooldown}
 
         true ->

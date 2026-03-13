@@ -578,7 +578,7 @@ game_configs = [
         }
       ],
       "plot_costs" => [
-        %{"manaCost" => 60, "harvestCosts" => [%{"itemName" => "Cress", "count" => 1}]},
+        %{"manaCost" => 50, "harvestCosts" => [%{"itemName" => "Cress", "count" => 1}]},
         %{"manaCost" => 200, "harvestCosts" => [%{"itemName" => "Cress", "count" => 4}]},
         %{"manaCost" => 260, "harvestCosts" => [%{"itemName" => "Basil", "count" => 2}]},
         %{"manaCost" => 330, "harvestCosts" => [%{"itemName" => "Chamomile", "count" => 1}]},
@@ -694,6 +694,22 @@ game_configs = [
           ]
         }
       ]
+    }
+  },
+  %{
+    key: "bird_config",
+    value: %{
+      "spawn_base_chance" => 0.33,
+      "spawn_decay" => 0.5
+    }
+  },
+  %{
+    key: "plot_config",
+    value: %{
+      "water_cooldown_seconds" => 7200,
+      "rain_water_cooldown_seconds" => 21600,
+      "rain_trigger_minutes" => 15,
+      "drop_spread_factor" => 0.3
     }
   },
   %{

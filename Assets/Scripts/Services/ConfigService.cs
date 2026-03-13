@@ -67,28 +67,24 @@ namespace Garden
 
         public float GetManaPerSecond(int flameLevel)
         {
-            if (mana_rates.Count == 0) return 0f;
             int index = Mathf.Clamp(flameLevel - 1, 0, mana_rates.Count - 1);
             return mana_rates[index];
         }
 
         public float GetManaCap(int flameLevel)
         {
-            if (mana_caps.Count == 0) return 1000f;
             int index = Mathf.Clamp(flameLevel - 1, 0, mana_caps.Count - 1);
             return mana_caps[index];
         }
 
         public int GetMaxEntities(int flameLevel)
         {
-            if (entity_caps.Count == 0) return 6;
             int index = Mathf.Clamp(flameLevel - 1, 0, entity_caps.Count - 1);
             return entity_caps[index];
         }
 
         public int GetGridSize(int flameLevel)
         {
-            if (grid_sizes.Count == 0) return 2;
             int index = Mathf.Clamp(flameLevel - 1, 0, grid_sizes.Count - 1);
             return grid_sizes[index];
         }
@@ -122,6 +118,22 @@ namespace Garden
     }
 
     [Serializable]
+    public class ServerBirdConfig
+    {
+        public float spawn_base_chance;
+        public float spawn_decay;
+    }
+
+    [Serializable]
+    public class ServerPlotConfig
+    {
+        public int water_cooldown_seconds;
+        public int rain_water_cooldown_seconds;
+        public int rain_trigger_minutes;
+        public float drop_spread_factor;
+    }
+
+    [Serializable]
     public class NewPlayerItemGrant
     {
         public string name;
@@ -149,6 +161,8 @@ namespace Garden
         private ServerFlameConfig _flameConfig;
         private ServerVaseConfig _vaseConfig;
         private ServerMallumHouseConfig _mallumHouseConfig;
+        private ServerBirdConfig _birdConfig;
+        private ServerPlotConfig _plotConfig;
         private ServerNewPlayerConfig _newPlayerConfig;
         private Dictionary<string, List<BuildingCost>> _buildingCosts = new();
         private Dictionary<string, string> _spriteManifest = new();
@@ -230,6 +244,8 @@ namespace Garden
         public ServerFlameConfig FlameConfig => _flameConfig;
         public ServerVaseConfig VaseConfig => _vaseConfig;
         public ServerMallumHouseConfig MallumHouseConfig => _mallumHouseConfig;
+        public ServerBirdConfig BirdConfig => _birdConfig;
+        public ServerPlotConfig PlotConfig => _plotConfig;
         public ServerNewPlayerConfig NewPlayerConfig => _newPlayerConfig;
         public Dictionary<string, string> SpriteManifest => _spriteManifest;
 
@@ -541,6 +557,28 @@ namespace Garden
                 {
                     _mallumHouseConfig.houseCosts = ParseBuildingCostList(costs);
                 }
+            }
+
+            // Bird config
+            if (root.TryGetValue("birdConfig", out var birdObj) && birdObj is Dictionary<string, object> bird)
+            {
+                _birdConfig = new ServerBirdConfig
+                {
+                    spawn_base_chance = GetFloat(bird, "spawn_base_chance"),
+                    spawn_decay = GetFloat(bird, "spawn_decay")
+                };
+            }
+
+            // Plot config
+            if (root.TryGetValue("plotConfig", out var plotObj) && plotObj is Dictionary<string, object> plot)
+            {
+                _plotConfig = new ServerPlotConfig
+                {
+                    water_cooldown_seconds = (int)GetFloat(plot, "water_cooldown_seconds"),
+                    rain_water_cooldown_seconds = (int)GetFloat(plot, "rain_water_cooldown_seconds"),
+                    rain_trigger_minutes = (int)GetFloat(plot, "rain_trigger_minutes"),
+                    drop_spread_factor = GetFloat(plot, "drop_spread_factor")
+                };
             }
 
             // New player config

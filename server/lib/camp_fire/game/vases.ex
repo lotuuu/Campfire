@@ -4,8 +4,16 @@ defmodule CampFire.Game.Vases do
   alias CampFire.Game.{PlayerVase, PlayerMallum, GridValidation}
   alias CampFire.Economy
 
-  @default_capacity 5
-  @fill_seconds_per_unit 60
+  defp vase_config! do
+    CampFire.ConfigCache.get("vase_config") ||
+      raise "vase_config not loaded in ConfigCache"
+  end
+
+  defp vase_capacity, do: vase_config!()["default_capacity"]
+
+  defp fill_duration_seconds do
+    vase_config!()["fill_duration_minutes"] * 60
+  end
 
   # --- Queries ---
 
@@ -57,7 +65,7 @@ defmodule CampFire.Game.Vases do
       |> PlayerVase.changeset(%{
         player_uid: player_uid,
         state: "empty",
-        capacity: @default_capacity,
+        capacity: vase_capacity(),
         current_water: 0,
         grid_x: grid_x,
         grid_y: grid_y
@@ -100,7 +108,7 @@ defmodule CampFire.Game.Vases do
          true <- vase.state == "filling" || {:error, :not_filling} do
       now = DateTime.utc_now() |> DateTime.truncate(:second)
       elapsed = DateTime.diff(now, vase.fill_start_time_utc, :second)
-      required = vase.capacity * @fill_seconds_per_unit
+      required = fill_duration_seconds()
 
       if elapsed >= required do
         # Free the mallum assigned to this vase

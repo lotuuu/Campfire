@@ -12,8 +12,8 @@ namespace Garden
         public event Action OnBirdPlaced;
         public event Action<BirdSave> OnBirdCollected;
 
-        private static readonly float BaseChance = 0.33f;
-        private static readonly float HalvingFactor = 0.5f;
+        private static float BaseChance => ConfigService.Instance.BirdConfig.spawn_base_chance;
+        private static float HalvingFactor => ConfigService.Instance.BirdConfig.spawn_decay;
 
         private bool _isChecking;
 

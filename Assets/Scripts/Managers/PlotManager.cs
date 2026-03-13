@@ -12,9 +12,12 @@ namespace Garden
         public event Action<int> OnPlotChanged;
         public event Action<int, HarvestResult> OnHarvested;
 
-        public static readonly float ManualWaterCooldownHours = 2f;
-        public static readonly float RainWaterCooldownHours = 6f;
-        public static readonly float RainTriggerMinutes = 15f;
+        public static float ManualWaterCooldownHours =>
+            ConfigService.Instance.PlotConfig.water_cooldown_seconds / 3600f;
+        public static float RainWaterCooldownHours =>
+            ConfigService.Instance.PlotConfig.rain_water_cooldown_seconds / 3600f;
+        public static float RainTriggerMinutes =>
+            ConfigService.Instance.PlotConfig.rain_trigger_minutes;
 
         public static bool CanWaterPlot(PlotSave plot, DateTime utcNow, float cooldownHours)
         {
@@ -654,7 +657,7 @@ namespace Garden
         public static int CalculateDrops(float score, int minDrops, int maxDrops)
         {
             float center = minDrops + score * (maxDrops - minDrops);
-            float spread = (maxDrops - minDrops) * 0.3f;
+            float spread = (maxDrops - minDrops) * ConfigService.Instance.PlotConfig.drop_spread_factor;
             int low = Mathf.Max(minDrops, Mathf.RoundToInt(center - spread));
             int high = Mathf.Min(maxDrops, Mathf.RoundToInt(center + spread));
             return UnityEngine.Random.Range(low, high + 1);

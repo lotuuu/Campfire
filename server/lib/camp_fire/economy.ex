@@ -3,14 +3,23 @@ defmodule CampFire.Economy do
   alias CampFire.Repo
   alias CampFire.Economy.{PlayerEconomy, PlayerInventory}
 
-  @base_mana_per_second 0.5
-  @mana_per_level 0.3
-  @max_flame_level 12
-  @mana_cap_per_level {300, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 7000, 9000, 12_000}
+  defp flame_config! do
+    CampFire.ConfigCache.get("flame_config") ||
+      raise "flame_config not loaded in ConfigCache"
+  end
+
+  defp max_flame_level, do: flame_config!()["max_flame_level"]
+
+  defp mana_rate(flame_level) do
+    rates = flame_config!()["mana_rates"]
+    index = max(flame_level - 1, 0) |> min(length(rates) - 1)
+    Enum.at(rates, index)
+  end
 
   defp mana_cap(flame_level) do
-    index = max(flame_level - 1, 0) |> min(tuple_size(@mana_cap_per_level) - 1)
-    elem(@mana_cap_per_level, index)
+    caps = flame_config!()["mana_caps"]
+    index = max(flame_level - 1, 0) |> min(length(caps) - 1)
+    Enum.at(caps, index)
   end
 
   # --- Init ---
@@ -69,7 +78,7 @@ defmodule CampFire.Economy do
         now = DateTime.utc_now() |> DateTime.truncate(:second)
         elapsed = max(DateTime.diff(now, economy.last_mana_collect_utc, :second), 0)
 
-        mana_rate = @base_mana_per_second + (economy.flame_level - 1) * @mana_per_level
+        mana_rate = mana_rate(economy.flame_level)
         earned = mana_rate * elapsed
         cap = mana_cap(economy.flame_level)
         capped_mana = min(economy.mana + earned, cap)
@@ -136,7 +145,7 @@ defmodule CampFire.Economy do
 
       cond do
         economy == nil -> Repo.rollback(:not_found)
-        economy.flame_level >= @max_flame_level -> Repo.rollback(:max_level)
+        economy.flame_level >= max_flame_level() -> Repo.rollback(:max_level)
         true -> :ok
       end
 

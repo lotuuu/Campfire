@@ -16,6 +16,8 @@ defmodule CampFireWeb.GameController do
     flame_config = ConfigCache.get("flame_config") || %{}
     vase_config = ConfigCache.get("vase_config") || %{}
     mallum_house_config = ConfigCache.get("mallum_house_config") || %{}
+    bird_config = ConfigCache.get("bird_config") || %{}
+    plot_config = ConfigCache.get("plot_config") || %{}
     skin_configs = ConfigCache.get("skin_configs") || %{}
     new_player_config = ConfigCache.get("new_player_config") || %{}
     sprite_manifest = ConfigCache.get("sprite_manifest") || %{}
@@ -69,6 +71,8 @@ defmodule CampFireWeb.GameController do
       flameConfig: serialize_game_config(flame_config),
       vaseConfig: serialize_game_config(vase_config),
       mallumHouseConfig: serialize_game_config(mallum_house_config),
+      birdConfig: serialize_game_config(bird_config),
+      plotConfig: serialize_game_config(plot_config),
       recipes: ConfigCache.get("recipe_configs") || %{},
       skins: skin_configs,
       newPlayerConfig: serialize_game_config(new_player_config),

@@ -68,8 +68,11 @@ defmodule CampFire.Game.GrowthRecipe do
   Score interpolates within the range; +-30% spread adds noise.
   """
   def calculate_drops(score, min_drops, max_drops) do
+    config = CampFire.ConfigCache.get("plot_config") ||
+      raise "plot_config not loaded in ConfigCache"
+    spread_factor = config["drop_spread_factor"]
     center = min_drops + score * (max_drops - min_drops)
-    spread = (max_drops - min_drops) * 0.3
+    spread = (max_drops - min_drops) * spread_factor
     low = max(min_drops, round(center - spread))
     high = min(max_drops, round(center + spread))
     Enum.random(low..high)

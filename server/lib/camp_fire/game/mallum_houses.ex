@@ -77,7 +77,8 @@ defmodule CampFire.Game.MallumHouses do
   end
 
   defp get_mallums_per_house do
-    config = CampFire.ConfigCache.get("mallum_house_config")
-    config["mallums_per_house"] || 2
+    config = CampFire.ConfigCache.get("mallum_house_config") ||
+      raise "mallum_house_config not loaded in ConfigCache"
+    config["mallums_per_house"]
   end
 end

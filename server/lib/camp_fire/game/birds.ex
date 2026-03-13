@@ -12,8 +12,10 @@ defmodule CampFire.Game.Birds do
   alias CampFire.Economy
   alias CampFire.Economy.PlayerEconomy
 
-  @spawn_base_chance 0.33
-  @spawn_decay 0.5
+  defp bird_config! do
+    CampFire.ConfigCache.get("bird_config") ||
+      raise "bird_config not loaded in ConfigCache"
+  end
 
   # ── Public API ──────────────────────────────────────────────
 
@@ -55,7 +57,8 @@ defmodule CampFire.Game.Birds do
     new_birds =
       Enum.reduce(hours, [], fn _hour, acc ->
         current_bird_count = count_birds(player_uid) + length(acc)
-        spawn_chance = @spawn_base_chance * :math.pow(@spawn_decay, current_bird_count)
+        config = bird_config!()
+        spawn_chance = config["spawn_base_chance"] * :math.pow(config["spawn_decay"], current_bird_count)
 
         if :rand.uniform() < spawn_chance do
           case try_spawn_bird(player_uid, flame_level, acc) do
