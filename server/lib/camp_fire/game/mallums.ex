@@ -31,7 +31,7 @@ defmodule CampFire.Game.Mallums do
       (cached[:reward_pool] || cached["reward_pool"] || [])
       |> Enum.map(fn entry ->
         %{
-          seed: entry["seed"] || entry["seed_name"] || entry[:seed] || entry[:seed_name],
+          item_key: entry["itemKey"] || entry[:itemKey] || entry["item_key"] || entry[:item_key],
           weight: entry["weight"] || entry[:weight],
           min: entry["minCount"] || entry["min"] || entry[:minCount] || entry[:min],
           max: entry["maxCount"] || entry["max"] || entry[:maxCount] || entry[:max]
@@ -117,9 +117,9 @@ defmodule CampFire.Game.Mallums do
 
       Repo.transaction(fn ->
         Enum.each(rewards, fn reward ->
-          seed_name = reward["seed_name"] <> "_Seed"
+          item_key = reward["item_key"]
           count = reward["count"]
-          Economy.upsert_item(player_uid, seed_name, count)
+          Economy.upsert_item(player_uid, item_key, count)
         end)
 
         mallum
@@ -188,7 +188,7 @@ defmodule CampFire.Game.Mallums do
         roll = :rand.uniform(total_weight)
         selected = pick_by_weight(config.rewards, roll, 0)
         count = Enum.random(selected.min..selected.max)
-        %{"seed_name" => selected.seed, "count" => count}
+        %{"item_key" => selected.item_key, "count" => count}
       end)
     end
   end

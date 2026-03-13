@@ -32,7 +32,7 @@ defmodule CampFire.Game.Skins do
 
             Repo.transaction(fn ->
               unless already_unlocked do
-                cost_item = skin["cost_item_name"]
+                cost_item = skin["cost_item_key"]
                 cost_qty = skin["cost_quantity"] || 1
 
                 case Economy.spend_item(player_uid, cost_item, cost_qty) do

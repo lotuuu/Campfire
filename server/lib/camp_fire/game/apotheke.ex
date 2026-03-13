@@ -12,8 +12,8 @@ defmodule CampFire.Game.Apotheke do
 
       recipe ->
         Repo.transaction(fn ->
-          Enum.each(recipe["ingredients"], fn %{"item_name" => name, "count" => count} ->
-            case Economy.spend_item(player_uid, name, count, opts) do
+          Enum.each(recipe["ingredients"], fn %{"itemKey" => key, "count" => count} ->
+            case Economy.spend_item(player_uid, key, count, opts) do
               {:ok, _} -> :ok
               {:error, reason} -> Repo.rollback(reason)
             end

@@ -94,8 +94,10 @@ defmodule CampFire.Game.Birds do
         else
           Repo.transaction(fn ->
             Repo.delete!(bird)
-            Economy.upsert_item(player_uid, bird.seed_name <> "_Seed", bird.seed_count)
-            %{seed_name: bird.seed_name, seed_count: bird.seed_count}
+            # Birds store seed_name (e.g. "Sprouts"), look up the seed item_key
+            seed_config = CampFire.Game.get_seed_config!(bird.seed_name)
+            Economy.upsert_item(player_uid, seed_config.item_key, bird.seed_count)
+            %{item_key: seed_config.item_key, seed_count: bird.seed_count}
           end)
         end
     end

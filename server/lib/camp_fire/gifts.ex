@@ -27,12 +27,12 @@ defmodule CampFire.Gifts do
         Repo.transaction(fn ->
           # Deduct items from sender's inventory
           Enum.each(items, fn item ->
-            item_name = item["item_name"] || item["itemName"]
+            item_key = item["itemKey"] || item["item_key"]
             count = item["count"] || 1
 
-            case Economy.spend_item(from_uid, item_name, count) do
+            case Economy.spend_item(from_uid, item_key, count) do
               {:ok, _} -> :ok
-              {:error, _} -> Repo.rollback({:insufficient_items, item_name})
+              {:error, _} -> Repo.rollback({:insufficient_items, item_key})
             end
           end)
 
@@ -77,9 +77,9 @@ defmodule CampFire.Gifts do
           {:ok, claimed} ->
             # Add items to receiver's inventory
             Enum.each(claimed.items, fn item ->
-              item_name = item["item_name"] || item["itemName"]
+              item_key = item["itemKey"] || item["item_key"]
               count = item["count"] || 1
-              Economy.upsert_item(to_uid, item_name, count)
+              Economy.upsert_item(to_uid, item_key, count)
             end)
 
             {:ok, claimed.items}

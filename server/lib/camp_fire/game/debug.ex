@@ -159,14 +159,14 @@ defmodule CampFire.Game.Debug do
 
   # ── Inventory Grants ─────────────────────────────────────────
 
-  @doc "Grant seeds to a player. seed_name should include _Seed suffix (e.g. 'Sprouts_Seed')."
-  def grant_seeds(player_uid, seed_name, count) when is_integer(count) and count > 0 do
-    Economy.upsert_item(player_uid, seed_name, count)
+  @doc "Grant seeds to a player by item_key (e.g. 'sprouts_seed')."
+  def grant_seeds(player_uid, item_key, count) when is_integer(count) and count > 0 do
+    Economy.upsert_item(player_uid, item_key, count)
   end
 
-  @doc "Grant items to a player."
-  def grant_items(player_uid, item_name, count) when is_integer(count) and count > 0 do
-    Economy.upsert_item(player_uid, item_name, count)
+  @doc "Grant items to a player by item_key."
+  def grant_items(player_uid, item_key, count) when is_integer(count) and count > 0 do
+    Economy.upsert_item(player_uid, item_key, count)
   end
 
   # ── Bird Spawning ────────────────────────────────────────────

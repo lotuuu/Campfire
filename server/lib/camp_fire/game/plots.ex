@@ -60,8 +60,8 @@ defmodule CampFire.Game.Plots do
 
       harvest_costs = cost["harvestCosts"] || []
 
-      Enum.each(harvest_costs, fn %{"itemName" => name, "count" => count} ->
-        case Economy.spend_item(player_uid, name, count, opts) do
+      Enum.each(harvest_costs, fn %{"itemKey" => key, "count" => count} ->
+        case Economy.spend_item(player_uid, key, count, opts) do
           {:ok, _} -> :ok
           {:error, reason} -> Repo.rollback(reason)
         end
@@ -89,8 +89,10 @@ defmodule CampFire.Game.Plots do
          true <- plot.player_uid == player_uid || {:error, :not_owned},
          true <- Map.has_key?(seed_configs, seed_name) || {:error, :unknown_seed},
          true <- plot.state == "empty" || {:error, :plot_not_empty} do
+      seed_config = CampFire.Game.get_seed_config!(seed_name)
+
       Repo.transaction(fn ->
-        case Economy.spend_item(player_uid, seed_name <> "_Seed", 1, opts) do
+        case Economy.spend_item(player_uid, seed_config.item_key, 1, opts) do
           {:error, reason} ->
             Repo.rollback(reason)
 
@@ -178,9 +180,9 @@ defmodule CampFire.Game.Plots do
           require Logger
           Logger.warning("Harvest with zero snapshots: player=#{player_uid} plot=#{plot_id} seed=#{plot.seed_name}")
         end
-        item_name = plot.seed_name
+        harvest_item_key = seed_config.harvest_item_key
 
-        Economy.upsert_item(player_uid, item_name, drops)
+        Economy.upsert_item(player_uid, harvest_item_key, drops)
 
         plot
         |> PlayerPlot.changeset(%{
@@ -193,7 +195,7 @@ defmodule CampFire.Game.Plots do
         })
         |> Repo.update!()
 
-        %{score: score, drops: drops, item_name: item_name}
+        %{score: score, drops: drops, harvest_item_key: harvest_item_key}
       end)
     else
       nil -> {:error, :not_found}

@@ -30,8 +30,8 @@ defmodule CampFire.Game.MallumHouses do
 
         harvest_costs = cost["harvestCosts"] || []
 
-        Enum.each(harvest_costs, fn %{"itemName" => name, "count" => count} ->
-          case Economy.spend_item(player_uid, name, count, opts) do
+        Enum.each(harvest_costs, fn %{"itemKey" => key, "count" => count} ->
+          case Economy.spend_item(player_uid, key, count, opts) do
             {:ok, _} -> :ok
             {:error, reason} -> Repo.rollback(reason)
           end
