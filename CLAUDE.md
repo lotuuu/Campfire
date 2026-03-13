@@ -203,9 +203,11 @@ An Elixir/Phoenix backend lives in `server/` (routes: `/auth`, `/friends`, `/vil
 ## Server Deployment
 
 Hosted on Gigalixir at `https://campfire.gigalixirapp.com`. Run from `server/`:
-- `make deploy` — push code to Gigalixir (rsyncs + force-pushes since Gigalixir doesn't support Git LFS)
-- `make deploy-migrate` — run Ecto migrations on remote
-- `make deploy-full` — both: deploy + migrate
+- `make deploy` — push code, wait for new version to be live, run migrations forward. Seeds run automatically via ConfigCache if DB is empty.
+- `make redeploy` — push code, wait for new version, reset DB (drop all tables + re-migrate + re-seed via `ps:remote_console`). Use for fresh DB rebuilds.
+- Both accept `COMMIT=<sha>` to deploy a specific commit without touching the working tree (uses `git archive`). Example: `make redeploy COMMIT=abc123`
+
+**Key details**: `wait_deploy` polls `gigalixir ps` until the running pod's sha matches the deployed sha, preventing race conditions where post-deploy commands run against the old instance. `ps:remote_console` is synchronous (SSH), unlike `gigalixir run` which is async/fire-and-forget. Gigalixir shared Postgres cannot `DROP SCHEMA`, so `Release.reset()` drops individual tables instead.
 
 ## Unity Development
 
