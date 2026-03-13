@@ -42,36 +42,41 @@ namespace Garden
         // ── Public API ──
 
         /// <summary>
-        /// Converts a display name like "Sprouts Seed" to a sprite-friendly slug "sprouts".
-        /// Strips trailing " Seed", lowercases, replaces spaces with hyphens.
+        /// Converts a seed item key like "basil_seed" to the plant slug "basil".
         /// </summary>
-        public static string SeedToSpriteKey(string seedName)
+        public static string SeedToSpriteKey(string seedItemKey)
         {
-            if (string.IsNullOrEmpty(seedName)) return seedName;
-            var s = seedName.Trim();
-            if (s.EndsWith(" Seed", System.StringComparison.OrdinalIgnoreCase))
-                s = s.Substring(0, s.Length - 5);
-            return s.ToLower().Replace(' ', '-');
+            if (string.IsNullOrEmpty(seedItemKey)) return seedItemKey;
+            return seedItemKey.EndsWith("_seed") ? seedItemKey[..^5] : seedItemKey;
         }
 
         /// <summary>
-        /// Resolves any inventory item name to its sprite key under "items/".
-        /// E.g. "Cress" → "items/cress/harvest", "Basil_pigment" → "items/basil/pigment",
-        /// "Speed_Potion" → "items/speed_potion".
+        /// Resolves any inventory item key to its sprite key under "items/".
+        /// Uses server-authoritative ItemConfig.spriteKey when available,
+        /// otherwise derives from item_key and category.
         /// </summary>
-        public static string ItemToSpriteKey(string itemName)
+        public static string ItemToSpriteKey(string itemKey)
         {
-            if (string.IsNullOrEmpty(itemName)) return null;
-            var lower = itemName.ToLower();
-            if (lower.EndsWith("_pigment"))
+            if (string.IsNullOrEmpty(itemKey)) return null;
+
+            // Check for explicit sprite_key override from config
+            var config = ConfigService.Instance?.GetItem(itemKey);
+            if (config?.spriteKey != null) return config.spriteKey;
+
+            // Derive from item_key and category
+            if (config != null)
             {
-                var plant = lower.Substring(0, lower.Length - "_pigment".Length);
-                return $"items/{plant}/pigment";
+                return config.category switch
+                {
+                    "seed" => $"items/{itemKey.Replace("_seed", "")}/seed",
+                    "harvest" => $"items/{itemKey}/harvest",
+                    "pigment" => $"items/{itemKey.Replace("_pigment", "")}/pigment",
+                    _ => $"items/{itemKey}"
+                };
             }
-            // Bare plant names (yields from harvesting) — check against known seeds
-            if (ConfigService.Instance?.GetSeed(itemName) != null)
-                return $"items/{lower}/harvest";
-            return $"items/{lower}";
+
+            // Fallback: direct mapping
+            return $"items/{itemKey}";
         }
 
         public Texture2D GetTexture(string key)
