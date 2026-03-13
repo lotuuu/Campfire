@@ -191,15 +191,16 @@ namespace Garden
 
         private static Sprite LoadHarvestIcon(string itemName)
         {
-            string seedName = itemName;
-
-            // Try seed icon
-            string key = SpriteService.SeedToSpriteKey(seedName);
-            var sprite = SpriteService.Instance?.GetSprite($"items/{key}/seed");
-            if (sprite != null) return sprite;
+            string key = SpriteService.ItemToSpriteKey(itemName);
+            if (key != null)
+            {
+                var sprite = SpriteService.Instance?.GetSprite(key);
+                if (sprite != null) return sprite;
+            }
 
             // Fallback: try garden plant icon
-            return SpriteService.Instance?.GetSprite($"gardens/{key}/icon");
+            string slug = SpriteService.SeedToSpriteKey(itemName);
+            return SpriteService.Instance?.GetSprite($"gardens/{slug}/icon");
         }
     }
 }
