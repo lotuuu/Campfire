@@ -576,7 +576,8 @@ namespace Garden
                 {
                     craft_cost_mana = GetFloat(vase, "craft_cost_mana"),
                     default_capacity = (int)GetFloat(vase, "default_capacity"),
-                    fill_duration_minutes = GetFloat(vase, "fill_duration_minutes")
+                    fill_duration_minutes = GetFloat(vase, "fill_duration_minutes"),
+                    speed_item = GetString(vase, "speed_item")
                 };
             }
 
