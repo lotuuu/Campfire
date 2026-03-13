@@ -232,7 +232,7 @@ defmodule CampFireWeb.PlayersLive do
               <thead><tr><th class="text-left text-gray-500">Item</th><th class="text-left text-gray-500">Count</th></tr></thead>
               <tbody>
                 <%= for i <- @detail.inventory do %>
-                  <tr><td>{i.item_name}</td><td>{i.count}</td></tr>
+                  <tr><td>{i.item_key}</td><td>{i.count}</td></tr>
                 <% end %>
               </tbody>
             </table>

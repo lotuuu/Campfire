@@ -22,6 +22,8 @@ defmodule CampFireWeb.GameController do
     new_player_config = ConfigCache.get("new_player_config") || %{}
     sprite_manifest = ConfigCache.get("sprite_manifest") || %{}
 
+    items = ConfigCache.get("items") || %{}
+
     seeds =
       Map.new(seed_configs, fn {name, s} ->
         {name,
@@ -31,7 +33,9 @@ defmodule CampFireWeb.GameController do
            minDrops: s.min_drops,
            maxDrops: s.max_drops,
            tier: s.tier,
-           recipe: s.recipe
+           recipe: s.recipe,
+           itemKey: s.item_key,
+           harvestItemKey: s.harvest_item_key
          }}
       end)
 
@@ -76,7 +80,8 @@ defmodule CampFireWeb.GameController do
       recipes: ConfigCache.get("recipe_configs") || %{},
       skins: skin_configs,
       newPlayerConfig: serialize_game_config(new_player_config),
-      sprites: sprite_manifest
+      sprites: sprite_manifest,
+      items: items
     })
   end
 
@@ -153,7 +158,7 @@ defmodule CampFireWeb.GameController do
           gems: economy.gems,
           flameLevel: economy.flame_level,
           lastManaCollectUtc: DateTime.to_iso8601(economy.last_mana_collect_utc),
-          inventory: Enum.map(inventory, fn i -> %{itemName: i.item_name, count: i.count} end)
+          inventory: Enum.map(inventory, fn i -> %{itemKey: i.item_key, count: i.count} end)
         }
       else
         nil
@@ -264,8 +269,8 @@ defmodule CampFireWeb.GameController do
     Plots.check_maturity(plot_id)
 
     case Plots.harvest(uid, plot_id) do
-      {:ok, %{score: score, drops: drops, item_name: item_name}} ->
-        conn |> put_status(200) |> json(%{score: score, drops: drops, itemName: item_name})
+      {:ok, %{score: score, drops: drops, harvest_item_key: harvest_item_key}} ->
+        conn |> put_status(200) |> json(%{score: score, drops: drops, itemKey: harvest_item_key})
 
       {:error, reason} ->
         conn |> put_status(422) |> json(%{error: format_error(reason)})
@@ -584,7 +589,7 @@ defmodule CampFireWeb.GameController do
 
     case Birds.collect_bird(uid, bird_id) do
       {:ok, reward} ->
-        conn |> put_status(200) |> json(%{seedName: reward.seed_name, seedCount: reward.seed_count})
+        conn |> put_status(200) |> json(%{itemKey: reward.item_key, seedCount: reward.seed_count})
 
       {:error, reason} ->
         conn |> put_status(422) |> json(%{error: format_error(reason)})

@@ -111,11 +111,11 @@ defmodule CampFireWeb.EconomyController do
     conn |> put_status(400) |> json(%{error: "Missing 'items' array"})
   end
 
-  def add_items(conn, %{"item_name" => name, "count" => count})
-      when is_binary(name) and is_integer(count) and count > 0 do
+  def add_items(conn, %{"item_key" => key, "count" => count})
+      when is_binary(key) and is_integer(count) and count > 0 do
     player_uid = conn.assigns.current_player.uid
 
-    case Economy.upsert_item(player_uid, name, count) do
+    case Economy.upsert_item(player_uid, key, count) do
       {:ok, _} ->
         inventory = Economy.list_inventory(player_uid)
         conn |> put_status(200) |> json(%{inventory: format_inventory(inventory)})
@@ -126,7 +126,7 @@ defmodule CampFireWeb.EconomyController do
   end
 
   def add_items(conn, _params) do
-    conn |> put_status(400) |> json(%{error: "Missing 'item_name' (string) and 'count' (positive integer)"})
+    conn |> put_status(400) |> json(%{error: "Missing 'item_key' (string) and 'count' (positive integer)"})
   end
 
   def spend_items(conn, %{"items" => items} = params) when is_list(items) do
@@ -161,6 +161,6 @@ defmodule CampFireWeb.EconomyController do
   end
 
   defp format_inventory(inventory) do
-    Enum.map(inventory, fn i -> %{itemName: i.item_name, count: i.count} end)
+    Enum.map(inventory, fn i -> %{itemKey: i.item_key, count: i.count} end)
   end
 end

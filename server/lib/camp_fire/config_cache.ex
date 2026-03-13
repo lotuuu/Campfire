@@ -132,11 +132,27 @@ defmodule CampFire.ConfigCache do
            min_drops: s.min_drops,
            max_drops: s.max_drops,
            tier: s.tier,
-           recipe: s.recipe
+           recipe: s.recipe,
+           item_key: s.item_key,
+           harvest_item_key: s.harvest_item_key
          }}
       end)
 
     :ets.insert(@table, {"seed_configs", seed_map})
+
+    items = CampFire.Game.list_items()
+
+    items_map =
+      Map.new(items, fn i ->
+        {i.item_key,
+         %{
+           "displayName" => i.display_name,
+           "category" => i.category,
+           "spriteKey" => i.sprite_key
+         }}
+      end)
+
+    :ets.insert(@table, {"items", items_map})
 
     sprite_manifest = CampFire.SpriteManifest.build()
     :ets.insert(@table, {"sprite_manifest", sprite_manifest})
