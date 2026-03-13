@@ -131,9 +131,15 @@ namespace Garden
             BuildLockedSection();
             SnapshotStates();
 
-            // Must defer scroll restore — layout needs a frame after Clear()+rebuild
+            // Restore scroll after layout resolves — GeometryChangedEvent fires once the
+            // content container has been measured, so the offset won't get clamped to 0.
             if (questScroll != null)
-                questScroll.schedule.Execute(() => questScroll.scrollOffset = savedOffset);
+            {
+                questScroll.contentContainer.RegisterCallbackOnce<GeometryChangedEvent>(evt =>
+                {
+                    questScroll.scrollOffset = savedOffset;
+                });
+            }
         }
 
         private void UpdateMallumStatus()
