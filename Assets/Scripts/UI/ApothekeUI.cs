@@ -112,6 +112,19 @@ namespace Garden
             }
             if (inventoryEmpty != null) inventoryEmpty.style.display = DisplayStyle.None;
 
+            // Sort seeds by tier then growth duration (fastest first)
+            if (groups.TryGetValue(InventoryCategory.Seeds, out var seedGroup))
+            {
+                seedGroup.Sort((a, b) =>
+                {
+                    var sa = ConfigService.Instance?.GetSeed(a.itemName[..^5]);
+                    var sb = ConfigService.Instance?.GetSeed(b.itemName[..^5]);
+                    int tierCmp = (sa?.tier ?? 99).CompareTo(sb?.tier ?? 99);
+                    if (tierCmp != 0) return tierCmp;
+                    return (sa?.growthDurationHours ?? 99f).CompareTo(sb?.growthDurationHours ?? 99f);
+                });
+            }
+
             int seedIndex = 0;
             foreach (var cat in CategoryOrder)
             {

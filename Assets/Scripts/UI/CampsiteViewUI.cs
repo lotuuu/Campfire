@@ -1858,6 +1858,14 @@ namespace Garden
         private void BuildSeedPicker(int plotIndex)
         {
             var seedItems = SaveManager.Instance.Data.inventory.FindAll(i => i.itemName.EndsWith("_Seed"));
+            seedItems.Sort((a, b) =>
+            {
+                var sa = ConfigService.Instance?.GetSeed(a.itemName[..^5]);
+                var sb = ConfigService.Instance?.GetSeed(b.itemName[..^5]);
+                int tierCmp = (sa?.tier ?? 99).CompareTo(sb?.tier ?? 99);
+                if (tierCmp != 0) return tierCmp;
+                return (sa?.growthDurationHours ?? 99f).CompareTo(sb?.growthDurationHours ?? 99f);
+            });
 
             var scroll = new ScrollView(ScrollViewMode.Vertical);
             scroll.AddToClassList("seed-picker-scroll");
