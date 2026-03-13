@@ -264,7 +264,7 @@ namespace Garden
                     if (sm.pendingRewards != null)
                     {
                         foreach (var r in sm.pendingRewards)
-                            mallum.pendingRewards.Add(new RewardEntry { seedName = r.seed_name, count = r.count });
+                            mallum.pendingRewards.Add(new RewardEntry { itemKey = r.item_key, count = r.count });
                     }
 
                     data.mallums.Add(mallum);
@@ -321,7 +321,7 @@ namespace Garden
                 data.inventory.Clear();
                 if (state.economy.inventory != null)
                     foreach (var i in state.economy.inventory)
-                        data.inventory.Add(new InventoryItem { itemName = i.itemName, count = i.count });
+                        data.inventory.Add(new InventoryItem { itemKey = i.itemKey, count = i.count });
             }
 
             // Apply server weather if available
