@@ -29,7 +29,7 @@ A unified real-time debug logging system visible in the Phoenix admin dashboard.
    - Economy context: logs transaction failures with player UID, `category: "economy"`
    - ConfigCache: logs refresh failures, `category: "config"`
 
-5. **`POST /api/debug/log`** — Authenticated endpoint for Unity client to report errors. Accepts JSON body:
+5. **`POST /debug/log`** — Added as a `log` action on the existing `DebugController` (in the existing `/debug` scope which already has `:api` + `:authenticated` pipelines). Accepts JSON body:
    ```json
    {
      "level": "error",
@@ -38,7 +38,7 @@ A unified real-time debug logging system visible in the Phoenix admin dashboard.
      "metadata": {"endpoint": "/api/game/configs", "status_code": 200, "error": "..."}
    }
    ```
-   Player UID extracted from bearer token auth (already on conn). Rate-limited to prevent flooding.
+   Player UID extracted from bearer token auth (already on conn). Rate-limited: max 10 requests per 60 seconds per player.
 
 6. **`CampFireWeb.Live.LogsLive`** — Admin LiveView page at `/admin/logs`. Subscribes to `"debug_log"` PubSub topic on mount. Shows a scrolling log table with:
    - Timestamp, level (color-coded), source badge, category, player UID (clickable link to player page), message
@@ -55,7 +55,7 @@ Server error paths ──→ Logger.error/warning ──→ LoggerBackend ──
                                                                         │
 Explicit instrumentation (API, Economy, Config) ────────────────→ DebugLog.log()
                                                                         │
-Unity client ──→ POST /api/debug/log ──→ DebugLogController ───→ DebugLog.log()
+Unity client ──→ POST /debug/log ──→ DebugController.log ────→ DebugLog.log()
                                                                         │
                                                                         ▼
                                                               ETS ring buffer
@@ -81,10 +81,10 @@ Real-time entries that don't match current filters are silently dropped (not sho
 
 ## Unity Client Side
 
-A lightweight `DebugLogService` singleton that:
-- Catches failed HTTP responses from `GameService`/`EconomyService` and posts them to `/api/debug/log`
-- Exposes `DebugLogService.LogError(message, category, metadata)` for manual reporting
-- Batches or debounces to avoid flooding (max 1 request per 5 seconds, queues intermediate entries)
+Add log reporting methods to the existing `DebugService` singleton (not a new service):
+- `DebugService.LogRemoteError(message, category, metadata)` — queues an error for server reporting
+- Catches failed HTTP responses from `GameService`/`EconomyService` and posts them to `POST /debug/log`
+- Batches or debounces to avoid flooding (max 1 request per 5 seconds, max queue size 50, drops oldest)
 
 ## Out of Scope
 
@@ -93,11 +93,20 @@ A lightweight `DebugLogService` singleton that:
 - Alerting/notifications
 - Audit trail for admin actions (separate concern)
 
+## Supervision & Configuration
+
+- Add `CampFire.DebugLog` to the supervision tree in `application.ex`, **before** `CampFireWeb.Endpoint`
+- Add Logger backend config in `config/config.exs`:
+  ```elixir
+  config :logger, backends: [:console, CampFire.DebugLog.LoggerBackend]
+  ```
+- Add "Logs" entry to admin sidebar in `admin.html.heex` with `active_tab: :logs`
+
 ## File Locations
 
 - `server/lib/camp_fire/debug_log.ex` — GenServer + ETS buffer
 - `server/lib/camp_fire/debug_log/entry.ex` — Entry struct
 - `server/lib/camp_fire/debug_log/logger_backend.ex` — Logger backend
 - `server/lib/camp_fire_web/live/logs_live.ex` — Admin LiveView
-- `server/lib/camp_fire_web/controllers/debug_log_controller.ex` — Client endpoint
-- `Assets/Scripts/Services/DebugLogService.cs` — Unity client service
+- `server/lib/camp_fire_web/controllers/debug_controller.ex` — Add `log` action to existing controller
+- `Assets/Scripts/Services/DebugService.cs` — Add remote logging methods to existing service
