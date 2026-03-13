@@ -1,4 +1,4 @@
-.PHONY: setup dev start test psql reset up down logs tunnel tunnel-stop deps deploy deploy-migrate remote-use
+.PHONY: setup dev start test psql reset up down logs tunnel tunnel-stop deps deploy deploy-migrate deploy-seed remote-use
 
 DEV_CONFIG := ../Assets/Scripts/Services/DevServerConfig.cs
 PORT := 4000
@@ -97,8 +97,12 @@ deploy:
 deploy-migrate:
 	$(GIGALIXIR) ps:migrate -a $(GIGALIXIR_APP)
 
-# Full deploy: push code then migrate
-deploy-full: deploy deploy-migrate
+# Run seeds on Gigalixir
+deploy-seed:
+	$(GIGALIXIR) ps:run -a $(GIGALIXIR_APP) -- eval 'Code.eval_file("priv/repo/seeds.exs")'
+
+# Full deploy: push code, migrate, then seed
+deploy-full: deploy deploy-migrate deploy-seed
 
 # Point DevServerConfig.cs at Gigalixir
 remote-use:
