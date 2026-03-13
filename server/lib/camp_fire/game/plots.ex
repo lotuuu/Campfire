@@ -181,7 +181,10 @@ defmodule CampFire.Game.Plots do
         end
         harvest_item_key = seed_config.harvest_item_key
 
-        Economy.upsert_item(player_uid, harvest_item_key, drops)
+        case Economy.upsert_item(player_uid, harvest_item_key, drops) do
+          {:ok, _} -> :ok
+          {:error, reason} -> Repo.rollback({:upsert_failed, harvest_item_key, reason})
+        end
 
         plot
         |> PlayerPlot.changeset(%{
