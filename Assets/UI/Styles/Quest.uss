@@ -236,6 +236,11 @@
     border-color: rgb(80, 190, 100);
 }
 
+.quest-reward-chip--unknown {
+    opacity: 0.6;
+    -unity-font-style: italic;
+}
+
 /* --- Progress Bar --- */
 
 .quest-card-progress {

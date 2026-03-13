@@ -103,7 +103,10 @@ namespace Garden
             if (npc?.seeds != null)
             {
                 foreach (var seed in npc.seeds)
+                {
                     data.inventory.Add(new InventoryItem { itemName = seed.name + "_Seed", count = seed.count });
+                    ApothekeManager.DiscoverSeed(data, seed.name);
+                }
             }
 
             // Grant starting items from config

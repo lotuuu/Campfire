@@ -103,9 +103,21 @@ namespace Garden
                 entry.count += count;
             else
                 data.inventory.Add(new InventoryItem { itemName = itemName, count = count });
+            DiscoverSeed(data, plantName);
             SaveManager.Instance.Save();
             EconomyService.Instance?.Enqueue("add-items",
                 JsonUtility.ToJson(new AddItemRequest { item_name = itemName, count = count }));
+        }
+
+        public static void DiscoverSeed(SaveData data, string seedName)
+        {
+            if (!data.discoveredSeeds.Contains(seedName))
+                data.discoveredSeeds.Add(seedName);
+        }
+
+        public static bool IsSeedDiscovered(string seedName)
+        {
+            return SaveManager.Instance?.Data?.discoveredSeeds?.Contains(seedName) ?? false;
         }
 
         public void AddItem(string itemName, int count = 1)

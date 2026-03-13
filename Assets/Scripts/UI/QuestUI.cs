@@ -371,8 +371,10 @@ namespace Garden
                 {
                     var chip = new VisualElement();
                     chip.AddToClassList("quest-reward-chip");
-                    var chipLabel = new Label(!string.IsNullOrEmpty(reward.seedName) ? reward.seedName : "?");
+                    bool discovered = !string.IsNullOrEmpty(reward.seedName) && ApothekeManager.IsSeedDiscovered(reward.seedName);
+                    var chipLabel = new Label(discovered ? reward.seedName : "???");
                     chipLabel.AddToClassList("quest-reward-name");
+                    if (!discovered) chip.AddToClassList("quest-reward-chip--unknown");
                     chip.Add(chipLabel);
                     rewardList.Add(chip);
                 }

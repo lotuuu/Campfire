@@ -26,6 +26,7 @@ namespace Garden
         public int apothekeGridY = 0;
         public List<BirdSave> birds = new();
         public string lastBirdCheckHourUtc;
+        public List<string> discoveredSeeds = new();
         public float musicVolume = 1f;
         public float sfxVolume = 1f;
         public int tutorialStep;
