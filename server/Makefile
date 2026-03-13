@@ -1,4 +1,4 @@
-.PHONY: setup dev start test psql reset up down logs tunnel tunnel-stop deps deploy deploy-migrate deploy-seed remote-use
+.PHONY: setup dev start test psql reset up down logs tunnel tunnel-stop deps deploy redeploy remote-use
 
 DEV_CONFIG := ../Assets/Scripts/Services/DevServerConfig.cs
 PORT := 4000
@@ -80,7 +80,7 @@ GIGALIXIR_APP := campfire
 GIGALIXIR_URL := https://campfire.gigalixirapp.com
 DEPLOY_DIR := /tmp/campfire-deploy
 
-# Deploy server/ to Gigalixir (handles LFS dereferencing)
+# Deploy: push code, wait for health, migrate forward, seed
 deploy:
 	@echo "Preparing deploy..."
 	@rm -rf $(DEPLOY_DIR)
@@ -92,17 +92,40 @@ deploy:
 	@cd $(DEPLOY_DIR) && git push -f gigalixir main
 	@rm -rf $(DEPLOY_DIR)
 	@echo "Deployed to $(GIGALIXIR_URL)"
-
-# Run Ecto migrations on Gigalixir
-deploy-migrate:
-	$(GIGALIXIR) run -a $(GIGALIXIR_APP) -- eval 'CampFire.Release.migrate()'
-
-# Run seeds on Gigalixir
-deploy-seed:
+	@echo "Waiting for instance to be healthy..."
+	@for i in 1 2 3 4 5 6 7 8 9 10 11 12; do \
+		sleep 10; \
+		if curl -sf $(GIGALIXIR_URL)/health > /dev/null 2>&1; then \
+			echo "Instance is healthy."; \
+			break; \
+		fi; \
+		echo "  ...not ready yet ($$((i * 10))s)"; \
+	done
+	$(GIGALIXIR) ps:migrate -a $(GIGALIXIR_APP)
 	$(GIGALIXIR) run -a $(GIGALIXIR_APP) -- eval 'CampFire.Release.seed()'
 
-# Full deploy: push code, migrate, then seed
-deploy-full: deploy deploy-migrate deploy-seed
+# Redeploy: push code, wait for health, nuke DB + re-migrate + re-seed
+redeploy:
+	@echo "Preparing deploy..."
+	@rm -rf $(DEPLOY_DIR)
+	@mkdir -p $(DEPLOY_DIR)
+	@cd .. && git lfs checkout -- server/
+	@rsync -a --exclude='.git' ./ $(DEPLOY_DIR)/
+	@cd $(DEPLOY_DIR) && git init && git add -A && git commit -m "deploy"
+	@cd $(DEPLOY_DIR) && git remote add gigalixir https://git.gigalixir.com/$(GIGALIXIR_APP).git/
+	@cd $(DEPLOY_DIR) && git push -f gigalixir main
+	@rm -rf $(DEPLOY_DIR)
+	@echo "Deployed to $(GIGALIXIR_URL)"
+	@echo "Waiting for instance to be healthy..."
+	@for i in 1 2 3 4 5 6 7 8 9 10 11 12; do \
+		sleep 10; \
+		if curl -sf $(GIGALIXIR_URL)/health > /dev/null 2>&1; then \
+			echo "Instance is healthy."; \
+			break; \
+		fi; \
+		echo "  ...not ready yet ($$((i * 10))s)"; \
+	done
+	$(GIGALIXIR) run -a $(GIGALIXIR_APP) -- eval 'CampFire.Release.reset()'
 
 # Point DevServerConfig.cs at Gigalixir
 remote-use:

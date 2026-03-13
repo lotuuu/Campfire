@@ -62,7 +62,25 @@ defmodule CampFire.ConfigCache do
   end
 
   defp load_all! do
+    require Logger
     configs = CampFire.Repo.all(CampFire.Admin.GameConfig)
+
+    configs =
+      if configs == [] do
+        Logger.info("ConfigCache: no game configs found, running seeds...")
+
+        try do
+          seed_path = Application.app_dir(:camp_fire, "priv/repo/seeds.exs")
+          Code.eval_file(seed_path)
+          CampFire.Repo.all(CampFire.Admin.GameConfig)
+        rescue
+          e ->
+            Logger.error("ConfigCache: seed failed: #{inspect(e)}")
+            raise "No game configs and seeding failed"
+        end
+      else
+        configs
+      end
 
     for config <- configs do
       :ets.insert(@table, {config.key, config.value})
