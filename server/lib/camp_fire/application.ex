@@ -10,10 +10,10 @@ defmodule CampFire.Application do
     children = [
       CampFireWeb.Telemetry,
       CampFire.Repo,
-      CampFire.DebugLog,
-      CampFire.ConfigCache,
       {DNSCluster, query: Application.get_env(:camp_fire, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: CampFire.PubSub},
+      CampFire.DebugLog,
+      CampFire.ConfigCache,
       # Start a worker by calling: CampFire.Worker.start_link(arg)
       # {CampFire.Worker, arg},
       # Weather poller — polls OWM for active locations
