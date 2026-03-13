@@ -94,44 +94,49 @@ define prepare_deploy
 	fi
 endef
 
-# Push deploy dir to Gigalixir
+# Push deploy dir to Gigalixir, save deployed sha to .deploy-sha
 define push_deploy
 	@cd $(DEPLOY_DIR) && git init && git add -A && git commit -m "deploy"
+	@cd $(DEPLOY_DIR) && git rev-parse HEAD > $(DEPLOY_DIR)/.deploy-sha
 	@cd $(DEPLOY_DIR) && git remote add gigalixir https://git.gigalixir.com/$(GIGALIXIR_APP).git/
 	@cd $(DEPLOY_DIR) && git push -f gigalixir main
+	@cp $(DEPLOY_DIR)/.deploy-sha /tmp/.campfire-deploy-sha
 	@rm -rf $(DEPLOY_DIR)
 	@echo "Deployed to $(GIGALIXIR_URL)"
 endef
 
-# Wait for Gigalixir instance to be healthy
-define wait_healthy
-	@echo "Waiting for instance to be healthy..."
-	@for i in 1 2 3 4 5 6 7 8 9 10 11 12; do \
+# Wait for the deployed sha to be running and healthy on Gigalixir
+define wait_deploy
+	@EXPECTED=$$(cat /tmp/.campfire-deploy-sha) && \
+	echo "Waiting for $$EXPECTED to be running..." && \
+	for i in $$(seq 1 30); do \
 		sleep 10; \
-		if curl -sf $(GIGALIXIR_URL)/health > /dev/null 2>&1; then \
-			echo "Instance is healthy."; \
-			break; \
+		RUNNING=$$($(GIGALIXIR) ps -a $(GIGALIXIR_APP) 2>/dev/null | python3 -c "import sys,json; pods=json.load(sys.stdin).get('pods',[]); print(pods[0]['sha'] if pods and pods[0].get('status')=='Healthy' else '')" 2>/dev/null) && \
+		if [ "$$RUNNING" = "$$EXPECTED" ]; then \
+			echo "New version is live ($$((i * 10))s)."; \
+			exit 0; \
 		fi; \
-		echo "  ...not ready yet ($$((i * 10))s)"; \
-	done
+		echo "  ...not ready yet ($$((i * 10))s, running: $${RUNNING:-pending})"; \
+	done; \
+	echo "WARNING: new version not confirmed after 300s, proceeding anyway"
 endef
 
-# Deploy: push code, wait for health, migrate forward
+# Deploy: push code, wait for new version, migrate forward
 # Usage: make deploy [COMMIT=<sha>]
 deploy:
 	@echo "Preparing deploy..."
 	$(call prepare_deploy)
 	$(call push_deploy)
-	$(call wait_healthy)
+	$(call wait_deploy)
 	$(GIGALIXIR) ps:migrate -a $(GIGALIXIR_APP)
 
-# Redeploy: push code, wait for health, reset DB (truncate + re-migrate + re-seed)
+# Redeploy: push code, wait for new version, reset DB (drop + re-migrate + re-seed)
 # Usage: make redeploy [COMMIT=<sha>]
 redeploy:
 	@echo "Preparing redeploy..."
 	$(call prepare_deploy)
 	$(call push_deploy)
-	$(call wait_healthy)
+	$(call wait_deploy)
 	@echo "Resetting database..."
 	printf '%s\n' 'CampFire.Release.reset()' | $(GIGALIXIR) ps:remote_console -a $(GIGALIXIR_APP) || true
 	@echo "Database reset complete."
