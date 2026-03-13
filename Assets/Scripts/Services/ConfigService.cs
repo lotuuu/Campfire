@@ -585,7 +585,8 @@ namespace Garden
             {
                 _mallumHouseConfig = new ServerMallumHouseConfig
                 {
-                    mallums_per_house = (int)GetFloat(mallum, "mallums_per_house")
+                    mallums_per_house = (int)GetFloat(mallum, "mallums_per_house"),
+                    quest_speed_item = GetString(mallum, "quest_speed_item")
                 };
 
                 if (mallum.TryGetValue("house_costs", out var costsObj) && costsObj is List<object> costs)
@@ -612,7 +613,8 @@ namespace Garden
                     water_cooldown_seconds = (int)GetFloat(plot, "water_cooldown_seconds"),
                     rain_water_cooldown_seconds = (int)GetFloat(plot, "rain_water_cooldown_seconds"),
                     rain_trigger_minutes = (int)GetFloat(plot, "rain_trigger_minutes"),
-                    drop_spread_factor = GetFloat(plot, "drop_spread_factor")
+                    drop_spread_factor = GetFloat(plot, "drop_spread_factor"),
+                    speed_item = GetString(plot, "speed_item")
                 };
             }
 
