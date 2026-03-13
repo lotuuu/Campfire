@@ -181,7 +181,7 @@ namespace Garden
             if (!CurrencyManager.FreeMode)
             foreach (var hc in cost.harvestCosts)
             {
-                var entry = data.inventory.Find(i => i.itemName == hc.itemName);
+                var entry = data.inventory.Find(i => i.itemKey == hc.itemKey);
                 if (entry == null) continue;
                 entry.count -= hc.count;
                 if (entry.count <= 0) data.inventory.Remove(entry);
@@ -194,7 +194,7 @@ namespace Garden
                 {
                     var spendItems = new SpendItemsRequest
                     {
-                        items = new List<SpendItemEntry> { new SpendItemEntry { item_name = hc.itemName, count = hc.count } },
+                        items = new List<SpendItemEntry> { new SpendItemEntry { item_key = hc.itemKey, count = hc.count } },
                         freeMode = CurrencyManager.FreeMode
                     };
                     EconomyService.Instance.Enqueue("spend-items", JsonUtility.ToJson(spendItems));
@@ -241,8 +241,11 @@ namespace Garden
             var plot = data.plots[plotIndex];
             if (plot.state != PlotState.Empty) return false;
 
-            var seedItemName = seedName + "_Seed";
-            var seedEntry = data.inventory.Find(i => i.itemName == seedItemName);
+            var seed = LoadSeed(seedName);
+            if (seed == null) return false;
+
+            var seedItemKey = seed.item_key;
+            var seedEntry = data.inventory.Find(i => i.itemKey == seedItemKey);
             if (!CurrencyManager.FreeMode)
             {
                 if (seedEntry == null || seedEntry.count <= 0) return false;
@@ -252,7 +255,7 @@ namespace Garden
                     EconomyService.Instance?.Enqueue("spend-items",
                         JsonUtility.ToJson(new SpendItemsRequest
                         {
-                            items = new List<SpendItemEntry> { new SpendItemEntry { item_name = seedItemName, count = 1 } },
+                            items = new List<SpendItemEntry> { new SpendItemEntry { item_key = seedItemKey, count = 1 } },
                             freeMode = CurrencyManager.FreeMode
                         }));
             }
@@ -381,9 +384,13 @@ namespace Garden
                 score = seed.recipe.Evaluate(plot.snapshots ?? new GrowthSnapshots(), plot.waterCount);
             int drops = CalculateDrops(score, seed.minDrops, seed.maxDrops);
 
+            // Use the harvest item key from config (what the plant yields)
+            string harvestItemKey = seed.harvest_item_key;
+
             var result = new HarvestResult
             {
                 seedName = seed.seedName,
+                harvestItemKey = harvestItemKey,
                 drops = drops,
                 recipeScore = score,
                 snapshots = plot.snapshots ?? new GrowthSnapshots(),
@@ -401,10 +408,10 @@ namespace Garden
             plot.state = PlotState.Empty;
 
             // Add items locally as fallback (server response will be authoritative)
-            AddItem(data, seed.seedName, drops);
+            AddItem(data, harvestItemKey, drops);
             if (!(GameService.Instance != null && GameService.Instance.IsOnline))
                 EconomyService.Instance?.Enqueue("add-items",
-                    JsonUtility.ToJson(new AddItemRequest { item_name = seed.seedName, count = drops }));
+                    JsonUtility.ToJson(new AddItemRequest { item_key = harvestItemKey, count = drops }));
 
             SaveManager.Instance.Save();
 
@@ -430,9 +437,9 @@ namespace Garden
             if (resp != null)
             {
                 var data = SaveManager.Instance.Data;
-                if (!string.IsNullOrEmpty(resp.itemName) && resp.drops > 0)
+                if (!string.IsNullOrEmpty(resp.itemKey) && resp.drops > 0)
                 {
-                    var entry = data.inventory.Find(i => i.itemName == resp.itemName);
+                    var entry = data.inventory.Find(i => i.itemKey == resp.itemKey);
                     if (entry != null)
                     {
                         // Server drops may differ from local estimate — adjust delta
@@ -481,7 +488,7 @@ namespace Garden
             string speedItem = ConfigService.Instance.PlotConfig.speed_item;
             if (!CurrencyManager.FreeMode)
             {
-                var potion = data.inventory.Find(i => i.itemName == speedItem);
+                var potion = data.inventory.Find(i => i.itemKey == speedItem);
                 if (potion == null || potion.count <= 0) return false;
                 potion.count--;
                 if (potion.count <= 0) data.inventory.Remove(potion);
@@ -493,7 +500,7 @@ namespace Garden
         public int GetSpeedItemCount()
         {
             string speedItem = ConfigService.Instance.PlotConfig.speed_item;
-            var item = SaveManager.Instance.Data.inventory.Find(i => i.itemName == speedItem);
+            var item = SaveManager.Instance.Data.inventory.Find(i => i.itemKey == speedItem);
             return item?.count ?? 0;
         }
 
@@ -636,13 +643,13 @@ namespace Garden
             if (changed) SaveManager.Instance.Save();
         }
 
-        private static void AddItem(SaveData data, string itemName, int count)
+        private static void AddItem(SaveData data, string itemKey, int count)
         {
-            var existing = data.inventory.Find(i => i.itemName == itemName);
+            var existing = data.inventory.Find(i => i.itemKey == itemKey);
             if (existing != null)
                 existing.count += count;
             else
-                data.inventory.Add(new InventoryItem { itemName = itemName, count = count });
+                data.inventory.Add(new InventoryItem { itemKey = itemKey, count = count });
         }
 
         private static async Task NotifyServerOrResync<T>(Task<T> serverCall)
@@ -659,13 +666,15 @@ namespace Garden
         }
 
         /// <summary>
-        /// Returns the display name for a seed given its asset name.
-        /// Falls back to the asset name if config is not found.
+        /// Returns the display name for a seed's item key.
+        /// Falls back to ConfigService.GetItemDisplayName for the seed's item_key.
         /// </summary>
-        public static string GetSeedDisplayName(string assetName)
+        public static string GetSeedDisplayName(string seedName)
         {
-            var seed = LoadSeed(assetName);
-            return seed != null ? seed.seedName : assetName;
+            var seed = LoadSeed(seedName);
+            if (seed != null && !string.IsNullOrEmpty(seed.item_key))
+                return ConfigService.Instance?.GetItemDisplayName(seed.item_key) ?? seedName;
+            return seedName;
         }
 
         public static int CalculateDrops(float score, int minDrops, int maxDrops)
@@ -682,6 +691,7 @@ namespace Garden
     public class HarvestResult
     {
         public string seedName;
+        public string harvestItemKey;
         public int drops;
         public float recipeScore;
         public GrowthSnapshots snapshots;
