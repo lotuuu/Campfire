@@ -59,7 +59,7 @@ namespace Garden
         {
             if (itemName.EndsWith("_Seed")) return InventoryCategory.Seeds;
             if (itemName.EndsWith("_pigment")) return InventoryCategory.Pigments;
-            if (itemName.EndsWith("_Potion") || itemName == "Fertilizer" || itemName.EndsWith("_Energizer"))
+            if (itemName.EndsWith("_Potion") || itemName.EndsWith("_Drink") || itemName == "Fertilizer" || itemName.EndsWith("_Energizer"))
                 return InventoryCategory.Consumables;
             return InventoryCategory.Yields;
         }
@@ -67,9 +67,9 @@ namespace Garden
         private static string CategoryLabel(InventoryCategory cat) => cat switch
         {
             InventoryCategory.Seeds => "Seeds",
-            InventoryCategory.Yields => "Yields",
+            InventoryCategory.Yields => "Harvests",
             InventoryCategory.Pigments => "Pigments",
-            InventoryCategory.Consumables => "Potions & Fertilizers",
+            InventoryCategory.Consumables => "Consumables",
             _ => cat.ToString()
         };
 
@@ -153,7 +153,7 @@ namespace Garden
 
             var icon = new VisualElement();
             icon.AddToClassList("seed-icon");
-            var sprite = SpriteService.Instance?.GetSprite($"items/{entry.itemName.ToLower()}");
+            var sprite = SpriteService.Instance?.GetSprite(SpriteService.ItemToSpriteKey(entry.itemName));
             if (sprite != null)
                 icon.style.backgroundImage = new StyleBackground(sprite);
             header.Add(icon);

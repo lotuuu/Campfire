@@ -54,6 +54,26 @@ namespace Garden
             return s.ToLower().Replace(' ', '-');
         }
 
+        /// <summary>
+        /// Resolves any inventory item name to its sprite key under "items/".
+        /// E.g. "Cress" → "items/cress/harvest", "Basil_pigment" → "items/basil/pigment",
+        /// "Speed_Potion" → "items/speed_potion".
+        /// </summary>
+        public static string ItemToSpriteKey(string itemName)
+        {
+            if (string.IsNullOrEmpty(itemName)) return null;
+            var lower = itemName.ToLower();
+            if (lower.EndsWith("_pigment"))
+            {
+                var plant = lower.Substring(0, lower.Length - "_pigment".Length);
+                return $"items/{plant}/pigment";
+            }
+            // Bare plant names (yields from harvesting) — check against known seeds
+            if (ConfigService.Instance?.GetSeed(itemName) != null)
+                return $"items/{lower}/harvest";
+            return $"items/{lower}";
+        }
+
         public Texture2D GetTexture(string key)
         {
             _textures.TryGetValue(key, out var tex);
