@@ -27,4 +27,5 @@ camp_fire-*.tar
 
 # Environment secrets
 .env
+secrets.json
 

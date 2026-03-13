@@ -198,7 +198,7 @@ An Elixir/Phoenix backend lives in `server/` (routes: `/auth`, `/friends`, `/vil
 - Scene: `Assets/Scenes/Garden.unity`
 - Server sprites: `server/priv/static/assets/sprites/` (served at `/assets/sprites/{key}.png`)
 - Social backend: `server/` (Elixir/Phoenix, Docker for Postgres)
-- Secrets: `Assets/Resources/Config/secrets.json` (gitignored, contains `openWeatherMapApiKey`)
+- Weather API key: `server/secrets.json` (gitignored, read by `dev.exs`; on Gigalixir use `OWM_API_KEY` env var)
 
 ## Server Deployment
 

@@ -17,12 +17,12 @@ Built with Unity 6 (6000.3.6f1), 2D URP. Online-only with a server-authoritative
 
 Open the project in Unity 6. The single scene is `Assets/Scenes/Garden.unity`.
 
-### Secrets
+### Weather API Key
 
-The game uses OpenWeatherMap for real-world weather. Create:
+The server uses OpenWeatherMap for real-world weather. For local dev, create:
 
 ```
-Assets/Resources/Config/secrets.json
+server/secrets.json
 ```
 
 ```json
@@ -31,7 +31,7 @@ Assets/Resources/Config/secrets.json
 }
 ```
 
-This file is gitignored. Without it, weather won't work on device (the Editor uses simulated weather by default).
+This file is gitignored. The local Phoenix server reads it automatically via `dev.exs`. On Gigalixir, set the `OWM_API_KEY` env var instead.
 
 ### Server (Local Development)
 
