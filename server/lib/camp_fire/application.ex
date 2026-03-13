@@ -10,6 +10,7 @@ defmodule CampFire.Application do
     children = [
       CampFireWeb.Telemetry,
       CampFire.Repo,
+      CampFire.DebugLog,
       CampFire.ConfigCache,
       {DNSCluster, query: Application.get_env(:camp_fire, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: CampFire.PubSub},
