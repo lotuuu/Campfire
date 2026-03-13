@@ -66,7 +66,7 @@ config :phoenix, :plug_init_mode, :runtime
 config :camp_fire, disable_rate_limit: true
 
 # In dev, read OWM key from server/secrets.json
-secrets_path = Path.expand("../../secrets.json", __DIR__)
+secrets_path = Path.expand("../secrets.json", __DIR__)
 
 if File.exists?(secrets_path) do
   case secrets_path |> File.read!() |> :json.decode() do
