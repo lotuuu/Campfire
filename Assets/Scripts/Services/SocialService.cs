@@ -516,8 +516,8 @@ namespace Garden
             var data = SaveManager.Instance.Data;
             foreach (var item in items)
             {
-                var invName = item.type == "seed" ? item.name + "_Seed" : item.name;
-                var entry = data.inventory.Find(i => i.itemName == invName);
+                var invName = item.type == "seed" ? item.name + "_seed" : item.name;
+                var entry = data.inventory.Find(i => i.itemKey == invName);
                 if (entry != null)
                 {
                     entry.count -= item.count;
@@ -531,18 +531,8 @@ namespace Garden
         {
             foreach (var item in items)
             {
-                if (item.type == "seed")
-                    ApothekeManager.Instance.AddSeed(item.name, item.count);
-                else
-                {
-                    var data = SaveManager.Instance.Data;
-                    var entry = data.inventory.Find(i => i.itemName == item.name);
-                    if (entry != null)
-                        entry.count += item.count;
-                    else
-                        data.inventory.Add(new InventoryItem { itemName = item.name, count = item.count });
-                    SaveManager.Instance.Save();
-                }
+                var itemKey = item.type == "seed" ? item.name + "_seed" : item.name;
+                ApothekeManager.Instance.AddItem(itemKey, item.count);
             }
         }
 
