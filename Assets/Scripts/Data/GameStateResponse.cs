@@ -21,7 +21,7 @@ namespace Garden
     public class ServerPlot
     {
         public int id;
-        public string seedName;
+        public string seedItemKey;
         public string state;
         public string plantTimeUtc;
         public int waterCount;
@@ -115,7 +115,7 @@ namespace Garden
 
     // Request DTOs
     [Serializable] public class CraftRequest { public int gridX; public int gridY; public bool freeMode; }
-    [Serializable] public class PlantRequest { public int plotId; public string seedName; public bool freeMode; }
+    [Serializable] public class PlantRequest { public int plotId; public string seedItemKey; public bool freeMode; }
     [Serializable] public class WaterRequest { public int plotId; public int vaseId; }
     [Serializable] public class HarvestRequest { public int plotId; }
     [Serializable] public class FillVaseRequest { public int vaseId; }

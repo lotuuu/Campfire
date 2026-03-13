@@ -52,7 +52,7 @@ namespace Garden
             {
                 snapshot.plots.Add(new SnapshotPlot
                 {
-                    seedName = p.seedName,
+                    seedItemKey = p.seedItemKey,
                     state = p.state.ToString(),
                     gridX = p.gridX,
                     gridY = p.gridY
@@ -90,7 +90,7 @@ namespace Garden
     [Serializable]
     public class SnapshotPlot
     {
-        public string seedName;
+        public string seedItemKey;
         public string state;
         public int gridX;
         public int gridY;

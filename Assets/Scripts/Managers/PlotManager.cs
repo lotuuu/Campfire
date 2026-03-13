@@ -234,17 +234,16 @@ namespace Garden
             }
         }
 
-        public bool Plant(int plotIndex, string seedName)
+        public bool Plant(int plotIndex, string seedItemKey)
         {
             var data = SaveManager.Instance.Data;
             if (plotIndex < 0 || plotIndex >= data.plots.Count) return false;
             var plot = data.plots[plotIndex];
             if (plot.state != PlotState.Empty) return false;
 
-            var seed = LoadSeed(seedName);
+            var seed = LoadSeed(seedItemKey);
             if (seed == null) return false;
 
-            var seedItemKey = seed.item_key;
             var seedEntry = data.inventory.Find(i => i.itemKey == seedItemKey);
             if (!CurrencyManager.FreeMode)
             {
@@ -260,7 +259,7 @@ namespace Garden
                         }));
             }
 
-            plot.seedName = seedName;
+            plot.seedItemKey = seedItemKey;
             plot.state = PlotState.Growing;
             plot.plantTimeUtc = GameTime.UtcNow.ToString("o");
             plot.waterCount = 0;
@@ -277,12 +276,12 @@ namespace Garden
             AudioManager.Instance?.PlaySFX("plot_plant");
 
             var remaining = GetRemainingSeconds(plotIndex);
-            NotificationService.Instance?.SchedulePlantNotification(plotIndex, seedName, remaining);
+            NotificationService.Instance?.SchedulePlantNotification(plotIndex, seedItemKey, remaining);
 
             // Notify server
             if (GameService.Instance != null && GameService.Instance.IsOnline && plot.serverId > 0)
             {
-                _ = NotifyServerOrResync(GameService.Instance.PlantSeed(plot.serverId, seedName));
+                _ = NotifyServerOrResync(GameService.Instance.PlantSeed(plot.serverId, seedItemKey));
             }
 
             return true;
@@ -310,7 +309,7 @@ namespace Garden
             if (plot.subscribeWater)
             {
                 double cooldownSeconds = ManualWaterCooldownHours * 3600.0;
-                NotificationService.Instance?.ScheduleWaterNotification(plotIndex, plot.seedName, cooldownSeconds);
+                NotificationService.Instance?.ScheduleWaterNotification(plotIndex, plot.seedItemKey, cooldownSeconds);
             }
 
             SaveManager.Instance.Save();
@@ -333,7 +332,7 @@ namespace Garden
             if (plot.state != PlotState.Growing || string.IsNullOrEmpty(plot.plantTimeUtc))
                 return 0f;
 
-            var seed = LoadSeed(plot.seedName);
+            var seed = LoadSeed(plot.seedItemKey);
             if (seed == null) return 0f;
 
             var plantTime = DateTime.Parse(plot.plantTimeUtc, null,
@@ -350,7 +349,7 @@ namespace Garden
             if (plot.state != PlotState.Growing || string.IsNullOrEmpty(plot.plantTimeUtc))
                 return 0f;
 
-            var seed = LoadSeed(plot.seedName);
+            var seed = LoadSeed(plot.seedItemKey);
             if (seed == null) return 0f;
 
             var plantTime = DateTime.Parse(plot.plantTimeUtc, null,
@@ -367,7 +366,7 @@ namespace Garden
             var plot = data.plots[plotIndex];
             if (plot.state != PlotState.Mature) return null;
 
-            var seed = LoadSeed(plot.seedName);
+            var seed = LoadSeed(plot.seedItemKey);
             if (seed == null) return null;
 
             // Fallback: use current weather if no snapshots were recorded during growth
@@ -389,7 +388,7 @@ namespace Garden
 
             var result = new HarvestResult
             {
-                seedName = seed.seedName,
+                seedItemKey = seed.item_key,
                 harvestItemKey = harvestItemKey,
                 drops = drops,
                 recipeScore = score,
@@ -400,7 +399,7 @@ namespace Garden
 
             int serverId = plot.serverId;
 
-            plot.seedName = null;
+            plot.seedItemKey = null;
             plot.plantTimeUtc = null;
             plot.waterCount = 0;
             plot.snapshots = new GrowthSnapshots();
@@ -562,12 +561,12 @@ namespace Garden
                 var plot = data.plots[i];
                 if (plot.state != PlotState.Growing) continue;
                 var remaining = GetRemainingSeconds(i);
-                ns.SchedulePlantNotification(i, plot.seedName, remaining);
+                ns.SchedulePlantNotification(i, plot.seedItemKey, remaining);
 
                 if (plot.subscribeWater)
                 {
                     double waterRemaining = GetWaterCooldownRemaining(plot);
-                    ns.ScheduleWaterNotification(i, plot.seedName, waterRemaining);
+                    ns.ScheduleWaterNotification(i, plot.seedItemKey, waterRemaining);
                 }
             }
         }
@@ -582,7 +581,7 @@ namespace Garden
             if (subscribe && plot.state == PlotState.Growing)
             {
                 double remaining = GetWaterCooldownRemaining(plot);
-                NotificationService.Instance?.ScheduleWaterNotification(plotIndex, plot.seedName, remaining);
+                NotificationService.Instance?.ScheduleWaterNotification(plotIndex, plot.seedItemKey, remaining);
             }
             else
             {
@@ -616,7 +615,7 @@ namespace Garden
                 float progress = GetGrowthProgress(i);
                 if (GrowthCapPercent < 1f && progress >= GrowthCapPercent)
                 {
-                    var seed = LoadSeed(plot.seedName);
+                    var seed = LoadSeed(plot.seedItemKey);
                     if (seed != null && !string.IsNullOrEmpty(plot.plantTimeUtc))
                     {
                         // Set plantTimeUtc so elapsed == capPercent * duration exactly
@@ -628,7 +627,7 @@ namespace Garden
 
                 if (progress >= 1f)
                 {
-                    Debug.Log($"[PlotManager] Plot {i} maturing (progress={progress:F3}, cap={GrowthCapPercent:F3}, seed={plot.seedName})");
+                    Debug.Log($"[PlotManager] Plot {i} maturing (progress={progress:F3}, cap={GrowthCapPercent:F3}, seed={plot.seedItemKey})");
                     // Backfill a snapshot if weather arrived after planting but before maturity
                     if (plot.snapshots != null && plot.snapshots.snapshotCount == 0
                         && WeatherService.Instance != null && WeatherService.Instance.HasWeather)
@@ -659,22 +658,24 @@ namespace Garden
                 await GameService.Instance.ResyncFullState();
         }
 
-        private static ServerSeedConfig LoadSeed(string seedName)
+        private static ServerSeedConfig LoadSeed(string seedItemKey)
         {
-            if (string.IsNullOrEmpty(seedName)) return null;
-            return ConfigService.Instance?.GetSeed(seedName);
+            if (string.IsNullOrEmpty(seedItemKey)) return null;
+            // Derive plant slug from seed item key: "sprouts_seed" → "sprouts"
+            var plantSlug = SpriteService.SeedToSpriteKey(seedItemKey);
+            return ConfigService.Instance?.GetSeed(plantSlug);
         }
 
         /// <summary>
-        /// Returns the display name for a seed's item key.
+        /// Returns the display name for a seed item key (e.g. "sprouts_seed").
         /// Falls back to ConfigService.GetItemDisplayName for the seed's item_key.
         /// </summary>
-        public static string GetSeedDisplayName(string seedName)
+        public static string GetSeedDisplayName(string seedItemKey)
         {
-            var seed = LoadSeed(seedName);
+            var seed = LoadSeed(seedItemKey);
             if (seed != null && !string.IsNullOrEmpty(seed.item_key))
-                return ConfigService.Instance?.GetItemDisplayName(seed.item_key) ?? seedName;
-            return seedName;
+                return ConfigService.Instance?.GetItemDisplayName(seed.item_key) ?? seedItemKey;
+            return seedItemKey;
         }
 
         public static int CalculateDrops(float score, int minDrops, int maxDrops)
@@ -690,7 +691,7 @@ namespace Garden
     [Serializable]
     public class HarvestResult
     {
-        public string seedName;
+        public string seedItemKey;
         public string harvestItemKey;
         public int drops;
         public float recipeScore;

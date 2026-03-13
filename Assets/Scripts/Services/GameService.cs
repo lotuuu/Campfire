@@ -196,7 +196,7 @@ namespace Garden
                     data.plots.Add(new PlotSave
                     {
                         serverId = sp.id,
-                        seedName = sp.seedName,
+                        seedItemKey = sp.seedItemKey,
                         state = ParsePlotState(sp.state),
                         plantTimeUtc = sp.plantTimeUtc,
                         waterCount = sp.waterCount,
@@ -410,12 +410,12 @@ namespace Garden
             return null;
         }
 
-        public async Task<ServerPlot> PlantSeed(int plotId, string seedName)
+        public async Task<ServerPlot> PlantSeed(int plotId, string seedItemKey)
         {
             if (!IsOnline) return null;
             try
             {
-                var body = JsonUtility.ToJson(new PlantRequest { plotId = plotId, seedName = seedName, freeMode = CurrencyManager.FreeMode });
+                var body = JsonUtility.ToJson(new PlantRequest { plotId = plotId, seedItemKey = seedItemKey, freeMode = CurrencyManager.FreeMode });
                 using var req = PostJson("/game/plot/plant", body);
                 await SendAsync(req);
 

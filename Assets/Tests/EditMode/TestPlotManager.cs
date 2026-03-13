@@ -11,7 +11,7 @@ namespace Garden.Tests
         {
             var plot = new PlotSave
             {
-                seedName = "Basil",
+                seedItemKey = "basil_seed",
                 plantTimeUtc = DateTime.UtcNow.AddHours(-2).ToString("o"),
                 state = PlotState.Growing
             };
@@ -30,17 +30,17 @@ namespace Garden.Tests
         {
             var plot = new PlotSave
             {
-                seedName = "Basil",
+                seedItemKey = "basil_seed",
                 state = PlotState.Mature,
                 waterCount = 2
             };
-            plot.seedName = null;
+            plot.seedItemKey = null;
             plot.plantTimeUtc = null;
             plot.waterCount = 0;
             plot.state = PlotState.Empty;
 
             Assert.AreEqual(PlotState.Empty, plot.state);
-            Assert.IsNull(plot.seedName);
+            Assert.IsNull(plot.seedItemKey);
             Assert.AreEqual(0, plot.waterCount);
         }
 
@@ -87,7 +87,7 @@ namespace Garden.Tests
         {
             var plot = new PlotSave
             {
-                seedName = "Basil",
+                seedItemKey = "basil_seed",
                 state = PlotState.Growing,
                 waterCount = 0
             };

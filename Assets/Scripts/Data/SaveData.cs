@@ -50,7 +50,7 @@ namespace Garden
     public class PlotSave
     {
         public int serverId;
-        public string seedName;
+        public string seedItemKey;
         public string plantTimeUtc;
         public int waterCount;
         public PlotState state = PlotState.Empty;

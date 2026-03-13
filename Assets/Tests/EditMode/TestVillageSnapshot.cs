@@ -11,7 +11,7 @@ namespace Garden.Tests
             var saveData = new SaveData { flameLevel = 3 };
             saveData.plots.Add(new PlotSave
             {
-                seedName = "Basil", state = PlotState.Growing, gridX = 1, gridY = 0
+                seedItemKey = "basil_seed", state = PlotState.Growing, gridX = 1, gridY = 0
             });
             saveData.vases.Add(new VaseSave
             {
@@ -26,7 +26,7 @@ namespace Garden.Tests
 
             Assert.AreEqual(3, snapshot.flameLevel);
             Assert.AreEqual(1, snapshot.plots.Count);
-            Assert.AreEqual("Basil", snapshot.plots[0].seedName);
+            Assert.AreEqual("basil_seed", snapshot.plots[0].seedItemKey);
             Assert.AreEqual("Growing", snapshot.plots[0].state);
             Assert.AreEqual(1, snapshot.vases.Count);
             Assert.AreEqual(3, snapshot.vases[0].currentWater);

@@ -7,10 +7,10 @@ public class TestGameService
     [Test]
     public void GameStateResponse_DeserializesPlots()
     {
-        string json = @"{""economy"":{""mana"":50,""gems"":5,""flameLevel"":1,""seeds"":[],""items"":[]},""plots"":[{""id"":1,""seedName"":""Basil"",""state"":""growing"",""gridX"":1,""gridY"":0,""waterCount"":2}],""vases"":[],""gardens"":[],""mallums"":[]}";
+        string json = @"{""economy"":{""mana"":50,""gems"":5,""flameLevel"":1,""seeds"":[],""items"":[]},""plots"":[{""id"":1,""seedItemKey"":""basil_seed"",""state"":""growing"",""gridX"":1,""gridY"":0,""waterCount"":2}],""vases"":[],""gardens"":[],""mallums"":[]}";
         var state = UnityEngine.JsonUtility.FromJson<GameStateResponse>(json);
         Assert.AreEqual(1, state.plots.Count);
-        Assert.AreEqual("Basil", state.plots[0].seedName);
+        Assert.AreEqual("basil_seed", state.plots[0].seedItemKey);
         Assert.AreEqual("growing", state.plots[0].state);
     }
 

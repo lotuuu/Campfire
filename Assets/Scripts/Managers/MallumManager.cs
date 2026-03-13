@@ -591,7 +591,7 @@ namespace Garden
             if (TutorialManager.Instance != null && !TutorialManager.Instance.IsComplete)
             {
                 // Look up the item key for cress seeds from config
-                var cressSeed = ConfigService.Instance?.GetSeed("Cress");
+                var cressSeed = ConfigService.Instance?.GetSeed("cress");
                 string cressItemKey = cressSeed?.item_key ?? "cress_seed";
 
                 bool hasCress = false;

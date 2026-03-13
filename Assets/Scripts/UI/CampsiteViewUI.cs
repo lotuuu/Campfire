@@ -477,7 +477,7 @@ namespace Garden
                     cell.AddToClassList("grid-cell--plot");
                     var plot = SaveManager.Instance.Data.plots[index];
                     string plotSkin = plot.skinName;
-                    if (label != null) label.text = string.IsNullOrEmpty(plot.seedName) ? "Plot" : PlotManager.GetSeedDisplayName(plot.seedName);
+                    if (label != null) label.text = string.IsNullOrEmpty(plot.seedItemKey) ? "Plot" : PlotManager.GetSeedDisplayName(plot.seedItemKey);
                     if (status != null) status.text = plot.state.ToString();
 
                     if (plot.state == PlotState.Empty)
@@ -487,7 +487,7 @@ namespace Garden
                     }
                     else if (plot.state == PlotState.Growing)
                     {
-                        string seed = SeedToSpriteKey(plot.seedName);
+                        string seed = SeedToSpriteKey(plot.seedItemKey);
                         string spritePrefix = $"hex/plot/{seed}";
                         float growthPct = PlotManager.Instance != null ? PlotManager.Instance.GetGrowthProgress(index) : 0f;
                         if (!TrySetHexSpriteByPercent(cell, spritePrefix, growthPct, plotSkin))
@@ -500,7 +500,7 @@ namespace Garden
                     }
                     else if (plot.state == PlotState.Mature)
                     {
-                        string seed = SeedToSpriteKey(plot.seedName);
+                        string seed = SeedToSpriteKey(plot.seedItemKey);
                         if (!TrySetHexSpriteByPercent(cell, $"hex/plot/{seed}", 1f, plotSkin))
                         {
                             ApplySkinColors(cell, plotSkin);
@@ -1161,14 +1161,14 @@ namespace Garden
                 case CampBuildingType.Plot:
                     cell.AddToClassList("grid-cell--plot");
                     var plot = visitSnapshot.plots[index];
-                    string seed = SeedToSpriteKey(plot.seedName);
-                    if (string.IsNullOrEmpty(plot.seedName) || plot.state == "empty")
+                    string seed = SeedToSpriteKey(plot.seedItemKey);
+                    if (string.IsNullOrEmpty(plot.seedItemKey) || plot.state == "empty")
                         TrySetHexSprite(cell, "hex/plot/empty");
                     else if (plot.state == "mature")
                         TrySetHexSpriteByPercent(cell, $"hex/plot/{seed}", 1f);
                     else
                         TrySetHexSpriteByPercent(cell, $"hex/plot/{seed}", 0f);
-                    if (label != null) label.text = string.IsNullOrEmpty(plot.seedName) ? "Plot" : PlotManager.GetSeedDisplayName(plot.seedName);
+                    if (label != null) label.text = string.IsNullOrEmpty(plot.seedItemKey) ? "Plot" : PlotManager.GetSeedDisplayName(plot.seedItemKey);
                     if (status != null) status.text = plot.state ?? "";
                     break;
 
@@ -1685,7 +1685,7 @@ namespace Garden
                     break;
 
                 case PlotState.Growing:
-                    interactionTitle.text = PlotManager.GetSeedDisplayName(plot.seedName);
+                    interactionTitle.text = PlotManager.GetSeedDisplayName(plot.seedItemKey);
                     float remaining = PlotManager.Instance.GetRemainingSeconds(index);
                     var progressLabel = new Label($"Growing... {FormatTimeRemaining(remaining)} left");
                     progressLabel.AddToClassList("interaction-info");
@@ -1697,7 +1697,7 @@ namespace Garden
 
                     AddWaterSubscribeToggle(index, plot);
 
-                    AddGrowthRecipeSection(plot.seedName);
+                    AddGrowthRecipeSection(plot.seedItemKey);
 
                     int plotPotionCount = PlotManager.Instance != null ? PlotManager.Instance.GetSpeedItemCount() : 0;
                     var finishBtn = new Button(() =>
@@ -1724,8 +1724,8 @@ namespace Garden
                     break;
 
                 case PlotState.Mature:
-                    interactionTitle.text = $"{PlotManager.GetSeedDisplayName(plot.seedName)} - Ready!";
-                    AddGrowthRecipeSection(plot.seedName);
+                    interactionTitle.text = $"{PlotManager.GetSeedDisplayName(plot.seedItemKey)} - Ready!";
+                    AddGrowthRecipeSection(plot.seedItemKey);
                     var harvestBtn = new Button(() =>
                     {
                         suppressRebuild = true;
@@ -1877,13 +1877,13 @@ namespace Garden
             {
                 if (entry.count <= 0) continue;
 
-                var plantName = SpriteService.SeedToSpriteKey(entry.itemKey); // "basil_seed" → "basil"
-                var seedData = ConfigService.Instance?.GetSeed(plantName);
+                var plantSlug = SpriteService.SeedToSpriteKey(entry.itemKey); // "basil_seed" → "basil"
+                var seedData = ConfigService.Instance?.GetSeed(plantSlug);
 
-                string sName = plantName;
+                string capturedItemKey = entry.itemKey;
                 var card = new Button(() =>
                 {
-                    PlotManager.Instance.Plant(plotIndex, sName);
+                    PlotManager.Instance.Plant(plotIndex, capturedItemKey);
                     CloseInteractionPanel();
                 });
                 card.AddToClassList("seed-card");
@@ -1894,7 +1894,7 @@ namespace Garden
                 // Hero seed icon
                 string spriteKey = seedData != null
                     ? SpriteService.SeedToSpriteKey(seedData.item_key)
-                    : plantName;
+                    : plantSlug;
 
                 var seedIcon = new VisualElement();
                 seedIcon.AddToClassList("seed-card--icon");
@@ -1910,7 +1910,7 @@ namespace Garden
                 // Title row: name + stats + count
                 var titleRow = new VisualElement();
                 titleRow.AddToClassList("seed-card--title-row");
-                var nameLabel = new Label(seedData != null ? ConfigService.Instance.GetItemDisplayName(seedData.item_key) : plantName);
+                var nameLabel = new Label(seedData != null ? ConfigService.Instance.GetItemDisplayName(seedData.item_key) : plantSlug);
                 nameLabel.AddToClassList("seed-card--name");
                 titleRow.Add(nameLabel);
 
@@ -2023,9 +2023,9 @@ namespace Garden
                 icon.style.backgroundImage = new StyleBackground(Background.FromVectorImage(vi));
         }
 
-        private void AddGrowthRecipeSection(string seedName)
+        private void AddGrowthRecipeSection(string seedItemKey)
         {
-            var seed = ConfigService.Instance?.GetSeed(seedName);
+            var seed = ConfigService.Instance?.GetSeed(SpriteService.SeedToSpriteKey(seedItemKey));
             if (seed == null || seed.recipe == null) return;
 
             var recipe = seed.recipe;

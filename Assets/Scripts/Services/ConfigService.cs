@@ -445,8 +445,8 @@ namespace Garden
                         var config = new ServerSeedConfig
                         {
                             seedName = GetString(seedMap, "seedName"),
-                            item_key = GetString(seedMap, "item_key"),
-                            harvest_item_key = GetString(seedMap, "harvest_item_key"),
+                            item_key = GetString(seedMap, "itemKey"),
+                            harvest_item_key = GetString(seedMap, "harvestItemKey"),
                             growthDurationHours = GetFloat(seedMap, "growthDurationHours"),
                             minDrops = (int)GetFloat(seedMap, "minDrops"),
                             maxDrops = (int)GetFloat(seedMap, "maxDrops"),

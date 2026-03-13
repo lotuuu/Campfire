@@ -118,16 +118,16 @@ namespace Garden
             return await Post("/debug/set-currency", "{" + string.Join(",", parts) + "}");
         }
 
-        public async Task<bool> GrantSeeds(string seedName, int count)
+        public async Task<bool> GrantSeeds(string itemKey, int count)
         {
             return await Post("/debug/grant-seeds",
-                JsonUtility.ToJson(new GrantSeedsReq { seedName = seedName, count = count }));
+                JsonUtility.ToJson(new GrantItemReq { itemKey = itemKey, count = count }));
         }
 
-        public async Task<bool> GrantItems(string itemName, int count)
+        public async Task<bool> GrantItems(string itemKey, int count)
         {
             return await Post("/debug/grant-items",
-                JsonUtility.ToJson(new GrantItemsReq { itemName = itemName, count = count }));
+                JsonUtility.ToJson(new GrantItemReq { itemKey = itemKey, count = count }));
         }
 
         public async Task<bool> SpawnBird() => await Post("/debug/spawn-bird", "{}");
@@ -241,8 +241,7 @@ namespace Garden
 
         [Serializable] private class SkipTimeReq { public int hours; }
         [Serializable] private class SkipTimeReqFloat { public float hours; }
-        [Serializable] private class GrantSeedsReq { public string seedName; public int count; }
-        [Serializable] private class GrantItemsReq { public string itemName; public int count; }
+        [Serializable] private class GrantItemReq { public string itemKey; public int count; }
         [Serializable] private class SetFlameLevelReq { public int level; }
     }
 }

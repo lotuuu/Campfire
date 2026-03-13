@@ -28,7 +28,7 @@ namespace Garden.Tests
             };
             data.inventory.Add(new InventoryItem { itemKey = "Basil_Seed", count = 5 });
             data.vases.Add(new VaseSave { capacity = 10, currentWater = 7 });
-            data.plots.Add(new PlotSave { seedName = "Basil", waterCount = 2, state = PlotState.Growing });
+            data.plots.Add(new PlotSave { seedItemKey = "basil_seed", waterCount = 2, state = PlotState.Growing });
             data.gardens.Add(new GardenSave { plantName = "Oak", mature = true });
             data.inventory.Add(new InventoryItem { itemKey = "Acorn", count = 3 });
 

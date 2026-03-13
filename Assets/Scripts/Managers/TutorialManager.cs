@@ -190,7 +190,7 @@ namespace Garden
             {
                 case StepHarvestFirst:
                     ShowDialogue("Spark of Ara", new List<string> {
-                        $"You harvested {result.drops} {result.seedName}!",
+                        $"You harvested {result.drops} {PlotManager.GetSeedDisplayName(result.seedItemKey)}!",
                         "Your harvest was improved because you followed the recipe by watering it.",
                         "Each seed has a recipe. Follow it for higher yields!"
                     }, () => AdvanceTo(StepBuildHouse));
@@ -214,7 +214,7 @@ namespace Garden
                     break;
 
                 case StepPlantCressSpeedPotion:
-                    if (result.seedName == "Cress")
+                    if (result.seedItemKey == "cress_seed")
                     {
                         ShowDialogue("Spark of Ara", new List<string> {
                             "Cress harvested! You can use this to build more plots."
