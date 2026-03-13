@@ -74,6 +74,7 @@ namespace Garden
         // Current grid state
         private int currentGridSize;
         private bool suppressRebuild;
+        private bool pendingRebuild;
         private bool needsRecenter = true;
 
         // Interaction panel live-refresh
@@ -230,7 +231,7 @@ namespace Garden
 
         public void RebuildGrid()
         {
-            if (suppressRebuild) return;
+            if (suppressRebuild) { pendingRebuild = true; return; }
             if (mode == CampsiteMode.Moving) return;
             if (canvas == null || FlameManager.Instance == null) return;
 
@@ -1755,6 +1756,10 @@ namespace Garden
 
         private void ShowHarvestResult(HarvestResult result)
         {
+            // Suppress grid rebuilds while harvest results are displayed so that
+            // another crop maturing doesn't auto-close this panel.
+            suppressRebuild = true;
+
             interactionBody.Clear();
             interactionActions.Clear();
             ClearBellIcon();
@@ -2494,6 +2499,18 @@ namespace Garden
                 interactionTitle.style.display = DisplayStyle.Flex;
             openInteractionType = null;
             flameBuildGrid = null;
+
+            // If rebuilds were suppressed (e.g. harvest result popup was open),
+            // do a deferred rebuild now that the panel is closed.
+            if (suppressRebuild)
+            {
+                suppressRebuild = false;
+                if (pendingRebuild)
+                {
+                    pendingRebuild = false;
+                    RebuildGrid();
+                }
+            }
 
         }
 
