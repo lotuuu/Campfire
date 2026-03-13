@@ -319,6 +319,26 @@ namespace Garden
             };
         }
 
+        // ── Flame Endpoints ──
+
+        public async Task<UpgradeFlameResponse> UpgradeFlame(List<SpendItemEntry> items, bool freeMode)
+        {
+            if (!IsOnline) return null;
+            try
+            {
+                var body = JsonUtility.ToJson(new UpgradeFlameRequest { items = items, freeMode = freeMode });
+                using var req = PostJson("/game/flame/upgrade", body);
+                await SendAsync(req);
+
+                if (req.responseCode >= 200 && req.responseCode < 300)
+                    return JsonUtility.FromJson<UpgradeFlameResponse>(req.downloadHandler.text);
+
+                Debug.LogWarning($"GameService: UpgradeFlame failed (HTTP {req.responseCode}): {req.downloadHandler.text}");
+            }
+            catch (Exception e) { Debug.LogWarning($"GameService: UpgradeFlame failed: {e.Message}"); }
+            return null;
+        }
+
         // ── Plot Endpoints ──
 
         public async Task<ServerPlot> CraftPlot(int gridX, int gridY)

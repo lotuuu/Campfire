@@ -267,8 +267,9 @@ namespace Garden
                     }
                 }
 
-                // Sync from server after drain completes to reconcile state
-                await SyncFromServer();
+                // Do NOT SyncFromServer here — it overwrites local state with
+                // potentially stale server data, causing race conditions with
+                // GameService-based actions (harvests, flame upgrades, etc.).
             }
             finally
             {

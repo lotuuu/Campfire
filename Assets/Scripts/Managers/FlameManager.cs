@@ -77,14 +77,22 @@ namespace Garden
             ConsumeIngredients(recipe, SaveManager.Instance.Data.inventory);
             SaveManager.Instance.Data.flameLevel++;
             SaveManager.Instance.Save();
-            if (EconomyService.Instance != null)
+
+            // Build items list for server
+            var items = new List<SpendItemEntry>();
+            foreach (var ing in recipe.ingredients)
+                items.Add(new SpendItemEntry { item_name = ing.itemName, count = ing.count });
+
+            if (GameService.Instance != null && GameService.Instance.IsOnline)
             {
-                var items = new List<SpendItemEntry>();
-                foreach (var ing in recipe.ingredients)
-                    items.Add(new SpendItemEntry { item_name = ing.itemName, count = ing.count });
+                _ = GameService.Instance.UpgradeFlame(items, CurrencyManager.FreeMode);
+            }
+            else if (EconomyService.Instance != null)
+            {
                 var req = new UpgradeFlameRequest { items = items, freeMode = CurrencyManager.FreeMode };
                 EconomyService.Instance.Enqueue("upgrade-flame", JsonUtility.ToJson(req));
             }
+
             OnFlameUpgraded?.Invoke();
             AudioManager.Instance?.PlaySFX("flame_upgrade");
             return true;

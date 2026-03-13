@@ -422,8 +422,26 @@ namespace Garden
             var resp = await GameService.Instance.Harvest(serverId);
             if (resp != null)
             {
-                // Server response is authoritative — sync economy
-                await EconomyService.Instance.SyncFromServer();
+                // Apply harvest drops from server response directly — do NOT call
+                // SyncFromServer() here as it creates race conditions that overwrite
+                // pending local changes (flame upgrades, other harvests) with stale state.
+                var data = SaveManager.Instance.Data;
+                if (!string.IsNullOrEmpty(resp.itemName) && resp.drops > 0)
+                {
+                    var entry = data.inventory.Find(i => i.itemName == resp.itemName);
+                    if (entry != null)
+                    {
+                        // Server drops may differ from local estimate — adjust delta
+                        int localDrops = localResult.drops;
+                        int delta = resp.drops - localDrops;
+                        if (delta != 0)
+                        {
+                            entry.count += delta;
+                            if (entry.count <= 0) data.inventory.Remove(entry);
+                            SaveManager.Instance.Save();
+                        }
+                    }
+                }
             }
         }
 

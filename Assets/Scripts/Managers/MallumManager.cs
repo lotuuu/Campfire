@@ -207,12 +207,10 @@ namespace Garden
 
         private async Task NotifyServerCollectQuest(int mallumServerId)
         {
-            var resp = await GameService.Instance.CollectQuest(mallumServerId);
-            if (resp != null)
-            {
-                // Server response is authoritative — sync economy for seed rewards
-                await EconomyService.Instance.SyncFromServer();
-            }
+            // Fire-and-forget — server records the collection.
+            // Do NOT call SyncFromServer() here as it creates race conditions
+            // that overwrite pending local changes with stale server state.
+            await GameService.Instance.CollectQuest(mallumServerId);
         }
 
         public bool CraftMallumHouse(int gridX, int gridY)

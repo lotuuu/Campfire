@@ -166,6 +166,7 @@ namespace Garden
     [Serializable] public class HouseSkinRequest { public int houseId; public string skinName; }
     [Serializable] public class LocationRequest { public float lat; public float lon; }
     [Serializable] public class HarvestResponse { public float score; public int drops; public string itemName; }
+    [Serializable] public class UpgradeFlameResponse { public int flameLevel; }
     [Serializable] public class CollectGardenResponse { public ServerGarden garden; public string yieldItem; public int yieldAmount; }
     [Serializable] public class CollectQuestResponse { public ServerMallum mallum; public List<ServerReward> rewards; }
 }

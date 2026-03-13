@@ -631,6 +631,31 @@ defmodule CampFireWeb.GameController do
     conn |> put_status(400) |> json(%{error: "Missing required fields: type, id, gridX, gridY"})
   end
 
+  # ── Flame ──────────────────────────────────────────────────
+
+  def upgrade_flame(conn, %{"items" => items} = params) when is_list(items) do
+    uid = conn.assigns.current_player.uid
+    opts = free_mode_opts(params)
+
+    case Economy.upgrade_flame(uid, items, opts) do
+      {:ok, economy} ->
+        conn |> put_status(200) |> json(%{flameLevel: economy.flame_level})
+
+      {:error, :max_level} ->
+        conn |> put_status(422) |> json(%{error: "Already at max flame level"})
+
+      {:error, {:insufficient_items, name}} ->
+        conn |> put_status(422) |> json(%{error: "Insufficient items: #{name}"})
+
+      {:error, reason} ->
+        conn |> put_status(422) |> json(%{error: format_error(reason)})
+    end
+  end
+
+  def upgrade_flame(conn, _params) do
+    conn |> put_status(400) |> json(%{error: "Missing 'items' array"})
+  end
+
   # ── Weather ─────────────────────────────────────────────────
 
   def submit_location(conn, %{"lat" => lat, "lon" => lon})
