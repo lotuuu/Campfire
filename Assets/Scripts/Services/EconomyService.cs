@@ -53,24 +53,9 @@ namespace Garden
     }
 
     [Serializable]
-    public class AddSeedRequest
-    {
-        public string seed_name;
-        public int count;
-    }
-
-    [Serializable]
-    public class SpendSeedRequest
-    {
-        public string seed_name;
-        public int count;
-        public bool freeMode;
-    }
-
-    [Serializable]
     public class AddItemRequest
     {
-        public string item_name;
+        public string item_key;
         public int count;
     }
 
@@ -84,7 +69,7 @@ namespace Garden
     [Serializable]
     public class SpendItemEntry
     {
-        public string item_name;
+        public string item_key;
         public int count;
     }
 
@@ -304,7 +289,7 @@ namespace Garden
             if (state.inventory != null)
             {
                 foreach (var i in state.inventory)
-                    data.inventory.Add(new InventoryItem { itemName = i.itemName, count = i.count });
+                    data.inventory.Add(new InventoryItem { itemKey = i.itemKey, count = i.count });
             }
 
             SaveManager.Instance.Save();
