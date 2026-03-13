@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -18,6 +19,82 @@ namespace Garden
             Instance = this;
         }
 
+        // --- Remote Debug Logging ---
+        private const float FlushIntervalSeconds = 5f;
+        private const int MaxQueueSize = 50;
+
+        private readonly List<RemoteLogEntry> _logQueue = new();
+        private float _lastFlushTime;
+
+        [Serializable]
+        private class RemoteLogEntry
+        {
+            public string level;
+            public string message;
+            public string category;
+            public string metadata;
+        }
+
+        public void LogRemoteError(string message, string category = "client", Dictionary<string, string> metadata = null)
+        {
+            QueueRemoteLog("error", message, category, metadata);
+        }
+
+        public void LogRemoteWarning(string message, string category = "client", Dictionary<string, string> metadata = null)
+        {
+            QueueRemoteLog("warning", message, category, metadata);
+        }
+
+        private void QueueRemoteLog(string level, string message, string category, Dictionary<string, string> metadata)
+        {
+            if (_logQueue.Count >= MaxQueueSize)
+                _logQueue.RemoveAt(0);
+
+            var metaJson = "{}";
+            if (metadata != null && metadata.Count > 0)
+            {
+                var parts = new List<string>();
+                foreach (var kv in metadata)
+                    parts.Add($"\"{EscapeJson(kv.Key)}\":\"{EscapeJson(kv.Value)}\"");
+                metaJson = "{" + string.Join(",", parts) + "}";
+            }
+
+            _logQueue.Add(new RemoteLogEntry
+            {
+                level = level,
+                message = message,
+                category = category,
+                metadata = metaJson
+            });
+        }
+
+        private void Update()
+        {
+            if (_logQueue.Count > 0 && Time.realtimeSinceStartup - _lastFlushTime >= FlushIntervalSeconds)
+            {
+                _lastFlushTime = Time.realtimeSinceStartup;
+                FlushLogQueue();
+            }
+        }
+
+        private async void FlushLogQueue()
+        {
+            var batch = new List<RemoteLogEntry>(_logQueue);
+            _logQueue.Clear();
+
+            foreach (var entry in batch)
+            {
+                var json = $"{{\"level\":\"{entry.level}\",\"message\":\"{EscapeJson(entry.message)}\",\"category\":\"{entry.category}\",\"metadata\":{entry.metadata}}}";
+                await PostQuiet("/debug/log", json);
+            }
+        }
+
+        private static string EscapeJson(string s)
+        {
+            if (s == null) return "";
+            return s.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\n", "\\n").Replace("\r", "\\r");
+        }
+
         public async Task<bool> SkipTime(int hours)
         {
             return await Post("/debug/skip-time", JsonUtility.ToJson(new SkipTimeReq { hours = hours }));
@@ -35,7 +112,7 @@ namespace Garden
         public async Task<bool> SetCurrency(float? mana = null, int? gems = null)
         {
             // Build JSON manually since JsonUtility doesn't handle nullable
-            var parts = new System.Collections.Generic.List<string>();
+            var parts = new List<string>();
             if (mana.HasValue) parts.Add($"\"mana\":{mana.Value}");
             if (gems.HasValue) parts.Add($"\"gems\":{gems.Value}");
             return await Post("/debug/set-currency", "{" + string.Join(",", parts) + "}");
