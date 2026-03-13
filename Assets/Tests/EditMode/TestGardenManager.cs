@@ -77,12 +77,12 @@ namespace Garden.Tests
                 manaCost = 200,
                 harvestCosts = new List<HarvestCost>
                 {
-                    new() { itemName = "Basil", count = 5 }
+                    new() { itemKey = "Basil", count = 5 }
                 }
             };
             Assert.AreEqual(200, cost.manaCost);
             Assert.AreEqual(1, cost.harvestCosts.Count);
-            Assert.AreEqual("Basil", cost.harvestCosts[0].itemName);
+            Assert.AreEqual("Basil", cost.harvestCosts[0].itemKey);
         }
 
         [Test]

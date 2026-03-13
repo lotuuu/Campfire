@@ -17,7 +17,7 @@ public class TestGameService
     [Test]
     public void HarvestResponse_Deserializes()
     {
-        string json = @"{""score"":0.85,""drops"":3,""itemName"":""Basil""}";
+        string json = @"{""score"":0.85,""drops"":3,""itemKey"":""basil""}";
         var resp = UnityEngine.JsonUtility.FromJson<HarvestResponse>(json);
         Assert.AreEqual(0.85f, resp.score, 0.01f);
         Assert.AreEqual(3, resp.drops);
@@ -43,7 +43,7 @@ public class TestGameService
     [Test]
     public void ServerMallum_DeserializesRewards()
     {
-        string json = @"{""id"":1,""state"":""quest_complete"",""assignedQuestName"":""SwampForage"",""pendingRewards"":[{""seed_name"":""Basil"",""count"":2}]}";
+        string json = @"{""id"":1,""state"":""quest_complete"",""assignedQuestName"":""SwampForage"",""pendingRewards"":[{""item_key"":""basil"",""count"":2}]}";
         var mallum = UnityEngine.JsonUtility.FromJson<ServerMallum>(json);
         Assert.AreEqual("quest_complete", mallum.state);
         Assert.AreEqual(1, mallum.pendingRewards.Count);

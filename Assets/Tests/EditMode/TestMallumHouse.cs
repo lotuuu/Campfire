@@ -28,7 +28,7 @@ namespace Garden.Tests
                 manaCost = 500,
                 harvestCosts = new List<HarvestCost>
                 {
-                    new() { itemName = "Basil", count = 10 }
+                    new() { itemKey = "Basil", count = 10 }
                 }
             };
             Assert.AreEqual(500, cost.manaCost);
@@ -48,11 +48,11 @@ namespace Garden.Tests
         {
             var items = new List<InventoryItem>
             {
-                new() { itemName = "Basil", count = 5 }
+                new() { itemKey = "Basil", count = 5 }
             };
             var costs = new List<HarvestCost>
             {
-                new() { itemName = "Basil", count = 3 }
+                new() { itemKey = "Basil", count = 3 }
             };
             Assert.IsTrue(MallumManager.CanAffordHarvests(items, costs));
         }
@@ -62,11 +62,11 @@ namespace Garden.Tests
         {
             var items = new List<InventoryItem>
             {
-                new() { itemName = "Basil", count = 1 }
+                new() { itemKey = "Basil", count = 1 }
             };
             var costs = new List<HarvestCost>
             {
-                new() { itemName = "Basil", count = 3 }
+                new() { itemKey = "Basil", count = 3 }
             };
             Assert.IsFalse(MallumManager.CanAffordHarvests(items, costs));
         }
@@ -77,7 +77,7 @@ namespace Garden.Tests
             var items = new List<InventoryItem>();
             var costs = new List<HarvestCost>
             {
-                new() { itemName = "Lavender", count = 1 }
+                new() { itemKey = "Lavender", count = 1 }
             };
             Assert.IsFalse(MallumManager.CanAffordHarvests(items, costs));
         }

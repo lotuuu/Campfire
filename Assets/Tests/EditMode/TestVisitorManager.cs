@@ -147,7 +147,7 @@ namespace Garden.Tests
             VisitorManager.ApplyGift(visitor, data);
 
             Assert.AreEqual(1, data.inventory.Count);
-            Assert.AreEqual("Feather", data.inventory[0].itemName);
+            Assert.AreEqual("Feather", data.inventory[0].itemKey);
             Assert.AreEqual(3, data.inventory[0].count);
             Assert.IsTrue(visitor.giftClaimed);
         }
@@ -157,7 +157,7 @@ namespace Garden.Tests
         {
             var visitor = new VisitorSave { giftType = "item", giftName = "Feather", giftAmount = 2 };
             var data = new SaveData();
-            data.inventory.Add(new InventoryItem { itemName = "Feather", count = 5 });
+            data.inventory.Add(new InventoryItem { itemKey = "Feather", count = 5 });
 
             VisitorManager.ApplyGift(visitor, data);
 
@@ -194,14 +194,14 @@ namespace Garden.Tests
             {
                 costs = new List<TradeCost>
                 {
-                    new TradeCost { itemName = "Petal", count = 2 }
+                    new TradeCost { itemKey = "Petal", count = 2 }
                 },
-                rewardSeedName = "Lavender",
+                rewardItemKey = "Lavender",
                 rewardCount = 1
             };
             var items = new List<InventoryItem>
             {
-                new InventoryItem { itemName = "Petal", count = 5 }
+                new InventoryItem { itemKey = "Petal", count = 5 }
             };
 
             Assert.IsTrue(VisitorManager.CanAffordOffer(offer, items));
@@ -214,14 +214,14 @@ namespace Garden.Tests
             {
                 costs = new List<TradeCost>
                 {
-                    new TradeCost { itemName = "Petal", count = 10 }
+                    new TradeCost { itemKey = "Petal", count = 10 }
                 },
-                rewardSeedName = "Lavender",
+                rewardItemKey = "Lavender",
                 rewardCount = 1
             };
             var items = new List<InventoryItem>
             {
-                new InventoryItem { itemName = "Petal", count = 3 }
+                new InventoryItem { itemKey = "Petal", count = 3 }
             };
 
             Assert.IsFalse(VisitorManager.CanAffordOffer(offer, items));
@@ -234,9 +234,9 @@ namespace Garden.Tests
             {
                 costs = new List<TradeCost>
                 {
-                    new TradeCost { itemName = "Petal", count = 1 }
+                    new TradeCost { itemKey = "Petal", count = 1 }
                 },
-                rewardSeedName = "Lavender",
+                rewardItemKey = "Lavender",
                 rewardCount = 1
             };
             var items = new List<InventoryItem>();
@@ -253,23 +253,23 @@ namespace Garden.Tests
             {
                 costs = new List<TradeCost>
                 {
-                    new TradeCost { itemName = "Petal", count = 2 },
-                    new TradeCost { itemName = "Root", count = 1 }
+                    new TradeCost { itemKey = "Petal", count = 2 },
+                    new TradeCost { itemKey = "Root", count = 1 }
                 },
-                rewardSeedName = "Dahlia",
+                rewardItemKey = "dahlia_seed",
                 rewardCount = 3
             };
             var inventory = new List<InventoryItem>
             {
-                new InventoryItem { itemName = "Petal", count = 5 },
-                new InventoryItem { itemName = "Root", count = 2 }
+                new InventoryItem { itemKey = "Petal", count = 5 },
+                new InventoryItem { itemKey = "Root", count = 2 }
             };
 
             VisitorManager.ExecuteTrade(offer, inventory);
 
-            Assert.AreEqual(3, inventory.Find(i => i.itemName == "Petal").count, "Petal count should be reduced by 2");
-            Assert.AreEqual(1, inventory.Find(i => i.itemName == "Root").count, "Root count should be reduced by 1");
-            var dahliaSeed = inventory.Find(i => i.itemName == "Dahlia_Seed");
+            Assert.AreEqual(3, inventory.Find(i => i.itemKey == "Petal").count, "Petal count should be reduced by 2");
+            Assert.AreEqual(1, inventory.Find(i => i.itemKey == "Root").count, "Root count should be reduced by 1");
+            var dahliaSeed = inventory.Find(i => i.itemKey == "dahlia_seed");
             Assert.IsNotNull(dahliaSeed);
             Assert.AreEqual(3, dahliaSeed.count);
         }
@@ -281,20 +281,20 @@ namespace Garden.Tests
             {
                 costs = new List<TradeCost>
                 {
-                    new TradeCost { itemName = "Petal", count = 1 }
+                    new TradeCost { itemKey = "Petal", count = 1 }
                 },
-                rewardSeedName = "Basil",
+                rewardItemKey = "basil_seed",
                 rewardCount = 2
             };
             var inventory = new List<InventoryItem>
             {
-                new InventoryItem { itemName = "Petal", count = 5 },
-                new InventoryItem { itemName = "Basil_Seed", count = 3 }
+                new InventoryItem { itemKey = "Petal", count = 5 },
+                new InventoryItem { itemKey = "basil_seed", count = 3 }
             };
 
             VisitorManager.ExecuteTrade(offer, inventory);
 
-            var basilSeed = inventory.Find(i => i.itemName == "Basil_Seed");
+            var basilSeed = inventory.Find(i => i.itemKey == "basil_seed");
             Assert.IsNotNull(basilSeed, "Should not create a duplicate entry");
             Assert.AreEqual(5, basilSeed.count, "Existing seed count should be incremented");
         }
@@ -306,19 +306,19 @@ namespace Garden.Tests
             {
                 costs = new List<TradeCost>
                 {
-                    new TradeCost { itemName = "Petal", count = 3 }
+                    new TradeCost { itemKey = "Petal", count = 3 }
                 },
-                rewardSeedName = "Mint",
+                rewardItemKey = "mint_seed",
                 rewardCount = 1
             };
             var inventory = new List<InventoryItem>
             {
-                new InventoryItem { itemName = "Petal", count = 3 }
+                new InventoryItem { itemKey = "Petal", count = 3 }
             };
 
             VisitorManager.ExecuteTrade(offer, inventory);
 
-            Assert.IsNull(inventory.Find(i => i.itemName == "Petal"), "Item with zero count should be removed");
+            Assert.IsNull(inventory.Find(i => i.itemKey == "Petal"), "Item with zero count should be removed");
         }
 
         // --- BuildVisitorSave ---
@@ -339,9 +339,9 @@ namespace Garden.Tests
                     {
                         costs = new List<TradeCost>
                         {
-                            new TradeCost { itemName = "Petal", count = 2 }
+                            new TradeCost { itemKey = "Petal", count = 2 }
                         },
-                        rewardSeedName = "Lavender",
+                        rewardItemKey = "Lavender",
                         rewardCount = 1
                     }
                 }
@@ -354,10 +354,10 @@ namespace Garden.Tests
             Assert.AreEqual("Peddler", save.visitorName);
             Assert.AreEqual("portrait_merchant", save.portraitId);
             Assert.AreEqual(1, save.offers.Count);
-            Assert.AreEqual("Lavender", save.offers[0].rewardSeedName);
+            Assert.AreEqual("Lavender", save.offers[0].rewardItemKey);
             Assert.AreEqual(1, save.offers[0].rewardCount);
             Assert.AreEqual(1, save.offers[0].costs.Count);
-            Assert.AreEqual("Petal", save.offers[0].costs[0].itemName);
+            Assert.AreEqual("Petal", save.offers[0].costs[0].itemKey);
             Assert.AreEqual(1, save.dialogueLines.Count);
             Assert.AreEqual("Hello!", save.dialogueLines[0]);
         }

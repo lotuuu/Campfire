@@ -156,8 +156,8 @@ namespace Garden.Tests
             var eligible = BirdManager.GetEligibleSeeds(seeds, 3);
             var bird = BirdManager.RollSeedDrop(eligible, 3);
             Assert.IsNotNull(bird);
-            Assert.IsFalse(string.IsNullOrEmpty(bird.seedName));
-            Assert.Greater(bird.seedCount, 0);
+            Assert.IsFalse(string.IsNullOrEmpty(bird.itemKey));
+            Assert.Greater(bird.itemCount, 0);
         }
 
         [Test]
@@ -192,9 +192,9 @@ namespace Garden.Tests
             for (int i = 0; i < runs; i++)
             {
                 var birdLow = BirdManager.RollSeedDrop(seeds, 1);
-                lowLevelTotal += birdLow.seedCount;
+                lowLevelTotal += birdLow.itemCount;
                 var birdHigh = BirdManager.RollSeedDrop(seeds, 5);
-                highLevelTotal += birdHigh.seedCount;
+                highLevelTotal += birdHigh.itemCount;
             }
 
             Assert.Greater(highLevelTotal, lowLevelTotal,
@@ -210,7 +210,7 @@ namespace Garden.Tests
             for (int i = 0; i < 50; i++)
             {
                 var bird = BirdManager.RollSeedDrop(seeds, 1);
-                Assert.GreaterOrEqual(bird.seedCount, 1);
+                Assert.GreaterOrEqual(bird.itemCount, 1);
             }
         }
 
@@ -338,8 +338,8 @@ namespace Garden.Tests
                 // Test with 2 existing birds
                 var data2 = new SaveData { flameLevel = 1 };
                 data2.lastBirdCheckHourUtc = lastCheck.ToString("o");
-                data2.birds.Add(new BirdSave { gridX = -1, gridY = 0, seedName = "Basil", seedCount = 1 });
-                data2.birds.Add(new BirdSave { gridX = 0, gridY = -1, seedName = "Basil", seedCount = 1 });
+                data2.birds.Add(new BirdSave { gridX = -1, gridY = 0, itemKey = "basil", itemCount = 1 });
+                data2.birds.Add(new BirdSave { gridX = 0, gridY = -1, itemKey = "basil", itemCount = 1 });
                 if (BirdManager.ProcessHourlyChecks(data2, seeds, 3, now))
                     placedWith2++;
             }
@@ -362,7 +362,7 @@ namespace Garden.Tests
             data.vases.Add(new VaseSave { gridX = 0, gridY = 1 });
             data.gardens.Add(new GardenSave { gridX = 0, gridY = -1 });
             data.mallumHouses.Add(new MallumHouseSave { gridX = 1, gridY = -1 });
-            data.birds.Add(new BirdSave { gridX = -1, gridY = 1, seedName = "Basil", seedCount = 1 });
+            data.birds.Add(new BirdSave { gridX = -1, gridY = 1, itemKey = "basil", itemCount = 1 });
 
             var lastCheck = new DateTime(2026, 3, 1, 10, 0, 0, DateTimeKind.Utc);
             data.lastBirdCheckHourUtc = lastCheck.ToString("o");
@@ -440,23 +440,23 @@ namespace Garden.Tests
         public void CollectBird_RemovesBirdAndReturnsIt()
         {
             var data = new SaveData();
-            data.birds.Add(new BirdSave { gridX = 1, gridY = -1, seedName = "Basil", seedCount = 3 });
-            data.birds.Add(new BirdSave { gridX = -1, gridY = 1, seedName = "Mint", seedCount = 2 });
+            data.birds.Add(new BirdSave { gridX = 1, gridY = -1, itemKey = "basil", itemCount = 3 });
+            data.birds.Add(new BirdSave { gridX = -1, gridY = 1, itemKey = "mint", itemCount = 2 });
 
             var collected = BirdManager.CollectBird(data, 0);
 
             Assert.IsNotNull(collected);
-            Assert.AreEqual("Basil", collected.seedName);
-            Assert.AreEqual(3, collected.seedCount);
+            Assert.AreEqual("basil", collected.itemKey);
+            Assert.AreEqual(3, collected.itemCount);
             Assert.AreEqual(1, data.birds.Count, "Bird list should shrink by 1");
-            Assert.AreEqual("Mint", data.birds[0].seedName, "Remaining bird should be the second one");
+            Assert.AreEqual("mint", data.birds[0].itemKey, "Remaining bird should be the second one");
         }
 
         [Test]
         public void CollectBird_ReturnsNull_ForNegativeIndex()
         {
             var data = new SaveData();
-            data.birds.Add(new BirdSave { seedName = "Basil", seedCount = 1 });
+            data.birds.Add(new BirdSave { itemKey = "basil", itemCount = 1 });
             var result = BirdManager.CollectBird(data, -1);
             Assert.IsNull(result);
             Assert.AreEqual(1, data.birds.Count);
@@ -466,7 +466,7 @@ namespace Garden.Tests
         public void CollectBird_ReturnsNull_ForOutOfRangeIndex()
         {
             var data = new SaveData();
-            data.birds.Add(new BirdSave { seedName = "Basil", seedCount = 1 });
+            data.birds.Add(new BirdSave { itemKey = "basil", itemCount = 1 });
             var result = BirdManager.CollectBird(data, 5);
             Assert.IsNull(result);
             Assert.AreEqual(1, data.birds.Count);

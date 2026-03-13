@@ -83,12 +83,12 @@ namespace Garden.Tests
         {
             var pool = new List<ServerQuestReward>
             {
-                new() { seedName = "Basil Seed", weight = 1f, minCount = 1, maxCount = 1 }
+                new() { itemKey = "basil_seed", weight = 1f, minCount = 1, maxCount = 1 }
             };
 
             var rewards = MallumManager.RollRewards(pool, 3);
             Assert.AreEqual(3, rewards.Count);
-            Assert.AreEqual("Basil Seed", rewards[0].seedName);
+            Assert.AreEqual("basil_seed", rewards[0].itemKey);
         }
 
         [Test]
@@ -100,7 +100,7 @@ namespace Garden.Tests
                 assignedQuestName = "Swamp Forage",
                 pendingRewards = new List<RewardEntry>
                 {
-                    new() { seedName = "Basil", count = 2 }
+                    new() { itemKey = "basil", count = 2 }
                 }
             };
             var rewards = MallumManager.CollectRewards(mallum);

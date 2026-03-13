@@ -70,12 +70,12 @@ namespace Garden.Tests
             {
                 ingredients = new List<FlameIngredient>
                 {
-                    new() { itemName = "Basil", count = 3 }
+                    new() { itemKey = "Basil", count = 3 }
                 }
             };
             var items = new List<InventoryItem>
             {
-                new() { itemName = "Basil", count = 5 }
+                new() { itemKey = "Basil", count = 5 }
             };
             Assert.IsTrue(FlameManager.CanAffordUpgrade(recipe, items));
         }
@@ -87,12 +87,12 @@ namespace Garden.Tests
             {
                 ingredients = new List<FlameIngredient>
                 {
-                    new() { itemName = "Basil", count = 3 }
+                    new() { itemKey = "Basil", count = 3 }
                 }
             };
             var items = new List<InventoryItem>
             {
-                new() { itemName = "Basil", count = 2 }
+                new() { itemKey = "Basil", count = 2 }
             };
             Assert.IsFalse(FlameManager.CanAffordUpgrade(recipe, items));
         }
@@ -104,7 +104,7 @@ namespace Garden.Tests
             {
                 ingredients = new List<FlameIngredient>
                 {
-                    new() { itemName = "Basil", count = 3 }
+                    new() { itemKey = "Basil", count = 3 }
                 }
             };
             var items = new List<InventoryItem>();
@@ -118,18 +118,18 @@ namespace Garden.Tests
             {
                 ingredients = new List<FlameIngredient>
                 {
-                    new() { itemName = "Basil", count = 3 },
-                    new() { itemName = "Chamomile", count = 2 }
+                    new() { itemKey = "Basil", count = 3 },
+                    new() { itemKey = "Chamomile", count = 2 }
                 }
             };
             var items = new List<InventoryItem>
             {
-                new() { itemName = "Basil", count = 5 },
-                new() { itemName = "Chamomile", count = 4 }
+                new() { itemKey = "Basil", count = 5 },
+                new() { itemKey = "Chamomile", count = 4 }
             };
             FlameManager.ConsumeIngredients(recipe, items);
-            Assert.AreEqual(2, items.Find(i => i.itemName == "Basil").count);
-            Assert.AreEqual(2, items.Find(i => i.itemName == "Chamomile").count);
+            Assert.AreEqual(2, items.Find(i => i.itemKey == "Basil").count);
+            Assert.AreEqual(2, items.Find(i => i.itemKey == "Chamomile").count);
         }
     }
 }
