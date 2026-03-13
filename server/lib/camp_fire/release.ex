@@ -16,7 +16,7 @@ defmodule CampFire.Release do
   end
 
   def reset do
-    # Truncate all tables (Gigalixir shared Postgres can't DROP SCHEMA)
+    # Drop all tables (Gigalixir shared Postgres can't DROP SCHEMA)
     {:ok, %{rows: rows}} =
       Ecto.Adapters.SQL.query(CampFire.Repo, """
       SELECT tablename FROM pg_tables WHERE schemaname = 'public'
@@ -24,13 +24,9 @@ defmodule CampFire.Release do
 
     table_names = Enum.map(rows, fn [name] -> name end)
 
-    if table_names != [] do
-      tables = Enum.join(table_names, ", ")
-      Ecto.Adapters.SQL.query(CampFire.Repo, "TRUNCATE #{tables} CASCADE")
+    for table <- table_names do
+      Ecto.Adapters.SQL.query(CampFire.Repo, "DROP TABLE IF EXISTS \"#{table}\" CASCADE")
     end
-
-    # Drop migration tracking so all migrations re-run
-    Ecto.Adapters.SQL.query(CampFire.Repo, "DROP TABLE IF EXISTS schema_migrations")
 
     # Re-run all migrations and seeds
     migrate()
