@@ -493,7 +493,8 @@ namespace Garden
                 }
                 bool satisfied = owned >= ing.quantity;
 
-                var countLabel = new Label($"{owned}/{ing.quantity}");
+                string prefix = satisfied ? "\u2713 " : "\u2717 ";
+                var countLabel = new Label($"{prefix}{owned}/{ing.quantity}");
                 countLabel.AddToClassList("recipe-ingredient-count");
                 countLabel.AddToClassList(satisfied
                     ? "recipe-ingredient-count--satisfied"
