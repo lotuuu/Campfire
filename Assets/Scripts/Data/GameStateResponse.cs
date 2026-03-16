@@ -31,6 +31,7 @@ namespace Garden
         public string skinName;
         public List<string> unlockedSkins = new();
         public bool fertilized;
+        public List<string> potionItemKeys = new();
     }
 
     [Serializable]
@@ -168,6 +169,7 @@ namespace Garden
     [Serializable] public class HouseSkinRequest { public int houseId; public string skinName; }
     [Serializable] public class LocationRequest { public float lat; public float lon; }
     [Serializable] public class FertilizePlotRequest { public int plotId; }
+    [Serializable] public class ApplyPotionRequest { public int plotId; public string potionItemKey; }
     [Serializable] public class FertilizeGardenRequest { public int gardenId; }
     [Serializable] public class HarvestResponse { public float score; public int drops; public string itemKey; }
     [Serializable] public class UpgradeFlameResponse { public int flameLevel; }

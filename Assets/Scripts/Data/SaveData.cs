@@ -60,6 +60,7 @@ namespace Garden
         public string lastWateredUtc;
         public bool subscribeWater;
         public bool fertilized;
+        public List<string> potions = new();
         public string skinName;
         public List<string> unlockedSkins = new();
 

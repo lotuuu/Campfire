@@ -415,6 +415,7 @@ namespace Garden
             plot.waterCount = 0;
             plot.snapshots = new GrowthSnapshots();
             plot.lastWateredUtc = null;
+            plot.potions = new List<string>();
             plot.state = PlotState.Empty;
 
             // Add server-authoritative items to inventory
@@ -557,6 +558,28 @@ namespace Garden
         }
 
         return true;
+    }
+
+    public async void ApplyPotion(int plotIndex, string potionItemKey)
+    {
+        if (plotIndex < 0 || plotIndex >= SaveManager.Instance.Data.plots.Count) return;
+        var plot = SaveManager.Instance.Data.plots[plotIndex];
+        if (plot.state != PlotState.Growing) return;
+        if (plot.serverId <= 0) return;
+
+        if (GameService.Instance != null && GameService.Instance.IsOnline)
+        {
+            var result = await GameService.Instance.ApplyPotion(plot.serverId, potionItemKey);
+            if (result == null)
+            {
+                await GameService.Instance.ResyncFullState();
+                return;
+            }
+
+            plot.potions = result.potionItemKeys ?? new List<string>();
+            SaveManager.Instance.Save();
+            OnPlotChanged?.Invoke(plotIndex);
+        }
     }
 
     public int GetSpeedItemCount()

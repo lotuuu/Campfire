@@ -245,7 +245,8 @@ namespace Garden
                         gridY = sp.gridY,
                         skinName = sp.skinName,
                         unlockedSkins = sp.unlockedSkins ?? new List<string>(),
-                        fertilized = sp.fertilized
+                        fertilized = sp.fertilized,
+                        potions = sp.potionItemKeys ?? new List<string>(),
                     });
                 }
             }
@@ -557,6 +558,24 @@ namespace Garden
                 Debug.LogWarning($"GameService: FertilizePlot failed (HTTP {req.responseCode}): {req.downloadHandler.text}");
             }
             catch (Exception e) { Debug.LogWarning($"GameService: FertilizePlot failed: {e.Message}"); }
+            return null;
+        }
+
+        public async Task<ServerPlot> ApplyPotion(int plotId, string potionItemKey)
+        {
+            if (!IsOnline) return null;
+            try
+            {
+                var body = JsonUtility.ToJson(new ApplyPotionRequest { plotId = plotId, potionItemKey = potionItemKey });
+                using var req = PostJson("/game/plot/apply-potion", body);
+                await SendAsync(req);
+
+                if (req.responseCode >= 200 && req.responseCode < 300)
+                    return JsonUtility.FromJson<ServerPlot>(req.downloadHandler.text);
+
+                Debug.LogWarning($"GameService: ApplyPotion failed (HTTP {req.responseCode}): {req.downloadHandler.text}");
+            }
+            catch (Exception e) { Debug.LogWarning($"GameService: ApplyPotion failed: {e.Message}"); }
             return null;
         }
 
