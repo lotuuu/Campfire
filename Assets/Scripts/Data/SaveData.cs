@@ -30,6 +30,7 @@ namespace Garden
         public float musicVolume = 1f;
         public float sfxVolume = 1f;
         public int tutorialStep;
+        public string locale;
     }
 
     [Serializable]

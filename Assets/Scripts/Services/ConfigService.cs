@@ -219,13 +219,13 @@ namespace Garden
 
         private const long SlowStepMs = 500;
 
-        public async Task<bool> FetchConfigs()
+        public async Task<bool> FetchConfigs(string locale = "en")
         {
             var totalSw = Stopwatch.StartNew();
 
             try
             {
-                var url = ServerBaseUrl + "/game/configs";
+                var url = ServerBaseUrl + $"/game/configs?locale={locale}";
                 using var req = UnityWebRequest.Get(url);
                 req.downloadHandler = new DownloadHandlerBuffer();
                 var token = SocialSaveManager.Instance?.Data?.authToken;
@@ -248,7 +248,7 @@ namespace Garden
                 }
 
                 var parseSw = Stopwatch.StartNew();
-                ParseResponse(req.downloadHandler.text);
+                ParseResponse(req.downloadHandler.text, locale);
                 if (parseSw.ElapsedMilliseconds > SlowStepMs)
                     Debug.LogWarning($"[INIT SLOW] ConfigService.ParseResponse took {parseSw.ElapsedMilliseconds}ms");
 
@@ -439,7 +439,7 @@ namespace Garden
 
         // ── JSON Parsing (manual for nested maps since JsonUtility can't handle Dictionary) ──
 
-        private void ParseResponse(string json)
+        private void ParseResponse(string json, string locale = "en")
         {
             var root = MiniJson.Deserialize(json) as Dictionary<string, object>;
             if (root == null) return;
@@ -690,6 +690,64 @@ namespace Garden
                             category = itemData.TryGetValue("category", out var cat) ? cat as string : "harvest",
                             spriteKey = itemData.TryGetValue("spriteKey", out var sk) ? sk as string : null
                         };
+                    }
+                }
+            }
+
+            // Translations
+            if (root.TryGetValue("translations", out var transObj) && transObj is Dictionary<string, object> trans)
+            {
+                var dict = new Dictionary<string, string>();
+                foreach (var kv in trans)
+                    dict[kv.Key] = kv.Value as string ?? "";
+                LocalizationService.Instance?.LoadTranslations(dict, locale);
+            }
+
+            if (root.TryGetValue("supportedLocales", out var localesObj) && localesObj is List<object> locales)
+            {
+                var list = locales.Select(l => l as string).Where(l => l != null).ToList();
+                LocalizationService.Instance?.SetSupportedLocales(list);
+            }
+        }
+
+        public void ApplyLocaleOverrides(Dictionary<string, object> overrides)
+        {
+            if (overrides == null) return;
+
+            if (overrides.TryGetValue("items", out var itemsObj) && itemsObj is Dictionary<string, object> items)
+            {
+                foreach (var kv in items)
+                {
+                    if (Items.TryGetValue(kv.Key, out var item) && kv.Value is Dictionary<string, object> fields)
+                    {
+                        if (fields.TryGetValue("displayName", out var dn) && dn is string name)
+                            item.displayName = name;
+                    }
+                }
+            }
+
+            if (overrides.TryGetValue("quests", out var questsObj) && questsObj is Dictionary<string, object> quests)
+            {
+                foreach (var kv in quests)
+                {
+                    if (_questConfigs.TryGetValue(kv.Key, out var quest) && kv.Value is Dictionary<string, object> fields)
+                    {
+                        if (fields.TryGetValue("questName", out var qn) && qn is string qname)
+                            quest.questName = qname;
+                        if (fields.TryGetValue("description", out var desc) && desc is string d)
+                            quest.description = d;
+                    }
+                }
+            }
+
+            if (overrides.TryGetValue("gardens", out var gardensObj) && gardensObj is Dictionary<string, object> gardens)
+            {
+                foreach (var kv in gardens)
+                {
+                    if (_gardenConfigs.TryGetValue(kv.Key, out var garden) && kv.Value is Dictionary<string, object> fields)
+                    {
+                        if (fields.TryGetValue("plantName", out var pn) && pn is string pname)
+                            garden.plantName = pname;
                     }
                 }
             }

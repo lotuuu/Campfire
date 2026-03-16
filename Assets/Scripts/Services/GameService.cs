@@ -103,11 +103,16 @@ namespace Garden
             {
                 var sw = Stopwatch.StartNew();
 
+                // Determine locale: saved preference > device detection > "en"
+                var locale = SaveManager.Instance?.Data?.locale;
+                if (string.IsNullOrEmpty(locale))
+                    locale = LocalizationService.DetectDeviceLocale();
+
                 // Fetch server configs before game state
                 LoadingStatus = "Fetching game config...";
                 if (ConfigService.Instance != null)
                 {
-                    var configLoaded = await ConfigService.Instance.FetchConfigs();
+                    var configLoaded = await ConfigService.Instance.FetchConfigs(locale);
                     BootTimer.Mark($"ConfigService.FetchConfigs done ({sw.ElapsedMilliseconds}ms)");
                     if (sw.ElapsedMilliseconds > SlowStepMs)
                         Debug.LogWarning($"[INIT SLOW] ConfigService.FetchConfigs took {sw.ElapsedMilliseconds}ms");
