@@ -54,6 +54,7 @@
     justify-content: center;
     margin-bottom: var(--spacing-sm);
     align-self: stretch;
+    position: relative;
 }
 
 #interaction-title {
@@ -62,6 +63,7 @@
     -unity-font-style: bold;
     -unity-text-align: upper-center;
     flex-grow: 1;
+    flex-shrink: 1;
 }
 
 #interaction-body {
@@ -439,6 +441,9 @@
 /* ── Water Subscribe Bell ── */
 
 .water-subscribe-bell {
+    position: absolute;
+    right: 0;
+    top: 0;
     width: 53px;
     height: 53px;
     background-color: rgba(60, 40, 20, 0.6);
@@ -448,8 +453,6 @@
     border-color: rgba(140, 100, 50, 0.3);
     border-radius: var(--radius-sm);
     padding: 6px;
-    margin-left: var(--spacing-xs);
-    flex-shrink: 0;
 }
 
 /* ══════════════════════════════════════════════════════
@@ -551,12 +554,6 @@
     margin-left: var(--spacing-xs);
 }
 
-/* Shared reveal animation class */
-.harvest-reveal--visible {
-    opacity: 1;
-    translate: 0 0;
-}
-
 /* ── Quality badge: text + percentage ── */
 .harvest-match-container {
     flex-direction: row;
@@ -569,6 +566,24 @@
     transition-property: opacity, translate;
     transition-duration: 300ms;
     transition-timing-function: ease-out;
+}
+
+/* ── Harvest "tap to close" hint ── */
+.harvest-tap-hint {
+    font-size: var(--font-xs);
+    color: rgb(140, 120, 90);
+    -unity-text-align: upper-center;
+    margin-top: var(--spacing-md);
+    opacity: 0;
+    transition-property: opacity;
+    transition-duration: 400ms;
+    transition-timing-function: ease-out;
+}
+
+/* Shared reveal animation class — must come AFTER elements it overrides */
+.harvest-reveal--visible {
+    opacity: 1;
+    translate: 0 0;
 }
 
 .harvest-match-badge {

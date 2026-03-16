@@ -82,8 +82,14 @@ namespace Garden
 
         // Interaction panel live-refresh
         private CampBuildingType? openInteractionType;
+        private int openInteractionIndex;
         private VisualElement flameBuildGrid;
         private float lastAffordCheckTime;
+
+        // Live-updating progress bar refs (plot/garden popups)
+        private Label progressPctLabel;
+        private VisualElement progressBarFill;
+        private Label progressTimeLabel;
 
         // Events
         public event Action OnApothekeTapped;
@@ -235,6 +241,39 @@ namespace Garden
             {
                 lastAffordCheckTime = Time.time;
                 RefreshFlameBuildGrid();
+            }
+
+            // Live-refresh growth progress bar in plot/garden popups
+            if (progressPctLabel != null && progressBarFill != null)
+            {
+                float fraction = 0f;
+                float remaining = 0f;
+                if (openInteractionType == CampBuildingType.Plot && PlotManager.Instance != null)
+                {
+                    fraction = PlotManager.Instance.GetGrowthProgress(openInteractionIndex);
+                    remaining = PlotManager.Instance.GetRemainingSeconds(openInteractionIndex);
+                }
+                else if (openInteractionType == CampBuildingType.Garden)
+                {
+                    var data = SaveManager.Instance?.Data;
+                    if (data != null && openInteractionIndex < data.gardens.Count)
+                    {
+                        var g = data.gardens[openInteractionIndex];
+                        var gc = ConfigService.Instance?.GetGarden(g.plantName);
+                        if (gc != null && !string.IsNullOrEmpty(g.lastYieldTimeUtc))
+                        {
+                            var lastYield = System.DateTime.Parse(g.lastYieldTimeUtc, null,
+                                System.Globalization.DateTimeStyles.RoundtripKind);
+                            float elapsed = (float)(GameTime.UtcNow - lastYield).TotalHours;
+                            fraction = Mathf.Clamp01(elapsed / gc.yieldIntervalHours);
+                            remaining = Mathf.Max(0f, (gc.yieldIntervalHours - elapsed) * 3600f);
+                        }
+                    }
+                }
+                progressPctLabel.text = $"{Mathf.RoundToInt(fraction * 100)}%";
+                progressBarFill.style.width = new Length(fraction * 100f, LengthUnit.Percent);
+                if (progressTimeLabel != null)
+                    progressTimeLabel.text = remaining > 0f ? FormatTimeRemaining(remaining) + " remaining" : "";
             }
         }
 
@@ -1325,7 +1364,11 @@ namespace Garden
             ClearPaintIcon();
 
             openInteractionType = type;
+            openInteractionIndex = index;
             flameBuildGrid = null;
+            progressPctLabel = null;
+            progressBarFill = null;
+            progressTimeLabel = null;
 
             switch (type)
             {
@@ -2119,6 +2162,22 @@ namespace Garden
                 child.schedule.Execute(() =>
                     child.AddToClassList("harvest-reveal--visible")).StartingIn(delay);
             }
+
+            // "tap to close" hint at bottom + make entire panel close on tap
+            var tapHint = new Label("tap anywhere to close");
+            tapHint.AddToClassList("harvest-tap-hint");
+            interactionBody.Add(tapHint);
+            int hintDelay = axisDelay + axisContainer.childCount * 80 + 200;
+            tapHint.schedule.Execute(() =>
+                tapHint.AddToClassList("harvest-reveal--visible")).StartingIn(hintDelay);
+
+            interactionPanel.RegisterCallback<ClickEvent>(OnHarvestTapToClose);
+        }
+
+        private void OnHarvestTapToClose(ClickEvent evt)
+        {
+            interactionPanel.UnregisterCallback<ClickEvent>(OnHarvestTapToClose);
+            CloseInteractionPanel();
         }
 
         private void BuildSeedPicker(int plotIndex)
@@ -2587,12 +2646,16 @@ namespace Garden
             interactionBody.Add(barTrack);
 
             // Time remaining
-            if (remainingSeconds > 0f)
-            {
-                var timeLabel = new Label(FormatTimeRemaining(remainingSeconds) + " remaining");
-                timeLabel.AddToClassList("interaction-info");
-                interactionBody.Add(timeLabel);
-            }
+            var timeLabel = new Label(remainingSeconds > 0f
+                ? FormatTimeRemaining(remainingSeconds) + " remaining"
+                : "");
+            timeLabel.AddToClassList("interaction-info");
+            interactionBody.Add(timeLabel);
+
+            // Store refs for live updates
+            progressPctLabel = pctLabel;
+            progressBarFill = barFill;
+            progressTimeLabel = timeLabel;
         }
 
         private static void TrySetSprite(VisualElement el, string spriteKey)
