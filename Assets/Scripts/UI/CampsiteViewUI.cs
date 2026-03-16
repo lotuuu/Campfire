@@ -2247,12 +2247,20 @@ namespace Garden
         private void ShowVaseInteraction(int index)
         {
             var vase = SaveManager.Instance.Data.vases[index];
+            interactionTitle.text = "Water Vase";
+
+            // Water level bar (shared across all states)
+            float waterFraction = vase.state == VaseState.Full
+                ? 1f
+                : vase.state == VaseState.Filling
+                    ? VaseManager.Instance.GetFillProgress(index)
+                    : 0f;
+            AddWaterLevelBar(waterFraction, vase.currentWater, vase.capacity, vase.state);
 
             switch (vase.state)
             {
                 case VaseState.Empty:
-                    interactionTitle.text = "Water Vase";
-                    var emptyLabel = new Label($"Empty - capacity {vase.capacity}");
+                    var emptyLabel = new Label("Empty");
                     emptyLabel.AddToClassList("interaction-info");
                     interactionBody.Add(emptyLabel);
 
@@ -2271,17 +2279,23 @@ namespace Garden
                         RebuildGrid();
                         ShowInteraction(CampBuildingType.Vase, index);
                     })
-                    { text = $"Send Mallum ({available}/{total})" };
+                    { text = available > 0 ? $"Send Mallum to Fill" : "No Mallums Available" };
                     collectBtn.SetEnabled(available > 0);
                     collectBtn.AddToClassList("interaction-btn-primary");
                     interactionActions.Add(collectBtn);
+
+                    if (available > 0)
+                    {
+                        var mallumInfo = new Label($"{available} of {total} Mallums idle");
+                        mallumInfo.AddToClassList("interaction-info");
+                        interactionBody.Add(mallumInfo);
+                    }
                     break;
 
                 case VaseState.Filling:
-                    interactionTitle.text = "Water Vase";
                     float fillRemaining = VaseManager.Instance.GetRemainingSeconds(index);
-                    var fillingLabel = new Label($"Mallum is collecting... {FormatTimeRemaining(fillRemaining)} left");
-                    fillingLabel.AddToClassList("interaction-info");
+                    var fillingLabel = new Label($"Mallum fetching water \u2014 {FormatTimeRemaining(fillRemaining)}");
+                    fillingLabel.AddToClassList("interaction-info-highlight");
                     interactionBody.Add(fillingLabel);
 
                     int vaseDrinkCount = MallumManager.Instance != null ? MallumManager.Instance.GetVaseSpeedItemCount() : 0;
@@ -2296,31 +2310,33 @@ namespace Garden
                         }
                     }
                     int capturedMallumIdx = fetchingMallumIndex;
-                    var finishVaseBtn = new Button(() =>
+                    if (vaseDrinkCount > 0 || CurrencyManager.FreeMode)
                     {
-                        if (MallumManager.Instance != null && capturedMallumIdx >= 0 && MallumManager.Instance.SpeedUpWaterFetch(capturedMallumIdx))
+                        var finishVaseBtn = new Button(() =>
                         {
-                            RebuildGrid();
-                            ShowInteraction(CampBuildingType.Vase, index);
-                        }
-                    })
-                    { text = $"Finish Now ({vaseDrinkCount} drinks)" };
-                    finishVaseBtn.SetEnabled((vaseDrinkCount > 0 && fetchingMallumIndex >= 0) || CurrencyManager.FreeMode);
-                    finishVaseBtn.AddToClassList("interaction-btn-primary");
-                    interactionActions.Add(finishVaseBtn);
+                            if (MallumManager.Instance != null && capturedMallumIdx >= 0 && MallumManager.Instance.SpeedUpWaterFetch(capturedMallumIdx))
+                            {
+                                RebuildGrid();
+                                ShowInteraction(CampBuildingType.Vase, index);
+                            }
+                        })
+                        { text = $"Speed Up ({vaseDrinkCount})" };
+                        finishVaseBtn.SetEnabled(fetchingMallumIndex >= 0 || CurrencyManager.FreeMode);
+                        finishVaseBtn.AddToClassList("interaction-btn-primary");
+                        interactionActions.Add(finishVaseBtn);
+                    }
                     break;
 
                 case VaseState.Full:
-                    interactionTitle.text = "Water Vase";
-                    var fullLabel = new Label($"Water: {vase.currentWater}/{vase.capacity}");
-                    fullLabel.AddToClassList("interaction-info");
+                    var fullLabel = new Label("Full! Ready to water your plants.");
+                    fullLabel.AddToClassList("interaction-info-highlight");
                     interactionBody.Add(fullLabel);
 
                     var waterBtn = new Button(() =>
                     {
                         EnterWateringMode(index);
                     })
-                    { text = "Water a plot" };
+                    { text = "Water a Plant" };
                     waterBtn.AddToClassList("interaction-btn-primary");
                     interactionActions.Add(waterBtn);
                     break;
@@ -2331,7 +2347,27 @@ namespace Garden
                 var paintBtn = new Button(() => ShowSkinSelector(CampBuildingType.Vase, index)) { text = "Paint" };
                 interactionActions.Add(paintBtn);
             }
+        }
 
+        private void AddWaterLevelBar(float fraction, int current, int capacity, VaseState state)
+        {
+            // Water counter
+            var waterCount = new Label($"{current} / {capacity}");
+            waterCount.AddToClassList("vase-water-count");
+            interactionBody.Add(waterCount);
+
+            // Level bar track
+            var barTrack = new VisualElement();
+            barTrack.AddToClassList("vase-level-track");
+            var barFill = new VisualElement();
+            barFill.AddToClassList("vase-level-fill");
+            if (state == VaseState.Filling)
+                barFill.AddToClassList("vase-level-fill--filling");
+            else if (state == VaseState.Full)
+                barFill.AddToClassList("vase-level-fill--full");
+            barFill.style.width = new Length(fraction * 100f, LengthUnit.Percent);
+            barTrack.Add(barFill);
+            interactionBody.Add(barTrack);
         }
 
         private void ShowGardenInteraction(int index)

@@ -510,3 +510,44 @@
     width: 15%;
     -unity-text-align: upper-center;
 }
+
+/* ── Vase Water Level Bar ── */
+
+.vase-water-count {
+    font-size: var(--font-lg);
+    color: var(--color-water);
+    -unity-font-style: bold;
+    -unity-text-align: upper-center;
+    margin-bottom: var(--spacing-xs);
+}
+
+.vase-level-track {
+    align-self: stretch;
+    height: 24px;
+    background-color: rgba(40, 60, 80, 0.3);
+    border-radius: 12px;
+    border-width: 1px;
+    border-color: rgba(100, 180, 240, 0.2);
+    overflow: hidden;
+    margin-bottom: var(--spacing-sm);
+}
+
+.vase-level-fill {
+    height: 100%;
+    border-radius: 12px;
+    background-color: rgba(60, 100, 140, 0.3);
+    transition-property: width;
+    transition-duration: 0.3s;
+}
+
+.vase-level-fill--filling {
+    background-color: rgba(100, 180, 240, 0.45);
+    border-width: 1px;
+    border-color: rgba(100, 180, 240, 0.4);
+}
+
+.vase-level-fill--full {
+    background-color: rgba(100, 180, 240, 0.6);
+    border-width: 1px;
+    border-color: rgba(100, 180, 240, 0.5);
+}
