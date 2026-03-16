@@ -233,7 +233,7 @@
                         <ui:ScrollView name="settings-scroll" vertical-scroller-visibility="Hidden" horizontal-scroller-visibility="Hidden" touch-scroll-type="Clamped" elasticity="0">
 
                         <!-- Audio section -->
-                        <ui:Label text="AUDIO" class="settings-section-header" />
+                        <ui:Label text="AUDIO" class="settings-section-header settings-section-first" />
                         <ui:VisualElement class="settings-slider-row">
                             <ui:Label text="Music" class="settings-slider-label" />
                             <ui:Slider name="music-slider" low-value="0" high-value="100" value="100" />
