@@ -6,10 +6,17 @@ defmodule CampFireWeb.Plugs.DebugLogErrors do
   @impl true
   def init(opts), do: opts
 
+  # 404s that are expected during fresh-account initialization and not worth logging
+  @expected_init_404s [
+    {"GET", "/economy/state"},
+    {"GET", "/weather/current"},
+    {"GET", "/weather/forecast"}
+  ]
+
   @impl true
   def call(conn, _opts) do
     register_before_send(conn, fn conn ->
-      if conn.status >= 400 do
+      if conn.status >= 400 and not expected_init_404?(conn) do
         player_uid =
           case conn.assigns do
             %{current_player: %{uid: uid}} -> uid
@@ -37,6 +44,10 @@ defmodule CampFireWeb.Plugs.DebugLogErrors do
 
       conn
     end)
+  end
+
+  defp expected_init_404?(conn) do
+    conn.status == 404 and {conn.method, conn.request_path} in @expected_init_404s
   end
 
   defp extract_error_reason(resp_body) do
