@@ -17,7 +17,7 @@ defmodule CampFireWeb.Router do
   end
 
   pipeline :auth_rate_limit do
-    plug CampFireWeb.Plugs.RateLimit, max: 5, window_ms: 60_000
+    plug CampFireWeb.Plugs.RateLimit, max: 20, window_ms: 60_000
   end
 
   pipeline :authenticated do
