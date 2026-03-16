@@ -1681,20 +1681,39 @@ namespace Garden
 
                 case PlotState.Growing:
                     interactionTitle.text = PlotManager.GetSeedDisplayName(plot.seedItemKey);
-                    float remaining = PlotManager.Instance.GetRemainingSeconds(index);
-                    var progressLabel = new Label($"Growing... {FormatTimeRemaining(remaining)} left");
-                    progressLabel.AddToClassList("interaction-info");
-                    interactionBody.Add(progressLabel);
 
+                    // Growth progress bar
+                    float growthFraction = PlotManager.Instance.GetGrowthProgress(index);
+                    float remaining = PlotManager.Instance.GetRemainingSeconds(index);
+                    AddGrowthProgressBar(growthFraction, remaining);
+
+                    // Waterings count
                     var wateringsLabel = new Label($"Waterings: {plot.waterCount}");
                     wateringsLabel.AddToClassList("interaction-info");
                     interactionBody.Add(wateringsLabel);
 
-                    AddWaterSubscribeToggle(index, plot);
+                    // Fertilized status
+                    if (plot.fertilized)
+                    {
+                        var fertLabel = new Label("\u2713 Fertilized \u2014 +50% yield");
+                        fertLabel.AddToClassList("interaction-info-highlight");
+                        interactionBody.Add(fertLabel);
+                    }
 
+                    // Applied potions
+                    if (plot.potions != null && plot.potions.Count > 0)
+                    {
+                        var appliedNames = string.Join(", ",
+                            plot.potions.Select(p => ConfigService.Instance?.GetItemDisplayName(p) ?? p));
+                        var appliedLabel = new Label($"Potions: {appliedNames}");
+                        appliedLabel.AddToClassList("interaction-info");
+                        interactionBody.Add(appliedLabel);
+                    }
+
+                    AddWaterSubscribeToggle(index, plot);
                     AddGrowthRecipeSection(plot.seedItemKey);
 
-                    // Fertilize button
+                    // Fertilize button (only when not yet fertilized)
                     if (!plot.fertilized)
                     {
                         int fertCount = PlotManager.Instance != null ? PlotManager.Instance.GetFertilizerCount() : 0;
@@ -1707,38 +1726,50 @@ namespace Garden
                         fertBtn.AddToClassList("interaction-btn-primary");
                         interactionActions.Add(fertBtn);
                     }
-                    else
-                    {
-                        var fertLabel = new Label("Fertilized! +50% yield");
-                        fertLabel.AddToClassList("interaction-info");
-                        interactionBody.Add(fertLabel);
-                    }
 
+                    // Speed-up button (only when player has items)
                     int plotPotionCount = PlotManager.Instance != null ? PlotManager.Instance.GetSpeedItemCount() : 0;
-                    var finishBtn = new Button(() => _ = SpeedUpAndHarvest(index))
-                    { text = $"Finish Now ({plotPotionCount} potions)" };
-                    finishBtn.SetEnabled(plotPotionCount > 0 || CurrencyManager.FreeMode);
-                    finishBtn.AddToClassList("interaction-btn-primary");
-                    interactionActions.Add(finishBtn);
-
-                    // Show applied weather potions
-                    if (plot.potions != null && plot.potions.Count > 0)
+                    if (plotPotionCount > 0 || CurrencyManager.FreeMode)
                     {
-                        var appliedNames = string.Join(", ",
-                            plot.potions.Select(p => ConfigService.Instance?.GetItemDisplayName(p) ?? p));
-                        var appliedLabel = new Label($"Potions: {appliedNames}");
-                        appliedLabel.AddToClassList("interaction-info");
-                        interactionBody.Add(appliedLabel);
+                        var finishBtn = new Button(() => _ = SpeedUpAndHarvest(index))
+                        { text = $"Speed Up ({plotPotionCount})" };
+                        finishBtn.SetEnabled(true);
+                        finishBtn.AddToClassList("interaction-btn-primary");
+                        interactionActions.Add(finishBtn);
                     }
 
-                    // Weather potion buttons — show for each potion in inventory
+                    // Weather potion buttons
                     AddWeatherPotionButtons(index, plot);
 
                     break;
 
                 case PlotState.Mature:
-                    interactionTitle.text = $"{PlotManager.GetSeedDisplayName(plot.seedItemKey)} - Ready!";
+                    interactionTitle.text = PlotManager.GetSeedDisplayName(plot.seedItemKey);
+
+                    // Yield preview
+                    var seed = ConfigService.Instance?.GetSeed(plot.seedItemKey);
+                    if (seed != null)
+                    {
+                        string dropName = ConfigService.Instance.GetItemDisplayName(seed.harvest_item_key) ?? seed.harvest_item_key;
+                        var yieldPreview = new Label($"{dropName} x{seed.minDrops}\u2013{seed.maxDrops}");
+                        yieldPreview.AddToClassList("plot-yield-preview");
+                        interactionBody.Add(yieldPreview);
+                    }
+
+                    // Ready badge
+                    var readyBadge = new Label("Ready to Harvest!");
+                    readyBadge.AddToClassList("plot-ready-badge");
+                    interactionBody.Add(readyBadge);
+
+                    if (plot.fertilized)
+                    {
+                        var fertNote = new Label("\u2713 Fertilized \u2014 +50% yield");
+                        fertNote.AddToClassList("interaction-info-highlight");
+                        interactionBody.Add(fertNote);
+                    }
+
                     AddGrowthRecipeSection(plot.seedItemKey);
+
                     var harvestBtn = new Button(() =>
                     {
                         _ = HarvestAndShow(index);
@@ -2250,11 +2281,10 @@ namespace Garden
             interactionTitle.text = "Water Vase";
 
             // Water level bar (shared across all states)
-            float waterFraction = vase.state == VaseState.Full
-                ? 1f
-                : vase.state == VaseState.Filling
-                    ? VaseManager.Instance.GetFillProgress(index)
-                    : 0f;
+            // Use actual water level, not just state — state can lag behind after watering
+            float waterFraction = vase.state == VaseState.Filling
+                ? VaseManager.Instance.GetFillProgress(index)
+                : vase.capacity > 0 ? (float)vase.currentWater / vase.capacity : 0f;
             AddWaterLevelBar(waterFraction, vase.currentWater, vase.capacity, vase.state);
 
             switch (vase.state)
@@ -2328,17 +2358,54 @@ namespace Garden
                     break;
 
                 case VaseState.Full:
-                    var fullLabel = new Label("Full! Ready to water your plants.");
-                    fullLabel.AddToClassList("interaction-info-highlight");
-                    interactionBody.Add(fullLabel);
-
-                    var waterBtn = new Button(() =>
+                    bool actuallyFull = vase.currentWater >= vase.capacity;
+                    if (actuallyFull)
                     {
-                        EnterWateringMode(index);
-                    })
-                    { text = "Water a Plant" };
-                    waterBtn.AddToClassList("interaction-btn-primary");
-                    interactionActions.Add(waterBtn);
+                        var fullLabel = new Label("Full! Ready to water your plants.");
+                        fullLabel.AddToClassList("interaction-info-highlight");
+                        interactionBody.Add(fullLabel);
+                    }
+                    else if (vase.currentWater > 0)
+                    {
+                        var partialLabel = new Label($"{vase.currentWater} water remaining");
+                        partialLabel.AddToClassList("interaction-info");
+                        interactionBody.Add(partialLabel);
+                    }
+                    else
+                    {
+                        var depletedLabel = new Label("Empty \u2014 send a Mallum to refill");
+                        depletedLabel.AddToClassList("interaction-info");
+                        interactionBody.Add(depletedLabel);
+                    }
+
+                    if (vase.currentWater > 0)
+                    {
+                        var waterBtn = new Button(() =>
+                        {
+                            EnterWateringMode(index);
+                        })
+                        { text = "Water a Plant" };
+                        waterBtn.AddToClassList("interaction-btn-primary");
+                        interactionActions.Add(waterBtn);
+                    }
+
+                    // Offer refill if not full
+                    if (!actuallyFull)
+                    {
+                        int refillAvailable = MallumManager.Instance != null ? MallumManager.Instance.GetAvailableMallumCount() : 0;
+                        var refillBtn = new Button(() =>
+                        {
+                            if (MallumManager.Instance != null)
+                                MallumManager.Instance.SendToFetchWater(index);
+                            else
+                                VaseManager.Instance.SendToCollect(index);
+                            RebuildGrid();
+                            ShowInteraction(CampBuildingType.Vase, index);
+                        })
+                        { text = "Send Mallum to Refill" };
+                        refillBtn.SetEnabled(refillAvailable > 0);
+                        interactionActions.Add(refillBtn);
+                    }
                     break;
             }
 
@@ -2370,6 +2437,39 @@ namespace Garden
             interactionBody.Add(barTrack);
         }
 
+        private void AddGrowthProgressBar(float fraction, float remainingSeconds)
+        {
+            // Progress percentage
+            var pctLabel = new Label($"{Mathf.RoundToInt(fraction * 100)}%");
+            pctLabel.AddToClassList("growth-progress-pct");
+            interactionBody.Add(pctLabel);
+
+            // Progress bar
+            var barTrack = new VisualElement();
+            barTrack.AddToClassList("growth-progress-track");
+            var barFill = new VisualElement();
+            barFill.AddToClassList("growth-progress-fill");
+            barFill.style.width = new Length(fraction * 100f, LengthUnit.Percent);
+            barTrack.Add(barFill);
+            interactionBody.Add(barTrack);
+
+            // Time remaining
+            if (remainingSeconds > 0f)
+            {
+                var timeLabel = new Label(FormatTimeRemaining(remainingSeconds) + " remaining");
+                timeLabel.AddToClassList("interaction-info");
+                interactionBody.Add(timeLabel);
+            }
+        }
+
+        private static void TrySetSprite(VisualElement el, string spriteKey)
+        {
+            if (el == null || SpriteService.Instance == null) return;
+            var tex = SpriteService.Instance.GetTexture(spriteKey);
+            if (tex != null)
+                el.style.backgroundImage = tex;
+        }
+
         private void ShowGardenInteraction(int index)
         {
             var garden = SaveManager.Instance.Data.gardens[index];
@@ -2383,12 +2483,44 @@ namespace Garden
 
             interactionTitle.text = garden.plantName;
 
-            var stateLabel = new Label(garden.mature ? "Mature - yielding fruit" : "Growing...");
-            stateLabel.AddToClassList("interaction-info");
-            interactionBody.Add(stateLabel);
+            var gardenConfig = ConfigService.Instance?.GetGarden(garden.plantName);
 
             if (garden.mature)
             {
+                // Yield info
+                if (gardenConfig != null)
+                {
+                    string yieldName = ConfigService.Instance.GetItemDisplayName(gardenConfig.yieldItem) ?? gardenConfig.yieldItem;
+                    var yieldLabel = new Label($"Yields {yieldName} x{gardenConfig.yieldAmount}");
+                    yieldLabel.AddToClassList("plot-yield-preview");
+                    interactionBody.Add(yieldLabel);
+                }
+
+                // Next yield timer
+                if (gardenConfig != null && !string.IsNullOrEmpty(garden.lastYieldTimeUtc))
+                {
+                    var lastYield = System.DateTime.Parse(garden.lastYieldTimeUtc, null,
+                        System.Globalization.DateTimeStyles.RoundtripKind);
+                    float elapsedHours = (float)(GameTime.UtcNow - lastYield).TotalHours;
+                    float yieldProgress = Mathf.Clamp01(elapsedHours / gardenConfig.yieldIntervalHours);
+                    float remainingSec = Mathf.Max(0f, (gardenConfig.yieldIntervalHours - elapsedHours) * 3600f);
+
+                    if (yieldProgress >= 1f)
+                    {
+                        var readyLabel = new Label("Fruit ready to collect!");
+                        readyLabel.AddToClassList("plot-ready-badge");
+                        interactionBody.Add(readyLabel);
+                    }
+                    else
+                    {
+                        AddGrowthProgressBar(yieldProgress, remainingSec);
+                        var yieldTimerLabel = new Label($"Next fruit in {FormatTimeRemaining(remainingSec)}");
+                        yieldTimerLabel.AddToClassList("interaction-info");
+                        interactionBody.Add(yieldTimerLabel);
+                    }
+                }
+
+                // Fertilize
                 if (!garden.fertilized)
                 {
                     int fertCount = SaveManager.Instance.Data.inventory.Find(i => i.itemKey == "fertilizer")?.count ?? 0;
@@ -2403,10 +2535,18 @@ namespace Garden
                 }
                 else
                 {
-                    var fertLabel = new Label("Fertilized! +50% next yield");
-                    fertLabel.AddToClassList("interaction-info");
+                    var fertLabel = new Label("\u2713 Fertilized \u2014 +50% next yield");
+                    fertLabel.AddToClassList("interaction-info-highlight");
                     interactionBody.Add(fertLabel);
                 }
+            }
+            else
+            {
+                // Growing state with progress bar
+                float progress = GardenManager.Instance.GetGrowthProgress(index);
+                float growthDuration = gardenConfig != null ? gardenConfig.growthDurationHours : 1f;
+                float remainingSec = Mathf.Max(0f, (1f - progress) * growthDuration * 3600f);
+                AddGrowthProgressBar(progress, remainingSec);
             }
 
         }
@@ -2426,11 +2566,38 @@ namespace Garden
         {
             if (MallumManager.Instance == null) return;
             var houseConfig = ConfigService.Instance.MallumHouseConfig;
-            interactionTitle.text = "House";
+            interactionTitle.text = "Mallum House";
 
-            var infoLabel = new Label($"Houses {houseConfig.MallumsPerHouse} {(houseConfig.MallumsPerHouse == 1 ? "Mallum" : "Mallums")}");
-            infoLabel.AddToClassList("interaction-info");
-            interactionBody.Add(infoLabel);
+            // Mallum count per house
+            int perHouse = houseConfig.MallumsPerHouse;
+            var capacityLabel = new Label($"{perHouse} {(perHouse == 1 ? "Mallum" : "Mallums")} per house");
+            capacityLabel.AddToClassList("interaction-info");
+            interactionBody.Add(capacityLabel);
+
+            // Total mallum overview
+            int totalMallums = MallumManager.Instance.GetTotalMallumCount();
+            int idleMallums = MallumManager.Instance.GetAvailableMallumCount();
+            int houseCount = SaveManager.Instance.Data.mallumHouses.Count;
+            int maxMallums = houseConfig.GetMaxMallums(houseCount);
+
+            var totalLabel = new Label($"{totalMallums} / {maxMallums} Mallums");
+            totalLabel.AddToClassList("plot-yield-preview");
+            interactionBody.Add(totalLabel);
+
+            // Status breakdown
+            int busy = totalMallums - idleMallums;
+            if (busy > 0)
+            {
+                var statusLabel = new Label($"{idleMallums} idle \u00B7 {busy} on task");
+                statusLabel.AddToClassList("interaction-info");
+                interactionBody.Add(statusLabel);
+            }
+            else
+            {
+                var statusLabel = new Label("All Mallums idle");
+                statusLabel.AddToClassList("interaction-info");
+                interactionBody.Add(statusLabel);
+            }
 
             if (SkinManager.Instance != null)
             {
@@ -2708,11 +2875,30 @@ namespace Garden
             if (index < 0 || index >= data.birds.Count) return;
 
             var bird = data.birds[index];
-            interactionTitle.text = "Bird";
+            interactionTitle.text = "Bird Visit";
 
-            var info = new Label($"A bird has brought you {bird.itemCount}x {ConfigService.Instance.GetItemDisplayName(bird.itemKey)}!");
-            info.AddToClassList("interaction-info");
-            interactionBody.Add(info);
+            // Gift display
+            string itemName = ConfigService.Instance.GetItemDisplayName(bird.itemKey) ?? bird.itemKey;
+
+            var giftRow = new VisualElement();
+            giftRow.AddToClassList("harvest-yield-row");
+
+            // Item icon
+            string spriteKey = SeedToSpriteKey(bird.itemKey);
+            var iconEl = new VisualElement();
+            iconEl.AddToClassList("harvest-seed-icon");
+            TrySetSprite(iconEl, $"items/{spriteKey}/seed");
+            giftRow.Add(iconEl);
+
+            var giftLabel = new Label($"{itemName} x{bird.itemCount}");
+            giftLabel.AddToClassList("harvest-yield-label");
+            giftRow.Add(giftLabel);
+
+            interactionBody.Add(giftRow);
+
+            var flavorLabel = new Label("A bird dropped this off for you!");
+            flavorLabel.AddToClassList("interaction-info");
+            interactionBody.Add(flavorLabel);
 
             var collectBtn = new Button(() =>
             {
@@ -2725,7 +2911,7 @@ namespace Garden
                 }
                 CloseInteractionPanel();
             })
-            { text = "Collect Seeds" };
+            { text = "Collect" };
             collectBtn.AddToClassList("interaction-btn-primary");
             interactionActions.Add(collectBtn);
 

@@ -551,3 +551,56 @@
     border-width: 1px;
     border-color: rgba(100, 180, 240, 0.5);
 }
+
+/* ── Growth Progress Bar ── */
+
+.growth-progress-pct {
+    font-size: var(--font-lg);
+    color: rgb(120, 200, 80);
+    -unity-font-style: bold;
+    -unity-text-align: upper-center;
+    margin-bottom: var(--spacing-xs);
+}
+
+.growth-progress-track {
+    align-self: stretch;
+    height: 20px;
+    background-color: rgba(40, 60, 30, 0.3);
+    border-radius: 10px;
+    border-width: 1px;
+    border-color: rgba(120, 180, 60, 0.2);
+    overflow: hidden;
+    margin-bottom: var(--spacing-xs);
+}
+
+.growth-progress-fill {
+    height: 100%;
+    border-radius: 10px;
+    background-color: rgba(120, 180, 60, 0.5);
+    border-width: 1px;
+    border-color: rgba(120, 180, 60, 0.4);
+    transition-property: width;
+    transition-duration: 0.3s;
+}
+
+/* ── Plot Yield Preview & Ready Badge ── */
+
+.plot-yield-preview {
+    font-size: var(--font-md);
+    color: rgb(220, 200, 160);
+    -unity-font-style: bold;
+    -unity-text-align: upper-center;
+    margin-bottom: var(--spacing-xs);
+}
+
+.plot-ready-badge {
+    font-size: var(--font-md);
+    color: rgb(120, 200, 80);
+    -unity-font-style: bold;
+    -unity-text-align: upper-center;
+    background-color: rgba(120, 200, 80, 0.12);
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--spacing-sm);
+    align-self: center;
+}
