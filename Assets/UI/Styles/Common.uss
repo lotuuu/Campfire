@@ -237,6 +237,7 @@
     flex-direction: row;
     flex-wrap: wrap;
     margin-top: var(--spacing-sm);
+    margin-bottom: 40px;
     justify-content: center;
     display: none;
 }

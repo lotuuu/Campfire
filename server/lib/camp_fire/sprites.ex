@@ -1,8 +1,6 @@
 defmodule CampFire.Sprites do
-  @sprites_dir "priv/static/assets/sprites"
-
   def sprites_dir do
-    Application.app_dir(:camp_fire, @sprites_dir)
+    Path.join(to_string(:code.priv_dir(:camp_fire)), "static/assets/sprites")
   end
 
   def list_sprites do

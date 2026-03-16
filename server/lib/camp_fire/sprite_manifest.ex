@@ -1,14 +1,15 @@
 defmodule CampFire.SpriteManifest do
-  @sprites_dir "priv/static/assets/sprites"
+  require Logger
 
   def build do
-    base = Application.app_dir(:camp_fire, @sprites_dir)
+    base = Path.join(to_string(:code.priv_dir(:camp_fire)), "static/assets/sprites")
 
     if File.dir?(base) do
-      base
-      |> scan_dir("")
-      |> Map.new()
+      result = base |> scan_dir("") |> Map.new()
+      Logger.info("SpriteManifest: found #{map_size(result)} sprites in #{base}")
+      result
     else
+      Logger.warning("SpriteManifest: directory not found at #{base}")
       %{}
     end
   end
