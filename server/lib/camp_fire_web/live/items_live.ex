@@ -4,8 +4,9 @@ defmodule CampFireWeb.ItemsLive do
   alias CampFire.Admin
   alias CampFire.Game.SeedConfig
 
-  @sub_tabs ~w(seeds pigments potions fertilizer skins)a
-  @recipe_categories %{pigments: "Pigment", potions: "Potion", fertilizer: "Material"}
+  @sub_tabs ~w(seeds pigments consumables fertilizer skins)a
+  @recipe_categories %{pigments: "Pigment", fertilizer: "Material"}
+  @consumable_categories ~w(potion consumable)
 
   def mount(_params, _session, socket) do
     {:ok,
@@ -17,6 +18,7 @@ defmodule CampFireWeb.ItemsLive do
        seed_names: Admin.list_seeds() |> Enum.map(& &1.item.item_key) |> Enum.sort(),
        recipes: Admin.list_recipes(),
        skins: Admin.list_skins(),
+       consumable_items: load_consumable_items(),
        editing: nil,
        form: nil,
        recipe_json: nil,
@@ -57,7 +59,7 @@ defmodule CampFireWeb.ItemsLive do
   end
 
   defp handle_edit_params(%{"id" => name}, %{assigns: %{sub_tab: sub_tab}} = socket)
-       when sub_tab in [:pigments, :potions, :fertilizer] do
+       when sub_tab in [:pigments, :fertilizer] do
     case Admin.get_recipe(name) do
       nil ->
         assign(socket, editing: nil, form: nil, ingredients: [])
@@ -90,6 +92,17 @@ defmodule CampFireWeb.ItemsLive do
             cost_quantity: to_string(skin["cost_quantity"] || 1)
           }
         )
+    end
+  end
+
+  defp handle_edit_params(%{"id" => id_str}, %{assigns: %{sub_tab: :consumables}} = socket) do
+    case Integer.parse(id_str) do
+      {id, _} ->
+        case CampFire.Game.get_item(id) do
+          nil -> assign(socket, editing: nil)
+          item -> assign(socket, editing: item)
+        end
+      :error -> assign(socket, editing: nil)
     end
   end
 
@@ -330,6 +343,83 @@ defmodule CampFireWeb.ItemsLive do
   end
 
   # ---------------------------------------------------------------------------
+  # Consumable events
+  # ---------------------------------------------------------------------------
+
+  def handle_event("edit_consumable", %{"id" => id}, socket) do
+    {:noreply, push_patch(socket, to: "/admin/items/consumables/#{id}/edit")}
+  end
+
+  def handle_event("new_consumable", _params, socket) do
+    alias CampFire.Game.Item
+    alias CampFire.Repo
+
+    suffix = System.unique_integer([:positive])
+    key = "new_consumable_#{suffix}"
+
+    case %Item{}
+         |> Item.changeset(%{item_key: key, display_name: "New Consumable #{suffix}", category: "consumable"})
+         |> Repo.insert() do
+      {:ok, item} ->
+        CampFire.ConfigCache.refresh()
+        {:noreply,
+         socket
+         |> assign(consumable_items: load_consumable_items())
+         |> push_patch(to: "/admin/items/consumables/#{item.id}/edit")}
+
+      {:error, _} ->
+        {:noreply, put_flash(socket, :error, "Failed to create consumable")}
+    end
+  end
+
+  def handle_event("save_consumable", params, socket) do
+    alias CampFire.Game.Item
+
+    item = socket.assigns.editing
+    attrs = %{
+      item_key: String.trim(params["item_key"] || item.item_key),
+      display_name: String.trim(params["display_name"] || item.display_name),
+      category: params["category"] || item.category
+    }
+
+    case item |> Item.changeset(attrs) |> CampFire.Repo.update() do
+      {:ok, _} ->
+        CampFire.ConfigCache.refresh()
+        {:noreply,
+         socket
+         |> put_flash(:info, "Consumable saved")
+         |> assign(consumable_items: load_consumable_items())
+         |> push_patch(to: "/admin/items/consumables")}
+
+      {:error, _} ->
+        {:noreply, put_flash(socket, :error, "Failed to save consumable")}
+    end
+  end
+
+  def handle_event("delete_consumable", %{"id" => id}, socket) do
+    alias CampFire.Game.Item
+
+    case CampFire.Repo.get(Item, id) do
+      nil ->
+        {:noreply, put_flash(socket, :error, "Item not found")}
+
+      item ->
+        case CampFire.Repo.delete(item) do
+          {:ok, _} ->
+            CampFire.ConfigCache.refresh()
+            {:noreply,
+             socket
+             |> put_flash(:info, "Consumable deleted")
+             |> assign(consumable_items: load_consumable_items())
+             |> push_patch(to: "/admin/items/consumables")}
+
+          {:error, _} ->
+            {:noreply, put_flash(socket, :error, "Failed to delete consumable")}
+        end
+    end
+  end
+
+  # ---------------------------------------------------------------------------
   # Skin events
   # ---------------------------------------------------------------------------
 
@@ -425,6 +515,12 @@ defmodule CampFireWeb.ItemsLive do
   # Helpers
   # ---------------------------------------------------------------------------
 
+  defp load_consumable_items do
+    alias CampFire.Game
+    Enum.flat_map(@consumable_categories, &Game.list_items_by_category/1)
+    |> Enum.sort_by(& &1.item_key)
+  end
+
   defp refresh_seeds(socket) do
     seeds = Admin.list_seeds()
     assign(socket,
@@ -496,7 +592,7 @@ defmodule CampFireWeb.ItemsLive do
 
       <%!-- Sub-tab bar --%>
       <div class="flex border-b mb-6">
-        <%= for tab <- ~w(seeds pigments potions fertilizer skins)a do %>
+        <%= for tab <- ~w(seeds pigments consumables fertilizer skins)a do %>
           <button
             phx-click="switch_tab"
             phx-value-tab={tab}
@@ -511,8 +607,10 @@ defmodule CampFireWeb.ItemsLive do
       <%= case @sub_tab do %>
         <% :seeds -> %>
           {render_seeds(assigns)}
-        <% tab when tab in [:pigments, :potions, :fertilizer] -> %>
+        <% tab when tab in [:pigments, :fertilizer] -> %>
           {render_recipes(assigns)}
+        <% :consumables -> %>
+          {render_consumables(assigns)}
         <% :skins -> %>
           {render_skins(assigns)}
       <% end %>
@@ -773,6 +871,86 @@ defmodule CampFireWeb.ItemsLive do
           <% end %>
           <%= if @items == [] do %>
             <tr><td colspan="4" class="px-4 py-6 text-center text-gray-400 italic">No items configured yet.</td></tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+    """
+  end
+
+  # ---------------------------------------------------------------------------
+  # Consumables sub-tab
+  # ---------------------------------------------------------------------------
+
+  defp render_consumables(assigns) do
+    ~H"""
+    <div>
+      <div class="flex justify-end mb-4">
+        <button phx-click="new_consumable" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+          + New Consumable
+        </button>
+      </div>
+
+      <%= if @editing do %>
+        <div class="bg-white border rounded-lg p-6 mb-6">
+          <h3 class="text-lg font-semibold mb-4">Edit: {@editing.item_key}</h3>
+          <form phx-submit="save_consumable" class="space-y-4">
+            <div class="grid grid-cols-3 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Item Key</label>
+                <input type="text" name="item_key" value={@editing.item_key}
+                  class="mt-1 block w-full border rounded px-3 py-2" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Display Name</label>
+                <input type="text" name="display_name" value={@editing.display_name}
+                  class="mt-1 block w-full border rounded px-3 py-2" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Category</label>
+                <select name="category" class="mt-1 block w-full border rounded px-3 py-2">
+                  <option value="consumable" selected={@editing.category == "consumable"}>consumable</option>
+                  <option value="potion" selected={@editing.category == "potion"}>potion</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="flex gap-2">
+              <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Save</button>
+              <button type="button" phx-click="cancel" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Cancel</button>
+              <button type="button" phx-click="delete_consumable" phx-value-id={@editing.id} data-confirm="Delete this item?"
+                class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 ml-auto">Delete</button>
+            </div>
+          </form>
+        </div>
+      <% end %>
+
+      <table class="w-full bg-white border rounded-lg">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Item Key</th>
+            <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Display Name</th>
+            <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Category</th>
+            <th class="px-4 py-3 text-left text-sm font-medium text-gray-500"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y">
+          <%= for item <- @consumable_items do %>
+            <tr class="hover:bg-gray-50">
+              <td class="px-4 py-3 font-medium">{item.item_key}</td>
+              <td class="px-4 py-3">{item.display_name}</td>
+              <td class="px-4 py-3 text-sm">
+                <span class={"inline-block rounded px-2 py-0.5 text-xs font-medium #{if item.category == "potion", do: "bg-purple-100 text-purple-700", else: "bg-blue-100 text-blue-700"}"}>
+                  {item.category}
+                </span>
+              </td>
+              <td class="px-4 py-3">
+                <button phx-click="edit_consumable" phx-value-id={item.id} class="text-blue-600 hover:underline">Edit</button>
+              </td>
+            </tr>
+          <% end %>
+          <%= if @consumable_items == [] do %>
+            <tr><td colspan="4" class="px-4 py-6 text-center text-gray-400 italic">No consumable items yet.</td></tr>
           <% end %>
         </tbody>
       </table>
