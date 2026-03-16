@@ -418,42 +418,137 @@
     -unity-background-image-tint-color: rgb(180, 160, 130);
 }
 
-/* ── Harvest Result ── */
+/* ══════════════════════════════════════════════════════
+   HARVEST RESULT — animated reveal with hero icon
+   ══════════════════════════════════════════════════════ */
 
+/* ── Hero: large icon with glow ring ── */
+.harvest-hero {
+    align-self: center;
+    width: 180px;
+    height: 180px;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--spacing-sm);
+    /* Animate: scale in from 0 */
+    scale: 0;
+    transition-property: scale;
+    transition-duration: 350ms;
+    transition-timing-function: ease-out;
+}
+
+.harvest-hero.harvest-hero--visible {
+    scale: 1;
+}
+
+.harvest-glow-ring {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 90px;
+    border-width: 3px;
+    border-color: rgba(255, 230, 170, 0.5);
+    opacity: 0;
+    scale: 1.3;
+    transition-property: opacity, scale;
+    transition-duration: 500ms;
+    transition-timing-function: ease-out;
+}
+
+.harvest-hero--visible > .harvest-glow-ring {
+    opacity: 1;
+    scale: 1;
+}
+
+/* Tier glow colors */
+.harvest-glow--tier0 { border-color: rgba(255, 230, 170, 0.5); }
+.harvest-glow--tier1 { border-color: rgba(80, 190, 100, 0.6); }
+.harvest-glow--tier2 { border-color: rgba(80, 150, 220, 0.6); }
+.harvest-glow--tier3 { border-color: rgba(170, 100, 220, 0.6); }
+.harvest-glow--tier4 { border-color: rgba(255, 200, 60, 0.7); }
+
+.harvest-hero-icon {
+    width: 120px;
+    height: 120px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* ── Item name ── */
+.harvest-result-name {
+    font-size: var(--font-lg);
+    color: rgb(240, 220, 180);
+    -unity-font-style: bold;
+    -unity-text-align: upper-center;
+    margin-bottom: var(--spacing-xxs);
+    /* Animate: fade + slide up */
+    opacity: 0;
+    translate: 0 20px;
+    transition-property: opacity, translate;
+    transition-duration: 300ms;
+    transition-timing-function: ease-out;
+}
+
+/* ── Yield count row ── */
 .harvest-yield-row {
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    margin-bottom: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+    /* Animate: fade + slide up */
+    opacity: 0;
+    translate: 0 16px;
+    transition-property: opacity, translate;
+    transition-duration: 300ms;
+    transition-timing-function: ease-out;
 }
 
-.harvest-seed-icon {
-    width: 64px;
-    height: 64px;
-    margin-right: var(--spacing-sm);
-    -unity-background-scale-mode: scale-to-fit;
-}
-
-.harvest-yield-label {
-    font-size: 32px;
-    color: rgb(240, 220, 180);
+.harvest-yield-count {
+    font-size: var(--font-xxl);
+    color: var(--color-text-accent);
     -unity-font-style: bold;
 }
 
 .harvest-bonus-label {
-    font-size: 28px;
+    font-size: var(--font-xl);
     color: rgb(130, 220, 110);
     -unity-font-style: bold;
-    margin-left: 6px;
+    margin-left: var(--spacing-xs);
+}
+
+/* Shared reveal animation class */
+.harvest-reveal--visible {
+    opacity: 1;
+    translate: 0 0;
+}
+
+/* ── Quality badge: text + percentage ── */
+.harvest-match-container {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--spacing-xs);
+    /* Animate: fade + slide up */
+    opacity: 0;
+    translate: 0 12px;
+    transition-property: opacity, translate;
+    transition-duration: 300ms;
+    transition-timing-function: ease-out;
 }
 
 .harvest-match-badge {
-    font-size: 28px;
+    font-size: var(--font-md);
     -unity-font-style: bold;
-    -unity-text-align: upper-center;
-    margin-bottom: var(--spacing-sm);
-    padding: 4px 16px;
-    border-radius: 8px;
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: var(--radius-sm);
+    -unity-text-align: middle-center;
+}
+
+.harvest-match-pct {
+    font-size: var(--font-xl);
+    -unity-font-style: bold;
+    margin-left: var(--spacing-sm);
 }
 
 .harvest-match--perfect {
@@ -471,14 +566,90 @@
     background-color: rgba(220, 120, 70, 0.15);
 }
 
+/* pct label inherits color from match class but no background */
+.harvest-match-pct.harvest-match--perfect { background-color: rgba(0,0,0,0); }
+.harvest-match-pct.harvest-match--good { background-color: rgba(0,0,0,0); }
+.harvest-match-pct.harvest-match--weak { background-color: rgba(0,0,0,0); }
+
+/* ── Animated quality bar ── */
+.harvest-quality-track {
+    align-self: stretch;
+    height: 16px;
+    background-color: rgba(40, 30, 15, 0.5);
+    border-radius: 8px;
+    border-width: 1px;
+    border-color: rgba(180, 120, 60, 0.2);
+    overflow: hidden;
+    margin-bottom: var(--spacing-md);
+}
+
+.harvest-quality-fill {
+    height: 100%;
+    width: 0;
+    border-radius: 8px;
+    transition-property: width;
+    transition-duration: 600ms;
+    transition-timing-function: ease-out;
+}
+
+.harvest-quality-fill.harvest-match--perfect {
+    background-color: rgba(120, 200, 80, 0.7);
+    border-width: 1px;
+    border-color: rgba(120, 200, 80, 0.5);
+}
+
+.harvest-quality-fill.harvest-match--good {
+    background-color: rgba(220, 180, 60, 0.6);
+    border-width: 1px;
+    border-color: rgba(220, 180, 60, 0.4);
+}
+
+.harvest-quality-fill.harvest-match--weak {
+    background-color: rgba(220, 120, 70, 0.5);
+    border-width: 1px;
+    border-color: rgba(220, 120, 70, 0.4);
+}
+
+/* ── Axis breakdown (cascading reveal) ── */
+.harvest-axis-container {
+    align-self: stretch;
+}
+
+.harvest-axis-header {
+    font-size: var(--font-xs);
+    color: var(--color-text-dim);
+    letter-spacing: 2px;
+    -unity-text-align: upper-center;
+    margin-bottom: var(--spacing-xs);
+    /* Animate */
+    opacity: 0;
+    translate: 0 8px;
+    transition-property: opacity, translate;
+    transition-duration: 250ms;
+    transition-timing-function: ease-out;
+}
+
 .harvest-axis-row {
     flex-direction: row;
     align-items: center;
-    padding: 4px var(--spacing-sm);
-    margin-bottom: 2px;
-    background-color: rgba(50, 35, 18, 0.4);
-    border-radius: 4px;
+    padding: 6px var(--spacing-sm);
+    margin-bottom: 4px;
+    background-color: rgba(50, 35, 18, 0.5);
+    border-radius: var(--radius-sm);
+    border-left-width: 4px;
+    border-left-color: rgba(180, 120, 60, 0.3);
     align-self: stretch;
+    /* Animate: fade + slide from left */
+    opacity: 0;
+    translate: -20px 0;
+    transition-property: opacity, translate;
+    transition-duration: 250ms;
+    transition-timing-function: ease-out;
+}
+
+.harvest-axis-row.harvest-reveal--visible {
+    opacity: 1;
+    translate: 0 0;
 }
 
 .harvest-axis-name {
@@ -498,42 +669,28 @@
 .harvest-axis-ideal {
     font-size: var(--font-xs);
     color: rgb(140, 120, 90);
-    width: 35%;
-    -unity-text-align: upper-center;
-}
-
-.harvest-axis-pass {
-    font-size: 24px;
-    color: rgb(120, 200, 80);
-    -unity-font-style: bold;
-    width: 15%;
-    -unity-text-align: upper-center;
-}
-
-.harvest-axis-fail {
-    font-size: 24px;
-    color: rgb(220, 90, 70);
-    -unity-font-style: bold;
-    width: 15%;
+    width: 30%;
     -unity-text-align: upper-center;
 }
 
 /* Harvest axis pass/fail icons (server-served sprites) */
 .harvest-axis-pass-icon {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     -unity-background-scale-mode: scale-to-fit;
     -unity-background-image-tint-color: rgb(120, 200, 80);
     flex-shrink: 0;
+    width: 20%;
     align-self: center;
 }
 
 .harvest-axis-fail-icon {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     -unity-background-scale-mode: scale-to-fit;
     -unity-background-image-tint-color: rgb(220, 90, 70);
     flex-shrink: 0;
+    width: 20%;
     align-self: center;
 }
 

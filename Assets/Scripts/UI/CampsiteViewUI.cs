@@ -243,7 +243,6 @@ namespace Garden
             fillingVases.Clear();
             cooldownPlots.Clear();
             cellLookup.Clear();
-            CloseInteractionPanel();
 
             // Remove previous cancel button if it exists
             if (modeCancelBtn != null)
@@ -369,6 +368,10 @@ namespace Garden
                                         {
                                             progress.AddToClassList("cell-progress--visible");
                                             progressFill.AddToClassList("cell-progress-fill--cooldown");
+                                            double totalSeconds = PlotManager.ManualWaterCooldownHours * 3600.0;
+                                            double remaining = PlotManager.GetWaterCooldownRemaining(data.plots[info.index]);
+                                            float cooldownPct = (float)(1.0 - remaining / totalSeconds);
+                                            progressFill.style.width = new Length(cooldownPct * 100f, LengthUnit.Percent);
                                             cooldownPlots.Add((progressFill, info.index));
                                         }
                                     }
@@ -498,6 +501,7 @@ namespace Garden
                         if (progress != null && progressFill != null)
                         {
                             progress.AddToClassList("cell-progress--visible");
+                            progressFill.style.width = new Length(growthPct * 100f, LengthUnit.Percent);
                             growingPlots.Add((progressFill, cell, spritePrefix, plotSkin, index));
                         }
                     }
@@ -526,6 +530,8 @@ namespace Garden
                     if (vase.state == VaseState.Filling && progress != null && progressFill != null)
                     {
                         progress.AddToClassList("cell-progress--visible");
+                        float fillPct = VaseManager.Instance != null ? VaseManager.Instance.GetFillProgress(index) : 0f;
+                        progressFill.style.width = new Length(fillPct * 100f, LengthUnit.Percent);
                         fillingVases.Add((progressFill, index));
                     }
                     break;
@@ -1926,24 +1932,45 @@ namespace Garden
             interactionActions.Clear();
             ClearBellIcon();
 
-            interactionTitle.text = "Harvested!";
+            interactionTitle.style.display = DisplayStyle.None;
+            AudioManager.Instance?.PlaySFX("harvest_reveal");
 
-            // Harvest icon + yield row
-            var yieldRow = new VisualElement();
-            yieldRow.AddToClassList("harvest-yield-row");
+            // ── Hero: large item icon with tier-colored glow ring ──
+            var heroContainer = new VisualElement();
+            heroContainer.AddToClassList("harvest-hero");
+
+            int tier = 0;
+            string plantSlug = SpriteService.SeedToSpriteKey(result.seedItemKey ?? "");
+            var seedData = ConfigService.Instance?.GetSeed(plantSlug);
+            if (seedData != null) tier = seedData.tier;
+
+            var glowRing = new VisualElement();
+            glowRing.AddToClassList("harvest-glow-ring");
+            glowRing.AddToClassList($"harvest-glow--tier{Mathf.Min(tier, 4)}");
+            heroContainer.Add(glowRing);
+
             string harvestSpriteKey = SpriteService.ItemToSpriteKey(result.harvestItemKey);
             var harvestSprite = harvestSpriteKey != null ? SpriteService.Instance?.GetSprite(harvestSpriteKey) : null;
+            var heroIcon = new VisualElement();
+            heroIcon.AddToClassList("harvest-hero-icon");
             if (harvestSprite != null)
-            {
-                var iconEl = new VisualElement();
-                iconEl.AddToClassList("harvest-seed-icon");
-                iconEl.style.backgroundImage = new StyleBackground(harvestSprite);
-                yieldRow.Add(iconEl);
-            }
+                heroIcon.style.backgroundImage = new StyleBackground(harvestSprite);
+            heroContainer.Add(heroIcon);
+            interactionBody.Add(heroContainer);
+
+            // ── Yield: item name + count ──
             int baseDrops = result.drops - result.bonusDrops;
-            var yieldLabel = new Label($"{ConfigService.Instance.GetItemDisplayName(result.harvestItemKey)} x{baseDrops}");
-            yieldLabel.AddToClassList("harvest-yield-label");
-            yieldRow.Add(yieldLabel);
+            string itemName = ConfigService.Instance.GetItemDisplayName(result.harvestItemKey);
+
+            var yieldName = new Label(itemName);
+            yieldName.AddToClassList("harvest-result-name");
+            interactionBody.Add(yieldName);
+
+            var yieldRow = new VisualElement();
+            yieldRow.AddToClassList("harvest-yield-row");
+            var yieldCount = new Label($"x{baseDrops}");
+            yieldCount.AddToClassList("harvest-yield-count");
+            yieldRow.Add(yieldCount);
             if (result.bonusDrops > 0)
             {
                 var bonusLabel = new Label($"+{result.bonusDrops}");
@@ -1952,7 +1979,7 @@ namespace Garden
             }
             interactionBody.Add(yieldRow);
 
-            // Recipe match tier
+            // ── Quality badge + percentage ──
             string matchText = result.recipeScore >= 0.8f ? "Perfect Match"
                 : result.recipeScore >= 0.5f ? "Good Match"
                 : "Weak Match";
@@ -1960,20 +1987,40 @@ namespace Garden
                 : result.recipeScore >= 0.5f ? "harvest-match--good"
                 : "harvest-match--weak";
             int pct = Mathf.RoundToInt(result.recipeScore * 100f);
-            var matchLabel = new Label($"{matchText} ({pct}%)");
+
+            var matchContainer = new VisualElement();
+            matchContainer.AddToClassList("harvest-match-container");
+            var matchLabel = new Label(matchText);
             matchLabel.AddToClassList("harvest-match-badge");
             matchLabel.AddToClassList(matchClass);
-            interactionBody.Add(matchLabel);
+            matchContainer.Add(matchLabel);
+            var matchPct = new Label($"{pct}%");
+            matchPct.AddToClassList("harvest-match-pct");
+            matchPct.AddToClassList(matchClass);
+            matchContainer.Add(matchPct);
+            interactionBody.Add(matchContainer);
 
-            // Per-axis breakdown
+            // ── Animated quality bar ──
+            var qualityTrack = new VisualElement();
+            qualityTrack.AddToClassList("harvest-quality-track");
+            var qualityFill = new VisualElement();
+            qualityFill.AddToClassList("harvest-quality-fill");
+            qualityFill.AddToClassList(matchClass);
+            qualityTrack.Add(qualityFill);
+            interactionBody.Add(qualityTrack);
+
+            // ── Per-axis breakdown (staggered cascade) ──
+            var axisContainer = new VisualElement();
+            axisContainer.AddToClassList("harvest-axis-container");
+
             if (result.recipe != null)
             {
                 var axisResults = result.recipe.EvaluatePerAxis(result.snapshots, result.waterCount);
                 if (axisResults.Count > 0)
                 {
                     var header = new Label("Recipe Breakdown");
-                    header.AddToClassList("interaction-section-header");
-                    interactionBody.Add(header);
+                    header.AddToClassList("harvest-axis-header");
+                    axisContainer.Add(header);
 
                     foreach (var axis in axisResults)
                     {
@@ -2020,11 +2067,32 @@ namespace Garden
                             statusEl.style.backgroundImage = statusTex;
                         row.Add(statusEl);
 
-                        interactionBody.Add(row);
+                        axisContainer.Add(row);
                     }
                 }
             }
+            interactionBody.Add(axisContainer);
 
+            // ── Staggered animation sequence ──
+            heroContainer.schedule.Execute(() =>
+                heroContainer.AddToClassList("harvest-hero--visible"));
+            yieldName.schedule.Execute(() =>
+                yieldName.AddToClassList("harvest-reveal--visible")).StartingIn(200);
+            yieldRow.schedule.Execute(() =>
+                yieldRow.AddToClassList("harvest-reveal--visible")).StartingIn(250);
+            matchContainer.schedule.Execute(() =>
+                matchContainer.AddToClassList("harvest-reveal--visible")).StartingIn(400);
+            qualityFill.schedule.Execute(() =>
+                qualityFill.style.width = new Length(pct, LengthUnit.Percent)).StartingIn(500);
+            // Axis rows cascade in one by one
+            int axisDelay = 600;
+            for (int i = 0; i < axisContainer.childCount; i++)
+            {
+                var child = axisContainer[i];
+                int delay = axisDelay + i * 80;
+                child.schedule.Execute(() =>
+                    child.AddToClassList("harvest-reveal--visible")).StartingIn(delay);
+            }
         }
 
         private void BuildSeedPicker(int plotIndex)
