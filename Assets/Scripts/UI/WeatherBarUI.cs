@@ -21,8 +21,6 @@ namespace Garden
         private VisualElement questFloatBtn;
 
         private static readonly int[] MoonPhaseToSpriteIndex = { 5, 6, 7, 8, 1, 2, 3, 4 };
-        private VisualElement humidityIconEl;
-        private VisualElement tempIconEl;
         private bool iconsLoaded;
 
         public void Initialize(VisualElement root)
@@ -34,10 +32,6 @@ namespace Garden
             weatherMoon = root.Q("weather-moon");
             playerName = root.Q<Label>("player-name");
             dateTime = root.Q<Label>("date-time");
-
-            humidityIconEl = root.Q("weather-humidity-icon");
-            tempIconEl = root.Q("weather-temp-icon");
-
 
             weatherBar = root.Q("weather-bar");
             forecastPanel = root.Q("forecast-panel");
@@ -358,16 +352,7 @@ namespace Garden
         {
             if (iconsLoaded) return;
             if (SpriteService.Instance == null) return;
-
-            var tex = SpriteService.Instance.GetTexture("ui/weather-humidity");
-            if (tex != null && humidityIconEl != null)
-                humidityIconEl.style.backgroundImage = tex;
-
-            var tex2 = SpriteService.Instance.GetTexture("ui/weather-temp");
-            if (tex2 != null && tempIconEl != null)
-                tempIconEl.style.backgroundImage = tex2;
-
-            iconsLoaded = tex != null && tex2 != null;
+            iconsLoaded = true;
         }
     }
 }

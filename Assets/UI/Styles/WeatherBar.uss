@@ -1,30 +1,15 @@
-/* WeatherBar.uss — 4-cell weather bar */
+/* WeatherBar.uss — Compact weather summary row */
 
 #weather-bar {
     flex-direction: row;
+    align-items: center;
     flex-shrink: 0;
     margin-top: var(--spacing-xs);
-}
-
-.weather-cell {
-    flex-grow: 1;
-    flex-basis: 0;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    padding: var(--spacing-sm) var(--spacing-xs);
+    padding: var(--spacing-sm);
     background-color: var(--color-bg-slot);
     border-width: 2px;
     border-color: var(--color-border);
     border-radius: var(--radius-sm);
-    margin-right: var(--spacing-xs);
-}
-
-.weather-cell-icon {
-    width: 36px;
-    height: 36px;
-    -unity-background-scale-mode: scale-to-fit;
-    margin-right: var(--spacing-xs);
 }
 
 #weather-condition-label {
@@ -38,12 +23,7 @@
     width: 40px;
     height: 40px;
     -unity-background-scale-mode: scale-to-fit;
-}
-
-#weather-humidity {
-    font-size: var(--font-sm);
-    color: var(--color-text-bright);
-    -unity-font-style: bold;
+    margin-right: var(--spacing-sm);
 }
 
 #weather-temp {
@@ -52,9 +32,36 @@
     -unity-font-style: bold;
 }
 
-#weather-cell-moon {
-    justify-content: center;
-    align-items: center;
+#weather-humidity {
+    font-size: var(--font-sm);
+    color: var(--color-text-bright);
+    -unity-font-style: bold;
+}
+
+.weather-summary-dim {
+    font-size: var(--font-sm);
+    color: var(--color-text-dim);
+    margin-left: var(--spacing-sm);
+}
+
+.weather-summary-moon {
+    width: 32px;
+    height: 32px;
+    -unity-background-scale-mode: scale-to-fit;
+    margin-left: var(--spacing-sm);
+}
+
+.weather-summary-chevron {
+    font-size: var(--font-xs);
+    color: var(--color-text-dim);
+    margin-left: auto;
+}
+
+.weather-cell-icon {
+    width: 36px;
+    height: 36px;
+    -unity-background-scale-mode: scale-to-fit;
+    margin-right: var(--spacing-xs);
 }
 
 #weather-moon {

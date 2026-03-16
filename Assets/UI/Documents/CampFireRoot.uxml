@@ -33,23 +33,14 @@
                 <ui:Label name="date-time" text="--" />
             </ui:VisualElement>
 
-            <!-- Weather row: 4 cells -->
+            <!-- Weather summary (tap to expand forecast) -->
             <ui:VisualElement name="weather-bar">
-                <ui:VisualElement name="weather-cell-condition" class="weather-cell">
-                    <ui:Label name="weather-condition-label" text="--" />
-                    <ui:VisualElement name="weather-icon" class="weather-cell-icon" />
-                </ui:VisualElement>
-                <ui:VisualElement name="weather-cell-humidity" class="weather-cell">
-                    <ui:VisualElement name="weather-humidity-icon" class="weather-cell-icon" />
-                    <ui:Label name="weather-humidity" text="--" />
-                </ui:VisualElement>
-                <ui:VisualElement name="weather-cell-temp" class="weather-cell">
-                    <ui:VisualElement name="weather-temp-icon" class="weather-cell-icon" />
-                    <ui:Label name="weather-temp" text="--" />
-                </ui:VisualElement>
-                <ui:VisualElement name="weather-cell-moon" class="weather-cell">
-                    <ui:VisualElement name="weather-moon" />
-                </ui:VisualElement>
+                <ui:Label name="weather-condition-label" text="--" />
+                <ui:VisualElement name="weather-icon" class="weather-cell-icon" />
+                <ui:Label name="weather-temp" text="--" />
+                <ui:Label name="weather-humidity" text="--" class="weather-summary-dim" />
+                <ui:VisualElement name="weather-moon" class="weather-summary-moon" />
+                <ui:Label name="weather-chevron" text="&#x25BC;" class="weather-summary-chevron" />
             </ui:VisualElement>
 
             <!-- Resources row with debug button -->
