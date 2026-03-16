@@ -168,6 +168,28 @@ defmodule CampFire.Game.Plots do
     end
   end
 
+  # --- Fertilize ---
+
+  def fertilize(player_uid, plot_id) do
+    with %PlayerPlot{} = plot <- Repo.get(PlayerPlot, plot_id),
+         true <- plot.player_uid == player_uid || {:error, :not_owned},
+         true <- plot.state == "growing" || {:error, :not_growing},
+         true <- not plot.fertilized || {:error, :already_fertilized} do
+      case Economy.spend_item(player_uid, "fertilizer", 1) do
+        {:ok, _} ->
+          plot
+          |> PlayerPlot.changeset(%{fertilized: true})
+          |> Repo.update()
+
+        {:error, reason} ->
+          {:error, reason}
+      end
+    else
+      nil -> {:error, :not_found}
+      {:error, _} = err -> err
+    end
+  end
+
   # --- Harvest ---
 
   def harvest(player_uid, plot_id) do
@@ -181,6 +203,7 @@ defmodule CampFire.Game.Plots do
 
         score = GrowthRecipe.evaluate(seed_config.recipe, plot.snapshots, plot.water_count)
         drops = GrowthRecipe.calculate_drops(score, seed_config.min_drops, seed_config.max_drops)
+        drops = if plot.fertilized, do: ceil(drops * 1.5), else: drops
 
         snapshot_count = get_in(plot.snapshots || %{}, [Access.key("snapshot_count", 0)])
         if snapshot_count == 0 do
@@ -201,7 +224,8 @@ defmodule CampFire.Game.Plots do
           plant_time_utc: nil,
           water_count: 0,
           last_watered_utc: nil,
-          snapshots: %{}
+          snapshots: %{},
+          fertilized: false
         })
         |> Repo.update!()
 
@@ -228,6 +252,7 @@ defmodule CampFire.Game.Plots do
       seed_config = CampFire.Game.get_seed_config_by_item_id!(plot.seed_item_id)
       score = GrowthRecipe.evaluate(seed_config.recipe, plot.snapshots, plot.water_count)
       drops = GrowthRecipe.calculate_drops(score, seed_config.min_drops, seed_config.max_drops)
+      drops = if plot.fertilized, do: ceil(drops * 1.5), else: drops
 
       {:ok, %{score: score, drops: drops, harvest_item_key: seed_config.harvest_item_key}}
     else

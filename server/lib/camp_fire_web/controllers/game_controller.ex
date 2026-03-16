@@ -416,6 +416,22 @@ defmodule CampFireWeb.GameController do
     conn |> put_status(400) |> json(%{error: "Missing 'plotId'"})
   end
 
+  def fertilize_plot(conn, %{"plotId" => plot_id}) do
+    uid = conn.assigns.current_player.uid
+
+    case Plots.fertilize(uid, plot_id) do
+      {:ok, plot} ->
+        conn |> put_status(200) |> json(serialize_plot(plot))
+
+      {:error, reason} ->
+        conn |> put_status(422) |> json(%{error: format_error(reason)})
+    end
+  end
+
+  def fertilize_plot(conn, _params) do
+    conn |> put_status(400) |> json(%{error: "Missing 'plotId'"})
+  end
+
   def instant_finish_vase(conn, %{"vaseId" => vase_id}) do
     uid = conn.assigns.current_player.uid
 
@@ -790,7 +806,8 @@ defmodule CampFireWeb.GameController do
       gridX: plot.grid_x,
       gridY: plot.grid_y,
       skinName: plot.skin_name,
-      unlockedSkins: plot.unlocked_skins
+      unlockedSkins: plot.unlocked_skins,
+      fertilized: plot.fertilized
     }
   end
 
