@@ -78,6 +78,10 @@
                 <ui:Label text="SEEDS" class="nav-btn-label" />
                 <ui:VisualElement name="nav-icon-seeds" class="nav-btn-icon" />
             </ui:Button>
+            <ui:Button name="btn-build" class="nav-btn">
+                <ui:Label text="BUILD" class="nav-btn-label" />
+                <ui:VisualElement name="nav-icon-build" class="nav-btn-icon" />
+            </ui:Button>
             <ui:Button name="btn-quest" class="nav-btn">
                 <ui:Label text="QUESTS" class="nav-btn-label" />
                 <ui:VisualElement name="nav-icon-quest" class="nav-btn-icon" />

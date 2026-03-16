@@ -138,6 +138,11 @@ namespace Garden
                     apotheke?.Refresh();
                     OpenOverlay("Apotheke", apothekePanel);
                 };
+                bottomNav.OnBuildClicked += () =>
+                {
+                    build?.Refresh();
+                    OpenOverlay("Build", buildPanel);
+                };
                 bottomNav.OnLettersClicked += () => OpenOverlay("Social", lettersPanel);
                 bottomNav.OnQuestClicked += () =>
                 {

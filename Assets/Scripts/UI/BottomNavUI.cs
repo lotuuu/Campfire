@@ -7,13 +7,14 @@ namespace Garden
     public class BottomNavUI : MonoBehaviour
     {
         public event Action OnApothekeClicked;
+        public event Action OnBuildClicked;
         public event Action OnLettersClicked;
         public event Action OnQuestClicked;
 
         private Label questBadge;
         private Label socialBadge;
 
-        private VisualElement iconSeeds, iconQuest, iconMail;
+        private VisualElement iconSeeds, iconBuild, iconQuest, iconMail;
         private bool iconsLoaded;
 
         public void Initialize(VisualElement root)
@@ -22,11 +23,15 @@ namespace Garden
             var btnQuest = root.Q<Button>("btn-quest");
             var btnMail = root.Q<Button>("btn-mail");
 
+            var btnBuild = root.Q<Button>("btn-build");
+
             btnSeeds?.RegisterCallback<ClickEvent>(_ => { AudioManager.Instance?.PlaySFX("ui_tap"); OnApothekeClicked?.Invoke(); });
+            btnBuild?.RegisterCallback<ClickEvent>(_ => { AudioManager.Instance?.PlaySFX("ui_tap"); OnBuildClicked?.Invoke(); });
             btnQuest?.RegisterCallback<ClickEvent>(_ => { AudioManager.Instance?.PlaySFX("ui_tap"); OnQuestClicked?.Invoke(); });
             btnMail?.RegisterCallback<ClickEvent>(_ => { AudioManager.Instance?.PlaySFX("ui_tap"); OnLettersClicked?.Invoke(); });
 
             iconSeeds = root.Q("nav-icon-seeds");
+            iconBuild = root.Q("nav-icon-build");
             iconQuest = root.Q("nav-icon-quest");
             iconMail = root.Q("nav-icon-mail");
 
@@ -39,9 +44,11 @@ namespace Garden
             if (!iconsLoaded && SpriteService.Instance != null)
             {
                 SetIcon(iconSeeds, "ui/nav-seeds");
+                SetIcon(iconBuild, "ui/nav-build");
                 SetIcon(iconQuest, "ui/quest-compass");
                 SetIcon(iconMail, "ui/nav-mail");
-                iconsLoaded = iconSeeds?.style.backgroundImage.value.texture != null;
+                iconsLoaded = iconSeeds?.style.backgroundImage.value.texture != null
+                           && iconBuild?.style.backgroundImage.value.texture != null;
             }
         }
 
