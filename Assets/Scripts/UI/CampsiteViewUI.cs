@@ -132,7 +132,10 @@ namespace Garden
 
             // Subscribe to manager events
             if (FlameManager.Instance != null)
-                FlameManager.Instance.OnFlameUpgraded += RebuildGrid;
+                FlameManager.Instance.OnFlameUpgraded += () =>
+                {
+                    if (!FlameLevelUpAnimator.IsPlaying) RebuildGrid();
+                };
             if (PlotManager.Instance != null)
                 PlotManager.Instance.OnPlotChanged += OnPlotChangedRebuild;
             if (VaseManager.Instance != null)
@@ -1492,8 +1495,11 @@ namespace Garden
                 bool canAfford = upgradeAllowed && FlameManager.Instance.CanUpgrade();
                 var upgradeBtn = new Button(() =>
                 {
+                    if (FlameLevelUpAnimator.IsPlaying) return;
+                    var flameCellEl = canvas?.Q(className: "grid-cell--flame");
                     FlameManager.Instance.UpgradeFlame();
                     CloseInteractionPanel();
+                    FlameLevelUpAnimator.Play(campRoot, flameCellEl, canvas, FlameManager.Instance.Level, RebuildGrid);
                 })
                 { text = "Level Up" };
                 upgradeBtn.SetEnabled(canAfford);
