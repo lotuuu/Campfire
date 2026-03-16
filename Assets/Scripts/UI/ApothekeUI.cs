@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -14,6 +15,11 @@ namespace Garden
         private Button tabCraft;
         private int expandedIndex = -1;
         private int expandedRecipeIndex = -1;
+
+        // Card element pools — reused across refreshes to avoid DOM churn
+        // that causes ScrollView to clamp scrollOffset and visibly jump.
+        private readonly List<VisualElement> seedPool = new();
+        private readonly List<VisualElement> recipePool = new();
 
         public void Initialize(VisualElement root)
         {
@@ -86,31 +92,72 @@ namespace Garden
             InventoryCategory.Consumables
         };
 
+        /// <summary>
+        /// Ensures a container has exactly <paramref name="needed"/> children in the pool,
+        /// adding new placeholder elements or removing excess from the end.
+        /// Never calls Clear() — DOM mutations are minimal to prevent scroll jumps.
+        /// </summary>
+        private static void SyncPoolCount(VisualElement container, List<VisualElement> pool, int needed)
+        {
+            while (pool.Count < needed)
+            {
+                var el = new VisualElement();
+                pool.Add(el);
+                container.Add(el);
+            }
+            while (pool.Count > needed)
+            {
+                var last = pool[pool.Count - 1];
+                last.RemoveFromHierarchy();
+                pool.RemoveAt(pool.Count - 1);
+            }
+        }
+
+        /// <summary>
+        /// Replaces the element at the given index in both the pool and the container's
+        /// child list, preserving the position in the DOM hierarchy.
+        /// </summary>
+        private static void ReplacePoolElement(VisualElement container, List<VisualElement> pool, int index, VisualElement newElement)
+        {
+            var old = pool[index];
+            if (old.parent == container)
+            {
+                int childIndex = container.IndexOf(old);
+                container.Remove(old);
+                container.Insert(childIndex, newElement);
+            }
+            else
+            {
+                container.Add(newElement);
+            }
+            pool[index] = newElement;
+        }
+
         private void RefreshSeeds()
         {
             if (seedList == null) return;
-            seedList.Clear();
 
             var allItems = ApothekeManager.Instance?.Items;
             if (allItems == null || allItems.Count == 0)
             {
+                SyncPoolCount(seedList, seedPool, 0);
                 if (inventoryEmpty != null) inventoryEmpty.style.display = DisplayStyle.Flex;
                 return;
             }
 
-            var groups = new System.Collections.Generic.Dictionary<InventoryCategory,
-                System.Collections.Generic.List<InventoryItem>>();
+            var groups = new Dictionary<InventoryCategory, List<InventoryItem>>();
             foreach (var item in allItems)
             {
                 if (item.count <= 0) continue;
                 var cat = CategorizeItem(item.itemKey);
                 if (!groups.ContainsKey(cat))
-                    groups[cat] = new System.Collections.Generic.List<InventoryItem>();
+                    groups[cat] = new List<InventoryItem>();
                 groups[cat].Add(item);
             }
 
             if (groups.Count == 0)
             {
+                SyncPoolCount(seedList, seedPool, 0);
                 if (inventoryEmpty != null) inventoryEmpty.style.display = DisplayStyle.Flex;
                 return;
             }
@@ -129,6 +176,8 @@ namespace Garden
                 });
             }
 
+            // Build the new elements into a flat list (headers + grids interleaved)
+            var newElements = new List<VisualElement>();
             int seedIndex = 0;
             foreach (var cat in CategoryOrder)
             {
@@ -136,7 +185,7 @@ namespace Garden
 
                 var header = new Label(CategoryLabel(cat));
                 header.AddToClassList("recipe-category-header");
-                seedList.Add(header);
+                newElements.Add(header);
 
                 var grid = new VisualElement();
                 grid.AddToClassList("inventory-grid");
@@ -156,7 +205,14 @@ namespace Garden
                     }
                 }
 
-                seedList.Add(grid);
+                newElements.Add(grid);
+            }
+
+            // Sync pool count then replace each element in place
+            SyncPoolCount(seedList, seedPool, newElements.Count);
+            for (int i = 0; i < newElements.Count; i++)
+            {
+                ReplacePoolElement(seedList, seedPool, i, newElements[i]);
             }
         }
 
@@ -321,22 +377,28 @@ namespace Garden
         private void RefreshRecipes()
         {
             if (recipeList == null || ApothekeManager.Instance == null) return;
-            recipeList.Clear();
 
             var recipes = ApothekeManager.Instance.AllRecipes;
-            if (recipes == null || recipes.Length == 0) return;
+            if (recipes == null || recipes.Length == 0)
+            {
+                SyncPoolCount(recipeList, recipePool, 0);
+                return;
+            }
 
             var items = SaveManager.Instance?.Data?.inventory;
 
             // Group by category, craftable first within each group
             var grouped = new System.Collections.Generic.SortedDictionary<RecipeCategory,
-                System.Collections.Generic.List<RecipeData>>();
+                List<RecipeData>>();
             foreach (var r in recipes)
             {
                 if (!grouped.ContainsKey(r.category))
-                    grouped[r.category] = new System.Collections.Generic.List<RecipeData>();
+                    grouped[r.category] = new List<RecipeData>();
                 grouped[r.category].Add(r);
             }
+
+            // Build the new elements into a flat list (headers + cards interleaved)
+            var newElements = new List<VisualElement>();
 
             foreach (var kvp in grouped)
             {
@@ -352,13 +414,20 @@ namespace Garden
                 // Category header
                 var header = new Label(CategoryLabel(kvp.Key));
                 header.AddToClassList("recipe-category-header");
-                recipeList.Add(header);
+                newElements.Add(header);
 
                 foreach (var recipe in kvp.Value)
                 {
                     var card = BuildRecipeCard(recipe, items);
-                    recipeList.Add(card);
+                    newElements.Add(card);
                 }
+            }
+
+            // Sync pool count then replace each element in place
+            SyncPoolCount(recipeList, recipePool, newElements.Count);
+            for (int i = 0; i < newElements.Count; i++)
+            {
+                ReplacePoolElement(recipeList, recipePool, i, newElements[i]);
             }
         }
 
@@ -373,7 +442,7 @@ namespace Garden
             };
         }
 
-        private VisualElement BuildRecipeCard(RecipeData recipe, System.Collections.Generic.List<InventoryItem> items)
+        private VisualElement BuildRecipeCard(RecipeData recipe, List<InventoryItem> items)
         {
             bool canMix = ApothekeManager.Instance.CanMix(recipe);
             int recipeIndex = System.Array.IndexOf(ApothekeManager.Instance.AllRecipes, recipe);
@@ -445,8 +514,9 @@ namespace Garden
             resultRow.Add(resultName);
             details.Add(resultRow);
 
-            // Mix button
-            var mixBtn = new Button(() =>
+            // Mix button — use clickable assignment to avoid handler accumulation on reuse
+            var mixBtn = new Button();
+            mixBtn.clickable = new Clickable(() =>
             {
                 ApothekeManager.Instance.Mix(recipe);
                 Refresh();

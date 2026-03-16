@@ -28,6 +28,7 @@ namespace Garden
         private VisualElement merchantSection;
         private VisualElement offerList;
         private VisualTreeAsset offerTemplate;
+        private readonly List<VisualElement> offerCardPool = new();
 
         // Quester
         private VisualElement questerSection;
@@ -179,10 +180,15 @@ namespace Garden
 
         private void RefreshMerchantOffers(VisitorSave visitor)
         {
-            offerList?.Clear();
             var data = SaveManager.Instance.Data;
-            if (visitor.offers == null) return;
+            if (visitor.offers == null)
+            {
+                foreach (var old in offerCardPool) old.RemoveFromHierarchy();
+                offerCardPool.Clear();
+                return;
+            }
 
+            var newCards = new List<VisualElement>();
             foreach (var offer in visitor.offers)
             {
                 if (offerTemplate == null) break;
@@ -216,17 +222,23 @@ namespace Garden
                 {
                     tradeBtn.SetEnabled(canAfford);
                     var capturedOffer = offer;
-                    tradeBtn.clicked += () =>
+                    tradeBtn.clickable = new Clickable(() =>
                     {
                         if (!VisitorManager.CanAffordOffer(capturedOffer, data.inventory)) return;
                         VisitorManager.ExecuteTrade(capturedOffer, data.inventory);
                         SaveManager.Instance.Save();
                         ShowModal(); // refresh
-                    };
+                    });
                 }
 
-                offerList.Add(el);
+                newCards.Add(el);
             }
+
+            // Swap: add new cards first, then remove old ones to prevent height collapse
+            foreach (var card in newCards) offerList.Add(card);
+            foreach (var old in offerCardPool) old.RemoveFromHierarchy();
+            offerCardPool.Clear();
+            offerCardPool.AddRange(newCards);
         }
 
         private void RefreshQuester(VisitorSave visitor)

@@ -60,6 +60,12 @@ namespace Garden
         private string giftTargetName;
         private readonly List<GiftItem> selectedGiftItems = new();
 
+        // Card element pools — reused across refreshes to avoid DOM churn
+        // that causes ScrollView to clamp scrollOffset and visibly jump.
+        private readonly List<VisualElement> inboxCardPool = new();
+        private readonly List<VisualElement> friendsCardPool = new();
+        private readonly List<VisualElement> giftPickerCardPool = new();
+
         public void Initialize(VisualElement root)
         {
             // Tab buttons
@@ -172,6 +178,15 @@ namespace Garden
             }
         }
 
+        private void OnDestroy()
+        {
+            if (SocialService.Instance != null)
+            {
+                SocialService.Instance.OnSignedIn -= OnSignedIn;
+                SocialService.Instance.OnFriendListUpdated -= OnFriendListUpdated;
+            }
+        }
+
         private void ShowTab(string tab)
         {
             inboxView.style.display = tab == "inbox" ? DisplayStyle.Flex : DisplayStyle.None;
@@ -218,13 +233,37 @@ namespace Garden
             OnBadgeCountChanged?.Invoke(total);
         }
 
+        // ── Card pool helper ──
+
+        /// <summary>
+        /// Swaps the children of a ScrollView without ever dropping content height to zero.
+        /// New children are added first, then old children are removed. This prevents
+        /// the ScrollView from clamping scrollOffset and causing a visible jump.
+        /// </summary>
+        private static void SwapChildren(ScrollView list, List<VisualElement> pool, List<VisualElement> newChildren)
+        {
+            if (list == null) return;
+
+            // Add new children first (height grows or stays same)
+            foreach (var child in newChildren)
+                list.Add(child);
+
+            // Remove old children (height normalizes to new content)
+            foreach (var old in pool)
+                old.RemoveFromHierarchy();
+
+            // Update pool
+            pool.Clear();
+            pool.AddRange(newChildren);
+        }
+
         // ── Inbox ──
 
         private async void RefreshInbox()
         {
             if (SocialService.Instance == null || !SocialService.Instance.IsSignedIn)
             {
-                inboxList?.Clear();
+                SwapChildren(inboxList, inboxCardPool, new List<VisualElement>());
                 if (inboxEmpty != null)
                 {
                     inboxEmpty.text = "Could not connect to server";
@@ -233,7 +272,7 @@ namespace Garden
                 return;
             }
 
-            inboxList?.Clear();
+            var newChildren = new List<VisualElement>();
 
             var requests = await SocialService.Instance.GetPendingRequests();
             foreach (var req in requests)
@@ -258,7 +297,7 @@ namespace Garden
                     RefreshInbox();
                 });
 
-                inboxList?.Add(el);
+                newChildren.Add(el);
             }
 
             var gifts = await SocialService.Instance.GetPendingGifts();
@@ -288,8 +327,10 @@ namespace Garden
                     RefreshInbox();
                 });
 
-                inboxList?.Add(el);
+                newChildren.Add(el);
             }
+
+            SwapChildren(inboxList, inboxCardPool, newChildren);
 
             bool isEmpty = requests.Count == 0 && gifts.Count == 0;
             if (inboxEmpty != null)
@@ -310,7 +351,7 @@ namespace Garden
         {
             if (SocialService.Instance == null || !SocialService.Instance.IsSignedIn)
             {
-                friendsList?.Clear();
+                SwapChildren(friendsList, friendsCardPool, new List<VisualElement>());
                 if (friendsEmpty != null)
                 {
                     friendsEmpty.text = "Could not connect to server";
@@ -331,13 +372,12 @@ namespace Garden
 
         private void RebuildFriendsList(List<CachedFriend> friends)
         {
-            friendsList?.Clear();
-
             friendsCount = friends?.Count ?? 0;
             UpdateTabBadge(badgeFriends, friendsCount);
 
             if (friends == null || friends.Count == 0)
             {
+                SwapChildren(friendsList, friendsCardPool, new List<VisualElement>());
                 if (friendsEmpty != null)
                 {
                     friendsEmpty.text = "No friends yet";
@@ -346,6 +386,8 @@ namespace Garden
                 return;
             }
             if (friendsEmpty != null) friendsEmpty.style.display = DisplayStyle.None;
+
+            var newChildren = new List<VisualElement>();
 
             foreach (var friend in friends)
             {
@@ -369,8 +411,10 @@ namespace Garden
                 giftBtn?.RegisterCallback<ClickEvent>(_ => OnOpenGiftPicker(friendUid, friendName));
                 deleteBtn?.RegisterCallback<ClickEvent>(_ => OnDeleteFriend(friendUid, friendName));
 
-                friendsList?.Add(el);
+                newChildren.Add(el);
             }
+
+            SwapChildren(friendsList, friendsCardPool, newChildren);
         }
 
         // ── Add Friend ──
@@ -519,28 +563,25 @@ namespace Garden
 
         private void PopulateGiftInventory()
         {
-            giftPickerInventory?.Clear();
+            var newChildren = new List<VisualElement>();
             var data = SaveManager.Instance.Data;
 
             foreach (var item in data.inventory)
             {
                 if (item.count <= 0) continue;
                 var itemConfig = ConfigService.Instance?.GetItem(item.itemKey);
-                string displayName = ConfigService.Instance.GetItemDisplayName(item.itemKey);
-                if (itemConfig?.category == "seed")
-                {
-                    AddGiftPickerRow("seed", item.itemKey, item.count, displayName);
-                }
-                else
-                {
-                    AddGiftPickerRow("item", item.itemKey, item.count, displayName);
-                }
+                string displayName = ConfigService.Instance?.GetItemDisplayName(item.itemKey) ?? item.itemKey;
+                var el = MakeGiftPickerRow(itemConfig?.category == "seed" ? "seed" : "item",
+                    item.itemKey, item.count, displayName);
+                if (el != null) newChildren.Add(el);
             }
+
+            SwapChildren(giftPickerInventory, giftPickerCardPool, newChildren);
         }
 
-        private void AddGiftPickerRow(string type, string name, int available, string displayName = null)
+        private VisualElement MakeGiftPickerRow(string type, string name, int available, string displayName = null)
         {
-            if (giftPickerItemTemplate == null) return;
+            if (giftPickerItemTemplate == null) return null;
             var el = giftPickerItemTemplate.CloneTree();
 
             var nameLabel = el.Q<Label>(className: "picker-item-name");
@@ -566,7 +607,7 @@ namespace Garden
                 UpdateGiftSelectedLabel();
             });
 
-            giftPickerInventory?.Add(el);
+            return el;
         }
 
         private void UpdateGiftSelectedLabel()

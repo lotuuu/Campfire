@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -7,6 +8,7 @@ namespace Garden
     public class BuildUI : MonoBehaviour
     {
         private VisualElement buildList;
+        private readonly List<VisualElement> buildCardPool = new();
 
         public event Action<CampBuildingType> OnRequestPlacement;
 
@@ -19,7 +21,8 @@ namespace Garden
         public void Refresh()
         {
             if (buildList == null) return;
-            buildList.Clear();
+
+            var newCards = new List<VisualElement>();
 
             bool canPlace = FlameManager.Instance != null && FlameManager.Instance.CanPlaceEntity;
             string capText = FlameManager.Instance != null
@@ -37,7 +40,7 @@ namespace Garden
                 bool canAfford = plotAllowed && canPlace && plotCost != null
                     && CurrencyManager.Instance.CanAffordMana(plotCost.manaCost)
                     && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, plotCost.harvestCosts);
-                buildList.Add(BuildCardHelper.CreateBuildCard(
+                newCards.Add(BuildCardHelper.CreateBuildCard(
                     "Plot", "Grow seeds", "ui/buildings/plot", null,
                     BuildCardHelper.FromBuildingCost(plotCost), capText,
                     canAfford, plotAllowed && canPlace,
@@ -57,7 +60,7 @@ namespace Garden
                     bool canAfford = vaseAllowed && canPlace && vaseCost != null
                         && CurrencyManager.Instance.CanAffordMana(vaseCost.manaCost)
                         && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, vaseCost.harvestCosts);
-                    buildList.Add(BuildCardHelper.CreateBuildCard(
+                    newCards.Add(BuildCardHelper.CreateBuildCard(
                         "Vase", "Stores water", "ui/buildings/vase", null,
                         BuildCardHelper.FromBuildingCost(vaseCost), capText,
                         canAfford, vaseAllowed && canPlace,
@@ -66,7 +69,7 @@ namespace Garden
                 }
                 else
                 {
-                    buildList.Add(BuildCardHelper.CreateBuildCard(
+                    newCards.Add(BuildCardHelper.CreateBuildCard(
                         "Vase", "Stores water",
                         "ui/buildings/vase", null,
                         null, capText, false, false, null,
@@ -84,7 +87,7 @@ namespace Garden
                     bool canAfford = houseAllowed && canPlace
                         && CurrencyManager.Instance.CanAffordMana(nextCost.manaCost)
                         && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, nextCost.harvestCosts);
-                    buildList.Add(BuildCardHelper.CreateBuildCard(
+                    newCards.Add(BuildCardHelper.CreateBuildCard(
                         "House", "Houses 1 Mallum", "ui/buildings/house", null,
                         BuildCardHelper.FromBuildingCost(nextCost), capText,
                         canAfford, houseAllowed && canPlace,
@@ -104,7 +107,7 @@ namespace Garden
                     bool canAfford = gardenAllowed && canPlace && gardenCost != null
                         && CurrencyManager.Instance.CanAffordMana(gardenCost.manaCost)
                         && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, gardenCost.harvestCosts);
-                    buildList.Add(BuildCardHelper.CreateBuildCard(
+                    newCards.Add(BuildCardHelper.CreateBuildCard(
                         "Garden", "Grow fruit trees", "ui/buildings/garden", null,
                         BuildCardHelper.FromBuildingCost(gardenCost), capText,
                         canAfford, gardenAllowed && canPlace,
@@ -113,7 +116,7 @@ namespace Garden
                 }
                 else
                 {
-                    buildList.Add(BuildCardHelper.CreateBuildCard(
+                    newCards.Add(BuildCardHelper.CreateBuildCard(
                         "Garden", "Grow fruit trees",
                         "ui/buildings/garden", null,
                         null, capText, false, false, null,
@@ -126,7 +129,7 @@ namespace Garden
             {
                 bool flameAllowed = allowed == null || allowed.Contains(CampBuildingType.Flame);
                 var recipe = FlameManager.Instance.GetUpgradeRecipe();
-                buildList.Add(BuildCardHelper.CreateBuildCard(
+                newCards.Add(BuildCardHelper.CreateBuildCard(
                     "Upgrade Flame", "Expand your camp", "ui/buildings/flame", null,
                     BuildCardHelper.FromFlameRecipe(recipe), "", flameAllowed, flameAllowed, () =>
                     {
@@ -135,6 +138,16 @@ namespace Garden
                     },
                     null));
             }
+
+            // Swap pattern: add new cards before removing old ones to prevent
+            // the container height from collapsing to zero (which causes scroll jumps).
+            foreach (var card in newCards)
+                buildList.Add(card);
+            foreach (var old in buildCardPool)
+                old.RemoveFromHierarchy();
+
+            buildCardPool.Clear();
+            buildCardPool.AddRange(newCards);
         }
     }
 }
