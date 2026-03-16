@@ -16,7 +16,7 @@ namespace Garden
 
     public enum PlotState { Empty, Growing, Mature }
 
-    public enum VaseState { Empty, Filling, Full }
+    public enum VaseState { Empty, Filling, HasWater }
 
     public enum CampBuildingType { None, Flame, Plot, Vase, Garden, Apotheke, MallumHouse, Bird, Visitor }
 }

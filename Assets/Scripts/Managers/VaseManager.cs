@@ -39,7 +39,7 @@ namespace Garden
             foreach (var vase in vases)
             {
                 vase.currentWater = vase.capacity;
-                vase.state = VaseState.Full;
+                vase.state = VaseState.HasWater;
                 vase.fillStartTimeUtc = null;
             }
         }
@@ -62,7 +62,7 @@ namespace Garden
                 if (elapsed.TotalMinutes >= FillDurationMinutes)
                 {
                     vase.currentWater = vase.capacity;
-                    vase.state = VaseState.Full;
+                    vase.state = VaseState.HasWater;
                     vase.fillStartTimeUtc = null;
                     changed = true;
 
@@ -88,7 +88,7 @@ namespace Garden
             var vase = data.vases[vaseIndex];
             if (vase.state != VaseState.Filling) return false;
             vase.currentWater = vase.capacity;
-            vase.state = VaseState.Full;
+            vase.state = VaseState.HasWater;
             vase.fillStartTimeUtc = null;
             SaveManager.Instance.Save();
             OnVasesChanged?.Invoke();

@@ -72,17 +72,17 @@ namespace Garden.Tests
             {
                 new VaseSave { capacity = 5, currentWater = 0, state = VaseState.Empty },
                 new VaseSave { capacity = 5, currentWater = 0, state = VaseState.Filling, fillStartTimeUtc = DateTime.UtcNow.ToString("o") },
-                new VaseSave { capacity = 5, currentWater = 5, state = VaseState.Full },
+                new VaseSave { capacity = 5, currentWater = 5, state = VaseState.HasWater },
             };
 
             VaseManager.RainFillAllVases(vases);
 
-            Assert.AreEqual(VaseState.Full, vases[0].state);
+            Assert.AreEqual(VaseState.HasWater, vases[0].state);
             Assert.AreEqual(5, vases[0].currentWater);
-            Assert.AreEqual(VaseState.Full, vases[1].state);
+            Assert.AreEqual(VaseState.HasWater, vases[1].state);
             Assert.AreEqual(5, vases[1].currentWater);
             Assert.IsNull(vases[1].fillStartTimeUtc);
-            Assert.AreEqual(VaseState.Full, vases[2].state);
+            Assert.AreEqual(VaseState.HasWater, vases[2].state);
         }
 
         // Task 5: RainWaterAllPlots tests
@@ -196,9 +196,9 @@ namespace Garden.Tests
                     MallumManager.FreeMallumFromWater(m);
             int watered = PlotManager.RainWaterAllPlots(data.plots, now);
 
-            Assert.AreEqual(VaseState.Full, data.vases[0].state);
+            Assert.AreEqual(VaseState.HasWater, data.vases[0].state);
             Assert.AreEqual(5, data.vases[0].currentWater);
-            Assert.AreEqual(VaseState.Full, data.vases[1].state);
+            Assert.AreEqual(VaseState.HasWater, data.vases[1].state);
 
             Assert.AreEqual(MallumState.Idle, data.mallums[0].state);
             Assert.AreEqual(-1, data.mallums[0].assignedVaseIndex);

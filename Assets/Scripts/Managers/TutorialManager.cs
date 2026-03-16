@@ -172,6 +172,23 @@ namespace Garden
                     }
                     break;
 
+                case StepFetchWater:
+                    // If the plot matured, switch highlight immediately (same frame as sprite update)
+                    if (plotIndex < data.plots.Count && data.plots[plotIndex].state == PlotState.Mature)
+                    {
+                        var plot = data.plots[plotIndex];
+                        if (!IsHighlightingCell(plot.gridX, plot.gridY))
+                        {
+                            string hint = plot.waterCount > 0
+                                ? "Your plant is ready! Tap to harvest"
+                                : "Your crop grew before you could water it. Harvest it now!";
+                            tutorialUI?.ShowHint(hint);
+                            ClearAllHighlights();
+                            HighlightHexCell(0);
+                        }
+                    }
+                    break;
+
                 case StepPlantAgain:
                     // Player planted a second seed
                     if (plotIndex < data.plots.Count && data.plots[plotIndex].state == PlotState.Growing)
@@ -234,7 +251,7 @@ namespace Garden
                 var vases = SaveManager.Instance.Data.vases;
                 foreach (var v in vases)
                 {
-                    if (v.state == VaseState.Full)
+                    if (v.state == VaseState.HasWater)
                     {
                         PlotManager.Instance.GrowthCapPercent = 1f;
                         return;
@@ -530,22 +547,6 @@ namespace Garden
             var data = SaveManager.Instance.Data;
             switch (CurrentStep)
             {
-                case StepFetchWater:
-                    // If the plot matured without watering, switch highlight to the plot
-                    if (data.plots.Count > 0 && data.plots[0].state == PlotState.Mature)
-                    {
-                        var plot = data.plots[0];
-                        if (!IsHighlightingCell(plot.gridX, plot.gridY))
-                        {
-                            string hint = plot.waterCount > 0
-                                ? "Your plant is ready! Tap to harvest"
-                                : "Your crop grew before you could water it. Harvest it now!";
-                            tutorialUI?.ShowHint(hint);
-                            ClearAllHighlights();
-                            HighlightHexCell(0);
-                        }
-                    }
-                    break;
                 case StepBuildHouse:
                     if (data.mallumHouses.Count > 0)
                     {

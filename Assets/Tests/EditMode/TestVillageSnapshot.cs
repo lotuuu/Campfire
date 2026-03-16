@@ -15,7 +15,7 @@ namespace Garden.Tests
             });
             saveData.vases.Add(new VaseSave
             {
-                currentWater = 3, capacity = 5, state = VaseState.Full, gridX = -1, gridY = 1
+                currentWater = 3, capacity = 5, state = VaseState.HasWater, gridX = -1, gridY = 1
             });
             saveData.gardens.Add(new GardenSave
             {

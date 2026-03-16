@@ -397,7 +397,7 @@ namespace Garden
             return s switch
             {
                 "filling" => VaseState.Filling,
-                "full" => VaseState.Full,
+                "full" => VaseState.HasWater,
                 _ => VaseState.Empty
             };
         }

@@ -2357,7 +2357,7 @@ namespace Garden
                     }
                     break;
 
-                case VaseState.Full:
+                case VaseState.HasWater:
                     bool actuallyFull = vase.currentWater >= vase.capacity;
                     if (actuallyFull)
                     {
@@ -2430,7 +2430,7 @@ namespace Garden
             barFill.AddToClassList("vase-level-fill");
             if (state == VaseState.Filling)
                 barFill.AddToClassList("vase-level-fill--filling");
-            else if (state == VaseState.Full)
+            else if (state == VaseState.HasWater)
                 barFill.AddToClassList("vase-level-fill--full");
             barFill.style.width = new Length(fraction * 100f, LengthUnit.Percent);
             barTrack.Add(barFill);

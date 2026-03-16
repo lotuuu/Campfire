@@ -90,7 +90,7 @@ namespace Garden
             VaseManager.InitializeNewPlayer(data, ConfigService.Instance.VaseConfig.default_capacity);
             int startingWater = npc?.startingWater ?? 1;
             data.vases[0].currentWater = startingWater;
-            data.vases[0].state = startingWater > 0 ? VaseState.Full : VaseState.Empty;
+            data.vases[0].state = startingWater > 0 ? VaseState.HasWater : VaseState.Empty;
             data.vases[0].gridX = positions[0].q;
             data.vases[0].gridY = positions[0].r;
             data.plots.Add(new PlotSave { state = PlotState.Empty, gridX = positions[1].q, gridY = positions[1].r });
