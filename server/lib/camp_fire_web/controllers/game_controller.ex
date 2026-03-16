@@ -883,6 +883,73 @@ defmodule CampFireWeb.GameController do
     end
   end
 
+  # ── Translations ──────────────────────────────────────────────
+
+  def get_translations(conn, params) do
+    locale = Map.get(params, "locale", "en")
+    translations = CampFire.Translations.get_translations_map(locale)
+    supported_locales = CampFire.Translations.supported_locales()
+    config_trans = CampFire.Translations.get_config_translations(locale)
+
+    # Build config overrides (only localized fields that differ from English)
+    config_overrides = %{
+      items: build_item_overrides(config_trans),
+      quests: build_quest_overrides(config_trans),
+      gardens: build_garden_overrides(config_trans)
+    }
+
+    conn
+    |> put_status(200)
+    |> json(%{
+      translations: translations,
+      configOverrides: config_overrides,
+      supportedLocales: supported_locales
+    })
+  end
+
+  defp build_item_overrides(config_trans) do
+    (Map.get(config_trans, "item", []))
+    |> Enum.group_by(& &1.translatable_key)
+    |> Map.new(fn {key, fields} ->
+      {key, Map.new(fields, fn ct ->
+        field_name = case ct.field do
+          "display_name" -> "displayName"
+          other -> other
+        end
+        {field_name, ct.value}
+      end)}
+    end)
+  end
+
+  defp build_quest_overrides(config_trans) do
+    (Map.get(config_trans, "quest", []))
+    |> Enum.group_by(& &1.translatable_key)
+    |> Map.new(fn {key, fields} ->
+      {key, Map.new(fields, fn ct ->
+        field_name = case ct.field do
+          "quest_name" -> "questName"
+          "description" -> "description"
+          other -> other
+        end
+        {field_name, ct.value}
+      end)}
+    end)
+  end
+
+  defp build_garden_overrides(config_trans) do
+    (Map.get(config_trans, "garden", []))
+    |> Enum.group_by(& &1.translatable_key)
+    |> Map.new(fn {key, fields} ->
+      {key, Map.new(fields, fn ct ->
+        field_name = case ct.field do
+          "plant_name" -> "plantName"
+          other -> other
+        end
+        {field_name, ct.value}
+      end)}
+    end)
+  end
+
   # ── Serializers ─────────────────────────────────────────────
 
   defp serialize_plot(plot) do
