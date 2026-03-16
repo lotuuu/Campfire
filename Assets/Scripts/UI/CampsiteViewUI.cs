@@ -193,6 +193,7 @@ namespace Garden
                     float progress = PlotManager.Instance.GetGrowthProgress(plotIndex);
                     fill.style.width = new Length(progress * 100f, LengthUnit.Percent);
                     TrySetHexSpriteByPercent(cell, spritePrefix, progress, skin);
+                    cell.EnableInClassList("grid-cell--ready", progress >= 1.0f);
                 }
             }
 
