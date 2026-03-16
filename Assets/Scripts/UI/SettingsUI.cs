@@ -71,6 +71,18 @@ namespace Garden
             _serverLabel.text = ServerConfig.Current.name;
             _versionLabel.text = Application.version;
 
+            // Language
+            var langDropdown = root.Q<DropdownField>("language-dropdown");
+            if (langDropdown != null && LocalizationService.Instance != null)
+            {
+                langDropdown.choices = LocalizationService.Instance.SupportedLocales;
+                langDropdown.value = LocalizationService.Instance.CurrentLocale;
+                langDropdown.RegisterValueChangedCallback(evt =>
+                {
+                    _ = LocalizationService.Instance.SwitchLocale(evt.newValue);
+                });
+            }
+
             // Delete save
             _deleteBtn = root.Q<Button>("settings-delete-btn");
             _confirmRow = root.Q<VisualElement>("settings-confirm-row");

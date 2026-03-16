@@ -53,6 +53,7 @@ defmodule CampFireWeb.Router do
     live "/weather", WeatherLive, :index
     live "/sprites", SpritesLive, :index
     live "/logs", LogsLive, :index
+    live "/translations", TranslationsLive
   end
 
   scope "/", CampFireWeb do
@@ -159,6 +160,7 @@ defmodule CampFireWeb.Router do
     post "/bird/collect", GameController, :collect_bird
     post "/move-building", GameController, :move_building
     post "/flame/upgrade", GameController, :upgrade_flame
+    get "/translations", GameController, :get_translations
   end
 
   scope "/weather", CampFireWeb do

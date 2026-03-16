@@ -112,7 +112,7 @@ namespace Garden
             if (textLabel != null)
                 textLabel.text = lines[currentIndex];
             if (tapHint != null)
-                tapHint.text = currentIndex < lines.Count - 1 ? "Tap to continue" : "Tap to close";
+                tapHint.text = currentIndex < lines.Count - 1 ? Loc.Get("ui.dialogue.tap_continue", "Tap to continue") : Loc.Get("ui.dialogue.tap_close", "Tap to close");
         }
     }
 }

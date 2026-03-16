@@ -144,8 +144,8 @@ namespace Garden
                         // Pause growth after 8s so the player has time to water
                         StartCoroutine(DelayedGrowthPause(8f));
 
-                        ShowDialogue("Spark of Ara", new List<string> {
-                            "Your seed is planted and growing!"
+                        ShowDialogue(Loc.Get("ui.label.spark_of_ara", "Spark of Ara"), new List<string> {
+                            Loc.Get("tutorial.dialogue.seed_planted", "Your seed is planted and growing!")
                         }, () => AdvanceTo(StepWaterFirst));
                     }
                     break;
@@ -167,7 +167,7 @@ namespace Garden
                     // Wait for the plant to actually mature before showing harvest hint
                     if (plotIndex < data.plots.Count && data.plots[plotIndex].state == PlotState.Mature)
                     {
-                        tutorialUI?.ShowHint("Your plant is ready! Tap to harvest");
+                        tutorialUI?.ShowHint(Loc.Get("tutorial.hint.harvest_ready", "Your plant is ready! Tap to harvest"));
                         HighlightHexCell(0);
                     }
                     break;
@@ -180,8 +180,8 @@ namespace Garden
                         if (!IsHighlightingCell(plot.gridX, plot.gridY))
                         {
                             string hint = plot.waterCount > 0
-                                ? "Your plant is ready! Tap to harvest"
-                                : "Your crop grew before you could water it. Harvest it now!";
+                                ? Loc.Get("tutorial.hint.harvest_ready", "Your plant is ready! Tap to harvest")
+                                : Loc.Get("tutorial.hint.crop_grew", "Your crop grew before you could water it. Harvest it now!");
                             tutorialUI?.ShowHint(hint);
                             ClearAllHighlights();
                             HighlightHexCell(0);
@@ -206,10 +206,10 @@ namespace Garden
             switch (CurrentStep)
             {
                 case StepHarvestFirst:
-                    ShowDialogue("Spark of Ara", new List<string> {
-                        $"You harvested {result.drops} {PlotManager.GetSeedDisplayName(result.seedItemKey)}!",
-                        "Your harvest was improved because you followed the recipe by watering it.",
-                        "Each seed has a recipe. Follow it for higher yields!"
+                    ShowDialogue(Loc.Get("ui.label.spark_of_ara", "Spark of Ara"), new List<string> {
+                        string.Format(Loc.Get("tutorial.dialogue.harvested", "You harvested {0} {1}!"), result.drops, PlotManager.GetSeedDisplayName(result.seedItemKey)),
+                        Loc.Get("tutorial.dialogue.harvest_improved", "Your harvest was improved because you followed the recipe by watering it."),
+                        Loc.Get("tutorial.dialogue.seed_recipe", "Each seed has a recipe. Follow it for higher yields!")
                     }, () => AdvanceTo(StepBuildHouse));
                     break;
 
@@ -217,15 +217,15 @@ namespace Garden
                     // Second harvest — check if they managed to water
                     if (result.waterCount > 0)
                     {
-                        ShowDialogue("Spark of Ara", new List<string> {
-                            "Nice work getting the water in time!"
+                        ShowDialogue(Loc.Get("ui.label.spark_of_ara", "Spark of Ara"), new List<string> {
+                            Loc.Get("tutorial.dialogue.water_success", "Nice work getting the water in time!")
                         }, () => AdvanceTo(StepSendOnQuest));
                     }
                     else
                     {
-                        ShowDialogue("Spark of Ara", new List<string> {
-                            "Without following the recipe, you got less harvest.",
-                            "You'll always earn some rewards, even if you don't follow the recipe at all"
+                        ShowDialogue(Loc.Get("ui.label.spark_of_ara", "Spark of Ara"), new List<string> {
+                            Loc.Get("tutorial.dialogue.harvest_without_recipe", "Without following the recipe, you got less harvest."),
+                            Loc.Get("tutorial.dialogue.always_rewards", "You'll always earn some rewards, even if you don't follow the recipe at all")
                         }, () => AdvanceTo(StepSendOnQuest));
                     }
                     break;
@@ -233,8 +233,8 @@ namespace Garden
                 case StepPlantCressSpeedPotion:
                     if (result.seedItemKey == "cress_seed")
                     {
-                        ShowDialogue("Spark of Ara", new List<string> {
-                            "Cress harvested! You can use this to build more plots."
+                        ShowDialogue(Loc.Get("ui.label.spark_of_ara", "Spark of Ara"), new List<string> {
+                            Loc.Get("tutorial.dialogue.cress_harvested", "Cress harvested! You can use this to build more plots.")
                         }, () => AdvanceTo(StepBuildSecondPlot));
                     }
                     break;
@@ -271,8 +271,8 @@ namespace Garden
                     // Check if a mallum house was built
                     if (data.mallumHouses.Count > 0)
                     {
-                        ShowDialogue("Spark of Ara", new List<string> {
-                            "Your Mallum can fetch water and go on quests!"
+                        ShowDialogue(Loc.Get("ui.label.spark_of_ara", "Spark of Ara"), new List<string> {
+                            Loc.Get("tutorial.dialogue.mallum_intro", "Your Mallum can fetch water and go on quests!")
                         }, () => AdvanceTo(StepPlantAgain));
                     }
                     break;
@@ -284,7 +284,7 @@ namespace Garden
                         if (m.state == MallumState.FetchingWater)
                         {
                             ClearAllHighlights();
-                            tutorialUI?.ShowHint("Use an Energy Drink to speed it up!");
+                            tutorialUI?.ShowHint(Loc.Get("tutorial.hint.speed_up", "Use an Energy Drink to speed it up!"));
                             HighlightVaseHex(0);
                             return;
                         }
@@ -323,8 +323,8 @@ namespace Garden
                         }
                         if (!anyOnQuest && !anyQuestComplete)
                         {
-                            ShowDialogue("Spark of Ara", new List<string> {
-                            "Quests reward you with seeds. Use those seeds to expand your camp!"
+                            ShowDialogue(Loc.Get("ui.label.spark_of_ara", "Spark of Ara"), new List<string> {
+                            Loc.Get("tutorial.dialogue.quest_rewards", "Quests reward you with seeds. Use those seeds to expand your camp!")
                         }, () => AdvanceTo(StepPlantCressSpeedPotion));
                         }
                         break;
@@ -341,10 +341,10 @@ namespace Garden
 
             if (CurrentStep == StepUpgradeFlame)
             {
-                ShowDialogue("Spark of Ara", new List<string> {
-                    "This is where you upgrade your flame.",
-                    "Collect harvests to gather the ingredients you need.",
-                    "You're on your own now. Good luck!"
+                ShowDialogue(Loc.Get("ui.label.spark_of_ara", "Spark of Ara"), new List<string> {
+                    Loc.Get("tutorial.dialogue.flame_upgrade", "This is where you upgrade your flame."),
+                    Loc.Get("tutorial.dialogue.collect_harvests", "Collect harvests to gather the ingredients you need."),
+                    Loc.Get("tutorial.dialogue.good_luck", "You're on your own now. Good luck!")
                 }, () => AdvanceTo(StepComplete));
             }
         }
@@ -365,13 +365,13 @@ namespace Garden
             switch (step)
             {
                 case StepPlantFirst:
-                    tutorialUI?.ShowHint("Tap your plot to plant a seed");
+                    tutorialUI?.ShowHint(Loc.Get("tutorial.hint.tap_to_plant", "Tap your plot to plant a seed"));
                     HighlightHexCell(0);
                     break;
                 case StepWaterFirst:
                     // On resume, restart the delayed pause coroutine
                     StartCoroutine(DelayedGrowthPause(8f));
-                    tutorialUI?.ShowHint("Water your plant for a better harvest");
+                    tutorialUI?.ShowHint(Loc.Get("tutorial.hint.water_plant", "Water your plant for a better harvest"));
                     HighlightVaseHex(0);
                     break;
                 case StepHarvestFirst:
@@ -380,22 +380,22 @@ namespace Garden
                         var plots = SaveManager.Instance.Data.plots;
                         if (plots.Count > 0 && plots[0].state == PlotState.Mature)
                         {
-                            tutorialUI?.ShowHint("Your plant is ready! Tap to harvest");
+                            tutorialUI?.ShowHint(Loc.Get("tutorial.hint.harvest_ready", "Your plant is ready! Tap to harvest"));
                             HighlightHexCell(0);
                         }
                         else
                         {
-                            tutorialUI?.ShowHint("Your plant is growing...");
+                            tutorialUI?.ShowHint(Loc.Get("tutorial.hint.plant_growing", "Your plant is growing..."));
                         }
                         break;
                     }
                 case StepBuildHouse:
-                    tutorialUI?.ShowHint("Build a Mallum House to get a helper");
+                    tutorialUI?.ShowHint(Loc.Get("tutorial.hint.build_house", "Build a Mallum House to get a helper"));
                     HighlightFlameHex();
                     tutorialUI?.DeferHighlightByClass("build-card--house");
                     break;
                 case StepPlantAgain:
-                    tutorialUI?.ShowHint("Plant another seed");
+                    tutorialUI?.ShowHint(Loc.Get("tutorial.hint.plant_again", "Plant another seed"));
                     HighlightHexCell(0);
                     break;
                 case StepFetchWater:
@@ -416,19 +416,19 @@ namespace Garden
                         }
                         if (alreadyFetching)
                         {
-                            tutorialUI?.ShowHint("Tap your vase and use an Energy Drink to speed it up!");
+                            tutorialUI?.ShowHint(Loc.Get("tutorial.hint.vase_speed_up", "Tap your vase and use an Energy Drink to speed it up!"));
                             HighlightVaseHex(0);
                         }
                         else
                         {
-                            tutorialUI?.ShowHint("Send your Mallum to fetch water");
+                            tutorialUI?.ShowHint(Loc.Get("tutorial.hint.send_fetch_water", "Send your Mallum to fetch water"));
                             HighlightVaseHex(0);
                         }
                         break;
                     }
                 case StepSendOnQuest:
-                    ShowDialogue("Spark of Ara", new List<string> {
-                        "Send a Mallum on a quest to get more seeds!"
+                    ShowDialogue(Loc.Get("ui.label.spark_of_ara", "Spark of Ara"), new List<string> {
+                        Loc.Get("tutorial.dialogue.send_quest", "Send a Mallum on a quest to get more seeds!")
                     }, () =>
                     {
                         tutorialUI?.HighlightElement("btn-quest");
@@ -446,7 +446,7 @@ namespace Garden
                         }
                         if (stillOnQuest)
                         {
-                            tutorialUI?.ShowHint("Use an Energy Drink to speed up the quest");
+                            tutorialUI?.ShowHint(Loc.Get("tutorial.hint.quest_speed_up", "Use an Energy Drink to speed up the quest"));
                             tutorialUI?.HighlightElementByClass("quest-speedup-btn", "btn-quest");
                         }
                         else
@@ -457,17 +457,17 @@ namespace Garden
                         break;
                     }
                 case StepPlantCressSpeedPotion:
-                    tutorialUI?.ShowHint("Plant a Cress and use a Speed Potion to grow it faster. Take a look at the recipe first!");
+                    tutorialUI?.ShowHint(Loc.Get("tutorial.hint.plant_cress", "Plant a Cress and use a Speed Potion to grow it faster. Take a look at the recipe first!"));
                     HighlightHexCell(0);
                     break;
                 case StepBuildSecondPlot:
-                    tutorialUI?.ShowHint("Build another plot to grow more seeds!");
+                    tutorialUI?.ShowHint(Loc.Get("tutorial.hint.build_plot", "Build another plot to grow more seeds!"));
                     HighlightFlameHex();
                     tutorialUI?.DeferHighlightByClass("build-card--plot");
                     break;
                 case StepUpgradeFlame:
-                    ShowDialogue("Spark of Ara", new List<string> {
-                        "You're almost ready to be on your own! Open the flame menu."
+                    ShowDialogue(Loc.Get("ui.label.spark_of_ara", "Spark of Ara"), new List<string> {
+                        Loc.Get("tutorial.dialogue.almost_ready", "You're almost ready to be on your own! Open the flame menu.")
                     }, () => HighlightFlameHex());
                     break;
             }
@@ -488,9 +488,9 @@ namespace Garden
 
         private void ShowWelcome()
         {
-            ShowDialogue("Spark of Ara", new List<string> {
-                "Welcome to your camp!",
-                "I'm the Spark of Ara. Let me show you around."
+            ShowDialogue(Loc.Get("ui.label.spark_of_ara", "Spark of Ara"), new List<string> {
+                Loc.Get("tutorial.dialogue.welcome", "Welcome to your camp!"),
+                Loc.Get("tutorial.dialogue.show_around", "I'm the Spark of Ara. Let me show you around.")
             }, () => AdvanceTo(StepPlantFirst));
         }
 
@@ -551,8 +551,8 @@ namespace Garden
                 case StepBuildHouse:
                     if (data.mallumHouses.Count > 0)
                     {
-                        ShowDialogue("Spark of Ara", new List<string> {
-                            "Your Mallum can fetch water and go on quests!"
+                        ShowDialogue(Loc.Get("ui.label.spark_of_ara", "Spark of Ara"), new List<string> {
+                            Loc.Get("tutorial.dialogue.mallum_intro", "Your Mallum can fetch water and go on quests!")
                         }, () => AdvanceTo(StepPlantAgain));
                     }
                     break;

@@ -109,6 +109,9 @@ namespace Garden
             rewardRevealUI = GetComponent<RewardRevealUI>();
             rewardRevealUI?.Initialize(root);
 
+            if (LocalizationService.Instance != null)
+                LocalizationService.Instance.OnLocaleChanged += OnLocaleChanged;
+
             // Overlay setup
             overlayContainer = root.Q("overlay-container");
             overlayBackdrop = root.Q("overlay-backdrop");
@@ -240,7 +243,7 @@ namespace Garden
                     serverSelector.Add(btn);
                 }
 
-                var reloadBtn = new Button { text = "Reload" };
+                var reloadBtn = new Button { text = Loc.Get("ui.button.reload", "Reload") };
                 reloadBtn.AddToClassList("server-btn");
                 reloadBtn.clicked += () => UnityEngine.SceneManagement.SceneManager.LoadScene(
                     UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
@@ -342,6 +345,8 @@ namespace Garden
             }
             if (VisitorManager.Instance != null)
                 VisitorManager.Instance.OnVisitorArrived -= ShowVisitorInteraction;
+            if (LocalizationService.Instance != null)
+                LocalizationService.Instance.OnLocaleChanged -= OnLocaleChanged;
         }
 
         private void Update()
@@ -370,7 +375,7 @@ namespace Garden
             if (elapsed >= 30f && loadingStall != null)
             {
                 loadingStall.style.display = DisplayStyle.Flex;
-                loadingStall.text = "Taking longer than usual...";
+                loadingStall.text = Loc.Get("ui.loading.slow", "Taking longer than usual...");
             }
         }
 
@@ -379,6 +384,15 @@ namespace Garden
             if (bottomNav == null || MallumManager.Instance == null) return;
             int completed = MallumManager.Instance.GetCompletedQuestCount();
             bottomNav.UpdateQuestBadge(completed);
+        }
+
+        private void OnLocaleChanged()
+        {
+            // Refresh UI controllers that display localized text
+            build?.Refresh();
+            questUI?.Refresh();
+            apotheke?.Refresh();
+            resourceDisplay?.Refresh();
         }
 
         // ── Loading gate callbacks ──
@@ -427,7 +441,7 @@ namespace Garden
             Debug.LogError($"[INIT] Service failed: {reason}");
 
             if (loadingGate == null) return;
-            loadingGateTitle.text = "Connection Failed";
+            loadingGateTitle.text = Loc.Get("ui.loading.connection_failed", "Connection Failed");
             loadingStatus.text = reason;
             loadingBarTrack.style.display = DisplayStyle.None;
 
@@ -440,7 +454,7 @@ namespace Garden
                 serverSelector.style.display = DisplayStyle.Flex;
 
             // Add a retry button
-            var retryBtn = new Button { text = "Retry" };
+            var retryBtn = new Button { text = Loc.Get("ui.button.retry", "Retry") };
             retryBtn.AddToClassList("server-btn");
             retryBtn.clicked += () => SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             loadingGate.Add(retryBtn);
@@ -499,10 +513,10 @@ namespace Garden
             }
 
             // Concrete status messages describing what's happening right now
-            if (!_socialDone) loadingStatus.text = "Signing in...";
-            else if (!_economyDone) loadingStatus.text = "Syncing save data...";
-            else if (!_gameDone) loadingStatus.text = GameService.Instance?.LoadingStatus ?? "Loading...";
-            else if (!_weatherDone) loadingStatus.text = "Checking the weather...";
+            if (!_socialDone) loadingStatus.text = Loc.Get("ui.loading.signing_in", "Signing in...");
+            else if (!_economyDone) loadingStatus.text = Loc.Get("ui.loading.syncing", "Syncing save data...");
+            else if (!_gameDone) loadingStatus.text = GameService.Instance?.LoadingStatus ?? Loc.Get("ui.loading.default", "Loading...");
+            else if (!_weatherDone) loadingStatus.text = Loc.Get("ui.loading.weather", "Checking the weather...");
         }
 
         private void ShowVisitorInteraction()

@@ -133,7 +133,7 @@ namespace Garden
             {
                 SetDisplay(giftIcon?.parent, false);
                 SetDisplay(giftClaimedText, true);
-                if (giftClaimedText != null) giftClaimedText.text = "Gift received! Thank you.";
+                if (giftClaimedText != null) giftClaimedText.text = Loc.Get("ui.visitor.gift_received", "Gift received! Thank you.");
                 SetDisplay(claimGiftBtn, false);
             }
             else
@@ -169,10 +169,10 @@ namespace Garden
 
                 string itemName = visitor.giftType switch
                 {
-                    "water" => "Water",
-                    "seed" => ConfigService.Instance?.GetItemDisplayName(visitor.giftName) ?? visitor.giftName ?? "Seeds",
-                    "item" => ConfigService.Instance?.GetItemDisplayName(visitor.giftName) ?? visitor.giftName ?? "Item",
-                    _ => "Mysterious Gift"
+                    "water" => Loc.Get("ui.visitor.water", "Water"),
+                    "seed" => ConfigService.Instance?.GetItemDisplayName(visitor.giftName) ?? visitor.giftName ?? Loc.Get("ui.visitor.seeds", "Seeds"),
+                    "item" => ConfigService.Instance?.GetItemDisplayName(visitor.giftName) ?? visitor.giftName ?? Loc.Get("ui.visitor.item", "Item"),
+                    _ => Loc.Get("ui.visitor.mysterious_gift", "Mysterious Gift")
                 };
                 if (itemName == "Mysterious Gift")
                     Debug.LogWarning($"[VisitorUI] Unknown gift type '{visitor.giftType}' for visitor '{visitor.visitorId}' — showing fallback");
@@ -183,10 +183,10 @@ namespace Garden
                 if (giftDesc != null)
                     giftDesc.text = visitor.giftType switch
                     {
-                        "water" => "Fills your vases",
-                        "seed" => "Added to your seed pouch",
-                        "item" => "Added to your inventory",
-                        _ => "Something special"
+                        "water" => Loc.Get("ui.visitor.fills_vases", "Fills your vases"),
+                        "seed" => Loc.Get("ui.visitor.added_seeds", "Added to your seed pouch"),
+                        "item" => Loc.Get("ui.visitor.added_inventory", "Added to your inventory"),
+                        _ => Loc.Get("ui.visitor.something_special", "Something special")
                     };
             }
         }
@@ -266,7 +266,7 @@ namespace Garden
                 var item = data.inventory.Find(i => i.itemKey == visitor.requestItem);
                 int have = item?.count ?? 0;
 
-                if (questLabel != null) questLabel.text = "Requesting:";
+                if (questLabel != null) questLabel.text = Loc.Get("ui.visitor.requesting", "Requesting:");
                 if (questValue != null) questValue.text = $"{visitor.requestCount}x {visitor.requestItem} (you have {have})";
 
                 SetDisplay(acceptQuestBtn, false);
@@ -277,13 +277,13 @@ namespace Garden
             else if (visitor.questFulfilled)
             {
                 if (questLabel != null) questLabel.text = "";
-                if (questValue != null) questValue.text = "Quest completed! Thank you.";
+                if (questValue != null) questValue.text = Loc.Get("ui.visitor.quest_completed", "Quest completed! Thank you.");
                 SetDisplay(acceptQuestBtn, false);
                 SetDisplay(turninQuestBtn, false);
             }
             else
             {
-                if (questLabel != null) questLabel.text = "Request:";
+                if (questLabel != null) questLabel.text = Loc.Get("ui.visitor.request", "Request:");
                 if (questValue != null) questValue.text = $"{visitor.requestCount}x {visitor.requestItem}";
                 SetDisplay(acceptQuestBtn, true);
                 SetDisplay(turninQuestBtn, false);
