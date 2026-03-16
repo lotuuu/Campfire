@@ -455,7 +455,6 @@
             <ui:VisualElement name="loading-gate-bottom">
                 <ui:Label name="loading-gate-title" text="Camp Fire" />
                 <ui:Label name="loading-gate-status" text="Starting up..." />
-                <ui:Label name="loading-gate-elapsed" />
                 <ui:Label name="loading-gate-stall" />
                 <ui:VisualElement name="loading-gate-bar-track">
                     <ui:VisualElement name="loading-gate-bar-fill" />

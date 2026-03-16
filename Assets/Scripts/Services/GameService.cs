@@ -15,6 +15,9 @@ namespace Garden
 
         public bool IsInitialized { get; private set; }
         public bool IsOnline { get; private set; }
+        public string LoadingStatus { get; private set; } = "Connecting...";
+        public int CompletedSteps { get; private set; }
+        public const int TotalSteps = 4; // config, sprites, textures, game state
 
         public event Action OnStateLoaded;
         public event Action<string> OnInitFailed;
@@ -96,6 +99,7 @@ namespace Garden
                 var sw = Stopwatch.StartNew();
 
                 // Fetch server configs before game state
+                LoadingStatus = "Fetching game config...";
                 if (ConfigService.Instance != null)
                 {
                     var configLoaded = await ConfigService.Instance.FetchConfigs();
@@ -113,17 +117,32 @@ namespace Garden
                         return;
                     }
                 }
+                CompletedSteps++; // 1: config fetched
 
-                // Sync sprites from server
+                // Download sprites from server
+                LoadingStatus = "Downloading sprites...";
                 if (SpriteService.Instance != null && ConfigService.Instance != null)
                 {
-                    await SpriteService.Instance.SyncSprites(ConfigService.Instance.SpriteManifest);
-                    BootTimer.Mark($"SpriteService.SyncSprites done ({sw.ElapsedMilliseconds}ms)");
+                    await SpriteService.Instance.DownloadSprites(ConfigService.Instance.SpriteManifest);
+                    BootTimer.Mark($"SpriteService.DownloadSprites done ({sw.ElapsedMilliseconds}ms)");
                     if (sw.ElapsedMilliseconds > SlowStepMs)
-                        Debug.LogWarning($"[INIT SLOW] SpriteService.SyncSprites took {sw.ElapsedMilliseconds}ms");
+                        Debug.LogWarning($"[INIT SLOW] SpriteService.DownloadSprites took {sw.ElapsedMilliseconds}ms");
                     sw.Restart();
                 }
+                CompletedSteps++; // 2: sprites downloaded
 
+                // Load textures from cache into memory
+                LoadingStatus = "Loading textures...";
+                if (SpriteService.Instance != null)
+                {
+                    SpriteService.Instance.LoadTextures();
+                    if (sw.ElapsedMilliseconds > SlowStepMs)
+                        Debug.LogWarning($"[INIT SLOW] SpriteService.LoadTextures took {sw.ElapsedMilliseconds}ms");
+                    sw.Restart();
+                }
+                CompletedSteps++; // 3: textures loaded
+
+                LoadingStatus = "Loading game state...";
                 using var req = GetAuth("/game/state");
                 await SendAsync(req);
                 BootTimer.Mark($"GET /game/state done ({sw.ElapsedMilliseconds}ms)");
@@ -142,14 +161,27 @@ namespace Garden
                         OnInitFailed?.Invoke("Failed to parse game state");
                         return;
                     }
-                    // If tutorial is incomplete, wipe everything and start fresh
-                    // BEFORE applying server state (which would cause visible position jumps)
+                    // If tutorial was started but not completed, wipe everything and start fresh
+                    // BEFORE applying server state (which would cause visible position jumps).
+                    // Step 0 is excluded — it means either brand-new or just-reset, not "in progress".
                     var localData = SaveManager.Instance.Data;
-                    if (localData.tutorialStep < TutorialManager.StepComplete && localData.vases.Count > 0)
+                    if (localData.tutorialStep > 0 && localData.tutorialStep < TutorialManager.StepComplete && localData.vases.Count > 0)
                     {
                         Debug.Log("[GameService] Tutorial incomplete — wiping save before applying server state");
-                        if (DebugService.Instance != null)
-                            await DebugService.Instance.ClearSave();
+                        // Clear server-side player data directly (don't rely on DebugService)
+                        try
+                        {
+                            using var clearReq = PostJson("/debug/clear-save", "{}");
+                            await SendAsync(clearReq);
+                            if (clearReq.responseCode >= 200 && clearReq.responseCode < 300)
+                                Debug.Log("[GameService] Server save cleared successfully");
+                            else
+                                Debug.LogWarning($"[GameService] Server clear-save failed (HTTP {clearReq.responseCode})");
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.LogWarning($"[GameService] Server clear-save failed: {ex.Message}");
+                        }
                         SaveManager.Instance.DeleteSave();
                         EconomyService.Instance?.ClearQueue();
                         // Don't apply stale server state — fall through to OnStateLoaded
@@ -162,6 +194,7 @@ namespace Garden
                             Debug.LogWarning($"[INIT SLOW] ApplyGameState took {sw.ElapsedMilliseconds}ms");
                     }
 
+                    CompletedSteps++; // 4: game state loaded
                     Debug.Log($"[INIT] GameService total: {totalSw.ElapsedMilliseconds}ms");
                     BootTimer.Mark("GameService state loaded");
                     IsInitialized = true;

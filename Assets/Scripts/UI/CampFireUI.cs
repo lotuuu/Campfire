@@ -51,7 +51,6 @@ namespace Garden
         private Label loadingStatus;
         private VisualElement loadingBarTrack;
         private VisualElement loadingBarFill;
-        private Label loadingElapsed;
         private Label loadingStall;
         private bool _weatherDone;
         private bool _socialDone;
@@ -233,7 +232,6 @@ namespace Garden
             loadingStatus = root.Q<Label>("loading-gate-status");
             loadingBarTrack = root.Q("loading-gate-bar-track");
             loadingBarFill = root.Q("loading-gate-bar-fill");
-            loadingElapsed = root.Q<Label>("loading-gate-elapsed");
             loadingStall = root.Q<Label>("loading-gate-stall");
 
             // Server selector — populate buttons (shown on failure or in editor/debug)
@@ -356,6 +354,7 @@ namespace Garden
         private void Update()
         {
             TryLoadSettingsIcon();
+            UpdateLoadingGate();
             UpdateLoadingElapsed();
         }
 
@@ -373,13 +372,6 @@ namespace Garden
             if (loadingGate == null || _initStopwatch == null) return;
 
             float elapsed = _initStopwatch.ElapsedMilliseconds / 1000f;
-
-            // Show elapsed time after 10 seconds
-            if (elapsed >= 10f && loadingElapsed != null)
-            {
-                loadingElapsed.style.display = DisplayStyle.Flex;
-                loadingElapsed.text = $"{elapsed:F0}s elapsed";
-            }
 
             // Stall warning after 30 seconds of no progress
             if (elapsed >= 30f && loadingStall != null)
@@ -446,9 +438,8 @@ namespace Garden
             loadingStatus.text = reason;
             loadingBarTrack.style.display = DisplayStyle.None;
 
-            // Hide stall/elapsed — failure message is sufficient
+            // Hide stall — failure message is sufficient
             if (loadingStall != null) loadingStall.style.display = DisplayStyle.None;
-            if (loadingElapsed != null) loadingElapsed.style.display = DisplayStyle.None;
 
             // Show server selector so the user can switch servers
             var serverSelector = loadingGate.Q("server-selector");
@@ -462,14 +453,19 @@ namespace Garden
             loadingGate.Add(retryBtn);
         }
 
+        // Total loading steps: social(1) + economy(1) + game sub-steps(4) + weather(1) = 7
+        private const int TotalLoadingSteps = 1 + 1 + GameService.TotalSteps + 1;
+
         private void UpdateLoadingGate()
         {
             if (loadingGate == null || _failed) return;
 
-            int done = (_socialDone ? 1 : 0) + (_economyDone ? 1 : 0)
-                     + (_gameDone ? 1 : 0) + (_weatherDone ? 1 : 0);
-            const int total = 4;
-            float pct = (float)done / total;
+            // Granular progress: each service contributes its sub-steps
+            int done = (_socialDone ? 1 : 0)
+                     + (_economyDone ? 1 : 0)
+                     + (GameService.Instance?.CompletedSteps ?? 0)
+                     + (_weatherDone ? 1 : 0);
+            float pct = (float)done / TotalLoadingSteps;
 
             // Track progress for stall detection
             if (done > _lastDoneCount)
@@ -480,7 +476,8 @@ namespace Garden
 
             loadingBarFill.style.width = Length.Percent(pct * 100f);
 
-            if (done >= total)
+            bool allDone = _socialDone && _economyDone && _gameDone && _weatherDone;
+            if (allDone)
             {
                 Debug.Log($"[INIT] ===== App fully loaded in {_initStopwatch?.ElapsedMilliseconds ?? 0}ms =====");
                 BootTimer.Mark("All services ready — loading gate dismissed");
@@ -503,7 +500,7 @@ namespace Garden
             // Concrete status messages describing what's happening right now
             if (!_socialDone) loadingStatus.text = "Signing in...";
             else if (!_economyDone) loadingStatus.text = "Syncing save data...";
-            else if (!_gameDone) loadingStatus.text = "Loading your camp...";
+            else if (!_gameDone) loadingStatus.text = GameService.Instance?.LoadingStatus ?? "Loading...";
             else if (!_weatherDone) loadingStatus.text = "Checking the weather...";
         }
 

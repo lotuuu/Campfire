@@ -129,22 +129,17 @@ namespace Garden
 
         // ── Sync ──
 
-        public async Task<bool> SyncSprites(Dictionary<string, string> serverManifest)
+        /// <summary>Downloads any sprites whose hashes differ from the server manifest.</summary>
+        public async Task<bool> DownloadSprites(Dictionary<string, string> serverManifest)
         {
-            var totalSw = Stopwatch.StartNew();
-
             if (serverManifest == null || serverManifest.Count == 0)
-            {
-                LoadAllFromCache();
                 return true;
-            }
 
             try
             {
                 Directory.CreateDirectory(CacheDir);
                 var localManifest = LoadLocalManifest();
 
-                // Find sprites that need downloading
                 var toDownload = new List<string>();
                 foreach (var kv in serverManifest)
                 {
@@ -166,21 +161,33 @@ namespace Garden
                     BootTimer.Mark($"SpriteService: all {serverManifest.Count} sprites cached, no downloads needed");
                 }
 
-                var cacheSw = Stopwatch.StartNew();
-                LoadAllFromCache();
-                BootTimer.Mark($"SpriteService.LoadAllFromCache done ({cacheSw.ElapsedMilliseconds}ms, {_textures.Count} textures)");
-                if (cacheSw.ElapsedMilliseconds > SlowStepMs)
-                    Debug.LogWarning($"[INIT SLOW] SpriteService.LoadAllFromCache took {cacheSw.ElapsedMilliseconds}ms ({_textures.Count} sprites)");
-
-                Debug.Log($"[INIT] SpriteService.SyncSprites total: {totalSw.ElapsedMilliseconds}ms ({_textures.Count} sprites loaded)");
                 return true;
             }
             catch (Exception e)
             {
-                Debug.LogWarning($"SpriteService: sync failed ({e.Message}), loading from cache.");
-                LoadAllFromCache();
-                return _textures.Count > 0;
+                Debug.LogWarning($"SpriteService: download failed ({e.Message}).");
+                return false;
             }
+        }
+
+        /// <summary>Loads all cached sprite PNGs into memory as Texture2D.</summary>
+        public void LoadTextures()
+        {
+            var sw = Stopwatch.StartNew();
+            LoadAllFromCache();
+            BootTimer.Mark($"SpriteService.LoadAllFromCache done ({sw.ElapsedMilliseconds}ms, {_textures.Count} textures)");
+            if (sw.ElapsedMilliseconds > SlowStepMs)
+                Debug.LogWarning($"[INIT SLOW] SpriteService.LoadAllFromCache took {sw.ElapsedMilliseconds}ms ({_textures.Count} sprites)");
+        }
+
+        /// <summary>Downloads sprites then loads textures in one call (legacy convenience).</summary>
+        public async Task<bool> SyncSprites(Dictionary<string, string> serverManifest)
+        {
+            var totalSw = Stopwatch.StartNew();
+            var ok = await DownloadSprites(serverManifest);
+            LoadTextures();
+            Debug.Log($"[INIT] SpriteService.SyncSprites total: {totalSw.ElapsedMilliseconds}ms ({_textures.Count} sprites loaded)");
+            return ok || _textures.Count > 0;
         }
 
         // ── Download ──

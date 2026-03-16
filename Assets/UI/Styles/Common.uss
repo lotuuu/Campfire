@@ -222,14 +222,6 @@
     transition-duration: 400ms;
 }
 
-#loading-gate-elapsed {
-    font-size: var(--font-xs);
-    color: rgba(255, 210, 120, 0.4);
-    margin-bottom: var(--spacing-xs);
-    -unity-text-align: middle-center;
-    display: none;
-}
-
 #loading-gate-stall {
     font-size: var(--font-sm);
     color: rgb(220, 180, 60);
