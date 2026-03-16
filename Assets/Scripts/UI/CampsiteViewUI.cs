@@ -273,7 +273,7 @@ namespace Garden
                 progressPctLabel.text = $"{Mathf.RoundToInt(fraction * 100)}%";
                 progressBarFill.style.width = new Length(fraction * 100f, LengthUnit.Percent);
                 if (progressTimeLabel != null)
-                    progressTimeLabel.text = remaining > 0f ? FormatTimeRemaining(remaining) + " remaining" : "";
+                    progressTimeLabel.text = remaining > 0f ? FormatTimeRemaining(remaining) + " " + Loc.Get("ui.label.remaining", "remaining") : "";
             }
         }
 
@@ -496,7 +496,7 @@ namespace Garden
             // Cancel button for placing/watering modes
             if (mode == CampsiteMode.Placing || mode == CampsiteMode.Watering)
             {
-                string label2 = mode == CampsiteMode.Watering ? "Cancel Watering" : "Cancel";
+                string label2 = mode == CampsiteMode.Watering ? Loc.Get("ui.button.cancel_watering", "Cancel Watering") : Loc.Get("ui.button.cancel", "Cancel");
                 modeCancelBtn = new Button(ExitMode) { text = label2 };
                 modeCancelBtn.name = "placement-cancel";
                 modeCancelBtn.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());
@@ -523,14 +523,14 @@ namespace Garden
                     cell.AddToClassList("grid-cell--flame");
                     TrySetHexSprite(cell, "hex/flame");
                     if (label != null) label.text = $"Lv.{FlameManager.Instance.Level}";
-                    if (status != null) status.text = "Spark of Ara";
+                    if (status != null) status.text = Loc.Get("ui.label.spark_of_ara", "Spark of Ara");
                     break;
 
                 case CampBuildingType.Plot:
                     cell.AddToClassList("grid-cell--plot");
                     var plot = SaveManager.Instance.Data.plots[index];
                     string plotSkin = plot.skinName;
-                    if (label != null) label.text = string.IsNullOrEmpty(plot.seedItemKey) ? "Plot" : PlotManager.GetSeedDisplayName(plot.seedItemKey);
+                    if (label != null) label.text = string.IsNullOrEmpty(plot.seedItemKey) ? Loc.Get("ui.label.plot", "Plot") : PlotManager.GetSeedDisplayName(plot.seedItemKey);
                     if (status != null) status.text = plot.state.ToString();
 
                     if (plot.state == PlotState.Empty)
@@ -567,7 +567,7 @@ namespace Garden
                     cell.AddToClassList("grid-cell--vase");
                     var vase = SaveManager.Instance.Data.vases[index];
                     string vaseSkin = vase.skinName;
-                    if (label != null) label.text = vase.currentWater >= vase.capacity ? "Full Vase" : vase.currentWater > 0 ? "Vase" : "Empty Vase";
+                    if (label != null) label.text = vase.currentWater >= vase.capacity ? Loc.Get("ui.label.full_vase", "Full Vase") : vase.currentWater > 0 ? Loc.Get("ui.label.vase", "Vase") : Loc.Get("ui.label.empty_vase", "Empty Vase");
                     if (status != null) status.text = $"{vase.currentWater}/{vase.capacity}";
 
                     float vasePct = vase.capacity > 0 ? (float)vase.currentWater / vase.capacity : 0f;
@@ -587,29 +587,29 @@ namespace Garden
                     cell.AddToClassList("grid-cell--garden");
                     var garden = SaveManager.Instance.Data.gardens[index];
                     string plant = garden.plantName?.ToLower();
-                    if (label != null) label.text = string.IsNullOrEmpty(garden.plantName) ? "Garden" : garden.plantName;
+                    if (label != null) label.text = string.IsNullOrEmpty(garden.plantName) ? Loc.Get("ui.label.garden", "Garden") : garden.plantName;
                     if (string.IsNullOrEmpty(garden.plantName))
                     {
                         TrySetHexSprite(cell, "hex/garden/empty");
-                        if (status != null) status.text = "Empty";
+                        if (status != null) status.text = Loc.Get("ui.label.empty", "Empty");
                     }
                     else if (garden.mature)
                     {
                         TrySetHexSprite(cell, $"hex/garden/{plant}/mature");
-                        if (status != null) status.text = "Mature";
+                        if (status != null) status.text = Loc.Get("ui.label.mature", "Mature");
                     }
                     else
                     {
                         TrySetHexSprite(cell, $"hex/garden/{plant}/growing");
-                        if (status != null) status.text = "Growing";
+                        if (status != null) status.text = Loc.Get("ui.label.growing", "Growing");
                     }
                     break;
 
                 case CampBuildingType.Apotheke:
                     cell.AddToClassList("grid-cell--apotheke");
                     TrySetHexSprite(cell, "hex/apotheke");
-                    if (label != null) label.text = "Apotheke";
-                    if (status != null) status.text = "Mixing";
+                    if (label != null) label.text = Loc.Get("ui.label.apotheke", "Apotheke");
+                    if (status != null) status.text = Loc.Get("ui.label.mixing", "Mixing");
                     break;
 
                 case CampBuildingType.MallumHouse:
@@ -617,13 +617,13 @@ namespace Garden
                     string houseSkin = SaveManager.Instance.Data.mallumHouses[index].skinName;
                     if (!TrySetHexSprite(cell, "hex/house", houseSkin))
                         ApplySkinColors(cell, houseSkin);
-                    if (label != null) label.text = "House";
+                    if (label != null) label.text = Loc.Get("ui.label.house", "House");
                     if (status != null)
                     {
                         int mallumCount = ConfigService.Instance?.MallumHouseConfig != null
                             ? ConfigService.Instance.MallumHouseConfig.MallumsPerHouse
                             : 1;
-                        status.text = $"+{mallumCount} Mallums";
+                        status.text = string.Format(Loc.Get("ui.label.mallum_count", "+{0} Mallums"), mallumCount);
                     }
                     break;
 
@@ -631,7 +631,7 @@ namespace Garden
                     cell.AddToClassList("grid-cell--bird");
                     TrySetHexSprite(cell, "hex/bird");
                     var bird = SaveManager.Instance.Data.birds[index];
-                    if (label != null) label.text = "Bird";
+                    if (label != null) label.text = Loc.Get("ui.label.bird", "Bird");
                     if (status != null) status.text = $"{bird.itemCount}x {ConfigService.Instance.GetItemDisplayName(bird.itemKey)}";
                     break;
 
@@ -639,14 +639,14 @@ namespace Garden
                     cell.AddToClassList("grid-cell--visitor");
                     TrySetHexSprite(cell, "hex/visitor");
                     var visitor = SaveManager.Instance.Data.currentVisitor;
-                    if (label != null) label.text = visitor?.visitorName ?? "Visitor";
+                    if (label != null) label.text = visitor?.visitorName ?? Loc.Get("ui.label.visitor", "Visitor");
                     if (status != null)
                     {
                         status.text = visitor?.type switch
                         {
-                            VisitorType.Merchant => $"{visitor.offers?.Count ?? 0} trades",
-                            VisitorType.Gifter => "Has a gift",
-                            VisitorType.Quester => "Has a quest",
+                            VisitorType.Merchant => string.Format(Loc.Get("ui.label.trades_count", "{0} trades"), visitor.offers?.Count ?? 0),
+                            VisitorType.Gifter => Loc.Get("ui.label.has_gift", "Has a gift"),
+                            VisitorType.Quester => Loc.Get("ui.label.has_quest", "Has a quest"),
                             _ => ""
                         };
                     }
@@ -823,7 +823,7 @@ namespace Garden
             bool canPlace = FlameManager.Instance.CanPlaceEntity;
             int current = FlameManager.Instance.CurrentEntityCount;
             int max = FlameManager.Instance.MaxEntities;
-            interactionTitle.text = $"Build ({current}/{max})";
+            interactionTitle.text = string.Format(Loc.Get("ui.interaction.build_count", "Build ({0}/{1})"), current, max);
 
             var grid = new VisualElement();
             grid.AddToClassList("build-grid");
@@ -842,7 +842,7 @@ namespace Garden
                         && CurrencyManager.Instance.CanAffordMana(plotCost.manaCost)
                         && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, plotCost.harvestCosts);
                     grid.Add(BuildCardHelper.CreateBuildCard(
-                        "Plot", "Grow seeds", "ui/buildings/plot", null,
+                        Loc.Get("ui.build.plot_name", "Plot"), Loc.Get("ui.build.plot_desc", "Grow seeds"), "ui/buildings/plot", null,
                         BuildCardHelper.FromBuildingCost(plotCost), null,
                         canAffordPlot, canPlace, () =>
                         {
@@ -866,7 +866,7 @@ namespace Garden
                             && CurrencyManager.Instance.CanAffordMana(vaseCost.manaCost)
                             && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, vaseCost.harvestCosts);
                         grid.Add(BuildCardHelper.CreateBuildCard(
-                            "Vase", "Stores water", "ui/buildings/vase", null,
+                            Loc.Get("ui.build.vase_name", "Vase"), Loc.Get("ui.build.vase_desc", "Stores water"), "ui/buildings/vase", null,
                             BuildCardHelper.FromBuildingCost(vaseCost), null,
                             canAffordVase, canPlace, () =>
                             {
@@ -878,10 +878,10 @@ namespace Garden
                 else
                 {
                     grid.Add(BuildCardHelper.CreateBuildCard(
-                        "Vase", "Stores water",
+                        Loc.Get("ui.build.vase_name", "Vase"), Loc.Get("ui.build.vase_desc", "Stores water"),
                         "ui/buildings/vase", null,
                         null, null, false, false, null,
-                        $"Unlocks at Fire Lv.{VaseManager.VaseUnlockLevel}"));
+                        string.Format(Loc.Get("ui.build.unlocks_at", "Unlocks at Fire Lv.{0}"), VaseManager.VaseUnlockLevel)));
                 }
             }
 
@@ -896,7 +896,7 @@ namespace Garden
                         && CurrencyManager.Instance.CanAffordMana(cost.manaCost)
                         && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, cost.harvestCosts);
                     grid.Add(BuildCardHelper.CreateBuildCard(
-                        "House", "Houses 1 Mallum", "ui/buildings/house", null,
+                        Loc.Get("ui.build.house_name", "House"), Loc.Get("ui.build.house_desc", "Houses 1 Mallum"), "ui/buildings/house", null,
                         BuildCardHelper.FromBuildingCost(cost), null,
                         canAffordHouse, canPlace, () =>
                         {
@@ -920,7 +920,7 @@ namespace Garden
                             && CurrencyManager.Instance.CanAffordMana(gardenCost.manaCost)
                             && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, gardenCost.harvestCosts);
                         grid.Add(BuildCardHelper.CreateBuildCard(
-                            "Garden", "Grow fruit trees", "ui/buildings/garden", null,
+                            Loc.Get("ui.build.garden_name", "Garden"), Loc.Get("ui.build.garden_desc", "Grow fruit trees"), "ui/buildings/garden", null,
                             BuildCardHelper.FromBuildingCost(gardenCost), null,
                             canAffordGarden, canPlace, () =>
                             {
@@ -932,10 +932,10 @@ namespace Garden
                 else
                 {
                     grid.Add(BuildCardHelper.CreateBuildCard(
-                        "Garden", "Grow fruit trees",
+                        Loc.Get("ui.build.garden_name", "Garden"), Loc.Get("ui.build.garden_desc", "Grow fruit trees"),
                         "ui/buildings/garden", null,
                         null, null, false, false, null,
-                        $"Unlocks at Fire Lv.{GardenManager.GardenUnlockLevel}"));
+                        string.Format(Loc.Get("ui.build.unlocks_at", "Unlocks at Fire Lv.{0}"), GardenManager.GardenUnlockLevel)));
                 }
             }
 
@@ -943,7 +943,7 @@ namespace Garden
 
             if (!canPlace)
             {
-                var hint = new Label("Upgrade flame for more slots");
+                var hint = new Label(Loc.Get("ui.label.upgrade_for_slots", "Upgrade flame for more slots"));
                 hint.AddToClassList("interaction-info");
                 interactionBody.Add(hint);
             }
@@ -1023,7 +1023,7 @@ namespace Garden
             {
                 var label = visitTransition.Q<Label>("curtain-label");
                 if (label != null)
-                    label.text = string.IsNullOrEmpty(friendName) ? "Visiting..." : $"Visiting {friendName}...";
+                    label.text = string.IsNullOrEmpty(friendName) ? Loc.Get("ui.label.visiting_generic", "Visiting...") : string.Format(Loc.Get("ui.label.visiting", "Visiting {0}..."), friendName);
             }
 
             StartCoroutine(VisitTransitionCoroutine(toVisit: true));
@@ -1034,7 +1034,7 @@ namespace Garden
             if (visitTransition != null)
             {
                 var label = visitTransition.Q<Label>("curtain-label");
-                if (label != null) label.text = "Returning...";
+                if (label != null) label.text = Loc.Get("ui.label.returning", "Returning...");
             }
             StartCoroutine(VisitTransitionCoroutine(toVisit: false));
         }
@@ -1185,7 +1185,7 @@ namespace Garden
             }
 
             // "Back to My Camp" button
-            visitBackBtn = new Button(ExitVisitMode) { text = "Back to My Camp" };
+            visitBackBtn = new Button(ExitVisitMode) { text = Loc.Get("ui.button.back_to_camp", "Back to My Camp") };
             visitBackBtn.name = "visit-back-btn";
             visitBackBtn.AddToClassList("interaction-btn-primary");
             visitBackBtn.RegisterCallback<PointerDownEvent>(evt => evt.StopPropagation());
@@ -1206,7 +1206,7 @@ namespace Garden
                     cell.AddToClassList("grid-cell--flame");
                     TrySetHexSprite(cell, "hex/flame");
                     if (label != null) label.text = $"Lv.{visitSnapshot.flameLevel}";
-                    if (status != null) status.text = "Spark of Ara";
+                    if (status != null) status.text = Loc.Get("ui.label.spark_of_ara", "Spark of Ara");
                     break;
 
                 case CampBuildingType.Plot:
@@ -1219,7 +1219,7 @@ namespace Garden
                         TrySetHexSpriteByPercent(cell, $"hex/plot/{seed}", 1f);
                     else
                         TrySetHexSpriteByPercent(cell, $"hex/plot/{seed}", 0f);
-                    if (label != null) label.text = string.IsNullOrEmpty(plot.seedItemKey) ? "Plot" : PlotManager.GetSeedDisplayName(plot.seedItemKey);
+                    if (label != null) label.text = string.IsNullOrEmpty(plot.seedItemKey) ? Loc.Get("ui.label.plot", "Plot") : PlotManager.GetSeedDisplayName(plot.seedItemKey);
                     if (status != null) status.text = plot.state ?? "";
                     break;
 
@@ -1242,15 +1242,15 @@ namespace Garden
                         TrySetHexSprite(cell, $"hex/garden/{plant}/mature");
                     else
                         TrySetHexSprite(cell, $"hex/garden/{plant}/growing");
-                    if (label != null) label.text = string.IsNullOrEmpty(garden.plantName) ? "Garden" : garden.plantName;
-                    if (status != null) status.text = string.IsNullOrEmpty(garden.plantName) ? "Empty" : (garden.mature ? "Mature" : "Growing");
+                    if (label != null) label.text = string.IsNullOrEmpty(garden.plantName) ? Loc.Get("ui.label.garden", "Garden") : garden.plantName;
+                    if (status != null) status.text = string.IsNullOrEmpty(garden.plantName) ? Loc.Get("ui.label.empty", "Empty") : (garden.mature ? Loc.Get("ui.label.mature", "Mature") : Loc.Get("ui.label.growing", "Growing"));
                     break;
 
                 case CampBuildingType.Apotheke:
                     cell.AddToClassList("grid-cell--apotheke");
                     TrySetHexSprite(cell, "hex/apotheke");
-                    if (label != null) label.text = "Apotheke";
-                    if (status != null) status.text = "Mixing";
+                    if (label != null) label.text = Loc.Get("ui.label.apotheke", "Apotheke");
+                    if (status != null) status.text = Loc.Get("ui.label.mixing", "Mixing");
                     break;
             }
         }
@@ -1406,13 +1406,13 @@ namespace Garden
         private void ShowFlameInteraction()
         {
             TutorialManager.Instance?.OnFlameMenuOpened();
-            interactionTitle.text = $"Spark of Ara";
+            interactionTitle.text = Loc.Get("ui.label.spark_of_ara", "Spark of Ara");
 
-            var levelLabel = new Label($"Level {FlameManager.Instance.Level}");
+            var levelLabel = new Label(string.Format(Loc.Get("ui.label.level", "Level {0}"), FlameManager.Instance.Level));
             levelLabel.AddToClassList("flame-level-badge");
             interactionBody.Add(levelLabel);
 
-            var manaLabel = new Label($"{FlameManager.Instance.ManaPerSecond:F1} Mana / sec");
+            var manaLabel = new Label(string.Format(Loc.Get("ui.label.mana_rate", "{0} Mana / sec"), FlameManager.Instance.ManaPerSecond.ToString("F1")));
             manaLabel.AddToClassList("flame-mana-rate");
             interactionBody.Add(manaLabel);
 
@@ -1422,7 +1422,7 @@ namespace Garden
 
             if (FlameManager.Instance.Level >= ConfigService.Instance.FlameConfig.MaxLevel)
             {
-                var maxLabel = new Label("Max Level");
+                var maxLabel = new Label(Loc.Get("ui.label.max_level", "Max Level"));
                 maxLabel.AddToClassList("plot-ready-badge");
                 interactionBody.Add(maxLabel);
             }
@@ -1434,7 +1434,7 @@ namespace Garden
                     var costList = new VisualElement();
                     costList.AddToClassList("upgrade-cost-list");
 
-                    var costHeader = new Label("UPGRADE COST");
+                    var costHeader = new Label(Loc.Get("ui.label.upgrade_cost", "UPGRADE COST"));
                     costHeader.AddToClassList("upgrade-cost-header");
                     costList.Add(costHeader);
 
@@ -1470,7 +1470,7 @@ namespace Garden
                 float currMana = FlameManager.Instance.ManaPerSecond;
                 if (nextMana > currMana)
                 {
-                    var benefitLabel = new Label($"+{(nextMana - currMana):F1} mana/sec at Lv {nextLevel}");
+                    var benefitLabel = new Label(string.Format(Loc.Get("ui.label.mana_benefit", "+{0} mana/sec at Lv {1}"), (nextMana - currMana).ToString("F1"), nextLevel));
                     benefitLabel.AddToClassList("interaction-info-highlight");
                     interactionBody.Add(benefitLabel);
                 }
@@ -1478,13 +1478,13 @@ namespace Garden
                 int currEntities = fc.GetMaxEntities(FlameManager.Instance.Level);
                 if (nextEntities > currEntities)
                 {
-                    var capLabel = new Label($"+{nextEntities - currEntities} build slots");
+                    var capLabel = new Label(string.Format(Loc.Get("ui.label.build_slots", "+{0} build slots"), nextEntities - currEntities));
                     capLabel.AddToClassList("interaction-info");
                     interactionBody.Add(capLabel);
                 }
                 if (nextLevel == GardenManager.GardenUnlockLevel)
                 {
-                    var unlockLabel = new Label("Unlocks Gardens!");
+                    var unlockLabel = new Label(Loc.Get("ui.label.unlocks_gardens", "Unlocks Gardens!"));
                     unlockLabel.AddToClassList("interaction-info-highlight");
                     interactionBody.Add(unlockLabel);
                 }
@@ -1495,7 +1495,7 @@ namespace Garden
                     FlameManager.Instance.UpgradeFlame();
                     CloseInteractionPanel();
                 })
-                { text = "Level Up" };
+                { text = Loc.Get("ui.button.level_up", "Level Up") };
                 upgradeBtn.SetEnabled(canAfford);
                 upgradeBtn.AddToClassList("upgrade-btn");
                 interactionBody.Add(upgradeBtn);
@@ -1516,7 +1516,7 @@ namespace Garden
             var headerRow = new VisualElement();
             headerRow.AddToClassList("flame-build-header");
 
-            var buildLabel = new Label("BUILD");
+            var buildLabel = new Label(Loc.Get("ui.label.build", "BUILD"));
             buildLabel.AddToClassList("upgrade-cost-header");
             headerRow.Add(buildLabel);
 
@@ -1556,7 +1556,7 @@ namespace Garden
                     && CurrencyManager.Instance.CanAffordMana(plotCost.manaCost)
                     && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, plotCost.harvestCosts);
                 grid.Add(BuildCardHelper.CreateBuildCard(
-                    "Plot", "Grow seeds", "ui/buildings/plot", null,
+                    Loc.Get("ui.build.plot_name", "Plot"), Loc.Get("ui.build.plot_desc", "Grow seeds"), "ui/buildings/plot", null,
                     BuildCardHelper.FromBuildingCost(plotCost), null,
                     canAfford, plotAllowed && canPlaceEntity, () =>
                     {
@@ -1578,7 +1578,7 @@ namespace Garden
                         && CurrencyManager.Instance.CanAffordMana(vaseCost.manaCost)
                         && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, vaseCost.harvestCosts);
                     grid.Add(BuildCardHelper.CreateBuildCard(
-                        "Vase", "Stores water", "ui/buildings/vase", null,
+                        Loc.Get("ui.build.vase_name", "Vase"), Loc.Get("ui.build.vase_desc", "Stores water"), "ui/buildings/vase", null,
                         BuildCardHelper.FromBuildingCost(vaseCost), null,
                         canAfford, vaseAllowed && canPlaceEntity, () =>
                         {
@@ -1589,10 +1589,10 @@ namespace Garden
                 else
                 {
                     grid.Add(BuildCardHelper.CreateBuildCard(
-                        "Vase", "Stores water",
+                        Loc.Get("ui.build.vase_name", "Vase"), Loc.Get("ui.build.vase_desc", "Stores water"),
                         "ui/buildings/vase", null,
                         null, null, false, false, null,
-                        $"Unlocks at Fire Lv.{VaseManager.VaseUnlockLevel}"));
+                        string.Format(Loc.Get("ui.build.unlocks_at", "Unlocks at Fire Lv.{0}"), VaseManager.VaseUnlockLevel)));
                 }
             }
 
@@ -1607,7 +1607,7 @@ namespace Garden
                         && CurrencyManager.Instance.CanAffordMana(nextCost.manaCost)
                         && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, nextCost.harvestCosts);
                     grid.Add(BuildCardHelper.CreateBuildCard(
-                        "House", "Houses 1 Mallum", "ui/buildings/house", null,
+                        Loc.Get("ui.build.house_name", "House"), Loc.Get("ui.build.house_desc", "Houses 1 Mallum"), "ui/buildings/house", null,
                         BuildCardHelper.FromBuildingCost(nextCost), null,
                         canAfford, houseAllowed && canPlaceEntity, () =>
                         {
@@ -1631,7 +1631,7 @@ namespace Garden
                             && CurrencyManager.Instance.CanAffordMana(gardenCost.manaCost)
                             && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, gardenCost.harvestCosts);
                         grid.Add(BuildCardHelper.CreateBuildCard(
-                            "Garden", "Grow fruit trees", "ui/buildings/garden", null,
+                            Loc.Get("ui.build.garden_name", "Garden"), Loc.Get("ui.build.garden_desc", "Grow fruit trees"), "ui/buildings/garden", null,
                             BuildCardHelper.FromBuildingCost(gardenCost), null,
                             canAfford, gardenAllowed && canPlaceEntity, () =>
                             {
@@ -1643,10 +1643,10 @@ namespace Garden
                 else
                 {
                     grid.Add(BuildCardHelper.CreateBuildCard(
-                        "Garden", "Grow fruit trees",
+                        Loc.Get("ui.build.garden_name", "Garden"), Loc.Get("ui.build.garden_desc", "Grow fruit trees"),
                         "ui/buildings/garden", null,
                         null, null, false, false, null,
-                        $"Unlocks at Fire Lv.{GardenManager.GardenUnlockLevel}"));
+                        string.Format(Loc.Get("ui.build.unlocks_at", "Unlocks at Fire Lv.{0}"), GardenManager.GardenUnlockLevel)));
                 }
             }
 
@@ -1672,7 +1672,7 @@ namespace Garden
                     && CurrencyManager.Instance.CanAffordMana(plotCost.manaCost)
                     && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, plotCost.harvestCosts);
                 flameBuildGrid.Add(BuildCardHelper.CreateBuildCard(
-                    "Plot", "Grow seeds", "ui/buildings/plot", null,
+                    Loc.Get("ui.build.plot_name", "Plot"), Loc.Get("ui.build.plot_desc", "Grow seeds"), "ui/buildings/plot", null,
                     BuildCardHelper.FromBuildingCost(plotCost), null,
                     canAfford, plotAllowed && canPlaceEntity, () =>
                     {
@@ -1695,7 +1695,7 @@ namespace Garden
                         && CurrencyManager.Instance.CanAffordMana(vaseCost.manaCost)
                         && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, vaseCost.harvestCosts);
                     flameBuildGrid.Add(BuildCardHelper.CreateBuildCard(
-                        "Vase", "Stores water", "ui/buildings/vase", null,
+                        Loc.Get("ui.build.vase_name", "Vase"), Loc.Get("ui.build.vase_desc", "Stores water"), "ui/buildings/vase", null,
                         BuildCardHelper.FromBuildingCost(vaseCost), null,
                         canAfford, vaseAllowed && canPlaceEntity, () =>
                         {
@@ -1707,10 +1707,10 @@ namespace Garden
                 else
                 {
                     flameBuildGrid.Add(BuildCardHelper.CreateBuildCard(
-                        "Vase", "Stores water",
+                        Loc.Get("ui.build.vase_name", "Vase"), Loc.Get("ui.build.vase_desc", "Stores water"),
                         "ui/buildings/vase", null,
                         null, null, false, false, null,
-                        $"Unlocks at Fire Lv.{VaseManager.VaseUnlockLevel}"));
+                        string.Format(Loc.Get("ui.build.unlocks_at", "Unlocks at Fire Lv.{0}"), VaseManager.VaseUnlockLevel)));
                 }
             }
 
@@ -1725,7 +1725,7 @@ namespace Garden
                         && CurrencyManager.Instance.CanAffordMana(nextCost.manaCost)
                         && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, nextCost.harvestCosts);
                     flameBuildGrid.Add(BuildCardHelper.CreateBuildCard(
-                        "House", "Houses 1 Mallum", "ui/buildings/house", null,
+                        Loc.Get("ui.build.house_name", "House"), Loc.Get("ui.build.house_desc", "Houses 1 Mallum"), "ui/buildings/house", null,
                         BuildCardHelper.FromBuildingCost(nextCost), null,
                         canAfford, houseAllowed && canPlaceEntity, () =>
                         {
@@ -1750,7 +1750,7 @@ namespace Garden
                             && CurrencyManager.Instance.CanAffordMana(gardenCost.manaCost)
                             && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, gardenCost.harvestCosts);
                         flameBuildGrid.Add(BuildCardHelper.CreateBuildCard(
-                            "Garden", "Grow fruit trees", "ui/buildings/garden", null,
+                            Loc.Get("ui.build.garden_name", "Garden"), Loc.Get("ui.build.garden_desc", "Grow fruit trees"), "ui/buildings/garden", null,
                             BuildCardHelper.FromBuildingCost(gardenCost), null,
                             canAfford, gardenAllowed && canPlaceEntity, () =>
                             {
@@ -1763,10 +1763,10 @@ namespace Garden
                 else
                 {
                     flameBuildGrid.Add(BuildCardHelper.CreateBuildCard(
-                        "Garden", "Grow fruit trees",
+                        Loc.Get("ui.build.garden_name", "Garden"), Loc.Get("ui.build.garden_desc", "Grow fruit trees"),
                         "ui/buildings/garden", null,
                         null, null, false, false, null,
-                        $"Unlocks at Fire Lv.{GardenManager.GardenUnlockLevel}"));
+                        string.Format(Loc.Get("ui.build.unlocks_at", "Unlocks at Fire Lv.{0}"), GardenManager.GardenUnlockLevel)));
                 }
             }
         }
@@ -1778,7 +1778,7 @@ namespace Garden
             switch (plot.state)
             {
                 case PlotState.Empty:
-                    interactionTitle.text = "Choose a Seed";
+                    interactionTitle.text = Loc.Get("ui.interaction.choose_seed", "Choose a Seed");
                     BuildSeedPicker(index);
                     break;
 
@@ -1791,14 +1791,14 @@ namespace Garden
                     AddGrowthProgressBar(growthFraction, remaining);
 
                     // Waterings count
-                    var wateringsLabel = new Label($"Waterings: {plot.waterCount}");
+                    var wateringsLabel = new Label(string.Format(Loc.Get("ui.label.waterings", "Waterings: {0}"), plot.waterCount));
                     wateringsLabel.AddToClassList("interaction-info");
                     interactionBody.Add(wateringsLabel);
 
                     // Fertilized status
                     if (plot.fertilized)
                     {
-                        var fertLabel = new Label("Fertilized - +50% yield");
+                        var fertLabel = new Label(Loc.Get("ui.label.fertilized_yield", "Fertilized - +50% yield"));
                         fertLabel.AddToClassList("interaction-info-highlight");
                         interactionBody.Add(fertLabel);
                     }
@@ -1808,7 +1808,7 @@ namespace Garden
                     {
                         var appliedNames = string.Join(", ",
                             plot.potions.Select(p => ConfigService.Instance?.GetItemDisplayName(p) ?? p));
-                        var appliedLabel = new Label($"Potions: {appliedNames}");
+                        var appliedLabel = new Label(string.Format(Loc.Get("ui.label.potions", "Potions: {0}"), appliedNames));
                         appliedLabel.AddToClassList("interaction-info");
                         interactionBody.Add(appliedLabel);
                     }
@@ -1824,7 +1824,7 @@ namespace Garden
                         {
                             _ = FertilizePlotAndRefresh(index);
                         })
-                        { text = $"Fertilize ({fertCount})" };
+                        { text = string.Format(Loc.Get("ui.button.fertilize", "Fertilize ({0})"), fertCount) };
                         fertBtn.SetEnabled(fertCount > 0 || CurrencyManager.FreeMode);
                         fertBtn.AddToClassList("interaction-btn-primary");
                         interactionActions.Add(fertBtn);
@@ -1835,7 +1835,7 @@ namespace Garden
                     if (plotPotionCount > 0 || CurrencyManager.FreeMode)
                     {
                         var finishBtn = new Button(() => _ = SpeedUpAndHarvest(index))
-                        { text = $"Speed Up ({plotPotionCount})" };
+                        { text = string.Format(Loc.Get("ui.button.speed_up", "Speed Up ({0})"), plotPotionCount) };
                         finishBtn.SetEnabled(true);
                         finishBtn.AddToClassList("interaction-btn-primary");
                         interactionActions.Add(finishBtn);
@@ -1854,19 +1854,19 @@ namespace Garden
                     if (seed != null)
                     {
                         string dropName = ConfigService.Instance.GetItemDisplayName(seed.harvest_item_key) ?? seed.harvest_item_key;
-                        var yieldPreview = new Label($"{dropName} x{seed.minDrops}-{seed.maxDrops}");
+                        var yieldPreview = new Label(string.Format(Loc.Get("ui.label.yield_preview", "{0} x{1}-{2}"), dropName, seed.minDrops, seed.maxDrops));
                         yieldPreview.AddToClassList("plot-yield-preview");
                         interactionBody.Add(yieldPreview);
                     }
 
                     // Ready badge
-                    var readyBadge = new Label("Ready to Harvest!");
+                    var readyBadge = new Label(Loc.Get("ui.label.ready_harvest", "Ready to Harvest!"));
                     readyBadge.AddToClassList("plot-ready-badge");
                     interactionBody.Add(readyBadge);
 
                     if (plot.fertilized)
                     {
-                        var fertNote = new Label("Fertilized - +50% yield");
+                        var fertNote = new Label(Loc.Get("ui.label.fertilized_yield", "Fertilized - +50% yield"));
                         fertNote.AddToClassList("interaction-info-highlight");
                         interactionBody.Add(fertNote);
                     }
@@ -1877,7 +1877,7 @@ namespace Garden
                     {
                         _ = HarvestAndShow(index);
                     })
-                    { text = "Harvest" };
+                    { text = Loc.Get("ui.button.harvest", "Harvest") };
                     harvestBtn.AddToClassList("interaction-btn-primary");
                     interactionActions.Add(harvestBtn);
                     break;
@@ -1894,7 +1894,7 @@ namespace Garden
             // Show loading — speed-up + harvest both need server
             interactionBody.Clear();
             interactionActions.Clear();
-            interactionTitle.text = "Finishing...";
+            interactionTitle.text = Loc.Get("ui.interaction.finishing", "Finishing...");
             ShowInteractionPanel();
 
             bool success = await PlotManager.Instance.SpeedUpGrowth(plotIndex);
@@ -1959,7 +1959,7 @@ namespace Garden
             {
                 interactionBody.Clear();
                 interactionActions.Clear();
-                interactionTitle.text = "Harvesting...";
+                interactionTitle.text = Loc.Get("ui.interaction.harvesting", "Harvesting...");
                 ShowInteractionPanel();
             }
 
@@ -1978,7 +1978,7 @@ namespace Garden
                 // Server unreachable — show waiting state
                 interactionBody.Clear();
                 interactionActions.Clear();
-                interactionTitle.text = "Waiting for server...";
+                interactionTitle.text = Loc.Get("ui.interaction.waiting_server", "Waiting for server...");
                 ShowInteractionPanel();
 
                 // Block until we can resync
@@ -2049,9 +2049,9 @@ namespace Garden
             interactionBody.Add(yieldRow);
 
             // ── Quality badge + percentage ──
-            string matchText = result.recipeScore >= 0.8f ? "Perfect Match"
-                : result.recipeScore >= 0.5f ? "Good Match"
-                : "Weak Match";
+            string matchText = result.recipeScore >= 0.8f ? Loc.Get("ui.harvest.perfect_match", "Perfect Match")
+                : result.recipeScore >= 0.5f ? Loc.Get("ui.harvest.good_match", "Good Match")
+                : Loc.Get("ui.harvest.weak_match", "Weak Match");
             string matchClass = result.recipeScore >= 0.8f ? "harvest-match--perfect"
                 : result.recipeScore >= 0.5f ? "harvest-match--good"
                 : "harvest-match--weak";
@@ -2087,7 +2087,7 @@ namespace Garden
                 var axisResults = result.recipe.EvaluatePerAxis(result.snapshots, result.waterCount);
                 if (axisResults.Count > 0)
                 {
-                    var header = new Label("Recipe Breakdown");
+                    var header = new Label(Loc.Get("ui.harvest.recipe_breakdown", "Recipe Breakdown"));
                     header.AddToClassList("harvest-axis-header");
                     axisContainer.Add(header);
 
@@ -2164,7 +2164,7 @@ namespace Garden
             }
 
             // "tap to close" hint at bottom + make entire panel close on tap
-            var tapHint = new Label("tap anywhere to close");
+            var tapHint = new Label(Loc.Get("ui.label.tap_to_close", "tap anywhere to close"));
             tapHint.AddToClassList("harvest-tap-hint");
             interactionBody.Add(tapHint);
             int hintDelay = axisDelay + axisContainer.childCount * 80 + 200;
@@ -2246,7 +2246,7 @@ namespace Garden
                 if (seedData != null)
                 {
                     string growthStr = TimeUtils.FormatDurationHours(seedData.growthDurationHours);
-                    var statsLabel = new Label($"{growthStr} | {seedData.minDrops}-{seedData.maxDrops} drops");
+                    var statsLabel = new Label(string.Format(Loc.Get("ui.label.seed_stats", "{0} | {1}-{2} drops"), growthStr, seedData.minDrops, seedData.maxDrops));
                     statsLabel.AddToClassList("seed-card--stats-line");
                     rightGroup.Add(statsLabel);
                 }
@@ -2268,26 +2268,26 @@ namespace Garden
                         tags.AddToClassList("seed-card--recipe-tags");
 
                         if (seedData.recipe.useHeat)
-                            AddRecipeTag(tags, $"Heat {seedData.recipe.idealTempMin}-{seedData.recipe.idealTempMax}\u00b0C");
+                            AddRecipeTag(tags, string.Format(Loc.Get("ui.recipe.heat", "Heat {0}-{1}\u00b0C"), seedData.recipe.idealTempMin, seedData.recipe.idealTempMax));
                         if (seedData.recipe.useWind)
-                            AddRecipeTag(tags, $"Wind {seedData.recipe.idealWindMin}-{seedData.recipe.idealWindMax}m/s");
+                            AddRecipeTag(tags, string.Format(Loc.Get("ui.recipe.wind", "Wind {0}-{1}m/s"), seedData.recipe.idealWindMin, seedData.recipe.idealWindMax));
                         if (seedData.recipe.useHumidity)
-                            AddRecipeTag(tags, $"Humid {seedData.recipe.idealHumidityMin}-{seedData.recipe.idealHumidityMax}%");
+                            AddRecipeTag(tags, string.Format(Loc.Get("ui.recipe.humidity", "Humid {0}-{1}%"), seedData.recipe.idealHumidityMin, seedData.recipe.idealHumidityMax));
                         if (seedData.recipe.useSunlight)
-                            AddRecipeTag(tags, $"Sun {seedData.recipe.idealSunlightMin}-{seedData.recipe.idealSunlightMax}%");
+                            AddRecipeTag(tags, string.Format(Loc.Get("ui.recipe.sunlight", "Sun {0}-{1}%"), seedData.recipe.idealSunlightMin, seedData.recipe.idealSunlightMax));
                         if (seedData.recipe.useRain)
                         {
                             int minPct = Mathf.RoundToInt(seedData.recipe.idealRainMin * 100f);
                             int maxPct = Mathf.RoundToInt(seedData.recipe.idealRainMax * 100f);
-                            AddRecipeTag(tags, $"Rain {minPct}-{maxPct}%");
+                            AddRecipeTag(tags, string.Format(Loc.Get("ui.recipe.rain", "Rain {0}-{1}%"), minPct, maxPct));
                         }
                         if (seedData.recipe.useMoon)
                             AddRecipeTag(tags, seedData.recipe.requiredMoonPhase.ToString());
                         if (seedData.recipe.useWaterings)
                         {
                             string waterTag = seedData.recipe.idealWateringsMin == seedData.recipe.idealWateringsMax
-                                ? $"Water x{seedData.recipe.idealWateringsMin}"
-                                : $"Water x{seedData.recipe.idealWateringsMin}-{seedData.recipe.idealWateringsMax}";
+                                ? string.Format(Loc.Get("ui.recipe.water_exact", "Water x{0}"), seedData.recipe.idealWateringsMin)
+                                : string.Format(Loc.Get("ui.recipe.water_range", "Water x{0}-{1}"), seedData.recipe.idealWateringsMin, seedData.recipe.idealWateringsMax);
                             AddRecipeTag(tags, waterTag);
                         }
 
@@ -2302,7 +2302,7 @@ namespace Garden
                         float match = GetCurrentWeatherMatch(seedData.recipe);
                         if (match >= 1f)
                         {
-                            var matchTag = new Label("Weather Match!");
+                            var matchTag = new Label(Loc.Get("ui.label.weather_match", "Weather Match!"));
                             matchTag.AddToClassList("seed-card--weather-match");
                             info.Add(matchTag);
                         }
@@ -2381,7 +2381,7 @@ namespace Garden
                 rightGroup.AddToClassList("seed-card--right-group");
 
                 string growthStr = TimeUtils.FormatDurationHours(plantData.growthDurationHours);
-                string yieldStr = $"Yields {plantData.yieldAmount} every {TimeUtils.FormatDurationHours(plantData.yieldIntervalHours)}";
+                string yieldStr = string.Format(Loc.Get("ui.label.garden_yield", "Yields {0} every {1}"), plantData.yieldAmount, TimeUtils.FormatDurationHours(plantData.yieldIntervalHours));
                 var statsLabel = new Label($"{growthStr} | {yieldStr}");
                 statsLabel.AddToClassList("seed-card--stats-line");
                 rightGroup.Add(statsLabel);
@@ -2396,9 +2396,9 @@ namespace Garden
                 // Cost tags
                 var tags = new VisualElement();
                 tags.AddToClassList("seed-card--recipe-tags");
-                AddRecipeTag(tags, $"Water x{plantData.waterRequired}");
+                AddRecipeTag(tags, string.Format(Loc.Get("ui.recipe.water_exact", "Water x{0}"), plantData.waterRequired));
                 if (plantData.manaCost > 0)
-                    AddRecipeTag(tags, $"Mana {plantData.manaCost:0}");
+                    AddRecipeTag(tags, string.Format(Loc.Get("ui.recipe.mana_cost", "Mana {0}"), plantData.manaCost.ToString("0")));
                 info.Add(tags);
 
                 card.Add(info);
@@ -2464,7 +2464,7 @@ namespace Garden
                 || recipe.useSunlight || recipe.useRain || recipe.useMoon || recipe.useWaterings;
             if (!hasAny) return;
 
-            var header = new Label("Growth Recipe");
+            var header = new Label(Loc.Get("ui.label.growth_recipe", "Growth Recipe"));
             header.AddToClassList("interaction-section-header");
             interactionBody.Add(header);
 
@@ -2474,7 +2474,7 @@ namespace Garden
         private void ShowVaseInteraction(int index)
         {
             var vase = SaveManager.Instance.Data.vases[index];
-            interactionTitle.text = "Water Vase";
+            interactionTitle.text = Loc.Get("ui.label.water_vase", "Water Vase");
 
             // Water level bar (shared across all states)
             // Use actual water level, not just state — state can lag behind after watering
@@ -2486,7 +2486,7 @@ namespace Garden
             switch (vase.state)
             {
                 case VaseState.Empty:
-                    var emptyLabel = new Label("Empty");
+                    var emptyLabel = new Label(Loc.Get("ui.label.empty", "Empty"));
                     emptyLabel.AddToClassList("interaction-info");
                     interactionBody.Add(emptyLabel);
 
@@ -2505,14 +2505,14 @@ namespace Garden
                         RebuildGrid();
                         ShowInteraction(CampBuildingType.Vase, index);
                     })
-                    { text = available > 0 ? $"Send Mallum to Fill" : "No Mallums Available" };
+                    { text = available > 0 ? Loc.Get("ui.button.send_fill", "Send Mallum to Fill") : Loc.Get("ui.button.no_mallums", "No Mallums Available") };
                     collectBtn.SetEnabled(available > 0);
                     collectBtn.AddToClassList("interaction-btn-primary");
                     interactionActions.Add(collectBtn);
 
                     if (available > 0)
                     {
-                        var mallumInfo = new Label($"{available} of {total} Mallums idle");
+                        var mallumInfo = new Label(string.Format(Loc.Get("ui.label.mallums_available", "{0} of {1} Mallums idle"), available, total));
                         mallumInfo.AddToClassList("interaction-info");
                         interactionBody.Add(mallumInfo);
                     }
@@ -2520,7 +2520,7 @@ namespace Garden
 
                 case VaseState.Filling:
                     float fillRemaining = VaseManager.Instance.GetRemainingSeconds(index);
-                    var fillingLabel = new Label($"Mallum fetching water - {FormatTimeRemaining(fillRemaining)}");
+                    var fillingLabel = new Label(string.Format(Loc.Get("ui.label.mallum_fetching", "Mallum fetching water - {0}"), FormatTimeRemaining(fillRemaining)));
                     fillingLabel.AddToClassList("interaction-info-highlight");
                     interactionBody.Add(fillingLabel);
 
@@ -2546,7 +2546,7 @@ namespace Garden
                                 ShowInteraction(CampBuildingType.Vase, index);
                             }
                         })
-                        { text = $"Speed Up ({vaseDrinkCount})" };
+                        { text = string.Format(Loc.Get("ui.button.speed_up", "Speed Up ({0})"), vaseDrinkCount) };
                         finishVaseBtn.SetEnabled(fetchingMallumIndex >= 0 || CurrencyManager.FreeMode);
                         finishVaseBtn.AddToClassList("interaction-btn-primary");
                         interactionActions.Add(finishVaseBtn);
@@ -2557,19 +2557,19 @@ namespace Garden
                     bool actuallyFull = vase.currentWater >= vase.capacity;
                     if (actuallyFull)
                     {
-                        var fullLabel = new Label("Full! Ready to water your plants.");
+                        var fullLabel = new Label(Loc.Get("ui.label.vase_full", "Full! Ready to water your plants."));
                         fullLabel.AddToClassList("interaction-info-highlight");
                         interactionBody.Add(fullLabel);
                     }
                     else if (vase.currentWater > 0)
                     {
-                        var partialLabel = new Label($"{vase.currentWater} water remaining");
+                        var partialLabel = new Label(string.Format(Loc.Get("ui.label.water_remaining", "{0} water remaining"), vase.currentWater));
                         partialLabel.AddToClassList("interaction-info");
                         interactionBody.Add(partialLabel);
                     }
                     else
                     {
-                        var depletedLabel = new Label("Empty - send a Mallum to refill");
+                        var depletedLabel = new Label(Loc.Get("ui.label.vase_empty_refill", "Empty - send a Mallum to refill"));
                         depletedLabel.AddToClassList("interaction-info");
                         interactionBody.Add(depletedLabel);
                     }
@@ -2580,7 +2580,7 @@ namespace Garden
                         {
                             EnterWateringMode(index);
                         })
-                        { text = "Water a Plant" };
+                        { text = Loc.Get("ui.button.water_plant", "Water a Plant") };
                         waterBtn.AddToClassList("interaction-btn-primary");
                         interactionActions.Add(waterBtn);
                     }
@@ -2598,7 +2598,7 @@ namespace Garden
                             RebuildGrid();
                             ShowInteraction(CampBuildingType.Vase, index);
                         })
-                        { text = "Send Mallum to Refill" };
+                        { text = Loc.Get("ui.button.send_refill", "Send Mallum to Refill") };
                         refillBtn.SetEnabled(refillAvailable > 0);
                         interactionActions.Add(refillBtn);
                     }
@@ -2647,7 +2647,7 @@ namespace Garden
 
             // Time remaining
             var timeLabel = new Label(remainingSeconds > 0f
-                ? FormatTimeRemaining(remainingSeconds) + " remaining"
+                ? FormatTimeRemaining(remainingSeconds) + " " + Loc.Get("ui.label.remaining", "remaining")
                 : "");
             timeLabel.AddToClassList("interaction-info");
             interactionBody.Add(timeLabel);
@@ -2704,7 +2704,7 @@ namespace Garden
 
             if (string.IsNullOrEmpty(garden.plantName))
             {
-                interactionTitle.text = "Garden";
+                interactionTitle.text = Loc.Get("ui.label.garden", "Garden");
                 BuildGardenPlantPicker(index);
                 return;
             }
@@ -2719,7 +2719,7 @@ namespace Garden
                 if (gardenConfig != null)
                 {
                     string yieldName = ConfigService.Instance.GetItemDisplayName(gardenConfig.yieldItem) ?? gardenConfig.yieldItem;
-                    var yieldLabel = new Label($"Yields {yieldName} x{gardenConfig.yieldAmount}");
+                    var yieldLabel = new Label(string.Format(Loc.Get("ui.label.yields", "Yields {0} x{1}"), yieldName, gardenConfig.yieldAmount));
                     yieldLabel.AddToClassList("plot-yield-preview");
                     interactionBody.Add(yieldLabel);
                 }
@@ -2735,14 +2735,14 @@ namespace Garden
 
                     if (yieldProgress >= 1f)
                     {
-                        var readyLabel = new Label("Fruit ready to collect!");
+                        var readyLabel = new Label(Loc.Get("ui.label.fruit_ready", "Fruit ready to collect!"));
                         readyLabel.AddToClassList("plot-ready-badge");
                         interactionBody.Add(readyLabel);
                     }
                     else
                     {
                         AddGrowthProgressBar(yieldProgress, remainingSec);
-                        var yieldTimerLabel = new Label($"Next fruit in {FormatTimeRemaining(remainingSec)}");
+                        var yieldTimerLabel = new Label(string.Format(Loc.Get("ui.label.next_fruit", "Next fruit in {0}"), FormatTimeRemaining(remainingSec)));
                         yieldTimerLabel.AddToClassList("interaction-info");
                         interactionBody.Add(yieldTimerLabel);
                     }
@@ -2756,14 +2756,14 @@ namespace Garden
                     {
                         _ = FertilizeGardenAndRefresh(index);
                     })
-                    { text = $"Fertilize ({fertCount})" };
+                    { text = string.Format(Loc.Get("ui.button.fertilize", "Fertilize ({0})"), fertCount) };
                     fertBtn.SetEnabled(fertCount > 0 || CurrencyManager.FreeMode);
                     fertBtn.AddToClassList("interaction-btn-primary");
                     interactionActions.Add(fertBtn);
                 }
                 else
                 {
-                    var fertLabel = new Label("Fertilized - +50% next yield");
+                    var fertLabel = new Label(Loc.Get("ui.label.fertilized_next", "Fertilized - +50% next yield"));
                     fertLabel.AddToClassList("interaction-info-highlight");
                     interactionBody.Add(fertLabel);
                 }
@@ -2794,11 +2794,11 @@ namespace Garden
         {
             if (MallumManager.Instance == null) return;
             var houseConfig = ConfigService.Instance.MallumHouseConfig;
-            interactionTitle.text = "Mallum House";
+            interactionTitle.text = Loc.Get("ui.interaction.mallum_house", "Mallum House");
 
             // Mallum count per house
             int perHouse = houseConfig.MallumsPerHouse;
-            var capacityLabel = new Label($"{perHouse} {(perHouse == 1 ? "Mallum" : "Mallums")} per house");
+            var capacityLabel = new Label(string.Format(Loc.Get("ui.label.mallums_per_house", "{0} Mallum per house"), perHouse));
             capacityLabel.AddToClassList("interaction-info");
             interactionBody.Add(capacityLabel);
 
@@ -2808,7 +2808,7 @@ namespace Garden
             int houseCount = SaveManager.Instance.Data.mallumHouses.Count;
             int maxMallums = houseConfig.GetMaxMallums(houseCount);
 
-            var totalLabel = new Label($"{totalMallums} / {maxMallums} Mallums");
+            var totalLabel = new Label(string.Format(Loc.Get("ui.label.mallums_total", "{0} / {1} Mallums"), totalMallums, maxMallums));
             totalLabel.AddToClassList("plot-yield-preview");
             interactionBody.Add(totalLabel);
 
@@ -2816,13 +2816,13 @@ namespace Garden
             int busy = totalMallums - idleMallums;
             if (busy > 0)
             {
-                var statusLabel = new Label($"{idleMallums} idle / {busy} on task");
+                var statusLabel = new Label(string.Format(Loc.Get("ui.label.mallum_status", "{0} idle / {1} on task"), idleMallums, busy));
                 statusLabel.AddToClassList("interaction-info");
                 interactionBody.Add(statusLabel);
             }
             else
             {
-                var statusLabel = new Label("All Mallums idle");
+                var statusLabel = new Label(Loc.Get("ui.label.mallums_idle", "All Mallums idle"));
                 statusLabel.AddToClassList("interaction-info");
                 interactionBody.Add(statusLabel);
             }
@@ -2868,9 +2868,9 @@ namespace Garden
 
             string typeName = type switch
             {
-                CampBuildingType.Plot => "Plot",
-                CampBuildingType.Vase => "Vase",
-                CampBuildingType.MallumHouse => "House",
+                CampBuildingType.Plot => Loc.Get("ui.label.plot", "Plot"),
+                CampBuildingType.Vase => Loc.Get("ui.label.vase", "Vase"),
+                CampBuildingType.MallumHouse => Loc.Get("ui.label.house", "House"),
                 _ => "Building"
             };
 
@@ -2890,7 +2890,7 @@ namespace Garden
                 backArrow.text = "<";
             headerRow.Add(backArrow);
 
-            var titleLabel = new Label($"Paint {typeName}");
+            var titleLabel = new Label(string.Format(Loc.Get("ui.label.paint_type", "Paint {0}"), typeName));
             titleLabel.AddToClassList("skin-title");
             headerRow.Add(titleLabel);
 
@@ -2901,7 +2901,7 @@ namespace Garden
             var skins = SkinManager.Instance.GetSkinsForBuilding(type);
             if (skins.Count == 0)
             {
-                var noSkins = new Label("No skins available");
+                var noSkins = new Label(Loc.Get("ui.label.no_skins", "No skins available"));
                 noSkins.AddToClassList("interaction-info");
                 interactionBody.Add(noSkins);
                 return;
@@ -3024,7 +3024,7 @@ namespace Garden
                     CloseInteractionPanel();
                     RebuildGrid();
                 })
-                { text = "Remove Skin" };
+                { text = Loc.Get("ui.button.remove_skin", "Remove Skin") };
                 interactionActions.Add(removeBtn);
             }
 
@@ -3041,7 +3041,7 @@ namespace Garden
 
             if (isEquipped)
             {
-                var equippedLabel = new Label("Equipped");
+                var equippedLabel = new Label(Loc.Get("ui.label.equipped", "Equipped"));
                 equippedLabel.AddToClassList("skin-detail-equipped");
                 detailArea.Add(equippedLabel);
             }
@@ -3055,7 +3055,7 @@ namespace Garden
                         RebuildGrid();
                     }
                 })
-                { text = "Paint" };
+                { text = Loc.Get("ui.button.paint", "Paint") };
                 paintBtn.AddToClassList("skin-action-btn");
                 detailArea.Add(paintBtn);
             }
@@ -3092,7 +3092,7 @@ namespace Garden
                         RebuildGrid();
                     }
                 })
-                { text = "Unlock" };
+                { text = Loc.Get("ui.button.unlock", "Unlock") };
                 unlockBtn.AddToClassList("skin-action-btn");
                 unlockBtn.SetEnabled(canAfford);
                 detailArea.Add(unlockBtn);
@@ -3105,7 +3105,7 @@ namespace Garden
             if (index < 0 || index >= data.birds.Count) return;
 
             var bird = data.birds[index];
-            interactionTitle.text = "Bird Visit";
+            interactionTitle.text = Loc.Get("ui.interaction.bird_visit", "Bird Visit");
 
             // Gift display
             string itemName = ConfigService.Instance.GetItemDisplayName(bird.itemKey) ?? bird.itemKey;
@@ -3126,7 +3126,7 @@ namespace Garden
 
             interactionBody.Add(giftRow);
 
-            var flavorLabel = new Label("A bird dropped this off for you!");
+            var flavorLabel = new Label(Loc.Get("ui.label.bird_gift", "A bird dropped this off for you!"));
             flavorLabel.AddToClassList("interaction-info");
             interactionBody.Add(flavorLabel);
 
@@ -3141,7 +3141,7 @@ namespace Garden
                 }
                 CloseInteractionPanel();
             })
-            { text = "Collect" };
+            { text = Loc.Get("ui.button.collect", "Collect") };
             collectBtn.AddToClassList("interaction-btn-primary");
             interactionActions.Add(collectBtn);
 
