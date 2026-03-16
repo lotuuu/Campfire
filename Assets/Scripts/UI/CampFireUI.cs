@@ -321,7 +321,10 @@ namespace Garden
             if (MallumManager.Instance != null)
                 MallumManager.Instance.OnMallumsChanged -= UpdateQuestBadge;
             if (WeatherService.Instance != null)
+            {
                 WeatherService.Instance.OnWeatherUpdated -= OnWeatherDataReady;
+                WeatherService.Instance.OnWeatherChanged -= ShowToast;
+            }
             if (SocialService.Instance != null)
             {
                 SocialService.Instance.OnSignedIn -= OnSocialReady;
@@ -479,6 +482,10 @@ namespace Garden
                 resourceDisplay?.Refresh();
                 campsiteView?.RebuildGrid();
                 UpdateQuestBadge();
+
+                // Subscribe to weather change notifications
+                if (WeatherService.Instance != null)
+                    WeatherService.Instance.OnWeatherChanged += ShowToast;
 
                 // Start tutorial after all services are ready
                 if (TutorialManager.Instance != null && dialogueUI != null && tutorialUI != null)

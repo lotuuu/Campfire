@@ -17,6 +17,7 @@ namespace Garden
         public WeatherData CurrentWeather { get; private set; }
         public List<DailyForecast> Forecast { get; private set; } = new();
         public event Action<WeatherData> OnWeatherUpdated;
+        public event Action<string> OnWeatherChanged;
         public event Action OnForecastUpdated;
         public event Action<bool> OnLocationResolved;
         public bool IsDebugMode => useDebugOverride;
@@ -140,11 +141,66 @@ namespace Garden
                 moonPhase = (MoonPhase)sw.moon_phase,
                 calendarEvent = CalendarEvents.GetEvent(now)
             };
+            var previous = CurrentWeather;
+            bool hadWeather = HasWeather;
             useDebugOverride = false;
             CurrentWeather = weather;
             HasWeather = true;
             BootTimer.Mark("WeatherService has weather");
             OnWeatherUpdated?.Invoke(weather);
+            if (hadWeather) DetectWeatherChanges(previous, weather);
+        }
+
+        private void DetectWeatherChanges(WeatherData prev, WeatherData curr)
+        {
+            if (prev.condition != curr.condition)
+            {
+                var msg = curr.condition switch
+                {
+                    WeatherCondition.Rain => "It started raining...",
+                    WeatherCondition.Storm => "A storm is brewing!",
+                    WeatherCondition.Snow => "Snow is falling!",
+                    WeatherCondition.Cloudy when prev.condition == WeatherCondition.Clear => "Clouds are rolling in",
+                    WeatherCondition.Clear when prev.condition == WeatherCondition.Rain => "The rain has stopped",
+                    WeatherCondition.Clear when prev.condition == WeatherCondition.Storm => "The storm has passed",
+                    WeatherCondition.Clear when prev.condition == WeatherCondition.Snow => "The snow has stopped",
+                    WeatherCondition.Clear => "The sun is out!",
+                    _ => null
+                };
+                if (msg != null) OnWeatherChanged?.Invoke(msg);
+            }
+
+            if (prev.isNight != curr.isNight)
+            {
+                OnWeatherChanged?.Invoke(curr.isNight ? "Night has fallen" : "The sun is rising");
+            }
+            else if (!prev.isGoldenHour && curr.isGoldenHour)
+            {
+                OnWeatherChanged?.Invoke("Golden hour begins");
+            }
+
+            if (prev.moonPhase != curr.moonPhase)
+            {
+                var msg = curr.moonPhase switch
+                {
+                    MoonPhase.FullMoon => "The full moon rises!",
+                    MoonPhase.NewMoon => "A new moon tonight",
+                    _ => null
+                };
+                if (msg != null) OnWeatherChanged?.Invoke(msg);
+            }
+
+            if (prev.calendarEvent != curr.calendarEvent && curr.calendarEvent != CalendarEvent.None)
+            {
+                var msg = curr.calendarEvent switch
+                {
+                    CalendarEvent.SpringEquinox => "It's the spring equinox!",
+                    CalendarEvent.FallEquinox => "It's the fall equinox!",
+                    CalendarEvent.LunarEclipse => "A lunar eclipse!",
+                    _ => null
+                };
+                if (msg != null) OnWeatherChanged?.Invoke(msg);
+            }
         }
 
         private static WeatherCondition ParseServerCondition(string condition)
