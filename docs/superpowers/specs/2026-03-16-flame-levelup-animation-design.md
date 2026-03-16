@@ -119,9 +119,9 @@ An animation state object tracks current time, shockwave radius, and ember posit
     border-radius: 24px;
     scale: 0 0;
     opacity: 0;
-    transition-property: opacity;
-    transition-duration: 300ms;
-    transition-timing-function: ease-out;
+    transition-property: opacity, scale;
+    transition-duration: 300ms, 250ms;
+    transition-timing-function: ease-out, ease-out;
 }
 .flame-level-badge__text--visible {
     opacity: 1;
