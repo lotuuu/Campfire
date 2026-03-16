@@ -265,6 +265,14 @@ defmodule CampFireWeb.ItemsLive do
   end
 
   def handle_event("save_recipe", params, socket) do
+    consume_uploaded_entries(socket, :icon, fn %{path: path}, _entry ->
+      result_item = socket.assigns.editing.recipe["result_item"] || socket.assigns.editing.name
+      key = "items/#{String.downcase(result_item)}"
+      data = File.read!(path)
+      CampFire.Sprites.upload_sprite(key, data)
+      {:ok, key}
+    end)
+
     old_name = socket.assigns.editing.name
     new_name = String.trim(params["recipe_name"] || old_name)
     result_item = String.trim(params["result_item"] || new_name)
@@ -373,6 +381,14 @@ defmodule CampFireWeb.ItemsLive do
 
   def handle_event("save_consumable", params, socket) do
     alias CampFire.Game.Item
+
+    consume_uploaded_entries(socket, :icon, fn %{path: path}, _entry ->
+      item = socket.assigns.editing
+      key = "items/#{String.downcase(item.item_key)}"
+      data = File.read!(path)
+      CampFire.Sprites.upload_sprite(key, data)
+      {:ok, key}
+    end)
 
     item = socket.assigns.editing
     attrs = %{
@@ -751,6 +767,19 @@ defmodule CampFireWeb.ItemsLive do
       <%= if @editing do %>
         <div class="bg-white border rounded-lg p-6 mb-6">
           <h3 class="text-lg font-semibold mb-4">Edit: {@editing.name}</h3>
+          <div class="flex items-center gap-4 mb-4">
+            <div class="w-16 h-16 bg-gray-100 rounded border flex items-center justify-center overflow-hidden">
+              <img
+                src={CampFire.Sprites.sprite_url("items/#{String.downcase(@editing.recipe["result_item"] || @editing.name)}")}
+                class="w-14 h-14 object-contain"
+                onerror="this.parentElement.innerHTML='<span class=\'text-xs text-gray-400\'>No icon</span>'"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Replace icon</label>
+              <.live_file_input upload={@uploads.icon} class="text-sm" />
+            </div>
+          </div>
           <form phx-submit="save_recipe" class="space-y-4">
             <div class="grid grid-cols-2 gap-4">
               <div>
@@ -845,6 +874,7 @@ defmodule CampFireWeb.ItemsLive do
       <table class="w-full bg-white border rounded-lg">
         <thead class="bg-gray-50">
           <tr>
+            <th class="px-4 py-3 w-12"></th>
             <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Name</th>
             <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Ingredients</th>
             <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Result</th>
@@ -854,6 +884,10 @@ defmodule CampFireWeb.ItemsLive do
         <tbody class="divide-y">
           <%= for {name, recipe} <- @items do %>
             <tr class="hover:bg-gray-50">
+              <td class="px-4 py-3">
+                <img src={CampFire.Sprites.sprite_url("items/#{String.downcase(recipe["result_item"] || name)}")}
+                  class="w-8 h-8 object-contain" onerror="this.style.display='none'" />
+              </td>
               <td class="px-4 py-3 font-medium">{name}</td>
               <td class="px-4 py-3 text-sm text-gray-500">
                 <%= for ing <- recipe["ingredients"] || [] do %>
@@ -869,7 +903,7 @@ defmodule CampFireWeb.ItemsLive do
             </tr>
           <% end %>
           <%= if @items == [] do %>
-            <tr><td colspan="4" class="px-4 py-6 text-center text-gray-400 italic">No items configured yet.</td></tr>
+            <tr><td colspan="5" class="px-4 py-6 text-center text-gray-400 italic">No items configured yet.</td></tr>
           <% end %>
         </tbody>
       </table>
@@ -893,6 +927,19 @@ defmodule CampFireWeb.ItemsLive do
       <%= if @editing do %>
         <div class="bg-white border rounded-lg p-6 mb-6">
           <h3 class="text-lg font-semibold mb-4">Edit: {@editing.item_key}</h3>
+          <div class="flex items-center gap-4 mb-4">
+            <div class="w-16 h-16 bg-gray-100 rounded border flex items-center justify-center overflow-hidden">
+              <img
+                src={CampFire.Sprites.sprite_url("items/#{String.downcase(@editing.item_key)}")}
+                class="w-14 h-14 object-contain"
+                onerror="this.parentElement.innerHTML='<span class=\'text-xs text-gray-400\'>No icon</span>'"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Replace icon</label>
+              <.live_file_input upload={@uploads.icon} class="text-sm" />
+            </div>
+          </div>
           <form phx-submit="save_consumable" class="space-y-4">
             <div class="grid grid-cols-3 gap-4">
               <div>
@@ -927,6 +974,7 @@ defmodule CampFireWeb.ItemsLive do
       <table class="w-full bg-white border rounded-lg">
         <thead class="bg-gray-50">
           <tr>
+            <th class="px-4 py-3 w-12"></th>
             <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Item Key</th>
             <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Display Name</th>
             <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Category</th>
@@ -936,6 +984,10 @@ defmodule CampFireWeb.ItemsLive do
         <tbody class="divide-y">
           <%= for item <- @consumable_items do %>
             <tr class="hover:bg-gray-50">
+              <td class="px-4 py-3">
+                <img src={CampFire.Sprites.sprite_url("items/#{String.downcase(item.item_key)}")}
+                  class="w-8 h-8 object-contain" onerror="this.style.display='none'" />
+              </td>
               <td class="px-4 py-3 font-medium">{item.item_key}</td>
               <td class="px-4 py-3">{item.display_name}</td>
               <td class="px-4 py-3 text-sm">
@@ -949,7 +1001,7 @@ defmodule CampFireWeb.ItemsLive do
             </tr>
           <% end %>
           <%= if @consumable_items == [] do %>
-            <tr><td colspan="4" class="px-4 py-6 text-center text-gray-400 italic">No consumable items yet.</td></tr>
+            <tr><td colspan="5" class="px-4 py-6 text-center text-gray-400 italic">No consumable items yet.</td></tr>
           <% end %>
         </tbody>
       </table>
