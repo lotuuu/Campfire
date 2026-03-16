@@ -122,6 +122,21 @@ templates = [
         "costs" => [%{"itemKey" => "lavender", "count" => 2}],
         "rewardItemKey" => "dahlia_seed",
         "rewardCount" => 1
+      },
+      %{
+        "costs" => [%{"itemKey" => "marigold", "count" => 3}],
+        "rewardItemKey" => "hot_potion",
+        "rewardCount" => 1
+      },
+      %{
+        "costs" => [%{"itemKey" => "snowdrop", "count" => 3}],
+        "rewardItemKey" => "cool_potion",
+        "rewardCount" => 1
+      },
+      %{
+        "costs" => [%{"itemKey" => "mint", "count" => 3}],
+        "rewardItemKey" => "humid_potion",
+        "rewardCount" => 1
       }
     ],
     gift_pool: [],
@@ -151,7 +166,10 @@ templates = [
       %{"itemKey" => "chamomile_seed", "count" => 2},
       %{"type" => "water", "count" => 3},
       %{"itemKey" => "basil_seed", "count" => 3},
-      %{"itemKey" => "basil", "count" => 2}
+      %{"itemKey" => "basil", "count" => 2},
+      %{"itemKey" => "hot_potion", "count" => 1},
+      %{"itemKey" => "rain_potion", "count" => 1},
+      %{"itemKey" => "sun_potion", "count" => 1}
     ],
     quest_pool: [],
     weight: 1.5
@@ -185,6 +203,13 @@ templates = [
         "return_days" => 5,
         "reward" => %{"itemKey" => "jasmine_seed", "count" => 1},
         "return_dialogue" => ["Perfect!", "I knew I could count on you."]
+      },
+      %{
+        "request_item_key" => "lavender",
+        "request_count" => 3,
+        "return_days" => 7,
+        "reward" => %{"itemKey" => "moon_potion", "count" => 1},
+        "return_dialogue" => ["Incredible! The moonlight guided me back.", "Here, this is special."]
       }
     ],
     weight: 0.8
