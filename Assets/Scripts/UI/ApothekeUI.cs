@@ -6,6 +6,26 @@ namespace Garden
 {
     public class ApothekeUI : MonoBehaviour
     {
+        /// <summary>
+        /// Registers a tap recognizer on an element that tolerates more finger movement
+        /// than the default ClickEvent (which gets swallowed by ScrollView on slight drags).
+        /// Uses PointerDown/PointerUp with a generous threshold so taps inside scroll views
+        /// fire reliably on mobile.
+        /// </summary>
+        private static void RegisterTapInScrollView(VisualElement target, System.Action onTap, float threshold = 30f)
+        {
+            Vector3 downPos = Vector3.zero;
+            target.RegisterCallback<PointerDownEvent>(e => downPos = e.position, TrickleDown.TrickleDown);
+            target.RegisterCallback<PointerUpEvent>(e =>
+            {
+                if (Vector3.Distance(downPos, e.position) < threshold)
+                {
+                    e.StopPropagation();
+                    onTap();
+                }
+            }, TrickleDown.TrickleDown);
+        }
+
         private VisualElement inventoryView;
         private VisualElement craftView;
         private Label inventoryEmpty;
@@ -320,9 +340,8 @@ namespace Garden
             card.Add(details);
 
             int idx = index;
-            header.RegisterCallback<ClickEvent>(evt =>
+            RegisterTapInScrollView(header, () =>
             {
-                evt.StopPropagation();
                 expandedIndex = expandedIndex == idx ? -1 : idx;
                 RefreshSeeds();
             });
@@ -529,11 +548,10 @@ namespace Garden
 
             card.Add(details);
 
-            // Click to expand/collapse
+            // Tap to expand/collapse — generous threshold so taps aren't eaten by scroll
             int idx = recipeIndex;
-            headerRow.RegisterCallback<ClickEvent>(evt =>
+            RegisterTapInScrollView(headerRow, () =>
             {
-                evt.StopPropagation();
                 expandedRecipeIndex = expandedRecipeIndex == idx ? -1 : idx;
                 RefreshRecipes();
             });
