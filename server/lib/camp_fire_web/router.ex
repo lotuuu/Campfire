@@ -136,6 +136,7 @@ defmodule CampFireWeb.Router do
     post "/plot/harvest", GameController, :harvest_plot
     post "/plot/instant-finish", GameController, :instant_finish_plot
     post "/plot/fertilize", GameController, :fertilize_plot
+    post "/plot/apply-potion", GameController, :apply_potion
     post "/plot/set-skin", GameController, :set_plot_skin
     get "/vases", GameController, :list_vases
     post "/vase/craft", GameController, :craft_vase

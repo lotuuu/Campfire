@@ -31,6 +31,17 @@ defmodule CampFire.TestHelpers do
       end)) ++
       [
         %{item_key: "speed_potion", display_name: "Speed Potion", category: "potion"},
+        %{item_key: "hot_potion", display_name: "Hot Potion", category: "potion"},
+        %{item_key: "cool_potion", display_name: "Cool Potion", category: "potion"},
+        %{item_key: "wind_potion", display_name: "Wind Potion", category: "potion"},
+        %{item_key: "calm_potion", display_name: "Calm Potion", category: "potion"},
+        %{item_key: "humid_potion", display_name: "Humid Potion", category: "potion"},
+        %{item_key: "dry_potion", display_name: "Dry Potion", category: "potion"},
+        %{item_key: "sun_potion", display_name: "Sun Potion", category: "potion"},
+        %{item_key: "shadow_potion", display_name: "Shadow Potion", category: "potion"},
+        %{item_key: "rain_potion", display_name: "Rain Potion", category: "potion"},
+        %{item_key: "impermeable_potion", display_name: "Impermeable Potion", category: "potion"},
+        %{item_key: "moon_potion", display_name: "Moon Potion", category: "potion"},
         %{item_key: "fertilizer", display_name: "Fertilizer", category: "material"},
         %{item_key: "energy_drink", display_name: "Energy Drink", category: "consumable"},
         # Test-only items for seeds that don't exist in production
@@ -198,6 +209,17 @@ defmodule CampFire.TestHelpers do
     item_id_to_key = Map.new(items, fn i -> {i.id, i.item_key} end)
     :ets.insert(:config_cache, {"item_key_to_id", item_key_to_id})
     :ets.insert(:config_cache, {"item_id_to_key", item_id_to_key})
+  end
+
+  def seed_plot_config do
+    config = %{
+      "water_cooldown_seconds" => 7200,
+      "rain_water_cooldown_seconds" => 21600,
+      "rain_trigger_minutes" => 15,
+      "drop_spread_factor" => 0.3,
+      "speed_item" => "speed_potion"
+    }
+    :ets.insert(:config_cache, {"plot_config", config})
   end
 
   def seed_mallum_house_config do

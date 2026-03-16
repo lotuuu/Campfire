@@ -35,6 +35,17 @@ items =
   # Potions, materials, consumables
   [
     %{item_key: "speed_potion", display_name: "Speed Potion", category: "potion"},
+    %{item_key: "hot_potion", display_name: "Hot Potion", category: "potion"},
+    %{item_key: "cool_potion", display_name: "Cool Potion", category: "potion"},
+    %{item_key: "wind_potion", display_name: "Wind Potion", category: "potion"},
+    %{item_key: "calm_potion", display_name: "Calm Potion", category: "potion"},
+    %{item_key: "humid_potion", display_name: "Humid Potion", category: "potion"},
+    %{item_key: "dry_potion", display_name: "Dry Potion", category: "potion"},
+    %{item_key: "sun_potion", display_name: "Sun Potion", category: "potion"},
+    %{item_key: "shadow_potion", display_name: "Shadow Potion", category: "potion"},
+    %{item_key: "rain_potion", display_name: "Rain Potion", category: "potion"},
+    %{item_key: "impermeable_potion", display_name: "Impermeable Potion", category: "potion"},
+    %{item_key: "moon_potion", display_name: "Moon Potion", category: "potion"},
     %{item_key: "fertilizer", display_name: "Fertilizer", category: "consumable"},
     %{item_key: "energy_drink", display_name: "Energy Drink", category: "consumable"}
   ]

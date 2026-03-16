@@ -10,6 +10,20 @@ defmodule CampFire.Game.Plots do
     config["water_cooldown_seconds"]
   end
 
+  @potion_types %{
+    "hot_potion" => %{"type" => "hot", "value" => 15},
+    "cool_potion" => %{"type" => "cool", "value" => -15},
+    "wind_potion" => %{"type" => "wind", "value" => 10},
+    "calm_potion" => %{"type" => "calm", "value" => -10},
+    "humid_potion" => %{"type" => "humid", "value" => 30},
+    "dry_potion" => %{"type" => "dry", "value" => -30},
+    "sun_potion" => %{"type" => "sun"},
+    "shadow_potion" => %{"type" => "shadow"},
+    "rain_potion" => %{"type" => "rain"},
+    "impermeable_potion" => %{"type" => "impermeable"},
+    "moon_potion" => %{"type" => "moon"}
+  }
+
   @empty_snapshots %{
     "temperatures" => [],
     "wind_speeds" => [],
@@ -107,7 +121,8 @@ defmodule CampFire.Game.Plots do
                 plant_time_utc: now,
                 water_count: 0,
                 last_watered_utc: nil,
-                snapshots: @empty_snapshots
+                snapshots: @empty_snapshots,
+                potions: []
               })
               |> Repo.update!()
 
@@ -190,6 +205,30 @@ defmodule CampFire.Game.Plots do
     end
   end
 
+  # --- Apply Potion ---
+
+  def apply_potion(player_uid, plot_id, potion_item_key) do
+    case Map.get(@potion_types, potion_item_key) do
+      nil ->
+        {:error, :unknown_potion}
+
+      potion_entry ->
+        with %PlayerPlot{} = plot <- Repo.get(PlayerPlot, plot_id),
+             true <- plot.player_uid == player_uid || {:error, :not_owned},
+             true <- plot.state == "growing" || {:error, :not_growing},
+             {:ok, _} <- Economy.spend_item(player_uid, potion_item_key, 1) do
+          updated_potions = (plot.potions || []) ++ [potion_entry]
+
+          plot
+          |> PlayerPlot.changeset(%{potions: updated_potions})
+          |> Repo.update()
+        else
+          nil -> {:error, :not_found}
+          {:error, _} = err -> err
+        end
+    end
+  end
+
   # --- Harvest ---
 
   def harvest(player_uid, plot_id) do
@@ -225,7 +264,8 @@ defmodule CampFire.Game.Plots do
           water_count: 0,
           last_watered_utc: nil,
           snapshots: %{},
-          fertilized: false
+          fertilized: false,
+          potions: []
         })
         |> Repo.update!()
 
@@ -293,6 +333,36 @@ defmodule CampFire.Game.Plots do
     end
   end
 
+  # --- Potion Weather Modifier ---
+
+  defp apply_potions(weather_data, [], _plot), do: weather_data
+
+  defp apply_potions(weather_data, potions, plot) do
+    Enum.reduce(potions, weather_data, fn potion, wd ->
+      case potion["type"] do
+        "hot" -> Map.update(wd, "temperature", 0.0, &(&1 + potion["value"]))
+        "cool" -> Map.update(wd, "temperature", 0.0, &(&1 + potion["value"]))
+        "wind" -> Map.update(wd, "wind_speed", 0.0, &max(&1 + potion["value"], 0.0))
+        "calm" -> Map.update(wd, "wind_speed", 0.0, &max(&1 + potion["value"], 0.0))
+        "humid" -> Map.update(wd, "humidity", 0.0, &min(max(&1 + potion["value"], 0.0), 100.0))
+        "dry" -> Map.update(wd, "humidity", 0.0, &min(max(&1 + potion["value"], 0.0), 100.0))
+        "sun" -> Map.put(wd, "cloud_cover", 0.0)
+        "shadow" -> Map.put(wd, "cloud_cover", 100.0)
+        "rain" -> Map.put(wd, "is_raining", true)
+        "impermeable" -> Map.put(wd, "is_raining", false)
+        "moon" ->
+          seed_config = CampFire.Game.get_seed_config_by_item_id!(plot.seed_item_id)
+          moon_axis = get_in(seed_config.recipe, ["moon"])
+          if is_map(moon_axis) and moon_axis["enabled"] do
+            Map.put(wd, "moon_phase", moon_axis["ideal_min"])
+          else
+            wd
+          end
+        _ -> wd
+      end
+    end)
+  end
+
   # --- Snapshot Recording ---
 
   defp record_initial_snapshot(player_uid, plot_id) do
@@ -313,15 +383,16 @@ defmodule CampFire.Game.Plots do
 
       plot ->
         if plot.state == "growing" do
+          effective_weather = apply_potions(weather_data, plot.potions || [], plot)
           snapshots = plot.snapshots || @empty_snapshots
 
           updated_snapshots = %{
-            "temperatures" => (snapshots["temperatures"] || []) ++ [weather_data["temperature"] || 0.0],
-            "wind_speeds" => (snapshots["wind_speeds"] || []) ++ [weather_data["wind_speed"] || 0.0],
-            "humidities" => (snapshots["humidities"] || []) ++ [weather_data["humidity"] || 0.0],
-            "cloud_covers" => (snapshots["cloud_covers"] || []) ++ [weather_data["cloud_cover"] || 0.0],
-            "rain_snapshots" => (snapshots["rain_snapshots"] || []) ++ [if(weather_data["is_raining"], do: 1.0, else: 0.0)],
-            "moon_phase_snapshots" => (snapshots["moon_phase_snapshots"] || []) ++ [weather_data["moon_phase"] || 0.0],
+            "temperatures" => (snapshots["temperatures"] || []) ++ [effective_weather["temperature"] || 0.0],
+            "wind_speeds" => (snapshots["wind_speeds"] || []) ++ [effective_weather["wind_speed"] || 0.0],
+            "humidities" => (snapshots["humidities"] || []) ++ [effective_weather["humidity"] || 0.0],
+            "cloud_covers" => (snapshots["cloud_covers"] || []) ++ [effective_weather["cloud_cover"] || 0.0],
+            "rain_snapshots" => (snapshots["rain_snapshots"] || []) ++ [if(effective_weather["is_raining"], do: 1.0, else: 0.0)],
+            "moon_phase_snapshots" => (snapshots["moon_phase_snapshots"] || []) ++ [effective_weather["moon_phase"] || 0.0],
             "snapshot_count" => (snapshots["snapshot_count"] || 0) + 1
           }
 

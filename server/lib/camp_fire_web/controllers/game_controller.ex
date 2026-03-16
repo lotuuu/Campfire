@@ -5,6 +5,13 @@ defmodule CampFireWeb.GameController do
   alias CampFire.Game.{Plots, Vases, Gardens, Mallums, MallumHouses, Birds, Weather, PlayerState, Apotheke, PlayerApotheke, Skins}
   alias CampFire.Repo
 
+  @potion_type_to_item_key %{
+    "hot" => "hot_potion", "cool" => "cool_potion", "wind" => "wind_potion",
+    "calm" => "calm_potion", "humid" => "humid_potion", "dry" => "dry_potion",
+    "sun" => "sun_potion", "shadow" => "shadow_potion", "rain" => "rain_potion",
+    "impermeable" => "impermeable_potion", "moon" => "moon_potion"
+  }
+
   alias CampFire.ConfigCache
 
   # ── Config sync ────────────────────────────────────────────
@@ -432,6 +439,18 @@ defmodule CampFireWeb.GameController do
     conn |> put_status(400) |> json(%{error: "Missing 'plotId'"})
   end
 
+  def apply_potion(conn, %{"plotId" => plot_id, "potionItemKey" => potion_item_key}) do
+    uid = conn.assigns.current_player.uid
+    case Plots.apply_potion(uid, plot_id, potion_item_key) do
+      {:ok, plot} -> conn |> put_status(200) |> json(serialize_plot(plot))
+      {:error, reason} -> conn |> put_status(422) |> json(%{error: format_error(reason)})
+    end
+  end
+
+  def apply_potion(conn, _params) do
+    conn |> put_status(400) |> json(%{error: "Missing 'plotId' and 'potionItemKey'"})
+  end
+
   def instant_finish_vase(conn, %{"vaseId" => vase_id}) do
     uid = conn.assigns.current_player.uid
 
@@ -823,7 +842,10 @@ defmodule CampFireWeb.GameController do
       gridY: plot.grid_y,
       skinName: plot.skin_name,
       unlockedSkins: plot.unlocked_skins,
-      fertilized: plot.fertilized
+      fertilized: plot.fertilized,
+      potionItemKeys: Enum.map(plot.potions || [], fn p ->
+        Map.get(@potion_type_to_item_key, p["type"], p["type"])
+      end)
     }
   end
 
