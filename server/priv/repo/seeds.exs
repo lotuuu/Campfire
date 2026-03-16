@@ -35,7 +35,7 @@ items =
   # Potions, materials, consumables
   [
     %{item_key: "speed_potion", display_name: "Speed Potion", category: "potion"},
-    %{item_key: "fertilizer", display_name: "Fertilizer", category: "material"},
+    %{item_key: "fertilizer", display_name: "Fertilizer", category: "consumable"},
     %{item_key: "energy_drink", display_name: "Energy Drink", category: "consumable"}
   ]
 

@@ -4,8 +4,8 @@ defmodule CampFireWeb.ItemsLive do
   alias CampFire.Admin
   alias CampFire.Game.SeedConfig
 
-  @sub_tabs ~w(seeds pigments consumables fertilizer skins)a
-  @recipe_categories %{pigments: "Pigment", fertilizer: "Material"}
+  @sub_tabs ~w(seeds pigments consumables skins)a
+  @recipe_categories %{pigments: "Pigment"}
   @consumable_categories ~w(potion consumable)
 
   def mount(_params, _session, socket) do
@@ -58,8 +58,7 @@ defmodule CampFireWeb.ItemsLive do
     assign(socket, editing: seed, form: form, recipe_json: recipe_json)
   end
 
-  defp handle_edit_params(%{"id" => name}, %{assigns: %{sub_tab: sub_tab}} = socket)
-       when sub_tab in [:pigments, :fertilizer] do
+  defp handle_edit_params(%{"id" => name}, %{assigns: %{sub_tab: :pigments}} = socket) do
     case Admin.get_recipe(name) do
       nil ->
         assign(socket, editing: nil, form: nil, ingredients: [])
