@@ -18,6 +18,7 @@ defmodule CampFire.Game.PlayerPlot do
     field :grid_y, :integer
     field :skin_name, :string
     field :unlocked_skins, {:array, :string}, default: []
+    field :fertilized, :boolean, default: false
     timestamps(type: :utc_datetime)
   end
 
@@ -25,7 +26,8 @@ defmodule CampFire.Game.PlayerPlot do
     plot
     |> cast(attrs, [
       :player_uid, :seed_item_id, :state, :plant_time_utc, :water_count,
-      :last_watered_utc, :snapshots, :grid_x, :grid_y, :skin_name, :unlocked_skins
+      :last_watered_utc, :snapshots, :grid_x, :grid_y, :skin_name, :unlocked_skins,
+      :fertilized
     ])
     |> validate_required([:player_uid, :state, :grid_x, :grid_y])
     |> validate_inclusion(:state, @valid_states)

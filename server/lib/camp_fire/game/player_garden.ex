@@ -10,6 +10,7 @@ defmodule CampFire.Game.PlayerGarden do
     field :mature, :boolean, default: false
     field :grid_x, :integer
     field :grid_y, :integer
+    field :fertilized, :boolean, default: false
     timestamps(type: :utc_datetime)
   end
 
@@ -17,7 +18,7 @@ defmodule CampFire.Game.PlayerGarden do
     garden
     |> cast(attrs, [
       :player_uid, :plant_name, :plant_time_utc, :last_yield_time_utc,
-      :mature, :grid_x, :grid_y
+      :mature, :grid_x, :grid_y, :fertilized
     ])
     |> validate_required([:player_uid, :plant_name, :plant_time_utc, :grid_x, :grid_y])
   end
