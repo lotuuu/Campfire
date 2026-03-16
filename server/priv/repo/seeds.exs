@@ -933,7 +933,7 @@ game_configs = [
         ],
         "result_item" => item_key!.("speed_potion"),
         "result_quantity" => 1,
-        "category" => "Potion"
+        "category" => "Consumable"
       },
       "fertilizer" => %{
         "ingredients" => [
@@ -942,7 +942,7 @@ game_configs = [
         ],
         "result_item" => item_key!.("fertilizer"),
         "result_quantity" => 1,
-        "category" => "Material"
+        "category" => "Consumable"
       }
     }
   },

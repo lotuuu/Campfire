@@ -7,7 +7,7 @@ namespace Garden
     public enum RecipeCategory
     {
         Pigment = 0,
-        Potion = 1,
+        Consumable = 1,
         Material = 2
     }
 

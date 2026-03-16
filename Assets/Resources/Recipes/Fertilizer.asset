@@ -21,4 +21,4 @@ MonoBehaviour:
   result: Fertilizer
   resultQuantity: 1
   icon: {fileID: 21300000, guid: 5a96f6a86784643a9b9da4030a60a7dd, type: 3}
-  category: 2
+  category: 1

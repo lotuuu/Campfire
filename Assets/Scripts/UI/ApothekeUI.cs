@@ -436,7 +436,7 @@ namespace Garden
             return cat switch
             {
                 RecipeCategory.Pigment => "Pigments",
-                RecipeCategory.Potion => "Potions",
+                RecipeCategory.Consumable => "Consumables",
                 RecipeCategory.Material => "Materials",
                 _ => cat.ToString()
             };
