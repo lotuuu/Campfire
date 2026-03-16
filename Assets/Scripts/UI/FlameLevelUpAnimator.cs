@@ -12,21 +12,32 @@ namespace Garden
         private struct Ember
         {
             public Vector2 position;
-            public float speed;      // pixels per second upward
-            public float drift;      // pixels per second horizontal
-            public float lifetime;   // total seconds
-            public float age;        // seconds elapsed
-            public float radius;     // circle radius in px
+            public float speed;
+            public float drift;
+            public float lifetime;
+            public float age;
+            public float radius;
+        }
+
+        private struct ShockwaveRing
+        {
+            public float startTime;   // when this ring starts expanding (relative to updater start)
+            public float duration;
+            public float radius;
+            public float maxRadius;
+            public bool done;
         }
 
         private class AnimationState
         {
             public float elapsed;
-            public float shockwaveRadius;
-            public float shockwaveMaxRadius;
-            public bool shockwaveDone;
+            public List<ShockwaveRing> rings = new();
             public List<Ember> embers = new();
+            public float shakeAmount;
         }
+
+        private static readonly Color GoldColor = new(1f, 0.71f, 0.2f, 1f);
+        private static readonly Color BrightGold = new(1f, 0.85f, 0.4f, 1f);
 
         private static void DrawOverlay(MeshGenerationContext ctx, AnimationState state)
         {
@@ -39,19 +50,48 @@ namespace Garden
             float cx = w / 2f;
             float cy = h / 2f;
 
-            // Shockwave ring
-            if (!state.shockwaveDone && state.shockwaveRadius > 0)
+            // Central glow — warm radial gradient approximation via concentric circles
+            float glowAlpha = Mathf.Clamp01(1f - state.elapsed / 2f) * 0.3f;
+            if (glowAlpha > 0.01f)
             {
-                float progress = Mathf.Clamp01(state.shockwaveRadius / state.shockwaveMaxRadius);
-                float alpha = 1f - progress;
-                float lineWidth = Mathf.Lerp(4f, 1f, progress);
+                for (int g = 3; g >= 0; g--)
+                {
+                    float r = 60f + g * 40f;
+                    float a = glowAlpha * (1f - g * 0.25f);
+                    painter.BeginPath();
+                    painter.Arc(new Vector2(cx, cy), r, 0f, 360f);
+                    painter.ClosePath();
+                    painter.fillColor = new Color(1f, 0.71f, 0.2f, a);
+                    painter.Fill();
+                }
+            }
+
+            // Shockwave rings
+            for (int i = 0; i < state.rings.Count; i++)
+            {
+                var ring = state.rings[i];
+                if (ring.done || ring.radius <= 0) continue;
+                float progress = Mathf.Clamp01(ring.radius / ring.maxRadius);
+                float alpha = (1f - progress) * 0.9f;
+                float lineWidth = Mathf.Lerp(6f, 1.5f, progress);
 
                 painter.BeginPath();
-                painter.Arc(new Vector2(cx, cy), state.shockwaveRadius, 0f, 360f);
+                painter.Arc(new Vector2(cx, cy), ring.radius, 0f, 360f);
                 painter.ClosePath();
                 painter.strokeColor = new Color(1f, 0.71f, 0.2f, alpha);
                 painter.lineWidth = lineWidth;
                 painter.Stroke();
+
+                // Inner bright ring for extra punch
+                if (progress < 0.5f)
+                {
+                    painter.BeginPath();
+                    painter.Arc(new Vector2(cx, cy), ring.radius - 2f, 0f, 360f);
+                    painter.ClosePath();
+                    painter.strokeColor = new Color(1f, 0.9f, 0.6f, alpha * 0.5f);
+                    painter.lineWidth = 1.5f;
+                    painter.Stroke();
+                }
             }
 
             // Embers
@@ -59,12 +99,24 @@ namespace Garden
             {
                 var e = state.embers[i];
                 if (e.age >= e.lifetime) continue;
-                float alpha = 1f - (e.age / e.lifetime);
+                float life = e.age / e.lifetime;
+                float alpha = life < 0.1f ? life / 0.1f : 1f - ((life - 0.1f) / 0.9f);
+                // Brighter core, dimmer outer
+                float px = cx + e.position.x;
+                float py = cy + e.position.y;
+
+                // Outer glow
                 painter.BeginPath();
-                painter.Arc(new Vector2(cx + e.position.x, cy + e.position.y),
-                    e.radius, 0f, 360f);
+                painter.Arc(new Vector2(px, py), e.radius * 2f, 0f, 360f);
                 painter.ClosePath();
-                painter.fillColor = new Color(1f, 0.71f, 0.2f, alpha);
+                painter.fillColor = new Color(1f, 0.6f, 0.1f, alpha * 0.2f);
+                painter.Fill();
+
+                // Core
+                painter.BeginPath();
+                painter.Arc(new Vector2(px, py), e.radius, 0f, 360f);
+                painter.ClosePath();
+                painter.fillColor = new Color(1f, 0.85f, 0.4f, alpha);
                 painter.Fill();
             }
         }
@@ -79,29 +131,24 @@ namespace Garden
             IVisualElementScheduledItem updater = null;
             var createdElements = new List<VisualElement>();
 
-            // ── Stage 1: Screen Flash (0.0s–0.3s) ──
+            // ── Stage 1: Golden Screen Flash (0.0s–0.5s) ──
             var flash = new VisualElement();
             flash.AddToClassList("flame-flash-overlay");
-            flash.pickingMode = PickingMode.Position; // blocks input
+            flash.pickingMode = PickingMode.Position;
             root.Add(flash);
             createdElements.Add(flash);
 
-            // Trigger fade on next frame so transition runs
+            // Trigger fade on next frame
             flash.schedule.Execute(() => flash.AddToClassList("flame-flash-overlay--fade"));
 
-            // ── Stage 2: Flame Pulse (0.0s–0.6s) ──
-            // Add pulse class (scales to 1.2 via USS transition over 600ms)
+            // ── Stage 2: Flame Pulse (0.0s–0.8s) — bigger scale ──
             flameCell?.AddToClassList("grid-cell--levelup-pulse");
-            // Remove pulse class at 600ms — the element reverts to base scale (1.0).
-            // Since the transition is defined on the pulse class itself, the snap-back
-            // is instant, but at this point the shockwave and cascade are drawing
-            // attention away from the flame cell, so the instant revert is fine.
             flameCell?.schedule.Execute(() =>
             {
                 flameCell.RemoveFromClassList("grid-cell--levelup-pulse");
-            }).StartingIn(600);
+            }).StartingIn(800);
 
-            // ── Stage 3: Shockwave Ring (0.2s) + Stage 5: Embers (0.3s) — via Painter2D overlay ──
+            // ── Painter2D overlay for rings, embers, glow ──
             var overlay = new VisualElement();
             overlay.pickingMode = PickingMode.Ignore;
             overlay.StretchToParentSize();
@@ -110,72 +157,95 @@ namespace Garden
             createdElements.Add(overlay);
 
             float containerWidth = gridContainer.resolvedStyle.width;
-            state.shockwaveMaxRadius = float.IsNaN(containerWidth) ? 400f : containerWidth / 2f;
+            float maxRadius = float.IsNaN(containerWidth) ? 500f : containerWidth / 2f;
 
-            // Init embers at 0.3s
+            // 3 staggered shockwave rings
+            state.rings.Add(new ShockwaveRing { startTime = 0f, duration = 1.2f, maxRadius = maxRadius });
+            state.rings.Add(new ShockwaveRing { startTime = 0.25f, duration = 1.0f, maxRadius = maxRadius * 0.85f });
+            state.rings.Add(new ShockwaveRing { startTime = 0.5f, duration = 0.8f, maxRadius = maxRadius * 0.7f });
+
+            // Init embers at 0.2s — 40 particles, bigger, faster
             gridContainer.schedule.Execute(() =>
             {
                 var rng = new System.Random();
-                for (int i = 0; i < 20; i++)
+                for (int i = 0; i < 40; i++)
                 {
                     state.embers.Add(new Ember
                     {
                         position = new Vector2(
-                            (float)(rng.NextDouble() * 60 - 30),
-                            (float)(rng.NextDouble() * 30 - 15)),
-                        speed = (float)(rng.NextDouble() * 80 + 60),   // 60–140 px/s
-                        drift = (float)(rng.NextDouble() * 40 - 20),   // -20 to +20 px/s
-                        lifetime = (float)(rng.NextDouble() * 1.0 + 1.0), // 1–2s
+                            (float)(rng.NextDouble() * 80 - 40),
+                            (float)(rng.NextDouble() * 40 - 20)),
+                        speed = (float)(rng.NextDouble() * 120 + 80),    // 80–200 px/s
+                        drift = (float)(rng.NextDouble() * 60 - 30),     // wider drift
+                        lifetime = (float)(rng.NextDouble() * 1.5 + 1.0), // 1–2.5s
                         age = 0f,
-                        radius = (float)(rng.NextDouble() * 3 + 3)     // 3–6 px
+                        radius = (float)(rng.NextDouble() * 4 + 4)       // 4–8 px
                     });
                 }
-            }).StartingIn(300);
+            }).StartingIn(200);
 
-            // Start update loop at 0.2s (shockwave starts immediately within the loop)
-            const float shockwaveDuration = 1.0f;
+            // ── Viewport shake (0.0s–0.6s) ──
+            state.shakeAmount = 8f;
+            var originalTranslate = gridContainer.resolvedStyle.translate;
 
+            // Update loop at 0.1s — drives rings, embers, and shake
             gridContainer.schedule.Execute(() =>
             {
+                var shakeRng = new System.Random(42);
                 updater = overlay.schedule.Execute(() =>
                 {
-                    float dt = 0.016f; // ~60fps
+                    float dt = 0.016f;
                     state.elapsed += dt;
 
-                    // Shockwave — starts immediately (the 0.2s delay is the StartingIn below)
-                    if (!state.shockwaveDone)
+                    // Shockwave rings
+                    for (int i = 0; i < state.rings.Count; i++)
                     {
-                        state.shockwaveRadius = (state.elapsed / shockwaveDuration)
-                            * state.shockwaveMaxRadius;
-                        if (state.elapsed >= shockwaveDuration)
-                            state.shockwaveDone = true;
+                        var ring = state.rings[i];
+                        if (ring.done) continue;
+                        float ringElapsed = state.elapsed - ring.startTime;
+                        if (ringElapsed < 0) continue;
+                        ring.radius = (ringElapsed / ring.duration) * ring.maxRadius;
+                        if (ringElapsed >= ring.duration) ring.done = true;
+                        state.rings[i] = ring;
                     }
 
                     // Embers
-                    bool anyAlive = false;
                     for (int i = 0; i < state.embers.Count; i++)
                     {
                         var e = state.embers[i];
                         if (e.age >= e.lifetime) continue;
                         e.age += dt;
-                        e.position.y -= e.speed * dt; // rise upward (negative Y)
+                        e.position.y -= e.speed * dt;
                         e.position.x += e.drift * dt;
                         state.embers[i] = e;
-                        if (e.age < e.lifetime) anyAlive = true;
                     }
+
+                    // Shake — decays over 0.6s
+                    if (state.shakeAmount > 0.1f)
+                    {
+                        state.shakeAmount *= 0.92f; // exponential decay
+                        float sx = ((float)shakeRng.NextDouble() * 2f - 1f) * state.shakeAmount;
+                        float sy = ((float)shakeRng.NextDouble() * 2f - 1f) * state.shakeAmount;
+                        gridContainer.style.translate =
+                            new Translate(new Length(sx, LengthUnit.Pixel), new Length(sy, LengthUnit.Pixel));
+                    }
+                    else if (state.shakeAmount > 0)
+                    {
+                        state.shakeAmount = 0;
+                        gridContainer.style.translate = StyleKeyword.Null;
+                    }
+
                     overlay.MarkDirtyRepaint();
                 }).Every(16);
-            }).StartingIn(200);
+            }).StartingIn(100);
 
-            // ── Stage 4: Hex Cascade (0.4s–1.5s) ──
+            // ── Stage 4: Hex Cascade (0.3s–2.0s) — brighter, staggered ──
             if (gridContainer.childCount > 0)
             {
-                // Collect cells by ring distance from center
                 var cellsByRing = new Dictionary<int, List<VisualElement>>();
                 foreach (var child in gridContainer.Children())
                 {
                     if (!child.ClassListContains("grid-cell")) continue;
-                    // Compute ring distance using element position relative to container center
                     float childCX = child.resolvedStyle.left + child.resolvedStyle.width / 2f;
                     float childCY = child.resolvedStyle.top + child.resolvedStyle.height / 2f;
                     float contCX = gridContainer.resolvedStyle.width / 2f;
@@ -183,7 +253,6 @@ namespace Garden
                     float dist = Vector2.Distance(
                         new Vector2(childCX, childCY),
                         new Vector2(contCX, contCY));
-                    // Approximate ring number: distance / hex spacing (~190px per ring at HexSize=220)
                     int ring = Mathf.RoundToInt(dist / 190f);
                     if (!cellsByRing.ContainsKey(ring))
                         cellsByRing[ring] = new List<VisualElement>();
@@ -193,25 +262,24 @@ namespace Garden
                 foreach (var kvp in cellsByRing)
                 {
                     int ring = kvp.Key;
-                    // Cap delay so glow-add + 400ms glow-remove finishes before 2500ms cleanup
-                    long delayMs = Math.Min(400 + ring * 200, 1700);
+                    // Start earlier, faster stagger, cap before cleanup
+                    long delayMs = Math.Min(300 + ring * 150, 2200);
                     foreach (var cell in kvp.Value)
                     {
-                        var c = cell; // capture
+                        var c = cell;
                         gridContainer.schedule.Execute(() =>
                         {
                             c.AddToClassList("grid-cell--levelup-glow");
-                            // Remove glow after 400ms
                             c.schedule.Execute(() =>
                             {
                                 c.RemoveFromClassList("grid-cell--levelup-glow");
-                            }).StartingIn(400);
+                            }).StartingIn(600); // longer glow
                         }).StartingIn(delayMs);
                     }
                 }
             }
 
-            // ── Stage 6: Level Badge (1.0s–2.5s) ──
+            // ── Stage 6: Level Badge (1.2s–3.5s) — bigger, with glow ──
             var badge = new VisualElement();
             badge.AddToClassList("flame-levelup-badge");
             var badgeText = new Label($"Level {newLevel}");
@@ -220,35 +288,34 @@ namespace Garden
             root.Add(badge);
             createdElements.Add(badge);
 
-            // Bounce in at 1.0s: scale 0 → 1.15 (250ms via USS transition), then 1.15 → 1.0 (200ms)
             root.schedule.Execute(() =>
             {
                 badgeText.AddToClassList("flame-levelup-badge__text--visible");
-                // Phase 1: USS transition animates scale from 0 → 1.15 over 250ms
-                badgeText.style.scale = new Scale(new Vector2(1.15f, 1.15f));
-                // Phase 2: settle to 1.0 after 250ms (USS transition animates 1.15 → 1.0)
+                // Bigger bounce: 0 → 1.25 → 1.0
+                badgeText.style.scale = new Scale(new Vector2(1.25f, 1.25f));
                 badgeText.schedule.Execute(() =>
                 {
                     badgeText.style.scale = new Scale(new Vector2(1f, 1f));
-                }).StartingIn(250);
-                // Fade out after 1.5s from badge appear
+                }).StartingIn(300);
+                // Fade out after 1.8s
                 badgeText.schedule.Execute(() =>
                 {
                     badgeText.RemoveFromClassList("flame-levelup-badge__text--visible");
                     badgeText.AddToClassList("flame-levelup-badge__text--fade");
-                }).StartingIn(1500);
-            }).StartingIn(1000);
+                }).StartingIn(1800);
+            }).StartingIn(1200);
 
-            // ── Cleanup at ~2.5s ──
+            // ── Cleanup at ~3.5s ──
             root.schedule.Execute(() =>
             {
                 updater?.Pause();
                 flameCell?.RemoveFromClassList("grid-cell--levelup-pulse");
+                gridContainer.style.translate = StyleKeyword.Null; // reset shake
                 foreach (var el in createdElements)
                     el.RemoveFromHierarchy();
                 IsPlaying = false;
                 onComplete?.Invoke();
-            }).StartingIn(2500);
+            }).StartingIn(3500);
         }
     }
 }
