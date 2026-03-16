@@ -21,6 +21,11 @@ namespace Garden
             InitializePlatform();
         }
 
+        private void OnApplicationPause(bool paused)
+        {
+            if (!paused) CancelAll();
+        }
+
         private void InitializePlatform()
         {
 #if UNITY_ANDROID
