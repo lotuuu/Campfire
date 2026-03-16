@@ -93,7 +93,13 @@ defmodule CampFire.Economy do
     end
   end
 
-  def spend_mana(player_uid, amount, opts \\ []) when is_number(amount) and amount > 0 do
+  def spend_mana(player_uid, amount, opts \\ [])
+
+  def spend_mana(player_uid, amount, _opts) when amount == 0 do
+    {:ok, Repo.get(PlayerEconomy, player_uid)}
+  end
+
+  def spend_mana(player_uid, amount, opts) when is_number(amount) and amount > 0 do
     if opts[:free_mode] do
       case Repo.get(PlayerEconomy, player_uid) do
         nil -> {:error, :insufficient_mana}
