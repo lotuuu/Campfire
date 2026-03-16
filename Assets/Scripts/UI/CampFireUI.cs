@@ -41,6 +41,9 @@ namespace Garden
         private VisualElement questsPanel;
         private VisualElement settingsPanel;
 
+        private Label toastLabel;
+        private IVisualElementScheduledItem _toastHide;
+
         // Deferred icon loading
         private Button settingsBtn;
         private bool _settingsIconLoaded;
@@ -117,6 +120,8 @@ namespace Garden
             debugPanelElement = root.Q("debug-panel");
             questsPanel = root.Q("quests-panel");
             settingsPanel = root.Q("settings-panel");
+
+            toastLabel = root.Q<Label>("toast-label");
 
             // Patch all ScrollViews: kill momentum on taps so buttons don't cause drift
             foreach (var sv in overlayBody.Query<ScrollView>().ToList())
@@ -529,6 +534,18 @@ namespace Garden
             panel.style.display = DisplayStyle.Flex;
             overlayContainer.style.display = DisplayStyle.Flex;
             overlayContainer.BringToFront();
+        }
+
+        public void ShowToast(string message)
+        {
+            if (toastLabel == null) return;
+            toastLabel.text = message;
+            toastLabel.style.display = DisplayStyle.Flex;
+            toastLabel.BringToFront();
+            _toastHide?.Pause();
+            _toastHide = toastLabel.schedule.Execute(() =>
+                toastLabel.style.display = DisplayStyle.None
+            ).StartingIn(2000);
         }
 
         public void CloseOverlay()
