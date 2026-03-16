@@ -2006,7 +2006,17 @@ namespace Garden
 
         private void BuildGardenPlantPicker(int gardenIndex)
         {
-            var allGardens = ConfigService.Instance.GetAllGardens();
+            var inventory = SaveManager.Instance.Data.inventory;
+
+            // Only show garden plants the player has seeds for
+            var availableGardens = new List<(ServerGardenConfig config, InventoryItem seedEntry)>();
+            foreach (var plantData in ConfigService.Instance.GetAllGardens())
+            {
+                string seedKey = GardenManager.GetSeedItemKey(plantData.plantName);
+                var seedEntry = inventory.Find(i => i.itemKey == seedKey && i.count > 0);
+                if (seedEntry != null || CurrencyManager.FreeMode)
+                    availableGardens.Add((plantData, seedEntry));
+            }
 
             var scroll = new ScrollView(ScrollViewMode.Vertical);
             scroll.AddToClassList("seed-picker-scroll");
@@ -2014,7 +2024,7 @@ namespace Garden
             var list = new VisualElement();
             list.AddToClassList("seed-picker-list");
 
-            foreach (var plantData in allGardens)
+            foreach (var (plantData, seedEntry) in availableGardens)
             {
                 string pName = plantData.plantName;
                 bool canAfford = CurrencyManager.Instance != null
@@ -2062,6 +2072,10 @@ namespace Garden
                 var statsLabel = new Label($"{growthStr} | {yieldStr}");
                 statsLabel.AddToClassList("seed-card--stats-line");
                 rightGroup.Add(statsLabel);
+
+                var countLabel = new Label($"x{seedEntry?.count ?? 0}");
+                countLabel.AddToClassList("seed-card--count");
+                rightGroup.Add(countLabel);
 
                 titleRow.Add(rightGroup);
                 info.Add(titleRow);

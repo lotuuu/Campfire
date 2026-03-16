@@ -17,6 +17,11 @@ items =
   Enum.map(plants, fn p ->
     %{item_key: p, display_name: String.capitalize(p), category: "harvest"}
   end) ++
+  # Garden seeds
+  [
+    %{item_key: "berrybush_seed", display_name: "BerryBush Seed", category: "garden_seed"},
+    %{item_key: "oak_seed", display_name: "Oak Seed", category: "garden_seed"}
+  ] ++
   # Garden yields (not from plants list)
   [
     %{item_key: "berry", display_name: "Berry", category: "harvest"},
@@ -496,8 +501,9 @@ quests = [
     required_flame_level: 6,
     reward_rolls: 4,
     reward_pool: [
-      %{"itemKey" => "poppy_seed", "weight" => 3, "minCount" => 1, "maxCount" => 2},
-      %{"itemKey" => "mint_seed", "weight" => 1, "minCount" => 1, "maxCount" => 1}
+      %{"itemKey" => "poppy_seed", "weight" => 15, "minCount" => 1, "maxCount" => 2},
+      %{"itemKey" => "mint_seed", "weight" => 5, "minCount" => 1, "maxCount" => 1},
+      %{"itemKey" => "berrybush_seed", "weight" => 1, "minCount" => 1, "maxCount" => 1}
     ]
   },
   %{
@@ -507,8 +513,9 @@ quests = [
     required_flame_level: 7,
     reward_rolls: 4,
     reward_pool: [
-      %{"itemKey" => "jasmine_seed", "weight" => 3, "minCount" => 1, "maxCount" => 2},
-      %{"itemKey" => "lavender_seed", "weight" => 1, "minCount" => 1, "maxCount" => 1}
+      %{"itemKey" => "jasmine_seed", "weight" => 15, "minCount" => 1, "maxCount" => 2},
+      %{"itemKey" => "lavender_seed", "weight" => 5, "minCount" => 1, "maxCount" => 1},
+      %{"itemKey" => "oak_seed", "weight" => 1, "minCount" => 1, "maxCount" => 1}
     ]
   },
   %{
@@ -518,8 +525,9 @@ quests = [
     required_flame_level: 8,
     reward_rolls: 4,
     reward_pool: [
-      %{"itemKey" => "rosemary_seed", "weight" => 3, "minCount" => 1, "maxCount" => 2},
-      %{"itemKey" => "pansy_seed", "weight" => 1, "minCount" => 1, "maxCount" => 1}
+      %{"itemKey" => "rosemary_seed", "weight" => 15, "minCount" => 1, "maxCount" => 2},
+      %{"itemKey" => "pansy_seed", "weight" => 5, "minCount" => 1, "maxCount" => 1},
+      %{"itemKey" => "berrybush_seed", "weight" => 1, "minCount" => 1, "maxCount" => 1}
     ]
   },
   %{
@@ -529,9 +537,10 @@ quests = [
     required_flame_level: 9,
     reward_rolls: 5,
     reward_pool: [
-      %{"itemKey" => "dahlia_seed", "weight" => 3, "minCount" => 1, "maxCount" => 2},
-      %{"itemKey" => "moonflower_seed", "weight" => 1, "minCount" => 1, "maxCount" => 1},
-      %{"itemKey" => "rosemary_seed", "weight" => 1, "minCount" => 1, "maxCount" => 1}
+      %{"itemKey" => "dahlia_seed", "weight" => 15, "minCount" => 1, "maxCount" => 2},
+      %{"itemKey" => "moonflower_seed", "weight" => 5, "minCount" => 1, "maxCount" => 1},
+      %{"itemKey" => "rosemary_seed", "weight" => 5, "minCount" => 1, "maxCount" => 1},
+      %{"itemKey" => "oak_seed", "weight" => 1, "minCount" => 1, "maxCount" => 1}
     ]
   }
 ]

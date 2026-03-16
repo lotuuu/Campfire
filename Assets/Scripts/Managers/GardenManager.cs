@@ -70,6 +70,11 @@ namespace Garden
 
         public List<GardenSave> Gardens => SaveManager.Instance.Data.gardens;
 
+        public static string GetSeedItemKey(string plantName)
+        {
+            return plantName.ToLower() + "_seed";
+        }
+
         public bool Plant(int gardenIndex, string plantName)
         {
             var data = SaveManager.Instance.Data;
@@ -79,6 +84,16 @@ namespace Garden
 
             var plantData = LoadPlantData(plantName);
             if (plantData == null) return false;
+
+            // Consume seed from inventory
+            string seedItemKey = GetSeedItemKey(plantName);
+            var seedEntry = data.inventory.Find(i => i.itemKey == seedItemKey);
+            if (!CurrencyManager.FreeMode)
+            {
+                if (seedEntry == null || seedEntry.count <= 0) return false;
+                seedEntry.count--;
+                if (seedEntry.count <= 0) data.inventory.Remove(seedEntry);
+            }
 
             if (!CurrencyManager.Instance.SpendWater(plantData.waterRequired)) return false;
 
