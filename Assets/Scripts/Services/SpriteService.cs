@@ -154,15 +154,21 @@ namespace Garden
 
                 if (toDownload.Count > 0)
                 {
-                    Debug.Log($"SpriteService: downloading {toDownload.Count} sprites...");
+                    BootTimer.Mark($"SpriteService: need to download {toDownload.Count} of {serverManifest.Count} sprites");
                     var dlSw = Stopwatch.StartNew();
                     await DownloadBatch(toDownload, serverManifest);
+                    BootTimer.Mark($"SpriteService.DownloadBatch done ({dlSw.ElapsedMilliseconds}ms, {toDownload.Count} sprites)");
                     if (dlSw.ElapsedMilliseconds > SlowStepMs)
                         Debug.LogWarning($"[INIT SLOW] SpriteService.DownloadBatch ({toDownload.Count} sprites) took {dlSw.ElapsedMilliseconds}ms");
+                }
+                else
+                {
+                    BootTimer.Mark($"SpriteService: all {serverManifest.Count} sprites cached, no downloads needed");
                 }
 
                 var cacheSw = Stopwatch.StartNew();
                 LoadAllFromCache();
+                BootTimer.Mark($"SpriteService.LoadAllFromCache done ({cacheSw.ElapsedMilliseconds}ms, {_textures.Count} textures)");
                 if (cacheSw.ElapsedMilliseconds > SlowStepMs)
                     Debug.LogWarning($"[INIT SLOW] SpriteService.LoadAllFromCache took {cacheSw.ElapsedMilliseconds}ms ({_textures.Count} sprites)");
 
@@ -184,10 +190,15 @@ namespace Garden
             var localManifest = LoadLocalManifest();
 
             // Try bundle download first, fall back to individual downloads
+            var bundleSw = Stopwatch.StartNew();
             if (!await DownloadBundle(keys, serverManifest, localManifest))
             {
-                Debug.Log("SpriteService: bundle failed, falling back to individual downloads");
+                BootTimer.Mark($"SpriteService: bundle failed ({bundleSw.ElapsedMilliseconds}ms), falling back to individual");
                 await DownloadIndividual(keys, serverManifest, localManifest);
+            }
+            else
+            {
+                BootTimer.Mark($"SpriteService: bundle download succeeded ({bundleSw.ElapsedMilliseconds}ms)");
             }
 
             SaveLocalManifest(localManifest);

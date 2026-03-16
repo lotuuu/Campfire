@@ -130,6 +130,7 @@ namespace Garden
                 social.displayName = response.displayName;
                 SocialSaveManager.Instance.Save();
 
+                BootTimer.Mark("SocialService registered OK");
                 IsSignedIn = true;
                 OnSignedIn?.Invoke();
             }
