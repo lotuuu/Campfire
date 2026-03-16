@@ -988,4 +988,4 @@ end
 IO.puts("Admin config seeds complete.")
 
 # ── UI Translations ──
-# Translations are seeded separately via: mix run priv/repo/translation_seeds.exs
+Code.eval_file(Path.join(__DIR__, "translation_seeds.exs"))
