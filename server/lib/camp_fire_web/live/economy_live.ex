@@ -12,7 +12,8 @@ defmodule CampFireWeb.EconomyLive do
        configs: Admin.list_game_configs(),
        editing_key: nil,
        edit_data: nil,
-       edit_json: nil
+       edit_json: nil,
+       show_new_config: false
      )}
   end
 
@@ -49,6 +50,10 @@ defmodule CampFireWeb.EconomyLive do
 
   def handle_event("cancel", _params, socket) do
     {:noreply, assign(socket, editing_key: nil, edit_data: nil, edit_json: nil)}
+  end
+
+  def handle_event("toggle_new_config", _params, socket) do
+    {:noreply, assign(socket, show_new_config: !socket.assigns.show_new_config)}
   end
 
   # --- Structured saves ---
@@ -527,33 +532,40 @@ defmodule CampFireWeb.EconomyLive do
     <div>
       <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-bold">Economy / Game Config</h2>
+        <%= if @show_new_config do %>
+          <button phx-click="toggle_new_config" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Cancel</button>
+        <% else %>
+          <button phx-click="toggle_new_config" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">+ New Config</button>
+        <% end %>
       </div>
 
-      <div class="mb-6 bg-white border rounded-lg p-4">
-        <h3 class="text-lg font-semibold mb-3">Add New Config</h3>
-        <form phx-submit="new" class="space-y-3">
-          <div class="flex gap-3 items-end">
-            <div class="flex-shrink-0">
-              <label class="block text-sm font-medium text-gray-700">Key</label>
-              <input type="text" name="key" placeholder="config_key" class="mt-1 border rounded px-3 py-2" required />
-            </div>
-            <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-              Create
-            </button>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Value (JSON)</label>
-            <div id="new-config-editor" phx-hook="JsonEditor" class="json-editor-wrap">
-              <div class="json-toolbar">
-                <button type="button" data-action="format">Format</button>
-                <button type="button" data-action="minify">Minify</button>
+      <%= if @show_new_config do %>
+        <div class="mb-6 bg-white border rounded-lg p-4">
+          <h3 class="text-lg font-semibold mb-3">Add New Config</h3>
+          <form phx-submit="new" class="space-y-3">
+            <div class="flex gap-3 items-end">
+              <div class="flex-shrink-0">
+                <label class="block text-sm font-medium text-gray-700">Key</label>
+                <input type="text" name="key" placeholder="config_key" class="mt-1 border rounded px-3 py-2" required />
               </div>
-              <textarea name="json" rows="4" class="w-full border rounded px-3 py-2">{}</textarea>
-              <div class="json-error-msg"></div>
+              <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                Create
+              </button>
             </div>
-          </div>
-        </form>
-      </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Value (JSON)</label>
+              <div id="new-config-editor" phx-hook="JsonEditor" class="json-editor-wrap">
+                <div class="json-toolbar">
+                  <button type="button" data-action="format">Format</button>
+                  <button type="button" data-action="minify">Minify</button>
+                </div>
+                <textarea name="json" rows="4" class="w-full border rounded px-3 py-2">{"{}"}</textarea>
+                <div class="json-error-msg"></div>
+              </div>
+            </div>
+          </form>
+        </div>
+      <% end %>
 
       <div class="space-y-4">
         <%= for config <- @configs do %>
