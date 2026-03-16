@@ -203,28 +203,11 @@ namespace Garden
 
             // Wire Visitor tile tap
             if (campsiteView != null)
-                campsiteView.OnVisitorTapped += () =>
-                {
-                    var data = SaveManager.Instance?.Data;
-                    if (data?.currentVisitor == null) return;
-                    var visitor = data.currentVisitor;
+                campsiteView.OnVisitorTapped += () => ShowVisitorInteraction();
 
-                    if (!visitor.dialogueSeen && visitor.dialogueLines != null && visitor.dialogueLines.Count > 0 && dialogueUI != null)
-                    {
-                        Texture2D portrait = SpriteService.Instance?.GetTexture($"portraits/{visitor.portraitId}");
-
-                        dialogueUI.Show(visitor.visitorName, visitor.dialogueLines, () =>
-                        {
-                            visitor.dialogueSeen = true;
-                            SaveManager.Instance.Save();
-                            visitorUI?.ShowModal();
-                        }, portrait);
-                    }
-                    else
-                    {
-                        visitorUI?.ShowModal();
-                    }
-                };
+            // Auto-show visitor dialogue when a visitor arrives in real-time
+            if (VisitorManager.Instance != null)
+                VisitorManager.Instance.OnVisitorArrived += ShowVisitorInteraction;
 
             // Loading gate — block UI until all services are ready
             loadingGate = root.Q("loading-gate");
@@ -349,6 +332,8 @@ namespace Garden
                 GameService.Instance.OnStateLoaded -= OnGameReady;
                 GameService.Instance.OnInitFailed -= OnServiceFailed;
             }
+            if (VisitorManager.Instance != null)
+                VisitorManager.Instance.OnVisitorArrived -= ShowVisitorInteraction;
         }
 
         private void Update()
@@ -494,6 +479,10 @@ namespace Garden
                 if (TutorialManager.Instance != null && dialogueUI != null && tutorialUI != null)
                     TutorialManager.Instance.Initialize(tutorialUI, dialogueUI, campsiteView);
 
+                // Auto-show visitor dialogue if one is present on app load
+                if (SaveManager.Instance?.Data?.currentVisitor != null)
+                    ShowVisitorInteraction();
+
                 return;
             }
 
@@ -502,6 +491,29 @@ namespace Garden
             else if (!_economyDone) loadingStatus.text = "Syncing save data...";
             else if (!_gameDone) loadingStatus.text = GameService.Instance?.LoadingStatus ?? "Loading...";
             else if (!_weatherDone) loadingStatus.text = "Checking the weather...";
+        }
+
+        private void ShowVisitorInteraction()
+        {
+            var data = SaveManager.Instance?.Data;
+            if (data?.currentVisitor == null) return;
+            var visitor = data.currentVisitor;
+
+            if (!visitor.dialogueSeen && visitor.dialogueLines != null && visitor.dialogueLines.Count > 0 && dialogueUI != null)
+            {
+                Texture2D portrait = SpriteService.Instance?.GetTexture($"portraits/{visitor.portraitId}");
+
+                dialogueUI.Show(visitor.visitorName, visitor.dialogueLines, () =>
+                {
+                    visitor.dialogueSeen = true;
+                    SaveManager.Instance.Save();
+                    visitorUI?.ShowModal();
+                }, portrait);
+            }
+            else
+            {
+                visitorUI?.ShowModal();
+            }
         }
 
         public void OpenOverlay(string title, VisualElement panel)
