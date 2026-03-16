@@ -518,7 +518,48 @@ namespace Garden
             return await InstantFinish(plotIndex);
         }
 
-        public int GetSpeedItemCount()
+        public int GetFertilizerCount()
+    {
+        var entry = SaveManager.Instance.Data.inventory.Find(i => i.itemKey == "fertilizer");
+        return entry?.count ?? 0;
+    }
+
+    public async Task<bool> Fertilize(int plotIndex)
+    {
+        var data = SaveManager.Instance.Data;
+        if (plotIndex < 0 || plotIndex >= data.plots.Count) return false;
+        var plot = data.plots[plotIndex];
+        if (plot.state != PlotState.Growing) return false;
+        if (plot.fertilized) return false;
+
+        // Check inventory
+        if (!CurrencyManager.FreeMode && GetFertilizerCount() <= 0) return false;
+
+        // Consume locally
+        if (!CurrencyManager.FreeMode)
+        {
+            var entry = data.inventory.Find(i => i.itemKey == "fertilizer");
+            entry.count--;
+            if (entry.count <= 0) data.inventory.Remove(entry);
+        }
+
+        plot.fertilized = true;
+        SaveManager.Instance.Save();
+        OnPlotChanged?.Invoke(plotIndex);
+        AudioManager.Instance?.PlaySFX("fertilize");
+
+        // Notify server
+        if (GameService.Instance != null && GameService.Instance.IsOnline && plot.serverId > 0)
+        {
+            var result = await GameService.Instance.FertilizePlot(plot.serverId);
+            if (result == null)
+                await GameService.Instance.ResyncFullState();
+        }
+
+        return true;
+    }
+
+    public int GetSpeedItemCount()
         {
             string speedItem = ConfigService.Instance.PlotConfig.speed_item;
             var item = SaveManager.Instance.Data.inventory.Find(i => i.itemKey == speedItem);

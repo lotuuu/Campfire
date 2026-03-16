@@ -174,10 +174,16 @@ namespace Garden
 
                 if (CheckYieldReady(garden, plantData.yieldIntervalHours, now))
                 {
-                    AddItem(data, plantData.yieldItem, plantData.yieldAmount);
+                    int amount = plantData.yieldAmount;
+                    if (garden.fertilized)
+                    {
+                        amount = Mathf.CeilToInt(amount * 1.5f);
+                        garden.fertilized = false;
+                    }
+                    AddItem(data, plantData.yieldItem, amount);
                     garden.lastYieldTimeUtc = now.ToString("o");
                     changed = true;
-                    OnYieldCollected?.Invoke(i, plantData.yieldItem, plantData.yieldAmount);
+                    OnYieldCollected?.Invoke(i, plantData.yieldItem, amount);
                     AudioManager.Instance?.PlaySFX("garden_harvest");
 
                     // Notify server
@@ -205,7 +211,43 @@ namespace Garden
             else data.inventory.Add(new InventoryItem { itemKey = itemKey, count = count });
         }
 
-        // ── Garden Building ──────────────────────────────────────────
+        public async Task<bool> Fertilize(int gardenIndex)
+    {
+        var data = SaveManager.Instance.Data;
+        if (gardenIndex < 0 || gardenIndex >= data.gardens.Count) return false;
+        var garden = data.gardens[gardenIndex];
+        if (!garden.mature) return false;
+        if (garden.fertilized) return false;
+
+        // Check inventory
+        int fertCount = data.inventory.Find(i => i.itemKey == "fertilizer")?.count ?? 0;
+        if (!CurrencyManager.FreeMode && fertCount <= 0) return false;
+
+        // Consume locally
+        if (!CurrencyManager.FreeMode)
+        {
+            var entry = data.inventory.Find(i => i.itemKey == "fertilizer");
+            entry.count--;
+            if (entry.count <= 0) data.inventory.Remove(entry);
+        }
+
+        garden.fertilized = true;
+        SaveManager.Instance.Save();
+        OnGardenChanged?.Invoke(gardenIndex);
+        AudioManager.Instance?.PlaySFX("fertilize");
+
+        // Notify server
+        if (GameService.Instance != null && GameService.Instance.IsOnline && garden.serverId > 0)
+        {
+            var result = await GameService.Instance.FertilizeGarden(garden.serverId);
+            if (result == null)
+                await GameService.Instance.ResyncFullState();
+        }
+
+        return true;
+    }
+
+    // ── Garden Building ──────────────────────────────────────────
 
         public BuildingCost GetNextGardenCost()
         {
