@@ -272,6 +272,10 @@ namespace Garden
             // Quest
             if (response.quest != null)
             {
+                if (string.IsNullOrEmpty(response.quest.request_item) && !response.quest.is_return)
+                    Debug.LogWarning($"[VisitorManager] Quest missing 'request_item' for visitor '{response.visitor_id}'");
+                if (response.quest.reward != null && string.IsNullOrEmpty(response.quest.reward.name))
+                    Debug.LogWarning($"[VisitorManager] Quest reward missing 'name' for visitor '{response.visitor_id}'");
                 save.requestItem = response.quest.request_item;
                 save.requestCount = response.quest.request_count;
                 save.returnDays = response.quest.return_days;
@@ -413,7 +417,10 @@ namespace Garden
             var reward = JsonUtility.FromJson<QuestReward>(quest.rewardJson);
             if (reward != null)
             {
-                ApothekeManager.Instance?.AddItem(reward.name, reward.count);
+                if (string.IsNullOrEmpty(reward.name))
+                    Debug.LogWarning($"[VisitorManager] Quest reward has no name — rewardJson: {quest.rewardJson}");
+                else
+                    ApothekeManager.Instance?.AddItem(reward.name, reward.count);
             }
 
             // Remove from active quests

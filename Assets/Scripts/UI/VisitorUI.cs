@@ -247,6 +247,9 @@ namespace Garden
 
         private void RefreshQuester(VisitorSave visitor)
         {
+            if (string.IsNullOrEmpty(visitor.requestItem) && !visitor.questFulfilled)
+                Debug.LogWarning($"[VisitorUI] Quest visitor '{visitor.visitorId}' has no requestItem — likely a server data issue");
+
             if (visitor.isReturnVisit)
             {
                 var data = SaveManager.Instance.Data;

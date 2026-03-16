@@ -232,22 +232,8 @@ defmodule CampFire.Visitors do
   end
   defp roll_dialogue(_), do: []
 
-  defp roll_gift(pool) when is_list(pool) and length(pool) > 0 do
-    pool |> Enum.random() |> normalize_gift()
-  end
+  defp roll_gift(pool) when is_list(pool) and length(pool) > 0, do: Enum.random(pool)
   defp roll_gift(_), do: nil
-
-  defp normalize_gift(%{"type" => "water", "count" => count}) do
-    %{type: "water", name: "Water", amount: count}
-  end
-
-  defp normalize_gift(%{"itemKey" => key, "count" => count}) do
-    type = if String.ends_with?(key, "_seed"), do: "seed", else: "item"
-    name = key |> String.replace("_", " ") |> String.split() |> Enum.map(&String.capitalize/1) |> Enum.join(" ")
-    %{type: type, name: name, amount: count}
-  end
-
-  defp normalize_gift(other), do: other
 
   defp roll_quest(pool) when is_list(pool) and length(pool) > 0, do: Enum.random(pool)
   defp roll_quest(_), do: nil

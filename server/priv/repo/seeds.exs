@@ -163,13 +163,13 @@ templates = [
     ],
     offer_pool: [],
     gift_pool: [
-      %{"itemKey" => "chamomile_seed", "count" => 2},
-      %{"type" => "water", "count" => 3},
-      %{"itemKey" => "basil_seed", "count" => 3},
-      %{"itemKey" => "basil", "count" => 2},
-      %{"itemKey" => "hot_potion", "count" => 1},
-      %{"itemKey" => "rain_potion", "count" => 1},
-      %{"itemKey" => "sun_potion", "count" => 1}
+      %{"type" => "seed", "name" => "Chamomile Seed", "amount" => 2},
+      %{"type" => "water", "name" => "Water", "amount" => 3},
+      %{"type" => "seed", "name" => "Basil Seed", "amount" => 3},
+      %{"type" => "item", "name" => "Basil", "amount" => 2},
+      %{"type" => "item", "name" => "Hot Potion", "amount" => 1},
+      %{"type" => "item", "name" => "Rain Potion", "amount" => 1},
+      %{"type" => "item", "name" => "Sun Potion", "amount" => 1}
     ],
     quest_pool: [],
     weight: 1.5
@@ -191,24 +191,24 @@ templates = [
     gift_pool: [],
     quest_pool: [
       %{
-        "request_item_key" => "lavender",
+        "request_item" => "lavender",
         "request_count" => 3,
         "return_days" => 7,
-        "reward" => %{"itemKey" => "moonflower_seed", "count" => 2},
+        "reward" => %{"type" => "seed", "name" => "Moonflower Seed", "count" => 2},
         "return_dialogue" => ["You found them!", "Here, take these rare seeds as thanks."]
       },
       %{
-        "request_item_key" => "chamomile",
+        "request_item" => "chamomile",
         "request_count" => 5,
         "return_days" => 5,
-        "reward" => %{"itemKey" => "jasmine_seed", "count" => 1},
+        "reward" => %{"type" => "seed", "name" => "Jasmine Seed", "count" => 1},
         "return_dialogue" => ["Perfect!", "I knew I could count on you."]
       },
       %{
-        "request_item_key" => "lavender",
+        "request_item" => "lavender",
         "request_count" => 3,
         "return_days" => 7,
-        "reward" => %{"itemKey" => "moon_potion", "count" => 1},
+        "reward" => %{"type" => "item", "name" => "Moon Potion", "count" => 1},
         "return_dialogue" => ["Incredible! The moonlight guided me back.", "Here, this is special."]
       }
     ],
