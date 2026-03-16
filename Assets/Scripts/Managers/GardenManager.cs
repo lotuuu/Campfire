@@ -177,7 +177,8 @@ namespace Garden
                     int amount = plantData.yieldAmount;
                     if (garden.fertilized)
                     {
-                        amount = Mathf.CeilToInt(amount * 1.5f);
+                        int bonus = Mathf.Max(Mathf.CeilToInt(amount * 0.5f), 1);
+                        amount += bonus;
                         garden.fertilized = false;
                     }
                     AddItem(data, plantData.yieldItem, amount);

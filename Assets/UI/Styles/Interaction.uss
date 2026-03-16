@@ -433,6 +433,13 @@
     -unity-font-style: bold;
 }
 
+.harvest-bonus-label {
+    font-size: 28px;
+    color: rgb(130, 220, 110);
+    -unity-font-style: bold;
+    margin-left: 6px;
+}
+
 .harvest-match-badge {
     font-size: 28px;
     -unity-font-style: bold;

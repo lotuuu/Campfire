@@ -1882,9 +1882,16 @@ namespace Garden
                 iconEl.style.backgroundImage = new StyleBackground(harvestSprite);
                 yieldRow.Add(iconEl);
             }
-            var yieldLabel = new Label($"{ConfigService.Instance.GetItemDisplayName(result.harvestItemKey)} x{result.drops}");
+            int baseDrops = result.drops - result.bonusDrops;
+            var yieldLabel = new Label($"{ConfigService.Instance.GetItemDisplayName(result.harvestItemKey)} x{baseDrops}");
             yieldLabel.AddToClassList("harvest-yield-label");
             yieldRow.Add(yieldLabel);
+            if (result.bonusDrops > 0)
+            {
+                var bonusLabel = new Label($"+{result.bonusDrops}");
+                bonusLabel.AddToClassList("harvest-bonus-label");
+                yieldRow.Add(bonusLabel);
+            }
             interactionBody.Add(yieldRow);
 
             // Recipe match tier

@@ -403,6 +403,7 @@ namespace Garden
                 seedItemKey = seed.item_key,
                 harvestItemKey = serverResult.itemKey,
                 drops = serverResult.drops,
+                bonusDrops = serverResult.bonusDrops,
                 recipeScore = serverResult.score,
                 snapshots = plot.snapshots ?? new GrowthSnapshots(),
                 waterCount = plot.waterCount,
@@ -784,6 +785,7 @@ namespace Garden
         public string seedItemKey;
         public string harvestItemKey;
         public int drops;
+        public int bonusDrops;
         public float recipeScore;
         public GrowthSnapshots snapshots;
         public int waterCount;

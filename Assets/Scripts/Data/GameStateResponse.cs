@@ -171,7 +171,7 @@ namespace Garden
     [Serializable] public class FertilizePlotRequest { public int plotId; }
     [Serializable] public class ApplyPotionRequest { public int plotId; public string potionItemKey; }
     [Serializable] public class FertilizeGardenRequest { public int gardenId; }
-    [Serializable] public class HarvestResponse { public float score; public int drops; public string itemKey; }
+    [Serializable] public class HarvestResponse { public float score; public int drops; public int bonusDrops; public string itemKey; }
     [Serializable] public class UpgradeFlameResponse { public int flameLevel; }
     [Serializable] public class CollectGardenResponse { public ServerGarden garden; public string yieldItem; public int yieldAmount; }
     [Serializable] public class CollectQuestResponse { public ServerMallum mallum; public List<ServerReward> rewards = new(); }
