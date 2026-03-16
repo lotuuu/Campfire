@@ -258,6 +258,12 @@ namespace Garden
             // Gift
             if (response.gift != null)
             {
+                if (string.IsNullOrEmpty(response.gift.type))
+                    Debug.LogWarning($"[VisitorManager] Gift missing 'type' field for visitor '{response.visitor_id}'");
+                if (string.IsNullOrEmpty(response.gift.name))
+                    Debug.LogWarning($"[VisitorManager] Gift missing 'name' field for visitor '{response.visitor_id}'");
+                if (response.gift.amount <= 0)
+                    Debug.LogWarning($"[VisitorManager] Gift has invalid amount ({response.gift.amount}) for visitor '{response.visitor_id}'");
                 save.giftType = response.gift.type;
                 save.giftName = response.gift.name;
                 save.giftAmount = response.gift.amount;

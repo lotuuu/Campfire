@@ -165,6 +165,10 @@ namespace Garden
                     "item" => visitor.giftName ?? "Item",
                     _ => "Mysterious Gift"
                 };
+                if (itemName == "Mysterious Gift")
+                    Debug.LogWarning($"[VisitorUI] Unknown gift type '{visitor.giftType}' for visitor '{visitor.visitorId}' — showing fallback");
+                if (visitor.giftAmount <= 0)
+                    Debug.LogWarning($"[VisitorUI] Gift amount is {visitor.giftAmount} for visitor '{visitor.visitorId}' — likely a server data issue");
 
                 if (giftName != null) giftName.text = $"{visitor.giftAmount}x {itemName}";
                 if (giftDesc != null)
