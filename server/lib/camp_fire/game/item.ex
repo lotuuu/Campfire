@@ -11,7 +11,7 @@ defmodule CampFire.Game.Item do
     timestamps()
   end
 
-  @valid_categories ~w(seed harvest pigment potion material consumable)
+  @valid_categories ~w(seed harvest pigment potion material consumable garden_seed)
 
   def changeset(item, attrs) do
     item
