@@ -212,7 +212,7 @@ namespace Garden
                         int have = item != null ? item.count : 0;
                         bool enough = have >= cost.count;
 
-                        string prefix = enough ? "\u2713 " : "\u2717 ";
+                        string prefix = enough ? "+ " : "x ";
                         var costLabel = new Label($"{prefix}{cost.count}x {displayName} ({have})");
                         costLabel.AddToClassList("merchant-cost-item");
                         if (!enough) costLabel.AddToClassList("merchant-cost-item--insufficient");

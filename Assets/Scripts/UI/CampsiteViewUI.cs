@@ -1721,7 +1721,7 @@ namespace Garden
                     // Fertilized status
                     if (plot.fertilized)
                     {
-                        var fertLabel = new Label("\u2713 Fertilized \u2014 +50% yield");
+                        var fertLabel = new Label("Fertilized - +50% yield");
                         fertLabel.AddToClassList("interaction-info-highlight");
                         interactionBody.Add(fertLabel);
                     }
@@ -1777,7 +1777,7 @@ namespace Garden
                     if (seed != null)
                     {
                         string dropName = ConfigService.Instance.GetItemDisplayName(seed.harvest_item_key) ?? seed.harvest_item_key;
-                        var yieldPreview = new Label($"{dropName} x{seed.minDrops}\u2013{seed.maxDrops}");
+                        var yieldPreview = new Label($"{dropName} x{seed.minDrops}-{seed.maxDrops}");
                         yieldPreview.AddToClassList("plot-yield-preview");
                         interactionBody.Add(yieldPreview);
                     }
@@ -1789,7 +1789,7 @@ namespace Garden
 
                     if (plot.fertilized)
                     {
-                        var fertNote = new Label("\u2713 Fertilized \u2014 +50% yield");
+                        var fertNote = new Label("Fertilized - +50% yield");
                         fertNote.AddToClassList("interaction-info-highlight");
                         interactionBody.Add(fertNote);
                     }
@@ -2142,13 +2142,14 @@ namespace Garden
                             info.Add(tags);
                     }
 
-                    // Weather match indicator
-                    if (seedData.recipe != null && WeatherService.Instance?.CurrentWeather != null)
+                    // Weather match indicator (only for perfect match on seeds with weather axes)
+                    if (seedData.recipe != null && HasWeatherAxes(seedData.recipe)
+                        && WeatherService.Instance != null && WeatherService.Instance.HasWeather)
                     {
                         float match = GetCurrentWeatherMatch(seedData.recipe);
-                        if (match >= 0.7f)
+                        if (match >= 1f)
                         {
-                            var matchTag = new Label(match >= 0.9f ? "Great weather today!" : "Good weather today");
+                            var matchTag = new Label("Weather Match!");
                             matchTag.AddToClassList("seed-card--weather-match");
                             info.Add(matchTag);
                         }
@@ -2366,7 +2367,7 @@ namespace Garden
 
                 case VaseState.Filling:
                     float fillRemaining = VaseManager.Instance.GetRemainingSeconds(index);
-                    var fillingLabel = new Label($"Mallum fetching water \u2014 {FormatTimeRemaining(fillRemaining)}");
+                    var fillingLabel = new Label($"Mallum fetching water - {FormatTimeRemaining(fillRemaining)}");
                     fillingLabel.AddToClassList("interaction-info-highlight");
                     interactionBody.Add(fillingLabel);
 
@@ -2415,7 +2416,7 @@ namespace Garden
                     }
                     else
                     {
-                        var depletedLabel = new Label("Empty \u2014 send a Mallum to refill");
+                        var depletedLabel = new Label("Empty - send a Mallum to refill");
                         depletedLabel.AddToClassList("interaction-info");
                         interactionBody.Add(depletedLabel);
                     }
@@ -2512,10 +2513,11 @@ namespace Garden
                 el.style.backgroundImage = tex;
         }
 
-        /// <summary>
-        /// Scores current weather against a seed's recipe (weather axes only, ignoring waterings/moon).
-        /// Returns 0-1 match quality. Returns 1 if recipe has no weather axes.
-        /// </summary>
+        private static bool HasWeatherAxes(GrowthRecipe recipe)
+        {
+            return recipe.useHeat || recipe.useWind || recipe.useHumidity;
+        }
+
         private static float GetCurrentWeatherMatch(GrowthRecipe recipe)
         {
             if (WeatherService.Instance == null || !WeatherService.Instance.HasWeather) return 0f;
@@ -2608,7 +2610,7 @@ namespace Garden
                 }
                 else
                 {
-                    var fertLabel = new Label("\u2713 Fertilized \u2014 +50% next yield");
+                    var fertLabel = new Label("Fertilized - +50% next yield");
                     fertLabel.AddToClassList("interaction-info-highlight");
                     interactionBody.Add(fertLabel);
                 }
@@ -2661,7 +2663,7 @@ namespace Garden
             int busy = totalMallums - idleMallums;
             if (busy > 0)
             {
-                var statusLabel = new Label($"{idleMallums} idle \u00B7 {busy} on task");
+                var statusLabel = new Label($"{idleMallums} idle / {busy} on task");
                 statusLabel.AddToClassList("interaction-info");
                 interactionBody.Add(statusLabel);
             }
