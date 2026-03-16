@@ -2004,6 +2004,84 @@ namespace Garden
             interactionBody.Add(scroll);
         }
 
+        private void BuildGardenPlantPicker(int gardenIndex)
+        {
+            var allGardens = ConfigService.Instance.GetAllGardens();
+
+            var scroll = new ScrollView(ScrollViewMode.Vertical);
+            scroll.AddToClassList("seed-picker-scroll");
+
+            var list = new VisualElement();
+            list.AddToClassList("seed-picker-list");
+
+            foreach (var plantData in allGardens)
+            {
+                string pName = plantData.plantName;
+                bool canAfford = CurrencyManager.Instance != null
+                    && CurrencyManager.Instance.CanAffordWater(plantData.waterRequired);
+
+                var card = new Button(() =>
+                {
+                    if (GardenManager.Instance.Plant(gardenIndex, pName))
+                    {
+                        CloseInteractionPanel();
+                        RebuildGrid();
+                    }
+                });
+                card.AddToClassList("seed-card");
+                card.SetEnabled(canAfford);
+
+                // Green accent for gardens
+                card.style.borderLeftColor = new Color(0.3f, 0.55f, 0.35f, 0.8f);
+
+                // Plant icon
+                string plantSlug = pName.ToLower();
+                var plantIcon = new VisualElement();
+                plantIcon.AddToClassList("seed-card--icon");
+                var sprite = SpriteService.Instance?.GetSprite($"hex/garden/{plantSlug}/mature");
+                if (sprite != null)
+                    plantIcon.style.backgroundImage = new StyleBackground(sprite);
+                card.Add(plantIcon);
+
+                // Info column
+                var info = new VisualElement();
+                info.AddToClassList("seed-card--info");
+
+                // Title row: name + stats
+                var titleRow = new VisualElement();
+                titleRow.AddToClassList("seed-card--title-row");
+                var nameLabel = new Label(pName);
+                nameLabel.AddToClassList("seed-card--name");
+                titleRow.Add(nameLabel);
+
+                var rightGroup = new VisualElement();
+                rightGroup.AddToClassList("seed-card--right-group");
+
+                string growthStr = TimeUtils.FormatDurationHours(plantData.growthDurationHours);
+                string yieldStr = $"{plantData.yieldAmount}x every {TimeUtils.FormatDurationHours(plantData.yieldIntervalHours)}";
+                var statsLabel = new Label($"{growthStr} | {yieldStr}");
+                statsLabel.AddToClassList("seed-card--stats-line");
+                rightGroup.Add(statsLabel);
+
+                titleRow.Add(rightGroup);
+                info.Add(titleRow);
+
+                // Cost tags
+                var tags = new VisualElement();
+                tags.AddToClassList("seed-card--recipe-tags");
+                AddRecipeTag(tags, $"Water x{plantData.waterRequired}");
+                if (plantData.manaCost > 0)
+                    AddRecipeTag(tags, $"Mana {plantData.manaCost:0}");
+                info.Add(tags);
+
+                card.Add(info);
+                list.Add(card);
+            }
+
+            scroll.Add(list);
+            interactionBody.Add(scroll);
+        }
+
         private static Color GetTierColor(int tier)
         {
             return tier switch
@@ -2163,32 +2241,7 @@ namespace Garden
             if (string.IsNullOrEmpty(garden.plantName))
             {
                 interactionTitle.text = "Garden";
-
-                var hint = new Label("Choose a plant to grow:");
-                hint.AddToClassList("interaction-info");
-                interactionBody.Add(hint);
-
-                foreach (var plantData in ConfigService.Instance.GetAllGardens())
-                {
-                    string pName = plantData.plantName;
-                    string desc = $"Water: {plantData.waterRequired}";
-                    bool canAfford = CurrencyManager.Instance != null
-                        && CurrencyManager.Instance.CanAffordWater(plantData.waterRequired);
-
-                    var btn = new Button(() =>
-                    {
-                        if (GardenManager.Instance.Plant(index, pName))
-                        {
-                            CloseInteractionPanel();
-                            RebuildGrid();
-                        }
-                    })
-                    { text = $"{pName} ({desc})" };
-                    btn.AddToClassList("interaction-btn-primary");
-                    btn.SetEnabled(canAfford);
-                    interactionActions.Add(btn);
-                }
-
+                BuildGardenPlantPicker(index);
                 return;
             }
 
