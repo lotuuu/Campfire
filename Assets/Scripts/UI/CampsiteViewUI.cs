@@ -1692,6 +1692,26 @@ namespace Garden
 
                     AddGrowthRecipeSection(plot.seedItemKey);
 
+                    // Fertilize button
+                    if (!plot.fertilized)
+                    {
+                        int fertCount = PlotManager.Instance != null ? PlotManager.Instance.GetFertilizerCount() : 0;
+                        var fertBtn = new Button(() =>
+                        {
+                            _ = FertilizePlotAndRefresh(index);
+                        })
+                        { text = $"Fertilize ({fertCount})" };
+                        fertBtn.SetEnabled(fertCount > 0 || CurrencyManager.FreeMode);
+                        fertBtn.AddToClassList("interaction-btn-primary");
+                        interactionActions.Add(fertBtn);
+                    }
+                    else
+                    {
+                        var fertLabel = new Label("Fertilized! +50% yield");
+                        fertLabel.AddToClassList("interaction-info");
+                        interactionBody.Add(fertLabel);
+                    }
+
                     int plotPotionCount = PlotManager.Instance != null ? PlotManager.Instance.GetSpeedItemCount() : 0;
                     var finishBtn = new Button(() => _ = SpeedUpAndHarvest(index))
                     { text = $"Finish Now ({plotPotionCount} potions)" };
@@ -1739,6 +1759,17 @@ namespace Garden
             }
 
             await HarvestAndShow(plotIndex);
+        }
+
+        private async Task FertilizePlotAndRefresh(int plotIndex)
+        {
+            if (PlotManager.Instance == null) return;
+            bool success = await PlotManager.Instance.Fertilize(plotIndex);
+            if (success)
+            {
+                RebuildGrid();
+                ShowInteraction(CampBuildingType.Plot, plotIndex);
+            }
         }
 
         private async Task HarvestAndShow(int plotIndex)
@@ -2265,6 +2296,39 @@ namespace Garden
             stateLabel.AddToClassList("interaction-info");
             interactionBody.Add(stateLabel);
 
+            if (garden.mature)
+            {
+                if (!garden.fertilized)
+                {
+                    int fertCount = SaveManager.Instance.Data.inventory.Find(i => i.itemKey == "fertilizer")?.count ?? 0;
+                    var fertBtn = new Button(() =>
+                    {
+                        _ = FertilizeGardenAndRefresh(index);
+                    })
+                    { text = $"Fertilize ({fertCount})" };
+                    fertBtn.SetEnabled(fertCount > 0 || CurrencyManager.FreeMode);
+                    fertBtn.AddToClassList("interaction-btn-primary");
+                    interactionActions.Add(fertBtn);
+                }
+                else
+                {
+                    var fertLabel = new Label("Fertilized! +50% next yield");
+                    fertLabel.AddToClassList("interaction-info");
+                    interactionBody.Add(fertLabel);
+                }
+            }
+
+        }
+
+        private async Task FertilizeGardenAndRefresh(int gardenIndex)
+        {
+            if (GardenManager.Instance == null) return;
+            bool success = await GardenManager.Instance.Fertilize(gardenIndex);
+            if (success)
+            {
+                RebuildGrid();
+                ShowInteraction(CampBuildingType.Garden, gardenIndex);
+            }
         }
 
         private void ShowMallumHouseInteraction(int index)
