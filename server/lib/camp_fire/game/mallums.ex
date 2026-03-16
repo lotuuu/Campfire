@@ -87,20 +87,25 @@ defmodule CampFire.Game.Mallums do
          true <- mallum.player_uid == player_uid || {:error, :not_owned},
          true <- mallum.state == "on_quest" || {:error, :not_on_quest} do
       config = get_quest_config(mallum.assigned_quest_name)
-      now = DateTime.utc_now() |> DateTime.truncate(:second)
-      elapsed_minutes = DateTime.diff(now, mallum.start_time_utc, :second) / 60.0
 
-      if elapsed_minutes >= config.duration_minutes do
-        rewards = roll_rewards(config)
-
-        mallum
-        |> PlayerMallum.changeset(%{
-          state: "quest_complete",
-          pending_rewards: rewards
-        })
-        |> Repo.update()
+      if config == nil do
+        {:error, :unknown_quest}
       else
-        {:ok, mallum}
+        now = DateTime.utc_now() |> DateTime.truncate(:second)
+        elapsed_minutes = DateTime.diff(now, mallum.start_time_utc, :second) / 60.0
+
+        if elapsed_minutes >= config.duration_minutes do
+          rewards = roll_rewards(config)
+
+          mallum
+          |> PlayerMallum.changeset(%{
+            state: "quest_complete",
+            pending_rewards: rewards
+          })
+          |> Repo.update()
+        else
+          {:ok, mallum}
+        end
       end
     else
       nil -> {:error, :not_found}
@@ -150,6 +155,7 @@ defmodule CampFire.Game.Mallums do
 
         _ ->
           config = get_quest_config(mallum.assigned_quest_name)
+          if config == nil, do: raise("Unknown quest: #{mallum.assigned_quest_name}")
           rewards = roll_rewards(config)
 
           mallum

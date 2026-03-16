@@ -655,12 +655,21 @@ defmodule CampFireWeb.GameController do
           conn |> put_status(404) |> json(%{error: "Building not found"})
 
         record ->
-          record
-          |> Ecto.Changeset.change(%{grid_x: gx, grid_y: gy})
-          |> Repo.update()
-          |> case do
-            {:ok, _} -> json(conn, %{ok: true})
-            {:error, _} -> conn |> put_status(422) |> json(%{error: "Failed to move building"})
+          # Validate grid coordinates are within reasonable bounds
+          flame_config = CampFire.ConfigCache.get("flame_config") || %{}
+          grid_sizes = flame_config["grid_sizes"] || []
+          max_grid = if grid_sizes != [], do: Enum.max(grid_sizes), else: 10
+
+          if abs(gx) > max_grid or abs(gy) > max_grid do
+            conn |> put_status(422) |> json(%{error: "Grid coordinates out of bounds"})
+          else
+            record
+            |> Ecto.Changeset.change(%{grid_x: gx, grid_y: gy})
+            |> Repo.update()
+            |> case do
+              {:ok, _} -> json(conn, %{ok: true})
+              {:error, _} -> conn |> put_status(422) |> json(%{error: "Failed to move building"})
+            end
           end
       end
     end

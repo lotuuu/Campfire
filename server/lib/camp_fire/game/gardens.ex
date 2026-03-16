@@ -85,54 +85,59 @@ defmodule CampFire.Game.Gardens do
           {:error, :not_owned}
         else
           config = get_plant_config(garden.plant_name)
-          now = DateTime.utc_now() |> DateTime.truncate(:second)
 
-          # Check maturity
-          garden =
-            if not garden.mature do
-              elapsed_hours = DateTime.diff(now, garden.plant_time_utc, :second) / 3600.0
+          if config == nil do
+            {:error, :unknown_plant}
+          else
+            now = DateTime.utc_now() |> DateTime.truncate(:second)
 
-              if elapsed_hours >= config.growth_hours do
-                garden
-                |> PlayerGarden.changeset(%{mature: true})
-                |> Repo.update!()
+            # Check maturity
+            garden =
+              if not garden.mature do
+                elapsed_hours = DateTime.diff(now, garden.plant_time_utc, :second) / 3600.0
+
+                if elapsed_hours >= config.growth_hours do
+                  garden
+                  |> PlayerGarden.changeset(%{mature: true})
+                  |> Repo.update!()
+                else
+                  garden
+                end
               else
                 garden
               end
+
+            if not garden.mature do
+              {:ok, %{status: :growing, garden: garden}}
             else
-              garden
-            end
+              # Check yield interval
+              reference_time = garden.last_yield_time_utc || garden.plant_time_utc
+              elapsed_since_yield = DateTime.diff(now, reference_time, :second) / 3600.0
 
-          if not garden.mature do
-            {:ok, %{status: :growing, garden: garden}}
-          else
-            # Check yield interval
-            reference_time = garden.last_yield_time_utc || garden.plant_time_utc
-            elapsed_since_yield = DateTime.diff(now, reference_time, :second) / 3600.0
+              if elapsed_since_yield >= config.yield_interval_hours do
+                Repo.transaction(fn ->
+                  Economy.upsert_item(player_uid, config.yield_item, config.yield_amount)
 
-            if elapsed_since_yield >= config.yield_interval_hours do
-              Repo.transaction(fn ->
-                Economy.upsert_item(player_uid, config.yield_item, config.yield_amount)
+                  garden
+                  |> PlayerGarden.changeset(%{last_yield_time_utc: now})
+                  |> Repo.update!()
+                end)
+                |> case do
+                  {:ok, updated_garden} ->
+                    {:ok,
+                     %{
+                       status: :collected,
+                       garden: updated_garden,
+                       item: config.yield_item,
+                       amount: config.yield_amount
+                     }}
 
-                garden
-                |> PlayerGarden.changeset(%{last_yield_time_utc: now})
-                |> Repo.update!()
-              end)
-              |> case do
-                {:ok, updated_garden} ->
-                  {:ok,
-                   %{
-                     status: :collected,
-                     garden: updated_garden,
-                     item: config.yield_item,
-                     amount: config.yield_amount
-                   }}
-
-                {:error, reason} ->
-                  {:error, reason}
+                  {:error, reason} ->
+                    {:error, reason}
+                end
+              else
+                {:ok, %{status: :not_ready, garden: garden}}
               end
-            else
-              {:ok, %{status: :not_ready, garden: garden}}
             end
           end
         end

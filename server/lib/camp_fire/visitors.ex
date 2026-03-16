@@ -23,7 +23,17 @@ defmodule CampFire.Visitors do
   end
 
   def accept_quest(uid, params) do
-    return_date = Date.utc_today() |> Date.add(params["return_days"])
+    return_days = params["return_days"]
+
+    if not is_integer(return_days) or return_days < 1 do
+      {:error, "return_days must be a positive integer"}
+    else
+      accept_quest_validated(uid, params, return_days)
+    end
+  end
+
+  defp accept_quest_validated(uid, params, return_days) do
+    return_date = Date.utc_today() |> Date.add(return_days)
 
     %VisitorQuest{}
     |> VisitorQuest.changeset(%{
