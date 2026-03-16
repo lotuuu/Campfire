@@ -299,7 +299,7 @@ namespace Garden
                     activeMallums.Add((i, data.mallums[i]));
             }
 
-            SyncHeader(activeSection, ref activeSectionHeader, "Active", true, activeMallums.Count > 0);
+            SyncHeader(activeSection, ref activeSectionHeader, Loc.Get("ui.quest.active", "Active"), true, activeMallums.Count > 0);
             SyncCardCount(activeSection, activeCardPool, activeMallums.Count);
 
             for (int c = 0; c < activeMallums.Count; c++)
@@ -333,7 +333,7 @@ namespace Garden
                 {
                     case MallumState.FetchingWater:
                         cardRoot.AddToClassList("quest-card--active");
-                        nameLabel.text = "Fetching Water";
+                        nameLabel.text = Loc.Get("ui.quest.fetching_water", "Fetching Water");
                         float waterRemaining = VaseManager.Instance.GetRemainingSeconds(mallum.assignedVaseIndex);
                         float waterProgress = VaseManager.Instance.GetFillProgress(mallum.assignedVaseIndex);
                         durationLabel.text = FormatTime(waterRemaining);
@@ -341,7 +341,7 @@ namespace Garden
                         progressText.text = $"{Mathf.RoundToInt(waterProgress * 100)}%";
                         timerLabel.style.display = DisplayStyle.None;
                         int waterDrinkCount = MallumManager.Instance.GetVaseSpeedItemCount();
-                        actionBtn.text = waterDrinkCount > 0 ? $"Speed Up ({waterDrinkCount})" : "Speed Up";
+                        actionBtn.text = waterDrinkCount > 0 ? string.Format(Loc.Get("ui.button.speed_up", "Speed Up ({0})"), waterDrinkCount) : Loc.Get("ui.button.speed_up_plain", "Speed Up");
                         actionBtn.AddToClassList("quest-speedup-btn");
                         actionBtn.SetEnabled(waterDrinkCount > 0);
                         actionBtn.clickable = new Clickable(() =>
@@ -377,7 +377,7 @@ namespace Garden
                         timerLabel.style.display = DisplayStyle.None;
 
                         int drinkCount = MallumManager.Instance.GetQuestSpeedItemCount();
-                        actionBtn.text = drinkCount > 0 ? $"Speed Up ({drinkCount})" : "Speed Up";
+                        actionBtn.text = drinkCount > 0 ? string.Format(Loc.Get("ui.button.speed_up", "Speed Up ({0})"), drinkCount) : Loc.Get("ui.button.speed_up_plain", "Speed Up");
                         actionBtn.AddToClassList("quest-speedup-btn");
                         actionBtn.SetEnabled(drinkCount > 0);
                         actionBtn.clickable = new Clickable(() =>
@@ -385,7 +385,7 @@ namespace Garden
                             var rewards = MallumManager.Instance.SpeedUpAndCollectQuest(capturedIndex);
                             if (rewards == null || rewards.Count == 0) return;
                             FindFirstObjectByType<CampFireUI>()?.CloseOverlay();
-                            RewardRevealUI.Instance?.Show("Quest Complete!", rewards, () =>
+                            RewardRevealUI.Instance?.Show(Loc.Get("ui.quest.quest_complete", "Quest Complete!"), rewards, () =>
                             {
                                 Refresh();
                             });
@@ -405,7 +405,7 @@ namespace Garden
                     case MallumState.QuestComplete:
                         cardRoot.AddToClassList("quest-card--complete");
                         nameLabel.text = mallum.assignedQuestName;
-                        durationLabel.text = "Complete!";
+                        durationLabel.text = Loc.Get("ui.quest.complete", "Complete!");
                         durationLabel.style.color = new StyleColor(new Color32(80, 190, 100, 255));
 
                         var completeQuest = FindQuestByName(mallum.assignedQuestName);
@@ -415,13 +415,13 @@ namespace Garden
                         progressContainer.style.display = DisplayStyle.None;
                         timerLabel.style.display = DisplayStyle.None;
 
-                        actionBtn.text = "Collect Rewards";
+                        actionBtn.text = Loc.Get("ui.quest.collect_rewards", "Collect Rewards");
                         actionBtn.AddToClassList("quest-collect-btn");
                         actionBtn.clickable = new Clickable(() =>
                         {
                             var rewards = new List<RewardEntry>(mallum.pendingRewards);
                             FindFirstObjectByType<CampFireUI>()?.CloseOverlay();
-                            RewardRevealUI.Instance?.Show("Quest Complete!", rewards, () =>
+                            RewardRevealUI.Instance?.Show(Loc.Get("ui.quest.quest_complete", "Quest Complete!"), rewards, () =>
                             {
                                 MallumManager.Instance.CollectQuestRewards(capturedIndex);
                                 Refresh();
@@ -436,7 +436,7 @@ namespace Garden
         {
             var quests = MallumManager.Instance.GetAvailableQuests();
 
-            SyncHeader(availableSection, ref availableSectionHeader, "Available Quests", false, quests.Count > 0);
+            SyncHeader(availableSection, ref availableSectionHeader, Loc.Get("ui.quest.available", "Available Quests"), false, quests.Count > 0);
             SyncCardCount(availableSection, availableCardPool, quests.Count);
 
             int available = MallumManager.Instance.GetAvailableMallumCount();
@@ -480,7 +480,7 @@ namespace Garden
                 }
 
                 var capturedQuest = quest;
-                actionBtn.text = available > 0 ? "Send Mallum" : "No Mallums Idle";
+                actionBtn.text = available > 0 ? Loc.Get("ui.quest.send_mallum", "Send Mallum") : Loc.Get("ui.quest.no_mallums", "No Mallums Idle");
                 actionBtn.AddToClassList("quest-send-btn");
                 actionBtn.SetEnabled(available > 0);
                 actionBtn.clickable = new Clickable(() =>
@@ -495,7 +495,7 @@ namespace Garden
         {
             var locked = MallumManager.Instance.GetLockedQuests();
 
-            SyncHeader(lockedSection, ref lockedSectionHeader, "Locked", false, locked.Count > 0);
+            SyncHeader(lockedSection, ref lockedSectionHeader, Loc.Get("ui.quest.locked", "Locked"), false, locked.Count > 0);
             SyncCardCount(lockedSection, lockedCardPool, locked.Count);
 
             for (int c = 0; c < locked.Count; c++)
@@ -526,7 +526,7 @@ namespace Garden
                 timerLabel.style.display = DisplayStyle.None;
                 actionBtn.style.display = DisplayStyle.None;
                 rewardsContainer.style.display = DisplayStyle.None;
-                lockedLabel.text = $"Requires Flame Level {quest.requiredFlameLevel}";
+                lockedLabel.text = string.Format(Loc.Get("ui.quest.requires_level", "Requires Flame Level {0}"), quest.requiredFlameLevel);
             }
         }
 
@@ -537,7 +537,7 @@ namespace Garden
 
         private static string FormatTime(float seconds)
         {
-            if (seconds <= 0) return "Done";
+            if (seconds <= 0) return Loc.Get("ui.quest.done", "Done");
             int h = (int)(seconds / 3600);
             int m = (int)((seconds % 3600) / 60);
             int s = (int)(seconds % 60);

@@ -96,10 +96,10 @@ namespace Garden
 
         private static string CategoryLabel(InventoryCategory cat) => cat switch
         {
-            InventoryCategory.Seeds => "Seeds",
-            InventoryCategory.Yields => "Harvests",
-            InventoryCategory.Pigments => "Pigments",
-            InventoryCategory.Consumables => "Consumables",
+            InventoryCategory.Seeds => Loc.Get("ui.apotheke.seeds", "Seeds"),
+            InventoryCategory.Yields => Loc.Get("ui.apotheke.harvests", "Harvests"),
+            InventoryCategory.Pigments => Loc.Get("ui.apotheke.pigments", "Pigments"),
+            InventoryCategory.Consumables => Loc.Get("ui.apotheke.consumables", "Consumables"),
             _ => cat.ToString()
         };
 
@@ -303,7 +303,7 @@ namespace Garden
             {
                 if (seedData.recipe != null)
                 {
-                    var title = new Label("Growth Recipe");
+                    var title = new Label(Loc.Get("ui.apotheke.growth_recipe", "Growth Recipe"));
                     title.AddToClassList("seed-recipe-title");
                     details.Add(title);
 
@@ -312,7 +312,7 @@ namespace Garden
 
                 var dropsRow = new VisualElement();
                 dropsRow.AddToClassList("seed-recipe-row");
-                var dropsLabel = new Label("Drops");
+                var dropsLabel = new Label(Loc.Get("ui.apotheke.drops", "Drops"));
                 dropsLabel.AddToClassList("seed-recipe-label");
                 dropsRow.Add(dropsLabel);
                 var dropsValue = new Label($"{seedData.minDrops}-{seedData.maxDrops}");
@@ -322,7 +322,7 @@ namespace Garden
 
                 var durationRow = new VisualElement();
                 durationRow.AddToClassList("seed-recipe-row");
-                var durLabel = new Label("Growth time");
+                var durLabel = new Label(Loc.Get("ui.apotheke.growth_time", "Growth time"));
                 durLabel.AddToClassList("seed-recipe-label");
                 durationRow.Add(durLabel);
                 var durValue = new Label(TimeUtils.FormatDurationHours(seedData.growthDurationHours));
@@ -332,7 +332,7 @@ namespace Garden
             }
             else
             {
-                var noRecipe = new Label("No recipe data");
+                var noRecipe = new Label(Loc.Get("ui.apotheke.no_recipe", "No recipe data"));
                 noRecipe.AddToClassList("seed-recipe-label");
                 details.Add(noRecipe);
             }
@@ -352,27 +352,27 @@ namespace Garden
         internal static void AddRecipeDimensions(VisualElement container, GrowthRecipe recipe)
         {
             if (recipe.useHeat)
-                AddDimensionRow(container, "Heat", $"{recipe.idealTempMin}-{recipe.idealTempMax}\u00b0C", recipe.heatWeight);
+                AddDimensionRow(container, Loc.Get("ui.recipe.heat", "Heat"), $"{recipe.idealTempMin}-{recipe.idealTempMax}\u00b0C", recipe.heatWeight);
             if (recipe.useWind)
-                AddDimensionRow(container, "Wind", $"{recipe.idealWindMin}-{recipe.idealWindMax} m/s", recipe.windWeight);
+                AddDimensionRow(container, Loc.Get("ui.recipe.wind", "Wind"), $"{recipe.idealWindMin}-{recipe.idealWindMax} m/s", recipe.windWeight);
             if (recipe.useHumidity)
-                AddDimensionRow(container, "Humidity", $"{recipe.idealHumidityMin}-{recipe.idealHumidityMax}%", recipe.humidityWeight);
+                AddDimensionRow(container, Loc.Get("ui.recipe.humidity", "Humidity"), $"{recipe.idealHumidityMin}-{recipe.idealHumidityMax}%", recipe.humidityWeight);
             if (recipe.useSunlight)
-                AddDimensionRow(container, "Sunlight", $"{recipe.idealSunlightMin}-{recipe.idealSunlightMax}%", recipe.sunlightWeight);
+                AddDimensionRow(container, Loc.Get("ui.recipe.sunlight", "Sunlight"), $"{recipe.idealSunlightMin}-{recipe.idealSunlightMax}%", recipe.sunlightWeight);
             if (recipe.useRain)
             {
                 int minPct = Mathf.RoundToInt(recipe.idealRainMin * 100f);
                 int maxPct = Mathf.RoundToInt(recipe.idealRainMax * 100f);
-                AddDimensionRow(container, "Rain", $"{minPct}-{maxPct}%", recipe.rainWeight);
+                AddDimensionRow(container, Loc.Get("ui.recipe.rain", "Rain"), $"{minPct}-{maxPct}%", recipe.rainWeight);
             }
             if (recipe.useMoon)
-                AddDimensionRow(container, "Moon", recipe.requiredMoonPhase.ToString(), recipe.moonWeight);
+                AddDimensionRow(container, Loc.Get("ui.recipe.moon", "Moon"), recipe.requiredMoonPhase.ToString(), recipe.moonWeight);
             if (recipe.useWaterings)
             {
                 string waterStr = recipe.idealWateringsMin == recipe.idealWateringsMax
                     ? $"{recipe.idealWateringsMin}"
                     : $"{recipe.idealWateringsMin}-{recipe.idealWateringsMax}";
-                AddDimensionRow(container, "Waterings", waterStr, recipe.wateringsWeight);
+                AddDimensionRow(container, Loc.Get("ui.recipe.waterings", "Waterings"), waterStr, recipe.wateringsWeight);
             }
         }
 
@@ -454,9 +454,9 @@ namespace Garden
         {
             return cat switch
             {
-                RecipeCategory.Pigment => "Pigments",
-                RecipeCategory.Consumable => "Consumables",
-                RecipeCategory.Material => "Materials",
+                RecipeCategory.Pigment => Loc.Get("ui.apotheke.pigments", "Pigments"),
+                RecipeCategory.Consumable => Loc.Get("ui.apotheke.consumables", "Consumables"),
+                RecipeCategory.Material => Loc.Get("ui.apotheke.materials", "Materials"),
                 _ => cat.ToString()
             };
         }
@@ -491,7 +491,7 @@ namespace Garden
             var details = new VisualElement();
             details.AddToClassList("recipe-card-details");
 
-            var ingTitle = new Label("Needs:");
+            var ingTitle = new Label(Loc.Get("ui.apotheke.needs", "Needs:"));
             ingTitle.AddToClassList("recipe-ingredients-title");
             details.Add(ingTitle);
 
@@ -526,7 +526,7 @@ namespace Garden
             // Result row
             var resultRow = new VisualElement();
             resultRow.AddToClassList("recipe-result-row");
-            var resultLbl = new Label("Makes:");
+            var resultLbl = new Label(Loc.Get("ui.apotheke.makes", "Makes:"));
             resultLbl.AddToClassList("recipe-result-label");
             resultRow.Add(resultLbl);
             var resultName = new Label($"{recipe.resultQuantity}x {ConfigService.Instance.GetItemDisplayName(recipe.result)}");
@@ -541,7 +541,7 @@ namespace Garden
                 ApothekeManager.Instance.Mix(recipe);
                 Refresh();
             });
-            mixBtn.text = "Craft";
+            mixBtn.text = Loc.Get("ui.button.craft", "Craft");
             mixBtn.AddToClassList("recipe-action");
             mixBtn.SetEnabled(canMix);
             details.Add(mixBtn);
