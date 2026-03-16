@@ -154,7 +154,7 @@ defmodule CampFire.Economy do
       end
 
       unless opts[:free_mode] do
-        Enum.each(required_items, fn %{"itemKey" => item_key, "count" => count} ->
+        Enum.each(required_items, fn %{"item_key" => item_key, "count" => count} ->
           case spend_items_in_tx(player_uid, item_key, count) do
             :ok -> :ok
             {:error, reason} -> Repo.rollback(reason)
@@ -227,7 +227,7 @@ defmodule CampFire.Economy do
       {:ok, nil}
     else
       Repo.transaction(fn ->
-        Enum.each(items, fn %{"itemKey" => item_key, "count" => count} ->
+        Enum.each(items, fn %{"item_key" => item_key, "count" => count} ->
           case spend_items_in_tx(player_uid, item_key, count) do
             :ok -> :ok
             {:error, reason} -> Repo.rollback(reason)
