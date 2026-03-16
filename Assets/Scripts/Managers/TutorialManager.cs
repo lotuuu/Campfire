@@ -393,6 +393,7 @@ namespace Garden
                 case StepBuildHouse:
                     tutorialUI?.ShowHint("Build a Mallum House to get a helper");
                     HighlightFlameHex();
+                    tutorialUI?.DeferHighlightByClass("build-card--house");
                     break;
                 case StepPlantAgain:
                     tutorialUI?.ShowHint("Plant another seed");
@@ -463,6 +464,7 @@ namespace Garden
                 case StepBuildSecondPlot:
                     tutorialUI?.ShowHint("Build another plot to grow more seeds!");
                     HighlightFlameHex();
+                    tutorialUI?.DeferHighlightByClass("build-card--plot");
                     break;
                 case StepUpgradeFlame:
                     ShowDialogue("Spark of Ara", new List<string> {

@@ -40,12 +40,14 @@ namespace Garden
                 bool canAfford = plotAllowed && canPlace && plotCost != null
                     && CurrencyManager.Instance.CanAffordMana(plotCost.manaCost)
                     && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, plotCost.harvestCosts);
-                newCards.Add(BuildCardHelper.CreateBuildCard(
+                var plotCard = BuildCardHelper.CreateBuildCard(
                     "Plot", "Grow seeds", "ui/buildings/plot", null,
                     BuildCardHelper.FromBuildingCost(plotCost), capText,
                     canAfford, plotAllowed && canPlace,
                     () => OnRequestPlacement?.Invoke(CampBuildingType.Plot),
-                    null));
+                    null);
+                plotCard.Q(className: "build-card")?.AddToClassList("build-card--plot");
+                newCards.Add(plotCard);
             }
 
             // Vase (unlocked at flame level 2)
@@ -87,12 +89,14 @@ namespace Garden
                     bool canAfford = houseAllowed && canPlace
                         && CurrencyManager.Instance.CanAffordMana(nextCost.manaCost)
                         && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, nextCost.harvestCosts);
-                    newCards.Add(BuildCardHelper.CreateBuildCard(
+                    var houseCard = BuildCardHelper.CreateBuildCard(
                         "House", "Houses 1 Mallum", "ui/buildings/house", null,
                         BuildCardHelper.FromBuildingCost(nextCost), capText,
                         canAfford, houseAllowed && canPlace,
                         () => OnRequestPlacement?.Invoke(CampBuildingType.MallumHouse),
-                        null));
+                        null);
+                    houseCard.Q(className: "build-card")?.AddToClassList("build-card--house");
+                    newCards.Add(houseCard);
                 }
             }
 
