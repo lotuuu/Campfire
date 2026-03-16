@@ -16,7 +16,9 @@ defmodule CampFireWeb.GameController do
 
   # ── Config sync ────────────────────────────────────────────
 
-  def get_configs(conn, _params) do
+  def get_configs(conn, params) do
+    locale = Map.get(params, "locale", "en")
+
     seed_configs = ConfigCache.get("seed_configs") || %{}
     quest_configs = ConfigCache.get("quest_configs") || %{}
     garden_configs = ConfigCache.get("garden_configs") || %{}
@@ -78,6 +80,60 @@ defmodule CampFireWeb.GameController do
          }}
       end)
 
+    # Fetch translations and apply config overlays for non-English locales
+    translations = CampFire.Translations.get_translations_map(locale)
+    supported_locales = CampFire.Translations.supported_locales()
+    config_trans = CampFire.Translations.get_config_translations(locale)
+
+    # Apply config translations to quests
+    quests =
+      if locale != "en" do
+        quest_trans = Map.get(config_trans, "quest", [])
+
+        Enum.reduce(quest_trans, quests, fn ct, acc ->
+          case Map.get(acc, ct.translatable_key) do
+            nil ->
+              acc
+
+            quest ->
+              updated =
+                case ct.field do
+                  "quest_name" -> %{quest | questName: ct.value}
+                  "description" -> %{quest | description: ct.value}
+                  _ -> quest
+                end
+
+              Map.put(acc, ct.translatable_key, updated)
+          end
+        end)
+      else
+        quests
+      end
+
+    # Apply config translations to gardens
+    gardens =
+      if locale != "en" do
+        garden_trans = Map.get(config_trans, "garden", [])
+
+        Enum.reduce(garden_trans, gardens, fn ct, acc ->
+          case Map.get(acc, ct.translatable_key) do
+            nil ->
+              acc
+
+            garden ->
+              updated =
+                case ct.field do
+                  "plant_name" -> %{garden | plantName: ct.value}
+                  _ -> garden
+                end
+
+              Map.put(acc, ct.translatable_key, updated)
+          end
+        end)
+      else
+        gardens
+      end
+
     conn
     |> put_status(200)
     |> json(%{
@@ -93,7 +149,9 @@ defmodule CampFireWeb.GameController do
       skins: skin_configs,
       newPlayerConfig: serialize_game_config(new_player_config),
       sprites: sprite_manifest,
-      items: items
+      items: items,
+      translations: translations,
+      supportedLocales: supported_locales
     })
   end
 
