@@ -168,9 +168,9 @@ defmodule CampFire.Game.GrowthRecipeTest do
         }
       }
 
-      # 2 rain snapshots out of 4 total -> ratio 0.5, within [0.4, 0.6] -> 1.0
+      # 2 rainy out of 4 total -> ratio 0.5, within [0.4, 0.6] -> 1.0
       snapshots = %{
-        "rain_snapshots" => [true, true],
+        "rain_snapshots" => [1.0, 0.0, 1.0, 0.0],
         "snapshot_count" => 4
       }
 

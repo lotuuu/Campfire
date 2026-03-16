@@ -82,7 +82,7 @@ defmodule CampFire.Game.GrowthRecipe do
       end},
       {"rain", fn ->
         if count == 0, do: 0.0,
-        else: length(Map.get(snapshots, "rain_snapshots", [])) / count
+        else: Enum.sum(Map.get(snapshots, "rain_snapshots", [])) / count
       end},
       {"moon", fn ->
         phases = Map.get(snapshots, "moon_phase_snapshots", [])
@@ -167,8 +167,8 @@ defmodule CampFire.Game.GrowthRecipe do
       if count == 0 do
         0.0
       else
-        rain_count = length(Map.get(snapshots, "rain_snapshots", []))
-        rain_count / count
+        rain_sum = Enum.sum(Map.get(snapshots, "rain_snapshots", []))
+        rain_sum / count
       end
     end)
 
