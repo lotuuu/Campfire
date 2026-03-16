@@ -206,7 +206,8 @@ namespace Garden
                         gridX = sp.gridX,
                         gridY = sp.gridY,
                         skinName = sp.skinName,
-                        unlockedSkins = sp.unlockedSkins ?? new List<string>()
+                        unlockedSkins = sp.unlockedSkins ?? new List<string>(),
+                        fertilized = sp.fertilized
                     });
                 }
             }
@@ -244,7 +245,8 @@ namespace Garden
                         lastYieldTimeUtc = sg.lastYieldTimeUtc,
                         mature = sg.mature,
                         gridX = sg.gridX,
-                        gridY = sg.gridY
+                        gridY = sg.gridY,
+                        fertilized = sg.fertilized
                     });
                 }
             }
@@ -502,6 +504,24 @@ namespace Garden
             return null;
         }
 
+        public async Task<ServerPlot> FertilizePlot(int plotId)
+        {
+            if (!IsOnline) return null;
+            try
+            {
+                var body = JsonUtility.ToJson(new FertilizePlotRequest { plotId = plotId });
+                using var req = PostJson("/game/plot/fertilize", body);
+                await SendAsync(req);
+
+                if (req.responseCode >= 200 && req.responseCode < 300)
+                    return JsonUtility.FromJson<ServerPlot>(req.downloadHandler.text);
+
+                Debug.LogWarning($"GameService: FertilizePlot failed (HTTP {req.responseCode}): {req.downloadHandler.text}");
+            }
+            catch (Exception e) { Debug.LogWarning($"GameService: FertilizePlot failed: {e.Message}"); }
+            return null;
+        }
+
         // ── Vase Endpoints ──
 
         public async Task<ServerVase> CraftVase(int gridX, int gridY)
@@ -647,6 +667,24 @@ namespace Garden
                 Debug.LogWarning($"GameService: CollectGarden failed (HTTP {req.responseCode}): {req.downloadHandler.text}");
             }
             catch (Exception e) { Debug.LogWarning($"GameService: CollectGarden failed: {e.Message}"); }
+            return null;
+        }
+
+        public async Task<ServerGarden> FertilizeGarden(int gardenId)
+        {
+            if (!IsOnline) return null;
+            try
+            {
+                var body = JsonUtility.ToJson(new FertilizeGardenRequest { gardenId = gardenId });
+                using var req = PostJson("/game/garden/fertilize", body);
+                await SendAsync(req);
+
+                if (req.responseCode >= 200 && req.responseCode < 300)
+                    return JsonUtility.FromJson<ServerGarden>(req.downloadHandler.text);
+
+                Debug.LogWarning($"GameService: FertilizeGarden failed (HTTP {req.responseCode}): {req.downloadHandler.text}");
+            }
+            catch (Exception e) { Debug.LogWarning($"GameService: FertilizeGarden failed: {e.Message}"); }
             return null;
         }
 
