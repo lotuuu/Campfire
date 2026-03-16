@@ -32,6 +32,11 @@ namespace Garden
             Instance = this;
         }
 
+        private void OnDestroy()
+        {
+            if (Instance == this) Instance = null;
+        }
+
         // ── Resync ──
 
         /// <summary>

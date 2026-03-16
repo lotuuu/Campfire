@@ -34,6 +34,11 @@ namespace Garden
             Instance = this;
         }
 
+        private void OnDestroy()
+        {
+            if (Instance == this) Instance = null;
+        }
+
         private void Start()
         {
             Initialize();

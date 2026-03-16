@@ -25,6 +25,11 @@ namespace Garden
             Load();
         }
 
+        private void OnDestroy()
+        {
+            if (Instance == this) Instance = null;
+        }
+
         private void Update()
         {
             _autoSaveTimer += Time.unscaledDeltaTime;
@@ -44,6 +49,20 @@ namespace Garden
         }
 
         public void Save() => _isDirty = true;
+
+        /// <summary>
+        /// Flush any pending changes immediately, then disable further updates.
+        /// Called before server switch to prevent writing to the wrong save file.
+        /// </summary>
+        public void FlushAndSuspend()
+        {
+            if (_isDirty)
+            {
+                _isDirty = false;
+                Flush();
+            }
+            enabled = false;
+        }
 
         private void OnApplicationPause(bool paused)
         {

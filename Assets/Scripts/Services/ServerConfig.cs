@@ -61,6 +61,13 @@ namespace Garden
         public static void Select(string serverId)
         {
             if (serverId == SelectedId) return;
+
+            // Flush pending saves to CURRENT server's files before changing the ID
+            // (which changes SavePrefix / file paths). Then suspend to prevent
+            // the old scene's LateUpdate from flushing to the NEW server's files.
+            SaveManager.Instance?.FlushAndSuspend();
+            SocialSaveManager.Instance?.FlushAndSuspend();
+
             SelectedId = serverId;
             // Reload the scene to reinitialize all services with the new server
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);

@@ -212,6 +212,11 @@ namespace Garden
             Instance = this;
         }
 
+        private void OnDestroy()
+        {
+            if (Instance == this) Instance = null;
+        }
+
         private const long SlowStepMs = 500;
 
         public async Task<bool> FetchConfigs()

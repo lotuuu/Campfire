@@ -23,6 +23,11 @@ namespace Garden
 #endif
         }
 
+        private void OnDestroy()
+        {
+            if (Instance == this) Instance = null;
+        }
+
         private void Start()
         {
             if (SocialService.Instance != null)

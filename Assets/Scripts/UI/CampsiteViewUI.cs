@@ -776,6 +776,8 @@ namespace Garden
 
             interactionBody.Clear();
             interactionActions.Clear();
+            interactionTitleRow.style.display = DisplayStyle.Flex;
+            interactionActions.style.display = DisplayStyle.Flex;
             ClearBellIcon();
             ClearPaintIcon();
 
@@ -1316,7 +1318,8 @@ namespace Garden
 
             interactionBody.Clear();
             interactionActions.Clear();
-            interactionTitle.style.display = DisplayStyle.Flex;
+            interactionTitleRow.style.display = DisplayStyle.Flex;
+            interactionActions.style.display = DisplayStyle.Flex;
             interactionPanel.RemoveFromClassList("skin-panel");
             ClearBellIcon();
             ClearPaintIcon();
@@ -1954,7 +1957,8 @@ namespace Garden
             ClearBellIcon();
             ClearPaintIcon();
 
-            interactionTitle.style.display = DisplayStyle.None;
+            interactionTitleRow.style.display = DisplayStyle.None;
+            interactionActions.style.display = DisplayStyle.None;
             AudioManager.Instance?.PlaySFX("harvest_reveal");
 
             // ── Hero: large item icon with tier-colored glow ring ──
@@ -2827,7 +2831,7 @@ namespace Garden
             headerRow.Add(titleLabel);
 
             // Hide default title, use our custom header
-            interactionTitle.style.display = DisplayStyle.None;
+            interactionTitleRow.style.display = DisplayStyle.None;
             interactionBody.Add(headerRow);
 
             var skins = SkinManager.Instance.GetSkinsForBuilding(type);
@@ -3100,7 +3104,7 @@ namespace Garden
                 interactionPanel.RemoveFromClassList("skin-panel");
             }
             if (interactionTitle != null)
-                interactionTitle.style.display = DisplayStyle.Flex;
+                interactionTitleRow.style.display = DisplayStyle.Flex;
             openInteractionType = null;
             flameBuildGrid = null;
 
