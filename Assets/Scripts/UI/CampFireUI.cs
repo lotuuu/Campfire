@@ -109,6 +109,9 @@ namespace Garden
             rewardRevealUI = GetComponent<RewardRevealUI>();
             rewardRevealUI?.Initialize(root);
 
+            if (LocalizationService.Instance != null)
+                LocalizationService.Instance.OnLocaleChanged += OnLocaleChanged;
+
             // Overlay setup
             overlayContainer = root.Q("overlay-container");
             overlayBackdrop = root.Q("overlay-backdrop");
@@ -342,6 +345,8 @@ namespace Garden
             }
             if (VisitorManager.Instance != null)
                 VisitorManager.Instance.OnVisitorArrived -= ShowVisitorInteraction;
+            if (LocalizationService.Instance != null)
+                LocalizationService.Instance.OnLocaleChanged -= OnLocaleChanged;
         }
 
         private void Update()
@@ -379,6 +384,15 @@ namespace Garden
             if (bottomNav == null || MallumManager.Instance == null) return;
             int completed = MallumManager.Instance.GetCompletedQuestCount();
             bottomNav.UpdateQuestBadge(completed);
+        }
+
+        private void OnLocaleChanged()
+        {
+            // Refresh UI controllers that display localized text
+            build?.Refresh();
+            questUI?.Refresh();
+            apotheke?.Refresh();
+            resourceDisplay?.Refresh();
         }
 
         // ── Loading gate callbacks ──
