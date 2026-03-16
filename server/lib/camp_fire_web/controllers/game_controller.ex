@@ -501,6 +501,22 @@ defmodule CampFireWeb.GameController do
     conn |> put_status(400) |> json(%{error: "Missing 'gardenId'"})
   end
 
+  def fertilize_garden(conn, %{"gardenId" => garden_id}) do
+    uid = conn.assigns.current_player.uid
+
+    case Gardens.fertilize(uid, garden_id) do
+      {:ok, garden} ->
+        conn |> put_status(200) |> json(serialize_garden(garden))
+
+      {:error, reason} ->
+        conn |> put_status(422) |> json(%{error: format_error(reason)})
+    end
+  end
+
+  def fertilize_garden(conn, _params) do
+    conn |> put_status(400) |> json(%{error: "Missing 'gardenId'"})
+  end
+
   # ── Quests ──────────────────────────────────────────────────
 
   def start_quest(conn, %{"questName" => quest_name}) do
@@ -833,7 +849,8 @@ defmodule CampFireWeb.GameController do
       lastYieldTimeUtc: format_datetime(garden.last_yield_time_utc),
       mature: garden.mature,
       gridX: garden.grid_x,
-      gridY: garden.grid_y
+      gridY: garden.grid_y,
+      fertilized: garden.fertilized
     }
   end
 

@@ -146,6 +146,7 @@ defmodule CampFireWeb.Router do
     get "/gardens", GameController, :list_gardens
     post "/garden/plant", GameController, :plant_garden
     post "/garden/collect", GameController, :collect_garden
+    post "/garden/fertilize", GameController, :fertilize_garden
     post "/quest/start", GameController, :start_quest
     post "/quest/check", GameController, :check_quest
     post "/quest/collect", GameController, :collect_quest

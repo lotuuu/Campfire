@@ -80,6 +80,28 @@ defmodule CampFire.Game.Gardens do
     end
   end
 
+  # --- Fertilize ---
+
+  def fertilize(player_uid, garden_id) do
+    with %PlayerGarden{} = garden <- Repo.get(PlayerGarden, garden_id),
+         true <- garden.player_uid == player_uid || {:error, :not_owned},
+         true <- garden.mature || {:error, :not_mature},
+         true <- not garden.fertilized || {:error, :already_fertilized} do
+      case Economy.spend_item(player_uid, "fertilizer", 1) do
+        {:ok, _} ->
+          garden
+          |> PlayerGarden.changeset(%{fertilized: true})
+          |> Repo.update()
+
+        {:error, reason} ->
+          {:error, reason}
+      end
+    else
+      nil -> {:error, :not_found}
+      {:error, _} = err -> err
+    end
+  end
+
   # --- Check & Collect ---
 
   def check_and_collect(player_uid, garden_id) do
@@ -122,11 +144,13 @@ defmodule CampFire.Game.Gardens do
               elapsed_since_yield = DateTime.diff(now, reference_time, :second) / 3600.0
 
               if elapsed_since_yield >= config.yield_interval_hours do
+                boosted_amount = if garden.fertilized, do: ceil(config.yield_amount * 1.5), else: config.yield_amount
+
                 Repo.transaction(fn ->
-                  Economy.upsert_item(player_uid, config.yield_item, config.yield_amount)
+                  Economy.upsert_item(player_uid, config.yield_item, boosted_amount)
 
                   garden
-                  |> PlayerGarden.changeset(%{last_yield_time_utc: now})
+                  |> PlayerGarden.changeset(%{last_yield_time_utc: now, fertilized: false})
                   |> Repo.update!()
                 end)
                 |> case do
@@ -136,7 +160,7 @@ defmodule CampFire.Game.Gardens do
                        status: :collected,
                        garden: updated_garden,
                        item: config.yield_item,
-                       amount: config.yield_amount
+                       amount: boosted_amount
                      }}
 
                   {:error, reason} ->
