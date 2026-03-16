@@ -234,7 +234,9 @@ namespace Garden
                 mallumStatusLabel.AddToClassList("quest-mallum-status-label");
                 mallumStatusContainer.Add(mallumStatusLabel);
             }
-            mallumStatusLabel.text = $"Free Mallums: {available} / {total}";
+            int busy = total - available;
+            mallumStatusLabel.text = $"{available} Idle / {total} Total";
+            if (busy > 0) mallumStatusLabel.text += $"  ({busy} on task)";
 
             // Sync dot count
             var data = SaveManager.Instance.Data;
