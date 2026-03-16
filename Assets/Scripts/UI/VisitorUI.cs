@@ -142,7 +142,7 @@ namespace Garden
                 SetDisplay(giftClaimedText, false);
                 SetDisplay(claimGiftBtn, true);
 
-                // Set icon class based on gift type
+                // Set icon class and sprite based on gift type
                 if (giftIcon != null)
                 {
                     giftIcon.RemoveFromClassList("visitor-gift-icon--seed");
@@ -155,6 +155,15 @@ namespace Garden
                         case "item":
                             giftIcon.AddToClassList("visitor-gift-icon--item");
                             break;
+                    }
+
+                    // Load actual sprite for the gift item
+                    if (!string.IsNullOrEmpty(visitor.giftName))
+                    {
+                        string spriteKey = SpriteService.ItemToSpriteKey(visitor.giftName);
+                        var sprite = spriteKey != null ? SpriteService.Instance?.GetSprite(spriteKey) : null;
+                        if (sprite != null)
+                            giftIcon.style.backgroundImage = new StyleBackground(sprite);
                     }
                 }
 
