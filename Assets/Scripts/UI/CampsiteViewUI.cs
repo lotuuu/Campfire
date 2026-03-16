@@ -2864,6 +2864,7 @@ namespace Garden
             if (SkinManager.Instance == null) return;
             interactionBody.Clear();
             interactionActions.Clear();
+            ClearPaintIcon();
 
             string typeName = type switch
             {
@@ -3148,12 +3149,12 @@ namespace Garden
 
         private static string FormatTimeRemaining(float seconds)
         {
-            if (seconds <= 0f) return "0s";
-            int totalMinutes = Mathf.CeilToInt(seconds / 60f);
-            if (totalMinutes < 60) return $"{totalMinutes}m";
-            int hours = totalMinutes / 60;
-            int mins = totalMinutes % 60;
-            return mins > 0 ? $"{hours}h {mins}m" : $"{hours}h";
+            if (seconds <= 0f) return "0:00";
+            int total = Mathf.CeilToInt(seconds);
+            int h = total / 3600;
+            int m = (total % 3600) / 60;
+            int s = total % 60;
+            return h > 0 ? $"{h}:{m:D2}:{s:D2}" : $"{m}:{s:D2}";
         }
 
         private void CloseInteractionPanel()

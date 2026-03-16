@@ -442,7 +442,7 @@
 
 .water-subscribe-bell {
     position: absolute;
-    right: 0;
+    right: 67px;
     top: 0;
     width: 53px;
     height: 53px;
