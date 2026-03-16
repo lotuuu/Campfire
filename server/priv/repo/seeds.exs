@@ -986,3 +986,87 @@ for c <- game_configs do
 end
 
 IO.puts("Admin config seeds complete.")
+
+# ── UI Translations (English baseline) ──
+
+alias CampFire.Translations.Translation
+
+en_translations = [
+  # Build panel
+  {"ui.build.plot_name", "Plot"},
+  {"ui.build.plot_desc", "Grow seeds"},
+  {"ui.build.vase_name", "Vase"},
+  {"ui.build.vase_desc", "Stores water"},
+  {"ui.build.house_name", "House"},
+  {"ui.build.house_desc", "Houses 1 Mallum"},
+  {"ui.build.garden_name", "Garden"},
+  {"ui.build.garden_desc", "Grow fruit trees"},
+  {"ui.build.flame_name", "Upgrade Flame"},
+  {"ui.build.flame_desc", "Expand your camp"},
+  {"ui.build.unlocks_at", "Unlocks at Fire Lv.{0}"},
+  # Buttons
+  {"ui.button.harvest", "Harvest"},
+  {"ui.button.craft", "Craft"},
+  {"ui.button.reload", "Reload"},
+  {"ui.button.retry", "Retry"},
+  # Labels
+  {"ui.label.spark_of_ara", "Spark of Ara"},
+  {"ui.label.empty", "Empty"},
+  {"ui.label.growing", "Growing"},
+  {"ui.label.mature", "Mature"},
+  {"ui.label.water_vase", "Water Vase"},
+  {"ui.label.full_vase", "Full Vase"},
+  {"ui.label.empty_vase", "Empty Vase"},
+  {"ui.label.mixing", "Mixing"},
+  {"ui.label.remaining", "{0} remaining"},
+  {"ui.label.plot", "Plot"},
+  {"ui.label.vase", "Vase"},
+  {"ui.label.house", "House"},
+  {"ui.label.garden", "Garden"},
+  {"ui.label.apotheke", "Apotheke"},
+  {"ui.label.bird", "Bird"},
+  # Loading
+  {"ui.loading.slow", "Taking longer than usual..."},
+  {"ui.loading.connection_failed", "Connection Failed"},
+  {"ui.loading.signing_in", "Signing in..."},
+  {"ui.loading.syncing", "Syncing save data..."},
+  {"ui.loading.weather", "Checking the weather..."},
+  # Quest
+  {"ui.quest.fetching_water", "Fetching Water"},
+  {"ui.quest.complete", "Complete!"},
+  {"ui.quest.collect_rewards", "Collect Rewards"},
+  # Navigation
+  {"ui.nav.seeds", "SEEDS"},
+  {"ui.nav.quests", "QUESTS"},
+  {"ui.nav.social", "SOCIAL"},
+  # Apotheke
+  {"ui.apotheke.seeds", "Seeds"},
+  {"ui.apotheke.harvests", "Harvests"},
+  {"ui.apotheke.pigments", "Pigments"},
+  {"ui.apotheke.consumables", "Consumables"},
+  {"ui.apotheke.growth_recipe", "Growth Recipe"},
+  {"ui.apotheke.drops", "Drops"},
+  {"ui.apotheke.growth_time", "Growth time"},
+  # Dialogue
+  {"ui.dialogue.tap_continue", "Tap to continue"},
+  {"ui.dialogue.tap_close", "Tap to close"},
+  # Visitor
+  {"ui.visitor.gift_received", "Gift received! Thank you."},
+  {"ui.visitor.water", "Water"},
+  {"ui.visitor.fills_vases", "Fills your vases"},
+  {"ui.visitor.added_seeds", "Added to your seed pouch"},
+  {"ui.visitor.added_inventory", "Added to your inventory"},
+  {"ui.visitor.something_special", "Something special"},
+  {"ui.visitor.mysterious_gift", "Mysterious Gift"},
+  {"ui.visitor.quest_completed", "Quest completed! Thank you."},
+  {"ui.visitor.request", "Request:"},
+]
+
+for {key, value} <- en_translations do
+  Repo.insert!(%Translation{locale: "en", key: key, value: value},
+    on_conflict: {:replace, [:value, :updated_at]},
+    conflict_target: [:locale, :key]
+  )
+end
+
+IO.puts("English translations seeded: #{length(en_translations)}")
