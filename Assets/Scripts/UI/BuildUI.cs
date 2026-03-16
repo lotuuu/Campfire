@@ -41,7 +41,7 @@ namespace Garden
                     && CurrencyManager.Instance.CanAffordMana(plotCost.manaCost)
                     && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, plotCost.harvestCosts);
                 var plotCard = BuildCardHelper.CreateBuildCard(
-                    "Plot", "Grow seeds", "ui/buildings/plot", null,
+                    Loc.Get("ui.build.plot_name", "Plot"), Loc.Get("ui.build.plot_desc", "Grow seeds"), "ui/buildings/plot", null,
                     BuildCardHelper.FromBuildingCost(plotCost), capText,
                     canAfford, plotAllowed && canPlace,
                     () => OnRequestPlacement?.Invoke(CampBuildingType.Plot),
@@ -63,7 +63,7 @@ namespace Garden
                         && CurrencyManager.Instance.CanAffordMana(vaseCost.manaCost)
                         && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, vaseCost.harvestCosts);
                     newCards.Add(BuildCardHelper.CreateBuildCard(
-                        "Vase", "Stores water", "ui/buildings/vase", null,
+                        Loc.Get("ui.build.vase_name", "Vase"), Loc.Get("ui.build.vase_desc", "Stores water"), "ui/buildings/vase", null,
                         BuildCardHelper.FromBuildingCost(vaseCost), capText,
                         canAfford, vaseAllowed && canPlace,
                         () => OnRequestPlacement?.Invoke(CampBuildingType.Vase),
@@ -72,10 +72,10 @@ namespace Garden
                 else
                 {
                     newCards.Add(BuildCardHelper.CreateBuildCard(
-                        "Vase", "Stores water",
+                        Loc.Get("ui.build.vase_name", "Vase"), Loc.Get("ui.build.vase_desc", "Stores water"),
                         "ui/buildings/vase", null,
                         null, capText, false, false, null,
-                        $"Unlocks at Fire Lv.{VaseManager.VaseUnlockLevel}"));
+                        string.Format(Loc.Get("ui.build.unlocks_at", "Unlocks at Fire Lv.{0}"), VaseManager.VaseUnlockLevel)));
                 }
             }
 
@@ -90,7 +90,7 @@ namespace Garden
                         && CurrencyManager.Instance.CanAffordMana(nextCost.manaCost)
                         && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, nextCost.harvestCosts);
                     var houseCard = BuildCardHelper.CreateBuildCard(
-                        "House", "Houses 1 Mallum", "ui/buildings/house", null,
+                        Loc.Get("ui.build.house_name", "House"), Loc.Get("ui.build.house_desc", "Houses 1 Mallum"), "ui/buildings/house", null,
                         BuildCardHelper.FromBuildingCost(nextCost), capText,
                         canAfford, houseAllowed && canPlace,
                         () => OnRequestPlacement?.Invoke(CampBuildingType.MallumHouse),
@@ -112,7 +112,7 @@ namespace Garden
                         && CurrencyManager.Instance.CanAffordMana(gardenCost.manaCost)
                         && MallumManager.CanAffordHarvests(SaveManager.Instance.Data.inventory, gardenCost.harvestCosts);
                     newCards.Add(BuildCardHelper.CreateBuildCard(
-                        "Garden", "Grow fruit trees", "ui/buildings/garden", null,
+                        Loc.Get("ui.build.garden_name", "Garden"), Loc.Get("ui.build.garden_desc", "Grow fruit trees"), "ui/buildings/garden", null,
                         BuildCardHelper.FromBuildingCost(gardenCost), capText,
                         canAfford, gardenAllowed && canPlace,
                         () => OnRequestPlacement?.Invoke(CampBuildingType.Garden),
@@ -121,10 +121,10 @@ namespace Garden
                 else
                 {
                     newCards.Add(BuildCardHelper.CreateBuildCard(
-                        "Garden", "Grow fruit trees",
+                        Loc.Get("ui.build.garden_name", "Garden"), Loc.Get("ui.build.garden_desc", "Grow fruit trees"),
                         "ui/buildings/garden", null,
                         null, capText, false, false, null,
-                        $"Unlocks at Fire Lv.{GardenManager.GardenUnlockLevel}"));
+                        string.Format(Loc.Get("ui.build.unlocks_at", "Unlocks at Fire Lv.{0}"), GardenManager.GardenUnlockLevel)));
                 }
             }
 
@@ -134,7 +134,7 @@ namespace Garden
                 bool flameAllowed = allowed == null || allowed.Contains(CampBuildingType.Flame);
                 var recipe = FlameManager.Instance.GetUpgradeRecipe();
                 newCards.Add(BuildCardHelper.CreateBuildCard(
-                    "Upgrade Flame", "Expand your camp", "ui/buildings/flame", null,
+                    Loc.Get("ui.build.flame_name", "Upgrade Flame"), Loc.Get("ui.build.flame_desc", "Expand your camp"), "ui/buildings/flame", null,
                     BuildCardHelper.FromFlameRecipe(recipe), "", flameAllowed, flameAllowed, () =>
                     {
                         FlameManager.Instance.UpgradeFlame();
