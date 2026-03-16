@@ -33,10 +33,12 @@
 }
 
 .letters-tab--active {
-    background-color: rgba(140, 80, 20, 0.5);
+    background-color: rgba(100, 70, 25, 0.2);
     border-color: rgba(220, 150, 50, 0.4);
     color: var(--color-text-bright);
     -unity-font-style: bold;
+    border-bottom-width: 3px;
+    border-bottom-color: var(--color-border-accent);
 }
 
 /* Tab badges */
