@@ -53,6 +53,7 @@ defmodule CampFireWeb.Router do
     live "/weather", WeatherLive, :index
     live "/sprites", SpritesLive, :index
     live "/logs", LogsLive, :index
+    live "/translations", TranslationsLive
   end
 
   scope "/", CampFireWeb do
