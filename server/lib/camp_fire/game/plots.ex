@@ -99,16 +99,22 @@ defmodule CampFire.Game.Plots do
           _ ->
             now = DateTime.utc_now() |> DateTime.truncate(:second)
 
-            plot
-            |> PlayerPlot.changeset(%{
-              seed_item_id: seed_config.item_id,
-              state: "growing",
-              plant_time_utc: now,
-              water_count: 0,
-              last_watered_utc: nil,
-              snapshots: @empty_snapshots
-            })
-            |> Repo.update!()
+            planted =
+              plot
+              |> PlayerPlot.changeset(%{
+                seed_item_id: seed_config.item_id,
+                state: "growing",
+                plant_time_utc: now,
+                water_count: 0,
+                last_watered_utc: nil,
+                snapshots: @empty_snapshots
+              })
+              |> Repo.update!()
+
+            # Record initial weather snapshot so short-lived plants get at least one
+            record_initial_snapshot(player_uid, planted.id)
+
+            planted
         end
       end)
     else
@@ -263,6 +269,17 @@ defmodule CampFire.Game.Plots do
   end
 
   # --- Snapshot Recording ---
+
+  defp record_initial_snapshot(player_uid, plot_id) do
+    economy = Economy.get_economy(player_uid)
+
+    if economy && economy.lat && economy.lon do
+      case CampFire.Game.Weather.get_or_fetch(economy.lat, economy.lon) do
+        {:ok, cache} -> record_snapshot(plot_id, cache.weather_data)
+        _ -> :ok
+      end
+    end
+  end
 
   def record_snapshot(plot_id, weather_data) do
     case Repo.get(PlayerPlot, plot_id) do

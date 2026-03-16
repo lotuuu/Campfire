@@ -64,6 +64,62 @@ defmodule CampFire.Game.GrowthRecipe do
   def evaluate(_recipe, _snapshots, _water_count), do: 1.0
 
   @doc """
+  Returns per-axis breakdown: list of %{axis, actual, ideal_min, ideal_max, tolerance, weight, score}.
+  """
+  def evaluate_per_axis(recipe, snapshots, water_count) when is_map(recipe) do
+    snapshots = snapshots || %{}
+    count = Map.get(snapshots, "snapshot_count", 0)
+
+    axis_defs = [
+      {"heat", fn -> avg_from_list(snapshots, "temperatures", count) end},
+      {"wind", fn -> avg_from_list(snapshots, "wind_speeds", count) end},
+      {"humidity", fn -> avg_from_list(snapshots, "humidities", count) end},
+      {"sunlight", fn ->
+        case avg_from_list(snapshots, "cloud_covers", count) do
+          +0.0 when count == 0 -> 0.0
+          avg -> 100.0 - avg
+        end
+      end},
+      {"rain", fn ->
+        if count == 0, do: 0.0,
+        else: length(Map.get(snapshots, "rain_snapshots", [])) / count
+      end},
+      {"moon", fn ->
+        phases = Map.get(snapshots, "moon_phase_snapshots", [])
+        if phases == [], do: 0.0, else: dominant_moon(phases)
+      end},
+      {"waterings", fn -> water_count * 1.0 end}
+    ]
+
+    Enum.flat_map(axis_defs, fn {axis_name, value_fn} ->
+      axis_config = Map.get(recipe, axis_name)
+
+      if is_map(axis_config) and Map.get(axis_config, "enabled", false) do
+        ideal_min = to_float(axis_config["ideal_min"])
+        ideal_max = to_float(axis_config["ideal_max"])
+        tolerance = to_float(axis_config["tolerance"])
+        weight = to_float(axis_config["weight"] || 1.0)
+        actual = value_fn.()
+        score = score_range(actual, ideal_min, ideal_max, tolerance)
+
+        [%{
+          axis: axis_name,
+          actual: Float.round(actual * 1.0, 2),
+          ideal_min: ideal_min,
+          ideal_max: ideal_max,
+          tolerance: tolerance,
+          weight: weight,
+          score: Float.round(score * 1.0, 3)
+        }]
+      else
+        []
+      end
+    end)
+  end
+
+  def evaluate_per_axis(_recipe, _snapshots, _water_count), do: []
+
+  @doc """
   Calculate drops from quality score using min/max range with randomness.
   Score interpolates within the range; +-30% spread adds noise.
   """
