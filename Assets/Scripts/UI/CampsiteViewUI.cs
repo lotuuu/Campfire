@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -1718,6 +1719,20 @@ namespace Garden
                     finishBtn.SetEnabled(plotPotionCount > 0 || CurrencyManager.FreeMode);
                     finishBtn.AddToClassList("interaction-btn-primary");
                     interactionActions.Add(finishBtn);
+
+                    // Show applied weather potions
+                    if (plot.potions != null && plot.potions.Count > 0)
+                    {
+                        var appliedNames = string.Join(", ",
+                            plot.potions.Select(p => ConfigService.Instance?.GetItemDisplayName(p) ?? p));
+                        var appliedLabel = new Label($"Potions: {appliedNames}");
+                        appliedLabel.AddToClassList("interaction-info");
+                        interactionBody.Add(appliedLabel);
+                    }
+
+                    // Weather potion buttons — show for each potion in inventory
+                    AddWeatherPotionButtons(index, plot);
+
                     break;
 
                 case PlotState.Mature:
@@ -1769,6 +1784,38 @@ namespace Garden
             {
                 RebuildGrid();
                 ShowInteraction(CampBuildingType.Plot, plotIndex);
+            }
+        }
+
+        private static readonly HashSet<string> NonWeatherPotionKeys = new()
+        {
+            "fertilizer", "speed_potion", "energy_drink"
+        };
+
+        private void AddWeatherPotionButtons(int plotIndex, PlotSave plot)
+        {
+            var inventory = SaveManager.Instance.Data.inventory;
+            string speedItem = ConfigService.Instance?.PlotConfig?.speed_item;
+            var appliedSet = new HashSet<string>(plot.potions ?? new List<string>());
+
+            foreach (var item in inventory)
+            {
+                if (item.count <= 0) continue;
+                if (!item.itemKey.EndsWith("_potion")) continue;
+                if (NonWeatherPotionKeys.Contains(item.itemKey)) continue;
+                if (speedItem != null && item.itemKey == speedItem) continue;
+                if (appliedSet.Contains(item.itemKey)) continue;
+
+                string potionKey = item.itemKey;
+                string displayName = ConfigService.Instance?.GetItemDisplayName(potionKey) ?? potionKey;
+                var btn = new Button(() =>
+                {
+                    PlotManager.Instance?.ApplyPotion(plotIndex, potionKey);
+                    ShowInteraction(CampBuildingType.Plot, plotIndex);
+                })
+                { text = $"{displayName} ({item.count})" };
+                btn.AddToClassList("interaction-btn-primary");
+                interactionActions.Add(btn);
             }
         }
 
