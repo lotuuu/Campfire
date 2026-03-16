@@ -836,3 +836,73 @@
     margin-bottom: var(--spacing-sm);
     align-self: center;
 }
+
+/* ── Flame Level-Up Animation ── */
+
+.flame-flash-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.4);
+    transition-property: opacity;
+    transition-duration: 300ms;
+    transition-timing-function: ease-out;
+}
+
+.flame-flash-overlay--fade {
+    opacity: 0;
+}
+
+.grid-cell--levelup-pulse {
+    scale: 1.2 1.2;
+    transition-property: scale;
+    transition-duration: 600ms;
+    transition-timing-function: ease-out;
+}
+
+.grid-cell--levelup-glow {
+    background-color: rgba(255, 180, 50, 0.15);
+    transition-property: background-color;
+    transition-duration: 200ms;
+    transition-timing-function: ease-in;
+}
+
+.flame-level-badge {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    -unity-text-align: middle-center;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0);
+    picking-mode: ignore;
+}
+
+.flame-level-badge__text {
+    background-color: rgba(20, 15, 10, 0.85);
+    color: #FFB432;
+    font-size: 36px;
+    -unity-font-style: bold;
+    padding: 12px 32px;
+    border-radius: 24px;
+    scale: 0 0;
+    opacity: 0;
+    transition-property: opacity, scale;
+    transition-duration: 300ms, 250ms;
+    transition-timing-function: ease-out, ease-out;
+}
+
+.flame-level-badge__text--visible {
+    opacity: 1;
+}
+
+.flame-level-badge__text--fade {
+    opacity: 0;
+    transition-property: opacity;
+    transition-duration: 500ms;
+    transition-timing-function: ease-out;
+}
