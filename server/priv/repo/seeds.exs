@@ -163,13 +163,13 @@ templates = [
     ],
     offer_pool: [],
     gift_pool: [
-      %{"type" => "seed", "name" => "Chamomile Seed", "amount" => 2},
-      %{"type" => "water", "name" => "Water", "amount" => 3},
-      %{"type" => "seed", "name" => "Basil Seed", "amount" => 3},
-      %{"type" => "item", "name" => "Basil", "amount" => 2},
-      %{"type" => "item", "name" => "Hot Potion", "amount" => 1},
-      %{"type" => "item", "name" => "Rain Potion", "amount" => 1},
-      %{"type" => "item", "name" => "Sun Potion", "amount" => 1}
+      %{"type" => "seed", "name" => "chamomile_seed", "amount" => 2},
+      %{"type" => "water", "name" => "water", "amount" => 3},
+      %{"type" => "seed", "name" => "basil_seed", "amount" => 3},
+      %{"type" => "item", "name" => "basil", "amount" => 2},
+      %{"type" => "item", "name" => "hot_potion", "amount" => 1},
+      %{"type" => "item", "name" => "rain_potion", "amount" => 1},
+      %{"type" => "item", "name" => "sun_potion", "amount" => 1}
     ],
     quest_pool: [],
     weight: 1.5
@@ -194,21 +194,21 @@ templates = [
         "request_item" => "lavender",
         "request_count" => 3,
         "return_days" => 7,
-        "reward" => %{"type" => "seed", "name" => "Moonflower Seed", "count" => 2},
+        "reward" => %{"type" => "seed", "name" => "moonflower_seed", "count" => 2},
         "return_dialogue" => ["You found them!", "Here, take these rare seeds as thanks."]
       },
       %{
         "request_item" => "chamomile",
         "request_count" => 5,
         "return_days" => 5,
-        "reward" => %{"type" => "seed", "name" => "Jasmine Seed", "count" => 1},
+        "reward" => %{"type" => "seed", "name" => "jasmine_seed", "count" => 1},
         "return_dialogue" => ["Perfect!", "I knew I could count on you."]
       },
       %{
         "request_item" => "lavender",
         "request_count" => 3,
         "return_days" => 7,
-        "reward" => %{"type" => "item", "name" => "Moon Potion", "count" => 1},
+        "reward" => %{"type" => "item", "name" => "moon_potion", "count" => 1},
         "return_dialogue" => ["Incredible! The moonlight guided me back.", "Here, this is special."]
       }
     ],
@@ -230,7 +230,7 @@ for t <- templates do
       quest_pool: t.quest_pool,
       weight: t.weight
     },
-    on_conflict: :nothing,
+    on_conflict: {:replace, [:name, :portrait_id, :type, :flame_level_min, :dialogue_pool, :offer_pool, :gift_pool, :quest_pool, :weight]},
     conflict_target: :visitor_id
   )
 end

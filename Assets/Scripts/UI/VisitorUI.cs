@@ -161,8 +161,8 @@ namespace Garden
                 string itemName = visitor.giftType switch
                 {
                     "water" => "Water",
-                    "seed" => visitor.giftName ?? "Seeds",
-                    "item" => visitor.giftName ?? "Item",
+                    "seed" => ConfigService.Instance?.GetItemDisplayName(visitor.giftName) ?? visitor.giftName ?? "Seeds",
+                    "item" => ConfigService.Instance?.GetItemDisplayName(visitor.giftName) ?? visitor.giftName ?? "Item",
                     _ => "Mysterious Gift"
                 };
                 if (itemName == "Mysterious Gift")
