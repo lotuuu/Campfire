@@ -16,6 +16,7 @@ namespace Garden
         private VisualElement interactionBackdrop;
         private VisualElement interactionPanel;
         private Label interactionTitle;
+        private VisualElement interactionTitleRow;
         private VisualElement interactionBody;
         private VisualElement interactionActions;
 
@@ -96,6 +97,13 @@ namespace Garden
             interactionBackdrop = root.Q("interaction-backdrop");
             interactionPanel = root.Q("interaction-panel");
             interactionTitle = root.Q<Label>("interaction-title");
+
+            // Wrap title in a row so bell icon can sit beside it
+            interactionTitleRow = new VisualElement();
+            interactionTitleRow.AddToClassList("interaction-title-row");
+            interactionTitle.parent.Insert(interactionTitle.parent.IndexOf(interactionTitle), interactionTitleRow);
+            interactionTitleRow.Add(interactionTitle);
+
             interactionBody = root.Q("interaction-body");
             interactionActions = root.Q("interaction-actions");
 
@@ -769,6 +777,7 @@ namespace Garden
             interactionBody.Clear();
             interactionActions.Clear();
             ClearBellIcon();
+            ClearPaintIcon();
 
             bool canPlace = FlameManager.Instance.CanPlaceEntity;
             int current = FlameManager.Instance.CurrentEntityCount;
@@ -1282,8 +1291,23 @@ namespace Garden
 
         private void ClearBellIcon()
         {
-            var existing = interactionPanel?.Q(className: "water-subscribe-bell");
+            var existing = interactionTitleRow?.Q(className: "water-subscribe-bell");
             existing?.RemoveFromHierarchy();
+        }
+
+        private void ClearPaintIcon()
+        {
+            var existing = interactionPanel?.Q(className: "interaction-paint");
+            existing?.RemoveFromHierarchy();
+        }
+
+        private void AddPaintIcon(CampBuildingType type, int index)
+        {
+            if (SkinManager.Instance == null) return;
+            var paintBtn = new Button(() => ShowSkinSelector(type, index));
+            paintBtn.AddToClassList("interaction-paint");
+            TrySetSprite(paintBtn, "ui/icon-paint-brush");
+            interactionPanel.Add(paintBtn);
         }
 
         private void ShowInteraction(CampBuildingType type, int index)
@@ -1295,6 +1319,7 @@ namespace Garden
             interactionTitle.style.display = DisplayStyle.Flex;
             interactionPanel.RemoveFromClassList("skin-panel");
             ClearBellIcon();
+            ClearPaintIcon();
 
             openInteractionType = type;
             flameBuildGrid = null;
@@ -1812,11 +1837,7 @@ namespace Garden
                     break;
             }
 
-            if (SkinManager.Instance != null)
-            {
-                var paintBtn = new Button(() => ShowSkinSelector(CampBuildingType.Plot, index)) { text = "Paint" };
-                interactionActions.Add(paintBtn);
-            }
+            AddPaintIcon(CampBuildingType.Plot, index);
 
         }
 
@@ -1931,6 +1952,7 @@ namespace Garden
             interactionBody.Clear();
             interactionActions.Clear();
             ClearBellIcon();
+            ClearPaintIcon();
 
             interactionTitle.style.display = DisplayStyle.None;
             AudioManager.Instance?.PlaySFX("harvest_reveal");
@@ -2358,7 +2380,7 @@ namespace Garden
                 UpdateBellIcon(bellIcon, newValue);
             });
 
-            interactionPanel.Add(bellIcon);
+            interactionTitleRow.Add(bellIcon);
         }
 
         private static void UpdateBellIcon(VisualElement icon, bool active)
@@ -2520,11 +2542,7 @@ namespace Garden
                     break;
             }
 
-            if (SkinManager.Instance != null)
-            {
-                var paintBtn = new Button(() => ShowSkinSelector(CampBuildingType.Vase, index)) { text = "Paint" };
-                interactionActions.Add(paintBtn);
-            }
+            AddPaintIcon(CampBuildingType.Vase, index);
         }
 
         private void AddWaterLevelBar(float fraction, int current, int capacity, VaseState state)
@@ -2742,11 +2760,7 @@ namespace Garden
                 interactionBody.Add(statusLabel);
             }
 
-            if (SkinManager.Instance != null)
-            {
-                var paintBtn = new Button(() => ShowSkinSelector(CampBuildingType.MallumHouse, index)) { text = "Paint" };
-                interactionActions.Add(paintBtn);
-            }
+            AddPaintIcon(CampBuildingType.MallumHouse, index);
 
         }
 
