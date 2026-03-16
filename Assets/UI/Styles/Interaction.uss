@@ -869,7 +869,7 @@
     transition-timing-function: ease-in;
 }
 
-.flame-level-badge {
+.flame-levelup-badge {
     position: absolute;
     left: 0;
     top: 0;
@@ -882,7 +882,7 @@
     picking-mode: ignore;
 }
 
-.flame-level-badge__text {
+.flame-levelup-badge__text {
     background-color: rgba(20, 15, 10, 0.85);
     color: #FFB432;
     font-size: 36px;
@@ -896,11 +896,11 @@
     transition-timing-function: ease-out, ease-out;
 }
 
-.flame-level-badge__text--visible {
+.flame-levelup-badge__text--visible {
     opacity: 1;
 }
 
-.flame-level-badge__text--fade {
+.flame-levelup-badge__text--fade {
     opacity: 0;
     transition-property: opacity;
     transition-duration: 500ms;

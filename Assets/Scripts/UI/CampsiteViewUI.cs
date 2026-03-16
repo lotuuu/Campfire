@@ -132,10 +132,7 @@ namespace Garden
 
             // Subscribe to manager events
             if (FlameManager.Instance != null)
-                FlameManager.Instance.OnFlameUpgraded += () =>
-                {
-                    if (!FlameLevelUpAnimator.IsPlaying) RebuildGrid();
-                };
+                FlameManager.Instance.OnFlameUpgraded += OnFlameUpgradedRebuild;
             if (PlotManager.Instance != null)
                 PlotManager.Instance.OnPlotChanged += OnPlotChangedRebuild;
             if (VaseManager.Instance != null)
@@ -172,13 +169,17 @@ namespace Garden
         }
 
         private void OnPlotChangedRebuild(int _) => RebuildGrid();
+        private void OnFlameUpgradedRebuild()
+        {
+            if (!FlameLevelUpAnimator.IsPlaying) RebuildGrid();
+        }
         private void OnGardenChangedRebuild(int _) => RebuildGrid();
         private void OnBirdCollectedRebuild(BirdSave _) => RebuildGrid();
 
         private void OnDestroy()
         {
             if (FlameManager.Instance != null)
-                FlameManager.Instance.OnFlameUpgraded -= RebuildGrid;
+                FlameManager.Instance.OnFlameUpgraded -= OnFlameUpgradedRebuild;
             if (PlotManager.Instance != null)
                 PlotManager.Instance.OnPlotChanged -= OnPlotChangedRebuild;
             if (VaseManager.Instance != null)

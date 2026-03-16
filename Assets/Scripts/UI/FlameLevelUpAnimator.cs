@@ -26,7 +26,6 @@ namespace Garden
             public float shockwaveMaxRadius;
             public bool shockwaveDone;
             public List<Ember> embers = new();
-            public bool embersDone;
         }
 
         private static void DrawOverlay(MeshGenerationContext ctx, AnimationState state)
@@ -164,9 +163,6 @@ namespace Garden
                         state.embers[i] = e;
                         if (e.age < e.lifetime) anyAlive = true;
                     }
-                    if (state.embers.Count > 0 && !anyAlive)
-                        state.embersDone = true;
-
                     overlay.MarkDirtyRepaint();
                 }).Every(16);
             }).StartingIn(200);
@@ -197,7 +193,8 @@ namespace Garden
                 foreach (var kvp in cellsByRing)
                 {
                     int ring = kvp.Key;
-                    long delayMs = 400 + ring * 200; // ring 0 at 0.4s, ring 1 at 0.6s, etc.
+                    // Cap delay so glow-add + 400ms glow-remove finishes before 2500ms cleanup
+                    long delayMs = Math.Min(400 + ring * 200, 1700);
                     foreach (var cell in kvp.Value)
                     {
                         var c = cell; // capture
@@ -216,9 +213,9 @@ namespace Garden
 
             // ── Stage 6: Level Badge (1.0s–2.5s) ──
             var badge = new VisualElement();
-            badge.AddToClassList("flame-level-badge");
+            badge.AddToClassList("flame-levelup-badge");
             var badgeText = new Label($"Level {newLevel}");
-            badgeText.AddToClassList("flame-level-badge__text");
+            badgeText.AddToClassList("flame-levelup-badge__text");
             badge.Add(badgeText);
             root.Add(badge);
             createdElements.Add(badge);
@@ -226,7 +223,7 @@ namespace Garden
             // Bounce in at 1.0s: scale 0 → 1.15 (250ms via USS transition), then 1.15 → 1.0 (200ms)
             root.schedule.Execute(() =>
             {
-                badgeText.AddToClassList("flame-level-badge__text--visible");
+                badgeText.AddToClassList("flame-levelup-badge__text--visible");
                 // Phase 1: USS transition animates scale from 0 → 1.15 over 250ms
                 badgeText.style.scale = new Scale(new Vector2(1.15f, 1.15f));
                 // Phase 2: settle to 1.0 after 250ms (USS transition animates 1.15 → 1.0)
@@ -237,8 +234,8 @@ namespace Garden
                 // Fade out after 1.5s from badge appear
                 badgeText.schedule.Execute(() =>
                 {
-                    badgeText.RemoveFromClassList("flame-level-badge__text--visible");
-                    badgeText.AddToClassList("flame-level-badge__text--fade");
+                    badgeText.RemoveFromClassList("flame-levelup-badge__text--visible");
+                    badgeText.AddToClassList("flame-levelup-badge__text--fade");
                 }).StartingIn(1500);
             }).StartingIn(1000);
 
