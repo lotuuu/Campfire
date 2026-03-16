@@ -729,7 +729,7 @@ defmodule CampFireWeb.ItemsLive do
             <tr class="hover:bg-gray-50">
               <td class="px-4 py-3">
                 <img src={CampFire.Sprites.sprite_url("items/#{String.downcase(seed.harvest_item.item_key)}/seed")}
-                  class="w-8 h-8 object-contain" onerror="this.style.display='none'" />
+                  class="w-8 h-8 object-contain bg-gray-100 rounded" onerror="this.style.display='none'" />
               </td>
               <td class="px-4 py-3 font-medium">{seed.item.item_key}</td>
               <td class="px-4 py-3 text-sm text-gray-500">{seed.harvest_item.item_key}</td>
@@ -886,7 +886,7 @@ defmodule CampFireWeb.ItemsLive do
             <tr class="hover:bg-gray-50">
               <td class="px-4 py-3">
                 <img src={CampFire.Sprites.sprite_url("items/#{String.downcase(recipe["result_item"] || name)}")}
-                  class="w-8 h-8 object-contain" onerror="this.style.display='none'" />
+                  class="w-8 h-8 object-contain bg-gray-100 rounded" onerror="this.style.display='none'" />
               </td>
               <td class="px-4 py-3 font-medium">{name}</td>
               <td class="px-4 py-3 text-sm text-gray-500">
@@ -986,7 +986,7 @@ defmodule CampFireWeb.ItemsLive do
             <tr class="hover:bg-gray-50">
               <td class="px-4 py-3">
                 <img src={CampFire.Sprites.sprite_url("items/#{String.downcase(item.item_key)}")}
-                  class="w-8 h-8 object-contain" onerror="this.style.display='none'" />
+                  class="w-8 h-8 object-contain bg-gray-100 rounded" onerror="this.style.display='none'" />
               </td>
               <td class="px-4 py-3 font-medium">{item.item_key}</td>
               <td class="px-4 py-3">{item.display_name}</td>
@@ -1093,7 +1093,7 @@ defmodule CampFireWeb.ItemsLive do
             <tr class="hover:bg-gray-50">
               <td class="px-4 py-3">
                 <img src={CampFire.Sprites.sprite_url("skins/#{String.downcase(name)}")}
-                  class="w-8 h-8 object-contain" onerror="this.style.display='none'" />
+                  class="w-8 h-8 object-contain bg-gray-100 rounded" onerror="this.style.display='none'" />
               </td>
               <td class="px-4 py-3 font-medium">{name}</td>
               <td class="px-4 py-3 text-sm">{skin["building_type"]}</td>
