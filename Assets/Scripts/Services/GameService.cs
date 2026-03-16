@@ -88,6 +88,7 @@ namespace Garden
         {
             if (SocialService.Instance == null || !SocialService.Instance.IsSignedIn) return;
 
+            BootTimer.Mark("GameService.Initialize start");
             var totalSw = Stopwatch.StartNew();
 
             try
@@ -98,6 +99,7 @@ namespace Garden
                 if (ConfigService.Instance != null)
                 {
                     var configLoaded = await ConfigService.Instance.FetchConfigs();
+                    BootTimer.Mark($"ConfigService.FetchConfigs done ({sw.ElapsedMilliseconds}ms)");
                     if (sw.ElapsedMilliseconds > SlowStepMs)
                         Debug.LogWarning($"[INIT SLOW] ConfigService.FetchConfigs took {sw.ElapsedMilliseconds}ms");
                     sw.Restart();
@@ -116,6 +118,7 @@ namespace Garden
                 if (SpriteService.Instance != null && ConfigService.Instance != null)
                 {
                     await SpriteService.Instance.SyncSprites(ConfigService.Instance.SpriteManifest);
+                    BootTimer.Mark($"SpriteService.SyncSprites done ({sw.ElapsedMilliseconds}ms)");
                     if (sw.ElapsedMilliseconds > SlowStepMs)
                         Debug.LogWarning($"[INIT SLOW] SpriteService.SyncSprites took {sw.ElapsedMilliseconds}ms");
                     sw.Restart();
@@ -123,6 +126,7 @@ namespace Garden
 
                 using var req = GetAuth("/game/state");
                 await SendAsync(req);
+                BootTimer.Mark($"GET /game/state done ({sw.ElapsedMilliseconds}ms)");
                 if (sw.ElapsedMilliseconds > SlowStepMs)
                     Debug.LogWarning($"[INIT SLOW] GET /game/state took {sw.ElapsedMilliseconds}ms");
                 sw.Restart();
@@ -159,6 +163,7 @@ namespace Garden
                     }
 
                     Debug.Log($"[INIT] GameService total: {totalSw.ElapsedMilliseconds}ms");
+                    BootTimer.Mark("GameService state loaded");
                     IsInitialized = true;
                     IsOnline = true;
                     OnStateLoaded?.Invoke();

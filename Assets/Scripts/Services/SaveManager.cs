@@ -21,6 +21,7 @@ namespace Garden
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
+            BootTimer.Mark("SaveManager.Awake — loading save");
             Load();
         }
 

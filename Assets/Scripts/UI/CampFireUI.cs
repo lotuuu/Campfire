@@ -74,6 +74,7 @@ namespace Garden
 
         private void Start()
         {
+            BootTimer.Mark("CampFireUI.Start (scene loaded)");
             _initStopwatch = Stopwatch.StartNew();
             uiDocument = GetComponentInChildren<UIDocument>();
             root = uiDocument.rootVisualElement;
@@ -560,6 +561,8 @@ namespace Garden
             if (done >= total)
             {
                 Debug.Log($"[INIT] ===== App fully loaded in {_initStopwatch?.ElapsedMilliseconds ?? 0}ms =====");
+                BootTimer.Mark("All services ready — loading gate dismissed");
+                BootTimer.Complete();
                 loadingGate.RemoveFromHierarchy();
                 loadingGate = null;
 

@@ -110,6 +110,7 @@ namespace Garden
         {
             if (SocialService.Instance == null || !SocialService.Instance.IsSignedIn) return;
 
+            BootTimer.Mark("EconomyService.Initialize start");
             var totalSw = Stopwatch.StartNew();
 
             try
@@ -127,6 +128,7 @@ namespace Garden
                     IsInitialized = true;
                     IsOnline = true;
                     Debug.Log($"[INIT] EconomyService total: {totalSw.ElapsedMilliseconds}ms");
+                    BootTimer.Mark("EconomyService synced");
                     OnStateSynced?.Invoke();
                     await DrainQueue();
                     return;
@@ -147,6 +149,7 @@ namespace Garden
                         IsInitialized = true;
                         IsOnline = true;
                         Debug.Log($"[INIT] EconomyService total: {totalSw.ElapsedMilliseconds}ms");
+                        BootTimer.Mark("EconomyService synced (new player)");
                         OnStateSynced?.Invoke();
                         ClearQueue();
                         return;

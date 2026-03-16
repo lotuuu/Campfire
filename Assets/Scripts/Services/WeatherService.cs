@@ -36,6 +36,7 @@ namespace Garden
 
         private void Start()
         {
+            BootTimer.Mark("WeatherService.Start");
             StartCoroutine(InitializeLocation());
         }
 
@@ -142,6 +143,7 @@ namespace Garden
             useDebugOverride = false;
             CurrentWeather = weather;
             HasWeather = true;
+            BootTimer.Mark("WeatherService has weather");
             OnWeatherUpdated?.Invoke(weather);
         }
 

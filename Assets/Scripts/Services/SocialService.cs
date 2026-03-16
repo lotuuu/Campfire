@@ -43,6 +43,7 @@ namespace Garden
 
         private async void Initialize()
         {
+            BootTimer.Mark("SocialService.Initialize start");
             var totalSw = Stopwatch.StartNew();
 
             if (SocialSaveManager.Instance?.Data == null)
@@ -62,6 +63,7 @@ namespace Garden
                     if (sw.ElapsedMilliseconds > SlowStepMs)
                         Debug.LogWarning($"[INIT SLOW] SocialService.ValidateToken took {sw.ElapsedMilliseconds}ms");
                     Debug.Log($"[INIT] SocialService total: {totalSw.ElapsedMilliseconds}ms");
+                    BootTimer.Mark("SocialService signed in (token valid)");
                     IsSignedIn = true;
                     OnSignedIn?.Invoke();
                     return;
@@ -83,6 +85,7 @@ namespace Garden
             if (regSw.ElapsedMilliseconds > SlowStepMs)
                 Debug.LogWarning($"[INIT SLOW] SocialService.Register took {regSw.ElapsedMilliseconds}ms");
             Debug.Log($"[INIT] SocialService total: {totalSw.ElapsedMilliseconds}ms");
+            BootTimer.Mark("SocialService signed in (registered)");
         }
 
         private async Task<bool> ValidateToken()
