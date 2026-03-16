@@ -12,7 +12,7 @@
     --color-border-accent: rgb(200, 150, 50);
 
     --color-text: rgb(230, 195, 100);
-    --color-text-dim: rgb(185, 150, 75);
+    --color-text-dim: rgb(200, 165, 90);
     --color-text-bright: rgb(245, 210, 110);
     --color-text-accent: rgb(255, 195, 60);
 
@@ -42,7 +42,7 @@
     --spacing-xl: 48px;
 
     /* Bottom bar height — shared by nav, tutorial hints, and dialogue */
-    --bottom-bar-height: 248px;
+    --bottom-bar-height: 160px;
 
     /* Border radius */
     --radius-sm: 8px;
