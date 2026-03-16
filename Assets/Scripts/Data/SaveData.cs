@@ -59,6 +59,7 @@ namespace Garden
         public GrowthSnapshots snapshots = new();
         public string lastWateredUtc;
         public bool subscribeWater;
+        public bool fertilized;
         public string skinName;
         public List<string> unlockedSkins = new();
 
@@ -76,6 +77,7 @@ namespace Garden
         public bool mature;
         public int gridX;
         public int gridY;
+        public bool fertilized;
     }
 
     [Serializable]

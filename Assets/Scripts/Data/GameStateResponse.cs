@@ -30,6 +30,7 @@ namespace Garden
         public int gridY;
         public string skinName;
         public List<string> unlockedSkins = new();
+        public bool fertilized;
     }
 
     [Serializable]
@@ -56,6 +57,7 @@ namespace Garden
         public bool mature;
         public int gridX;
         public int gridY;
+        public bool fertilized;
     }
 
     [Serializable]
@@ -165,6 +167,8 @@ namespace Garden
     [Serializable] public class BirdCollectResponse { public string itemKey; public int itemCount; }
     [Serializable] public class HouseSkinRequest { public int houseId; public string skinName; }
     [Serializable] public class LocationRequest { public float lat; public float lon; }
+    [Serializable] public class FertilizePlotRequest { public int plotId; }
+    [Serializable] public class FertilizeGardenRequest { public int gardenId; }
     [Serializable] public class HarvestResponse { public float score; public int drops; public string itemKey; }
     [Serializable] public class UpgradeFlameResponse { public int flameLevel; }
     [Serializable] public class CollectGardenResponse { public ServerGarden garden; public string yieldItem; public int yieldAmount; }
