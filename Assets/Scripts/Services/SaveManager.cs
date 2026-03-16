@@ -71,7 +71,7 @@ namespace Garden
 
                 // Verify the write succeeded before replacing the real save
                 var written = File.ReadAllText(TmpPath);
-                if (written.Length != json.Length)
+                if (written != json)
                 {
                     Debug.LogError("SaveManager: Tmp file verification failed, skipping replace.");
                     return;

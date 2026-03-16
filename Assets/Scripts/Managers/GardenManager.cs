@@ -227,9 +227,24 @@ namespace Garden
             });
 
             SaveManager.Instance.Save();
-            OnGardenChanged?.Invoke(data.gardens.Count - 1);
+            int newIndex = data.gardens.Count - 1;
+            OnGardenChanged?.Invoke(newIndex);
             AudioManager.Instance?.PlaySFX("garden_craft");
+
+            // Notify server
+            if (GameService.Instance != null && GameService.Instance.IsOnline)
+            {
+                _ = NotifyServerCraftGarden(newIndex, gridX, gridY);
+            }
+
             return true;
+        }
+
+        private async Task NotifyServerCraftGarden(int gardenIndex, int gridX, int gridY)
+        {
+            // Server creates the garden via the plant endpoint; craft is plant with empty name
+            // For now, resync to pick up the server-assigned ID
+            await GameService.Instance.ResyncFullState();
         }
 
         // ── Helpers ─────────────────────────────────────────────────

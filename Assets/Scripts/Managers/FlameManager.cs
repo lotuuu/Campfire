@@ -124,6 +124,7 @@ namespace Garden
             foreach (var ingredient in recipe.ingredients)
             {
                 var item = items.Find(i => i.itemKey == ingredient.itemKey);
+                if (item == null) continue;
                 item.count -= ingredient.count;
             }
         }

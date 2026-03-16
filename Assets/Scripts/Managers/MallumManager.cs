@@ -574,7 +574,7 @@ namespace Garden
         {
             if (string.IsNullOrEmpty(mallum.startTimeUtc)) return false;
             var quest = FindQuest(mallum.assignedQuestName);
-            if (quest == null) return true;
+            if (quest == null) return false;
 
             var startTime = DateTime.Parse(mallum.startTimeUtc, null,
                 System.Globalization.DateTimeStyles.RoundtripKind);

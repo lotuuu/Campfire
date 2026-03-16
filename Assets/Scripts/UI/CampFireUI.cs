@@ -340,6 +340,29 @@ namespace Garden
             UpdateLoadingGate();
         }
 
+        private void OnDestroy()
+        {
+            if (MallumManager.Instance != null)
+                MallumManager.Instance.OnMallumsChanged -= UpdateQuestBadge;
+            if (WeatherService.Instance != null)
+                WeatherService.Instance.OnWeatherUpdated -= OnWeatherDataReady;
+            if (SocialService.Instance != null)
+            {
+                SocialService.Instance.OnSignedIn -= OnSocialReady;
+                SocialService.Instance.OnInitFailed -= OnServiceFailed;
+            }
+            if (EconomyService.Instance != null)
+            {
+                EconomyService.Instance.OnStateSynced -= OnEconomyReady;
+                EconomyService.Instance.OnInitFailed -= OnServiceFailed;
+            }
+            if (GameService.Instance != null)
+            {
+                GameService.Instance.OnStateLoaded -= OnGameReady;
+                GameService.Instance.OnInitFailed -= OnServiceFailed;
+            }
+        }
+
         private void Update()
         {
             TryLoadSettingsIcon();

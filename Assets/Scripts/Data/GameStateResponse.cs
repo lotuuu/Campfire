@@ -7,12 +7,12 @@ namespace Garden
     public class GameStateResponse
     {
         public EconomyState economy;
-        public List<ServerPlot> plots;
-        public List<ServerVase> vases;
-        public List<ServerGarden> gardens;
-        public List<ServerMallum> mallums;
-        public List<ServerMallumHouse> mallumHouses;
-        public List<ServerBird> birds;
+        public List<ServerPlot> plots = new();
+        public List<ServerVase> vases = new();
+        public List<ServerGarden> gardens = new();
+        public List<ServerMallum> mallums = new();
+        public List<ServerMallumHouse> mallumHouses = new();
+        public List<ServerBird> birds = new();
         public ServerApotheke apotheke;
         public ServerWeather weather;
     }
@@ -29,7 +29,7 @@ namespace Garden
         public int gridX;
         public int gridY;
         public string skinName;
-        public List<string> unlockedSkins;
+        public List<string> unlockedSkins = new();
     }
 
     [Serializable]
@@ -43,7 +43,7 @@ namespace Garden
         public int gridX;
         public int gridY;
         public string skinName;
-        public List<string> unlockedSkins;
+        public List<string> unlockedSkins = new();
     }
 
     [Serializable]
@@ -66,7 +66,7 @@ namespace Garden
         public string assignedQuestName;
         public string startTimeUtc;
         public int assignedVaseId;
-        public List<ServerReward> pendingRewards;
+        public List<ServerReward> pendingRewards = new();
     }
 
     [Serializable]
@@ -110,7 +110,7 @@ namespace Garden
     [Serializable]
     public class ServerForecastResponse
     {
-        public List<ServerForecastDay> forecast;
+        public List<ServerForecastDay> forecast = new();
     }
 
     // Request DTOs
@@ -137,7 +137,7 @@ namespace Garden
         public int gridX;
         public int gridY;
         public string skinName;
-        public List<string> unlockedSkins;
+        public List<string> unlockedSkins = new();
     }
 
     [Serializable]
@@ -161,12 +161,12 @@ namespace Garden
     [Serializable] public class BirdCollectRequest { public int birdId; }
     [Serializable] public class ApothekeCraftRequest { public string recipeName; public bool freeMode; }
     [Serializable] public class ApothekeCraftResponse { public string resultItem; public int resultQuantity; }
-    [Serializable] public class BirdCheckResponse { public List<ServerBird> newBirds; }
+    [Serializable] public class BirdCheckResponse { public List<ServerBird> newBirds = new(); }
     [Serializable] public class BirdCollectResponse { public string itemKey; public int itemCount; }
     [Serializable] public class HouseSkinRequest { public int houseId; public string skinName; }
     [Serializable] public class LocationRequest { public float lat; public float lon; }
     [Serializable] public class HarvestResponse { public float score; public int drops; public string itemKey; }
     [Serializable] public class UpgradeFlameResponse { public int flameLevel; }
     [Serializable] public class CollectGardenResponse { public ServerGarden garden; public string yieldItem; public int yieldAmount; }
-    [Serializable] public class CollectQuestResponse { public ServerMallum mallum; public List<ServerReward> rewards; }
+    [Serializable] public class CollectQuestResponse { public ServerMallum mallum; public List<ServerReward> rewards = new(); }
 }

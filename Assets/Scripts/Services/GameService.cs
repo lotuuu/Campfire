@@ -44,9 +44,7 @@ namespace Garden
             // Yield one frame so multiple failures in the same frame coalesce
             await Task.Yield();
 
-            _resyncPending = false;
-
-            if (!IsOnline) return;
+            if (!IsOnline) { _resyncPending = false; return; }
 
             try
             {
@@ -75,6 +73,10 @@ namespace Garden
             catch (Exception e)
             {
                 Debug.LogWarning($"[GameService] Resync failed: {e.Message}");
+            }
+            finally
+            {
+                _resyncPending = false;
             }
         }
 

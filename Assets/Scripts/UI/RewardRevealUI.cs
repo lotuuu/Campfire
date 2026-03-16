@@ -133,7 +133,7 @@ namespace Garden
             card.Add(sprite);
 
             // Item name
-            var nameLabel = new Label(ConfigService.Instance.GetItemDisplayName(reward.itemKey));
+            var nameLabel = new Label(ConfigService.Instance?.GetItemDisplayName(reward.itemKey) ?? reward.itemKey);
             nameLabel.AddToClassList("reward-card-name");
             card.Add(nameLabel);
 

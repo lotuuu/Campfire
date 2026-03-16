@@ -78,24 +78,28 @@ namespace Garden
 
         public float GetManaPerSecond(int flameLevel)
         {
+            if (mana_rates.Count == 0) return 0f;
             int index = Mathf.Clamp(flameLevel - 1, 0, mana_rates.Count - 1);
             return mana_rates[index];
         }
 
         public float GetManaCap(int flameLevel)
         {
+            if (mana_caps.Count == 0) return 0f;
             int index = Mathf.Clamp(flameLevel - 1, 0, mana_caps.Count - 1);
             return mana_caps[index];
         }
 
         public int GetMaxEntities(int flameLevel)
         {
+            if (entity_caps.Count == 0) return 0;
             int index = Mathf.Clamp(flameLevel - 1, 0, entity_caps.Count - 1);
             return entity_caps[index];
         }
 
         public int GetGridSize(int flameLevel)
         {
+            if (grid_sizes.Count == 0) return 2;
             int index = Mathf.Clamp(flameLevel - 1, 0, grid_sizes.Count - 1);
             return grid_sizes[index];
         }
@@ -711,7 +715,7 @@ namespace Garden
                 foreach (var item in list)
                 {
                     if (item is double d) result.Add((float)d);
-                    else if (item is long l) result.Add(l);
+                    else if (item is long l) result.Add((float)l);
                 }
             return result;
         }
@@ -725,7 +729,7 @@ namespace Garden
                 var cost = new BuildingCost();
 
                 if (d.TryGetValue("manaCost", out var mc))
-                    cost.manaCost = mc is double dd ? (float)dd : mc is long ll ? ll : 0f;
+                    cost.manaCost = mc is double dd ? (float)dd : mc is long ll ? (float)ll : 0f;
 
                 if (d.TryGetValue("harvestCosts", out var hcObj) && hcObj is List<object> hcList)
                 {

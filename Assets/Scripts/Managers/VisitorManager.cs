@@ -364,7 +364,7 @@ namespace Garden
                 requestCount = visitor.requestCount,
                 returnDateUtc = response.return_date,
                 rewardJson = visitor.rewardJson,
-                returnDialogue = new List<string>(visitor.returnDialogue)
+                returnDialogue = visitor.returnDialogue != null ? new List<string>(visitor.returnDialogue) : new List<string>()
             });
 
             SaveManager.Instance.Save();
