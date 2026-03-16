@@ -69,11 +69,11 @@
 
 /* ── Empty state text ── */
 .letters-empty-text {
+    -unity-text-align: middle-center;
     font-size: var(--font-md);
     color: var(--color-text-dim);
-    -unity-text-align: middle-center;
-    -unity-font-style: italic;
     padding: var(--spacing-xl) var(--spacing-md);
+    white-space: normal;
 }
 
 /* ── Section title ── */
