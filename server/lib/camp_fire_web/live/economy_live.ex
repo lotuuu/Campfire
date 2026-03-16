@@ -3,7 +3,7 @@ defmodule CampFireWeb.EconomyLive do
 
   alias CampFire.Admin
 
-  @known_keys ~w(flame_config vase_config mallum_house_config)
+  @known_keys ~w(flame_config vase_config mallum_house_config bird_config plot_config new_player_config recipe_configs skin_configs)
 
   def mount(_params, _session, socket) do
     {:ok,
@@ -26,7 +26,21 @@ defmodule CampFireWeb.EconomyLive do
     config = Admin.get_game_config!(id)
 
     if config.key in @known_keys do
-      {:noreply, assign(socket, editing_key: config.key, edit_data: config.value)}
+      edit_data =
+        case config.key do
+          key when key in ~w(recipe_configs skin_configs) ->
+            entries =
+              config.value
+              |> Enum.sort_by(fn {k, _v} -> k end)
+              |> Enum.to_list()
+
+            %{"_entries" => entries}
+
+          _ ->
+            config.value
+        end
+
+      {:noreply, assign(socket, editing_key: config.key, edit_data: edit_data)}
     else
       json = Jason.encode!(config.value, pretty: true)
       {:noreply, assign(socket, editing_key: config.key, edit_json: json)}
@@ -226,6 +240,161 @@ defmodule CampFireWeb.EconomyLive do
     {:noreply, assign(socket, edit_data: Map.put(data, "house_costs", costs))}
   end
 
+  # --- Bird config save ---
+  def handle_event("save_bird", params, socket) do
+    value = %{
+      "spawn_base_chance" => parse_float(params["spawn_base_chance"]),
+      "spawn_decay" => parse_float(params["spawn_decay"])
+    }
+
+    save_config("bird_config", value, socket)
+  end
+
+  # --- Plot config save ---
+  def handle_event("save_plot", params, socket) do
+    value = %{
+      "water_cooldown_seconds" => parse_int(params["water_cooldown_seconds"]),
+      "rain_water_cooldown_seconds" => parse_int(params["rain_water_cooldown_seconds"]),
+      "rain_trigger_minutes" => parse_int(params["rain_trigger_minutes"]),
+      "drop_spread_factor" => parse_float(params["drop_spread_factor"]),
+      "speed_item" => params["speed_item"] || ""
+    }
+
+    save_config("plot_config", value, socket)
+  end
+
+  # --- New player config save ---
+  def handle_event("save_new_player", params, socket) do
+    items =
+      (params["item"] || %{})
+      |> Enum.sort_by(fn {k, _v} -> parse_int(k) end)
+      |> Enum.map(fn {_idx, item_params} ->
+        %{"itemKey" => item_params["itemKey"], "count" => parse_int(item_params["count"])}
+      end)
+      |> Enum.reject(fn item -> item["itemKey"] == "" or item["itemKey"] == nil end)
+
+    value = %{
+      "mana" => parse_float(params["mana"]),
+      "gems" => parse_int(params["gems"]),
+      "starting_water" => parse_int(params["starting_water"]),
+      "items" => items
+    }
+
+    save_config("new_player_config", value, socket)
+  end
+
+  def handle_event("add_new_player_item", _params, socket) do
+    data = socket.assigns.edit_data
+    items = (data["items"] || []) ++ [%{"itemKey" => "", "count" => 1}]
+    {:noreply, assign(socket, edit_data: Map.put(data, "items", items))}
+  end
+
+  def handle_event("remove_new_player_item", %{"index" => idx}, socket) do
+    i = parse_int(idx)
+    data = socket.assigns.edit_data
+    items = List.delete_at(data["items"] || [], i)
+    {:noreply, assign(socket, edit_data: Map.put(data, "items", items))}
+  end
+
+  # --- Recipe configs save ---
+  def handle_event("save_recipe", params, socket) do
+    recipes =
+      (params["recipe"] || %{})
+      |> Enum.sort_by(fn {k, _v} -> k end)
+      |> Enum.into(%{}, fn {_idx, recipe_params} ->
+        key = recipe_params["key"] || ""
+
+        ingredients =
+          (recipe_params["ingredient"] || %{})
+          |> Enum.sort_by(fn {k, _} -> parse_int(k) end)
+          |> Enum.map(fn {_i, ing} ->
+            %{"itemKey" => ing["itemKey"], "count" => parse_int(ing["count"])}
+          end)
+          |> Enum.reject(fn ing -> ing["itemKey"] == "" or ing["itemKey"] == nil end)
+
+        {key,
+         %{
+           "ingredients" => ingredients,
+           "result_item" => recipe_params["result_item"] || "",
+           "result_quantity" => parse_int(recipe_params["result_quantity"]),
+           "category" => recipe_params["category"] || ""
+         }}
+      end)
+
+    save_config("recipe_configs", recipes, socket)
+  end
+
+  def handle_event("add_recipe", _params, socket) do
+    data = socket.assigns.edit_data
+    # edit_data for recipes is a list of {key, value} tuples for ordering
+    entries = data["_entries"] || []
+    entries = entries ++ [{"", %{"ingredients" => [], "result_item" => "", "result_quantity" => 1, "category" => ""}}]
+    {:noreply, assign(socket, edit_data: Map.put(data, "_entries", entries))}
+  end
+
+  def handle_event("remove_recipe", %{"index" => idx}, socket) do
+    i = parse_int(idx)
+    data = socket.assigns.edit_data
+    entries = List.delete_at(data["_entries"] || [], i)
+    {:noreply, assign(socket, edit_data: Map.put(data, "_entries", entries))}
+  end
+
+  def handle_event("add_recipe_ing", %{"recipe-index" => ri}, socket) do
+    i = parse_int(ri)
+    data = socket.assigns.edit_data
+    entries = data["_entries"] || []
+    {key, recipe} = Enum.at(entries, i)
+    ingredients = (recipe["ingredients"] || []) ++ [%{"itemKey" => "", "count" => 1}]
+    recipe = Map.put(recipe, "ingredients", ingredients)
+    entries = List.replace_at(entries, i, {key, recipe})
+    {:noreply, assign(socket, edit_data: Map.put(data, "_entries", entries))}
+  end
+
+  def handle_event("remove_recipe_ing", %{"recipe-index" => ri, "ingredient-index" => ii}, socket) do
+    i = parse_int(ri)
+    j = parse_int(ii)
+    data = socket.assigns.edit_data
+    entries = data["_entries"] || []
+    {key, recipe} = Enum.at(entries, i)
+    ingredients = List.delete_at(recipe["ingredients"] || [], j)
+    recipe = Map.put(recipe, "ingredients", ingredients)
+    entries = List.replace_at(entries, i, {key, recipe})
+    {:noreply, assign(socket, edit_data: Map.put(data, "_entries", entries))}
+  end
+
+  # --- Skin configs save ---
+  def handle_event("save_skin", params, socket) do
+    skins =
+      (params["skin"] || %{})
+      |> Enum.sort_by(fn {k, _v} -> k end)
+      |> Enum.into(%{}, fn {_idx, skin_params} ->
+        key = skin_params["key"] || ""
+
+        {key,
+         %{
+           "building_type" => skin_params["building_type"] || "",
+           "cost_item_key" => skin_params["cost_item_key"] || "",
+           "cost_quantity" => parse_int(skin_params["cost_quantity"])
+         }}
+      end)
+
+    save_config("skin_configs", skins, socket)
+  end
+
+  def handle_event("add_skin", _params, socket) do
+    data = socket.assigns.edit_data
+    entries = data["_entries"] || []
+    entries = entries ++ [{"", %{"building_type" => "", "cost_item_key" => "", "cost_quantity" => 1}}]
+    {:noreply, assign(socket, edit_data: Map.put(data, "_entries", entries))}
+  end
+
+  def handle_event("remove_skin", %{"index" => idx}, socket) do
+    i = parse_int(idx)
+    data = socket.assigns.edit_data
+    entries = List.delete_at(data["_entries"] || [], i)
+    {:noreply, assign(socket, edit_data: Map.put(data, "_entries", entries))}
+  end
+
   # Add/remove building cost rows
   def handle_event("add_building_cost", %{"type" => type}, socket) do
     data = socket.assigns.edit_data
@@ -419,6 +588,11 @@ defmodule CampFireWeb.EconomyLive do
       "flame_config" -> render_flame_display(assigns)
       "vase_config" -> render_vase_display(assigns)
       "mallum_house_config" -> render_mallum_display(assigns)
+      "bird_config" -> render_bird_display(assigns)
+      "plot_config" -> render_plot_display(assigns)
+      "new_player_config" -> render_new_player_display(assigns)
+      "recipe_configs" -> render_recipe_display(assigns)
+      "skin_configs" -> render_skin_display(assigns)
       _ -> render_json_display(assigns)
     end
   end
@@ -563,6 +737,149 @@ defmodule CampFireWeb.EconomyLive do
     """
   end
 
+  defp render_bird_display(assigns) do
+    v = assigns.config.value
+    assigns = assign(assigns, base_chance: v["spawn_base_chance"], decay: v["spawn_decay"])
+
+    ~H"""
+    <div class="mt-3 grid grid-cols-2 gap-4 text-sm">
+      <div><span class="text-gray-500">Spawn Base Chance:</span> <span class="font-medium">{@base_chance}</span></div>
+      <div><span class="text-gray-500">Spawn Decay:</span> <span class="font-medium">{@decay}</span></div>
+    </div>
+    """
+  end
+
+  defp render_plot_display(assigns) do
+    v = assigns.config.value
+
+    assigns =
+      assign(assigns,
+        water_cd: v["water_cooldown_seconds"],
+        rain_cd: v["rain_water_cooldown_seconds"],
+        rain_trigger: v["rain_trigger_minutes"],
+        drop_spread: v["drop_spread_factor"],
+        speed_item: v["speed_item"]
+      )
+
+    ~H"""
+    <div class="mt-3 grid grid-cols-2 gap-4 text-sm">
+      <div><span class="text-gray-500">Water Cooldown:</span> <span class="font-medium">{@water_cd}s</span></div>
+      <div><span class="text-gray-500">Rain Water Cooldown:</span> <span class="font-medium">{@rain_cd}s</span></div>
+      <div><span class="text-gray-500">Rain Trigger:</span> <span class="font-medium">{@rain_trigger} min</span></div>
+      <div><span class="text-gray-500">Drop Spread Factor:</span> <span class="font-medium">{@drop_spread}</span></div>
+      <div><span class="text-gray-500">Speed Item:</span> <span class="font-medium">{@speed_item}</span></div>
+    </div>
+    """
+  end
+
+  defp render_new_player_display(assigns) do
+    v = assigns.config.value
+
+    assigns =
+      assign(assigns,
+        mana: v["mana"],
+        gems: v["gems"],
+        starting_water: v["starting_water"],
+        items: v["items"] || []
+      )
+
+    ~H"""
+    <div class="mt-3 space-y-3">
+      <div class="grid grid-cols-3 gap-4 text-sm">
+        <div><span class="text-gray-500">Mana:</span> <span class="font-medium">{@mana}</span></div>
+        <div><span class="text-gray-500">Gems:</span> <span class="font-medium">{@gems}</span></div>
+        <div><span class="text-gray-500">Starting Water:</span> <span class="font-medium">{@starting_water}</span></div>
+      </div>
+      <div class="text-sm">
+        <span class="text-gray-500">Starting Items:</span>
+        <div class="mt-1 flex flex-wrap gap-1">
+          <%= for item <- @items do %>
+            <span class="inline-block bg-blue-100 text-blue-800 rounded px-2 py-0.5 text-xs">
+              {item["count"]}x {item["itemKey"]}
+            </span>
+          <% end %>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  defp render_recipe_display(assigns) do
+    entries =
+      assigns.config.value
+      |> Enum.sort_by(fn {k, _v} -> k end)
+
+    assigns = assign(assigns, entries: entries)
+
+    ~H"""
+    <div class="mt-3">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="bg-gray-50">
+            <th class="px-3 py-2 text-left text-gray-500">Recipe</th>
+            <th class="px-3 py-2 text-left text-gray-500">Category</th>
+            <th class="px-3 py-2 text-left text-gray-500">Ingredients</th>
+            <th class="px-3 py-2 text-left text-gray-500">Result</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y">
+          <%= for {key, recipe} <- @entries do %>
+            <tr>
+              <td class="px-3 py-1.5 font-medium">{key}</td>
+              <td class="px-3 py-1.5">
+                <span class="inline-block bg-gray-100 text-gray-700 rounded px-2 py-0.5 text-xs">{recipe["category"]}</span>
+              </td>
+              <td class="px-3 py-1.5">
+                <%= for ing <- recipe["ingredients"] || [] do %>
+                  <span class="inline-block bg-amber-100 text-amber-800 rounded px-2 py-0.5 text-xs mr-1">
+                    {ing["count"]}x {ing["itemKey"]}
+                  </span>
+                <% end %>
+              </td>
+              <td class="px-3 py-1.5">{recipe["result_quantity"]}x {recipe["result_item"]}</td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+    """
+  end
+
+  defp render_skin_display(assigns) do
+    entries =
+      assigns.config.value
+      |> Enum.sort_by(fn {k, _v} -> k end)
+
+    assigns = assign(assigns, entries: entries)
+
+    ~H"""
+    <div class="mt-3">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="bg-gray-50">
+            <th class="px-3 py-2 text-left text-gray-500">Skin Key</th>
+            <th class="px-3 py-2 text-left text-gray-500">Building Type</th>
+            <th class="px-3 py-2 text-left text-gray-500">Cost</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y">
+          <%= for {key, skin} <- @entries do %>
+            <tr>
+              <td class="px-3 py-1.5 font-medium">{key}</td>
+              <td class="px-3 py-1.5">{skin["building_type"]}</td>
+              <td class="px-3 py-1.5">
+                <span class="inline-block bg-purple-100 text-purple-800 rounded px-2 py-0.5 text-xs">
+                  {skin["cost_quantity"]}x {skin["cost_item_key"]}
+                </span>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+    """
+  end
+
   defp render_json_display(assigns) do
     ~H"""
     <pre class="mt-2 text-sm text-gray-600 bg-gray-50 rounded p-3 max-h-48 overflow-auto font-mono leading-relaxed">{Jason.encode!(@config.value, pretty: true)}</pre>
@@ -578,6 +895,11 @@ defmodule CampFireWeb.EconomyLive do
       "flame_config" -> render_flame_editor(assigns)
       "vase_config" -> render_vase_editor(assigns)
       "mallum_house_config" -> render_mallum_editor(assigns)
+      "bird_config" -> render_bird_editor(assigns)
+      "plot_config" -> render_plot_editor(assigns)
+      "new_player_config" -> render_new_player_editor(assigns)
+      "recipe_configs" -> render_recipe_editor(assigns)
+      "skin_configs" -> render_skin_editor(assigns)
       _ -> render_json_editor(assigns)
     end
   end
@@ -791,6 +1113,246 @@ defmodule CampFireWeb.EconomyLive do
           <% end %>
         </div>
       </div>
+
+      <div class="flex gap-2">
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Save</button>
+        <button type="button" phx-click="cancel" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Cancel</button>
+      </div>
+    </form>
+    """
+  end
+
+  defp render_bird_editor(assigns) do
+    d = assigns.edit_data
+    assigns = assign(assigns, base_chance: d["spawn_base_chance"], decay: d["spawn_decay"])
+
+    ~H"""
+    <form phx-submit="save_bird" class="mt-3 space-y-4">
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Spawn Base Chance</label>
+          <input type="number" step="0.01" name="spawn_base_chance" value={@base_chance} class="mt-1 w-full border rounded px-3 py-2" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Spawn Decay</label>
+          <input type="number" step="0.01" name="spawn_decay" value={@decay} class="mt-1 w-full border rounded px-3 py-2" />
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Save</button>
+        <button type="button" phx-click="cancel" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Cancel</button>
+      </div>
+    </form>
+    """
+  end
+
+  defp render_plot_editor(assigns) do
+    d = assigns.edit_data
+
+    assigns =
+      assign(assigns,
+        water_cd: d["water_cooldown_seconds"],
+        rain_cd: d["rain_water_cooldown_seconds"],
+        rain_trigger: d["rain_trigger_minutes"],
+        drop_spread: d["drop_spread_factor"],
+        speed_item: d["speed_item"]
+      )
+
+    ~H"""
+    <form phx-submit="save_plot" class="mt-3 space-y-4">
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Water Cooldown (seconds)</label>
+          <input type="number" name="water_cooldown_seconds" value={@water_cd} class="mt-1 w-full border rounded px-3 py-2" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Rain Water Cooldown (seconds)</label>
+          <input type="number" name="rain_water_cooldown_seconds" value={@rain_cd} class="mt-1 w-full border rounded px-3 py-2" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Rain Trigger (minutes)</label>
+          <input type="number" name="rain_trigger_minutes" value={@rain_trigger} class="mt-1 w-full border rounded px-3 py-2" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Drop Spread Factor</label>
+          <input type="number" step="0.01" name="drop_spread_factor" value={@drop_spread} class="mt-1 w-full border rounded px-3 py-2" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Speed Item Key</label>
+          <input type="text" name="speed_item" value={@speed_item} class="mt-1 w-full border rounded px-3 py-2" />
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Save</button>
+        <button type="button" phx-click="cancel" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Cancel</button>
+      </div>
+    </form>
+    """
+  end
+
+  defp render_new_player_editor(assigns) do
+    d = assigns.edit_data
+
+    assigns =
+      assign(assigns,
+        mana: d["mana"],
+        gems: d["gems"],
+        starting_water: d["starting_water"],
+        items: d["items"] || []
+      )
+
+    ~H"""
+    <form phx-submit="save_new_player" class="mt-3 space-y-4">
+      <div class="grid grid-cols-3 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Starting Mana</label>
+          <input type="number" step="0.1" name="mana" value={@mana} class="mt-1 w-full border rounded px-3 py-2" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Starting Gems</label>
+          <input type="number" name="gems" value={@gems} class="mt-1 w-full border rounded px-3 py-2" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Starting Water</label>
+          <input type="number" name="starting_water" value={@starting_water} class="mt-1 w-full border rounded px-3 py-2" />
+        </div>
+      </div>
+
+      <div>
+        <div class="flex justify-between items-center mb-2">
+          <label class="text-sm font-medium text-gray-700">Starting Items</label>
+          <button type="button" phx-click="add_new_player_item" class="text-sm text-green-600 hover:underline">+ Add Item</button>
+        </div>
+        <div class="space-y-2">
+          <%= for {item, i} <- Enum.with_index(@items) do %>
+            <div class="flex gap-2 items-center">
+              <input type="text" name={"item[#{i}][itemKey]"} value={item["itemKey"]} placeholder="item_key" class="border rounded px-2 py-1 text-sm w-48" />
+              <span class="text-gray-400 text-xs">x</span>
+              <input type="number" name={"item[#{i}][count]"} value={item["count"]} class="border rounded px-2 py-1 text-sm w-20" />
+              <button type="button" phx-click="remove_new_player_item" phx-value-index={i} class="text-red-500 hover:text-red-700 text-xs">X</button>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="flex gap-2">
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Save</button>
+        <button type="button" phx-click="cancel" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Cancel</button>
+      </div>
+    </form>
+    """
+  end
+
+  defp render_recipe_editor(assigns) do
+    entries = assigns.edit_data["_entries"] || []
+    assigns = assign(assigns, entries: entries)
+
+    ~H"""
+    <form phx-submit="save_recipe" class="mt-3 space-y-4">
+      <div class="flex justify-between items-center mb-2">
+        <label class="text-sm font-medium text-gray-700">Recipes</label>
+        <button type="button" phx-click="add_recipe" class="text-sm text-green-600 hover:underline">+ Add Recipe</button>
+      </div>
+      <div class="space-y-3">
+        <%= for {{key, recipe}, i} <- Enum.with_index(@entries) do %>
+          <div class="border rounded p-3 bg-gray-50">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-sm font-medium text-gray-700">Recipe #{i + 1}</span>
+              <button type="button" phx-click="remove_recipe" phx-value-index={i} class="text-red-500 hover:text-red-700 text-xs">Remove</button>
+            </div>
+            <div class="grid grid-cols-4 gap-3 mb-2">
+              <div>
+                <label class="block text-xs text-gray-500">Key</label>
+                <input type="text" name={"recipe[#{i}][key]"} value={key} class="w-full border rounded px-2 py-1 text-sm" />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500">Result Item</label>
+                <input type="text" name={"recipe[#{i}][result_item]"} value={recipe["result_item"]} class="w-full border rounded px-2 py-1 text-sm" />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500">Result Qty</label>
+                <input type="number" name={"recipe[#{i}][result_quantity]"} value={recipe["result_quantity"]} class="w-full border rounded px-2 py-1 text-sm" />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500">Category</label>
+                <select name={"recipe[#{i}][category]"} class="w-full border rounded px-2 py-1 text-sm">
+                  <option value="Pigment" selected={recipe["category"] == "Pigment"}>Pigment</option>
+                  <option value="Consumable" selected={recipe["category"] == "Consumable"}>Consumable</option>
+                </select>
+              </div>
+            </div>
+            <div class="ml-2">
+              <label class="block text-xs text-gray-500 mb-1">Ingredients</label>
+              <div class="space-y-1">
+                <%= for {ing, j} <- Enum.with_index(recipe["ingredients"] || []) do %>
+                  <div class="flex gap-1 items-center">
+                    <input type="text" name={"recipe[#{i}][ingredient][#{j}][itemKey]"} value={ing["itemKey"]} placeholder="item_key" class="border rounded px-1 py-0.5 text-xs w-32" />
+                    <span class="text-gray-400 text-xs">x</span>
+                    <input type="number" name={"recipe[#{i}][ingredient][#{j}][count]"} value={ing["count"]} class="border rounded px-1 py-0.5 text-xs w-14" />
+                    <button type="button" phx-click="remove_recipe_ing" phx-value-recipe-index={i} phx-value-ingredient-index={j} class="text-red-500 hover:text-red-700 text-xs">X</button>
+                  </div>
+                <% end %>
+                <button type="button" phx-click="add_recipe_ing" phx-value-recipe-index={i} class="text-xs text-green-600 hover:underline">+ ingredient</button>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <div class="flex gap-2">
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Save</button>
+        <button type="button" phx-click="cancel" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Cancel</button>
+      </div>
+    </form>
+    """
+  end
+
+  defp render_skin_editor(assigns) do
+    entries = assigns.edit_data["_entries"] || []
+    assigns = assign(assigns, entries: entries)
+
+    ~H"""
+    <form phx-submit="save_skin" class="mt-3 space-y-4">
+      <div class="flex justify-between items-center mb-2">
+        <label class="text-sm font-medium text-gray-700">Skins</label>
+        <button type="button" phx-click="add_skin" class="text-sm text-green-600 hover:underline">+ Add Skin</button>
+      </div>
+      <table class="w-full text-sm border">
+        <thead>
+          <tr class="bg-gray-50">
+            <th class="px-3 py-2 text-left text-gray-500">Skin Key</th>
+            <th class="px-3 py-2 text-left text-gray-500">Building Type</th>
+            <th class="px-3 py-2 text-left text-gray-500">Cost Item</th>
+            <th class="px-3 py-2 text-left text-gray-500">Cost Qty</th>
+            <th class="px-3 py-2 w-10"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y">
+          <%= for {{key, skin}, i} <- Enum.with_index(@entries) do %>
+            <tr>
+              <td class="px-3 py-1">
+                <input type="text" name={"skin[#{i}][key]"} value={key} class="w-full border rounded px-2 py-1 text-sm" />
+              </td>
+              <td class="px-3 py-1">
+                <select name={"skin[#{i}][building_type]"} class="w-full border rounded px-2 py-1 text-sm">
+                  <option value="plot" selected={skin["building_type"] == "plot"}>plot</option>
+                  <option value="vase" selected={skin["building_type"] == "vase"}>vase</option>
+                  <option value="mallum_house" selected={skin["building_type"] == "mallum_house"}>mallum_house</option>
+                </select>
+              </td>
+              <td class="px-3 py-1">
+                <input type="text" name={"skin[#{i}][cost_item_key]"} value={skin["cost_item_key"]} class="w-full border rounded px-2 py-1 text-sm" />
+              </td>
+              <td class="px-3 py-1">
+                <input type="number" name={"skin[#{i}][cost_quantity]"} value={skin["cost_quantity"]} class="w-full border rounded px-2 py-1 text-sm w-16" />
+              </td>
+              <td class="px-3 py-1">
+                <button type="button" phx-click="remove_skin" phx-value-index={i} class="text-red-500 hover:text-red-700 text-xs">X</button>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
 
       <div class="flex gap-2">
         <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Save</button>
