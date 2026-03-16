@@ -244,9 +244,9 @@
 /* ── Progress bar ── */
 .cell-progress {
     width: 80%;
-    height: 6px;
+    height: 14px;
     background-color: rgba(20, 35, 15, 0.6);
-    border-radius: 3px;
+    border-radius: 7px;
     overflow: hidden;
     margin-top: var(--spacing-xxs);
     display: none;
@@ -260,7 +260,9 @@
     height: 100%;
     width: 0%;
     background-color: rgb(120, 180, 60);
-    border-radius: 3px;
+    border-radius: 7px;
+    border-width: 1px;
+    border-color: rgba(120, 180, 60, 0.5);
 }
 
 /* ── Drag-move highlights ── */
@@ -586,4 +588,12 @@
 
 .skin-cost-text--need {
     color: rgb(220, 100, 70);
+}
+
+/* Harvest-ready highlight */
+.grid-cell--ready {
+    border-width: 3px;
+    border-color: rgba(255, 210, 70, 0.8);
+    transition-property: border-color;
+    transition-duration: 0.8s;
 }

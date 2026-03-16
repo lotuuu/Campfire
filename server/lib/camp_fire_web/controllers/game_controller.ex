@@ -290,8 +290,8 @@ defmodule CampFireWeb.GameController do
     uid = conn.assigns.current_player.uid
 
     case Plots.harvest_preview(uid, plot_id) do
-      {:ok, %{score: score, drops: drops, harvest_item_key: harvest_item_key}} ->
-        conn |> put_status(200) |> json(%{score: score, drops: drops, itemKey: harvest_item_key})
+      {:ok, %{score: score, drops: drops, bonus_drops: bonus_drops, harvest_item_key: harvest_item_key}} ->
+        conn |> put_status(200) |> json(%{score: score, drops: drops, bonusDrops: bonus_drops, itemKey: harvest_item_key})
 
       {:error, reason} ->
         conn |> put_status(422) |> json(%{error: format_error(reason)})
@@ -306,8 +306,8 @@ defmodule CampFireWeb.GameController do
     uid = conn.assigns.current_player.uid
 
     case Plots.harvest(uid, plot_id) do
-      {:ok, %{score: score, drops: drops, harvest_item_key: harvest_item_key}} ->
-        conn |> put_status(200) |> json(%{score: score, drops: drops, itemKey: harvest_item_key})
+      {:ok, %{score: score, drops: drops, bonus_drops: bonus_drops, harvest_item_key: harvest_item_key}} ->
+        conn |> put_status(200) |> json(%{score: score, drops: drops, bonusDrops: bonus_drops, itemKey: harvest_item_key})
 
       {:error, reason} ->
         conn |> put_status(422) |> json(%{error: format_error(reason)})
@@ -407,10 +407,11 @@ defmodule CampFireWeb.GameController do
     conn |> put_status(400) |> json(%{error: "Missing 'vaseId' and 'skinName'"})
   end
 
-  def instant_finish_plot(conn, %{"plotId" => plot_id}) do
+  def instant_finish_plot(conn, %{"plotId" => plot_id} = params) do
     uid = conn.assigns.current_player.uid
+    opts = free_mode_opts(params)
 
-    case Plots.instant_finish(uid, plot_id) do
+    case Plots.instant_finish(uid, plot_id, opts) do
       {:ok, plot} ->
         conn |> put_status(200) |> json(serialize_plot(plot))
 
@@ -423,10 +424,11 @@ defmodule CampFireWeb.GameController do
     conn |> put_status(400) |> json(%{error: "Missing 'plotId'"})
   end
 
-  def fertilize_plot(conn, %{"plotId" => plot_id}) do
+  def fertilize_plot(conn, %{"plotId" => plot_id} = params) do
     uid = conn.assigns.current_player.uid
+    opts = free_mode_opts(params)
 
-    case Plots.fertilize(uid, plot_id) do
+    case Plots.fertilize(uid, plot_id, opts) do
       {:ok, plot} ->
         conn |> put_status(200) |> json(serialize_plot(plot))
 
@@ -439,9 +441,10 @@ defmodule CampFireWeb.GameController do
     conn |> put_status(400) |> json(%{error: "Missing 'plotId'"})
   end
 
-  def apply_potion(conn, %{"plotId" => plot_id, "potionItemKey" => potion_item_key}) do
+  def apply_potion(conn, %{"plotId" => plot_id, "potionItemKey" => potion_item_key} = params) do
     uid = conn.assigns.current_player.uid
-    case Plots.apply_potion(uid, plot_id, potion_item_key) do
+    opts = free_mode_opts(params)
+    case Plots.apply_potion(uid, plot_id, potion_item_key, opts) do
       {:ok, plot} -> conn |> put_status(200) |> json(serialize_plot(plot))
       {:error, reason} -> conn |> put_status(422) |> json(%{error: format_error(reason)})
     end
@@ -451,10 +454,11 @@ defmodule CampFireWeb.GameController do
     conn |> put_status(400) |> json(%{error: "Missing 'plotId' and 'potionItemKey'"})
   end
 
-  def instant_finish_vase(conn, %{"vaseId" => vase_id}) do
+  def instant_finish_vase(conn, %{"vaseId" => vase_id} = params) do
     uid = conn.assigns.current_player.uid
+    opts = free_mode_opts(params)
 
-    case Vases.instant_finish(uid, vase_id) do
+    case Vases.instant_finish(uid, vase_id, opts) do
       {:ok, vase} ->
         conn |> put_status(200) |> json(serialize_vase(vase))
 

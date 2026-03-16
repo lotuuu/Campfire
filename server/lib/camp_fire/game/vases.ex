@@ -133,13 +133,13 @@ defmodule CampFire.Game.Vases do
 
   # --- Instant Finish ---
 
-  def instant_finish(player_uid, vase_id) do
+  def instant_finish(player_uid, vase_id, opts \\ []) do
     alias CampFire.Economy
 
     with %PlayerVase{} = vase <- Repo.get(PlayerVase, vase_id),
          true <- vase.player_uid == player_uid || {:error, :not_owned},
          true <- vase.state == "filling" || {:error, :not_filling},
-         {:ok, _} <- Economy.spend_item(player_uid, vase_config!()["speed_item"], 1) do
+         {:ok, _} <- Economy.spend_item(player_uid, vase_config!()["speed_item"], 1, opts) do
       # Free the mallum assigned to this vase
       free_mallum_for_vase(player_uid, vase_id)
 

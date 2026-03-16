@@ -185,12 +185,12 @@ defmodule CampFire.Game.Plots do
 
   # --- Fertilize ---
 
-  def fertilize(player_uid, plot_id) do
+  def fertilize(player_uid, plot_id, opts \\ []) do
     with %PlayerPlot{} = plot <- Repo.get(PlayerPlot, plot_id),
          true <- plot.player_uid == player_uid || {:error, :not_owned},
          true <- plot.state == "growing" || {:error, :not_growing},
          true <- not plot.fertilized || {:error, :already_fertilized} do
-      case Economy.spend_item(player_uid, "fertilizer", 1) do
+      case Economy.spend_item(player_uid, "fertilizer", 1, opts) do
         {:ok, _} ->
           plot
           |> PlayerPlot.changeset(%{fertilized: true})
@@ -207,7 +207,7 @@ defmodule CampFire.Game.Plots do
 
   # --- Apply Potion ---
 
-  def apply_potion(player_uid, plot_id, potion_item_key) do
+  def apply_potion(player_uid, plot_id, potion_item_key, opts \\ []) do
     case Map.get(@potion_types, potion_item_key) do
       nil ->
         {:error, :unknown_potion}
@@ -216,7 +216,7 @@ defmodule CampFire.Game.Plots do
         with %PlayerPlot{} = plot <- Repo.get(PlayerPlot, plot_id),
              true <- plot.player_uid == player_uid || {:error, :not_owned},
              true <- plot.state == "growing" || {:error, :not_growing},
-             {:ok, _} <- Economy.spend_item(player_uid, potion_item_key, 1) do
+             {:ok, _} <- Economy.spend_item(player_uid, potion_item_key, 1, opts) do
           updated_potions = (plot.potions || []) ++ [potion_entry]
 
           plot
@@ -241,8 +241,9 @@ defmodule CampFire.Game.Plots do
         seed_config = CampFire.Game.get_seed_config_by_item_id!(plot.seed_item_id)
 
         score = GrowthRecipe.evaluate(seed_config.recipe, plot.snapshots, plot.water_count)
-        drops = GrowthRecipe.calculate_drops(score, seed_config.min_drops, seed_config.max_drops)
-        drops = if plot.fertilized, do: ceil(drops * 1.5), else: drops
+        base_drops = GrowthRecipe.calculate_drops(score, seed_config.min_drops, seed_config.max_drops)
+        bonus_drops = if plot.fertilized, do: max(ceil(base_drops * 0.5), 1), else: 0
+        drops = base_drops + bonus_drops
 
         snapshot_count = get_in(plot.snapshots || %{}, [Access.key("snapshot_count", 0)])
         if snapshot_count == 0 do
@@ -269,7 +270,7 @@ defmodule CampFire.Game.Plots do
         })
         |> Repo.update!()
 
-        %{score: score, drops: drops, harvest_item_key: harvest_item_key}
+        %{score: score, drops: drops, bonus_drops: bonus_drops, harvest_item_key: harvest_item_key}
       end)
     else
       nil -> {:error, :not_found}
@@ -291,10 +292,11 @@ defmodule CampFire.Game.Plots do
          true <- plot.state == "mature" || {:error, {:not_mature, plot.state}} do
       seed_config = CampFire.Game.get_seed_config_by_item_id!(plot.seed_item_id)
       score = GrowthRecipe.evaluate(seed_config.recipe, plot.snapshots, plot.water_count)
-      drops = GrowthRecipe.calculate_drops(score, seed_config.min_drops, seed_config.max_drops)
-      drops = if plot.fertilized, do: ceil(drops * 1.5), else: drops
+      base_drops = GrowthRecipe.calculate_drops(score, seed_config.min_drops, seed_config.max_drops)
+      bonus_drops = if plot.fertilized, do: max(ceil(base_drops * 0.5), 1), else: 0
+      drops = base_drops + bonus_drops
 
-      {:ok, %{score: score, drops: drops, harvest_item_key: seed_config.harvest_item_key}}
+      {:ok, %{score: score, drops: drops, bonus_drops: bonus_drops, harvest_item_key: seed_config.harvest_item_key}}
     else
       nil -> {:error, :not_found}
       {:error, _} = err -> err
@@ -428,11 +430,11 @@ defmodule CampFire.Game.Plots do
     config["speed_item"]
   end
 
-  def instant_finish(player_uid, plot_id) do
+  def instant_finish(player_uid, plot_id, opts \\ []) do
     with %PlayerPlot{} = plot <- Repo.get(PlayerPlot, plot_id),
          true <- plot.player_uid == player_uid || {:error, :not_owned},
          true <- plot.state == "growing" || {:error, :not_growing},
-         {:ok, _} <- CampFire.Economy.spend_item(player_uid, speed_item(), 1) do
+         {:ok, _} <- CampFire.Economy.spend_item(player_uid, speed_item(), 1, opts) do
       plot
       |> PlayerPlot.changeset(%{state: "mature"})
       |> Repo.update()
