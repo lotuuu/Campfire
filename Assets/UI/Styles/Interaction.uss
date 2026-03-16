@@ -235,6 +235,13 @@
     color: rgb(200, 170, 110);
 }
 
+.seed-card--weather-match {
+    font-size: var(--font-xs);
+    color: rgb(120, 200, 80);
+    -unity-font-style: bold;
+    margin-top: 4px;
+}
+
 .seed-card--plant-btn {
     align-self: stretch;
     min-height: 64px;
@@ -509,6 +516,25 @@
     -unity-font-style: bold;
     width: 15%;
     -unity-text-align: upper-center;
+}
+
+/* Harvest axis pass/fail icons (server-served sprites) */
+.harvest-axis-pass-icon {
+    width: 28px;
+    height: 28px;
+    -unity-background-scale-mode: scale-to-fit;
+    -unity-background-image-tint-color: rgb(120, 200, 80);
+    flex-shrink: 0;
+    align-self: center;
+}
+
+.harvest-axis-fail-icon {
+    width: 28px;
+    height: 28px;
+    -unity-background-scale-mode: scale-to-fit;
+    -unity-background-image-tint-color: rgb(220, 90, 70);
+    flex-shrink: 0;
+    align-self: center;
 }
 
 /* ── Vase Water Level Bar ── */

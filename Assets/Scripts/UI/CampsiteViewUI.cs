@@ -1345,8 +1345,8 @@ namespace Garden
 
             if (FlameManager.Instance.Level >= ConfigService.Instance.FlameConfig.MaxLevel)
             {
-                var maxLabel = new Label("Max level reached");
-                maxLabel.AddToClassList("interaction-info");
+                var maxLabel = new Label("Max Level");
+                maxLabel.AddToClassList("plot-ready-badge");
                 interactionBody.Add(maxLabel);
             }
             else
@@ -1357,7 +1357,7 @@ namespace Garden
                     var costList = new VisualElement();
                     costList.AddToClassList("upgrade-cost-list");
 
-                    var costHeader = new Label("REQUIRED");
+                    var costHeader = new Label("UPGRADE COST");
                     costHeader.AddToClassList("upgrade-cost-header");
                     costList.Add(costHeader);
 
@@ -1384,6 +1384,32 @@ namespace Garden
                         costList.Add(row);
                     }
                     interactionBody.Add(costList);
+                }
+
+                // Show what next level unlocks
+                int nextLevel = FlameManager.Instance.Level + 1;
+                var fc = ConfigService.Instance.FlameConfig;
+                float nextMana = fc.GetManaPerSecond(nextLevel);
+                float currMana = FlameManager.Instance.ManaPerSecond;
+                if (nextMana > currMana)
+                {
+                    var benefitLabel = new Label($"+{(nextMana - currMana):F1} mana/sec at Lv {nextLevel}");
+                    benefitLabel.AddToClassList("interaction-info-highlight");
+                    interactionBody.Add(benefitLabel);
+                }
+                int nextEntities = fc.GetMaxEntities(nextLevel);
+                int currEntities = fc.GetMaxEntities(FlameManager.Instance.Level);
+                if (nextEntities > currEntities)
+                {
+                    var capLabel = new Label($"+{nextEntities - currEntities} build slots");
+                    capLabel.AddToClassList("interaction-info");
+                    interactionBody.Add(capLabel);
+                }
+                if (nextLevel == GardenManager.GardenUnlockLevel)
+                {
+                    var unlockLabel = new Label("Unlocks Gardens!");
+                    unlockLabel.AddToClassList("interaction-info-highlight");
+                    interactionBody.Add(unlockLabel);
                 }
 
                 bool canAfford = upgradeAllowed && FlameManager.Instance.CanUpgrade();
@@ -1986,8 +2012,12 @@ namespace Garden
                         idealEl.AddToClassList("harvest-axis-ideal");
                         row.Add(idealEl);
 
-                        var statusEl = new Label(axis.score >= 0.5f ? "+" : "-");
-                        statusEl.AddToClassList(axis.score >= 0.5f ? "harvest-axis-pass" : "harvest-axis-fail");
+                        bool passed = axis.score >= 0.5f;
+                        var statusEl = new VisualElement();
+                        statusEl.AddToClassList(passed ? "harvest-axis-pass-icon" : "harvest-axis-fail-icon");
+                        var statusTex = SpriteService.Instance?.GetTexture(passed ? "ui/icon-check" : "ui/icon-cross");
+                        if (statusTex != null)
+                            statusEl.style.backgroundImage = statusTex;
                         row.Add(statusEl);
 
                         interactionBody.Add(row);
@@ -2111,6 +2141,18 @@ namespace Garden
                         if (tags.childCount > 0)
                             info.Add(tags);
                     }
+
+                    // Weather match indicator
+                    if (seedData.recipe != null && WeatherService.Instance?.CurrentWeather != null)
+                    {
+                        float match = GetCurrentWeatherMatch(seedData.recipe);
+                        if (match >= 0.7f)
+                        {
+                            var matchTag = new Label(match >= 0.9f ? "Great weather today!" : "Good weather today");
+                            matchTag.AddToClassList("seed-card--weather-match");
+                            info.Add(matchTag);
+                        }
+                    }
                 }
 
                 card.Add(info);
@@ -2185,7 +2227,7 @@ namespace Garden
                 rightGroup.AddToClassList("seed-card--right-group");
 
                 string growthStr = TimeUtils.FormatDurationHours(plantData.growthDurationHours);
-                string yieldStr = $"{plantData.yieldAmount}x every {TimeUtils.FormatDurationHours(plantData.yieldIntervalHours)}";
+                string yieldStr = $"Yields {plantData.yieldAmount} every {TimeUtils.FormatDurationHours(plantData.yieldIntervalHours)}";
                 var statsLabel = new Label($"{growthStr} | {yieldStr}");
                 statsLabel.AddToClassList("seed-card--stats-line");
                 rightGroup.Add(statsLabel);
@@ -2470,6 +2512,37 @@ namespace Garden
                 el.style.backgroundImage = tex;
         }
 
+        /// <summary>
+        /// Scores current weather against a seed's recipe (weather axes only, ignoring waterings/moon).
+        /// Returns 0-1 match quality. Returns 1 if recipe has no weather axes.
+        /// </summary>
+        private static float GetCurrentWeatherMatch(GrowthRecipe recipe)
+        {
+            if (WeatherService.Instance == null || !WeatherService.Instance.HasWeather) return 0f;
+            var w = WeatherService.Instance.CurrentWeather;
+
+            float weightSum = 0f;
+            float scoreSum = 0f;
+
+            if (recipe.useHeat)
+            {
+                scoreSum += GrowthRecipe.ScoreRange(w.temperature, recipe.idealTempMin, recipe.idealTempMax, recipe.heatTolerance) * recipe.heatWeight;
+                weightSum += recipe.heatWeight;
+            }
+            if (recipe.useWind)
+            {
+                scoreSum += GrowthRecipe.ScoreRange(w.windSpeed, recipe.idealWindMin, recipe.idealWindMax, recipe.windTolerance) * recipe.windWeight;
+                weightSum += recipe.windWeight;
+            }
+            if (recipe.useHumidity)
+            {
+                scoreSum += GrowthRecipe.ScoreRange(w.humidity, recipe.idealHumidityMin, recipe.idealHumidityMax, recipe.humidityTolerance) * recipe.humidityWeight;
+                weightSum += recipe.humidityWeight;
+            }
+
+            return weightSum > 0f ? scoreSum / weightSum : 1f;
+        }
+
         private void ShowGardenInteraction(int index)
         {
             var garden = SaveManager.Instance.Data.gardens[index];
@@ -2656,8 +2729,13 @@ namespace Garden
             var headerRow = new VisualElement();
             headerRow.AddToClassList("skin-header");
 
-            var backArrow = new Button(() => ShowInteraction(type, index)) { text = "<" };
+            var backArrow = new Button(() => ShowInteraction(type, index));
             backArrow.AddToClassList("skin-back-arrow");
+            var backIcon = SpriteService.Instance?.GetTexture("ui/icon-arrow-left");
+            if (backIcon != null)
+                backArrow.style.backgroundImage = backIcon;
+            else
+                backArrow.text = "<";
             headerRow.Add(backArrow);
 
             var titleLabel = new Label($"Paint {typeName}");
@@ -2811,7 +2889,7 @@ namespace Garden
 
             if (isEquipped)
             {
-                var equippedLabel = new Label("Currently applied");
+                var equippedLabel = new Label("Equipped");
                 equippedLabel.AddToClassList("skin-detail-equipped");
                 detailArea.Add(equippedLabel);
             }
