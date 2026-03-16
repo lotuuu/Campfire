@@ -182,7 +182,7 @@ defmodule CampFireWeb.LogsLive do
                     <span class="text-gray-400">-</span>
                   <% end %>
                 </td>
-                <td class="px-3 py-2 text-gray-800 truncate max-w-md" title={entry.message}>
+                <td class="px-3 py-2 text-gray-800 whitespace-pre-wrap break-all">
                   {entry.message}
                 </td>
               </tr>
