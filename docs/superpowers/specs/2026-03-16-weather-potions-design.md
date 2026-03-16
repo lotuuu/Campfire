@@ -73,7 +73,7 @@ Each entry in the array:
 Add to schema:
 
 ```elixir
-field :potions, :map, default: []
+field :potions, {:array, :map}, default: []
 ```
 
 Add `:potions` to the changeset cast list (line 28 of `player_plot.ex`).
