@@ -266,7 +266,7 @@ namespace Garden
                 SwapChildren(inboxList, inboxCardPool, new List<VisualElement>());
                 if (inboxEmpty != null)
                 {
-                    inboxEmpty.text = "Could not connect to server";
+                    inboxEmpty.text = Loc.Get("ui.letters.connect_error", "Could not connect to server");
                     inboxEmpty.style.display = DisplayStyle.Flex;
                 }
                 return;
@@ -280,7 +280,7 @@ namespace Garden
                 if (requestTemplate == null) break;
                 var el = requestTemplate.CloneTree();
                 var nameLabel = el.Q<Label>(className: "request-from");
-                if (nameLabel != null) nameLabel.text = $"{req.fromName} wants to be friends";
+                if (nameLabel != null) nameLabel.text = string.Format(Loc.Get("ui.letters.wants_friends", "{0} wants to be friends"), req.fromName);
 
                 var acceptBtn = el.Q<Button>(className: "btn-accept");
                 var declineBtn = el.Q<Button>(className: "btn-decline");
@@ -335,7 +335,7 @@ namespace Garden
             bool isEmpty = requests.Count == 0 && gifts.Count == 0;
             if (inboxEmpty != null)
             {
-                inboxEmpty.text = "No new letters";
+                inboxEmpty.text = Loc.Get("ui.letters.no_letters", "No new letters");
                 inboxEmpty.style.display = isEmpty ? DisplayStyle.Flex : DisplayStyle.None;
             }
 
@@ -354,7 +354,7 @@ namespace Garden
                 SwapChildren(friendsList, friendsCardPool, new List<VisualElement>());
                 if (friendsEmpty != null)
                 {
-                    friendsEmpty.text = "Could not connect to server";
+                    friendsEmpty.text = Loc.Get("ui.letters.connect_error", "Could not connect to server");
                     friendsEmpty.style.display = DisplayStyle.Flex;
                 }
                 return;
@@ -380,7 +380,7 @@ namespace Garden
                 SwapChildren(friendsList, friendsCardPool, new List<VisualElement>());
                 if (friendsEmpty != null)
                 {
-                    friendsEmpty.text = "No friends yet";
+                    friendsEmpty.text = Loc.Get("ui.letters.no_friends", "No friends yet");
                     friendsEmpty.style.display = DisplayStyle.Flex;
                 }
                 return;
@@ -423,7 +423,7 @@ namespace Garden
         {
             if (SocialService.Instance == null || !SocialService.Instance.IsSignedIn)
             {
-                if (displayNameStatus != null) displayNameStatus.text = "Could not connect to server";
+                if (displayNameStatus != null) displayNameStatus.text = Loc.Get("ui.letters.connect_error", "Could not connect to server");
                 if (myFriendCode != null) myFriendCode.text = "";
                 if (addFriendStatus != null) addFriendStatus.text = "";
                 return;
@@ -439,7 +439,7 @@ namespace Garden
             if (myFriendCode != null)
             {
                 var code = SocialService.Instance?.FriendCode;
-                myFriendCode.text = string.IsNullOrEmpty(code) ? "Your code: loading..." : $"Your code: {code}";
+                myFriendCode.text = string.IsNullOrEmpty(code) ? Loc.Get("ui.letters.code_loading", "Your code: loading...") : string.Format(Loc.Get("ui.letters.your_code", "Your code: {0}"), code);
             }
             if (addFriendStatus != null) addFriendStatus.text = "";
         }
@@ -449,7 +449,7 @@ namespace Garden
             var code = SocialService.Instance?.FriendCode;
             if (string.IsNullOrEmpty(code))
             {
-                if (shareStatus != null) shareStatus.text = "Code not available yet";
+                if (shareStatus != null) shareStatus.text = Loc.Get("ui.letters.code_unavailable", "Code not available yet");
                 return;
             }
 
@@ -457,7 +457,7 @@ namespace Garden
             string message = $"{name} wants to be your friend in Camp Fire!\ncampfire://invite/{code}";
 
             GUIUtility.systemCopyBuffer = message;
-            if (shareStatus != null) shareStatus.text = "Copied to clipboard!";
+            if (shareStatus != null) shareStatus.text = Loc.Get("ui.letters.copied", "Copied to clipboard!");
         }
 
         private async void OnDisplayNameSubmit()
@@ -472,22 +472,22 @@ namespace Garden
 
             if (!SocialService.Instance.IsSignedIn)
             {
-                if (displayNameStatus != null) displayNameStatus.text = "Not signed in";
+                if (displayNameStatus != null) displayNameStatus.text = Loc.Get("ui.letters.not_signed_in", "Not signed in");
                 return;
             }
 
             if (!SocialService.IsValidDisplayName(newName))
             {
-                if (displayNameStatus != null) displayNameStatus.text = "Letters, numbers, spaces only (1-20 chars)";
+                if (displayNameStatus != null) displayNameStatus.text = Loc.Get("ui.letters.name_format", "Letters, numbers, spaces only (1-20 chars)");
                 displayNameInput.SetValueWithoutNotify(currentName);
                 return;
             }
 
-            if (displayNameStatus != null) displayNameStatus.text = "Saving...";
+            if (displayNameStatus != null) displayNameStatus.text = Loc.Get("ui.letters.saving", "Saving...");
 
             bool success = await SocialService.Instance.UpdateDisplayName(newName);
             if (displayNameStatus != null)
-                displayNameStatus.text = success ? "Name saved!" : "Failed to save name";
+                displayNameStatus.text = success ? Loc.Get("ui.letters.name_saved", "Name saved!") : Loc.Get("ui.letters.name_failed", "Failed to save name");
 
             if (!success)
                 displayNameInput.SetValueWithoutNotify(currentName);
@@ -498,15 +498,15 @@ namespace Garden
             var code = friendCodeInput?.value?.Trim().ToUpperInvariant();
             if (string.IsNullOrEmpty(code))
             {
-                if (addFriendStatus != null) addFriendStatus.text = "Enter a friend code";
+                if (addFriendStatus != null) addFriendStatus.text = Loc.Get("ui.letters.enter_code", "Enter a friend code");
                 return;
             }
 
-            if (addFriendStatus != null) addFriendStatus.text = "Sending...";
+            if (addFriendStatus != null) addFriendStatus.text = Loc.Get("ui.letters.sending", "Sending...");
 
             bool success = await SocialService.Instance.SendFriendRequest(code);
             if (addFriendStatus != null)
-                addFriendStatus.text = success ? "Request sent!" : "Code not found or already friends";
+                addFriendStatus.text = success ? Loc.Get("ui.letters.request_sent", "Request sent!") : Loc.Get("ui.letters.code_not_found", "Code not found or already friends");
 
             if (success && friendCodeInput != null)
                 friendCodeInput.value = "";
@@ -615,7 +615,7 @@ namespace Garden
             if (giftSelectedLabel == null) return;
             if (selectedGiftItems.Count == 0)
             {
-                giftSelectedLabel.text = "Selected: none";
+                giftSelectedLabel.text = Loc.Get("ui.letters.selected_none", "Selected: none");
                 return;
             }
 
