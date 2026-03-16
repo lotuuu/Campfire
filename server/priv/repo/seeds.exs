@@ -241,7 +241,7 @@ seed_configs = [
     max_drops: 4,
     tier: 0,
     recipe: %{
-      "waterings" => RecipeHelper.axis(1, 1, 1, 1)
+      "waterings" => RecipeHelper.axis(1, 1, 0, 1)
     }
   },
   %{
@@ -252,9 +252,9 @@ seed_configs = [
     max_drops: 3,
     tier: 0,
     recipe: %{
-      "heat" => RecipeHelper.axis(10, 25, 15, 1),
-      "humidity" => RecipeHelper.axis(50, 85, 15, 1),
-      "waterings" => RecipeHelper.axis(1, 1, 1, 1)
+      "heat" => RecipeHelper.axis(10, 25, 0, 1),
+      "humidity" => RecipeHelper.axis(50, 85, 0, 1),
+      "waterings" => RecipeHelper.axis(1, 1, 0, 1)
     }
   },
   %{
@@ -265,8 +265,8 @@ seed_configs = [
     max_drops: 4,
     tier: 1,
     recipe: %{
-      "heat" => RecipeHelper.axis(20, 30, 10, 1),
-      "waterings" => RecipeHelper.axis(1, 1, 1, 0.5)
+      "heat" => RecipeHelper.axis(20, 30, 0, 1),
+      "waterings" => RecipeHelper.axis(1, 1, 0, 0.5)
     }
   },
   %{
@@ -277,8 +277,8 @@ seed_configs = [
     max_drops: 5,
     tier: 1,
     recipe: %{
-      "heat" => RecipeHelper.axis(15, 25, 10, 1),
-      "sunlight" => RecipeHelper.axis(50, 90, 20, 1)
+      "heat" => RecipeHelper.axis(15, 25, 0, 1),
+      "sunlight" => RecipeHelper.axis(50, 90, 0, 1)
     }
   },
   %{
@@ -289,9 +289,9 @@ seed_configs = [
     max_drops: 6,
     tier: 2,
     recipe: %{
-      "heat" => RecipeHelper.axis(20, 35, 10, 1),
-      "sunlight" => RecipeHelper.axis(60, 100, 20, 1),
-      "waterings" => RecipeHelper.axis(1, 2, 1, 0.5)
+      "heat" => RecipeHelper.axis(20, 35, 0, 1),
+      "sunlight" => RecipeHelper.axis(60, 100, 0, 1),
+      "waterings" => RecipeHelper.axis(1, 2, 0, 0.5)
     }
   },
   %{
@@ -302,9 +302,9 @@ seed_configs = [
     max_drops: 6,
     tier: 2,
     recipe: %{
-      "heat" => RecipeHelper.axis(0, 10, 10, 1.5),
-      "humidity" => RecipeHelper.axis(50, 80, 20, 1),
-      "waterings" => RecipeHelper.axis(1, 2, 1, 0.5)
+      "heat" => RecipeHelper.axis(0, 10, 0, 1.5),
+      "humidity" => RecipeHelper.axis(50, 80, 0, 1),
+      "waterings" => RecipeHelper.axis(1, 2, 0, 0.5)
     }
   },
   %{
@@ -315,9 +315,9 @@ seed_configs = [
     max_drops: 8,
     tier: 3,
     recipe: %{
-      "humidity" => RecipeHelper.axis(50, 80, 20, 1),
-      "rain" => RecipeHelper.axis(0.2, 0.6, 0.3, 1.5),
-      "waterings" => RecipeHelper.axis(1, 2, 1, 0.5)
+      "humidity" => RecipeHelper.axis(50, 80, 0, 1),
+      "rain" => RecipeHelper.axis(0.2, 0.6, 0, 1.5),
+      "waterings" => RecipeHelper.axis(1, 2, 0, 0.5)
     }
   },
   %{
@@ -328,9 +328,9 @@ seed_configs = [
     max_drops: 9,
     tier: 4,
     recipe: %{
-      "heat" => RecipeHelper.axis(25, 35, 10, 1.5),
-      "wind" => RecipeHelper.axis(5, 15, 5, 1),
-      "sunlight" => RecipeHelper.axis(70, 100, 20, 1.5)
+      "heat" => RecipeHelper.axis(25, 35, 0, 1.5),
+      "wind" => RecipeHelper.axis(5, 15, 0, 1),
+      "sunlight" => RecipeHelper.axis(70, 100, 0, 1.5)
     }
   },
   %{
@@ -341,9 +341,9 @@ seed_configs = [
     max_drops: 8,
     tier: 3,
     recipe: %{
-      "heat" => RecipeHelper.axis(5, 15, 10, 1.5),
-      "sunlight" => RecipeHelper.axis(40, 80, 20, 1),
-      "rain" => RecipeHelper.axis(0.2, 0.6, 0.3, 1)
+      "heat" => RecipeHelper.axis(5, 15, 0, 1.5),
+      "sunlight" => RecipeHelper.axis(40, 80, 0, 1),
+      "rain" => RecipeHelper.axis(0.2, 0.6, 0, 1)
     }
   },
   %{
@@ -354,9 +354,9 @@ seed_configs = [
     max_drops: 10,
     tier: 5,
     recipe: %{
-      "heat" => RecipeHelper.axis(15, 25, 10, 1),
-      "humidity" => RecipeHelper.axis(40, 75, 20, 1),
-      "rain" => RecipeHelper.axis(0.3, 0.7, 0.3, 1.5)
+      "heat" => RecipeHelper.axis(15, 25, 0, 1),
+      "humidity" => RecipeHelper.axis(40, 75, 0, 1),
+      "rain" => RecipeHelper.axis(0.3, 0.7, 0, 1.5)
     }
   },
   %{
@@ -367,9 +367,9 @@ seed_configs = [
     max_drops: 12,
     tier: 6,
     recipe: %{
-      "heat" => RecipeHelper.axis(20, 30, 10, 1),
-      "humidity" => RecipeHelper.axis(60, 90, 20, 1.5),
-      "waterings" => RecipeHelper.axis(2, 4, 2, 1)
+      "heat" => RecipeHelper.axis(20, 30, 0, 1),
+      "humidity" => RecipeHelper.axis(60, 90, 0, 1.5),
+      "waterings" => RecipeHelper.axis(2, 4, 0, 1)
     }
   },
   %{
@@ -380,9 +380,9 @@ seed_configs = [
     max_drops: 14,
     tier: 7,
     recipe: %{
-      "heat" => RecipeHelper.axis(20, 35, 10, 1),
-      "wind" => RecipeHelper.axis(5, 20, 5, 1),
-      "sunlight" => RecipeHelper.axis(60, 100, 20, 1.5)
+      "heat" => RecipeHelper.axis(20, 35, 0, 1),
+      "wind" => RecipeHelper.axis(5, 20, 0, 1),
+      "sunlight" => RecipeHelper.axis(60, 100, 0, 1.5)
     }
   },
   %{
@@ -393,10 +393,10 @@ seed_configs = [
     max_drops: 16,
     tier: 8,
     recipe: %{
-      "heat" => RecipeHelper.axis(18, 28, 8, 1),
-      "humidity" => RecipeHelper.axis(50, 80, 20, 1),
-      "sunlight" => RecipeHelper.axis(50, 90, 20, 1),
-      "waterings" => RecipeHelper.axis(3, 6, 2, 1)
+      "heat" => RecipeHelper.axis(18, 28, 0, 1),
+      "humidity" => RecipeHelper.axis(50, 80, 0, 1),
+      "sunlight" => RecipeHelper.axis(50, 90, 0, 1),
+      "waterings" => RecipeHelper.axis(3, 6, 0, 1)
     }
   },
   %{
@@ -407,9 +407,9 @@ seed_configs = [
     max_drops: 20,
     tier: 9,
     recipe: %{
-      "humidity" => RecipeHelper.axis(60, 90, 20, 1),
+      "humidity" => RecipeHelper.axis(60, 90, 0, 1),
       "moon" => RecipeHelper.axis(4, 4, 0, 3),
-      "waterings" => RecipeHelper.axis(3, 6, 2, 1)
+      "waterings" => RecipeHelper.axis(3, 6, 0, 1)
     }
   }
 ]

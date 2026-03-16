@@ -10,49 +10,49 @@ namespace Garden
         [Header("Heat")]
         public bool useHeat;
         public float idealTempMin;
-        public float idealTempMax = 30f;
-        public float heatTolerance = 10f;
-        public float heatWeight = 1f;
+        public float idealTempMax;
+        public float heatTolerance;
+        public float heatWeight;
 
         [Header("Wind")]
         public bool useWind;
         public float idealWindMin;
-        public float idealWindMax = 10f;
-        public float windTolerance = 5f;
-        public float windWeight = 1f;
+        public float idealWindMax;
+        public float windTolerance;
+        public float windWeight;
 
         [Header("Humidity")]
         public bool useHumidity;
         public float idealHumidityMin;
-        public float idealHumidityMax = 80f;
-        public float humidityTolerance = 20f;
-        public float humidityWeight = 1f;
+        public float idealHumidityMax;
+        public float humidityTolerance;
+        public float humidityWeight;
 
         [Header("Sunlight")]
         public bool useSunlight;
         public float idealSunlightMin;
-        public float idealSunlightMax = 100f;
-        public float sunlightTolerance = 20f;
-        public float sunlightWeight = 1f;
+        public float idealSunlightMax;
+        public float sunlightTolerance;
+        public float sunlightWeight;
 
         [Header("Rain")]
         public bool useRain;
         public float idealRainMin;
-        public float idealRainMax = 1f;
-        public float rainTolerance = 0.3f;
-        public float rainWeight = 1f;
+        public float idealRainMax;
+        public float rainTolerance;
+        public float rainWeight;
 
         [Header("Moon")]
         public bool useMoon;
         public MoonPhase requiredMoonPhase;
-        public float moonWeight = 1f;
+        public float moonWeight;
 
         [Header("Waterings")]
         public bool useWaterings;
         public int idealWateringsMin;
         public int idealWateringsMax;
-        public float wateringsTolerance = 2f;
-        public float wateringsWeight = 1f;
+        public float wateringsTolerance;
+        public float wateringsWeight;
 
         public float Evaluate(GrowthSnapshots snapshots, int waterCount)
         {
