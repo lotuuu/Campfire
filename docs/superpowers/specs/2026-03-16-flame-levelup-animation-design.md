@@ -16,13 +16,13 @@ The flame hex cell scales to 120% then eases back to 100%. Border thickens from 
 A single golden ring expands outward from the flame center, drawn on a Painter2D overlay element. Starts at flame hex radius (~110px), expands to cover the full grid. Stroke width interpolates from 4px to 1px, opacity from 1.0 to 0.0. Animated via `schedule.Execute().Every(16)` on the overlay element.
 
 ### Stage 4 — Hex Cascade (0.4s–1.5s)
-Each occupied hex briefly glows golden in a ripple pattern outward from (0,0). Ring distance 1 highlights at 0.4s, ring 2 at 0.6s, ring 3 at 0.8s, etc. Each cell gets a temporary `grid-cell--levelup-glow` CSS class adding a golden border + subtle background tint, removed after 400ms. Staggered via `schedule.Execute().StartingIn()`.
+All hex cells (occupied and empty) briefly glow golden in a ripple pattern outward from (0,0). Ring distance 1 highlights at 0.4s, ring 2 at 0.6s, ring 3 at 0.8s, etc. Each cell gets a temporary USS class adding a golden `background-color` tint, removed after 400ms. Staggered via `schedule.Execute().StartingIn()`. Note: hex borders are drawn via Painter2D in `DrawHexCell`, so the cascade glow uses `background-color` only (not `border-color`), which is USS-controlled and independent of Painter2D borders.
 
 ### Stage 5 — Rising Embers (0.3s–2.5s)
 ~20 small circles (3–6px radius) spawn near the flame center and float upward with slight horizontal drift. Drawn on the same Painter2D overlay as the shockwave ring. Each ember has randomized: start position (within flame hex bounds), rise speed, horizontal drift, lifetime (1–2s), and size. Color: golden (`#FFB432`) fading to transparent over lifetime.
 
 ### Stage 6 — Level Badge (1.0s–2.5s)
-A "Level X" label scales in with bounce easing (overshoot) at screen center. Gold text on a dark semi-transparent rounded-rect background. Scales from 0 → 1.1 → 1.0 (bounce). Fades out after 1.5s. Pure USS element with transitions triggered by class addition.
+A "Level X" label appears at screen center. Gold text on a dark semi-transparent rounded-rect background. Bounce effect implemented procedurally: scheduled callback scales from 0 → 1.15 over 250ms (ease-out), then a second phase scales from 1.15 → 1.0 over 200ms (ease-in-out). Opacity fades in via USS transition. Fades out after 1.5s via USS opacity transition.
 
 ## Architecture
 
@@ -38,7 +38,7 @@ public static void Play(VisualElement root, VisualElement flameCell,
 
 Parameters:
 - `root`: The root VisualElement (for full-screen flash overlay and level badge)
-- `flameCell`: The flame hex cell element (for pulse/scale animation)
+- `flameCell`: The flame hex cell element (for pulse/scale animation). Caller identifies this by the `grid-cell--flame` CSS class already applied in `PopulateOccupiedCell`.
 - `gridContainer`: The grid container (for Painter2D overlay and hex cascade)
 - `newLevel`: The new flame level (for badge text)
 - `onComplete`: Callback when animation finishes (~2.5s), triggers grid rebuild
@@ -47,15 +47,19 @@ Internal structure:
 - Creates the flash overlay, Painter2D overlay, and level badge elements
 - Uses `schedule.Execute()` for timing stages
 - Painter2D overlay uses `generateVisualContent` callback; a scheduled updater at ~60fps drives shockwave expansion and ember particle positions
+- Flash overlay uses `pickingMode = PickingMode.Position` to block all input during the animation sequence. Other created elements use `PickingMode.Ignore`.
+- A static `IsPlaying` flag prevents re-triggering during animation
 - Cleans up all created elements in `onComplete`
+
+**Audio:** The existing `"flame_upgrade"` SFX continues to play as-is (fired from `FlameManager.UpgradeFlame()`). No additional audio changes.
 
 ### Painter2D Overlay Element
 
-A single `VisualElement` added as a child of `gridContainer`, sized to cover the full grid area via `style.position = Absolute` and matching the container dimensions. Uses `generateVisualContent` for Painter2D drawing of:
+A single `VisualElement` added as a child of `gridContainer`, sized via `StretchToParentSize()` to cover the full grid area. Uses `generateVisualContent` for Painter2D drawing of:
 - The expanding shockwave ring (stage 3)
 - Rising ember particles (stage 5)
 
-An animation state object tracks current time, shockwave radius, and ember positions. A scheduled callback (`Every(16)`) updates state and calls `MarkDirtyRepaint()`. The overlay is removed when both shockwave and embers have completed.
+An animation state object tracks current time, shockwave radius, and ember positions. A scheduled callback (`Every(16)`) updates state and calls `MarkDirtyRepaint()`. Shockwave max radius is calculated dynamically from `gridContainer.resolvedStyle.width / 2` so it scales with grid size at any flame level. The overlay is removed when both shockwave and embers have completed.
 
 ### USS Additions (in `Interaction.uss`)
 
@@ -63,9 +67,14 @@ An animation state object tracks current time, shockwave radius, and ember posit
 /* Stage 1: Screen flash */
 .flame-flash-overlay {
     position: absolute;
-    left: 0; top: 0; right: 0; bottom: 0;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
     background-color: rgba(255, 255, 255, 0.4);
-    transition: opacity 300ms ease-out;
+    transition-property: opacity;
+    transition-duration: 300ms;
+    transition-timing-function: ease-out;
 }
 .flame-flash-overlay--fade {
     opacity: 0;
@@ -74,28 +83,34 @@ An animation state object tracks current time, shockwave radius, and ember posit
 /* Stage 2: Flame pulse (applied to flame hex cell) */
 .grid-cell--levelup-pulse {
     scale: 1.2 1.2;
-    border-color: #FFB432;
-    border-width: 5px;
-    transition: scale 600ms ease-out, border-color 600ms ease-out, border-width 600ms ease-out;
+    transition-property: scale;
+    transition-duration: 600ms;
+    transition-timing-function: ease-out;
 }
 
-/* Stage 4: Hex cascade glow */
+/* Stage 4: Hex cascade glow (background-color only — borders are Painter2D) */
 .grid-cell--levelup-glow {
-    border-color: rgba(255, 180, 50, 0.8);
-    background-color: rgba(255, 180, 50, 0.1);
-    transition: border-color 200ms ease-in, background-color 200ms ease-in;
-}
-.grid-cell--levelup-glow-fade {
-    border-color: initial;
-    background-color: initial;
-    transition: border-color 300ms ease-out, background-color 300ms ease-out;
+    background-color: rgba(255, 180, 50, 0.15);
+    transition-property: background-color;
+    transition-duration: 200ms;
+    transition-timing-function: ease-in;
 }
 
-/* Stage 6: Level badge */
+/* Stage 6: Level badge — scale is driven procedurally for bounce effect */
 .flame-level-badge {
     position: absolute;
-    align-self: center;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
     -unity-text-align: middle-center;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0);
+    picking-mode: ignore;
+}
+
+.flame-level-badge__text {
     background-color: rgba(20, 15, 10, 0.85);
     color: #FFB432;
     font-size: 36px;
@@ -104,17 +119,22 @@ An animation state object tracks current time, shockwave radius, and ember posit
     border-radius: 24px;
     scale: 0 0;
     opacity: 0;
-    transition: scale 400ms ease-out-back, opacity 300ms ease-out;
+    transition-property: opacity;
+    transition-duration: 300ms;
+    transition-timing-function: ease-out;
 }
-.flame-level-badge--visible {
-    scale: 1 1;
+.flame-level-badge__text--visible {
     opacity: 1;
 }
-.flame-level-badge--fade {
+.flame-level-badge__text--fade {
     opacity: 0;
-    transition: opacity 500ms ease-out;
+    transition-property: opacity;
+    transition-duration: 500ms;
+    transition-timing-function: ease-out;
 }
 ```
+
+Note: USS uses longhand transition properties to match existing codebase conventions. The level badge bounce is procedural (scheduled scale interpolation), not USS `ease-out-back` which Unity USS does not support. Hex cascade uses `background-color` only since hex borders are drawn via Painter2D. The glow class is simply removed (no `initial` keyword needed) — removing the class reverts `background-color` to the element's base style.
 
 ### Integration Point
 
