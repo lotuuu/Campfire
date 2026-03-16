@@ -398,6 +398,44 @@ namespace Garden
             return true;
         }
 
+        /// <summary>
+        /// Speed up a quest AND collect rewards in one atomic operation.
+        /// Returns the reward list, or null on failure.
+        /// The server handles this as a single call — no separate collect needed.
+        /// </summary>
+        public List<RewardEntry> SpeedUpAndCollectQuest(int mallumIndex)
+        {
+            var data = SaveManager.Instance.Data;
+            if (mallumIndex < 0 || mallumIndex >= data.mallums.Count) return null;
+            var mallum = data.mallums[mallumIndex];
+            if (mallum.state != MallumState.OnQuest) return null;
+
+            if (!ConsumeQuestSpeedItem()) return null;
+
+            int serverId = mallum.serverId;
+
+            // Complete quest (rolls rewards into pendingRewards)
+            CompleteQuest(mallum);
+            NotificationService.Instance?.CancelQuestNotification(mallumIndex);
+
+            // Immediately collect rewards (sets state to Idle)
+            var rewards = CollectRewards(mallum);
+            foreach (var r in rewards)
+                ApothekeManager.Instance.AddItem(r.itemKey, r.count);
+
+            SaveManager.Instance.Save();
+            OnMallumsChanged?.Invoke();
+            AudioManager.Instance?.PlaySFX("quest_collect_rewards");
+
+            // Single server call — speed_up_quest on server now does speed-up + collect atomically
+            if (GameService.Instance != null && GameService.Instance.IsOnline && serverId > 0)
+            {
+                _ = NotifyServerOrResync(GameService.Instance.SpeedUpQuest(serverId));
+            }
+
+            return rewards;
+        }
+
         public bool SpeedUpWaterFetch(int mallumIndex)
         {
             var data = SaveManager.Instance.Data;

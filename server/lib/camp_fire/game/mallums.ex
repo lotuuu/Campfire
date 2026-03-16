@@ -158,12 +158,24 @@ defmodule CampFire.Game.Mallums do
           if config == nil, do: raise("Unknown quest: #{mallum.assigned_quest_name}")
           rewards = roll_rewards(config)
 
-          mallum
-          |> PlayerMallum.changeset(%{
-            state: "quest_complete",
-            pending_rewards: rewards
-          })
-          |> Repo.update()
+          # Atomically speed-up + collect: distribute rewards and go straight to idle
+          # to avoid race conditions with a separate collect call
+          Repo.transaction(fn ->
+            Enum.each(rewards, fn reward ->
+              item_key = reward["item_key"]
+              count = reward["count"]
+              Economy.upsert_item(player_uid, item_key, count)
+            end)
+
+            mallum
+            |> PlayerMallum.changeset(%{
+              state: "idle",
+              assigned_quest_name: nil,
+              start_time_utc: nil,
+              pending_rewards: []
+            })
+            |> Repo.update!()
+          end)
       end
     else
       nil -> {:error, :not_found}

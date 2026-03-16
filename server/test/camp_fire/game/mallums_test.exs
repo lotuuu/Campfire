@@ -146,7 +146,7 @@ defmodule CampFire.Game.MallumsTest do
   end
 
   describe "speed_up_quest/2" do
-    test "consumes energy_drink and completes quest" do
+    test "consumes energy_drink, collects rewards, and resets to idle" do
       {player, _mallum} = setup_player()
       {:ok, quest_mallum} = Mallums.send_on_quest(player.uid, "SwampForage")
 
@@ -155,14 +155,18 @@ defmodule CampFire.Game.MallumsTest do
 
       {:ok, completed} = Mallums.speed_up_quest(player.uid, quest_mallum.id)
 
-      assert completed.state == "quest_complete"
-      assert is_list(completed.pending_rewards)
-      assert length(completed.pending_rewards) >= 1
+      # Speed-up now atomically collects: state goes to idle, rewards distributed
+      assert completed.state == "idle"
+      assert completed.pending_rewards == []
 
       # energy_drink should be consumed (had 3, used 1 = 2)
       inventory = Economy.list_inventory(player.uid)
       drink = Enum.find(inventory, &(&1.item_key == "energy_drink"))
       assert drink.count == 2
+
+      # Rewards should have been distributed to inventory
+      reward_items = Enum.reject(inventory, &(&1.item_key == "energy_drink"))
+      assert length(reward_items) >= 1
     end
 
     test "fails without energy_drink" do

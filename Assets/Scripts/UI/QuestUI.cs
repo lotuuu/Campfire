@@ -382,13 +382,11 @@ namespace Garden
                         actionBtn.SetEnabled(drinkCount > 0);
                         actionBtn.clickable = new Clickable(() =>
                         {
-                            MallumManager.Instance.SpeedUpQuest(capturedIndex);
-                            var mallumData = SaveManager.Instance.Data.mallums[capturedIndex];
-                            var rewards = new List<RewardEntry>(mallumData.pendingRewards);
+                            var rewards = MallumManager.Instance.SpeedUpAndCollectQuest(capturedIndex);
+                            if (rewards == null || rewards.Count == 0) return;
                             FindFirstObjectByType<CampFireUI>()?.CloseOverlay();
                             RewardRevealUI.Instance?.Show("Quest Complete!", rewards, () =>
                             {
-                                MallumManager.Instance.CollectQuestRewards(capturedIndex);
                                 Refresh();
                             });
                         });

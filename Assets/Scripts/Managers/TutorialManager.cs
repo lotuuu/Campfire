@@ -305,8 +305,8 @@ namespace Garden
 
                 case StepSpeedUpQuest:
                     {
-                        // Hide hint as soon as quest is sped up (QuestComplete),
-                        // but wait for rewards to be collected (Idle) before showing next dialogue
+                        // SpeedUpAndCollectQuest goes directly to Idle, so check for
+                        // no active quests to detect completion
                         bool anyOnQuest = false;
                         bool anyQuestComplete = false;
                         foreach (var m in data.mallums)
@@ -318,7 +318,6 @@ namespace Garden
                         }
                         if (anyQuestComplete && !anyOnQuest)
                         {
-                            // Quest sped up — hide hint while reward reveal is showing
                             tutorialUI?.HideHint();
                             ClearAllHighlights();
                         }
