@@ -89,30 +89,59 @@ namespace Garden
             }
         }
 
+        private static readonly int BaseFontSize = 52;
+        private static readonly int MinFontSize = 30;
+        // Character count threshold at which we start shrinking
+        private static readonly int ShrinkThreshold = 14;
+
         private static string TruncateName(string name, int max = 10)
         {
             if (string.IsNullOrEmpty(name)) return Loc.Get("ui.label.camper", "Camper");
             return name.Length > max ? name[..max] : name;
         }
 
+        private void SetPlayerNameText(string text)
+        {
+            if (playerName == null) return;
+            playerName.text = text;
+
+            // Find the longest line to determine if we need to shrink
+            int maxLineLen = 0;
+            foreach (var line in text.Split('\n'))
+            {
+                if (line.Length > maxLineLen)
+                    maxLineLen = line.Length;
+            }
+
+            if (maxLineLen > ShrinkThreshold)
+            {
+                float scale = (float)ShrinkThreshold / maxLineLen;
+                int size = Mathf.Max(MinFontSize, Mathf.RoundToInt(BaseFontSize * scale));
+                playerName.style.fontSize = size;
+            }
+            else
+            {
+                playerName.style.fontSize = BaseFontSize;
+            }
+        }
+
         private void UpdatePlayerName()
         {
             if (playerName == null) return;
             var name = SocialSaveManager.Instance?.Data?.displayName;
-            playerName.text = string.Format(Loc.Get("ui.label.camp_name", "{0}'s Camp"), TruncateName(name));
+            SetPlayerNameText(string.Format(Loc.Get("ui.label.camp_name", "{0}'s Camp"), TruncateName(name)));
         }
 
         private void OnDisplayNameUpdated(string newName)
         {
-            if (playerName != null)
-                playerName.text = string.Format(Loc.Get("ui.label.camp_name", "{0}'s Camp"), TruncateName(newName));
+            SetPlayerNameText(string.Format(Loc.Get("ui.label.camp_name", "{0}'s Camp"), TruncateName(newName)));
         }
 
         public void SetVisitingName(string friendName)
         {
             if (playerName == null) return;
             if (friendName != null)
-                playerName.text = string.Format(Loc.Get("ui.label.camp_name", "{0}'s Camp"), TruncateName(friendName));
+                SetPlayerNameText(string.Format(Loc.Get("ui.label.camp_name", "{0}'s Camp"), TruncateName(friendName)));
             else
                 UpdatePlayerName();
         }

@@ -544,7 +544,7 @@ es = [
   {"ui.weather.msg_clear", "Salio el sol!"},
   # Camp name
   {"ui.label.camper", "Campista"},
-  {"ui.label.camp_name", "Campamento de\n{0}"},
+  {"ui.label.camp_name", "Campamento de {0}"},
   # Settings
   {"ui.settings.title", "Ajustes"},
   {"ui.settings.language", "IDIOMA"},
