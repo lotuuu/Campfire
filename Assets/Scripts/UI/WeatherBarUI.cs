@@ -169,7 +169,8 @@ namespace Garden
                 var header = new VisualElement();
                 header.AddToClassList("forecast-day-header");
 
-                var dayLabel = new Label(day.dayLabel.ToUpper());
+                var dayLabelText = Loc.Get($"ui.weather.day_{day.dayLabel.ToLower()}", day.dayLabel);
+                var dayLabel = new Label(dayLabelText.ToUpper());
                 dayLabel.AddToClassList("forecast-day-name");
                 header.Add(dayLabel);
 

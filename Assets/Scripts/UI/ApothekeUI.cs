@@ -54,7 +54,23 @@ namespace Garden
             tabInventory?.RegisterCallback<ClickEvent>(_ => ShowTab(0));
             tabCraft?.RegisterCallback<ClickEvent>(_ => ShowTab(1));
 
+            RefreshTabLabels();
+            if (LocalizationService.Instance != null)
+                LocalizationService.Instance.OnLocaleChanged += RefreshTabLabels;
+
             ShowTab(0);
+        }
+
+        private void RefreshTabLabels()
+        {
+            if (tabInventory != null) tabInventory.text = Loc.Get("ui.apotheke.inventory", "Inventory");
+            if (tabCraft != null) tabCraft.text = Loc.Get("ui.button.craft", "Craft");
+        }
+
+        private void OnDestroy()
+        {
+            if (LocalizationService.Instance != null)
+                LocalizationService.Instance.OnLocaleChanged -= RefreshTabLabels;
         }
 
         public void Refresh()

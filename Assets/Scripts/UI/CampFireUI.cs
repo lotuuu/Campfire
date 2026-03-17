@@ -144,13 +144,13 @@ namespace Garden
                 bottomNav.OnApothekeClicked += () =>
                 {
                     apotheke?.Refresh();
-                    OpenOverlay("Apotheke", apothekePanel);
+                    OpenOverlay(Loc.Get("ui.label.apotheke", "Apotheke"), apothekePanel);
                 };
-                bottomNav.OnLettersClicked += () => OpenOverlay("Social", lettersPanel);
+                bottomNav.OnLettersClicked += () => OpenOverlay(Loc.Get("ui.nav.social", "Social"), lettersPanel);
                 bottomNav.OnQuestClicked += () =>
                 {
                     questUI?.Refresh();
-                    OpenOverlay("Quests", questsPanel);
+                    OpenOverlay(Loc.Get("ui.nav.quests_title", "Quests"), questsPanel);
                 };
             }
 
@@ -172,7 +172,7 @@ namespace Garden
             if (settingsBtn != null)
             {
                 TryLoadSettingsIcon();
-                settingsBtn.clicked += () => OpenOverlay("Settings", settingsPanel);
+                settingsBtn.clicked += () => OpenOverlay(Loc.Get("ui.settings.title", "Settings"), settingsPanel);
             }
 
             // Wire debug button (editor + development builds)
@@ -205,7 +205,7 @@ namespace Garden
                 campsiteView.OnApothekeTapped += () =>
                 {
                     apotheke?.Refresh();
-                    OpenOverlay("Apotheke", apothekePanel);
+                    OpenOverlay(Loc.Get("ui.label.apotheke", "Apotheke"), apothekePanel);
                 };
             }
 

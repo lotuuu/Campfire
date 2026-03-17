@@ -122,6 +122,10 @@ namespace Garden
             tabFriends?.RegisterCallback<ClickEvent>(_ => ShowTab("friends"));
             tabAdd?.RegisterCallback<ClickEvent>(_ => ShowTab("add"));
 
+            RefreshTabLabels();
+            if (LocalizationService.Instance != null)
+                LocalizationService.Instance.OnLocaleChanged += RefreshTabLabels;
+
             // Wire display name and friend code input
             if (Application.isMobilePlatform)
             {
@@ -178,6 +182,13 @@ namespace Garden
             }
         }
 
+        private void RefreshTabLabels()
+        {
+            if (tabInbox != null) tabInbox.text = Loc.Get("ui.letters.inbox", "Inbox");
+            if (tabFriends != null) tabFriends.text = Loc.Get("ui.letters.friends", "Friends");
+            if (tabAdd != null) tabAdd.text = Loc.Get("ui.letters.add", "Add");
+        }
+
         private void OnDestroy()
         {
             if (SocialService.Instance != null)
@@ -185,6 +196,8 @@ namespace Garden
                 SocialService.Instance.OnSignedIn -= OnSignedIn;
                 SocialService.Instance.OnFriendListUpdated -= OnFriendListUpdated;
             }
+            if (LocalizationService.Instance != null)
+                LocalizationService.Instance.OnLocaleChanged -= RefreshTabLabels;
         }
 
         private void ShowTab(string tab)
