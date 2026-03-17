@@ -54,6 +54,9 @@ namespace Garden
                 if (WeatherService.Instance.Forecast.Count > 0)
                     PopulateForecast();
             }
+
+            if (LocalizationService.Instance != null)
+                LocalizationService.Instance.OnLocaleChanged += OnLocaleChanged;
         }
 
         private void OnDestroy()
@@ -65,6 +68,16 @@ namespace Garden
             }
             if (SocialService.Instance != null)
                 SocialService.Instance.OnDisplayNameUpdated -= OnDisplayNameUpdated;
+            if (LocalizationService.Instance != null)
+                LocalizationService.Instance.OnLocaleChanged -= OnLocaleChanged;
+        }
+
+        private void OnLocaleChanged()
+        {
+            UpdatePlayerName();
+            if (WeatherService.Instance != null)
+                UpdateWeather(WeatherService.Instance.CurrentWeather);
+            PopulateForecast();
         }
 
         private void Update()

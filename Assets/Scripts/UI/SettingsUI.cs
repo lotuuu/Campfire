@@ -21,6 +21,9 @@ namespace Garden
         private Button _confirmDelete;
         private DropdownField _langDropdown;
 
+        private Label _headerLanguage, _headerAudio, _headerAccount, _headerDanger;
+        private Label _labelMusic, _labelSfx, _labelPlayer, _labelServer, _labelVersion, _labelConfirm;
+
         public void Initialize(VisualElement root)
         {
             // Audio
@@ -72,6 +75,19 @@ namespace Garden
             _serverLabel.text = ServerConfig.Current.name;
             _versionLabel.text = Application.version;
 
+            // Localizable labels
+            _headerLanguage = root.Q<Label>("settings-header-language");
+            _headerAudio = root.Q<Label>("settings-header-audio");
+            _headerAccount = root.Q<Label>("settings-header-account");
+            _headerDanger = root.Q<Label>("settings-header-danger");
+            _labelMusic = root.Q<Label>("settings-label-music");
+            _labelSfx = root.Q<Label>("settings-label-sfx");
+            _labelPlayer = root.Q<Label>("settings-label-player");
+            _labelServer = root.Q<Label>("settings-label-server");
+            _labelVersion = root.Q<Label>("settings-label-version");
+            _labelConfirm = root.Q<Label>("settings-label-confirm");
+            RefreshLabels();
+
             // Language
             _langDropdown = root.Q<DropdownField>("language-dropdown");
             if (_langDropdown != null)
@@ -83,7 +99,7 @@ namespace Garden
                         _ = LocalizationService.Instance.SwitchLocale(evt.newValue);
                 });
                 if (LocalizationService.Instance != null)
-                    LocalizationService.Instance.OnLocaleChanged += RefreshLanguageDropdown;
+                    LocalizationService.Instance.OnLocaleChanged += OnLocaleChanged;
             }
 
             // Delete save
@@ -119,10 +135,33 @@ namespace Garden
             _langDropdown.SetValueWithoutNotify(LocalizationService.Instance.CurrentLocale);
         }
 
+        private void OnLocaleChanged()
+        {
+            RefreshLanguageDropdown();
+            RefreshLabels();
+        }
+
+        private void RefreshLabels()
+        {
+            if (_headerLanguage != null) _headerLanguage.text = Loc.Get("ui.settings.language", "LANGUAGE");
+            if (_headerAudio != null) _headerAudio.text = Loc.Get("ui.settings.audio", "AUDIO");
+            if (_headerAccount != null) _headerAccount.text = Loc.Get("ui.settings.account", "ACCOUNT");
+            if (_headerDanger != null) _headerDanger.text = Loc.Get("ui.settings.danger_zone", "DANGER ZONE");
+            if (_labelMusic != null) _labelMusic.text = Loc.Get("ui.settings.music", "Music");
+            if (_labelSfx != null) _labelSfx.text = Loc.Get("ui.settings.sfx", "Sound FX");
+            if (_labelPlayer != null) _labelPlayer.text = Loc.Get("ui.settings.player", "Player");
+            if (_labelServer != null) _labelServer.text = Loc.Get("ui.settings.server", "Server");
+            if (_labelVersion != null) _labelVersion.text = Loc.Get("ui.settings.version", "Version");
+            if (_labelConfirm != null) _labelConfirm.text = Loc.Get("ui.settings.confirm", "Are you sure?");
+            if (_deleteBtn != null) _deleteBtn.text = Loc.Get("ui.settings.delete_save", "Delete Save Data");
+            if (_confirmCancel != null) _confirmCancel.text = Loc.Get("ui.button.cancel", "Cancel");
+            if (_confirmDelete != null) _confirmDelete.text = Loc.Get("ui.settings.delete", "Delete");
+        }
+
         private void OnDestroy()
         {
             if (LocalizationService.Instance != null)
-                LocalizationService.Instance.OnLocaleChanged -= RefreshLanguageDropdown;
+                LocalizationService.Instance.OnLocaleChanged -= OnLocaleChanged;
         }
     }
 }

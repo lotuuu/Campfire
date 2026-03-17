@@ -225,45 +225,45 @@
 
                         <!-- Language section -->
                         <ui:VisualElement class="settings-section">
-                            <ui:Label text="LANGUAGE" class="settings-section-header settings-section-first" />
+                            <ui:Label name="settings-header-language" text="LANGUAGE" class="settings-section-header settings-section-first" />
                             <ui:VisualElement class="settings-row">
                                 <ui:DropdownField name="language-dropdown" label="Language" />
                             </ui:VisualElement>
                         </ui:VisualElement>
 
                         <!-- Audio section -->
-                        <ui:Label text="AUDIO" class="settings-section-header" />
+                        <ui:Label name="settings-header-audio" text="AUDIO" class="settings-section-header" />
                         <ui:VisualElement class="settings-slider-row">
-                            <ui:Label text="Music" class="settings-slider-label" />
+                            <ui:Label name="settings-label-music" text="Music" class="settings-slider-label" />
                             <ui:Slider name="music-slider" low-value="0" high-value="100" value="100" />
                             <ui:Label name="music-value" text="100%" class="settings-slider-value" />
                         </ui:VisualElement>
                         <ui:VisualElement class="settings-slider-row">
-                            <ui:Label text="Sound FX" class="settings-slider-label" />
+                            <ui:Label name="settings-label-sfx" text="Sound FX" class="settings-slider-label" />
                             <ui:Slider name="sfx-slider" low-value="0" high-value="100" value="100" />
                             <ui:Label name="sfx-value" text="100%" class="settings-slider-value" />
                         </ui:VisualElement>
 
                         <!-- Account section -->
-                        <ui:Label text="ACCOUNT" class="settings-section-header" />
+                        <ui:Label name="settings-header-account" text="ACCOUNT" class="settings-section-header" />
                         <ui:VisualElement class="settings-info-row">
-                            <ui:Label text="Player" class="settings-info-label" />
+                            <ui:Label name="settings-label-player" text="Player" class="settings-info-label" />
                             <ui:Label name="settings-player-id" text="---" class="settings-info-value" />
                         </ui:VisualElement>
                         <ui:VisualElement class="settings-info-row">
-                            <ui:Label text="Server" class="settings-info-label" />
+                            <ui:Label name="settings-label-server" text="Server" class="settings-info-label" />
                             <ui:Label name="settings-server" text="---" class="settings-info-value" />
                         </ui:VisualElement>
                         <ui:VisualElement class="settings-info-row">
-                            <ui:Label text="Version" class="settings-info-label" />
+                            <ui:Label name="settings-label-version" text="Version" class="settings-info-label" />
                             <ui:Label name="settings-version" text="---" class="settings-info-value" />
                         </ui:VisualElement>
 
                         <!-- Danger zone section -->
-                        <ui:Label text="DANGER ZONE" class="settings-section-header" />
+                        <ui:Label name="settings-header-danger" text="DANGER ZONE" class="settings-section-header" />
                         <ui:Button name="settings-delete-btn" text="Delete Save Data" class="settings-delete-btn" />
                         <ui:VisualElement name="settings-confirm-row" class="settings-confirm-row" style="display: none;">
-                            <ui:Label text="Are you sure?" class="settings-confirm-label" />
+                            <ui:Label name="settings-label-confirm" text="Are you sure?" class="settings-confirm-label" />
                             <ui:Button name="settings-confirm-cancel" text="Cancel" class="settings-confirm-cancel" />
                             <ui:Button name="settings-confirm-delete" text="Delete" class="settings-confirm-delete" />
                         </ui:VisualElement>

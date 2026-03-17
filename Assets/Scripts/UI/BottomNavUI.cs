@@ -14,6 +14,7 @@ namespace Garden
         private Label socialBadge;
 
         private VisualElement iconSeeds, iconQuest, iconMail;
+        private Label labelSeeds, labelQuest, labelMail;
         private bool iconsLoaded;
 
         public void Initialize(VisualElement root)
@@ -30,8 +31,29 @@ namespace Garden
             iconQuest = root.Q("nav-icon-quest");
             iconMail = root.Q("nav-icon-mail");
 
+            labelSeeds = btnSeeds?.Q<Label>(className: "nav-btn-label");
+            labelQuest = btnQuest?.Q<Label>(className: "nav-btn-label");
+            labelMail = btnMail?.Q<Label>(className: "nav-btn-label");
+
             questBadge = root.Q<Label>("nav-quest-badge");
             socialBadge = root.Q<Label>("nav-social-badge");
+
+            RefreshLabels();
+            if (LocalizationService.Instance != null)
+                LocalizationService.Instance.OnLocaleChanged += RefreshLabels;
+        }
+
+        private void OnDestroy()
+        {
+            if (LocalizationService.Instance != null)
+                LocalizationService.Instance.OnLocaleChanged -= RefreshLabels;
+        }
+
+        private void RefreshLabels()
+        {
+            if (labelSeeds != null) labelSeeds.text = Loc.Get("ui.nav.seeds", "SEEDS");
+            if (labelQuest != null) labelQuest.text = Loc.Get("ui.nav.quests", "QUESTS");
+            if (labelMail != null) labelMail.text = Loc.Get("ui.nav.social", "SOCIAL");
         }
 
         private void Update()

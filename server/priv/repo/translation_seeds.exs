@@ -249,6 +249,19 @@ en = [
   # Camp name
   {"ui.label.camper", "Camper"},
   {"ui.label.camp_name", "{0}'s Camp"},
+  # Settings
+  {"ui.settings.language", "LANGUAGE"},
+  {"ui.settings.audio", "AUDIO"},
+  {"ui.settings.account", "ACCOUNT"},
+  {"ui.settings.danger_zone", "DANGER ZONE"},
+  {"ui.settings.music", "Music"},
+  {"ui.settings.sfx", "Sound FX"},
+  {"ui.settings.player", "Player"},
+  {"ui.settings.server", "Server"},
+  {"ui.settings.version", "Version"},
+  {"ui.settings.confirm", "Are you sure?"},
+  {"ui.settings.delete_save", "Delete Save Data"},
+  {"ui.settings.delete", "Delete"},
 ]
 
 # ── Spanish ──
@@ -496,6 +509,19 @@ es = [
   # Camp name
   {"ui.label.camper", "Campista"},
   {"ui.label.camp_name", "Campamento de {0}"},
+  # Settings
+  {"ui.settings.language", "IDIOMA"},
+  {"ui.settings.audio", "AUDIO"},
+  {"ui.settings.account", "CUENTA"},
+  {"ui.settings.danger_zone", "ZONA DE PELIGRO"},
+  {"ui.settings.music", "Musica"},
+  {"ui.settings.sfx", "Efectos"},
+  {"ui.settings.player", "Jugador"},
+  {"ui.settings.server", "Servidor"},
+  {"ui.settings.version", "Version"},
+  {"ui.settings.confirm", "Estas seguro?"},
+  {"ui.settings.delete_save", "Borrar Datos"},
+  {"ui.settings.delete", "Borrar"},
 ]
 
 # ── Seed all locales ──
