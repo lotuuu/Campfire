@@ -27,11 +27,14 @@ namespace Garden
             if (Instance == this) Instance = null;
         }
 
+        public bool IsLoaded { get; private set; }
+
         public string Get(string key, string fallback)
         {
             if (_strings.TryGetValue(key, out var value))
                 return value;
-            Debug.LogWarning($"[Loc] Missing translation key: \"{key}\", using fallback: \"{fallback}\"");
+            if (IsLoaded)
+                Debug.LogWarning($"[Loc] Missing translation key: \"{key}\", using fallback: \"{fallback}\"");
             return fallback;
         }
 
@@ -39,6 +42,7 @@ namespace Garden
         {
             _strings = data ?? new();
             CurrentLocale = locale;
+            IsLoaded = true;
         }
 
         public void SetSupportedLocales(List<string> locales)
