@@ -342,9 +342,6 @@ namespace Garden
                 viewport.style.translate = StyleKeyword.Null; // reset shake
                 foreach (var el in createdElements)
                     el.RemoveFromHierarchy();
-                // Restore bars
-                topBar?.RemoveFromClassList("flame-bar-hidden");
-                bottomNav?.RemoveFromClassList("flame-bar-hidden");
                 IsPlaying = false;
                 onComplete?.Invoke();
             }).StartingIn(3500);
@@ -358,9 +355,9 @@ namespace Garden
         /// Cells must already have grid-cell--reveal-hidden applied during RebuildGrid.
         /// </summary>
         public static void AnimateNewCells(Dictionary<(int, int), VisualElement> cellLookup,
-            int oldRadius, VisualElement viewport)
+            int oldRadius, VisualElement viewport, Action onComplete = null)
         {
-            if (oldRadius <= 0) return;
+            if (oldRadius <= 0) { onComplete?.Invoke(); return; }
 
             var newCells = new List<(VisualElement cell, float angle)>();
 
@@ -439,6 +436,7 @@ namespace Garden
                 {
                     viewport.style.scale = StyleKeyword.Null;
                     viewport.style.overflow = StyleKeyword.Null;
+                    onComplete?.Invoke();
                 }
             }).Every(16).StartingIn(zoomBackStart).Until(() => backElapsed >= backDurationMs);
         }

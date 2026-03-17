@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -23,8 +22,7 @@ namespace Garden
         private VisualTreeAsset cellTemplate;
         private CampsitePanController panController;
 
-        // Curtain transition
-        private VisualElement visitTransition;
+        // Visit transition (world-space sprite wipe via TransitionWipe singleton)
 
         private const float HexSize = 220f;     // hex outer radius (pixel spacing)
         private const float CellWidth = 380f;   // cell element width
@@ -123,8 +121,6 @@ namespace Garden
             });
 
             cellTemplate = Resources.Load<VisualTreeAsset>("UI/Templates/GridCell");
-            visitTransition = root.Q("visit-transition");
-
             panController = new CampsitePanController(viewport, canvas);
 
             // Viewport pointer handlers for drag-move
@@ -1021,8 +1017,6 @@ namespace Garden
 
         // ── Visit Mode ──
 
-        private const float CurtainDurationMs = 480f;
-
         private string visitFriendName;
 
         public void EnterVisitMode(VillageSnapshot snapshot, string friendName = null)
@@ -1030,58 +1024,35 @@ namespace Garden
             visitSnapshot = snapshot;
             visitFriendName = friendName;
             CloseInteractionPanel();
-
-            // Set curtain label
-            if (visitTransition != null)
-            {
-                var label = visitTransition.Q<Label>("curtain-label");
-                if (label != null)
-                    label.text = string.IsNullOrEmpty(friendName) ? Loc.Get("ui.label.visiting_generic", "Visiting...") : string.Format(Loc.Get("ui.label.visiting", "Visiting {0}..."), friendName);
-            }
-
-            StartCoroutine(VisitTransitionCoroutine(toVisit: true));
+            PlayVisitTransition(toVisit: true);
         }
 
         public void ExitVisitMode()
         {
-            if (visitTransition != null)
-            {
-                var label = visitTransition.Q<Label>("curtain-label");
-                if (label != null) label.text = Loc.Get("ui.label.returning", "Returning...");
-            }
-            StartCoroutine(VisitTransitionCoroutine(toVisit: false));
+            PlayVisitTransition(toVisit: false);
         }
 
-        private IEnumerator VisitTransitionCoroutine(bool toVisit)
+        private void PlayVisitTransition(bool toVisit)
         {
-            if (visitTransition == null)
+            var wipe = TransitionWipe.Instance;
+            if (wipe == null)
             {
-                // No transition element — just switch immediately
                 ApplyVisitState(toVisit);
-                yield break;
+                return;
             }
 
-            // Show container and close curtains
-            visitTransition.style.display = DisplayStyle.Flex;
-            // Force a frame so display:flex is applied before adding the class
-            yield return null;
-            visitTransition.AddToClassList("curtain-closed");
+            // Hide all UI so the sprite wipe covers everything
+            if (campRoot != null)
+                campRoot.style.display = DisplayStyle.None;
 
-            // Wait for curtains to fully close
-            yield return new WaitForSeconds(CurtainDurationMs / 1000f + 0.05f);
-
-            // Swap the content behind the curtains
-            ApplyVisitState(toVisit);
-
-            // Let one frame render the new grid
-            yield return null;
-
-            // Open curtains
-            visitTransition.RemoveFromClassList("curtain-closed");
-
-            // Wait for curtains to fully open, then hide
-            yield return new WaitForSeconds(CurtainDurationMs / 1000f + 0.05f);
-            visitTransition.style.display = DisplayStyle.None;
+            wipe.Play(
+                onMidPoint: () => ApplyVisitState(toVisit),
+                onComplete: () =>
+                {
+                    if (campRoot != null)
+                        campRoot.style.display = DisplayStyle.Flex;
+                }
+            );
         }
 
         private void ApplyVisitState(bool toVisit)
@@ -1519,6 +1490,12 @@ namespace Garden
                     int newLevel = FlameManager.Instance.Level;
 
                     // Callback: rebuild grid with new cells born hidden, then cascade
+                    void RestoreBars()
+                    {
+                        campRoot.Q("top-bar")?.RemoveFromClassList("flame-bar-hidden");
+                        campRoot.Q("bottom-nav")?.RemoveFromClassList("flame-bar-hidden");
+                    }
+
                     void OnAnimationComplete()
                     {
                         int newRadius = FlameManager.Instance.GetGridSize();
@@ -1528,7 +1505,9 @@ namespace Garden
                         RebuildGrid();
                         _revealOuterBeyondRadius = -1;
                         if (gridExpanded)
-                            FlameLevelUpAnimator.AnimateNewCells(cellLookup, oldRadius, viewport);
+                            FlameLevelUpAnimator.AnimateNewCells(cellLookup, oldRadius, viewport, RestoreBars);
+                        else
+                            RestoreBars();
                     }
 
                     // Pan to center on flame (using current offsets), then play animation
@@ -3212,6 +3191,9 @@ namespace Garden
             return h > 0 ? $"{h}:{m:D2}:{s:D2}" : $"{m}:{s:D2}";
         }
 
+        public bool IsInteractionPanelOpen =>
+            interactionBackdrop != null && interactionBackdrop.style.display == DisplayStyle.Flex;
+
         private void CloseInteractionPanel()
         {
             AudioManager.Instance?.PlaySFX("ui_panel_close");
@@ -3239,6 +3221,8 @@ namespace Garden
                 }
             }
 
+            // Notify tutorial of panel close so deferred steps can advance
+            TutorialManager.Instance?.OnInteractionPanelClosed();
         }
 
         // ── Drag-Move ──
