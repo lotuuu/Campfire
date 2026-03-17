@@ -486,7 +486,7 @@ namespace Garden
             tutorialUI?.HideHint();
             if (_portraitCache == null)
                 _portraitCache = SpriteService.Instance?.GetTexture("portraits/spark_of_ara");
-            dialogueUI?.Show(speaker, lines, onComplete, _portraitCache);
+            dialogueUI?.Show(speaker, lines, onComplete, _portraitCache, "ui.label.spark_of_ara");
         }
 
         private void ShowWelcome()

@@ -17,6 +17,7 @@ namespace Garden
 
         private List<string> lines;
         private string speaker;
+        private string speakerLocKey;
         private int currentIndex;
         private Action onComplete;
 
@@ -44,10 +45,13 @@ namespace Garden
                 Advance();
             });
 
+            if (LocalizationService.Instance != null)
+                LocalizationService.Instance.OnLocaleChanged += RefreshLocale;
+
             Hide();
         }
 
-        public void Show(string speakerName, List<string> dialogueLines, Action onDialogueComplete, Texture2D portrait = null)
+        public void Show(string speakerName, List<string> dialogueLines, Action onDialogueComplete, Texture2D portrait = null, string speakerKey = null)
         {
             if (dialogueLines == null || dialogueLines.Count == 0)
             {
@@ -56,6 +60,7 @@ namespace Garden
             }
 
             speaker = speakerName;
+            speakerLocKey = speakerKey;
             lines = dialogueLines;
             currentIndex = 0;
             onComplete = onDialogueComplete;
@@ -113,6 +118,22 @@ namespace Garden
                 textLabel.text = lines[currentIndex];
             if (tapHint != null)
                 tapHint.text = currentIndex < lines.Count - 1 ? Loc.Get("ui.dialogue.tap_continue", "Tap to continue") : Loc.Get("ui.dialogue.tap_close", "Tap to close");
+        }
+
+        private void RefreshLocale()
+        {
+            if (overlay == null || overlay.style.display == DisplayStyle.None) return;
+            if (!string.IsNullOrEmpty(speakerLocKey) && speakerLabel != null)
+                speakerLabel.text = Loc.Get(speakerLocKey, speaker);
+            // Refresh tap hint
+            if (tapHint != null && lines != null && currentIndex < lines.Count)
+                tapHint.text = currentIndex < lines.Count - 1 ? Loc.Get("ui.dialogue.tap_continue", "Tap to continue") : Loc.Get("ui.dialogue.tap_close", "Tap to close");
+        }
+
+        private void OnDestroy()
+        {
+            if (LocalizationService.Instance != null)
+                LocalizationService.Instance.OnLocaleChanged -= RefreshLocale;
         }
     }
 }
