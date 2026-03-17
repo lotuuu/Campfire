@@ -316,5 +316,65 @@ namespace Garden
                 onComplete?.Invoke();
             }).StartingIn(3500);
         }
+
+        /// <summary>
+        /// Animate newly revealed hex cells after a grid expansion.
+        /// Cells outside oldRadius are hidden then revealed in a cascade.
+        /// Call this right after RebuildGrid when the grid has expanded.
+        /// </summary>
+        public static void AnimateNewCells(Dictionary<(int, int), VisualElement> cellLookup, int oldRadius)
+        {
+            if (oldRadius <= 0) return;
+
+            // Collect new cells (outside old radius) grouped by hex distance from center
+            var cellsByDist = new Dictionary<int, List<VisualElement>>();
+            int maxDist = 0;
+
+            foreach (var kvp in cellLookup)
+            {
+                int q = kvp.Key.Item1;
+                int r = kvp.Key.Item2;
+                // Hex distance from origin
+                int dist = (Mathf.Abs(q) + Mathf.Abs(r) + Mathf.Abs(q + r)) / 2;
+                if (dist <= oldRadius) continue; // existing cell, skip
+
+                if (!cellsByDist.ContainsKey(dist))
+                    cellsByDist[dist] = new List<VisualElement>();
+                cellsByDist[dist].Add(kvp.Value);
+                if (dist > maxDist) maxDist = dist;
+            }
+
+            if (cellsByDist.Count == 0) return;
+
+            // Hide all new cells immediately
+            foreach (var list in cellsByDist.Values)
+                foreach (var cell in list)
+                    cell.AddToClassList("grid-cell--reveal-hidden");
+
+            // Cascade reveal: innermost new ring first, then outward
+            int minNewDist = int.MaxValue;
+            foreach (var d in cellsByDist.Keys)
+                if (d < minNewDist) minNewDist = d;
+
+            foreach (var kvp in cellsByDist)
+            {
+                int ringOffset = kvp.Key - minNewDist;
+                long delayMs = 200 + ringOffset * 150; // stagger by ring
+                foreach (var cell in kvp.Value)
+                {
+                    var c = cell;
+                    c.schedule.Execute(() =>
+                    {
+                        c.AddToClassList("grid-cell--reveal");
+                        // Clean up classes after transition completes
+                        c.schedule.Execute(() =>
+                        {
+                            c.RemoveFromClassList("grid-cell--reveal-hidden");
+                            c.RemoveFromClassList("grid-cell--reveal");
+                        }).StartingIn(500);
+                    }).StartingIn(delayMs);
+                }
+            }
+        }
     }
 }

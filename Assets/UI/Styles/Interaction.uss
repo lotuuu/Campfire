@@ -869,6 +869,19 @@
     transition-timing-function: ease-in;
 }
 
+.grid-cell--reveal-hidden {
+    scale: 0 0;
+    opacity: 0;
+}
+
+.grid-cell--reveal {
+    scale: 1 1;
+    opacity: 1;
+    transition-property: scale, opacity;
+    transition-duration: 400ms, 300ms;
+    transition-timing-function: ease-out, ease-out;
+}
+
 .flame-levelup-badge {
     position: absolute;
     left: 0;
