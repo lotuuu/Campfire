@@ -269,6 +269,7 @@ defmodule CampFireWeb.GameController do
       mallumHouses: Enum.map(houses, &serialize_mallum_house/1),
       birds: Enum.map(birds, &serialize_bird/1),
       apotheke: %{id: apotheke.id, gridX: apotheke.grid_x, gridY: apotheke.grid_y},
+      tutorialStep: player_state["tutorialStep"] || 0,
       cosmeticState: player_state,
       weather: weather_data
     })
@@ -296,6 +297,31 @@ defmodule CampFireWeb.GameController do
 
   def save_state(conn, _params) do
     conn |> put_status(400) |> json(%{error: "Missing 'data' field"})
+  end
+
+  def save_tutorial_step(conn, %{"tutorialStep" => step}) when is_integer(step) do
+    uid = conn.assigns.current_player.uid
+
+    case Repo.get(PlayerState, uid) do
+      nil ->
+        %PlayerState{}
+        |> PlayerState.changeset(%{player_uid: uid, data: %{"tutorialStep" => step}})
+        |> Repo.insert()
+
+      existing ->
+        merged = Map.put(existing.data || %{}, "tutorialStep", step)
+        existing
+        |> PlayerState.changeset(%{data: merged})
+        |> Repo.update()
+    end
+    |> case do
+      {:ok, _} -> conn |> put_status(200) |> json(%{ok: true})
+      {:error, _} -> conn |> put_status(422) |> json(%{error: "Failed to save tutorial step"})
+    end
+  end
+
+  def save_tutorial_step(conn, _params) do
+    conn |> put_status(400) |> json(%{error: "Missing 'tutorialStep'"})
   end
 
   # ── Plots ───────────────────────────────────────────────────

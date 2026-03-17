@@ -129,6 +129,7 @@ defmodule CampFireWeb.Router do
     post "/sprites/bundle", SpriteController, :bundle
     get "/state", GameController, :get_state
     put "/state", GameController, :save_state
+    post "/tutorial-step", GameController, :save_tutorial_step
     get "/plots", GameController, :list_plots
     post "/plot/craft", GameController, :craft_plot
     post "/plot/plant", GameController, :plant_seed

@@ -171,13 +171,16 @@ namespace Garden
                         OnInitFailed?.Invoke("Failed to parse game state");
                         return;
                     }
-                    // If tutorial was started but not completed, wipe everything and start fresh
-                    // BEFORE applying server state (which would cause visible position jumps).
-                    // Step 0 is excluded — it means either brand-new or just-reset, not "in progress".
+                    // If tutorial was started but not completed, wipe everything and start fresh.
+                    // Check BOTH local and server tutorial step — on reconnect (e.g. app reinstall),
+                    // local step is 0 but the server may have partial data from an incomplete tutorial.
                     var localData = SaveManager.Instance.Data;
-                    if (localData.tutorialStep > 0 && localData.tutorialStep < TutorialManager.StepComplete && localData.vases.Count > 0)
+                    int serverTutorialStep = state.tutorialStep;
+                    bool localIncomplete = localData.tutorialStep > 0 && localData.tutorialStep < TutorialManager.StepComplete;
+                    bool serverIncomplete = serverTutorialStep > 0 && serverTutorialStep < TutorialManager.StepComplete;
+                    if (localIncomplete || serverIncomplete)
                     {
-                        Debug.Log("[GameService] Tutorial incomplete — wiping save before applying server state");
+                        Debug.Log($"[GameService] Tutorial incomplete (local={localData.tutorialStep}, server={serverTutorialStep}) — wiping save");
                         // Clear server-side player data directly (don't rely on DebugService)
                         try
                         {
@@ -1020,6 +1023,26 @@ namespace Garden
             }
             catch (Exception e) { Debug.LogWarning($"GameService: CraftApotheke failed: {e.Message}"); }
             return null;
+        }
+
+        // ── Tutorial Step ──
+
+        [Serializable]
+        private class TutorialStepRequest { public int tutorialStep; }
+
+        public async Task SaveTutorialStep(int step)
+        {
+            if (!IsOnline) return;
+            try
+            {
+                var body = JsonUtility.ToJson(new TutorialStepRequest { tutorialStep = step });
+                using var req = PostJson("/game/tutorial-step", body);
+                await SendAsync(req);
+
+                if (req.responseCode < 200 || req.responseCode >= 300)
+                    Debug.LogWarning($"GameService: SaveTutorialStep failed (HTTP {req.responseCode})");
+            }
+            catch (Exception e) { Debug.LogWarning($"GameService: SaveTutorialStep failed: {e.Message}"); }
         }
 
         // ── Cosmetic State ──

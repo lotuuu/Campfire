@@ -14,6 +14,7 @@ namespace Garden
         private bool initialized;
         private int highlightQ = int.MinValue;
         private int highlightR = int.MinValue;
+        private int _pendingAdvanceStep = -1;
 
 
         // Flow: Welcome → Plant → Water → Harvest → Build House → Plant Again → Fetch Water → Quest → Speed Up Quest → Cress → Second Plot → Upgrade → Complete
@@ -121,6 +122,10 @@ namespace Garden
             SaveManager.Instance.Data.tutorialStep = step;
             SaveManager.Instance.Save();
 
+            // Sync to server so reconnecting clients can detect incomplete tutorials
+            if (GameService.Instance != null && GameService.Instance.IsOnline)
+                _ = GameService.Instance.SaveTutorialStep(step);
+
             if (step >= StepComplete)
             {
                 ClearAllHighlights();
@@ -129,6 +134,35 @@ namespace Garden
             }
 
             ShowHintForStep(step);
+        }
+
+        /// <summary>
+        /// Advance to step when the interaction panel is closed.
+        /// If no panel is open, advances immediately.
+        /// </summary>
+        private void AdvanceWhenPanelCloses(int step)
+        {
+            if (campsiteView != null && campsiteView.IsInteractionPanelOpen)
+            {
+                _pendingAdvanceStep = step;
+            }
+            else
+            {
+                AdvanceTo(step);
+            }
+        }
+
+        /// <summary>
+        /// Called by CampsiteViewUI when the interaction panel closes.
+        /// </summary>
+        public void OnInteractionPanelClosed()
+        {
+            if (_pendingAdvanceStep >= 0)
+            {
+                int step = _pendingAdvanceStep;
+                _pendingAdvanceStep = -1;
+                AdvanceTo(step);
+            }
         }
 
         // --- Event handlers ---
@@ -213,7 +247,7 @@ namespace Garden
                         string.Format(Loc.Get("tutorial.dialogue.harvested", "You harvested {0} {1}!"), result.drops, PlotManager.GetSeedDisplayName(result.seedItemKey)),
                         Loc.Get("tutorial.dialogue.harvest_improved", "Your harvest was improved because you followed the recipe by watering it."),
                         Loc.Get("tutorial.dialogue.seed_recipe", "Each seed has a recipe. Follow it for higher yields!")
-                    }, () => AdvanceTo(StepBuildHouse));
+                    }, () => AdvanceWhenPanelCloses(StepBuildHouse));
                     break;
 
                 case StepFetchWater:
@@ -222,14 +256,14 @@ namespace Garden
                     {
                         ShowDialogue(Loc.Get("ui.label.spark_of_ara", "Spark of Ara"), new List<string> {
                             Loc.Get("tutorial.dialogue.water_success", "Nice work getting the water in time!")
-                        }, () => AdvanceTo(StepSendOnQuest));
+                        }, () => AdvanceWhenPanelCloses(StepSendOnQuest));
                     }
                     else
                     {
                         ShowDialogue(Loc.Get("ui.label.spark_of_ara", "Spark of Ara"), new List<string> {
                             Loc.Get("tutorial.dialogue.harvest_without_recipe", "Without following the recipe, you got less harvest."),
                             Loc.Get("tutorial.dialogue.always_rewards", "You'll always earn some rewards, even if you don't follow the recipe at all")
-                        }, () => AdvanceTo(StepSendOnQuest));
+                        }, () => AdvanceWhenPanelCloses(StepSendOnQuest));
                     }
                     break;
 
@@ -238,7 +272,7 @@ namespace Garden
                     {
                         ShowDialogue(Loc.Get("ui.label.spark_of_ara", "Spark of Ara"), new List<string> {
                             Loc.Get("tutorial.dialogue.cress_harvested", "Cress harvested! You can use this to build more plots.")
-                        }, () => AdvanceTo(StepBuildSecondPlot));
+                        }, () => AdvanceWhenPanelCloses(StepBuildSecondPlot));
                     }
                     break;
             }
@@ -276,7 +310,7 @@ namespace Garden
                     {
                         ShowDialogue(Loc.Get("ui.label.spark_of_ara", "Spark of Ara"), new List<string> {
                             Loc.Get("tutorial.dialogue.mallum_intro", "Your Mallum can fetch water and go on quests!")
-                        }, () => AdvanceTo(StepPlantAgain));
+                        }, () => AdvanceWhenPanelCloses(StepPlantAgain));
                     }
                     break;
 
@@ -556,7 +590,7 @@ namespace Garden
                     {
                         ShowDialogue(Loc.Get("ui.label.spark_of_ara", "Spark of Ara"), new List<string> {
                             Loc.Get("tutorial.dialogue.mallum_intro", "Your Mallum can fetch water and go on quests!")
-                        }, () => AdvanceTo(StepPlantAgain));
+                        }, () => AdvanceWhenPanelCloses(StepPlantAgain));
                     }
                     break;
                 case StepBuildSecondPlot:

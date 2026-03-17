@@ -15,6 +15,7 @@ namespace Garden
         public List<ServerBird> birds = new();
         public ServerApotheke apotheke;
         public ServerWeather weather;
+        public int tutorialStep;
     }
 
     [Serializable]
