@@ -32,6 +32,11 @@ namespace Garden
         private Label shareStatus;
         private Label addFriendStatus;
 
+        // Tab text labels (child Labels inside each Button, separate from button.text)
+        private Label tabInboxLabel;
+        private Label tabFriendsLabel;
+        private Label tabAddLabel;
+
         // Badges
         private Label badgeInbox;
         private Label badgeFriends;
@@ -105,6 +110,11 @@ namespace Garden
             giftSelectedLabel = root.Q<Label>("gift-selected-label");
             confirmGiftBtn = root.Q<Button>("btn-confirm-gift");
             cancelGiftBtn = root.Q<Button>("btn-cancel-gift");
+
+            // Tab text labels — first Label child that isn't the badge
+            tabInboxLabel = GetTabTextLabel(tabInbox);
+            tabFriendsLabel = GetTabTextLabel(tabFriends);
+            tabAddLabel = GetTabTextLabel(tabAdd);
 
             // Badges
             badgeInbox = root.Q<Label>("badge-inbox");
@@ -182,11 +192,22 @@ namespace Garden
             }
         }
 
+        private static Label GetTabTextLabel(Button tab)
+        {
+            if (tab == null) return null;
+            foreach (var child in tab.Children())
+            {
+                if (child is Label label && !label.ClassListContains("tab-badge"))
+                    return label;
+            }
+            return null;
+        }
+
         private void RefreshTabLabels()
         {
-            if (tabInbox != null) tabInbox.text = Loc.Get("ui.letters.inbox", "Inbox");
-            if (tabFriends != null) tabFriends.text = Loc.Get("ui.letters.friends", "Friends");
-            if (tabAdd != null) tabAdd.text = Loc.Get("ui.letters.add", "Add");
+            if (tabInboxLabel != null) tabInboxLabel.text = Loc.Get("ui.letters.inbox", "Inbox");
+            if (tabFriendsLabel != null) tabFriendsLabel.text = Loc.Get("ui.letters.friends", "Friends");
+            if (tabAddLabel != null) tabAddLabel.text = Loc.Get("ui.letters.add", "Add");
         }
 
         private void OnDestroy()
