@@ -196,6 +196,7 @@ namespace Garden
 
         public string GetItemDisplayName(string itemKey)
         {
+            if (string.IsNullOrEmpty(itemKey)) return "";
             if (Items.TryGetValue(itemKey, out var config))
                 return config.displayName;
             return itemKey; // fallback to raw key
@@ -245,7 +246,8 @@ namespace Garden
 
                 if (req.responseCode != 200)
                 {
-                    Debug.LogWarning($"ConfigService: fetch failed (HTTP {req.responseCode})");
+                    var body = req.downloadHandler?.text ?? "(no body)";
+                    Debug.LogError($"ConfigService: fetch failed (HTTP {req.responseCode}) url={url} error={req.error} body={body}");
                     return false;
                 }
 
@@ -256,7 +258,7 @@ namespace Garden
 
                 if (_seedConfigs.Count == 0)
                 {
-                    Debug.LogWarning("ConfigService: response missing seeds section, treating as failed.");
+                    Debug.LogError("ConfigService: response missing seeds section, treating as failed.");
                     return false;
                 }
                 IsLoaded = true;
@@ -265,7 +267,7 @@ namespace Garden
             }
             catch (Exception e)
             {
-                Debug.LogWarning($"ConfigService: fetch failed ({e.Message})");
+                Debug.LogError($"ConfigService: fetch failed ({e.GetType().Name}: {e.Message})\n{e.StackTrace}");
                 return false;
             }
         }
