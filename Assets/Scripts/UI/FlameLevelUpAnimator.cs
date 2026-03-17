@@ -284,7 +284,13 @@ namespace Garden
                 }
 
                 // Sync with shockwave: first ring starts at 100ms (when updater starts),
-                // each subsequent ring 120ms later — matches the shockwave speed
+                // each subsequent ring 120ms later — matches the shockwave speed.
+                // Fade glow alpha procedurally (CSS transitions don't affect Painter2D).
+                const float fadeInDuration = 150f;  // ms
+                const float holdDuration = 200f;    // ms
+                const float fadeOutDuration = 350f;  // ms
+                const float peakAlpha = 0.35f;
+
                 foreach (var kvp in cellsByRing)
                 {
                     int ring = kvp.Key;
@@ -294,29 +300,37 @@ namespace Garden
                         var c = cell;
                         gridContainer.schedule.Execute(() =>
                         {
-                            c.AddToClassList("grid-cell--levelup-glow");
-                            c.MarkDirtyRepaint();
+                            float glowElapsed = 0f;
                             c.schedule.Execute(() =>
                             {
-                                c.RemoveFromClassList("grid-cell--levelup-glow");
+                                glowElapsed += 16f;
+                                float alpha;
+                                if (glowElapsed < fadeInDuration)
+                                    alpha = peakAlpha * (glowElapsed / fadeInDuration);
+                                else if (glowElapsed < fadeInDuration + holdDuration)
+                                    alpha = peakAlpha;
+                                else
+                                {
+                                    float t = (glowElapsed - fadeInDuration - holdDuration) / fadeOutDuration;
+                                    alpha = peakAlpha * (1f - Mathf.Clamp01(t));
+                                }
+                                CampsiteViewUI.GlowAlpha[c] = alpha;
                                 c.MarkDirtyRepaint();
-                            }).StartingIn(500);
+                                if (glowElapsed >= fadeInDuration + holdDuration + fadeOutDuration)
+                                    CampsiteViewUI.GlowAlpha.Remove(c);
+                            }).Every(16).Until(() => glowElapsed >= fadeInDuration + holdDuration + fadeOutDuration);
                         }).StartingIn(delayMs);
                     }
                 }
             }
 
-            // ── Hide top/bottom bars (after all layout reads are done) ──
+            // ── Hide top/bottom bars and unconstrain viewport ──
             var topBar = root.Q("top-bar");
             var bottomNav = root.Q("bottom-nav");
             topBar?.AddToClassList("flame-bar-hidden");
             bottomNav?.AddToClassList("flame-bar-hidden");
-            // After opacity fade, collapse out of flow so viewport expands
-            root.schedule.Execute(() =>
-            {
-                if (topBar != null) topBar.style.display = DisplayStyle.None;
-                if (bottomNav != null) bottomNav.style.display = DisplayStyle.None;
-            }).StartingIn(300);
+            // Allow animation content (shake, rings, embers) to extend beyond viewport
+            viewport.style.overflow = Overflow.Visible;
 
             // ── Stage 6: Level Badge (1.2s–3.5s) — bigger, with glow ──
             var badge = new VisualElement();

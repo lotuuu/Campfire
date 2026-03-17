@@ -861,10 +861,6 @@
     transition-timing-function: ease-out;
 }
 
-.grid-cell--levelup-glow {
-    -unity-background-image-tint-color: rgba(255, 200, 80, 1);
-}
-
 .grid-cell--reveal-hidden {
     scale: 0 0;
     opacity: 0;

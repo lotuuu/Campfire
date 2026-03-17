@@ -31,6 +31,8 @@ namespace Garden
         // USS custom properties for hex drawing
         private static readonly CustomStyleProperty<Color> s_HexFill = new("--hex-fill");
         private static readonly CustomStyleProperty<Color> s_HexBorder = new("--hex-border");
+        /// <summary>Procedural glow alpha per cell, driven by FlameLevelUpAnimator.</summary>
+        internal static readonly Dictionary<VisualElement, float> GlowAlpha = new();
 
         // Mode state machine
         private enum CampsiteMode { Normal, Placing, Watering, Visiting, Moving, Tutorial }
@@ -1299,8 +1301,8 @@ namespace Garden
             painter.lineWidth = el.ClassListContains("grid-cell--flame") ? 3f : 2f;
             painter.Stroke();
 
-            // Level-up glow overlay
-            if (el.ClassListContains("grid-cell--levelup-glow"))
+            // Level-up glow overlay (alpha driven procedurally by FlameLevelUpAnimator)
+            if (GlowAlpha.TryGetValue(el, out float glowA) && glowA > 0.001f)
             {
                 painter.BeginPath();
                 for (int i = 0; i < 6; i++)
@@ -1312,7 +1314,7 @@ namespace Garden
                     else painter.LineTo(new Vector2(vx, vy));
                 }
                 painter.ClosePath();
-                painter.fillColor = new Color(1f, 0.67f, 0.16f, 0.35f);
+                painter.fillColor = new Color(1f, 0.67f, 0.16f, glowA);
                 painter.Fill();
             }
         }
