@@ -269,8 +269,8 @@ namespace Garden
                 }).Every(16);
             }).StartingIn(100);
 
-            // ── Stage 4: Hex Cascade (0.3s–2.0s) — brighter, staggered ──
-            if (gridContainer.childCount > 0)
+            // ── Stage 4: Warm tint ripple synced with shockwave (0.1s outward) ──
+            // Tint each hex ring as the shockwave passes through, ring by ring.
             {
                 var cellsByRing = new Dictionary<int, List<VisualElement>>();
                 foreach (var child in gridContainer.Children())
@@ -289,11 +289,12 @@ namespace Garden
                     cellsByRing[ring].Add(child);
                 }
 
+                // Sync with shockwave: first ring starts at 100ms (when updater starts),
+                // each subsequent ring 120ms later — matches the shockwave speed
                 foreach (var kvp in cellsByRing)
                 {
                     int ring = kvp.Key;
-                    // Start earlier, faster stagger, cap before cleanup
-                    long delayMs = Math.Min(300 + ring * 150, 2200);
+                    long delayMs = Math.Min(100 + ring * 120, 2500);
                     foreach (var cell in kvp.Value)
                     {
                         var c = cell;
@@ -303,7 +304,7 @@ namespace Garden
                             c.schedule.Execute(() =>
                             {
                                 c.RemoveFromClassList("grid-cell--levelup-glow");
-                            }).StartingIn(600); // longer glow
+                            }).StartingIn(500);
                         }).StartingIn(delayMs);
                     }
                 }
