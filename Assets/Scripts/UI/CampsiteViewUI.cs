@@ -2332,7 +2332,7 @@ namespace Garden
             var availableGardens = new List<(ServerGardenConfig config, InventoryItem seedEntry)>();
             foreach (var plantData in ConfigService.Instance.GetAllGardens())
             {
-                string seedKey = GardenManager.GetSeedItemKey(plantData.plantName);
+                string seedKey = GardenManager.GetSeedItemKey(plantData.plantKey);
                 var seedEntry = inventory.Find(i => i.itemKey == seedKey && i.count > 0);
                 if (seedEntry != null || CurrencyManager.FreeMode)
                     availableGardens.Add((plantData, seedEntry));
@@ -2346,7 +2346,7 @@ namespace Garden
 
             foreach (var (plantData, seedEntry) in availableGardens)
             {
-                string pName = plantData.plantName;
+                string pName = plantData.plantKey;
                 bool canAfford = CurrencyManager.Instance != null
                     && CurrencyManager.Instance.CanAffordWater(plantData.waterRequired);
 

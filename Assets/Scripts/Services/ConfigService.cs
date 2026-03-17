@@ -58,6 +58,7 @@ namespace Garden
     [Serializable]
     public class ServerGardenConfig
     {
+        public string plantKey;
         public string plantName;
         public float growthDurationHours;
         public string yieldItem;
@@ -520,6 +521,7 @@ namespace Garden
                     {
                         _gardenConfigs[kv.Key] = new ServerGardenConfig
                         {
+                            plantKey = kv.Key,
                             plantName = GetString(gardenMap, "plantName"),
                             growthDurationHours = GetFloat(gardenMap, "growthDurationHours"),
                             yieldItem = GetString(gardenMap, "yieldItem"),
