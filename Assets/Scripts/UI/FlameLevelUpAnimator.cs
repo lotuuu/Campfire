@@ -131,6 +131,12 @@ namespace Garden
             IVisualElementScheduledItem updater = null;
             var createdElements = new List<VisualElement>();
 
+            // ── Hide top/bottom bars for dramatic full-screen effect ──
+            var topBar = root.Q("top-bar");
+            var bottomNav = root.Q("bottom-nav");
+            topBar?.AddToClassList("flame-bar-hidden");
+            bottomNav?.AddToClassList("flame-bar-hidden");
+
             // ── Stage 1: Golden Screen Flash (0.0s–0.5s) ──
             var flash = new VisualElement();
             flash.AddToClassList("flame-flash-overlay");
@@ -141,12 +147,37 @@ namespace Garden
             // Trigger fade on next frame
             flash.schedule.Execute(() => flash.AddToClassList("flame-flash-overlay--fade"));
 
-            // ── Stage 2: Flame Pulse (0.0s–0.8s) — bigger scale ──
-            flameCell?.AddToClassList("grid-cell--levelup-pulse");
-            flameCell?.schedule.Execute(() =>
+            // ── Stage 2: Flame Pulse (0.0s–1.2s) — procedural scale for smooth flow ──
+            if (flameCell != null)
             {
-                flameCell.RemoveFromClassList("grid-cell--levelup-pulse");
-            }).StartingIn(800);
+                float pulseElapsed = 0f;
+                const float pulseUpDuration = 0.4f;   // seconds to reach peak
+                const float pulseDownDuration = 0.8f;  // seconds to ease back
+                const float peakScale = 1.35f;
+
+                flameCell.schedule.Execute(() =>
+                {
+                    pulseElapsed += 0.016f;
+                    float s;
+                    if (pulseElapsed < pulseUpDuration)
+                    {
+                        // Ease-out quad up to peak
+                        float t = pulseElapsed / pulseUpDuration;
+                        float ease = 1f - (1f - t) * (1f - t);
+                        s = Mathf.Lerp(1f, peakScale, ease);
+                    }
+                    else
+                    {
+                        // Ease-in-out back down to 1
+                        float t = Mathf.Clamp01((pulseElapsed - pulseUpDuration) / pulseDownDuration);
+                        float ease = t * t * (3f - 2f * t); // smoothstep
+                        s = Mathf.Lerp(peakScale, 1f, ease);
+                    }
+                    flameCell.style.scale = new Scale(new Vector2(s, s));
+                    if (pulseElapsed >= pulseUpDuration + pulseDownDuration)
+                        flameCell.style.scale = StyleKeyword.Null;
+                }).Every(16).Until(() => pulseElapsed >= pulseUpDuration + pulseDownDuration);
+            }
 
             // ── Painter2D overlay for rings, embers, glow ──
             var overlay = new VisualElement();
@@ -308,10 +339,12 @@ namespace Garden
             root.schedule.Execute(() =>
             {
                 updater?.Pause();
-                flameCell?.RemoveFromClassList("grid-cell--levelup-pulse");
                 viewport.style.translate = StyleKeyword.Null; // reset shake
                 foreach (var el in createdElements)
                     el.RemoveFromHierarchy();
+                // Restore bars
+                topBar?.RemoveFromClassList("flame-bar-hidden");
+                bottomNav?.RemoveFromClassList("flame-bar-hidden");
                 IsPlaying = false;
                 onComplete?.Invoke();
             }).StartingIn(3500);
