@@ -6,15 +6,13 @@
     right: 0;
     top: 0;
     bottom: 0;
+    justify-content: center;
+    align-items: center;
     display: none;
 }
 
 #interaction-panel {
-    position: absolute;
-    left: 4%;
-    right: 4%;
-    top: 50%;
-    translate: 0 -50%;
+    width: 92%;
     max-height: 85%;
     overflow: hidden;
     background-color: rgba(30, 20, 12, 0.95);
@@ -856,10 +854,7 @@
 }
 
 .flame-bar-hidden {
-    opacity: 0;
-    transition-property: opacity;
-    transition-duration: 300ms;
-    transition-timing-function: ease-out;
+    display: none;
 }
 
 .grid-cell--levelup-glow {
