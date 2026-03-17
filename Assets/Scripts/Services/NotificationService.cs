@@ -72,8 +72,8 @@ namespace Garden
             if (remainingSeconds <= 0) return;
 
             string displayName = PlotManager.GetSeedDisplayName(seedName);
-            string title = $"Your {displayName} is ready!";
-            string body = $"Come harvest your {displayName} at the camp!";
+            string title = string.Format(Loc.Get("notif.plant_harvest.title", "Your {0} is ready!"), displayName);
+            string body = string.Format(Loc.Get("notif.plant_harvest.body", "Come harvest your {0} at the camp!"), displayName);
 
 #if UNITY_ANDROID
             var notification = new AndroidNotification
@@ -113,8 +113,8 @@ namespace Garden
             if (remainingSeconds <= 0) return;
 
             string displayName = PlotManager.GetSeedDisplayName(seedName);
-            string title = $"Your {displayName} is ready to water!";
-            string body = $"The watering cooldown has ended - give your {displayName} a drink!";
+            string title = string.Format(Loc.Get("notif.water_ready.title", "Your {0} is ready to water!"), displayName);
+            string body = string.Format(Loc.Get("notif.water_ready.body", "The watering cooldown has ended - give your {0} a drink!"), displayName);
             int id = plotIndex + WaterNotificationIdOffset;
 
 #if UNITY_ANDROID
@@ -169,8 +169,8 @@ namespace Garden
             if (remainingSeconds <= 0) return;
 
             string displayName = questName.Replace("_", " ");
-            string title = "Mallum has returned!";
-            string body = $"Your Mallum is back from {displayName} with rewards to collect!";
+            string title = Loc.Get("notif.quest_complete.title", "Mallum has returned!");
+            string body = string.Format(Loc.Get("notif.quest_complete.body", "Your Mallum is back from {0} with rewards to collect!"), displayName);
             int id = mallumIndex + QuestNotificationIdOffset;
 
 #if UNITY_ANDROID
@@ -215,8 +215,8 @@ namespace Garden
         {
             if (remainingSeconds <= 0) return;
 
-            string title = "Water is ready!";
-            string body = "Your Mallum has finished fetching water for your vase!";
+            string title = Loc.Get("notif.water_fetch.title", "Water is ready!");
+            string body = Loc.Get("notif.water_fetch.body", "Your Mallum has finished fetching water for your vase!");
             int id = mallumIndex + WaterFetchNotificationIdOffset;
 
 #if UNITY_ANDROID
@@ -261,8 +261,8 @@ namespace Garden
         {
             if (remainingSeconds <= 0) return;
 
-            string title = $"Your {plantName} has fruit!";
-            string body = $"Your {plantName} garden has produced a harvest - come collect it!";
+            string title = string.Format(Loc.Get("notif.garden_yield.title", "Your {0} has fruit!"), plantName);
+            string body = string.Format(Loc.Get("notif.garden_yield.body", "Your {0} garden has produced a harvest - come collect it!"), plantName);
             int id = gardenIndex + GardenYieldNotificationIdOffset;
 
 #if UNITY_ANDROID

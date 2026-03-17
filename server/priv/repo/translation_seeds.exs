@@ -275,6 +275,17 @@ en = [
   {"ui.settings.confirm", "Are you sure?"},
   {"ui.settings.delete_save", "Delete Save Data"},
   {"ui.settings.delete", "Delete"},
+  # Notifications
+  {"notif.plant_harvest.title", "Your {0} is ready!"},
+  {"notif.plant_harvest.body", "Come harvest your {0} at the camp!"},
+  {"notif.water_ready.title", "Your {0} is ready to water!"},
+  {"notif.water_ready.body", "The watering cooldown has ended - give your {0} a drink!"},
+  {"notif.quest_complete.title", "Mallum has returned!"},
+  {"notif.quest_complete.body", "Your Mallum is back from {0} with rewards to collect!"},
+  {"notif.water_fetch.title", "Water is ready!"},
+  {"notif.water_fetch.body", "Your Mallum has finished fetching water for your vase!"},
+  {"notif.garden_yield.title", "Your {0} has fruit!"},
+  {"notif.garden_yield.body", "Your {0} garden has produced a harvest - come collect it!"},
 ]
 
 # ── Spanish ──
@@ -548,6 +559,17 @@ es = [
   {"ui.settings.confirm", "Estas seguro?"},
   {"ui.settings.delete_save", "Borrar Datos"},
   {"ui.settings.delete", "Borrar"},
+  # Notifications
+  {"notif.plant_harvest.title", "Tu {0} esta lista!"},
+  {"notif.plant_harvest.body", "Ven a cosechar tu {0} en el campamento!"},
+  {"notif.water_ready.title", "Tu {0} esta lista para regar!"},
+  {"notif.water_ready.body", "El tiempo de riego termino - dale agua a tu {0}!"},
+  {"notif.quest_complete.title", "El Mallum ha regresado!"},
+  {"notif.quest_complete.body", "Tu Mallum regreso de {0} con recompensas!"},
+  {"notif.water_fetch.title", "El agua esta lista!"},
+  {"notif.water_fetch.body", "Tu Mallum termino de buscar agua para tu vasija!"},
+  {"notif.garden_yield.title", "Tu {0} tiene fruta!"},
+  {"notif.garden_yield.body", "Tu jardin de {0} produjo una cosecha - ven a recogerla!"},
 ]
 
 # ── Seed all locales ──
