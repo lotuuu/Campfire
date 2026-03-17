@@ -1027,6 +1027,7 @@ namespace Garden
 
         public void ExitVisitMode()
         {
+            mode = CampsiteMode.Normal;
             if (visitBackBtn != null)
             {
                 visitBackBtn.RemoveFromHierarchy();

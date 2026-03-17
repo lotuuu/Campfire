@@ -23,8 +23,8 @@ namespace Garden
 
         static readonly Vector2 StartOffset = new Vector2(-120f, -120f);
         static readonly Vector2 EndOffset = new Vector2(120f, 120f);
-        const float Duration = 0.8f;
-        const float SwitchPoint = 0.781f;
+        const float Duration = 1.4f;
+        const float SwitchPoint = 0.5f;
         const float GlobalSpeed = 0.7f;
 
         static readonly LayerConfig[] LayerConfigs = new[]

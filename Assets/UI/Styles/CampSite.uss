@@ -156,5 +156,7 @@
 
 #wipe-layer-3 {
     background-image: url("project://database/Assets/UI/Transition/TX_Transition3.png");
+    width: 300%;
+    height: 300%;
 }
 
