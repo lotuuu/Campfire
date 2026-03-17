@@ -1506,12 +1506,9 @@ namespace Garden
                     {
                         var top = campRoot.Q("top-bar");
                         var bottom = campRoot.Q("bottom-nav");
-                        // Restore to flow (still invisible — class has opacity:0)
-                        if (top != null) top.style.display = StyleKeyword.Null;
-                        if (bottom != null) bottom.style.display = StyleKeyword.Null;
-                        // Remove class to fade back in
                         top?.RemoveFromClassList("flame-bar-hidden");
                         bottom?.RemoveFromClassList("flame-bar-hidden");
+                        viewport.style.overflow = StyleKeyword.Null;
                     }
 
                     void OnAnimationComplete()
