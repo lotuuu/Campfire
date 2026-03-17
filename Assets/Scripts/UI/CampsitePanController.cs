@@ -159,7 +159,8 @@ namespace Garden
         /// <summary>
         /// Smoothly animate the pan to center on a point over the given duration.
         /// </summary>
-        public void AnimateCenterOnPoint(float focusX, float focusY, float canvasWidth, float canvasHeight, float durationMs = 600f)
+        public void AnimateCenterOnPoint(float focusX, float focusY, float canvasWidth, float canvasHeight,
+            float durationMs = 600f, System.Action onComplete = null)
         {
             focusPtX = focusX;
             focusPtY = focusY;
@@ -183,15 +184,20 @@ namespace Garden
 
             var startOffset = panOffset;
             float elapsed = 0f;
+            bool done = false;
 
             canvas.schedule.Execute(() =>
             {
                 elapsed += 16f;
                 float t = Mathf.Clamp01(elapsed / durationMs);
-                // Ease-out cubic
                 float ease = 1f - (1f - t) * (1f - t) * (1f - t);
                 panOffset = Vector2.Lerp(startOffset, targetOffset, ease);
                 ApplyPan();
+                if (elapsed >= durationMs && !done)
+                {
+                    done = true;
+                    onComplete?.Invoke();
+                }
             }).Every(16).Until(() => elapsed >= durationMs);
         }
     }

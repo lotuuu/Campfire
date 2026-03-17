@@ -1500,16 +1500,27 @@ namespace Garden
                     var flameCellEl = canvas?.Q(className: "grid-cell--flame");
                     FlameManager.Instance.UpgradeFlame();
                     CloseInteractionPanel();
-                    FlameLevelUpAnimator.Play(campRoot, flameCellEl, canvas, viewport, FlameManager.Instance.Level, () =>
+
+                    int newLevel = FlameManager.Instance.Level;
+
+                    // Smooth pan to center on flame first, then play animation
+                    var flameCenter = HexGridUtil.HexToPixel(0, 0, HexSize);
+                    float cw = canvas.resolvedStyle.width;
+                    float ch = canvas.resolvedStyle.height;
+                    if (!float.IsNaN(cw) && cw > 0)
                     {
-                        RebuildGrid();
-                        // Smoothly pan to center on flame after grid rebuild
-                        var flameCenter = HexGridUtil.HexToPixel(0, 0, HexSize);
-                        float cw = canvas.resolvedStyle.width;
-                        float ch = canvas.resolvedStyle.height;
-                        if (!float.IsNaN(cw) && cw > 0)
-                            panController.AnimateCenterOnPoint(flameCenter.x + gridOffsetX, flameCenter.y + gridOffsetY, cw, ch);
-                    });
+                        panController.AnimateCenterOnPoint(
+                            flameCenter.x + gridOffsetX, flameCenter.y + gridOffsetY, cw, ch,
+                            durationMs: 400f,
+                            onComplete: () =>
+                            {
+                                FlameLevelUpAnimator.Play(campRoot, flameCellEl, canvas, viewport, newLevel, RebuildGrid);
+                            });
+                    }
+                    else
+                    {
+                        FlameLevelUpAnimator.Play(campRoot, flameCellEl, canvas, viewport, newLevel, RebuildGrid);
+                    }
                 })
                 { text = Loc.Get("ui.button.level_up", "Level Up") };
                 upgradeBtn.SetEnabled(canAfford);
