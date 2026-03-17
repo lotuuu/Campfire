@@ -430,6 +430,7 @@ namespace Garden
                 GameService.Instance.OnStateLoaded -= OnGameReady;
             _gameDone = true;
             Debug.Log($"[INIT] Game ready at {_initStopwatch?.ElapsedMilliseconds ?? 0}ms");
+            settingsUI?.RefreshLanguageDropdown();
             UpdateLoadingGate();
         }
 

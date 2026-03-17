@@ -19,6 +19,7 @@ namespace Garden
         private VisualElement _confirmRow;
         private Button _confirmCancel;
         private Button _confirmDelete;
+        private DropdownField _langDropdown;
 
         public void Initialize(VisualElement root)
         {
@@ -72,15 +73,17 @@ namespace Garden
             _versionLabel.text = Application.version;
 
             // Language
-            var langDropdown = root.Q<DropdownField>("language-dropdown");
-            if (langDropdown != null && LocalizationService.Instance != null)
+            _langDropdown = root.Q<DropdownField>("language-dropdown");
+            if (_langDropdown != null)
             {
-                langDropdown.choices = LocalizationService.Instance.SupportedLocales;
-                langDropdown.value = LocalizationService.Instance.CurrentLocale;
-                langDropdown.RegisterValueChangedCallback(evt =>
+                RefreshLanguageDropdown();
+                _langDropdown.RegisterValueChangedCallback(evt =>
                 {
-                    _ = LocalizationService.Instance.SwitchLocale(evt.newValue);
+                    if (LocalizationService.Instance != null)
+                        _ = LocalizationService.Instance.SwitchLocale(evt.newValue);
                 });
+                if (LocalizationService.Instance != null)
+                    LocalizationService.Instance.OnLocaleChanged += RefreshLanguageDropdown;
             }
 
             // Delete save
@@ -107,6 +110,19 @@ namespace Garden
                 SocialSaveManager.Instance?.DeleteSave();
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             };
+        }
+
+        public void RefreshLanguageDropdown()
+        {
+            if (_langDropdown == null || LocalizationService.Instance == null) return;
+            _langDropdown.choices = LocalizationService.Instance.SupportedLocales;
+            _langDropdown.SetValueWithoutNotify(LocalizationService.Instance.CurrentLocale);
+        }
+
+        private void OnDestroy()
+        {
+            if (LocalizationService.Instance != null)
+                LocalizationService.Instance.OnLocaleChanged -= RefreshLanguageDropdown;
         }
     }
 }
