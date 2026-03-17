@@ -319,16 +319,15 @@ namespace Garden
 
         /// <summary>
         /// Animate the new outer ring of hex cells after a grid expansion.
-        /// Zooms the viewport out to show the full grid, then cascades cells in
-        /// clockwise from the top, then zooms back to normal.
+        /// Scales the canvas down to show the full grid, cascades cells in
+        /// clockwise from the top, then scales back and restores pan state.
         /// Cells must already have grid-cell--reveal-hidden applied during RebuildGrid.
         /// </summary>
         public static void AnimateNewCells(Dictionary<(int, int), VisualElement> cellLookup,
-            int oldRadius, VisualElement viewport)
+            int oldRadius, VisualElement canvas, CampsitePanController panController)
         {
             if (oldRadius <= 0) return;
 
-            // Collect new cells with their angle from center for cascading
             var newCells = new List<(VisualElement cell, float angle)>();
 
             foreach (var kvp in cellLookup)
@@ -338,7 +337,6 @@ namespace Garden
                 int dist = (Mathf.Abs(q) + Mathf.Abs(r) + Mathf.Abs(q + r)) / 2;
                 if (dist <= oldRadius) continue;
 
-                // Angle from center: top = 0, clockwise
                 float px = q + r * 0.5f;
                 float py = r * 0.866f;
                 float angle = Mathf.Atan2(px, -py);
@@ -351,32 +349,50 @@ namespace Garden
 
             newCells.Sort((a, b) => a.angle.CompareTo(b.angle));
 
-            // ── Zoom out viewport to show full grid ──
-            // Scale down the viewport so all content is visible
+            // ── Zoom out by scaling canvas down ──
+            // This makes the canvas smaller inside the viewport (which has overflow:hidden),
+            // so more of the grid becomes visible without clipping issues.
             float zoomOut = 0.75f;
             float zoomDurationMs = 400f;
-            float elapsed = 0f;
+            float zoomElapsed = 0f;
 
-            // Animate zoom out
-            viewport.schedule.Execute(() =>
+            // Set transform-origin to center of canvas so it zooms from the middle
+            float cw = canvas.resolvedStyle.width;
+            float ch = canvas.resolvedStyle.height;
+            canvas.style.transformOrigin = new TransformOrigin(
+                new Length(cw / 2f, LengthUnit.Pixel),
+                new Length(ch / 2f, LengthUnit.Pixel));
+
+            // Center the pan on the flame before zooming
+            var flamePixel = HexGridUtil.HexToPixel(0, 0, 220f);
+            // Find grid offset from canvas children positions
+            float offsetX = 0, offsetY = 0;
+            if (cellLookup.TryGetValue((0, 0), out var flameCell))
             {
-                elapsed += 16f;
-                float t = Mathf.Clamp01(elapsed / zoomDurationMs);
-                float ease = 1f - (1f - t) * (1f - t); // ease-out quad
-                float s = Mathf.Lerp(1f, zoomOut, ease);
-                viewport.style.scale = new Scale(new Vector2(s, s));
-            }).Every(16).Until(() => elapsed >= zoomDurationMs);
+                offsetX = flameCell.resolvedStyle.left + flameCell.resolvedStyle.width / 2f - flamePixel.x;
+                offsetY = flameCell.resolvedStyle.top + flameCell.resolvedStyle.height / 2f - flamePixel.y;
+            }
+            panController.CenterOnPoint(flamePixel.x + offsetX, flamePixel.y + offsetY, cw, ch);
 
-            // ── Cascade reveal cells after zoom finishes ──
+            canvas.schedule.Execute(() =>
+            {
+                zoomElapsed += 16f;
+                float t = Mathf.Clamp01(zoomElapsed / zoomDurationMs);
+                float ease = 1f - (1f - t) * (1f - t);
+                float s = Mathf.Lerp(1f, zoomOut, ease);
+                canvas.style.scale = new Scale(new Vector2(s, s));
+            }).Every(16).Until(() => zoomElapsed >= zoomDurationMs);
+
+            // ── Cascade reveal after zoom ──
             float delayPerCell = 60f;
             long zoomDelayMs = (long)zoomDurationMs;
-            float lastCellDelayMs = 0;
+            float lastCellDelay = 0;
 
             for (int i = 0; i < newCells.Count; i++)
             {
                 var c = newCells[i].cell;
                 long delayMs = zoomDelayMs + (long)(i * delayPerCell);
-                lastCellDelayMs = delayMs;
+                lastCellDelay = delayMs;
                 c.schedule.Execute(() =>
                 {
                     c.AddToClassList("grid-cell--reveal");
@@ -388,20 +404,28 @@ namespace Garden
                 }).StartingIn(delayMs);
             }
 
-            // ── Zoom back to normal after all cells revealed ──
-            long zoomBackStart = (long)lastCellDelayMs + 600; // wait for last cell's transition
+            // ── Zoom back + restore pan ──
+            long zoomBackStart = (long)lastCellDelay + 600;
             float backElapsed = 0f;
             float backDurationMs = 500f;
 
-            viewport.schedule.Execute(() =>
+            canvas.schedule.Execute(() =>
             {
                 backElapsed += 16f;
                 float t = Mathf.Clamp01(backElapsed / backDurationMs);
-                float ease = 1f - (1f - t) * (1f - t) * (1f - t); // ease-out cubic
+                float ease = 1f - (1f - t) * (1f - t) * (1f - t);
                 float s = Mathf.Lerp(zoomOut, 1f, ease);
-                viewport.style.scale = new Scale(new Vector2(s, s));
+                canvas.style.scale = new Scale(new Vector2(s, s));
                 if (backElapsed >= backDurationMs)
-                    viewport.style.scale = StyleKeyword.Null; // clean reset
+                {
+                    canvas.style.scale = StyleKeyword.Null;
+                    canvas.style.transformOrigin = StyleKeyword.Null;
+                    // Re-center with correct dimensions so pan controller has valid state
+                    float newCw = canvas.resolvedStyle.width;
+                    float newCh = canvas.resolvedStyle.height;
+                    panController.CenterOnPoint(
+                        flamePixel.x + offsetX, flamePixel.y + offsetY, newCw, newCh);
+                }
             }).Every(16).StartingIn(zoomBackStart).Until(() => backElapsed >= backDurationMs);
         }
     }

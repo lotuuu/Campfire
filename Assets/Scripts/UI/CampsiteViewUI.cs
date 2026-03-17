@@ -1508,25 +1508,30 @@ namespace Garden
                     if (FlameLevelUpAnimator.IsPlaying) return;
                     var flameCellEl = canvas?.Q(className: "grid-cell--flame");
                     int oldRadius = currentGridSize;
-                    FlameManager.Instance.UpgradeFlame();
-                    CloseInteractionPanel();
 
+                    // Suppress the event-driven rebuild so cells don't flash on
+                    suppressRebuild = true;
+                    FlameManager.Instance.UpgradeFlame();
+                    suppressRebuild = false;
+                    pendingRebuild = false; // discard the suppressed rebuild
+
+                    CloseInteractionPanel();
                     int newLevel = FlameManager.Instance.Level;
 
-                    // Callback: rebuild grid with new cells hidden, then animate them in
+                    // Callback: rebuild grid with new cells born hidden, then cascade
                     void OnAnimationComplete()
                     {
                         int newRadius = FlameManager.Instance.GetGridSize();
                         bool gridExpanded = newRadius > oldRadius;
                         if (gridExpanded)
-                            _revealOuterBeyondRadius = oldRadius; // cells born hidden during rebuild
+                            _revealOuterBeyondRadius = oldRadius;
                         RebuildGrid();
-                        _revealOuterBeyondRadius = -1; // reset for future rebuilds
+                        _revealOuterBeyondRadius = -1;
                         if (gridExpanded)
-                            FlameLevelUpAnimator.AnimateNewCells(cellLookup, oldRadius, viewport);
+                            FlameLevelUpAnimator.AnimateNewCells(cellLookup, oldRadius, canvas, panController);
                     }
 
-                    // Smooth pan to center on flame first, then play animation
+                    // Pan to center on flame (using current offsets), then play animation
                     var flameCenter = HexGridUtil.HexToPixel(0, 0, HexSize);
                     float cw = canvas.resolvedStyle.width;
                     float ch = canvas.resolvedStyle.height;
