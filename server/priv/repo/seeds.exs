@@ -6,49 +6,54 @@ alias CampFire.Visitors.{VisitorTemplate, VisitorSchedule}
 
 alias CampFire.Game.Item
 
-plants = ~w(sprouts cress basil chamomile marigold snowdrop mint lavender pansy poppy jasmine rosemary dahlia moonflower)
+plants =
+  ~w(sprouts cress basil chamomile marigold snowdrop mint lavender pansy poppy jasmine rosemary dahlia moonflower)
 
+# Seeds
+# Harvests
+# Garden seeds
+# Garden yields (not from plants list)
+# Pigments (not all plants have pigment recipes — only tier 1+, so exclude sprouts and cress)
+# Potions, materials, consumables
 items =
-  # Seeds
   Enum.map(plants, fn p ->
     %{item_key: "#{p}_seed", display_name: "#{String.capitalize(p)} Seed", category: "seed"}
   end) ++
-  # Harvests
-  Enum.map(plants, fn p ->
-    %{item_key: p, display_name: String.capitalize(p), category: "harvest"}
-  end) ++
-  # Garden seeds
-  [
-    %{item_key: "berrybush_seed", display_name: "BerryBush Seed", category: "garden_seed"},
-    %{item_key: "oak_seed", display_name: "Oak Seed", category: "garden_seed"}
-  ] ++
-  # Garden yields (not from plants list)
-  [
-    %{item_key: "berry", display_name: "Berry", category: "harvest"},
-    %{item_key: "acorn", display_name: "Acorn", category: "harvest"}
-  ] ++
-  # Pigments (not all plants have pigment recipes — only tier 1+, so exclude sprouts and cress)
-  ((plants -- ~w(sprouts cress))
-  |> Enum.map(fn p ->
-    %{item_key: "#{p}_pigment", display_name: "#{String.capitalize(p)} Pigment", category: "pigment"}
-  end)) ++
-  # Potions, materials, consumables
-  [
-    %{item_key: "speed_potion", display_name: "Speed Potion", category: "potion"},
-    %{item_key: "hot_potion", display_name: "Hot Potion", category: "potion"},
-    %{item_key: "cool_potion", display_name: "Cool Potion", category: "potion"},
-    %{item_key: "wind_potion", display_name: "Wind Potion", category: "potion"},
-    %{item_key: "calm_potion", display_name: "Calm Potion", category: "potion"},
-    %{item_key: "humid_potion", display_name: "Humid Potion", category: "potion"},
-    %{item_key: "dry_potion", display_name: "Dry Potion", category: "potion"},
-    %{item_key: "sun_potion", display_name: "Sun Potion", category: "potion"},
-    %{item_key: "shadow_potion", display_name: "Shadow Potion", category: "potion"},
-    %{item_key: "rain_potion", display_name: "Rain Potion", category: "potion"},
-    %{item_key: "impermeable_potion", display_name: "Impermeable Potion", category: "potion"},
-    %{item_key: "moon_potion", display_name: "Moon Potion", category: "potion"},
-    %{item_key: "fertilizer", display_name: "Fertilizer", category: "consumable"},
-    %{item_key: "energy_drink", display_name: "Energy Drink", category: "consumable"}
-  ]
+    Enum.map(plants, fn p ->
+      %{item_key: p, display_name: String.capitalize(p), category: "harvest"}
+    end) ++
+    [
+      %{item_key: "berrybush_seed", display_name: "BerryBush Seed", category: "garden_seed"},
+      %{item_key: "oak_seed", display_name: "Oak Seed", category: "garden_seed"}
+    ] ++
+    [
+      %{item_key: "berry", display_name: "Berry", category: "harvest"},
+      %{item_key: "acorn", display_name: "Acorn", category: "harvest"}
+    ] ++
+    ((plants -- ~w(sprouts cress))
+     |> Enum.map(fn p ->
+       %{
+         item_key: "#{p}_pigment",
+         display_name: "#{String.capitalize(p)} Pigment",
+         category: "pigment"
+       }
+     end)) ++
+    [
+      %{item_key: "speed_potion", display_name: "Speed Potion", category: "potion"},
+      %{item_key: "hot_potion", display_name: "Hot Potion", category: "potion"},
+      %{item_key: "cool_potion", display_name: "Cool Potion", category: "potion"},
+      %{item_key: "wind_potion", display_name: "Wind Potion", category: "potion"},
+      %{item_key: "calm_potion", display_name: "Calm Potion", category: "potion"},
+      %{item_key: "humid_potion", display_name: "Humid Potion", category: "potion"},
+      %{item_key: "dry_potion", display_name: "Dry Potion", category: "potion"},
+      %{item_key: "sun_potion", display_name: "Sun Potion", category: "potion"},
+      %{item_key: "shadow_potion", display_name: "Shadow Potion", category: "potion"},
+      %{item_key: "rain_potion", display_name: "Rain Potion", category: "potion"},
+      %{item_key: "impermeable_potion", display_name: "Impermeable Potion", category: "potion"},
+      %{item_key: "moon_potion", display_name: "Moon Potion", category: "potion"},
+      %{item_key: "fertilizer", display_name: "Fertilizer", category: "consumable"},
+      %{item_key: "energy_drink", display_name: "Energy Drink", category: "consumable"}
+    ]
 
 for item <- items do
   %Item{}
@@ -209,7 +214,10 @@ templates = [
         "request_count" => 3,
         "return_days" => 7,
         "reward" => %{"type" => "item", "name" => "moon_potion", "count" => 1},
-        "return_dialogue" => ["Incredible! The moonlight guided me back.", "Here, this is special."]
+        "return_dialogue" => [
+          "Incredible! The moonlight guided me back.",
+          "Here, this is special."
+        ]
       }
     ],
     weight: 0.8
@@ -230,7 +238,19 @@ for t <- templates do
       quest_pool: t.quest_pool,
       weight: t.weight
     },
-    on_conflict: {:replace, [:name, :portrait_id, :type, :flame_level_min, :dialogue_pool, :offer_pool, :gift_pool, :quest_pool, :weight]},
+    on_conflict:
+      {:replace,
+       [
+         :name,
+         :portrait_id,
+         :type,
+         :flame_level_min,
+         :dialogue_pool,
+         :offer_pool,
+         :gift_pool,
+         :quest_pool,
+         :weight
+       ]},
     conflict_target: :visitor_id
   )
 end
@@ -457,7 +477,15 @@ seed_configs = [
   }
 ]
 
-replace_fields = [:growth_duration_hours, :min_drops, :max_drops, :tier, :recipe, :harvest_item_id, :updated_at]
+replace_fields = [
+  :growth_duration_hours,
+  :min_drops,
+  :max_drops,
+  :tier,
+  :recipe,
+  :harvest_item_id,
+  :updated_at
+]
 
 for config <- seed_configs do
   %SeedConfig{}
@@ -637,8 +665,8 @@ game_configs = [
       "max_flame_level" => 12,
       "mana_rates" => [0.5, 1, 1.5, 2, 3, 4, 5, 7.5, 10, 12.5, 15, 20],
       "mana_caps" => [300, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 7000, 9000, 12000],
-      "entity_caps" => [5, 6, 7, 9, 12, 15, 18, 22, 26, 30, 35, 40],
-      "grid_sizes" => [2, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5],
+      "entity_caps" => [5, 6, 8, 10, 12, 15, 18, 22, 26, 30, 35, 40],
+      "grid_sizes" => [1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5],
       "upgrade_recipes" => [
         %{"ingredients" => [%{"itemKey" => item_key!.("sprouts"), "count" => 10}]},
         %{
@@ -703,11 +731,26 @@ game_configs = [
         }
       ],
       "plot_costs" => [
-        %{"manaCost" => 50, "harvestCosts" => [%{"itemKey" => item_key!.("cress"), "count" => 1}]},
-        %{"manaCost" => 200, "harvestCosts" => [%{"itemKey" => item_key!.("cress"), "count" => 4}]},
-        %{"manaCost" => 260, "harvestCosts" => [%{"itemKey" => item_key!.("basil"), "count" => 2}]},
-        %{"manaCost" => 330, "harvestCosts" => [%{"itemKey" => item_key!.("chamomile"), "count" => 1}]},
-        %{"manaCost" => 420, "harvestCosts" => [%{"itemKey" => item_key!.("chamomile"), "count" => 1}]},
+        %{
+          "manaCost" => 50,
+          "harvestCosts" => [%{"itemKey" => item_key!.("cress"), "count" => 1}]
+        },
+        %{
+          "manaCost" => 200,
+          "harvestCosts" => [%{"itemKey" => item_key!.("cress"), "count" => 4}]
+        },
+        %{
+          "manaCost" => 260,
+          "harvestCosts" => [%{"itemKey" => item_key!.("basil"), "count" => 2}]
+        },
+        %{
+          "manaCost" => 330,
+          "harvestCosts" => [%{"itemKey" => item_key!.("chamomile"), "count" => 1}]
+        },
+        %{
+          "manaCost" => 420,
+          "harvestCosts" => [%{"itemKey" => item_key!.("chamomile"), "count" => 1}]
+        },
         %{
           "manaCost" => 520,
           "harvestCosts" => [
@@ -715,7 +758,10 @@ game_configs = [
             %{"itemKey" => item_key!.("basil"), "count" => 1}
           ]
         },
-        %{"manaCost" => 640, "harvestCosts" => [%{"itemKey" => item_key!.("chamomile"), "count" => 2}]},
+        %{
+          "manaCost" => 640,
+          "harvestCosts" => [%{"itemKey" => item_key!.("chamomile"), "count" => 2}]
+        },
         %{
           "manaCost" => 780,
           "harvestCosts" => [
@@ -739,10 +785,22 @@ game_configs = [
         }
       ],
       "vase_costs" => [
-        %{"manaCost" => 100, "harvestCosts" => [%{"itemKey" => item_key!.("cress"), "count" => 1}]},
-        %{"manaCost" => 120, "harvestCosts" => [%{"itemKey" => item_key!.("basil"), "count" => 2}]},
-        %{"manaCost" => 150, "harvestCosts" => [%{"itemKey" => item_key!.("chamomile"), "count" => 1}]},
-        %{"manaCost" => 180, "harvestCosts" => [%{"itemKey" => item_key!.("chamomile"), "count" => 1}]},
+        %{
+          "manaCost" => 100,
+          "harvestCosts" => [%{"itemKey" => item_key!.("cress"), "count" => 1}]
+        },
+        %{
+          "manaCost" => 120,
+          "harvestCosts" => [%{"itemKey" => item_key!.("basil"), "count" => 2}]
+        },
+        %{
+          "manaCost" => 150,
+          "harvestCosts" => [%{"itemKey" => item_key!.("chamomile"), "count" => 1}]
+        },
+        %{
+          "manaCost" => 180,
+          "harvestCosts" => [%{"itemKey" => item_key!.("chamomile"), "count" => 1}]
+        },
         %{
           "manaCost" => 220,
           "harvestCosts" => [
@@ -750,7 +808,10 @@ game_configs = [
             %{"itemKey" => item_key!.("basil"), "count" => 1}
           ]
         },
-        %{"manaCost" => 260, "harvestCosts" => [%{"itemKey" => item_key!.("chamomile"), "count" => 2}]},
+        %{
+          "manaCost" => 260,
+          "harvestCosts" => [%{"itemKey" => item_key!.("chamomile"), "count" => 2}]
+        },
         %{
           "manaCost" => 310,
           "harvestCosts" => [
@@ -767,8 +828,14 @@ game_configs = [
         }
       ],
       "garden_costs" => [
-        %{"manaCost" => 550, "harvestCosts" => [%{"itemKey" => item_key!.("chamomile"), "count" => 3}]},
-        %{"manaCost" => 850, "harvestCosts" => [%{"itemKey" => item_key!.("lavender"), "count" => 3}]},
+        %{
+          "manaCost" => 550,
+          "harvestCosts" => [%{"itemKey" => item_key!.("chamomile"), "count" => 3}]
+        },
+        %{
+          "manaCost" => 850,
+          "harvestCosts" => [%{"itemKey" => item_key!.("lavender"), "count" => 3}]
+        },
         %{
           "manaCost" => 1200,
           "harvestCosts" => [
@@ -810,9 +877,18 @@ game_configs = [
       "mallums_per_house" => 1,
       "quest_speed_item" => item_key!.("energy_drink"),
       "house_costs" => [
-        %{"manaCost" => 10, "harvestCosts" => [%{"itemKey" => item_key!.("sprouts"), "count" => 1}]},
-        %{"manaCost" => 100, "harvestCosts" => [%{"itemKey" => item_key!.("basil"), "count" => 2}]},
-        %{"manaCost" => 500, "harvestCosts" => [%{"itemKey" => item_key!.("lavender"), "count" => 3}]},
+        %{
+          "manaCost" => 10,
+          "harvestCosts" => [%{"itemKey" => item_key!.("sprouts"), "count" => 1}]
+        },
+        %{
+          "manaCost" => 100,
+          "harvestCosts" => [%{"itemKey" => item_key!.("basil"), "count" => 2}]
+        },
+        %{
+          "manaCost" => 500,
+          "harvestCosts" => [%{"itemKey" => item_key!.("lavender"), "count" => 3}]
+        },
         %{
           "manaCost" => 1000,
           "harvestCosts" => [
