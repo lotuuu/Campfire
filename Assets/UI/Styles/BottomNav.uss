@@ -8,6 +8,9 @@
     border-top-width: 3px;
     border-top-color: rgb(214, 154, 53);
     padding: var(--spacing-sm) var(--spacing-md);
+    transition-property: opacity;
+    transition-duration: 300ms;
+    transition-timing-function: ease-out;
 }
 
 .nav-btn {

@@ -444,6 +444,13 @@
             </ui:VisualElement>
         </ui:VisualElement>
 
+        <!-- Diagonal wipe transition layers -->
+        <ui:VisualElement name="wipe-container" picking-mode="Ignore">
+            <ui:VisualElement name="wipe-layer-0" class="wipe-layer" picking-mode="Ignore" />
+            <ui:VisualElement name="wipe-layer-1" class="wipe-layer" picking-mode="Ignore" />
+            <ui:VisualElement name="wipe-layer-2" class="wipe-layer" picking-mode="Ignore" />
+            <ui:VisualElement name="wipe-layer-3" class="wipe-layer" picking-mode="Ignore" />
+        </ui:VisualElement>
 
         <!-- Loading gate — covers UI until all services are ready -->
         <ui:VisualElement name="loading-gate">

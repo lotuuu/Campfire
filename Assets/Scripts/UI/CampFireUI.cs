@@ -108,6 +108,8 @@ namespace Garden
             tutorialUI?.Initialize(root);
             rewardRevealUI = GetComponent<RewardRevealUI>();
             rewardRevealUI?.Initialize(root);
+            var transitionWipe = GetComponent<TransitionWipe>();
+            transitionWipe?.Initialize(root);
 
             if (LocalizationService.Instance != null)
                 LocalizationService.Instance.OnLocaleChanged += OnLocaleChanged;

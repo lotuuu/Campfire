@@ -854,16 +854,15 @@
 }
 
 .flame-bar-hidden {
-    position: absolute;
     opacity: 0;
-    translate: 0 -200px;
+    picking-mode: ignore;
+    transition-property: opacity;
+    transition-duration: 300ms;
+    transition-timing-function: ease-out;
 }
 
 .grid-cell--levelup-glow {
-    background-color: rgba(255, 170, 40, 0.35);
-    transition-property: background-color;
-    transition-duration: 250ms;
-    transition-timing-function: ease-out;
+    -unity-background-image-tint-color: rgba(255, 200, 80, 1);
 }
 
 .grid-cell--reveal-hidden {

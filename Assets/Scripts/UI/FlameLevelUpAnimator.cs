@@ -7,7 +7,7 @@ namespace Garden
 {
     public static class FlameLevelUpAnimator
     {
-        public static bool IsPlaying { get; set; }
+        public static bool IsPlaying { get; private set; }
 
         private struct Ember
         {
@@ -295,9 +295,11 @@ namespace Garden
                         gridContainer.schedule.Execute(() =>
                         {
                             c.AddToClassList("grid-cell--levelup-glow");
+                            c.MarkDirtyRepaint();
                             c.schedule.Execute(() =>
                             {
                                 c.RemoveFromClassList("grid-cell--levelup-glow");
+                                c.MarkDirtyRepaint();
                             }).StartingIn(500);
                         }).StartingIn(delayMs);
                     }
@@ -309,6 +311,12 @@ namespace Garden
             var bottomNav = root.Q("bottom-nav");
             topBar?.AddToClassList("flame-bar-hidden");
             bottomNav?.AddToClassList("flame-bar-hidden");
+            // After opacity fade, collapse out of flow so viewport expands
+            root.schedule.Execute(() =>
+            {
+                if (topBar != null) topBar.style.display = DisplayStyle.None;
+                if (bottomNav != null) bottomNav.style.display = DisplayStyle.None;
+            }).StartingIn(300);
 
             // ── Stage 6: Level Badge (1.2s–3.5s) — bigger, with glow ──
             var badge = new VisualElement();

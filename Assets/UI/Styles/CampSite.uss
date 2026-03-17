@@ -16,6 +16,9 @@
     border-bottom-width: 3px;
     border-color: rgb(214, 154, 53);
     border-radius: 0;
+    transition-property: opacity;
+    transition-duration: 300ms;
+    transition-timing-function: ease-out;
 }
 
 /* ── Header row ── */
@@ -120,48 +123,38 @@
     position: absolute;
 }
 
-/* ── Visit transition curtains ── */
-#visit-transition {
+/* ── Diagonal wipe transition ── */
+#wipe-container {
     position: absolute;
     left: 0;
     top: 0;
     right: 0;
     bottom: 0;
-    flex-direction: row;
+    overflow: hidden;
     display: none;
-    justify-content: center;
-    align-items: center;
 }
 
-#curtain-left,
-#curtain-right {
+.wipe-layer {
     position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 100%;
-    background-image: url("project://database/Assets/Resources/UI/Images/CloudWall.png");
-    -unity-background-scale-mode: stretch-to-fill;
-    transition-property: translate;
-    transition-duration: 480ms;
-    transition-timing-function: ease-in-out;
+    width: 200%;
+    height: 200%;
+    -unity-background-scale-mode: scale-and-crop;
+    translate: -120% -120%;
 }
 
-#curtain-left {
-    left: 0;
-    translate: -100% 0;
+#wipe-layer-0 {
+    background-image: url("project://database/Assets/UI/Transition/TX_Transition2.png");
 }
 
-#curtain-right {
-    right: 0;
-    translate: 100% 0;
-    scale: -1 1;
+#wipe-layer-1 {
+    background-image: url("project://database/Assets/UI/Transition/TX_Transition2.png");
 }
 
-#visit-transition.curtain-closed #curtain-left {
-    translate: -37% 0;
+#wipe-layer-2 {
+    background-image: url("project://database/Assets/UI/Transition/TX_Transition1.png");
 }
 
-#visit-transition.curtain-closed #curtain-right {
-    translate: 37% 0;
+#wipe-layer-3 {
+    background-image: url("project://database/Assets/UI/Transition/TX_Transition3.png");
 }
 

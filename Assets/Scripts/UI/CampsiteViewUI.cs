@@ -22,8 +22,6 @@ namespace Garden
         private VisualTreeAsset cellTemplate;
         private CampsitePanController panController;
 
-        private TransitionWipe transitionWipe;
-
         private const float HexSize = 220f;     // hex outer radius (pixel spacing)
         private const float CellWidth = 380f;   // cell element width
         private const float CellHeight = 380f;  // cell element height
@@ -97,7 +95,6 @@ namespace Garden
         public void Initialize(VisualElement root)
         {
             campRoot = root;
-            transitionWipe = FindAnyObjectByType<TransitionWipe>(FindObjectsInactive.Include);
             viewport = root.Q("campsite-viewport");
             canvas = root.Q("campsite-canvas");
             interactionBackdrop = root.Q("interaction-backdrop");
@@ -1040,22 +1037,15 @@ namespace Garden
 
         private void PlayVisitTransition(bool toVisit)
         {
-            if (transitionWipe == null)
+            var wipe = TransitionWipe.Instance;
+            if (wipe == null)
             {
                 ApplyVisitState(toVisit);
                 return;
             }
 
-            transitionWipe.Play(
-                onMidPoint: () =>
-                {
-                    // Sprites fully cover the screen at midpoint — safe to swap behind them
-                    if (campRoot != null)
-                        campRoot.style.display = DisplayStyle.None;
-                    ApplyVisitState(toVisit);
-                    if (campRoot != null)
-                        campRoot.style.display = DisplayStyle.Flex;
-                },
+            wipe.Play(
+                onMidPoint: () => ApplyVisitState(toVisit),
                 onComplete: null
             );
         }
@@ -1307,6 +1297,23 @@ namespace Garden
             painter.strokeColor = borderColor;
             painter.lineWidth = el.ClassListContains("grid-cell--flame") ? 3f : 2f;
             painter.Stroke();
+
+            // Level-up glow overlay
+            if (el.ClassListContains("grid-cell--levelup-glow"))
+            {
+                painter.BeginPath();
+                for (int i = 0; i < 6; i++)
+                {
+                    float angle = Mathf.Deg2Rad * (60f * i - 90f);
+                    float vx = cx + hexR * Mathf.Cos(angle);
+                    float vy = cy + hexR * Mathf.Sin(angle);
+                    if (i == 0) painter.MoveTo(new Vector2(vx, vy));
+                    else painter.LineTo(new Vector2(vx, vy));
+                }
+                painter.ClosePath();
+                painter.fillColor = new Color(1f, 0.67f, 0.16f, 0.35f);
+                painter.Fill();
+            }
         }
 
         private static void ApplySkinColors(VisualElement cell, string skinName)
@@ -1494,14 +1501,17 @@ namespace Garden
                     CloseInteractionPanel();
                     int newLevel = FlameManager.Instance.Level;
 
-                    // Block all event-driven rebuilds for the entire animation sequence
-                    FlameLevelUpAnimator.IsPlaying = true;
-
                     // Callback: rebuild grid with new cells born hidden, then cascade
                     void RestoreBars()
                     {
-                        campRoot.Q("top-bar")?.RemoveFromClassList("flame-bar-hidden");
-                        campRoot.Q("bottom-nav")?.RemoveFromClassList("flame-bar-hidden");
+                        var top = campRoot.Q("top-bar");
+                        var bottom = campRoot.Q("bottom-nav");
+                        // Restore to flow (still invisible — class has opacity:0)
+                        if (top != null) top.style.display = StyleKeyword.Null;
+                        if (bottom != null) bottom.style.display = StyleKeyword.Null;
+                        // Remove class to fade back in
+                        top?.RemoveFromClassList("flame-bar-hidden");
+                        bottom?.RemoveFromClassList("flame-bar-hidden");
                     }
 
                     void OnAnimationComplete()
