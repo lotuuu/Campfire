@@ -234,14 +234,14 @@ defmodule CampFireWeb.GameControllerTest do
 
       # Start quest
       conn1 = post(conn, "/game/quest/start", %{questName: "SwampForage"})
-      mallum = json_response(conn1, 200)
+      _mallum = json_response(conn1, 200)
 
       # Speed up
-      conn2 = build_conn() |> authed_conn(player) |> post("/game/quest/speed-up", %{mallumId: mallum["id"]})
+      conn2 = build_conn() |> authed_conn(player) |> post("/game/quest/speed-up", %{questName: "SwampForage"})
       sped_up = json_response(conn2, 200)
 
-      assert sped_up["state"] == "quest_complete"
-      assert is_list(sped_up["pendingRewards"])
+      assert sped_up["state"] == "idle"
+      assert sped_up["pendingRewards"] == []
     end
   end
 

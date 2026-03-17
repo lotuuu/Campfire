@@ -640,10 +640,10 @@ defmodule CampFireWeb.GameController do
     conn |> put_status(400) |> json(%{error: "Missing 'questName'"})
   end
 
-  def check_quest(conn, %{"mallumId" => mallum_id}) do
+  def check_quest(conn, %{"questName" => quest_name}) do
     uid = conn.assigns.current_player.uid
 
-    case Mallums.check_quest(uid, mallum_id) do
+    case Mallums.check_quest(uid, quest_name) do
       {:ok, mallum} ->
         conn |> put_status(200) |> json(serialize_mallum(mallum))
 
@@ -653,14 +653,13 @@ defmodule CampFireWeb.GameController do
   end
 
   def check_quest(conn, _params) do
-    conn |> put_status(400) |> json(%{error: "Missing 'mallumId'"})
+    conn |> put_status(400) |> json(%{error: "Missing 'questName'"})
   end
 
-  def collect_quest(conn, %{"mallumId" => mallum_id}) do
+  def collect_quest(conn, %{"questName" => quest_name}) do
     uid = conn.assigns.current_player.uid
 
-    # Capture rewards before collect_rewards resets the mallum
-    case Mallums.collect_rewards(uid, mallum_id) do
+    case Mallums.collect_rewards(uid, quest_name) do
       {:ok, %{rewards: rewards}} ->
         conn |> put_status(200) |> json(%{rewards: rewards})
 
@@ -670,13 +669,13 @@ defmodule CampFireWeb.GameController do
   end
 
   def collect_quest(conn, _params) do
-    conn |> put_status(400) |> json(%{error: "Missing 'mallumId'"})
+    conn |> put_status(400) |> json(%{error: "Missing 'questName'"})
   end
 
-  def speed_up_quest(conn, %{"mallumId" => mallum_id}) do
+  def speed_up_quest(conn, %{"questName" => quest_name}) do
     uid = conn.assigns.current_player.uid
 
-    case Mallums.speed_up_quest(uid, mallum_id) do
+    case Mallums.speed_up_quest(uid, quest_name) do
       {:ok, mallum} ->
         conn |> put_status(200) |> json(serialize_mallum(mallum))
 
@@ -686,7 +685,7 @@ defmodule CampFireWeb.GameController do
   end
 
   def speed_up_quest(conn, _params) do
-    conn |> put_status(400) |> json(%{error: "Missing 'mallumId'"})
+    conn |> put_status(400) |> json(%{error: "Missing 'questName'"})
   end
 
   # ── Mallum Houses ─────────────────────────────────────────────

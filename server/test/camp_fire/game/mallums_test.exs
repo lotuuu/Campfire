@@ -78,7 +78,7 @@ defmodule CampFire.Game.MallumsTest do
       |> Ecto.Changeset.change(start_time_utc: past)
       |> Repo.update!()
 
-      {:ok, completed} = Mallums.check_quest(player.uid, quest_mallum.id)
+      {:ok, completed} = Mallums.check_quest(player.uid, "SwampForage")
 
       assert completed.state == "quest_complete"
       assert is_list(completed.pending_rewards)
@@ -94,10 +94,10 @@ defmodule CampFire.Game.MallumsTest do
 
     test "before time returns unchanged mallum" do
       {player, _mallum} = setup_player()
-      {:ok, quest_mallum} = Mallums.send_on_quest(player.uid, "SwampForage")
+      {:ok, _quest_mallum} = Mallums.send_on_quest(player.uid, "SwampForage")
 
       # Don't manipulate time — quest just started
-      {:ok, still_questing} = Mallums.check_quest(player.uid, quest_mallum.id)
+      {:ok, still_questing} = Mallums.check_quest(player.uid, "SwampForage")
       assert still_questing.state == "on_quest"
     end
   end
@@ -114,10 +114,10 @@ defmodule CampFire.Game.MallumsTest do
       |> Ecto.Changeset.change(start_time_utc: past)
       |> Repo.update!()
 
-      {:ok, completed} = Mallums.check_quest(player.uid, quest_mallum.id)
+      {:ok, completed} = Mallums.check_quest(player.uid, "SwampForage")
       assert completed.state == "quest_complete"
 
-      {:ok, %{rewards: rewards}} = Mallums.collect_rewards(player.uid, completed.id)
+      {:ok, %{rewards: rewards}} = Mallums.collect_rewards(player.uid, "SwampForage")
 
       assert is_list(rewards)
       assert length(rewards) >= 1
@@ -139,21 +139,21 @@ defmodule CampFire.Game.MallumsTest do
     end
 
     test "fails when not quest_complete" do
-      {player, mallum} = setup_player()
+      {player, _mallum} = setup_player()
 
-      {:error, :not_quest_complete} = Mallums.collect_rewards(player.uid, mallum.id)
+      {:error, :not_found} = Mallums.collect_rewards(player.uid, "SwampForage")
     end
   end
 
   describe "speed_up_quest/2" do
     test "consumes energy_drink, collects rewards, and resets to idle" do
       {player, _mallum} = setup_player()
-      {:ok, quest_mallum} = Mallums.send_on_quest(player.uid, "SwampForage")
+      {:ok, _quest_mallum} = Mallums.send_on_quest(player.uid, "SwampForage")
 
       # Give the player energy_drinks
       Economy.upsert_item(player.uid, "energy_drink", 3)
 
-      {:ok, completed} = Mallums.speed_up_quest(player.uid, quest_mallum.id)
+      {:ok, completed} = Mallums.speed_up_quest(player.uid, "SwampForage")
 
       # Speed-up now atomically collects: state goes to idle, rewards distributed
       assert completed.state == "idle"
@@ -171,20 +171,20 @@ defmodule CampFire.Game.MallumsTest do
 
     test "fails without energy_drink" do
       {player, _mallum} = setup_player()
-      {:ok, quest_mallum} = Mallums.send_on_quest(player.uid, "SwampForage")
+      {:ok, _quest_mallum} = Mallums.send_on_quest(player.uid, "SwampForage")
 
       # Spend all energy_drinks if any exist
       inventory = Economy.list_inventory(player.uid)
       drink = Enum.find(inventory, &(&1.item_key == "energy_drink"))
       if drink, do: Economy.spend_item(player.uid, "energy_drink", drink.count)
 
-      {:error, :insufficient_items} = Mallums.speed_up_quest(player.uid, quest_mallum.id)
+      {:error, :insufficient_items} = Mallums.speed_up_quest(player.uid, "SwampForage")
     end
 
     test "fails when not on quest" do
-      {player, mallum} = setup_player()
+      {player, _mallum} = setup_player()
 
-      {:error, :not_on_quest} = Mallums.speed_up_quest(player.uid, mallum.id)
+      {:error, :not_found} = Mallums.speed_up_quest(player.uid, "SwampForage")
     end
   end
 

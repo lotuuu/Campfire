@@ -62,9 +62,10 @@ namespace Garden
                         changed = true;
 
                         // Notify server
-                        if (GameService.Instance != null && GameService.Instance.IsOnline && mallum.serverId > 0)
+                        if (GameService.Instance != null && GameService.Instance.IsOnline
+                            && !string.IsNullOrEmpty(mallum.assignedQuestName))
                         {
-                            _ = NotifyServerOrResync(GameService.Instance.CheckQuest(mallum.serverId));
+                            _ = NotifyServerOrResync(GameService.Instance.CheckQuest(mallum.assignedQuestName));
                         }
                     }
                 }
@@ -186,7 +187,7 @@ namespace Garden
             var mallum = data.mallums[mallumIndex];
             if (mallum.state != MallumState.QuestComplete) return null;
 
-            int serverId = mallum.serverId;
+            string questName = mallum.assignedQuestName;
             var rewards = CollectRewards(mallum);
 
             foreach (var r in rewards)
@@ -197,17 +198,18 @@ namespace Garden
             AudioManager.Instance?.PlaySFX("quest_collect_rewards");
 
             // Notify server for authoritative rewards
-            if (GameService.Instance != null && GameService.Instance.IsOnline && serverId > 0)
+            if (GameService.Instance != null && GameService.Instance.IsOnline
+                && !string.IsNullOrEmpty(questName))
             {
-                _ = NotifyServerCollectQuest(serverId);
+                _ = NotifyServerCollectQuest(questName);
             }
 
             return rewards;
         }
 
-        private async Task NotifyServerCollectQuest(int mallumServerId)
+        private async Task NotifyServerCollectQuest(string questName)
         {
-            var result = await GameService.Instance.CollectQuest(mallumServerId);
+            var result = await GameService.Instance.CollectQuest(questName);
             if (result == null)
                 await GameService.Instance.ResyncFullState();
         }
@@ -384,15 +386,16 @@ namespace Garden
 
             if (!ConsumeQuestSpeedItem()) return false;
 
-            int serverId = mallum.serverId;
+            string questName = mallum.assignedQuestName;
             CompleteQuest(mallum);
             NotificationService.Instance?.CancelQuestNotification(mallumIndex);
             SaveManager.Instance.Save();
             OnMallumsChanged?.Invoke();
 
-            if (GameService.Instance != null && GameService.Instance.IsOnline && serverId > 0)
+            if (GameService.Instance != null && GameService.Instance.IsOnline
+                && !string.IsNullOrEmpty(questName))
             {
-                _ = NotifyServerOrResync(GameService.Instance.SpeedUpQuest(serverId));
+                _ = NotifyServerOrResync(GameService.Instance.SpeedUpQuest(questName));
             }
 
             return true;
@@ -412,7 +415,7 @@ namespace Garden
 
             if (!ConsumeQuestSpeedItem()) return null;
 
-            int serverId = mallum.serverId;
+            string questName = mallum.assignedQuestName;
 
             // Complete quest (rolls rewards into pendingRewards)
             CompleteQuest(mallum);
@@ -428,9 +431,10 @@ namespace Garden
             AudioManager.Instance?.PlaySFX("quest_collect_rewards");
 
             // Single server call — speed_up_quest on server now does speed-up + collect atomically
-            if (GameService.Instance != null && GameService.Instance.IsOnline && serverId > 0)
+            if (GameService.Instance != null && GameService.Instance.IsOnline
+                && !string.IsNullOrEmpty(questName))
             {
-                _ = NotifyServerOrResync(GameService.Instance.SpeedUpQuest(serverId));
+                _ = NotifyServerOrResync(GameService.Instance.SpeedUpQuest(questName));
             }
 
             return rewards;

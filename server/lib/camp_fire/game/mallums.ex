@@ -82,84 +82,47 @@ defmodule CampFire.Game.Mallums do
     end
   end
 
-  def check_quest(player_uid, mallum_id) do
-    with %PlayerMallum{} = mallum <- Repo.get(PlayerMallum, mallum_id),
-         true <- mallum.player_uid == player_uid || {:error, :not_owned},
-         true <- mallum.state == "on_quest" || {:error, :not_on_quest} do
-      config = get_quest_config(mallum.assigned_quest_name)
+  def check_quest(player_uid, quest_name) do
+    case find_mallum_on_quest(player_uid, quest_name) do
+      nil ->
+        {:error, :not_found}
 
-      if config == nil do
-        {:error, :unknown_quest}
-      else
-        now = DateTime.utc_now() |> DateTime.truncate(:second)
-        elapsed_minutes = DateTime.diff(now, mallum.start_time_utc, :second) / 60.0
+      mallum ->
+        config = get_quest_config(quest_name)
 
-        if elapsed_minutes >= config.duration_minutes do
-          rewards = roll_rewards(config)
-
-          mallum
-          |> PlayerMallum.changeset(%{
-            state: "quest_complete",
-            pending_rewards: rewards
-          })
-          |> Repo.update()
+        if config == nil do
+          {:error, :unknown_quest}
         else
-          {:ok, mallum}
+          now = DateTime.utc_now() |> DateTime.truncate(:second)
+          elapsed_minutes = DateTime.diff(now, mallum.start_time_utc, :second) / 60.0
+
+          if elapsed_minutes >= config.duration_minutes do
+            rewards = roll_rewards(config)
+
+            mallum
+            |> PlayerMallum.changeset(%{
+              state: "quest_complete",
+              pending_rewards: rewards
+            })
+            |> Repo.update()
+          else
+            {:ok, mallum}
+          end
         end
-      end
-    else
-      nil -> {:error, :not_found}
-      {:error, _} = err -> err
     end
   end
 
-  def collect_rewards(player_uid, mallum_id) do
-    with %PlayerMallum{} = mallum <- Repo.get(PlayerMallum, mallum_id),
-         true <- mallum.player_uid == player_uid || {:error, :not_owned},
-         true <- mallum.state == "quest_complete" || {:error, :not_quest_complete},
-         true <- mallum.pending_rewards != [] || {:error, :no_rewards} do
-      rewards = mallum.pending_rewards
+  def collect_rewards(player_uid, quest_name) do
+    case find_mallum_quest_complete(player_uid, quest_name) do
+      nil ->
+        {:error, :not_found}
 
-      Repo.transaction(fn ->
-        Enum.each(rewards, fn reward ->
-          item_key = reward["item_key"]
-          count = reward["count"]
-          Economy.upsert_item(player_uid, item_key, count)
-        end)
+      mallum ->
+        if mallum.pending_rewards == [] do
+          {:error, :no_rewards}
+        else
+          rewards = mallum.pending_rewards
 
-        mallum
-        |> PlayerMallum.changeset(%{
-          state: "idle",
-          assigned_quest_name: nil,
-          start_time_utc: nil,
-          pending_rewards: []
-        })
-        |> Repo.update!()
-
-        %{rewards: rewards}
-      end)
-    else
-      nil -> {:error, :not_found}
-      {:error, _} = err -> err
-    end
-  end
-
-  def speed_up_quest(player_uid, mallum_id) do
-    with %PlayerMallum{} = mallum <- Repo.get(PlayerMallum, mallum_id),
-         true <- mallum.player_uid == player_uid || {:error, :not_owned},
-         true <- mallum.state == "on_quest" || {:error, :not_on_quest} do
-      quest_speed_item = (CampFire.ConfigCache.get("mallum_house_config") || raise "mallum_house_config not loaded")["quest_speed_item"]
-      case Economy.spend_item(player_uid, quest_speed_item, 1) do
-        {:error, reason} ->
-          {:error, reason}
-
-        _ ->
-          config = get_quest_config(mallum.assigned_quest_name)
-          if config == nil, do: raise("Unknown quest: #{mallum.assigned_quest_name}")
-          rewards = roll_rewards(config)
-
-          # Atomically speed-up + collect: distribute rewards and go straight to idle
-          # to avoid race conditions with a separate collect call
           Repo.transaction(fn ->
             Enum.each(rewards, fn reward ->
               item_key = reward["item_key"]
@@ -175,11 +138,48 @@ defmodule CampFire.Game.Mallums do
               pending_rewards: []
             })
             |> Repo.update!()
+
+            %{rewards: rewards}
           end)
-      end
-    else
-      nil -> {:error, :not_found}
-      {:error, _} = err -> err
+        end
+    end
+  end
+
+  def speed_up_quest(player_uid, quest_name) do
+    case find_mallum_on_quest(player_uid, quest_name) do
+      nil ->
+        {:error, :not_found}
+
+      mallum ->
+        quest_speed_item = (CampFire.ConfigCache.get("mallum_house_config") || raise "mallum_house_config not loaded")["quest_speed_item"]
+        case Economy.spend_item(player_uid, quest_speed_item, 1) do
+          {:error, reason} ->
+            {:error, reason}
+
+          _ ->
+            config = get_quest_config(quest_name)
+            if config == nil, do: raise("Unknown quest: #{quest_name}")
+            rewards = roll_rewards(config)
+
+            # Atomically speed-up + collect: distribute rewards and go straight to idle
+            # to avoid race conditions with a separate collect call
+            Repo.transaction(fn ->
+              Enum.each(rewards, fn reward ->
+                item_key = reward["item_key"]
+                count = reward["count"]
+                Economy.upsert_item(player_uid, item_key, count)
+              end)
+
+              mallum
+              |> PlayerMallum.changeset(%{
+                state: "idle",
+                assigned_quest_name: nil,
+                start_time_utc: nil,
+                pending_rewards: []
+              })
+              |> Repo.update!()
+            end)
+        end
     end
   end
 
@@ -212,6 +212,24 @@ defmodule CampFire.Game.Mallums do
   end
 
   # --- Private Helpers ---
+
+  defp find_mallum_on_quest(player_uid, quest_name) do
+    Repo.one(
+      from(m in PlayerMallum,
+        where: m.player_uid == ^player_uid and m.state == "on_quest" and m.assigned_quest_name == ^quest_name,
+        limit: 1
+      )
+    )
+  end
+
+  defp find_mallum_quest_complete(player_uid, quest_name) do
+    Repo.one(
+      from(m in PlayerMallum,
+        where: m.player_uid == ^player_uid and m.state == "quest_complete" and m.assigned_quest_name == ^quest_name,
+        limit: 1
+      )
+    )
+  end
 
   defp claim_idle_mallum(player_uid, quest_name) do
     Repo.transaction(fn ->

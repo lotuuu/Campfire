@@ -129,7 +129,6 @@ namespace Garden
     [Serializable] public class PlantGardenRequest { public string plantName; public int gridX; public int gridY; public bool freeMode; }
     [Serializable] public class CollectGardenRequest { public int gardenId; }
     [Serializable] public class QuestRequest { public string questName; public bool freeMode; }
-    [Serializable] public class MallumIdRequest { public int mallumId; }
     [Serializable] public class SetSkinRequest { public string skinName; }
     [Serializable] public class PlotSkinRequest { public int plotId; public string skinName; }
     [Serializable] public class VaseSkinRequest { public int vaseId; public string skinName; }

@@ -775,12 +775,12 @@ namespace Garden
             return null;
         }
 
-        public async Task<ServerMallum> CheckQuest(int mallumId)
+        public async Task<ServerMallum> CheckQuest(string questName)
         {
             if (!IsOnline) return null;
             try
             {
-                var body = JsonUtility.ToJson(new MallumIdRequest { mallumId = mallumId });
+                var body = JsonUtility.ToJson(new QuestRequest { questName = questName });
                 using var req = PostJson("/game/quest/check", body);
                 await SendAsync(req);
 
@@ -793,12 +793,12 @@ namespace Garden
             return null;
         }
 
-        public async Task<CollectQuestResponse> CollectQuest(int mallumId)
+        public async Task<CollectQuestResponse> CollectQuest(string questName)
         {
             if (!IsOnline) return null;
             try
             {
-                var body = JsonUtility.ToJson(new MallumIdRequest { mallumId = mallumId });
+                var body = JsonUtility.ToJson(new QuestRequest { questName = questName });
                 using var req = PostJson("/game/quest/collect", body);
                 await SendAsync(req);
 
@@ -811,12 +811,12 @@ namespace Garden
             return null;
         }
 
-        public async Task<ServerMallum> SpeedUpQuest(int mallumId)
+        public async Task<ServerMallum> SpeedUpQuest(string questName)
         {
             if (!IsOnline) return null;
             try
             {
-                var body = JsonUtility.ToJson(new MallumIdRequest { mallumId = mallumId });
+                var body = JsonUtility.ToJson(new QuestRequest { questName = questName });
                 using var req = PostJson("/game/quest/speed-up", body);
                 await SendAsync(req);
 
