@@ -319,9 +319,12 @@ namespace Garden
 
         /// <summary>
         /// Animate the new outer ring of hex cells after a grid expansion.
-        /// Cells cascade in by angle, starting from the top and sweeping clockwise.
+        /// Zooms the viewport out to show the full grid, then cascades cells in
+        /// clockwise from the top, then zooms back to normal.
+        /// Cells must already have grid-cell--reveal-hidden applied during RebuildGrid.
         /// </summary>
-        public static void AnimateNewCells(Dictionary<(int, int), VisualElement> cellLookup, int oldRadius)
+        public static void AnimateNewCells(Dictionary<(int, int), VisualElement> cellLookup,
+            int oldRadius, VisualElement viewport)
         {
             if (oldRadius <= 0) return;
 
@@ -335,10 +338,10 @@ namespace Garden
                 int dist = (Mathf.Abs(q) + Mathf.Abs(r) + Mathf.Abs(q + r)) / 2;
                 if (dist <= oldRadius) continue;
 
-                // Compute angle from center for cascade ordering (top = 0, clockwise)
-                float px = q + r * 0.5f; // approximate x in hex space
-                float py = r * 0.866f;   // approximate y in hex space
-                float angle = Mathf.Atan2(px, -py); // top = 0, clockwise
+                // Angle from center: top = 0, clockwise
+                float px = q + r * 0.5f;
+                float py = r * 0.866f;
+                float angle = Mathf.Atan2(px, -py);
                 if (angle < 0) angle += Mathf.PI * 2f;
 
                 newCells.Add((kvp.Value, angle));
@@ -346,19 +349,34 @@ namespace Garden
 
             if (newCells.Count == 0) return;
 
-            // Sort by angle (top-first, clockwise)
             newCells.Sort((a, b) => a.angle.CompareTo(b.angle));
 
-            // Hide all new cells
-            foreach (var (cell, _) in newCells)
-                cell.AddToClassList("grid-cell--reveal-hidden");
+            // ── Zoom out viewport to show full grid ──
+            // Scale down the viewport so all content is visible
+            float zoomOut = 0.75f;
+            float zoomDurationMs = 400f;
+            float elapsed = 0f;
 
-            // Cascade reveal with even spacing
-            float delayPerCell = 60f; // ms between each cell
+            // Animate zoom out
+            viewport.schedule.Execute(() =>
+            {
+                elapsed += 16f;
+                float t = Mathf.Clamp01(elapsed / zoomDurationMs);
+                float ease = 1f - (1f - t) * (1f - t); // ease-out quad
+                float s = Mathf.Lerp(1f, zoomOut, ease);
+                viewport.style.scale = new Scale(new Vector2(s, s));
+            }).Every(16).Until(() => elapsed >= zoomDurationMs);
+
+            // ── Cascade reveal cells after zoom finishes ──
+            float delayPerCell = 60f;
+            long zoomDelayMs = (long)zoomDurationMs;
+            float lastCellDelayMs = 0;
+
             for (int i = 0; i < newCells.Count; i++)
             {
                 var c = newCells[i].cell;
-                long delayMs = 200 + (long)(i * delayPerCell);
+                long delayMs = zoomDelayMs + (long)(i * delayPerCell);
+                lastCellDelayMs = delayMs;
                 c.schedule.Execute(() =>
                 {
                     c.AddToClassList("grid-cell--reveal");
@@ -369,6 +387,22 @@ namespace Garden
                     }).StartingIn(500);
                 }).StartingIn(delayMs);
             }
+
+            // ── Zoom back to normal after all cells revealed ──
+            long zoomBackStart = (long)lastCellDelayMs + 600; // wait for last cell's transition
+            float backElapsed = 0f;
+            float backDurationMs = 500f;
+
+            viewport.schedule.Execute(() =>
+            {
+                backElapsed += 16f;
+                float t = Mathf.Clamp01(backElapsed / backDurationMs);
+                float ease = 1f - (1f - t) * (1f - t) * (1f - t); // ease-out cubic
+                float s = Mathf.Lerp(zoomOut, 1f, ease);
+                viewport.style.scale = new Scale(new Vector2(s, s));
+                if (backElapsed >= backDurationMs)
+                    viewport.style.scale = StyleKeyword.Null; // clean reset
+            }).Every(16).StartingIn(zoomBackStart).Until(() => backElapsed >= backDurationMs);
         }
     }
 }

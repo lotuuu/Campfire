@@ -76,6 +76,7 @@ namespace Garden
 
         // Current grid state
         private int currentGridSize;
+        private int _revealOuterBeyondRadius = -1; // if >= 0, cells beyond this radius are born hidden
         private bool suppressRebuild;
         private bool pendingRebuild;
         private bool needsRecenter = true;
@@ -389,6 +390,14 @@ namespace Garden
                     int gy = r;
 
                     cellLookup[(q, r)] = cell;
+
+                    // Hide outer-ring cells if a reveal animation is pending
+                    if (_revealOuterBeyondRadius >= 0)
+                    {
+                        int hexDist = (Mathf.Abs(q) + Mathf.Abs(r) + Mathf.Abs(q + r)) / 2;
+                        if (hexDist > _revealOuterBeyondRadius)
+                            cell.AddToClassList("grid-cell--reveal-hidden");
+                    }
 
                     if (occupied.TryGetValue((q, r), out var info))
                     {
@@ -1504,13 +1513,17 @@ namespace Garden
 
                     int newLevel = FlameManager.Instance.Level;
 
-                    // Callback: rebuild grid, then animate new cells if grid expanded
+                    // Callback: rebuild grid with new cells hidden, then animate them in
                     void OnAnimationComplete()
                     {
-                        RebuildGrid();
                         int newRadius = FlameManager.Instance.GetGridSize();
-                        if (newRadius > oldRadius)
-                            FlameLevelUpAnimator.AnimateNewCells(cellLookup, oldRadius);
+                        bool gridExpanded = newRadius > oldRadius;
+                        if (gridExpanded)
+                            _revealOuterBeyondRadius = oldRadius; // cells born hidden during rebuild
+                        RebuildGrid();
+                        _revealOuterBeyondRadius = -1; // reset for future rebuilds
+                        if (gridExpanded)
+                            FlameLevelUpAnimator.AnimateNewCells(cellLookup, oldRadius, viewport);
                     }
 
                     // Smooth pan to center on flame first, then play animation
