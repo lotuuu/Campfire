@@ -379,15 +379,14 @@
             </ui:VisualElement>
         </ui:VisualElement>
 
-        <!-- Interaction backdrop (captures taps outside the panel) -->
-        <ui:VisualElement name="interaction-backdrop" />
-
-        <!-- Interaction panel (tap on camp objects) -->
-        <ui:VisualElement name="interaction-panel">
-            <ui:Button name="interaction-close" />
-            <ui:Label name="interaction-title" text="" />
-            <ui:VisualElement name="interaction-body" />
-            <ui:VisualElement name="interaction-actions" />
+        <!-- Interaction backdrop (captures taps outside the panel, centers panel via flex) -->
+        <ui:VisualElement name="interaction-backdrop">
+            <ui:VisualElement name="interaction-panel">
+                <ui:Button name="interaction-close" />
+                <ui:Label name="interaction-title" text="" />
+                <ui:VisualElement name="interaction-body" />
+                <ui:VisualElement name="interaction-actions" />
+            </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- Reward reveal overlay -->
@@ -445,11 +444,6 @@
             </ui:VisualElement>
         </ui:VisualElement>
 
-        <!-- Visit transition curtains -->
-        <ui:VisualElement name="visit-transition" picking-mode="Ignore">
-            <ui:VisualElement name="curtain-left" picking-mode="Ignore" />
-            <ui:VisualElement name="curtain-right" picking-mode="Ignore" />
-        </ui:VisualElement>
 
         <!-- Loading gate — covers UI until all services are ready -->
         <ui:VisualElement name="loading-gate">
