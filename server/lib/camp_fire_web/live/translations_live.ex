@@ -102,71 +102,79 @@ defmodule CampFireWeb.TranslationsLive do
     assigns = assign(assigns, :filtered, filtered)
 
     ~H"""
-    <div style="max-width: 1000px; margin: 0 auto; padding: 20px;">
-      <h1>Translations</h1>
+    <div>
+      <div class="flex items-center justify-between mb-4">
+        <h1 class="text-xl font-semibold text-gray-900">Translations</h1>
+        <span class="text-sm text-gray-500"><%= length(@filtered) %> translations</span>
+      </div>
 
-      <div style="display: flex; gap: 16px; margin-bottom: 20px; align-items: center;">
+      <div class="flex items-center gap-3 mb-4">
         <form phx-change="filter_locale">
-          <select name="locale" style="padding: 6px;">
+          <select name="locale" class="rounded border border-gray-300 px-2 py-1 text-sm">
             <%= for l <- @locales do %>
               <option value={l} selected={l == @locale_filter}><%= l %></option>
             <% end %>
           </select>
         </form>
 
-        <form phx-change="filter_prefix">
-          <input type="text" name="prefix" value={@prefix_filter} placeholder="Filter by key prefix..." style="padding: 6px; width: 300px;" />
+        <form phx-change="filter_prefix" class="flex-1 max-w-xs">
+          <input type="text" name="prefix" value={@prefix_filter} placeholder="Filter by key prefix..."
+            class="w-full rounded border border-gray-300 px-2 py-1 text-sm" />
         </form>
 
-        <button phx-click="toggle_new" style="padding: 6px 12px;">
+        <button phx-click="toggle_new" class="rounded bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700">
           <%= if @show_new_form, do: "Cancel", else: "+ Add Translation" %>
         </button>
       </div>
 
       <%= if @show_new_form do %>
-        <form phx-submit="save_new" style="display: flex; gap: 8px; margin-bottom: 20px; padding: 12px; background: #f5f5f5; border-radius: 4px;">
-          <input type="text" name="locale" value={@new_locale} placeholder="Locale (e.g. ja)" style="padding: 6px; width: 80px;" />
-          <input type="text" name="key" value={@new_key} placeholder="Key (e.g. ui.button.harvest)" style="padding: 6px; width: 300px;" />
-          <input type="text" name="value" value={@new_value} placeholder="Value" style="padding: 6px; flex: 1;" />
-          <button type="submit" style="padding: 6px 12px;">Save</button>
+        <form phx-submit="save_new" class="flex items-center gap-2 mb-4 p-3 bg-gray-50 rounded border border-gray-200">
+          <input type="text" name="locale" value={@new_locale} placeholder="Locale (e.g. ja)"
+            class="rounded border border-gray-300 px-2 py-1 text-sm w-20" />
+          <input type="text" name="key" value={@new_key} placeholder="Key (e.g. ui.button.harvest)"
+            class="rounded border border-gray-300 px-2 py-1 text-sm w-64" />
+          <input type="text" name="value" value={@new_value} placeholder="Value"
+            class="rounded border border-gray-300 px-2 py-1 text-sm flex-1" />
+          <button type="submit" class="rounded bg-green-600 px-3 py-1 text-sm text-white hover:bg-green-700">Save</button>
         </form>
       <% end %>
 
-      <p style="color: #666;"><%= length(@filtered) %> translations</p>
-
-      <table style="width: 100%; border-collapse: collapse;">
-        <thead>
-          <tr style="border-bottom: 2px solid #ddd;">
-            <th style="text-align: left; padding: 8px;">Key</th>
-            <th style="text-align: left; padding: 8px;">Value</th>
-            <th style="text-align: right; padding: 8px; width: 120px;">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <%= for t <- @filtered do %>
-            <tr style="border-bottom: 1px solid #eee;">
-              <td style="padding: 8px; font-family: monospace; font-size: 13px;"><%= t.key %></td>
-              <td style="padding: 8px;">
-                <%= if @editing_id == t.id do %>
-                  <form phx-submit="save_edit" style="display: flex; gap: 4px;">
-                    <input type="text" name="value" value={@edit_value} style="padding: 4px; flex: 1;" autofocus />
-                    <button type="submit" style="padding: 4px 8px;">Save</button>
-                    <button type="button" phx-click="cancel_edit" style="padding: 4px 8px;">Cancel</button>
-                  </form>
-                <% else %>
-                  <%= t.value %>
-                <% end %>
-              </td>
-              <td style="text-align: right; padding: 8px;">
-                <%= if @editing_id != t.id do %>
-                  <button phx-click="edit" phx-value-id={t.id} style="padding: 2px 8px;">Edit</button>
-                  <button phx-click="delete" phx-value-id={t.id} style="padding: 2px 8px; color: red;" data-confirm="Delete this translation?">Delete</button>
-                <% end %>
-              </td>
+      <div class="rounded border border-gray-200 overflow-hidden">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-gray-50 border-b border-gray-200">
+              <th class="text-left px-3 py-2 font-medium text-gray-600 w-2/5">Key</th>
+              <th class="text-left px-3 py-2 font-medium text-gray-600">Value</th>
+              <th class="text-right px-3 py-2 font-medium text-gray-600 w-28">Actions</th>
             </tr>
-          <% end %>
-        </tbody>
-      </table>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            <%= for t <- @filtered do %>
+              <tr class="hover:bg-gray-50">
+                <td class="px-3 py-1.5 font-mono text-xs text-gray-700 align-top"><%= t.key %></td>
+                <td class="px-3 py-1.5 text-gray-900 align-top">
+                  <%= if @editing_id == t.id do %>
+                    <form phx-submit="save_edit" class="flex items-center gap-1">
+                      <input type="text" name="value" value={@edit_value}
+                        class="rounded border border-gray-300 px-2 py-0.5 text-sm flex-1" autofocus />
+                      <button type="submit" class="rounded bg-green-600 px-2 py-0.5 text-xs text-white hover:bg-green-700">Save</button>
+                      <button type="button" phx-click="cancel_edit" class="rounded border border-gray-300 px-2 py-0.5 text-xs hover:bg-gray-100">Cancel</button>
+                    </form>
+                  <% else %>
+                    <%= t.value %>
+                  <% end %>
+                </td>
+                <td class="text-right px-3 py-1.5 align-top whitespace-nowrap">
+                  <%= if @editing_id != t.id do %>
+                    <button phx-click="edit" phx-value-id={t.id} class="text-xs text-blue-600 hover:text-blue-800 mr-2">Edit</button>
+                    <button phx-click="delete" phx-value-id={t.id} class="text-xs text-red-500 hover:text-red-700" data-confirm="Delete this translation?">Delete</button>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
     </div>
     """
   end
