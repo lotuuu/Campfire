@@ -22,7 +22,7 @@ namespace Garden
         private VisualTreeAsset cellTemplate;
         private CampsitePanController panController;
 
-        // Visit transition (world-space sprite wipe via TransitionWipe singleton)
+        private TransitionWipe transitionWipe;
 
         private const float HexSize = 220f;     // hex outer radius (pixel spacing)
         private const float CellWidth = 380f;   // cell element width
@@ -97,6 +97,7 @@ namespace Garden
         public void Initialize(VisualElement root)
         {
             campRoot = root;
+            transitionWipe = FindAnyObjectByType<TransitionWipe>(FindObjectsInactive.Include);
             viewport = root.Q("campsite-viewport");
             canvas = root.Q("campsite-canvas");
             interactionBackdrop = root.Q("interaction-backdrop");
@@ -1029,29 +1030,33 @@ namespace Garden
 
         public void ExitVisitMode()
         {
+            if (visitBackBtn != null)
+            {
+                visitBackBtn.RemoveFromHierarchy();
+                visitBackBtn = null;
+            }
             PlayVisitTransition(toVisit: false);
         }
 
         private void PlayVisitTransition(bool toVisit)
         {
-            var wipe = TransitionWipe.Instance;
-            if (wipe == null)
+            if (transitionWipe == null)
             {
                 ApplyVisitState(toVisit);
                 return;
             }
 
-            // Hide all UI so the sprite wipe covers everything
-            if (campRoot != null)
-                campRoot.style.display = DisplayStyle.None;
-
-            wipe.Play(
-                onMidPoint: () => ApplyVisitState(toVisit),
-                onComplete: () =>
+            transitionWipe.Play(
+                onMidPoint: () =>
                 {
+                    // Sprites fully cover the screen at midpoint — safe to swap behind them
+                    if (campRoot != null)
+                        campRoot.style.display = DisplayStyle.None;
+                    ApplyVisitState(toVisit);
                     if (campRoot != null)
                         campRoot.style.display = DisplayStyle.Flex;
-                }
+                },
+                onComplete: null
             );
         }
 
@@ -1488,6 +1493,9 @@ namespace Garden
 
                     CloseInteractionPanel();
                     int newLevel = FlameManager.Instance.Level;
+
+                    // Block all event-driven rebuilds for the entire animation sequence
+                    FlameLevelUpAnimator.IsPlaying = true;
 
                     // Callback: rebuild grid with new cells born hidden, then cascade
                     void RestoreBars()

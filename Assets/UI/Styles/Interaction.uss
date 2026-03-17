@@ -854,7 +854,9 @@
 }
 
 .flame-bar-hidden {
-    display: none;
+    position: absolute;
+    opacity: 0;
+    translate: 0 -200px;
 }
 
 .grid-cell--levelup-glow {

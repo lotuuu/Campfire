@@ -7,7 +7,7 @@ namespace Garden
 {
     public static class FlameLevelUpAnimator
     {
-        public static bool IsPlaying { get; private set; }
+        public static bool IsPlaying { get; set; }
 
         private struct Ember
         {
@@ -130,12 +130,6 @@ namespace Garden
             var state = new AnimationState();
             IVisualElementScheduledItem updater = null;
             var createdElements = new List<VisualElement>();
-
-            // ── Hide top/bottom bars for dramatic full-screen effect ──
-            var topBar = root.Q("top-bar");
-            var bottomNav = root.Q("bottom-nav");
-            topBar?.AddToClassList("flame-bar-hidden");
-            bottomNav?.AddToClassList("flame-bar-hidden");
 
             // ── Stage 1: Golden Screen Flash (0.0s–0.5s) ──
             var flash = new VisualElement();
@@ -309,6 +303,12 @@ namespace Garden
                     }
                 }
             }
+
+            // ── Hide top/bottom bars (after all layout reads are done) ──
+            var topBar = root.Q("top-bar");
+            var bottomNav = root.Q("bottom-nav");
+            topBar?.AddToClassList("flame-bar-hidden");
+            bottomNav?.AddToClassList("flame-bar-hidden");
 
             // ── Stage 6: Level Badge (1.2s–3.5s) — bigger, with glow ──
             var badge = new VisualElement();
