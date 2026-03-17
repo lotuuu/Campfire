@@ -225,6 +225,30 @@ en = [
   {"ui.visitor.seeds", "Seeds"},
   {"ui.visitor.something_special", "Something special"},
   {"ui.visitor.water", "Water"},
+  # Weather
+  {"ui.weather.clear", "Clear"},
+  {"ui.weather.cloudy", "Cloudy"},
+  {"ui.weather.rain", "Rain"},
+  {"ui.weather.storm", "Storm"},
+  {"ui.weather.snow", "Snow"},
+  {"ui.weather.today", "TODAY"},
+  {"ui.weather.sunrise", "Sunrise"},
+  {"ui.weather.sunset", "Sunset"},
+  {"ui.weather.temp", "Temp"},
+  {"ui.weather.humidity", "Humidity"},
+  {"ui.weather.wind", "Wind"},
+  {"ui.weather.cloud", "Cloud"},
+  {"ui.weather.msg_rain", "It started raining..."},
+  {"ui.weather.msg_storm", "A storm is brewing!"},
+  {"ui.weather.msg_snow", "Snow is falling!"},
+  {"ui.weather.msg_cloudy", "Clouds are rolling in"},
+  {"ui.weather.msg_rain_stopped", "The rain has stopped"},
+  {"ui.weather.msg_storm_passed", "The storm has passed"},
+  {"ui.weather.msg_snow_stopped", "The snow has stopped"},
+  {"ui.weather.msg_clear", "The sun is out!"},
+  # Camp name
+  {"ui.label.camper", "Camper"},
+  {"ui.label.camp_name", "{0}'s Camp"},
 ]
 
 # ── Spanish ──
@@ -448,6 +472,30 @@ es = [
   {"ui.visitor.seeds", "Semillas"},
   {"ui.visitor.something_special", "Algo especial"},
   {"ui.visitor.water", "Agua"},
+  # Weather
+  {"ui.weather.clear", "Despejado"},
+  {"ui.weather.cloudy", "Nublado"},
+  {"ui.weather.rain", "Lluvia"},
+  {"ui.weather.storm", "Tormenta"},
+  {"ui.weather.snow", "Nieve"},
+  {"ui.weather.today", "HOY"},
+  {"ui.weather.sunrise", "Amanecer"},
+  {"ui.weather.sunset", "Atardecer"},
+  {"ui.weather.temp", "Temp"},
+  {"ui.weather.humidity", "Humedad"},
+  {"ui.weather.wind", "Viento"},
+  {"ui.weather.cloud", "Nubes"},
+  {"ui.weather.msg_rain", "Empezo a llover..."},
+  {"ui.weather.msg_storm", "Se acerca una tormenta!"},
+  {"ui.weather.msg_snow", "Esta nevando!"},
+  {"ui.weather.msg_cloudy", "Las nubes se acercan"},
+  {"ui.weather.msg_rain_stopped", "Dejo de llover"},
+  {"ui.weather.msg_storm_passed", "La tormenta paso"},
+  {"ui.weather.msg_snow_stopped", "Dejo de nevar"},
+  {"ui.weather.msg_clear", "Salio el sol!"},
+  # Camp name
+  {"ui.label.camper", "Campista"},
+  {"ui.label.camp_name", "Campamento de {0}"},
 ]
 
 # ── Seed all locales ──

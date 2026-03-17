@@ -78,7 +78,7 @@ namespace Garden
 
         private static string TruncateName(string name, int max = 10)
         {
-            if (string.IsNullOrEmpty(name)) return "Camper";
+            if (string.IsNullOrEmpty(name)) return Loc.Get("ui.label.camper", "Camper");
             return name.Length > max ? name[..max] : name;
         }
 
@@ -86,20 +86,20 @@ namespace Garden
         {
             if (playerName == null) return;
             var name = SocialSaveManager.Instance?.Data?.displayName;
-            playerName.text = TruncateName(name) + "'s Camp";
+            playerName.text = string.Format(Loc.Get("ui.label.camp_name", "{0}'s Camp"), TruncateName(name));
         }
 
         private void OnDisplayNameUpdated(string newName)
         {
             if (playerName != null)
-                playerName.text = TruncateName(newName) + "'s Camp";
+                playerName.text = string.Format(Loc.Get("ui.label.camp_name", "{0}'s Camp"), TruncateName(newName));
         }
 
         public void SetVisitingName(string friendName)
         {
             if (playerName == null) return;
             if (friendName != null)
-                playerName.text = TruncateName(friendName) + "'s Camp";
+                playerName.text = string.Format(Loc.Get("ui.label.camp_name", "{0}'s Camp"), TruncateName(friendName));
             else
                 UpdatePlayerName();
         }
@@ -167,7 +167,8 @@ namespace Garden
                     icon.style.backgroundImage = dayWeatherTex;
                 header.Add(icon);
 
-                var condLabel = new Label(day.condition.ToString());
+                var dayCondKey = $"ui.weather.{day.condition.ToString().ToLower()}";
+                var condLabel = new Label(Loc.Get(dayCondKey, day.condition.ToString()));
                 condLabel.AddToClassList("forecast-day-condition");
                 header.Add(condLabel);
 
@@ -185,20 +186,20 @@ namespace Garden
                 // Row 1: sunrise, sunset, temp
                 var statsRow1 = new VisualElement();
                 statsRow1.AddToClassList("forecast-stats-row");
-                AddStatCell(statsRow1, FormatHour(sunriseHour), "Sunrise");
-                AddStatCell(statsRow1, FormatHour(sunsetHour), "Sunset");
-                AddStatCell(statsRow1, $"{day.tempHigh:F0}\u00b0/{day.tempLow:F0}\u00b0", "Temp",
+                AddStatCell(statsRow1, FormatHour(sunriseHour), Loc.Get("ui.weather.sunrise", "Sunrise"));
+                AddStatCell(statsRow1, FormatHour(sunsetHour), Loc.Get("ui.weather.sunset", "Sunset"));
+                AddStatCell(statsRow1, $"{day.tempHigh:F0}\u00b0/{day.tempLow:F0}\u00b0", Loc.Get("ui.weather.temp", "Temp"),
                     TempClass(day.tempHigh));
                 card.Add(statsRow1);
 
                 // Row 2: humidity, wind, cloud
                 var statsRow2 = new VisualElement();
                 statsRow2.AddToClassList("forecast-stats-row");
-                AddStatCell(statsRow2, $"{day.humidity:F0}%", "Humidity",
+                AddStatCell(statsRow2, $"{day.humidity:F0}%", Loc.Get("ui.weather.humidity", "Humidity"),
                     HumidityClass(day.humidity));
-                AddStatCell(statsRow2, $"{day.windSpeed:F1} m/s", "Wind",
+                AddStatCell(statsRow2, $"{day.windSpeed:F1} m/s", Loc.Get("ui.weather.wind", "Wind"),
                     WindClass(day.windSpeed));
-                AddStatCell(statsRow2, $"{day.cloudCover:F0}%", "Cloud");
+                AddStatCell(statsRow2, $"{day.cloudCover:F0}%", Loc.Get("ui.weather.cloud", "Cloud"));
                 card.Add(statsRow2);
 
                 forecastDays.Add(card);
@@ -215,7 +216,7 @@ namespace Garden
             var header = new VisualElement();
             header.AddToClassList("forecast-day-header");
 
-            var dayLabel = new Label("TODAY");
+            var dayLabel = new Label(Loc.Get("ui.weather.today", "TODAY"));
             dayLabel.AddToClassList("forecast-day-name");
             header.Add(dayLabel);
 
@@ -226,7 +227,8 @@ namespace Garden
                 icon.style.backgroundImage = todayWeatherTex;
             header.Add(icon);
 
-            var condLabel = new Label(weather.condition.ToString());
+            var todayCondKey = $"ui.weather.{weather.condition.ToString().ToLower()}";
+            var condLabel = new Label(Loc.Get(todayCondKey, weather.condition.ToString()));
             condLabel.AddToClassList("forecast-day-condition");
             header.Add(condLabel);
 
@@ -244,20 +246,20 @@ namespace Garden
             // Row 1: sunrise, sunset, temp
             var row1 = new VisualElement();
             row1.AddToClassList("forecast-stats-row");
-            AddStatCell(row1, FormatHour(weather.sunriseHour), "Sunrise");
-            AddStatCell(row1, FormatHour(weather.sunsetHour), "Sunset");
-            AddStatCell(row1, $"{weather.temperature:F0}\u00b0", "Temp",
+            AddStatCell(row1, FormatHour(weather.sunriseHour), Loc.Get("ui.weather.sunrise", "Sunrise"));
+            AddStatCell(row1, FormatHour(weather.sunsetHour), Loc.Get("ui.weather.sunset", "Sunset"));
+            AddStatCell(row1, $"{weather.temperature:F0}\u00b0", Loc.Get("ui.weather.temp", "Temp"),
                 TempClass(weather.temperature));
             card.Add(row1);
 
             // Row 2: humidity, wind, cloud
             var row2 = new VisualElement();
             row2.AddToClassList("forecast-stats-row");
-            AddStatCell(row2, $"{weather.humidity:F0}%", "Humidity",
+            AddStatCell(row2, $"{weather.humidity:F0}%", Loc.Get("ui.weather.humidity", "Humidity"),
                 HumidityClass(weather.humidity));
-            AddStatCell(row2, $"{weather.windSpeed:F1} m/s", "Wind",
+            AddStatCell(row2, $"{weather.windSpeed:F1} m/s", Loc.Get("ui.weather.wind", "Wind"),
                 WindClass(weather.windSpeed));
-            AddStatCell(row2, $"{weather.cloudCover:F0}%", "Cloud");
+            AddStatCell(row2, $"{weather.cloudCover:F0}%", Loc.Get("ui.weather.cloud", "Cloud"));
             card.Add(row2);
 
             forecastDays.Add(card);
@@ -318,7 +320,11 @@ namespace Garden
             var tex = GetWeatherIcon(weather.condition);
             if (weatherIcon != null && tex != null)
                 weatherIcon.style.backgroundImage = tex;
-            if (weatherConditionLabel != null) weatherConditionLabel.text = weather.condition.ToString().ToUpper();
+            if (weatherConditionLabel != null)
+            {
+                var condKey = $"ui.weather.{weather.condition.ToString().ToLower()}";
+                weatherConditionLabel.text = Loc.Get(condKey, weather.condition.ToString()).ToUpper();
+            }
             if (weatherHumidity != null) weatherHumidity.text = $"{weather.humidity:F0}";
             if (weatherTemp != null) weatherTemp.text = $"{weather.temperature:F0}\u00b0";
             if (weatherMoon != null)

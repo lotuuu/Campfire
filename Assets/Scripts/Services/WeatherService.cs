@@ -157,14 +157,14 @@ namespace Garden
             {
                 var msg = curr.condition switch
                 {
-                    WeatherCondition.Rain => "It started raining...",
-                    WeatherCondition.Storm => "A storm is brewing!",
-                    WeatherCondition.Snow => "Snow is falling!",
-                    WeatherCondition.Cloudy when prev.condition == WeatherCondition.Clear => "Clouds are rolling in",
-                    WeatherCondition.Clear when prev.condition == WeatherCondition.Rain => "The rain has stopped",
-                    WeatherCondition.Clear when prev.condition == WeatherCondition.Storm => "The storm has passed",
-                    WeatherCondition.Clear when prev.condition == WeatherCondition.Snow => "The snow has stopped",
-                    WeatherCondition.Clear => "The sun is out!",
+                    WeatherCondition.Rain => Loc.Get("ui.weather.msg_rain", "It started raining..."),
+                    WeatherCondition.Storm => Loc.Get("ui.weather.msg_storm", "A storm is brewing!"),
+                    WeatherCondition.Snow => Loc.Get("ui.weather.msg_snow", "Snow is falling!"),
+                    WeatherCondition.Cloudy when prev.condition == WeatherCondition.Clear => Loc.Get("ui.weather.msg_cloudy", "Clouds are rolling in"),
+                    WeatherCondition.Clear when prev.condition == WeatherCondition.Rain => Loc.Get("ui.weather.msg_rain_stopped", "The rain has stopped"),
+                    WeatherCondition.Clear when prev.condition == WeatherCondition.Storm => Loc.Get("ui.weather.msg_storm_passed", "The storm has passed"),
+                    WeatherCondition.Clear when prev.condition == WeatherCondition.Snow => Loc.Get("ui.weather.msg_snow_stopped", "The snow has stopped"),
+                    WeatherCondition.Clear => Loc.Get("ui.weather.msg_clear", "The sun is out!"),
                     _ => null
                 };
                 if (msg != null) OnWeatherChanged?.Invoke(msg);
