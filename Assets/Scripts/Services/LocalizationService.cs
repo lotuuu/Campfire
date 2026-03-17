@@ -43,6 +43,7 @@ namespace Garden
             _strings = data ?? new();
             CurrentLocale = locale;
             IsLoaded = true;
+            OnLocaleChanged?.Invoke();
         }
 
         public void SetSupportedLocales(List<string> locales)
