@@ -1528,7 +1528,7 @@ namespace Garden
                         RebuildGrid();
                         _revealOuterBeyondRadius = -1;
                         if (gridExpanded)
-                            FlameLevelUpAnimator.AnimateNewCells(cellLookup, oldRadius, canvas, panController);
+                            FlameLevelUpAnimator.AnimateNewCells(cellLookup, oldRadius, viewport);
                     }
 
                     // Pan to center on flame (using current offsets), then play animation
