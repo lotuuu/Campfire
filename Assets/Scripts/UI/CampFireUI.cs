@@ -393,6 +393,7 @@ namespace Garden
             questUI?.Refresh();
             apotheke?.Refresh();
             resourceDisplay?.Refresh();
+            campsiteView?.RebuildGrid();
         }
 
         // ── Loading gate callbacks ──

@@ -76,6 +76,9 @@ namespace Garden
             SubscribeEvents();
             initialized = true;
 
+            if (LocalizationService.Instance != null)
+                LocalizationService.Instance.OnLocaleChanged += () => ShowHintForStep(CurrentStep);
+
             // If step 0, show welcome. Otherwise resume current step hint.
             if (CurrentStep == StepWelcome)
                 ShowWelcome();
