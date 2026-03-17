@@ -85,6 +85,30 @@ defmodule CampFireWeb.GameController do
     supported_locales = CampFire.Translations.supported_locales()
     config_trans = CampFire.Translations.get_config_translations(locale)
 
+    # Apply config translations to items
+    items =
+      if locale != "en" do
+        item_trans = Map.get(config_trans, "item", [])
+
+        Enum.reduce(item_trans, items, fn ct, acc ->
+          case Map.get(acc, ct.translatable_key) do
+            nil ->
+              acc
+
+            item ->
+              updated =
+                case ct.field do
+                  "display_name" -> Map.put(item, "displayName", ct.value)
+                  _ -> item
+                end
+
+              Map.put(acc, ct.translatable_key, updated)
+          end
+        end)
+      else
+        items
+      end
+
     # Apply config translations to quests
     quests =
       if locale != "en" do

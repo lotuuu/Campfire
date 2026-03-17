@@ -469,3 +469,109 @@ end
 
 TranslationSeeder.seed("en", en, Repo)
 TranslationSeeder.seed("es", es, Repo)
+
+# ── Config Translations (localized DTO fields) ──
+
+alias CampFire.Translations.ConfigTranslation
+
+es_config_translations = [
+  # Items — seeds
+  {"item", "sprouts_seed", "display_name", "Semilla de Brotes"},
+  {"item", "cress_seed", "display_name", "Semilla de Berro"},
+  {"item", "basil_seed", "display_name", "Semilla de Albahaca"},
+  {"item", "chamomile_seed", "display_name", "Semilla de Manzanilla"},
+  {"item", "marigold_seed", "display_name", "Semilla de Calendula"},
+  {"item", "snowdrop_seed", "display_name", "Semilla de Campanilla"},
+  {"item", "mint_seed", "display_name", "Semilla de Menta"},
+  {"item", "lavender_seed", "display_name", "Semilla de Lavanda"},
+  {"item", "pansy_seed", "display_name", "Semilla de Pensamiento"},
+  {"item", "poppy_seed", "display_name", "Semilla de Amapola"},
+  {"item", "jasmine_seed", "display_name", "Semilla de Jazmin"},
+  {"item", "rosemary_seed", "display_name", "Semilla de Romero"},
+  {"item", "dahlia_seed", "display_name", "Semilla de Dalia"},
+  {"item", "moonflower_seed", "display_name", "Semilla de Flor de Luna"},
+  {"item", "berrybush_seed", "display_name", "Semilla de Arbusto de Bayas"},
+  {"item", "oak_seed", "display_name", "Semilla de Roble"},
+  # Items — harvests
+  {"item", "sprouts", "display_name", "Brotes"},
+  {"item", "cress", "display_name", "Berro"},
+  {"item", "basil", "display_name", "Albahaca"},
+  {"item", "chamomile", "display_name", "Manzanilla"},
+  {"item", "marigold", "display_name", "Calendula"},
+  {"item", "snowdrop", "display_name", "Campanilla"},
+  {"item", "mint", "display_name", "Menta"},
+  {"item", "lavender", "display_name", "Lavanda"},
+  {"item", "pansy", "display_name", "Pensamiento"},
+  {"item", "poppy", "display_name", "Amapola"},
+  {"item", "jasmine", "display_name", "Jazmin"},
+  {"item", "rosemary", "display_name", "Romero"},
+  {"item", "dahlia", "display_name", "Dalia"},
+  {"item", "moonflower", "display_name", "Flor de Luna"},
+  {"item", "berry", "display_name", "Baya"},
+  {"item", "acorn", "display_name", "Bellota"},
+  # Items — pigments
+  {"item", "basil_pigment", "display_name", "Pigmento de Albahaca"},
+  {"item", "chamomile_pigment", "display_name", "Pigmento de Manzanilla"},
+  {"item", "marigold_pigment", "display_name", "Pigmento de Calendula"},
+  {"item", "snowdrop_pigment", "display_name", "Pigmento de Campanilla"},
+  {"item", "mint_pigment", "display_name", "Pigmento de Menta"},
+  {"item", "lavender_pigment", "display_name", "Pigmento de Lavanda"},
+  {"item", "pansy_pigment", "display_name", "Pigmento de Pensamiento"},
+  {"item", "poppy_pigment", "display_name", "Pigmento de Amapola"},
+  {"item", "jasmine_pigment", "display_name", "Pigmento de Jazmin"},
+  {"item", "rosemary_pigment", "display_name", "Pigmento de Romero"},
+  {"item", "dahlia_pigment", "display_name", "Pigmento de Dalia"},
+  {"item", "moonflower_pigment", "display_name", "Pigmento de Flor de Luna"},
+  # Items — potions & consumables
+  {"item", "speed_potion", "display_name", "Pocion de Velocidad"},
+  {"item", "hot_potion", "display_name", "Pocion Caliente"},
+  {"item", "cool_potion", "display_name", "Pocion Fria"},
+  {"item", "wind_potion", "display_name", "Pocion de Viento"},
+  {"item", "calm_potion", "display_name", "Pocion de Calma"},
+  {"item", "humid_potion", "display_name", "Pocion de Humedad"},
+  {"item", "dry_potion", "display_name", "Pocion Seca"},
+  {"item", "sun_potion", "display_name", "Pocion de Sol"},
+  {"item", "shadow_potion", "display_name", "Pocion de Sombra"},
+  {"item", "rain_potion", "display_name", "Pocion de Lluvia"},
+  {"item", "impermeable_potion", "display_name", "Pocion Impermeable"},
+  {"item", "moon_potion", "display_name", "Pocion de Luna"},
+  {"item", "fertilizer", "display_name", "Fertilizante"},
+  {"item", "energy_drink", "display_name", "Bebida Energetica"},
+  # Quests
+  {"quest", "NearbyGathering", "quest_name", "Recoleccion Cercana"},
+  {"quest", "NearbyGathering", "description", "Recolecta semillas de los alrededores del campamento."},
+  {"quest", "SwampForage", "quest_name", "Forrajeo del Pantano"},
+  {"quest", "SwampForage", "description", "Busca semillas utiles en el pantano cercano."},
+  {"quest", "MeadowExpedition", "quest_name", "Expedicion al Prado"},
+  {"quest", "MeadowExpedition", "description", "Explora el prado en busca de flores silvestres."},
+  {"quest", "DeepWoodsTrek", "quest_name", "Travesia al Bosque Profundo"},
+  {"quest", "DeepWoodsTrek", "description", "Adentrate en el bosque en busca de hallazgos raros."},
+  {"quest", "HighlandPass", "quest_name", "Paso de las Tierras Altas"},
+  {"quest", "HighlandPass", "description", "Cruza el paso montanoso para encontrar hierbas de montana."},
+  {"quest", "DeepMarsh", "quest_name", "Pantano Profundo"},
+  {"quest", "DeepMarsh", "description", "Navega por el pantano profundo en busca de plantas exoticas."},
+  {"quest", "MountainAscent", "quest_name", "Ascenso a la Montana"},
+  {"quest", "MountainAscent", "description", "Escala la montana en busca de flora de gran altitud."},
+  {"quest", "MoonlitPath", "quest_name", "Sendero de Luna"},
+  {"quest", "MoonlitPath", "description", "Sigue el sendero iluminado por la luna a traves del bosque encantado."},
+  {"quest", "AncientGrove", "quest_name", "Arboleda Ancestral"},
+  {"quest", "AncientGrove", "description", "Explora la arboleda ancestral en busca de semillas legendarias."},
+  # Gardens
+  {"garden", "BerryBush", "plant_name", "Arbusto de Bayas"},
+  {"garden", "Oak", "plant_name", "Roble"},
+]
+
+for {type, key, field, value} <- es_config_translations do
+  Repo.insert!(%ConfigTranslation{
+    locale: "es",
+    translatable_type: type,
+    translatable_key: key,
+    field: field,
+    value: value
+  },
+    on_conflict: {:replace, [:value, :updated_at]},
+    conflict_target: [:locale, :translatable_type, :translatable_key, :field]
+  )
+end
+
+IO.puts("ES config translations seeded: #{length(es_config_translations)}")
