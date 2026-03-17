@@ -155,5 +155,44 @@ namespace Garden
         {
             canvas.style.translate = new Translate(panOffset.x, panOffset.y, 0);
         }
+
+        /// <summary>
+        /// Smoothly animate the pan to center on a point over the given duration.
+        /// </summary>
+        public void AnimateCenterOnPoint(float focusX, float focusY, float canvasWidth, float canvasHeight, float durationMs = 600f)
+        {
+            focusPtX = focusX;
+            focusPtY = focusY;
+            storedCanvasW = canvasWidth;
+            storedCanvasH = canvasHeight;
+
+            var (vpW, vpH) = GetViewportSize();
+            var targetOffset = new Vector2(
+                vpW / 2f - focusX,
+                vpH / 2f - focusY
+            );
+            // Clamp target
+            if (storedCanvasW <= vpW)
+                targetOffset.x = vpW / 2f - focusPtX;
+            else
+                targetOffset.x = Mathf.Clamp(targetOffset.x, vpW - storedCanvasW, 0f);
+            if (storedCanvasH <= vpH)
+                targetOffset.y = vpH / 2f - focusPtY;
+            else
+                targetOffset.y = Mathf.Clamp(targetOffset.y, vpH - storedCanvasH, 0f);
+
+            var startOffset = panOffset;
+            float elapsed = 0f;
+
+            canvas.schedule.Execute(() =>
+            {
+                elapsed += 16f;
+                float t = Mathf.Clamp01(elapsed / durationMs);
+                // Ease-out cubic
+                float ease = 1f - (1f - t) * (1f - t) * (1f - t);
+                panOffset = Vector2.Lerp(startOffset, targetOffset, ease);
+                ApplyPan();
+            }).Every(16).Until(() => elapsed >= durationMs);
+        }
     }
 }

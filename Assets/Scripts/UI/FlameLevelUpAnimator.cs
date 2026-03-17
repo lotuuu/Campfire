@@ -122,7 +122,7 @@ namespace Garden
         }
 
         public static void Play(VisualElement root, VisualElement flameCell,
-            VisualElement gridContainer, int newLevel, Action onComplete)
+            VisualElement gridContainer, VisualElement viewport, int newLevel, Action onComplete)
         {
             if (IsPlaying) return;
             IsPlaying = true;
@@ -184,9 +184,8 @@ namespace Garden
                 }
             }).StartingIn(200);
 
-            // ── Viewport shake (0.0s–0.6s) ──
+            // ── Viewport shake (0.0s–0.6s) — applied to viewport, not canvas ──
             state.shakeAmount = 8f;
-            var originalTranslate = gridContainer.resolvedStyle.translate;
 
             // Update loop at 0.1s — drives rings, embers, and shake
             gridContainer.schedule.Execute(() =>
@@ -220,19 +219,19 @@ namespace Garden
                         state.embers[i] = e;
                     }
 
-                    // Shake — decays over 0.6s
+                    // Shake — applied to viewport so it doesn't conflict with pan controller's translate on canvas
                     if (state.shakeAmount > 0.1f)
                     {
-                        state.shakeAmount *= 0.92f; // exponential decay
+                        state.shakeAmount *= 0.92f;
                         float sx = ((float)shakeRng.NextDouble() * 2f - 1f) * state.shakeAmount;
                         float sy = ((float)shakeRng.NextDouble() * 2f - 1f) * state.shakeAmount;
-                        gridContainer.style.translate =
+                        viewport.style.translate =
                             new Translate(new Length(sx, LengthUnit.Pixel), new Length(sy, LengthUnit.Pixel));
                     }
                     else if (state.shakeAmount > 0)
                     {
                         state.shakeAmount = 0;
-                        gridContainer.style.translate = StyleKeyword.Null;
+                        viewport.style.translate = StyleKeyword.Null;
                     }
 
                     overlay.MarkDirtyRepaint();
@@ -310,7 +309,7 @@ namespace Garden
             {
                 updater?.Pause();
                 flameCell?.RemoveFromClassList("grid-cell--levelup-pulse");
-                gridContainer.style.translate = StyleKeyword.Null; // reset shake
+                viewport.style.translate = StyleKeyword.Null; // reset shake
                 foreach (var el in createdElements)
                     el.RemoveFromHierarchy();
                 IsPlaying = false;

@@ -1500,7 +1500,16 @@ namespace Garden
                     var flameCellEl = canvas?.Q(className: "grid-cell--flame");
                     FlameManager.Instance.UpgradeFlame();
                     CloseInteractionPanel();
-                    FlameLevelUpAnimator.Play(campRoot, flameCellEl, canvas, FlameManager.Instance.Level, RebuildGrid);
+                    FlameLevelUpAnimator.Play(campRoot, flameCellEl, canvas, viewport, FlameManager.Instance.Level, () =>
+                    {
+                        RebuildGrid();
+                        // Smoothly pan to center on flame after grid rebuild
+                        var flameCenter = HexGridUtil.HexToPixel(0, 0, HexSize);
+                        float cw = canvas.resolvedStyle.width;
+                        float ch = canvas.resolvedStyle.height;
+                        if (!float.IsNaN(cw) && cw > 0)
+                            panController.AnimateCenterOnPoint(flameCenter.x + gridOffsetX, flameCenter.y + gridOffsetY, cw, ch);
+                    });
                 })
                 { text = Loc.Get("ui.button.level_up", "Level Up") };
                 upgradeBtn.SetEnabled(canAfford);
