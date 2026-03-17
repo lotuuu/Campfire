@@ -574,18 +574,20 @@ es = [
 
 # ── Seed all locales ──
 
-defmodule TranslationSeeder do
-  def seed(locale, translations, repo) do
-    alias CampFire.Translations.Translation
+unless Code.ensure_loaded?(TranslationSeeder) do
+  defmodule TranslationSeeder do
+    def seed(locale, translations, repo) do
+      alias CampFire.Translations.Translation
 
-    for {key, value} <- translations do
-      repo.insert!(%Translation{locale: locale, key: key, value: value},
-        on_conflict: {:replace, [:value, :updated_at]},
-        conflict_target: [:locale, :key]
-      )
+      for {key, value} <- translations do
+        repo.insert!(%Translation{locale: locale, key: key, value: value},
+          on_conflict: {:replace, [:value, :updated_at]},
+          conflict_target: [:locale, :key]
+        )
+      end
+
+      IO.puts("#{String.upcase(locale)} translations seeded: #{length(translations)}")
     end
-
-    IO.puts("#{String.upcase(locale)} translations seeded: #{length(translations)}")
   end
 end
 

@@ -261,15 +261,17 @@ end
 
 alias CampFire.Game.SeedConfig
 
-defmodule RecipeHelper do
-  def axis(ideal_min, ideal_max, tolerance, weight) do
-    %{
-      "enabled" => true,
-      "ideal_min" => ideal_min,
-      "ideal_max" => ideal_max,
-      "tolerance" => tolerance,
-      "weight" => weight
-    }
+unless Code.ensure_loaded?(RecipeHelper) do
+  defmodule RecipeHelper do
+    def axis(ideal_min, ideal_max, tolerance, weight) do
+      %{
+        "enabled" => true,
+        "ideal_min" => ideal_min,
+        "ideal_max" => ideal_max,
+        "tolerance" => tolerance,
+        "weight" => weight
+      }
+    end
   end
 end
 
