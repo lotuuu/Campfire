@@ -325,7 +325,7 @@ es = [
   {"tutorial.hint.water_plant", "Riega tu planta para una mejor cosecha"},
   # Apotheke
   {"ui.apotheke.consumables", "Consumibles"},
-  {"ui.apotheke.drops", "Gotas"},
+  {"ui.apotheke.drops", "Cosechas"},
   {"ui.apotheke.inventory", "Inventario"},
   {"ui.apotheke.growth_recipe", "Receta de Crecimiento"},
   {"ui.apotheke.growth_time", "Tiempo de crecimiento"},
@@ -425,7 +425,7 @@ es = [
   {"ui.label.ready_harvest", "Lista para Cosechar!"},
   {"ui.label.remaining", "restante"},
   {"ui.label.returning", "Regresando..."},
-  {"ui.label.seed_stats", "{0} | {1}-{2} gotas"},
+  {"ui.label.seed_stats", "{0} | {1}-{2} cosechas"},
   {"ui.label.spark_of_ara", "Chispa de Ara"},
   {"ui.label.tap_to_close", "toca en cualquier lugar para cerrar"},
   {"ui.label.trades_count", "{0} intercambios"},
