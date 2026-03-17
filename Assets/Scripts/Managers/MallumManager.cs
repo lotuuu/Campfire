@@ -153,12 +153,12 @@ namespace Garden
         public bool SendOnQuest(ServerQuestConfig quest)
         {
             var data = SaveManager.Instance.Data;
-            if (!ClaimMallumForQuest(data.mallums, quest.questName, GameTime.UtcNow.ToString("o")))
+            if (!ClaimMallumForQuest(data.mallums, quest.questKey, GameTime.UtcNow.ToString("o")))
                 return false;
 
             if (NotificationService.Instance != null)
             {
-                int mallumIndex = data.mallums.FindIndex(m => m.state == MallumState.OnQuest && m.assignedQuestName == quest.questName);
+                int mallumIndex = data.mallums.FindIndex(m => m.state == MallumState.OnQuest && m.assignedQuestName == quest.questKey);
                 if (mallumIndex >= 0)
                 {
                     double seconds = quest.durationMinutes * 60.0;
@@ -173,7 +173,7 @@ namespace Garden
             // Notify server
             if (GameService.Instance != null && GameService.Instance.IsOnline)
             {
-                _ = NotifyServerOrResync(GameService.Instance.StartQuest(quest.questName));
+                _ = NotifyServerOrResync(GameService.Instance.StartQuest(quest.questKey));
             }
 
             return true;

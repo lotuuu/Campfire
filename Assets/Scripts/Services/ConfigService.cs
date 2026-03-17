@@ -46,6 +46,7 @@ namespace Garden
     [Serializable]
     public class ServerQuestConfig
     {
+        public string questKey;
         public string questName;
         public string description;
         public int durationMinutes;
@@ -480,6 +481,7 @@ namespace Garden
                     {
                         var config = new ServerQuestConfig
                         {
+                            questKey = kv.Key,
                             questName = GetString(questMap, "questName"),
                             description = GetString(questMap, "description"),
                             durationMinutes = (int)GetFloat(questMap, "durationMinutes"),

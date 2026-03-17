@@ -363,9 +363,8 @@ namespace Garden
 
                     case MallumState.OnQuest:
                         cardRoot.AddToClassList("quest-card--active");
-                        nameLabel.text = mallum.assignedQuestName;
-
                         var questData = FindQuestByName(mallum.assignedQuestName);
+                        nameLabel.text = questData?.questName ?? mallum.assignedQuestName;
                         if (questData != null)
                             accentStrip.AddToClassList(TierClass(questData.requiredFlameLevel));
 
@@ -404,11 +403,10 @@ namespace Garden
 
                     case MallumState.QuestComplete:
                         cardRoot.AddToClassList("quest-card--complete");
-                        nameLabel.text = mallum.assignedQuestName;
+                        var completeQuest = FindQuestByName(mallum.assignedQuestName);
+                        nameLabel.text = completeQuest?.questName ?? mallum.assignedQuestName;
                         durationLabel.text = Loc.Get("ui.quest.complete", "Complete!");
                         durationLabel.style.color = new StyleColor(new Color32(80, 190, 100, 255));
-
-                        var completeQuest = FindQuestByName(mallum.assignedQuestName);
                         if (completeQuest != null)
                             accentStrip.AddToClassList(TierClass(completeQuest.requiredFlameLevel));
 
