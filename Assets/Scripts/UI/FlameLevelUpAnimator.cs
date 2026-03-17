@@ -318,62 +318,56 @@ namespace Garden
         }
 
         /// <summary>
-        /// Animate newly revealed hex cells after a grid expansion.
-        /// Cells outside oldRadius are hidden then revealed in a cascade.
-        /// Call this right after RebuildGrid when the grid has expanded.
+        /// Animate the new outer ring of hex cells after a grid expansion.
+        /// Cells cascade in by angle, starting from the top and sweeping clockwise.
         /// </summary>
         public static void AnimateNewCells(Dictionary<(int, int), VisualElement> cellLookup, int oldRadius)
         {
             if (oldRadius <= 0) return;
 
-            // Collect new cells (outside old radius) grouped by hex distance from center
-            var cellsByDist = new Dictionary<int, List<VisualElement>>();
-            int maxDist = 0;
+            // Collect new cells with their angle from center for cascading
+            var newCells = new List<(VisualElement cell, float angle)>();
 
             foreach (var kvp in cellLookup)
             {
                 int q = kvp.Key.Item1;
                 int r = kvp.Key.Item2;
-                // Hex distance from origin
                 int dist = (Mathf.Abs(q) + Mathf.Abs(r) + Mathf.Abs(q + r)) / 2;
-                if (dist <= oldRadius) continue; // existing cell, skip
+                if (dist <= oldRadius) continue;
 
-                if (!cellsByDist.ContainsKey(dist))
-                    cellsByDist[dist] = new List<VisualElement>();
-                cellsByDist[dist].Add(kvp.Value);
-                if (dist > maxDist) maxDist = dist;
+                // Compute angle from center for cascade ordering (top = 0, clockwise)
+                float px = q + r * 0.5f; // approximate x in hex space
+                float py = r * 0.866f;   // approximate y in hex space
+                float angle = Mathf.Atan2(px, -py); // top = 0, clockwise
+                if (angle < 0) angle += Mathf.PI * 2f;
+
+                newCells.Add((kvp.Value, angle));
             }
 
-            if (cellsByDist.Count == 0) return;
+            if (newCells.Count == 0) return;
 
-            // Hide all new cells immediately
-            foreach (var list in cellsByDist.Values)
-                foreach (var cell in list)
-                    cell.AddToClassList("grid-cell--reveal-hidden");
+            // Sort by angle (top-first, clockwise)
+            newCells.Sort((a, b) => a.angle.CompareTo(b.angle));
 
-            // Cascade reveal: innermost new ring first, then outward
-            int minNewDist = int.MaxValue;
-            foreach (var d in cellsByDist.Keys)
-                if (d < minNewDist) minNewDist = d;
+            // Hide all new cells
+            foreach (var (cell, _) in newCells)
+                cell.AddToClassList("grid-cell--reveal-hidden");
 
-            foreach (var kvp in cellsByDist)
+            // Cascade reveal with even spacing
+            float delayPerCell = 60f; // ms between each cell
+            for (int i = 0; i < newCells.Count; i++)
             {
-                int ringOffset = kvp.Key - minNewDist;
-                long delayMs = 200 + ringOffset * 150; // stagger by ring
-                foreach (var cell in kvp.Value)
+                var c = newCells[i].cell;
+                long delayMs = 200 + (long)(i * delayPerCell);
+                c.schedule.Execute(() =>
                 {
-                    var c = cell;
+                    c.AddToClassList("grid-cell--reveal");
                     c.schedule.Execute(() =>
                     {
-                        c.AddToClassList("grid-cell--reveal");
-                        // Clean up classes after transition completes
-                        c.schedule.Execute(() =>
-                        {
-                            c.RemoveFromClassList("grid-cell--reveal-hidden");
-                            c.RemoveFromClassList("grid-cell--reveal");
-                        }).StartingIn(500);
-                    }).StartingIn(delayMs);
-                }
+                        c.RemoveFromClassList("grid-cell--reveal-hidden");
+                        c.RemoveFromClassList("grid-cell--reveal");
+                    }).StartingIn(500);
+                }).StartingIn(delayMs);
             }
         }
     }
