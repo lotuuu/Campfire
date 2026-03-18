@@ -384,10 +384,10 @@
         <!-- Interaction backdrop (captures taps outside the panel, centers panel via flex) -->
         <ui:VisualElement name="interaction-backdrop">
             <ui:VisualElement name="interaction-panel">
-                <ui:Button name="interaction-close" />
                 <ui:Label name="interaction-title" text="" />
                 <ui:VisualElement name="interaction-body" />
                 <ui:VisualElement name="interaction-actions" />
+                <ui:Button name="interaction-close" />
             </ui:VisualElement>
         </ui:VisualElement>
 
@@ -410,7 +410,6 @@
         <ui:VisualElement name="visitor-modal">
             <ui:VisualElement name="visitor-modal-backdrop" />
             <ui:VisualElement name="visitor-modal-card">
-                <ui:Button name="visitor-modal-close" />
                 <ui:VisualElement name="visitor-modal-header">
                     <ui:VisualElement name="visitor-modal-portrait" />
                     <ui:Label name="visitor-modal-name" text="" />
@@ -443,6 +442,7 @@
                         <ui:Button name="visitor-turnin-quest-btn" text="Turn In" class="visitor-action-btn" />
                     </ui:VisualElement>
                 </ui:VisualElement>
+                <ui:Button name="visitor-modal-close" />
             </ui:VisualElement>
         </ui:VisualElement>
 
