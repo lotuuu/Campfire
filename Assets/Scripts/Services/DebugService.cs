@@ -225,7 +225,7 @@ namespace Garden
                 if (req.responseCode >= 200 && req.responseCode < 300)
                 {
                     Debug.Log($"[DebugService] {path} OK: {req.downloadHandler.text}");
-                    GameService.Instance?.Initialize();
+                    _ = GameService.Instance?.ResyncFullState();
                     return true;
                 }
 
