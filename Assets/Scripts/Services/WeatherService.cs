@@ -43,8 +43,11 @@ namespace Garden
 
         private void Update()
         {
-            if (!HasWeather || useDebugOverride) return;
+            if (!HasWeather) return;
 
+            // Always track time-of-day from GameTime, even in debug mode.
+            // Debug mode only prevents server weather from overriding —
+            // time-of-day should still progress with game time.
             if (UpdateTimeOfDay(CurrentWeather, GameTime.Now, out var updated))
             {
                 CurrentWeather = updated;

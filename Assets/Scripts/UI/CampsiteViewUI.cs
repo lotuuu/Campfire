@@ -33,9 +33,6 @@ namespace Garden
         private static readonly CustomStyleProperty<Color> s_HexBorder = new("--hex-border");
         /// <summary>Procedural glow color per cell (RGB + alpha), driven by animations.</summary>
         internal static readonly Dictionary<VisualElement, Color> GlowColor = new();
-        /// <summary>Global ambient hex tint based on weather + time of day.</summary>
-        private static Color ambientTint = Color.clear;
-        private static Color targetAmbientTint = Color.clear;
         /// <summary>Canvas center in local coords, for lighting overlay.</summary>
         private static Vector2 canvasCenter;
         private CampsiteLightingOverlay lightingOverlay;
@@ -109,15 +106,6 @@ namespace Garden
                         GlowColor.Remove(cell);
                 }
             }).Every(16).Until(() => elapsed >= total);
-        }
-
-        private static Color LerpColor(Color a, Color b, float t)
-        {
-            return new Color(
-                Mathf.MoveTowards(a.r, b.r, t),
-                Mathf.MoveTowards(a.g, b.g, t),
-                Mathf.MoveTowards(a.b, b.b, t),
-                Mathf.MoveTowards(a.a, b.a, t));
         }
 
         private int dragPointerId = -1;
@@ -211,17 +199,6 @@ namespace Garden
             }
             if (GameService.Instance != null)
                 GameService.Instance.OnStateLoaded += RebuildGrid;
-            if (WeatherService.Instance != null)
-            {
-                WeatherService.Instance.OnWeatherUpdated += OnWeatherChanged;
-                if (WeatherService.Instance.HasWeather)
-                {
-                    UpdateAmbientTint(WeatherService.Instance.CurrentWeather);
-                    // Snap to target immediately on init (no lerp from zero)
-                    ambientTint = targetAmbientTint;
-                }
-            }
-
             // Initialize canvas-level lighting overlay (night + fire glow + fireflies)
             lightingOverlay = GetComponent<CampsiteLightingOverlay>();
             if (lightingOverlay == null)
@@ -250,40 +227,6 @@ namespace Garden
         private void OnGardenChangedRebuild(int _) => RebuildGrid();
         private void OnBirdCollectedRebuild(BirdSave _) => RebuildGrid();
 
-        private void OnWeatherChanged(WeatherData w)
-        {
-            UpdateAmbientTint(w);
-        }
-
-        private void UpdateAmbientTint(WeatherData w)
-        {
-            // Subtle weather tints only (night/fire handled by lighting overlay)
-            Color tint;
-            switch (w.condition)
-            {
-                case WeatherCondition.Rain:
-                case WeatherCondition.Storm:
-                    tint = new Color(0.25f, 0.4f, 0.7f, 0.15f);
-                    break;
-                case WeatherCondition.Snow:
-                    tint = new Color(0.6f, 0.7f, 0.9f, 0.12f);
-                    break;
-                case WeatherCondition.Cloudy:
-                    tint = new Color(0.35f, 0.35f, 0.4f, 0.1f);
-                    break;
-                default: // Clear
-                    tint = new Color(1f, 0.9f, 0.5f, 0.05f);
-                    break;
-            }
-
-            // Golden hour gets a warm tint via ambient (night handled by lighting overlay)
-            if (w.isGoldenHour)
-                tint = new Color(1f, 0.55f, 0.15f, 0.15f);
-            else if (w.isNight)
-                tint = Color.clear; // lighting overlay handles night
-
-            targetAmbientTint = tint;
-        }
 
         private void OnDestroy()
         {
@@ -309,8 +252,6 @@ namespace Garden
             }
             if (GameService.Instance != null)
                 GameService.Instance.OnStateLoaded -= RebuildGrid;
-            if (WeatherService.Instance != null)
-                WeatherService.Instance.OnWeatherUpdated -= OnWeatherChanged;
         }
 
         private void Update()
@@ -347,23 +288,6 @@ namespace Garden
                         float progress = (float)(1.0 - remaining / totalSeconds);
                         fill.style.width = new Length(progress * 100f, LengthUnit.Percent);
                     }
-                }
-            }
-
-            // Smoothly lerp ambient tint toward target
-            float lerpSpeed = 2f * Time.deltaTime; // ~0.5s transition at normal speed
-            bool tintChanged = false;
-            if (ambientTint != targetAmbientTint)
-            {
-                ambientTint = LerpColor(ambientTint, targetAmbientTint, lerpSpeed);
-                tintChanged = true;
-            }
-            if (tintChanged)
-            {
-                foreach (var cell in cellLookup.Values)
-                {
-                    if (!cell.ClassListContains("grid-cell--sprite"))
-                        cell.MarkDirtyRepaint();
                 }
             }
 
@@ -634,8 +558,16 @@ namespace Garden
                 }
             }
 
+            // Collect building light positions for lighting overlay
+            var buildingLights = new System.Collections.Generic.List<Vector2>();
+            for (int i = 0; i < data.mallumHouses.Count; i++)
+            {
+                var housePos = HexGridUtil.HexToPixel(data.mallumHouses[i].gridX, data.mallumHouses[i].gridY, HexSize);
+                buildingLights.Add(new Vector2(housePos.x + gridOffsetX, housePos.y + gridOffsetY));
+            }
+
             // Re-attach lighting overlay on top of all cells
-            lightingOverlay?.OnGridRebuilt(canvasCenter);
+            lightingOverlay?.OnGridRebuilt(canvasCenter, buildingLights);
 
             // Cancel button for placing/watering modes
             if (mode == CampsiteMode.Placing || mode == CampsiteMode.Watering)
@@ -900,6 +832,15 @@ namespace Garden
                 mode = CampsiteMode.Normal;
             }
 
+            // During incomplete tutorial with no active highlight, block all cell interactions
+            // so players can't wander into build menus during non-building steps
+            if (TutorialManager.Instance != null && !TutorialManager.Instance.IsComplete
+                && mode == CampsiteMode.Normal
+                && tutorialTargetQ == int.MinValue && tutorialTargetR == int.MinValue)
+            {
+                return;
+            }
+
             if (type == CampBuildingType.Apotheke)
             {
                 OnApothekeTapped?.Invoke();
@@ -953,6 +894,10 @@ namespace Garden
             }
 
             if (mode != CampsiteMode.Normal) return;
+
+            // Block building on empty cells during incomplete tutorial
+            if (TutorialManager.Instance != null && !TutorialManager.Instance.IsComplete) return;
+
             ShowBuildMenu(gridX, gridY);
         }
 
@@ -1436,23 +1381,6 @@ namespace Garden
             painter.strokeColor = borderColor;
             painter.lineWidth = el.ClassListContains("grid-cell--flame") ? 3f : 2f;
             painter.Stroke();
-
-            // Ambient weather/time tint (very subtle, under pulse glows)
-            if (ambientTint.a > 0.001f)
-            {
-                painter.BeginPath();
-                for (int i = 0; i < 6; i++)
-                {
-                    float angle = Mathf.Deg2Rad * (60f * i - 90f);
-                    float vx = cx + hexR * Mathf.Cos(angle);
-                    float vy = cy + hexR * Mathf.Sin(angle);
-                    if (i == 0) painter.MoveTo(new Vector2(vx, vy));
-                    else painter.LineTo(new Vector2(vx, vy));
-                }
-                painter.ClosePath();
-                painter.fillColor = ambientTint;
-                painter.Fill();
-            }
 
             // Procedural glow overlay (color + alpha driven by animations)
             if (GlowColor.TryGetValue(el, out var glowC) && glowC.a > 0.001f)

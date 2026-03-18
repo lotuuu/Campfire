@@ -23,8 +23,8 @@ namespace Garden
 
         // ── Configuration ──
 
-        private const int TexSize = 128;               // lightmap resolution
-        private const float FireBaseRadius = 0.35f;     // normalized (~3-4 hex rings)
+        private const int TexSize = 256;               // lightmap resolution
+        private const float FireBaseRadius = 0.45f;     // normalized (~4-5 hex rings)
         private const float FirePulseAmount = 0.10f;    // ±10% radius
         private const float FirePulsePeriod = 3.5f;     // seconds per cycle
         private const int MaxFireflies = 7;
@@ -40,10 +40,16 @@ namespace Garden
         private VisualElement canvas;
         private Texture2D lightmap;
         private Color32[] pixels;
-        private float nightAlpha;
-        private float targetNightAlpha;
+        private float overlayAlpha;         // current strength of the overlay (lerped)
+        private float targetOverlayAlpha;
+        private Color overlayBaseColor;     // current base color (lerped)
+        private Color targetBaseColor;
+        private float targetBaseAlpha;      // max darkness alpha at full strength
+        private float baseAlpha;
         private float fireflyAlpha;
         private float targetFireflyAlpha;
+        private bool fireGlowActive;       // whether fire punches a hole in the overlay
+        private bool targetFireGlow;
         private Vector2 firePositionNorm;  // normalized 0–1
         private Vector2 firePositionCanvas; // raw canvas coords (for OnGridRebuilt)
         private float canvasWidth, canvasHeight;
@@ -62,9 +68,12 @@ namespace Garden
 
         // ── Public API ──
 
+        private VisualElement viewport;
+
         public void Initialize(VisualElement canvasElement)
         {
             canvas = canvasElement;
+            viewport = canvas.parent;
 
             lightmap = new Texture2D(TexSize, TexSize, TextureFormat.RGBA32, false)
             {
@@ -93,15 +102,19 @@ namespace Garden
                 if (WeatherService.Instance.HasWeather)
                 {
                     UpdateTargets(WeatherService.Instance.CurrentWeather);
-                    nightAlpha = targetNightAlpha;
+                    overlayAlpha = targetOverlayAlpha;
+                    baseAlpha = targetBaseAlpha;
+                    overlayBaseColor = targetBaseColor;
                     fireflyAlpha = targetFireflyAlpha;
                 }
             }
         }
 
-        public void OnGridRebuilt(Vector2 flameCenterCanvas)
+        /// <summary>Call after RebuildGrid. Pass building positions for small light sources.</summary>
+        public void OnGridRebuilt(Vector2 flameCenterCanvas, List<Vector2> buildingLights = null)
         {
             firePositionCanvas = flameCenterCanvas;
+            buildingLightPositions = buildingLights ?? new List<Vector2>();
 
             if (overlay != null && canvas != null)
             {
@@ -109,6 +122,9 @@ namespace Garden
                 canvas.Add(overlay);
             }
         }
+
+        private List<Vector2> buildingLightPositions = new();
+        private const float BuildingLightRadius = 0.35f; // DEBUG: same as fire for testing
 
         private void OnDestroy()
         {
@@ -124,20 +140,54 @@ namespace Garden
 
         private void UpdateTargets(WeatherData w)
         {
+            // Time-of-day determines overlay strength and fire behavior
             if (w.isNight)
             {
-                targetNightAlpha = 1f;
+                targetBaseColor = new Color(0.01f, 0.02f, 0.08f);
+                targetBaseAlpha = 0.92f;
+                targetOverlayAlpha = 1f;
                 targetFireflyAlpha = 1f;
+                targetFireGlow = true;
             }
             else if (w.isGoldenHour)
             {
-                targetNightAlpha = 0.3f;
-                targetFireflyAlpha = 0.5f;
+                targetBaseColor = new Color(0.6f, 0.3f, 0.05f);
+                targetBaseAlpha = 0.18f;
+                targetOverlayAlpha = 1f;
+                targetFireflyAlpha = 0.3f;
+                targetFireGlow = false;
             }
             else
             {
-                targetNightAlpha = 0f;
+                targetOverlayAlpha = 0f;
                 targetFireflyAlpha = 0f;
+                targetFireGlow = false;
+            }
+
+            // Weather condition modifies the base color (composited on top of time-of-day)
+            if (!w.isNight && !w.isGoldenHour)
+            {
+                switch (w.condition)
+                {
+                    case WeatherCondition.Rain:
+                    case WeatherCondition.Storm:
+                        targetBaseColor = new Color(0.15f, 0.25f, 0.45f);
+                        targetBaseAlpha = 0.2f;
+                        targetOverlayAlpha = 1f;
+                        break;
+                    case WeatherCondition.Snow:
+                        targetBaseColor = new Color(0.4f, 0.45f, 0.55f);
+                        targetBaseAlpha = 0.15f;
+                        targetOverlayAlpha = 1f;
+                        break;
+                    case WeatherCondition.Cloudy:
+                        targetBaseColor = new Color(0.25f, 0.25f, 0.3f);
+                        targetBaseAlpha = 0.1f;
+                        targetOverlayAlpha = 1f;
+                        break;
+                    default: // Clear day — no overlay
+                        break;
+                }
             }
         }
 
@@ -150,9 +200,22 @@ namespace Garden
             bool dirty = false;
             float lerpSpeed = 2f * Time.deltaTime;
 
-            if (Mathf.Abs(nightAlpha - targetNightAlpha) > 0.001f)
+            if (Mathf.Abs(overlayAlpha - targetOverlayAlpha) > 0.001f)
             {
-                nightAlpha = Mathf.MoveTowards(nightAlpha, targetNightAlpha, lerpSpeed);
+                overlayAlpha = Mathf.MoveTowards(overlayAlpha, targetOverlayAlpha, lerpSpeed);
+                dirty = true;
+            }
+            if (Mathf.Abs(baseAlpha - targetBaseAlpha) > 0.001f)
+            {
+                baseAlpha = Mathf.MoveTowards(baseAlpha, targetBaseAlpha, lerpSpeed);
+                dirty = true;
+            }
+            if (overlayBaseColor != targetBaseColor)
+            {
+                overlayBaseColor = new Color(
+                    Mathf.MoveTowards(overlayBaseColor.r, targetBaseColor.r, lerpSpeed),
+                    Mathf.MoveTowards(overlayBaseColor.g, targetBaseColor.g, lerpSpeed),
+                    Mathf.MoveTowards(overlayBaseColor.b, targetBaseColor.b, lerpSpeed));
                 dirty = true;
             }
             if (Mathf.Abs(fireflyAlpha - targetFireflyAlpha) > 0.001f)
@@ -160,19 +223,35 @@ namespace Garden
                 fireflyAlpha = Mathf.MoveTowards(fireflyAlpha, targetFireflyAlpha, lerpSpeed);
                 dirty = true;
             }
+            fireGlowActive = targetFireGlow || fireGlowActive; // stays on during fade-out
+
+            // Tint viewport + canvas background to match night darkness (covers area beyond grid)
+            if (dirty)
+            {
+                float vpAlpha = baseAlpha * overlayAlpha;
+                Color bgColor = vpAlpha > 0.001f
+                    ? new Color(overlayBaseColor.r, overlayBaseColor.g, overlayBaseColor.b, vpAlpha)
+                    : Color.clear;
+                if (viewport != null)
+                    viewport.style.backgroundColor = vpAlpha > 0.001f ? (StyleColor)bgColor : StyleKeyword.Null;
+                if (canvas != null)
+                    canvas.style.backgroundColor = vpAlpha > 0.001f ? (StyleColor)bgColor : StyleKeyword.Null;
+            }
 
             // Show/hide overlay
-            if (nightAlpha > 0.001f)
+            if (overlayAlpha > 0.001f)
             {
                 if (overlay.style.display == DisplayStyle.None)
                     overlay.style.display = DisplayStyle.Flex;
-                firePhase += Time.deltaTime;
+                if (fireGlowActive)
+                    firePhase += Time.deltaTime;
                 dirty = true;
                 UpdateFireflies(Time.deltaTime);
             }
             else
             {
                 fireflies.Clear();
+                fireGlowActive = false;
                 if (dirty)
                 {
                     ClearLightmap();
@@ -259,18 +338,39 @@ namespace Garden
 
         private void RenderLightmap()
         {
-            // Build light list
-            float pulse = 1f + Mathf.Sin(firePhase * Mathf.PI * 2f / FirePulsePeriod) * FirePulseAmount;
             float aspect = canvasWidth / canvasHeight;
+            float maxAlpha = baseAlpha * overlayAlpha;
 
+            // Build light list (only when fire glow is active)
             var lights = new List<LightSource>();
-            lights.Add(new LightSource
+            if (fireGlowActive)
             {
-                position = firePositionNorm,
-                color = new Color(1f, 0.7f, 0.3f),
-                radius = FireBaseRadius * pulse,
-                intensity = nightAlpha
-            });
+                float pulse = 1f + Mathf.Sin(firePhase * Mathf.PI * 2f / FirePulsePeriod) * FirePulseAmount;
+                lights.Add(new LightSource
+                {
+                    position = firePositionNorm,
+                    color = new Color(1f, 0.7f, 0.3f),
+                    radius = FireBaseRadius * pulse,
+                    intensity = overlayAlpha
+                });
+            }
+
+            // Building lights (mallum houses etc.)
+            if (canvasWidth > 0)
+            {
+                foreach (var pos in buildingLightPositions)
+                {
+                    var normPos = new Vector2(pos.x / canvasWidth, pos.y / canvasHeight);
+                    if (float.IsNaN(normPos.x) || float.IsNaN(normPos.y)) continue;
+                    lights.Add(new LightSource
+                    {
+                        position = normPos,
+                        color = new Color(1f, 0.8f, 0.4f),
+                        radius = BuildingLightRadius,
+                        intensity = overlayAlpha
+                    });
+                }
+            }
 
             foreach (var f in fireflies)
             {
@@ -290,14 +390,10 @@ namespace Garden
                 }
             }
 
-            // Night base color
-            Color nightBase = new Color(0.01f, 0.02f, 0.08f);
-            float maxAlpha = 0.92f * nightAlpha;
-
-            // Render each pixel
+            // Render each pixel (texture Y=0 is bottom, but UI Y=0 is top — flip)
             for (int y = 0; y < TexSize; y++)
             {
-                float ny = (float)y / (TexSize - 1);  // normalized 0–1
+                float ny = 1f - (float)y / (TexSize - 1);
                 for (int x = 0; x < TexSize; x++)
                 {
                     float nx = (float)x / (TexSize - 1);
@@ -308,7 +404,6 @@ namespace Garden
 
                     foreach (var light in lights)
                     {
-                        // Distance in normalized coords, corrected for aspect ratio
                         float dx = (nx - light.position.x) * aspect;
                         float dy = ny - light.position.y;
                         float dist = Mathf.Sqrt(dx * dx + dy * dy);
@@ -317,29 +412,33 @@ namespace Garden
                         if (distNorm >= 1f) continue;
 
                         float falloff = 1f - distNorm;
-                        falloff *= falloff; // quadratic
+                        falloff *= falloff;
                         float illum = falloff * light.intensity;
                         totalIllum += illum;
 
-                        // Accumulate warm color contribution
-                        warmAccum.r += light.color.r * illum * 0.15f;
-                        warmAccum.g += light.color.g * illum * 0.1f;
+                        warmAccum.r += light.color.r * illum * 0.4f;
+                        warmAccum.g += light.color.g * illum * 0.2f;
                         warmAccum.b += light.color.b * illum * 0.05f;
                     }
 
                     totalIllum = Mathf.Clamp01(totalIllum);
 
-                    // Darkness = night color, reduced by illumination
+                    // Darkness reduced by illumination
                     float darkness = maxAlpha * (1f - totalIllum);
 
-                    // Blend warm color into the transition zone
-                    float r = Mathf.Lerp(nightBase.r, Mathf.Clamp01(nightBase.r + warmAccum.r), totalIllum);
-                    float g = Mathf.Lerp(nightBase.g, Mathf.Clamp01(nightBase.g + warmAccum.g), totalIllum);
-                    float b = Mathf.Lerp(nightBase.b, Mathf.Clamp01(nightBase.b + warmAccum.b), totalIllum);
+                    // Warm tint: visible in the fire-lit zone with residual alpha
+                    float warmStrength = Mathf.Clamp01(warmAccum.r + warmAccum.g + warmAccum.b);
+                    float warmAlpha = warmStrength * 0.2f;
+                    float alpha = Mathf.Max(darkness, warmAlpha);
+
+                    // Color: blend from night base toward warm in illuminated areas
+                    float r = Mathf.Lerp(overlayBaseColor.r, Mathf.Clamp01(warmAccum.r), totalIllum);
+                    float g = Mathf.Lerp(overlayBaseColor.g, Mathf.Clamp01(warmAccum.g), totalIllum);
+                    float b = Mathf.Lerp(overlayBaseColor.b, Mathf.Clamp01(warmAccum.b), totalIllum);
 
                     pixels[y * TexSize + x] = new Color32(
                         (byte)(r * 255), (byte)(g * 255), (byte)(b * 255),
-                        (byte)(darkness * 255));
+                        (byte)(alpha * 255));
                 }
             }
 
