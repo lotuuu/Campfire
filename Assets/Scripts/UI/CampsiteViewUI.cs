@@ -3182,15 +3182,9 @@ namespace Garden
             flavorLabel.AddToClassList("interaction-info");
             interactionBody.Add(flavorLabel);
 
-            var collectBtn = new Button(() =>
+            var collectBtn = new Button(async () =>
             {
-                var drop = BirdManager.CollectBird(data, index);
-                if (drop != null)
-                {
-                    ApothekeManager.Instance?.AddItem(drop.itemKey, drop.itemCount);
-                    SaveManager.Instance.Save();
-                    BirdManager.Instance?.NotifyBirdCollected(drop);
-                }
+                await BirdManager.Instance.CollectBirdFromServer(index);
                 CloseInteractionPanel();
             })
             { text = Loc.Get("ui.button.collect", "Collect") };
