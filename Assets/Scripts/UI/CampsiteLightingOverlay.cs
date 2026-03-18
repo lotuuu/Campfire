@@ -25,8 +25,7 @@ namespace Garden
 
         private const int TexSize = 256;               // lightmap resolution
         private const float FireBaseRadius = 0.45f;     // normalized (~4-5 hex rings)
-        private const float FirePulseAmount = 0.10f;    // ±10% radius
-        private const float FirePulsePeriod = 3.5f;     // seconds per cycle
+        private const float FireBaseIntensity = 1f;
         private const int MaxFireflies = 7;
         private const float FireflyRadius = 0.04f;      // normalized
         private const float FireflyDriftSpeed = 0.01f;  // normalized/sec
@@ -54,6 +53,11 @@ namespace Garden
         private Vector2 firePositionCanvas; // raw canvas coords (for OnGridRebuilt)
         private float canvasWidth, canvasHeight;
         private float firePhase;
+        private float fireFlickerRadius;   // current animated radius
+        private float fireFlickerIntensity; // current animated intensity
+        private Color fireFlickerColor;     // current animated color
+        private float nextFlareTime;        // countdown to next bright flare
+        private float flareStrength;        // current flare (0 = none, 1 = full)
         private readonly List<Firefly> fireflies = new();
         private float nextFireflySpawn;
 
@@ -124,7 +128,7 @@ namespace Garden
         }
 
         private List<Vector2> buildingLightPositions = new();
-        private const float BuildingLightRadius = 0.35f; // DEBUG: same as fire for testing
+        private const float BuildingLightRadius = 0.15f; // small warm glow
 
         private void OnDestroy()
         {
@@ -244,7 +248,10 @@ namespace Garden
                 if (overlay.style.display == DisplayStyle.None)
                     overlay.style.display = DisplayStyle.Flex;
                 if (fireGlowActive)
+                {
                     firePhase += Time.deltaTime;
+                    UpdateFireFlicker(Time.deltaTime);
+                }
                 dirty = true;
                 UpdateFireflies(Time.deltaTime);
             }
@@ -274,6 +281,44 @@ namespace Garden
 
             if (dirty && canvasWidth > 0)
                 RenderLightmap();
+        }
+
+        // ── Fire flicker ──
+
+        private void UpdateFireFlicker(float dt)
+        {
+            float t = firePhase;
+
+            // Layered radius flicker — fast and noticeable
+            float slow = Mathf.Sin(t * 1.2f) * 0.08f;                      // ~5s breathing
+            float medium = Mathf.Sin(t * 3.5f + 0.8f) * 0.06f;             // ~1.8s wobble
+            float fast = Mathf.Sin(t * 8f + 2.1f) * 0.03f;                 // ~0.8s flicker
+            float noise = (Mathf.PerlinNoise(t * 4f, 0f) - 0.5f) * 0.08f;  // organic noise
+
+            fireFlickerRadius = FireBaseRadius * (1f + slow + medium + fast + noise);
+
+            // Intensity flicker — larger swings
+            float iSlow = Mathf.Sin(t * 1.5f + 1.3f) * 0.1f;
+            float iFast = Mathf.Sin(t * 6f + 0.5f) * 0.08f;
+            float iNoise = (Mathf.PerlinNoise(t * 5f, 5f) - 0.5f) * 0.12f;
+
+            // Occasional bright flares
+            nextFlareTime -= dt;
+            if (nextFlareTime <= 0f)
+            {
+                flareStrength = Random.Range(0.15f, 0.35f);
+                nextFlareTime = Random.Range(2f, 5f);
+            }
+            flareStrength = Mathf.MoveTowards(flareStrength, 0f, dt * 0.5f);
+
+            fireFlickerIntensity = FireBaseIntensity * (1f + iSlow + iFast + iNoise + flareStrength);
+
+            // Color temperature — deep amber, shifting toward orange on flares
+            float warmth = Mathf.PerlinNoise(t * 1.5f, 10f);
+            fireFlickerColor = Color.Lerp(
+                new Color(1f, 0.4f, 0.05f),   // deep amber-red
+                new Color(1f, 0.6f, 0.15f),   // bright orange
+                warmth * 0.6f + flareStrength * 0.8f);
         }
 
         private void ClearLightmap()
@@ -345,29 +390,35 @@ namespace Garden
             var lights = new List<LightSource>();
             if (fireGlowActive)
             {
-                float pulse = 1f + Mathf.Sin(firePhase * Mathf.PI * 2f / FirePulsePeriod) * FirePulseAmount;
                 lights.Add(new LightSource
                 {
                     position = firePositionNorm,
-                    color = new Color(1f, 0.7f, 0.3f),
-                    radius = FireBaseRadius * pulse,
-                    intensity = overlayAlpha
+                    color = fireFlickerColor,
+                    radius = fireFlickerRadius,
+                    intensity = fireFlickerIntensity * overlayAlpha
                 });
             }
 
-            // Building lights (mallum houses etc.)
+            // Building lights (mallum houses etc.) — subtle candle flicker
             if (canvasWidth > 0)
             {
-                foreach (var pos in buildingLightPositions)
+                for (int bi = 0; bi < buildingLightPositions.Count; bi++)
                 {
+                    var pos = buildingLightPositions[bi];
                     var normPos = new Vector2(pos.x / canvasWidth, pos.y / canvasHeight);
                     if (float.IsNaN(normPos.x) || float.IsNaN(normPos.y)) continue;
+
+                    // Each building has its own flicker phase (offset by index)
+                    float bPhase = firePhase + bi * 3.7f;
+                    float bFlicker = 1f + Mathf.Sin(bPhase * 2.5f) * 0.06f
+                        + (Mathf.PerlinNoise(bPhase * 1.5f, bi * 10f) - 0.5f) * 0.08f;
+
                     lights.Add(new LightSource
                     {
                         position = normPos,
                         color = new Color(1f, 0.8f, 0.4f),
-                        radius = BuildingLightRadius,
-                        intensity = overlayAlpha
+                        radius = BuildingLightRadius * bFlicker,
+                        intensity = overlayAlpha * bFlicker
                     });
                 }
             }
@@ -416,8 +467,8 @@ namespace Garden
                         float illum = falloff * light.intensity;
                         totalIllum += illum;
 
-                        warmAccum.r += light.color.r * illum * 0.4f;
-                        warmAccum.g += light.color.g * illum * 0.2f;
+                        warmAccum.r += light.color.r * illum * 0.8f;
+                        warmAccum.g += light.color.g * illum * 0.3f;
                         warmAccum.b += light.color.b * illum * 0.05f;
                     }
 
@@ -428,7 +479,7 @@ namespace Garden
 
                     // Warm tint: visible in the fire-lit zone with residual alpha
                     float warmStrength = Mathf.Clamp01(warmAccum.r + warmAccum.g + warmAccum.b);
-                    float warmAlpha = warmStrength * 0.2f;
+                    float warmAlpha = warmStrength * 0.45f;
                     float alpha = Mathf.Max(darkness, warmAlpha);
 
                     // Color: blend from night base toward warm in illuminated areas
