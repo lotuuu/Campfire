@@ -33,7 +33,7 @@ namespace Garden
         public const int StepComplete = 12;
 
         public bool IsComplete => CurrentStep >= StepComplete;
-        public int CurrentStep => SaveManager.Instance.Data.tutorialStep;
+        public int CurrentStep => SaveManager.Instance?.Data?.tutorialStep ?? StepComplete;
 
         /// <summary>
         /// Returns the set of building types allowed at the current tutorial step.

@@ -840,15 +840,6 @@ namespace Garden
                 mode = CampsiteMode.Normal;
             }
 
-            // During incomplete tutorial with no active highlight, block all cell interactions
-            // so players can't wander into build menus during non-building steps
-            if (TutorialManager.Instance != null && !TutorialManager.Instance.IsComplete
-                && mode == CampsiteMode.Normal
-                && tutorialTargetQ == int.MinValue && tutorialTargetR == int.MinValue)
-            {
-                return;
-            }
-
             if (type == CampBuildingType.Apotheke)
             {
                 OnApothekeTapped?.Invoke();
