@@ -39,7 +39,7 @@
 }
 
 #dialogue-text {
-    font-size: var(--font-md);
+    font-size: var(--font-lg);
     color: var(--color-text);
     white-space: normal;
 }
