@@ -1,5 +1,22 @@
 * {
-    -unity-font-definition: url('project://database/Assets/PIXEARG_%20SDF.asset');
+    -unity-font-definition: url('project://database/Assets/Fonts/Nunito-Regular.ttf');
+}
+
+/* Display font (Fredoka) for headers, titles, and prominent text */
+.font-display,
+.panel-header,
+.gate-title,
+.skin-title,
+.harvest-yield-count,
+#loading-gate-title,
+#overlay-title,
+#dialogue-speaker,
+#tutorial-hint-speaker,
+#tutorial-hint-centered-speaker,
+#visitor-modal-name,
+#reward-reveal-title,
+#player-name {
+    -unity-font-definition: url('project://database/Assets/Fonts/Fredoka-SemiBold.ttf');
 }
 
 :root {

@@ -1,6 +1,10 @@
 /* Garden global theme — extends Unity default, overrides dropdown popup sizing */
 @import url("unity-theme://default");
 
+* {
+    -unity-font-definition: url('project://database/Assets/Fonts/Nunito-Regular.ttf');
+}
+
 .unity-base-dropdown {
     background-color: transparent;
 }
