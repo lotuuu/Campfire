@@ -314,10 +314,10 @@ namespace Garden
                                     float t = (glowElapsed - fadeInDuration - holdDuration) / fadeOutDuration;
                                     alpha = peakAlpha * (1f - Mathf.Clamp01(t));
                                 }
-                                CampsiteViewUI.GlowAlpha[c] = alpha;
+                                CampsiteViewUI.GlowColor[c] = new Color(1f, 0.67f, 0.16f, alpha);
                                 c.MarkDirtyRepaint();
                                 if (glowElapsed >= fadeInDuration + holdDuration + fadeOutDuration)
-                                    CampsiteViewUI.GlowAlpha.Remove(c);
+                                    CampsiteViewUI.GlowColor.Remove(c);
                             }).Every(16).Until(() => glowElapsed >= fadeInDuration + holdDuration + fadeOutDuration);
                         }).StartingIn(delayMs);
                     }

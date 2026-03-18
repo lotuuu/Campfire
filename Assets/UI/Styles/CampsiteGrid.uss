@@ -16,6 +16,8 @@
     --hex-border: rgba(70, 120, 45, 0.15);
 }
 
+
+
 /* ── Empty cell ── */
 .grid-cell--empty {
     --hex-fill: rgb(123, 135, 60);
