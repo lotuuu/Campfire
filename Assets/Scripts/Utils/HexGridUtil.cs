@@ -55,6 +55,18 @@ namespace Garden
         }
 
         /// <summary>
+        /// Returns the six axial-coordinate neighbors of a hex cell.
+        /// </summary>
+        public static (int q, int r)[] GetNeighbors(int q, int r)
+        {
+            return new[]
+            {
+                (q + 1, r), (q + 1, r - 1), (q, r - 1),
+                (q - 1, r), (q - 1, r + 1), (q, r + 1)
+            };
+        }
+
+        /// <summary>
         /// Fisher-Yates shuffle of a list in place.
         /// </summary>
         public static void Shuffle<T>(System.Collections.Generic.List<T> list)

@@ -121,6 +121,9 @@ namespace Garden
         private readonly List<(VisualElement fill, int vaseIndex)> fillingVases = new();
         private readonly List<(VisualElement fill, int plotIndex)> cooldownPlots = new();
 
+        // Pending craft animation (set before rebuild, consumed after)
+        private (int q, int r)? pendingCraftAnimCoords;
+
         // Current grid state
         private int currentGridSize;
         private int _revealOuterBeyondRadius = -1; // if >= 0, cells beyond this radius are born hidden
@@ -595,6 +598,55 @@ namespace Garden
                 panController.CenterOnPoint(flameCenterX, flameCenterY, canvasWidth, canvasHeight);
                 needsRecenter = false;
             }
+
+            // Play craft animation if one is pending
+            if (pendingCraftAnimCoords.HasValue)
+            {
+                var (aq, ar) = pendingCraftAnimCoords.Value;
+                pendingCraftAnimCoords = null;
+                PlayCraftAnimation(aq, ar);
+            }
+        }
+
+        private void PlayCraftAnimation(int q, int r)
+        {
+            var cell = GetCellElement(q, r);
+            if (cell == null) return;
+
+            // Scale bounce: 0 → ~1.12 → 1.0 (elastic ease-out)
+            cell.style.scale = new Scale(Vector2.zero);
+            float elapsed = 0f;
+            const float bounceDuration = 400f;
+            cell.schedule.Execute(() =>
+            {
+                elapsed += 16f;
+                float t = Mathf.Clamp01(elapsed / bounceDuration);
+                // Elastic ease-out: overshoots then settles
+                float scale = 1f - Mathf.Pow(2f, -10f * t) * Mathf.Cos(t * Mathf.PI * 2.5f);
+                cell.style.scale = new Scale(new Vector2(scale, scale));
+                if (elapsed >= bounceDuration)
+                    cell.style.scale = StyleKeyword.Null;
+            }).Every(16).Until(() => elapsed >= bounceDuration);
+
+            // Neighbor glow ripple — warm golden color
+            Color glowRgb = new Color(1f, 0.72f, 0.2f);
+            var neighbors = HexGridUtil.GetNeighbors(q, r);
+            for (int i = 0; i < neighbors.Length; i++)
+            {
+                var neighbor = GetCellElement(neighbors[i].q, neighbors[i].r);
+                if (neighbor == null) continue;
+                long delay = 120 + i * 30; // stagger each neighbor by 30ms
+                neighbor.schedule.Execute(() =>
+                {
+                    PlayGlowPulse(neighbor, glowRgb, 0.25f, 80f, 100f, 250f);
+                }).StartingIn(delay);
+            }
+
+            // Also glow the crafted cell itself
+            cell.schedule.Execute(() =>
+            {
+                PlayGlowPulse(cell, glowRgb, 0.35f, 60f, 120f, 200f);
+            }).StartingIn(50);
         }
 
         private void PopulateOccupiedCell(VisualElement cell, Label label, Label status,
@@ -888,7 +940,11 @@ namespace Garden
                         success = GardenManager.Instance.CraftEmptyGarden(gridX, gridY);
                         break;
                 }
-                if (success) ExitMode();
+                if (success)
+                {
+                    pendingCraftAnimCoords = (gridX, gridY);
+                    ExitMode();
+                }
                 return;
             }
 
@@ -938,7 +994,10 @@ namespace Garden
                         canAffordPlot, canPlace, () =>
                         {
                             if (PlotManager.Instance.CraftPlot(gridX, gridY))
+                            {
+                                pendingCraftAnimCoords = (gridX, gridY);
                                 CloseInteractionPanel();
+                            }
                         }));
                 }
             }
@@ -962,7 +1021,10 @@ namespace Garden
                             canAffordVase, canPlace, () =>
                             {
                                 if (VaseManager.Instance.CraftVase(gridX, gridY))
+                                {
+                                    pendingCraftAnimCoords = (gridX, gridY);
                                     CloseInteractionPanel();
+                                }
                             }));
                     }
                 }
@@ -992,7 +1054,10 @@ namespace Garden
                         canAffordHouse, canPlace, () =>
                         {
                             if (MallumManager.Instance.CraftMallumHouse(gridX, gridY))
+                            {
+                                pendingCraftAnimCoords = (gridX, gridY);
                                 CloseInteractionPanel();
+                            }
                         }));
                 }
             }
@@ -1016,7 +1081,10 @@ namespace Garden
                             canAffordGarden, canPlace, () =>
                             {
                                 if (GardenManager.Instance.CraftEmptyGarden(gridX, gridY))
+                                {
+                                    pendingCraftAnimCoords = (gridX, gridY);
                                     CloseInteractionPanel();
+                                }
                             }));
                     }
                 }
