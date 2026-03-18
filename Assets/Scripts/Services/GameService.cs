@@ -91,11 +91,18 @@ namespace Garden
         // ── Initialization ──
 
         private const long SlowStepMs = 500;
+        private bool _initializing;
 
         public async void Initialize()
         {
+            if (_initializing)
+            {
+                Debug.Log("[GameService] Initialize already in progress — skipping");
+                return;
+            }
             if (SocialService.Instance == null || !SocialService.Instance.IsSignedIn) return;
 
+            _initializing = true;
             BootTimer.Mark("GameService.Initialize start");
             var totalSw = Stopwatch.StartNew();
 
@@ -229,6 +236,10 @@ namespace Garden
                 IsInitialized = true;
                 IsOnline = false;
                 OnInitFailed?.Invoke("Could not load game state from server");
+            }
+            finally
+            {
+                _initializing = false;
             }
         }
 
