@@ -178,18 +178,16 @@ namespace Garden
                         OnInitFailed?.Invoke("Failed to parse game state");
                         return;
                     }
-                    // If tutorial was not completed on the server, wipe everything and start fresh.
-                    // Server is authoritative — local tutorialStep is unreliable (may be 0 from
-                    // fresh install or from SaveManager.Load discarding incomplete local data).
-                    // Include step 0: a player at Welcome who had InitializeNewPlayer run still
-                    // has server-side data (vases, plots, economy) that must be cleared.
-                    var localData = SaveManager.Instance.Data;
+                    // If tutorial was started but not completed, wipe and start fresh.
+                    // Only check the server step — local is unreliable (SaveManager.Load
+                    // may have already discarded incomplete local data, resetting to 0).
+                    // Step 0 is excluded: brand new players also have step 0 with buildings
+                    // (from init_economy), and wiping them would shuffle their positions.
                     int serverTutorialStep = state.tutorialStep;
-                    bool serverIncomplete = serverTutorialStep < TutorialManager.StepComplete;
-                    bool hasServerData = state.vases != null && state.vases.Count > 0;
-                    if (serverIncomplete && hasServerData)
+                    bool serverIncomplete = serverTutorialStep > 0 && serverTutorialStep < TutorialManager.StepComplete;
+                    if (serverIncomplete)
                     {
-                        Debug.Log($"[GameService] Tutorial incomplete (local={localData.tutorialStep}, server={serverTutorialStep}) — wiping save");
+                        Debug.Log($"[GameService] Tutorial incomplete (server={serverTutorialStep}) — wiping save");
                         // Clear server-side player data directly (don't rely on DebugService)
                         try
                         {
