@@ -328,6 +328,8 @@
                             <ui:Button name="time-scale-2" text="x2" class="preset-btn" />
                             <ui:Button name="time-scale-5" text="x5" class="preset-btn" />
                             <ui:Button name="time-scale-100" text="x100" class="preset-btn" />
+                            <ui:Button name="time-scale-2000" text="x2000" class="preset-btn" />
+                            <ui:Button name="time-reset" text="Reset" class="preset-btn" />
                         </ui:VisualElement>
                         <ui:Label name="current-time-label" />
 

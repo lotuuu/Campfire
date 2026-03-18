@@ -99,6 +99,8 @@ namespace Garden
             root.Q<Button>("time-scale-2")?.RegisterCallback<ClickEvent>(_ => SetTimeScale(2f));
             root.Q<Button>("time-scale-5")?.RegisterCallback<ClickEvent>(_ => SetTimeScale(5f));
             root.Q<Button>("time-scale-100")?.RegisterCallback<ClickEvent>(_ => SetTimeScale(100f));
+            root.Q<Button>("time-scale-2000")?.RegisterCallback<ClickEvent>(_ => SetTimeScale(2000f));
+            root.Q<Button>("time-reset")?.RegisterCallback<ClickEvent>(_ => ResetTime());
 
             // Wire economy buttons
             root.Q<Button>("set-mana-button")?.RegisterCallback<ClickEvent>(evt =>
@@ -229,12 +231,19 @@ namespace Garden
             }
             else
             {
-                // Returning to x1 — sync game state from server
-                GameTime.ResetTimeScale();
+                // Returning to x1 — keep accelerated game time, just sync server state
                 GameService.Instance?.Initialize();
             }
 
             Debug.Log($"[Debug] Time scale set to x{scale:G0}");
+        }
+
+        private void ResetTime()
+        {
+            SetTimeScale(1f);
+            GameTime.ResetTimeScale();
+            GameService.Instance?.Initialize();
+            Debug.Log("[Debug] Time reset to real time");
         }
 
         private IEnumerator TimeAccelerationLoop(float scale)
