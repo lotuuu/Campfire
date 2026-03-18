@@ -206,8 +206,27 @@ namespace Garden
                         }
                         SaveManager.Instance.DeleteSave();
                         EconomyService.Instance?.ClearQueue();
-                        // Don't apply stale server state — fall through to OnStateLoaded
-                        // which will trigger new player init via CheckNewPlayer
+                        // Re-fetch state — clear_save re-initialized the economy and
+                        // created fresh starter buildings on the server. Apply that
+                        // state so the client has proper serverIds and matching positions.
+                        try
+                        {
+                            using var freshReq = GetAuth("/game/state");
+                            await SendAsync(freshReq);
+                            if (freshReq.responseCode == 200)
+                            {
+                                var freshState = JsonUtility.FromJson<GameStateResponse>(freshReq.downloadHandler.text);
+                                if (freshState != null)
+                                {
+                                    ApplyGameState(freshState);
+                                    Debug.Log("[GameService] Applied fresh server state after tutorial wipe");
+                                }
+                            }
+                        }
+                        catch (Exception ex2)
+                        {
+                            Debug.LogWarning($"[GameService] Failed to re-fetch state after wipe: {ex2.Message}");
+                        }
                     }
                     else
                     {
