@@ -158,8 +158,8 @@ namespace Garden
             // Skip empty/placeholder weather (server has no real data yet)
             if (sw.humidity == 0 && sw.wind_speed == 0 && sw.temperature == 0) return;
             var now = GameTime.Now;
-            float sunriseHour = 6.5f;
-            float sunsetHour = 18.5f;
+            float sunriseHour = sw.sunrise_hour > 0 ? sw.sunrise_hour : 6.5f;
+            float sunsetHour = sw.sunset_hour > 0 ? sw.sunset_hour : 18.5f;
             var weather = new WeatherData
             {
                 temperature = sw.temperature,

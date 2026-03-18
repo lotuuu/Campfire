@@ -90,6 +90,8 @@ namespace Garden
         public string condition;
         public bool is_raining;
         public int moon_phase;
+        public float sunrise_hour;
+        public float sunset_hour;
     }
 
     [Serializable]

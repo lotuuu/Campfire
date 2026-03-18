@@ -209,6 +209,28 @@ defmodule CampFire.Game.Weather do
     city_name = body["name"] || ""
     country = get_in(body, ["sys", "country"]) || ""
 
+    # OWM returns sunrise/sunset as UTC unix timestamps and timezone as offset in seconds.
+    # Convert to local fractional hours (e.g. 6.5 = 6:30 AM local).
+    tz_offset = (body["timezone"] || 0) * 1
+    sunrise_unix = get_in(body, ["sys", "sunrise"])
+    sunset_unix = get_in(body, ["sys", "sunset"])
+
+    sunrise_hour =
+      if sunrise_unix do
+        local_seconds = rem(sunrise_unix + tz_offset, 86400)
+        local_seconds / 3600.0
+      else
+        6.5
+      end
+
+    sunset_hour =
+      if sunset_unix do
+        local_seconds = rem(sunset_unix + tz_offset, 86400)
+        local_seconds / 3600.0
+      else
+        18.5
+      end
+
     %{
       "temperature" => temperature * 1.0,
       "humidity" => humidity * 1.0,
@@ -218,7 +240,9 @@ defmodule CampFire.Game.Weather do
       "is_raining" => is_raining,
       "moon_phase" => moon_phase * 1.0,
       "city" => city_name,
-      "country" => country
+      "country" => country,
+      "sunrise_hour" => sunrise_hour * 1.0,
+      "sunset_hour" => sunset_hour * 1.0
     }
   end
 
