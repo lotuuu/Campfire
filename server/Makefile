@@ -60,7 +60,7 @@ tunnel:
 	fi
 	@URL=$$(curl -s http://localhost:4040/api/tunnels | python3 -c "import sys,json; print(json.load(sys.stdin)['tunnels'][0]['public_url'])" 2>/dev/null) && \
 	if [ -z "$$URL" ]; then echo "ERROR: Could not get ngrok URL. Is ngrok running?"; exit 1; fi && \
-	printf 'namespace Garden\n{\n    public static class DevServerConfig\n    {\n        public const string BaseUrl = "%s";\n    }\n}\n' "$$URL" > $(DEV_CONFIG) && \
+	printf 'namespace Garden\n{\n// DO NOT COMMIT changes to this file — it is constantly overwritten by `make dev` / `make tunnel`.\n\n    public static class DevServerConfig\n    {\n        public const string BaseUrl = "%s";\n    }\n}\n' "$$URL" > $(DEV_CONFIG) && \
 	echo "DevServerConfig.cs updated: $$URL"
 
 # Stop ngrok tunnel and reset DevServerConfig to localhost
@@ -72,7 +72,7 @@ tunnel-stop:
 	else \
 		echo "ngrok not running."; \
 	fi
-	@printf 'namespace Garden\n{\n    public static class DevServerConfig\n    {\n        public const string BaseUrl = "http://localhost:4000";\n    }\n}\n' > $(DEV_CONFIG)
+	@printf 'namespace Garden\n{\n// DO NOT COMMIT changes to this file — it is constantly overwritten by `make dev` / `make tunnel`.\n\n    public static class DevServerConfig\n    {\n        public const string BaseUrl = "http://localhost:4000";\n    }\n}\n' > $(DEV_CONFIG)
 	@echo "DevServerConfig.cs reset to localhost."
 
 GIGALIXIR := $(HOME)/.local/bin/gigalixir
@@ -143,5 +143,5 @@ redeploy:
 
 # Point DevServerConfig.cs at Gigalixir
 remote-use:
-	@printf 'namespace Garden\n{\n    public static class DevServerConfig\n    {\n        public const string BaseUrl = "$(GIGALIXIR_URL)";\n    }\n}\n' > $(DEV_CONFIG)
+	@printf 'namespace Garden\n{\n// DO NOT COMMIT changes to this file — it is constantly overwritten by `make dev` / `make tunnel`.\n\n    public static class DevServerConfig\n    {\n        public const string BaseUrl = "$(GIGALIXIR_URL)";\n    }\n}\n' > $(DEV_CONFIG)
 	@echo "DevServerConfig.cs updated: $(GIGALIXIR_URL)"
