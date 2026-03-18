@@ -120,6 +120,6 @@ MonoBehaviour:
     pitchMax: 1
   - key: music_main
     clip: {fileID: 8300000, guid: 260d24687218e42b2892485c83736796, type: 3}
-    volume: 0.25
+    volume: 0.5
     pitchMin: 1
     pitchMax: 1
