@@ -41,6 +41,35 @@ namespace Garden
             StartCoroutine(InitializeLocation());
         }
 
+        private void Update()
+        {
+            if (!HasWeather || useDebugOverride) return;
+
+            if (UpdateTimeOfDay(CurrentWeather, GameTime.Now, out var updated))
+            {
+                CurrentWeather = updated;
+                OnWeatherUpdated?.Invoke(updated);
+            }
+        }
+
+        /// <summary>
+        /// Checks if time-of-day fields need updating. Returns true if changed.
+        /// </summary>
+        public static bool UpdateTimeOfDay(WeatherData current, System.DateTime now, out WeatherData updated)
+        {
+            updated = current;
+            bool night = TimeUtils.IsNight(now, current.sunriseHour, current.sunsetHour);
+            bool golden = !night && TimeUtils.IsGoldenHour(now, current.sunsetHour);
+
+            if (night == current.isNight && golden == current.isGoldenHour)
+                return false;
+
+            updated.isNight = night;
+            updated.isGoldenHour = golden;
+            updated.timeOfDay = TimeUtils.GetTimeOfDay(now, current.sunriseHour, current.sunsetHour);
+            return true;
+        }
+
         private IEnumerator InitializeLocation()
         {
 #if UNITY_EDITOR
@@ -121,6 +150,8 @@ namespace Garden
         public void ApplyServerWeather(ServerWeather sw)
         {
             if (sw == null) return;
+            // Don't override explicit debug weather
+            if (useDebugOverride) return;
             // Skip empty/placeholder weather (server has no real data yet)
             if (sw.humidity == 0 && sw.wind_speed == 0 && sw.temperature == 0) return;
             var now = GameTime.Now;
