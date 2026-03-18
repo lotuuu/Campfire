@@ -79,6 +79,7 @@ namespace Garden
             canvas = canvasElement;
             viewport = canvas.parent;
 
+            firePhase = Random.Range(0f, 100f); // randomize so fire doesn't sync with buildings
             lightmap = new Texture2D(TexSize, TexSize, TextureFormat.RGBA32, false)
             {
                 filterMode = FilterMode.Bilinear,
@@ -119,6 +120,9 @@ namespace Garden
         {
             firePositionCanvas = flameCenterCanvas;
             buildingLightPositions = buildingLights ?? new List<Vector2>();
+            buildingPhaseOffsets = new List<float>(buildingLightPositions.Count);
+            for (int i = 0; i < buildingLightPositions.Count; i++)
+                buildingPhaseOffsets.Add(Random.Range(0f, 100f));
 
             if (overlay != null && canvas != null)
             {
@@ -128,6 +132,7 @@ namespace Garden
         }
 
         private List<Vector2> buildingLightPositions = new();
+        private List<float> buildingPhaseOffsets = new();
         private const float BuildingLightRadius = 0.15f; // small warm glow
 
         private void OnDestroy()
@@ -408,8 +413,8 @@ namespace Garden
                     var normPos = new Vector2(pos.x / canvasWidth, pos.y / canvasHeight);
                     if (float.IsNaN(normPos.x) || float.IsNaN(normPos.y)) continue;
 
-                    // Each building has its own flicker phase (offset by index)
-                    float bPhase = firePhase + bi * 3.7f;
+                    // Each building has its own random flicker phase
+                    float bPhase = firePhase + buildingPhaseOffsets[bi];
                     float bFlicker = 1f + Mathf.Sin(bPhase * 2.5f) * 0.06f
                         + (Mathf.PerlinNoise(bPhase * 1.5f, bi * 10f) - 0.5f) * 0.08f;
 
