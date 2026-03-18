@@ -383,14 +383,22 @@ namespace Garden
                 }
             }
 
-            float canvasWidth = (maxX - minX) + CellWidth + GridPadding * 2;
-            float canvasHeight = (maxY - minY) + CellHeight + GridPadding * 2;
+            float gridW = (maxX - minX) + CellWidth + GridPadding * 2;
+            float gridH = (maxY - minY) + CellHeight + GridPadding * 2;
+            // Add viewport-sized padding so the lighting overlay extends beyond
+            // the viewport in all directions, even after pan centering
+            float vpW = viewport.resolvedStyle.width;
+            float vpH = viewport.resolvedStyle.height;
+            float extraW = (!float.IsNaN(vpW) && vpW > 0) ? vpW : 0f;
+            float extraH = (!float.IsNaN(vpH) && vpH > 0) ? vpH : 0f;
+            float canvasWidth = gridW + extraW;
+            float canvasHeight = gridH + extraH;
             canvas.style.width = canvasWidth;
             canvas.style.height = canvasHeight;
 
-            // Offset so that top-left hex center maps to (GridPadding + CellWidth/2, GridPadding + CellHeight/2)
-            float offsetX = -minX + GridPadding + CellWidth / 2f;
-            float offsetY = -minY + GridPadding + CellHeight / 2f;
+            // Offset so hex cells are centered in the expanded canvas
+            float offsetX = -minX + GridPadding + CellWidth / 2f + extraW / 2f;
+            float offsetY = -minY + GridPadding + CellHeight / 2f + extraH / 2f;
             gridOffsetX = offsetX;
             gridOffsetY = offsetY;
             var flamePixel = HexGridUtil.HexToPixel(0, 0, HexSize);
@@ -1185,13 +1193,19 @@ namespace Garden
                 }
             }
 
-            float canvasWidth = (maxX - minX) + CellWidth + GridPadding * 2;
-            float canvasHeight = (maxY - minY) + CellHeight + GridPadding * 2;
+            float gridW2 = (maxX - minX) + CellWidth + GridPadding * 2;
+            float gridH2 = (maxY - minY) + CellHeight + GridPadding * 2;
+            float vpW2 = viewport.resolvedStyle.width;
+            float vpH2 = viewport.resolvedStyle.height;
+            float extraW2 = (!float.IsNaN(vpW2) && vpW2 > 0) ? vpW2 : 0f;
+            float extraH2 = (!float.IsNaN(vpH2) && vpH2 > 0) ? vpH2 : 0f;
+            float canvasWidth = gridW2 + extraW2;
+            float canvasHeight = gridH2 + extraH2;
             canvas.style.width = canvasWidth;
             canvas.style.height = canvasHeight;
 
-            float offsetX = -minX + GridPadding + CellWidth / 2f;
-            float offsetY = -minY + GridPadding + CellHeight / 2f;
+            float offsetX = -minX + GridPadding + CellWidth / 2f + extraW2 / 2f;
+            float offsetY = -minY + GridPadding + CellHeight / 2f + extraH2 / 2f;
 
             // Build occupied lookup from snapshot data
             var occupied = new Dictionary<(int, int), (CampBuildingType type, int index)>();

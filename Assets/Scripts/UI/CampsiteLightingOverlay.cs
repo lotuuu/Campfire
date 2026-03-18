@@ -290,10 +290,10 @@ namespace Garden
             float t = firePhase;
 
             // Layered radius flicker — fast and noticeable
-            float slow = Mathf.Sin(t * 1.2f) * 0.08f;                      // ~5s breathing
-            float medium = Mathf.Sin(t * 3.5f + 0.8f) * 0.06f;             // ~1.8s wobble
-            float fast = Mathf.Sin(t * 8f + 2.1f) * 0.03f;                 // ~0.8s flicker
-            float noise = (Mathf.PerlinNoise(t * 4f, 0f) - 0.5f) * 0.08f;  // organic noise
+            float slow = Mathf.Sin(t * 1.2f) * 0.06f;                      // ~5s breathing
+            float medium = Mathf.Sin(t * 3.5f + 0.8f) * 0.04f;             // ~1.8s wobble
+            float fast = Mathf.Sin(t * 8f + 2.1f) * 0.02f;                 // ~0.8s flicker
+            float noise = (Mathf.PerlinNoise(t * 4f, 0f) - 0.5f) * 0.06f;  // organic noise
 
             fireFlickerRadius = FireBaseRadius * (1f + slow + medium + fast + noise);
 
