@@ -89,9 +89,9 @@ namespace Garden
             if (bottomNav != null) bottomNav.style.display = DisplayStyle.None;
         }
 
-        public void Hide()
+        public void Hide(bool silent = false)
         {
-            if (overlay != null && overlay.style.display != DisplayStyle.None)
+            if (!silent && overlay != null && overlay.style.display != DisplayStyle.None)
                 AudioManager.Instance?.PlaySFX("ui_panel_close");
             if (overlay != null) overlay.style.display = DisplayStyle.None;
             if (dialogueBox != null) dialogueBox.style.display = DisplayStyle.None;
@@ -107,7 +107,7 @@ namespace Garden
             }
             else
             {
-                Hide();
+                Hide(silent: onComplete != null);
                 onComplete?.Invoke();
             }
         }

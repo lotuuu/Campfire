@@ -196,7 +196,7 @@ namespace Garden
             {
                 build.OnRequestPlacement += type =>
                 {
-                    CloseOverlay();
+                    CloseOverlay(silent: true);
                     campsiteView.EnterPlacementMode(type);
                 };
             }
@@ -568,9 +568,9 @@ namespace Garden
             ).StartingIn(2000);
         }
 
-        public void CloseOverlay()
+        public void CloseOverlay(bool silent = false)
         {
-            AudioManager.Instance?.PlaySFX("ui_panel_close");
+            if (!silent) AudioManager.Instance?.PlaySFX("ui_panel_close");
             HideAllPanels();
             overlayContainer.style.display = DisplayStyle.None;
         }

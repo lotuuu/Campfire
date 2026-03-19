@@ -13,13 +13,8 @@ MonoBehaviour:
   m_Name: SoundLibrary
   m_EditorClassIdentifier: Garden::Garden.SoundLibrary
   entries:
-  - key: ui_tap
-    clip: {fileID: 8300000, guid: 04ecdbafbe3c440e58b3902a55ca0ffc, type: 3}
-    volume: 1
-    pitchMin: 0.95
-    pitchMax: 1.05
   - key: ui_panel_open
-    clip: {fileID: 8300000, guid: 843bb5a360197443484b3f49e99a45c9, type: 3}
+    clip: {fileID: 8300000, guid: a58d5609ea7ab4a82b8500a9c93135be, type: 3}
     volume: 1
     pitchMin: 1
     pitchMax: 1
@@ -28,18 +23,13 @@ MonoBehaviour:
     volume: 1
     pitchMin: 1
     pitchMax: 1
-  - key: flame_collect_mana
-    clip: {fileID: 8300000, guid: 3d999ef062290464389a7de7b6d995bf, type: 3}
-    volume: 1
-    pitchMin: 0.95
-    pitchMax: 1.05
   - key: flame_upgrade
     clip: {fileID: 8300000, guid: fe4df92d1ce52430384bbce170f9a541, type: 3}
     volume: 1
     pitchMin: 1
     pitchMax: 1
   - key: plot_craft
-    clip: {fileID: 8300000, guid: 37d5cc0e196334de7a71bc1d98d5e23b, type: 3}
+    clip: {fileID: 8300000, guid: 9a5dfc8b6a09d409e8ecc2fdb32ace83, type: 3}
     volume: 1
     pitchMin: 1
     pitchMax: 1
@@ -59,7 +49,7 @@ MonoBehaviour:
     pitchMin: 1
     pitchMax: 1
   - key: vase_craft
-    clip: {fileID: 8300000, guid: 120dadcd4d3cb41efa0bfc63ac2d1bcd, type: 3}
+    clip: {fileID: 8300000, guid: 9a5dfc8b6a09d409e8ecc2fdb32ace83, type: 3}
     volume: 1
     pitchMin: 1
     pitchMax: 1
@@ -79,7 +69,7 @@ MonoBehaviour:
     pitchMin: 0.95
     pitchMax: 1.05
   - key: quest_complete
-    clip: {fileID: 8300000, guid: be1b184b651a244649ab646c367b7a20, type: 3}
+    clip: {fileID: 8300000, guid: 7912bf78b372b4b9d8592f1d5a4f1c5c, type: 3}
     volume: 1
     pitchMin: 1
     pitchMax: 1
@@ -94,7 +84,7 @@ MonoBehaviour:
     pitchMin: 1
     pitchMax: 1
   - key: garden_craft
-    clip: {fileID: 8300000, guid: 631f87df03982419dad6b2ec77d3efbd, type: 3}
+    clip: {fileID: 8300000, guid: 9a5dfc8b6a09d409e8ecc2fdb32ace83, type: 3}
     volume: 1
     pitchMin: 1
     pitchMax: 1
@@ -104,12 +94,17 @@ MonoBehaviour:
     pitchMin: 1
     pitchMax: 1
   - key: bird_arrive
-    clip: {fileID: 8300000, guid: ee3e9d6f226084f87a97c0faa282f823, type: 3}
+    clip: {fileID: 8300000, guid: a0132aafe3d314231a81d9f22f286e00, type: 3}
     volume: 1
     pitchMin: 0.9
     pitchMax: 1.1
   - key: bird_collect
-    clip: {fileID: 8300000, guid: 07065681c80b74f43a101eee5c505304, type: 3}
+    clip: {fileID: 8300000, guid: 8ce2882195a4c4dd88e21b05bdd11014, type: 3}
+    volume: 1
+    pitchMin: 1
+    pitchMax: 1
+  - key: harvest_reveal
+    clip: {fileID: 8300000, guid: 529499bf61ef044fd83c0a387ca27e09, type: 3}
     volume: 1
     pitchMin: 1
     pitchMax: 1
