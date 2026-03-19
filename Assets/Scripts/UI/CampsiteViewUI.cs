@@ -1550,7 +1550,7 @@ namespace Garden
 
         private void ShowInteractionPanel()
         {
-            AudioManager.Instance?.PlaySFX("ui_tap");
+            AudioManager.Instance?.PlaySFX("ui_panel_open");
             if (interactionBackdrop != null)
                 interactionBackdrop.style.display = DisplayStyle.Flex;
             interactionPanel.style.display = DisplayStyle.Flex;
@@ -2401,6 +2401,7 @@ namespace Garden
 
             var scroll = new ScrollView(ScrollViewMode.Vertical);
             scroll.AddToClassList("seed-picker-scroll");
+            scroll.verticalScrollerVisibility = ScrollerVisibility.Hidden;
 
             var list = new VisualElement();
             list.AddToClassList("seed-picker-list");
@@ -2546,6 +2547,7 @@ namespace Garden
 
             var scroll = new ScrollView(ScrollViewMode.Vertical);
             scroll.AddToClassList("seed-picker-scroll");
+            scroll.verticalScrollerVisibility = ScrollerVisibility.Hidden;
 
             var list = new VisualElement();
             list.AddToClassList("seed-picker-list");

@@ -145,10 +145,6 @@
     align-self: stretch;
 }
 
-.seed-picker-scroll .unity-scroller--vertical {
-    display: none;
-}
-
 .seed-picker-list {
     flex-direction: column;
     padding: var(--spacing-xs) 0;
