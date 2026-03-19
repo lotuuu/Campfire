@@ -44,6 +44,24 @@ namespace Garden
     }
 
     [Serializable]
+    public class ServerRecipeIngredient
+    {
+        public string itemKey;
+        public int count;
+    }
+
+    [Serializable]
+    public class ServerRecipeConfig
+    {
+        public string name;
+        public string category;
+        public string resultItem;
+        public int resultQuantity;
+        public string descriptionKey;
+        public List<ServerRecipeIngredient> ingredients = new();
+    }
+
+    [Serializable]
     public class ServerQuestConfig
     {
         public string questKey;
@@ -184,6 +202,7 @@ namespace Garden
         private ServerBirdConfig _birdConfig;
         private ServerPlotConfig _plotConfig;
         private ServerNewPlayerConfig _newPlayerConfig;
+        private Dictionary<string, ServerRecipeConfig> _recipeConfigs = new();
         private Dictionary<string, List<BuildingCost>> _buildingCosts = new();
         private Dictionary<string, string> _spriteManifest = new();
 
@@ -286,6 +305,11 @@ namespace Garden
         public List<ServerSeedConfig> GetAllSeeds() => new(_seedConfigs.Values);
         public List<ServerQuestConfig> GetAllQuests() => new(_questConfigs.Values);
         public List<ServerGardenConfig> GetAllGardens() => new(_gardenConfigs.Values);
+
+        public ServerRecipeConfig GetRecipe(string name) =>
+            _recipeConfigs.TryGetValue(name, out var c) ? c : null;
+
+        public Dictionary<string, ServerRecipeConfig> GetAllRecipes() => _recipeConfigs;
 
         public ServerFlameConfig FlameConfig => _flameConfig;
         public ServerVaseConfig VaseConfig => _vaseConfig;
@@ -696,6 +720,43 @@ namespace Garden
                             category = itemData.TryGetValue("category", out var cat) ? cat as string : "harvest",
                             spriteKey = itemData.TryGetValue("spriteKey", out var sk) ? sk as string : null
                         };
+                    }
+                }
+            }
+
+            // Recipes
+            if (root.TryGetValue("recipes", out var recipesObj) && recipesObj is Dictionary<string, object> recipesDict)
+            {
+                _recipeConfigs = new Dictionary<string, ServerRecipeConfig>();
+                foreach (var kv in recipesDict)
+                {
+                    if (kv.Value is Dictionary<string, object> rMap)
+                    {
+                        var config = new ServerRecipeConfig
+                        {
+                            name = kv.Key,
+                            category = GetString(rMap, "category"),
+                            resultItem = GetString(rMap, "result_item"),
+                            resultQuantity = (int)GetFloat(rMap, "result_quantity", 1f),
+                            descriptionKey = GetString(rMap, "description_key")
+                        };
+
+                        if (rMap.TryGetValue("ingredients", out var ingsObj) && ingsObj is List<object> ings)
+                        {
+                            foreach (var item in ings)
+                            {
+                                if (item is Dictionary<string, object> ingMap)
+                                {
+                                    config.ingredients.Add(new ServerRecipeIngredient
+                                    {
+                                        itemKey = GetString(ingMap, "itemKey"),
+                                        count = (int)GetFloat(ingMap, "count", 1f)
+                                    });
+                                }
+                            }
+                        }
+
+                        _recipeConfigs[kv.Key] = config;
                     }
                 }
             }
