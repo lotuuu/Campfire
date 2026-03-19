@@ -63,8 +63,13 @@ MonoBehaviour:
     volume: 1
     pitchMin: 0.95
     pitchMax: 1.05
-  - key: mallum_dispatch_quest
-    clip: {fileID: 8300000, guid: 5137e736845de4225a4a5679893cde26, type: 3}
+  - key: mallum_gear_up
+    clip: {fileID: 8300000, guid: 8b7712766463a48a59043073d3fa6972, type: 3}
+    volume: 1
+    pitchMin: 0.95
+    pitchMax: 1.05
+  - key: mallum_footsteps
+    clip: {fileID: 8300000, guid: d268b94e14cf448dca2ed4400dfe460e, type: 3}
     volume: 1
     pitchMin: 0.95
     pitchMax: 1.05

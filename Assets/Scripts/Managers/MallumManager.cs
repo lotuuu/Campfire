@@ -169,7 +169,8 @@ namespace Garden
 
             SaveManager.Instance.Save();
             OnMallumsChanged?.Invoke();
-            AudioManager.Instance?.PlaySFX("mallum_dispatch_quest");
+            AudioManager.Instance?.PlaySFX("mallum_gear_up");
+            AudioManager.Instance?.PlaySFXWithFadeOut("mallum_footsteps", 1.5f);
 
             // Notify server
             if (GameService.Instance != null && GameService.Instance.IsOnline)

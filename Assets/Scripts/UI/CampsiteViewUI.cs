@@ -996,7 +996,7 @@ namespace Garden
                             if (PlotManager.Instance.CraftPlot(gridX, gridY))
                             {
                                 pendingCraftAnimCoords = (gridX, gridY);
-                                CloseInteractionPanel();
+                                CloseInteractionPanel(silent: true);
                             }
                         }));
                 }
@@ -1023,7 +1023,7 @@ namespace Garden
                                 if (VaseManager.Instance.CraftVase(gridX, gridY))
                                 {
                                     pendingCraftAnimCoords = (gridX, gridY);
-                                    CloseInteractionPanel();
+                                    CloseInteractionPanel(silent: true);
                                 }
                             }));
                     }
@@ -1056,7 +1056,7 @@ namespace Garden
                             if (MallumManager.Instance.CraftMallumHouse(gridX, gridY))
                             {
                                 pendingCraftAnimCoords = (gridX, gridY);
-                                CloseInteractionPanel();
+                                CloseInteractionPanel(silent: true);
                             }
                         }));
                 }
@@ -1083,7 +1083,7 @@ namespace Garden
                                 if (GardenManager.Instance.CraftEmptyGarden(gridX, gridY))
                                 {
                                     pendingCraftAnimCoords = (gridX, gridY);
-                                    CloseInteractionPanel();
+                                    CloseInteractionPanel(silent: true);
                                 }
                             }));
                     }
@@ -1655,7 +1655,7 @@ namespace Garden
                     suppressRebuild = false;
                     pendingRebuild = false; // discard the suppressed rebuild
 
-                    CloseInteractionPanel();
+                    CloseInteractionPanel(silent: true);
                     int newLevel = FlameManager.Instance.Level;
 
                     // Callback: rebuild grid with new cells born hidden, then cascade
@@ -1766,7 +1766,7 @@ namespace Garden
                     BuildCardHelper.FromBuildingCost(plotCost), null,
                     canAfford, plotAllowed && canPlaceEntity, () =>
                     {
-                        CloseInteractionPanel();
+                        CloseInteractionPanel(silent: true);
                         EnterPlacementMode(CampBuildingType.Plot);
                     }));
             }
@@ -1788,7 +1788,7 @@ namespace Garden
                         BuildCardHelper.FromBuildingCost(vaseCost), null,
                         canAfford, vaseAllowed && canPlaceEntity, () =>
                         {
-                            CloseInteractionPanel();
+                            CloseInteractionPanel(silent: true);
                             EnterPlacementMode(CampBuildingType.Vase);
                         }));
                 }
@@ -1817,7 +1817,7 @@ namespace Garden
                         BuildCardHelper.FromBuildingCost(nextCost), null,
                         canAfford, houseAllowed && canPlaceEntity, () =>
                         {
-                            CloseInteractionPanel();
+                            CloseInteractionPanel(silent: true);
                             EnterPlacementMode(CampBuildingType.MallumHouse);
                         }));
                 }
@@ -1841,7 +1841,7 @@ namespace Garden
                             BuildCardHelper.FromBuildingCost(gardenCost), null,
                             canAfford, gardenAllowed && canPlaceEntity, () =>
                             {
-                                CloseInteractionPanel();
+                                CloseInteractionPanel(silent: true);
                                 EnterPlacementMode(CampBuildingType.Garden);
                             }));
                     }
@@ -1882,7 +1882,7 @@ namespace Garden
                     BuildCardHelper.FromBuildingCost(plotCost), null,
                     canAfford, plotAllowed && canPlaceEntity, () =>
                     {
-                        CloseInteractionPanel();
+                        CloseInteractionPanel(silent: true);
                         EnterPlacementMode(CampBuildingType.Plot);
                     },
                     null));
@@ -1905,7 +1905,7 @@ namespace Garden
                         BuildCardHelper.FromBuildingCost(vaseCost), null,
                         canAfford, vaseAllowed && canPlaceEntity, () =>
                         {
-                            CloseInteractionPanel();
+                            CloseInteractionPanel(silent: true);
                             EnterPlacementMode(CampBuildingType.Vase);
                         },
                         null));
@@ -1935,7 +1935,7 @@ namespace Garden
                         BuildCardHelper.FromBuildingCost(nextCost), null,
                         canAfford, houseAllowed && canPlaceEntity, () =>
                         {
-                            CloseInteractionPanel();
+                            CloseInteractionPanel(silent: true);
                             EnterPlacementMode(CampBuildingType.MallumHouse);
                         },
                         null));
@@ -1960,7 +1960,7 @@ namespace Garden
                             BuildCardHelper.FromBuildingCost(gardenCost), null,
                             canAfford, gardenAllowed && canPlaceEntity, () =>
                             {
-                                CloseInteractionPanel();
+                                CloseInteractionPanel(silent: true);
                                 EnterPlacementMode(CampBuildingType.Garden);
                             },
                             null));
@@ -2106,7 +2106,7 @@ namespace Garden
             bool success = await PlotManager.Instance.SpeedUpGrowth(plotIndex);
             if (!success)
             {
-                CloseInteractionPanel();
+                CloseInteractionPanel(silent: true);
                 return;
             }
 
@@ -2191,7 +2191,7 @@ namespace Garden
                 if (GameService.Instance != null)
                     await GameService.Instance.ResyncFullState();
                 RebuildGrid();
-                CloseInteractionPanel();
+                CloseInteractionPanel(silent: true);
             }
         }
 
@@ -2417,7 +2417,7 @@ namespace Garden
                 var card = new Button(() =>
                 {
                     PlotManager.Instance.Plant(plotIndex, capturedItemKey);
-                    CloseInteractionPanel();
+                    CloseInteractionPanel(silent: true);
                 });
                 card.AddToClassList("seed-card");
 
@@ -2562,7 +2562,7 @@ namespace Garden
                 {
                     if (GardenManager.Instance.Plant(gardenIndex, pName))
                     {
-                        CloseInteractionPanel();
+                        CloseInteractionPanel(silent: true);
                         RebuildGrid();
                     }
                 });
@@ -3236,7 +3236,7 @@ namespace Garden
                 var removeBtn = new Button(() =>
                 {
                     SkinManager.Instance.RemoveSkin(type, index);
-                    CloseInteractionPanel();
+                    CloseInteractionPanel(silent: true);
                     RebuildGrid();
                 })
                 { text = Loc.Get("ui.button.remove_skin", "Remove Skin") };
@@ -3266,7 +3266,7 @@ namespace Garden
                 {
                     if (SkinManager.Instance.ApplySkin(type, index, skin))
                     {
-                        CloseInteractionPanel();
+                        CloseInteractionPanel(silent: true);
                         RebuildGrid();
                     }
                 })
@@ -3303,7 +3303,7 @@ namespace Garden
                 {
                     if (SkinManager.Instance.ApplySkin(type, index, skin))
                     {
-                        CloseInteractionPanel();
+                        CloseInteractionPanel(silent: true);
                         RebuildGrid();
                     }
                 })
@@ -3352,7 +3352,7 @@ namespace Garden
                 int rewardCount = bird.itemCount;
 
                 var collected = await BirdManager.Instance.CollectBirdFromServer(index);
-                CloseInteractionPanel();
+                CloseInteractionPanel(silent: true);
 
                 if (collected != null)
                     CampFireUI.Instance?.ShowToast($"+{rewardCount}x {rewardName}");
@@ -3378,9 +3378,9 @@ namespace Garden
         public bool IsInteractionPanelOpen =>
             interactionBackdrop != null && interactionBackdrop.style.display == DisplayStyle.Flex;
 
-        private void CloseInteractionPanel()
+        private void CloseInteractionPanel(bool silent = false)
         {
-            AudioManager.Instance?.PlaySFX("ui_panel_close");
+            if (!silent) AudioManager.Instance?.PlaySFX("ui_panel_close");
             if (interactionBackdrop != null)
                 interactionBackdrop.style.display = DisplayStyle.None;
             if (interactionPanel != null)

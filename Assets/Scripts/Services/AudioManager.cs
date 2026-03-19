@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
@@ -79,6 +80,35 @@ namespace Garden
 
             source.pitch = Random.Range(entry.pitchMin, entry.pitchMax);
             source.PlayOneShot(entry.clip, entry.volume);
+        }
+
+        public void PlaySFXWithFadeOut(string key, float fadeDuration)
+        {
+            if (_lookup == null || !_lookup.TryGetValue(key, out var entry)) return;
+            if (entry.clip == null) return;
+
+            var source = _sfxSources[_sfxIndex];
+            _sfxIndex = (_sfxIndex + 1) % SfxPoolSize;
+
+            source.Stop();
+            source.clip = entry.clip;
+            source.volume = entry.volume;
+            source.pitch = Random.Range(entry.pitchMin, entry.pitchMax);
+            source.Play();
+            StartCoroutine(FadeOutSource(source, entry.volume, fadeDuration));
+        }
+
+        private IEnumerator FadeOutSource(AudioSource source, float startVolume, float duration)
+        {
+            float elapsed = 0f;
+            while (elapsed < duration && source.isPlaying)
+            {
+                elapsed += Time.deltaTime;
+                source.volume = Mathf.Lerp(startVolume, 0f, elapsed / duration);
+                yield return null;
+            }
+            source.Stop();
+            source.clip = null;
         }
 
         public void PlayMusic()

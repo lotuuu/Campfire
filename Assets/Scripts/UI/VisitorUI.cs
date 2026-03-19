@@ -70,7 +70,7 @@ namespace Garden
             acceptQuestBtn?.RegisterCallback<ClickEvent>(_ => OnAcceptQuest());
             turninQuestBtn?.RegisterCallback<ClickEvent>(_ => OnTurninQuest());
 
-            HideModal();
+            if (modal != null) modal.style.display = DisplayStyle.None;
         }
 
         public void ShowModal()
