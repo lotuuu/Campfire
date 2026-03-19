@@ -34,6 +34,7 @@ namespace Garden
         private Button tabInventory;
         private Button tabCraft;
         private int expandedIndex = -1;
+        private string expandedItemKey;
         private int expandedRecipeIndex = -1;
 
         // Card element pools — reused across refreshes to avoid DOM churn
@@ -254,8 +255,11 @@ namespace Garden
 
         private VisualElement BuildItemCard(InventoryItem entry)
         {
+            bool isExpanded = expandedItemKey == entry.itemKey;
+
             var card = new VisualElement();
             card.AddToClassList("seed-card");
+            if (isExpanded) card.AddToClassList("seed-card--expanded");
 
             var header = new VisualElement();
             header.AddToClassList("seed-card-header");
@@ -278,6 +282,15 @@ namespace Garden
             header.Add(info);
 
             card.Add(header);
+
+            string key = entry.itemKey;
+            RegisterTapInScrollView(header, () =>
+            {
+                expandedItemKey = expandedItemKey == key ? null : key;
+                expandedIndex = -1;
+                RefreshSeeds();
+            });
+
             return card;
         }
 
@@ -359,6 +372,7 @@ namespace Garden
             RegisterTapInScrollView(header, () =>
             {
                 expandedIndex = expandedIndex == idx ? -1 : idx;
+                expandedItemKey = null;
                 RefreshSeeds();
             });
 
