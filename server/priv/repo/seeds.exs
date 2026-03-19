@@ -936,73 +936,85 @@ game_configs = [
         "ingredients" => [%{"itemKey" => item_key!.("basil"), "count" => 3}],
         "result_item" => item_key!.("basil_pigment"),
         "result_quantity" => 1,
-        "category" => "Pigment"
+        "category" => "Pigment",
+        "description_key" => "recipe.basil_pigment.desc"
       },
       "chamomile_pigment" => %{
         "ingredients" => [%{"itemKey" => item_key!.("chamomile"), "count" => 3}],
         "result_item" => item_key!.("chamomile_pigment"),
         "result_quantity" => 1,
-        "category" => "Pigment"
+        "category" => "Pigment",
+        "description_key" => "recipe.chamomile_pigment.desc"
       },
       "dahlia_pigment" => %{
         "ingredients" => [%{"itemKey" => item_key!.("dahlia"), "count" => 3}],
         "result_item" => item_key!.("dahlia_pigment"),
         "result_quantity" => 1,
-        "category" => "Pigment"
+        "category" => "Pigment",
+        "description_key" => "recipe.dahlia_pigment.desc"
       },
       "jasmine_pigment" => %{
         "ingredients" => [%{"itemKey" => item_key!.("jasmine"), "count" => 3}],
         "result_item" => item_key!.("jasmine_pigment"),
         "result_quantity" => 1,
-        "category" => "Pigment"
+        "category" => "Pigment",
+        "description_key" => "recipe.jasmine_pigment.desc"
       },
       "lavender_pigment" => %{
         "ingredients" => [%{"itemKey" => item_key!.("lavender"), "count" => 3}],
         "result_item" => item_key!.("lavender_pigment"),
         "result_quantity" => 1,
-        "category" => "Pigment"
+        "category" => "Pigment",
+        "description_key" => "recipe.lavender_pigment.desc"
       },
       "marigold_pigment" => %{
         "ingredients" => [%{"itemKey" => item_key!.("marigold"), "count" => 3}],
         "result_item" => item_key!.("marigold_pigment"),
         "result_quantity" => 1,
-        "category" => "Pigment"
+        "category" => "Pigment",
+        "description_key" => "recipe.marigold_pigment.desc"
       },
       "mint_pigment" => %{
         "ingredients" => [%{"itemKey" => item_key!.("mint"), "count" => 3}],
         "result_item" => item_key!.("mint_pigment"),
         "result_quantity" => 1,
-        "category" => "Pigment"
+        "category" => "Pigment",
+        "description_key" => "recipe.mint_pigment.desc"
       },
       "moonflower_pigment" => %{
         "ingredients" => [%{"itemKey" => item_key!.("moonflower"), "count" => 3}],
         "result_item" => item_key!.("moonflower_pigment"),
         "result_quantity" => 1,
-        "category" => "Pigment"
+        "category" => "Pigment",
+        "description_key" => "recipe.moonflower_pigment.desc"
       },
       "pansy_pigment" => %{
         "ingredients" => [%{"itemKey" => item_key!.("pansy"), "count" => 3}],
         "result_item" => item_key!.("pansy_pigment"),
         "result_quantity" => 1,
-        "category" => "Pigment"
+        "category" => "Pigment",
+        "description_key" => "recipe.pansy_pigment.desc"
       },
       "poppy_pigment" => %{
         "ingredients" => [%{"itemKey" => item_key!.("poppy"), "count" => 3}],
         "result_item" => item_key!.("poppy_pigment"),
         "result_quantity" => 1,
-        "category" => "Pigment"
+        "category" => "Pigment",
+        "description_key" => "recipe.poppy_pigment.desc"
       },
       "rosemary_pigment" => %{
         "ingredients" => [%{"itemKey" => item_key!.("rosemary"), "count" => 3}],
         "result_item" => item_key!.("rosemary_pigment"),
         "result_quantity" => 1,
-        "category" => "Pigment"
+        "category" => "Pigment",
+        "description_key" => "recipe.rosemary_pigment.desc"
       },
       "snowdrop_pigment" => %{
         "ingredients" => [%{"itemKey" => item_key!.("snowdrop"), "count" => 3}],
         "result_item" => item_key!.("snowdrop_pigment"),
         "result_quantity" => 1,
-        "category" => "Pigment"
+        "category" => "Pigment",
+        "description_key" => "recipe.snowdrop_pigment.desc"
       },
       "speed_potion" => %{
         "ingredients" => [
@@ -1011,7 +1023,8 @@ game_configs = [
         ],
         "result_item" => item_key!.("speed_potion"),
         "result_quantity" => 1,
-        "category" => "Consumable"
+        "category" => "Consumable",
+        "description_key" => "recipe.speed_potion.desc"
       },
       "fertilizer" => %{
         "ingredients" => [
@@ -1020,7 +1033,8 @@ game_configs = [
         ],
         "result_item" => item_key!.("fertilizer"),
         "result_quantity" => 1,
-        "category" => "Consumable"
+        "category" => "Consumable",
+        "description_key" => "recipe.fertilizer.desc"
       }
     }
   },

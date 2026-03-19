@@ -160,6 +160,13 @@ en = [
   {"ui.label.weather_match", "Weather Match!"},
   {"ui.label.yield_preview", "{0} x{1}-{2}"},
   {"ui.label.yields", "Yields {0} x{1}"},
+  # Format strings
+  {"ui.label.lv", "Lv {0}"},
+  {"ui.label.item_count", "{0}x {1}"},
+  {"ui.quest.mallum_status", "{0} Idle / {1} Total"},
+  {"ui.quest.mallum_on_task", "({0} on task)"},
+  {"ui.visitor.merchant_cost", "{0}x {1} ({2})"},
+  {"ui.visitor.request_have", "{0}x {1} (you have {2})"},
   # Letters / Social
   {"ui.letters.add", "Add"},
   {"ui.letters.code_loading", "Your code: loading..."},
@@ -168,6 +175,7 @@ en = [
   {"ui.letters.connect_error", "Could not connect to server"},
   {"ui.letters.copied", "Copied to clipboard!"},
   {"ui.letters.enter_code", "Enter a friend code"},
+  {"ui.letters.from", "From {0}"},
   {"ui.letters.friends", "Friends"},
   {"ui.letters.inbox", "Inbox"},
   {"ui.letters.name_failed", "Failed to save name"},
@@ -178,8 +186,10 @@ en = [
   {"ui.letters.not_signed_in", "Not signed in"},
   {"ui.letters.request_sent", "Request sent!"},
   {"ui.letters.saving", "Saving..."},
+  {"ui.letters.selected", "Selected: {0}"},
   {"ui.letters.selected_none", "Selected: none"},
   {"ui.letters.sending", "Sending..."},
+  {"ui.letters.to", "To: {0}"},
   {"ui.letters.wants_friends", "{0} wants to be friends"},
   {"ui.letters.your_code", "Your code: {0}"},
   # Loading
@@ -286,6 +296,23 @@ en = [
   {"notif.water_fetch.body", "Your Mallum has finished fetching water for your vase!"},
   {"notif.garden_yield.title", "Your {0} has fruit!"},
   {"notif.garden_yield.body", "Your {0} garden has produced a harvest - come collect it!"},
+  # Recipe descriptions
+  {"recipe.basil_pigment.desc", "A rich green dye extracted from fresh basil leaves. Use it to paint your camp buildings."},
+  {"recipe.chamomile_pigment.desc", "A soft golden pigment distilled from chamomile flowers. Perfect for warm, sunny decorations."},
+  {"recipe.dahlia_pigment.desc", "A deep magenta dye pressed from dahlia petals. Adds a bold splash of color."},
+  {"recipe.jasmine_pigment.desc", "A delicate white pigment made from jasmine blooms. Gives a clean, elegant finish."},
+  {"recipe.lavender_pigment.desc", "A calming purple dye brewed from lavender sprigs. Brings a peaceful touch to your camp."},
+  {"recipe.marigold_pigment.desc", "A bright orange pigment ground from marigold petals. Warm and cheerful."},
+  {"recipe.mint_pigment.desc", "A cool teal dye infused from fresh mint. Crisp and refreshing."},
+  {"recipe.moonflower_pigment.desc", "A rare silvery pigment harvested under moonlight. Shimmers with an ethereal glow."},
+  {"recipe.pansy_pigment.desc", "A vibrant violet dye from pansy petals. Bold and expressive."},
+  {"recipe.poppy_pigment.desc", "A vivid red pigment pressed from wild poppies. Fiery and eye-catching."},
+  {"recipe.rosemary_pigment.desc", "A muted sage-green dye steeped from rosemary. Earthy and grounding."},
+  {"recipe.snowdrop_pigment.desc", "A pale frost-white pigment from snowdrop flowers. Delicate as fresh snow."},
+  {"recipe.speed_potion.desc", "A zippy tonic brewed from mint and chamomile. Speeds up plant growth for a short time."},
+  {"recipe.fertilizer.desc", "A hearty mix of berries and acorns. Apply to a plot to boost your next harvest."},
+  # New UI key for craft tab
+  {"ui.apotheke.ingredients", "Ingredients"},
 ]
 
 # ── Spanish ──
@@ -444,6 +471,13 @@ es = [
   {"ui.label.weather_match", "Clima Ideal!"},
   {"ui.label.yield_preview", "{0} x{1}-{2}"},
   {"ui.label.yields", "Produce {0} x{1}"},
+  # Format strings
+  {"ui.label.lv", "Nv {0}"},
+  {"ui.label.item_count", "{0}x {1}"},
+  {"ui.quest.mallum_status", "{0} Libres / {1} Total"},
+  {"ui.quest.mallum_on_task", "({0} en tarea)"},
+  {"ui.visitor.merchant_cost", "{0}x {1} ({2})"},
+  {"ui.visitor.request_have", "{0}x {1} (tienes {2})"},
   # Letters / Social
   {"ui.letters.add", "Agregar"},
   {"ui.letters.code_loading", "Tu codigo: cargando..."},
@@ -452,6 +486,7 @@ es = [
   {"ui.letters.connect_error", "No se pudo conectar al servidor"},
   {"ui.letters.copied", "Copiado al portapapeles!"},
   {"ui.letters.enter_code", "Ingresa un codigo de amigo"},
+  {"ui.letters.from", "De {0}"},
   {"ui.letters.friends", "Amigos"},
   {"ui.letters.inbox", "Buzon"},
   {"ui.letters.name_failed", "Error al guardar el nombre"},
@@ -462,8 +497,10 @@ es = [
   {"ui.letters.not_signed_in", "Sin sesion iniciada"},
   {"ui.letters.request_sent", "Solicitud enviada!"},
   {"ui.letters.saving", "Guardando..."},
+  {"ui.letters.selected", "Seleccionado: {0}"},
   {"ui.letters.selected_none", "Seleccionado: ninguno"},
   {"ui.letters.sending", "Enviando..."},
+  {"ui.letters.to", "Para: {0}"},
   {"ui.letters.wants_friends", "{0} quiere ser tu amigo"},
   {"ui.letters.your_code", "Tu codigo: {0}"},
   # Loading
@@ -570,6 +607,23 @@ es = [
   {"notif.water_fetch.body", "Tu Mallum termino de buscar agua para tu vasija!"},
   {"notif.garden_yield.title", "Tu {0} tiene fruta!"},
   {"notif.garden_yield.body", "Tu jardin de {0} produjo una cosecha - ven a recogerla!"},
+  # Recipe descriptions
+  {"recipe.basil_pigment.desc", "Un rico tinte verde extraido de hojas frescas de albahaca. Usalo para pintar los edificios de tu campamento."},
+  {"recipe.chamomile_pigment.desc", "Un suave pigmento dorado destilado de flores de manzanilla. Perfecto para decoraciones calidas."},
+  {"recipe.dahlia_pigment.desc", "Un profundo tinte magenta prensado de petalos de dalia. Un toque audaz de color."},
+  {"recipe.jasmine_pigment.desc", "Un delicado pigmento blanco hecho de flores de jazmin. Un acabado limpio y elegante."},
+  {"recipe.lavender_pigment.desc", "Un tinte purpura calmante preparado con ramitas de lavanda. Un toque de paz para tu campamento."},
+  {"recipe.marigold_pigment.desc", "Un pigmento naranja brillante molido de petalos de calendula. Calido y alegre."},
+  {"recipe.mint_pigment.desc", "Un tinte verde azulado infusionado con menta fresca. Fresco y revitalizante."},
+  {"recipe.moonflower_pigment.desc", "Un raro pigmento plateado cosechado bajo la luz de la luna. Brilla con un resplandor etereo."},
+  {"recipe.pansy_pigment.desc", "Un vibrante tinte violeta de petalos de pensamiento. Audaz y expresivo."},
+  {"recipe.poppy_pigment.desc", "Un vivido pigmento rojo prensado de amapolas silvestres. Ardiente y llamativo."},
+  {"recipe.rosemary_pigment.desc", "Un tinte verde salvia suave macerado con romero. Terroso y reconfortante."},
+  {"recipe.snowdrop_pigment.desc", "Un palido pigmento blanco helado de flores de campanilla. Delicado como nieve fresca."},
+  {"recipe.speed_potion.desc", "Un tonico rapido preparado con menta y manzanilla. Acelera el crecimiento de las plantas."},
+  {"recipe.fertilizer.desc", "Una mezcla abundante de bayas y bellotas. Aplica a una parcela para mejorar tu proxima cosecha."},
+  # New UI key
+  {"ui.apotheke.ingredients", "Ingredientes"},
 ]
 
 # ── Seed all locales ──
