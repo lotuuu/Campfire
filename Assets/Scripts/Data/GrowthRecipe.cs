@@ -238,7 +238,7 @@ namespace Garden
             sumTemp += weather.temperature;
             sumWind += weather.windSpeed;
             sumHumidity += weather.humidity;
-            sumSunlight += 100f - weather.cloudCover;
+            sumSunlight += weather.isNight ? 0f : (100f - weather.cloudCover);
             if (weather.condition == WeatherCondition.Rain || weather.condition == WeatherCondition.Storm)
                 rainSnapshots++;
             if (moonPhaseSnapshots == null || moonPhaseSnapshots.Length < 8)

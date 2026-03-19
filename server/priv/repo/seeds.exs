@@ -7,7 +7,12 @@ alias CampFire.Visitors.{VisitorTemplate, VisitorSchedule}
 alias CampFire.Game.Item
 
 plants =
-  ~w(sprouts cress basil chamomile marigold snowdrop mint lavender pansy poppy jasmine rosemary dahlia moonflower)
+  ~w(sprouts cress evening_primrose basil chamomile marigold snowdrop mint lavender pansy poppy jasmine rosemary dahlia moonflower)
+
+# Title-case helper: "evening_primrose" -> "Evening Primrose"
+title_case = fn key ->
+  key |> String.split("_") |> Enum.map(&String.capitalize/1) |> Enum.join(" ")
+end
 
 # Seeds
 # Harvests
@@ -17,10 +22,10 @@ plants =
 # Potions, materials, consumables
 items =
   Enum.map(plants, fn p ->
-    %{item_key: "#{p}_seed", display_name: "#{String.capitalize(p)} Seed", category: "seed"}
+    %{item_key: "#{p}_seed", display_name: "#{title_case.(p)} Seed", category: "seed"}
   end) ++
     Enum.map(plants, fn p ->
-      %{item_key: p, display_name: String.capitalize(p), category: "harvest"}
+      %{item_key: p, display_name: title_case.(p), category: "harvest"}
     end) ++
     [
       %{item_key: "berrybush_seed", display_name: "BerryBush Seed", category: "garden_seed"},
@@ -34,7 +39,7 @@ items =
      |> Enum.map(fn p ->
        %{
          item_key: "#{p}_pigment",
-         display_name: "#{String.capitalize(p)} Pigment",
+         display_name: "#{title_case.(p)} Pigment",
          category: "pigment"
        }
      end)) ++
@@ -321,6 +326,19 @@ seed_configs = [
     }
   },
   %{
+    item_id: item_id!.("evening_primrose_seed"),
+    harvest_item_id: item_id!.("evening_primrose"),
+    growth_duration_hours: 0.25,
+    min_drops: 1,
+    max_drops: 4,
+    tier: 1,
+    recipe: %{
+      "sunlight" => RecipeHelper.axis(0, 15, 0, 1),
+      "humidity" => RecipeHelper.axis(50, 80, 0, 0.8),
+      "waterings" => RecipeHelper.axis(1, 1, 0, 0.5)
+    }
+  },
+  %{
     item_id: item_id!.("basil_seed"),
     harvest_item_id: item_id!.("basil"),
     growth_duration_hours: 1.0,
@@ -524,6 +542,7 @@ quests = [
     reward_pool: [
       %{"itemKey" => "cress_seed", "weight" => 4, "minCount" => 1, "maxCount" => 2},
       %{"itemKey" => "basil_seed", "weight" => 3, "minCount" => 1, "maxCount" => 2},
+      %{"itemKey" => "evening_primrose_seed", "weight" => 3, "minCount" => 1, "maxCount" => 2},
       %{"itemKey" => "chamomile_seed", "weight" => 2, "minCount" => 1, "maxCount" => 2}
     ]
   },
@@ -675,7 +694,12 @@ game_configs = [
             %{"itemKey" => item_key!.("cress"), "count" => 5}
           ]
         },
-        %{"ingredients" => [%{"itemKey" => item_key!.("basil"), "count" => 5}]},
+        %{
+          "ingredients" => [
+            %{"itemKey" => item_key!.("basil"), "count" => 5},
+            %{"itemKey" => item_key!.("evening_primrose"), "count" => 3}
+          ]
+        },
         %{"ingredients" => [%{"itemKey" => item_key!.("chamomile"), "count" => 5}]},
         %{
           "ingredients" => [
@@ -946,6 +970,13 @@ game_configs = [
         "category" => "Pigment",
         "description_key" => "recipe.chamomile_pigment.desc"
       },
+      "evening_primrose_pigment" => %{
+        "ingredients" => [%{"itemKey" => item_key!.("evening_primrose"), "count" => 3}],
+        "result_item" => item_key!.("evening_primrose_pigment"),
+        "result_quantity" => 1,
+        "category" => "Pigment",
+        "description_key" => "recipe.evening_primrose_pigment.desc"
+      },
       "dahlia_pigment" => %{
         "ingredients" => [%{"itemKey" => item_key!.("dahlia"), "count" => 3}],
         "result_item" => item_key!.("dahlia_pigment"),
@@ -1042,7 +1073,7 @@ game_configs = [
     key: "skin_configs",
     value:
       Enum.reduce(
-        ~w(basil chamomile dahlia jasmine lavender marigold mint moonflower pansy poppy rosemary snowdrop),
+        ~w(basil chamomile dahlia evening_primrose jasmine lavender marigold mint moonflower pansy poppy rosemary snowdrop),
         %{},
         fn plant, acc ->
           pigment = "#{plant}_pigment"
