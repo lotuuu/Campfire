@@ -379,12 +379,13 @@ namespace Garden
                         actionBtn.text = drinkCount > 0 ? string.Format(Loc.Get("ui.button.speed_up", "Speed Up ({0})"), drinkCount) : Loc.Get("ui.button.speed_up_plain", "Speed Up");
                         actionBtn.AddToClassList("quest-speedup-btn");
                         actionBtn.SetEnabled(drinkCount > 0);
+                        var capturedQuestName = questData?.questName ?? mallum.assignedQuestName;
                         actionBtn.clickable = new Clickable(() =>
                         {
                             var rewards = MallumManager.Instance.SpeedUpAndCollectQuest(capturedIndex);
                             if (rewards == null || rewards.Count == 0) return;
-                            FindFirstObjectByType<CampFireUI>()?.CloseOverlay();
-                            RewardRevealUI.Instance?.Show(Loc.Get("ui.quest.quest_complete", "Quest Complete!"), rewards, () =>
+                            FindFirstObjectByType<CampFireUI>()?.CloseOverlay(silent: true);
+                            RewardRevealUI.Instance?.Show(Loc.Get("ui.quest.quest_complete", "Quest Complete!"), capturedQuestName, rewards, () =>
                             {
                                 Refresh();
                             });
@@ -415,11 +416,12 @@ namespace Garden
 
                         actionBtn.text = Loc.Get("ui.quest.collect_rewards", "Collect Rewards");
                         actionBtn.AddToClassList("quest-collect-btn");
+                        var capturedQuestName2 = completeQuest?.questName ?? mallum.assignedQuestName;
                         actionBtn.clickable = new Clickable(() =>
                         {
                             var rewards = new List<RewardEntry>(mallum.pendingRewards);
-                            FindFirstObjectByType<CampFireUI>()?.CloseOverlay();
-                            RewardRevealUI.Instance?.Show(Loc.Get("ui.quest.quest_complete", "Quest Complete!"), rewards, () =>
+                            FindFirstObjectByType<CampFireUI>()?.CloseOverlay(silent: true);
+                            RewardRevealUI.Instance?.Show(Loc.Get("ui.quest.quest_complete", "Quest Complete!"), capturedQuestName2, rewards, () =>
                             {
                                 MallumManager.Instance.CollectQuestRewards(capturedIndex);
                                 Refresh();

@@ -6,48 +6,90 @@
     top: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.85);
+    background-color: rgba(12, 8, 4, 0.94);
     align-items: center;
     justify-content: center;
     display: none;
     opacity: 0;
     transition-property: opacity;
-    transition-duration: 200ms;
+    transition-duration: 250ms;
 }
 
 #reward-reveal-overlay.reward-reveal--visible {
     opacity: 1;
 }
 
+/* --- Title group with decorative rules --- */
+
+#reward-reveal-title-group {
+    flex-direction: row;
+    align-items: center;
+    align-self: stretch;
+    margin-left: 40px;
+    margin-right: 40px;
+    margin-bottom: var(--spacing-sm);
+}
+
+.reward-reveal-rule {
+    flex-grow: 1;
+    height: 4px;
+    border-radius: 2px;
+}
+
+#reward-reveal-rule-left {
+    background-color: rgba(255, 195, 60, 0.5);
+    margin-right: var(--spacing-lg);
+}
+
+#reward-reveal-rule-right {
+    background-color: rgba(255, 195, 60, 0.5);
+    margin-left: var(--spacing-lg);
+}
+
 #reward-reveal-title {
-    font-size: var(--font-xl);
+    font-size: var(--font-xxl);
     color: var(--color-text-accent);
     -unity-font-style: bold;
     -unity-text-align: middle-center;
+}
+
+/* --- Quest name subtitle --- */
+
+#reward-reveal-subtitle {
+    font-size: var(--font-sm);
+    color: var(--color-text-dim);
+    -unity-text-align: middle-center;
+    letter-spacing: 4px;
     margin-bottom: var(--spacing-xl);
 }
+
+/* --- Reward cards container --- */
 
 #reward-reveal-cards {
     flex-direction: row;
     justify-content: center;
     align-items: center;
     flex-wrap: wrap;
-    padding: 0 var(--spacing-lg);
+    padding: 0 var(--spacing-md);
 }
 
+/* --- Individual reward card --- */
+
 .reward-card {
-    width: 150px;
-    height: 200px;
+    width: 260px;
+    height: 340px;
     margin: var(--spacing-sm);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-lg);
     background-color: rgba(20, 14, 8, 0.95);
     align-items: center;
     justify-content: center;
-    border-width: 2px;
+    border-width: 3px;
     border-color: rgba(255, 230, 170, 0.8);
     scale: 0;
-    transition-property: scale;
-    transition-duration: 300ms;
+    opacity: 1;
+    translate: 0 0;
+    transition-property: scale, translate, opacity;
+    transition-duration: 350ms;
     transition-timing-function: ease-out;
 }
 
@@ -62,19 +104,21 @@
 .reward-card--tier3 { border-color: rgba(170, 100, 220, 0.8); }
 .reward-card--tier4 { border-color: rgba(255, 200, 60, 0.9); }
 
+/* --- Glow ring behind card --- */
+
 .reward-card-glow {
     position: absolute;
-    left: -10px;
-    top: -10px;
-    right: -10px;
-    bottom: -10px;
-    border-radius: var(--radius-lg);
-    border-width: 2px;
-    border-color: rgba(255, 230, 170, 0.4);
-    scale: 1.2;
+    left: -14px;
+    top: -14px;
+    right: -14px;
+    bottom: -14px;
+    border-radius: 38px;
+    border-width: 4px;
+    border-color: rgba(255, 230, 170, 0.35);
+    scale: 1.15;
     opacity: 0;
     transition-property: scale, opacity;
-    transition-duration: 400ms;
+    transition-duration: 450ms;
     transition-timing-function: ease-out;
 }
 
@@ -84,51 +128,110 @@
 }
 
 /* Tier glow colors */
-.reward-card--tier0 > .reward-card-glow { border-color: rgba(255, 230, 170, 0.4); }
-.reward-card--tier1 > .reward-card-glow { border-color: rgba(80, 190, 100, 0.4); }
-.reward-card--tier2 > .reward-card-glow { border-color: rgba(80, 150, 220, 0.4); }
-.reward-card--tier3 > .reward-card-glow { border-color: rgba(170, 100, 220, 0.4); }
-.reward-card--tier4 > .reward-card-glow { border-color: rgba(255, 200, 60, 0.5); }
+.reward-card--tier0 > .reward-card-glow { border-color: rgba(255, 230, 170, 0.35); }
+.reward-card--tier1 > .reward-card-glow { border-color: rgba(80, 190, 100, 0.35); }
+.reward-card--tier2 > .reward-card-glow { border-color: rgba(80, 150, 220, 0.35); }
+.reward-card--tier3 > .reward-card-glow { border-color: rgba(170, 100, 220, 0.35); }
+.reward-card--tier4 > .reward-card-glow { border-color: rgba(255, 200, 60, 0.45); }
+
+/* --- Inner glow overlay --- */
+
+.reward-card-inner-glow {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: var(--radius-lg);
+    border-width: 2px;
+    opacity: 0;
+    transition-property: opacity;
+    transition-duration: 450ms;
+}
+
+.reward-card--visible > .reward-card-inner-glow {
+    opacity: 1;
+}
+
+.reward-card--tier0 > .reward-card-inner-glow { border-color: rgba(255, 230, 170, 0.15); }
+.reward-card--tier1 > .reward-card-inner-glow { border-color: rgba(80, 190, 100, 0.2); }
+.reward-card--tier2 > .reward-card-inner-glow { border-color: rgba(80, 150, 220, 0.2); }
+.reward-card--tier3 > .reward-card-inner-glow { border-color: rgba(170, 100, 220, 0.2); }
+.reward-card--tier4 > .reward-card-inner-glow { border-color: rgba(255, 200, 60, 0.25); }
+
+/* --- Item sprite --- */
 
 .reward-card-sprite {
-    width: 80px;
-    height: 80px;
+    width: 140px;
+    height: 140px;
     -unity-background-scale-mode: scale-to-fit;
-    margin-bottom: var(--spacing-xs);
+    margin-bottom: var(--spacing-sm);
 }
+
+/* --- Item name --- */
 
 .reward-card-name {
-    font-size: var(--font-sm);
+    font-size: var(--font-lg);
     color: var(--color-text);
+    -unity-font-style: bold;
     -unity-text-align: middle-center;
     white-space: normal;
+    padding-left: var(--spacing-sm);
+    padding-right: var(--spacing-sm);
 }
 
+/* --- Count badge --- */
+
 .reward-card-count {
-    position: absolute;
-    top: 6px;
-    right: 8px;
-    font-size: var(--font-sm);
-    color: var(--color-text-bright);
+    font-size: var(--font-md);
     -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    margin-top: var(--spacing-xs);
 }
+
+.reward-card--tier0 > .reward-card-count { color: rgba(255, 230, 170, 0.9); }
+.reward-card--tier1 > .reward-card-count { color: rgba(80, 190, 100, 0.9); }
+.reward-card--tier2 > .reward-card-count { color: rgba(80, 150, 220, 0.9); }
+.reward-card--tier3 > .reward-card-count { color: rgba(80, 150, 220, 0.9); }
+.reward-card--tier4 > .reward-card-count { color: rgba(255, 200, 60, 0.9); }
+
+/* --- Collect button --- */
 
 #reward-reveal-collect {
     margin-top: var(--spacing-xl);
-    padding: var(--spacing-sm) var(--spacing-xl);
-    background-color: var(--color-button-bg);
+    padding: var(--spacing-md) var(--spacing-xl);
+    min-width: 400px;
+    height: 100px;
+    background-color: rgb(120, 88, 24);
     border-radius: var(--radius-md);
-    border-width: 2px;
+    border-width: 3px;
     border-color: var(--color-border-accent);
-    font-size: var(--font-md);
-    color: var(--color-text-accent);
+    font-size: var(--font-lg);
+    color: var(--color-text-bright);
     -unity-font-style: bold;
+    -unity-text-align: middle-center;
 }
 
 #reward-reveal-collect:hover {
-    background-color: var(--color-button-bg-hover);
+    background-color: rgb(140, 102, 30);
 }
 
 #reward-reveal-collect:active {
-    background-color: var(--color-button-bg-active);
+    background-color: rgb(100, 74, 20);
+}
+
+/* --- Fly-out animation --- */
+
+.reward-card.reward-card--flying {
+    scale: 0.15;
+    opacity: 0;
+    /* translate is set per-card via inline style in C# */
+}
+
+/* Fade title group and button during fly-out */
+#reward-reveal-title-group,
+#reward-reveal-subtitle,
+#reward-reveal-collect {
+    transition-property: opacity;
+    transition-duration: 250ms;
 }

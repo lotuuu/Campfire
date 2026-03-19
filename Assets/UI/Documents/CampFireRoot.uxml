@@ -393,9 +393,14 @@
 
         <!-- Reward reveal overlay -->
         <ui:VisualElement name="reward-reveal-overlay" style="display: none;">
-            <ui:Label name="reward-reveal-title" text="" />
+            <ui:VisualElement name="reward-reveal-title-group">
+                <ui:VisualElement name="reward-reveal-rule-left" class="reward-reveal-rule" />
+                <ui:Label name="reward-reveal-title" text="" />
+                <ui:VisualElement name="reward-reveal-rule-right" class="reward-reveal-rule" />
+            </ui:VisualElement>
+            <ui:Label name="reward-reveal-subtitle" text="" />
             <ui:VisualElement name="reward-reveal-cards" />
-            <ui:Button name="reward-reveal-collect" text="Collect" />
+            <ui:Button name="reward-reveal-collect" text="Collect All" />
         </ui:VisualElement>
 
         <!-- Toast notification -->

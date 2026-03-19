@@ -10,8 +10,11 @@ namespace Garden
     {
         public static RewardRevealUI Instance { get; private set; }
 
+        private VisualElement root;
         private VisualElement overlay;
+        private VisualElement titleGroup;
         private Label titleLabel;
+        private Label subtitleLabel;
         private VisualElement cardsContainer;
         private Button collectBtn;
 
@@ -23,10 +26,13 @@ namespace Garden
             Instance = this;
         }
 
-        public void Initialize(VisualElement root)
+        public void Initialize(VisualElement rootElement)
         {
+            root = rootElement;
             overlay = root.Q("reward-reveal-overlay");
+            titleGroup = root.Q("reward-reveal-title-group");
             titleLabel = root.Q<Label>("reward-reveal-title");
+            subtitleLabel = root.Q<Label>("reward-reveal-subtitle");
             cardsContainer = root.Q("reward-reveal-cards");
             collectBtn = root.Q<Button>("reward-reveal-collect");
 
@@ -40,7 +46,7 @@ namespace Garden
             overlay?.RegisterCallback<ClickEvent>(evt => evt.StopPropagation());
         }
 
-        public void Show(string title, List<RewardEntry> rewards, Action onCollectCallback)
+        public void Show(string title, string subtitle, List<RewardEntry> rewards, Action onCollectCallback)
         {
             if (overlay == null || rewards == null || rewards.Count == 0)
             {
@@ -50,6 +56,14 @@ namespace Garden
 
             onCollect = onCollectCallback;
             titleLabel.text = title;
+
+            if (subtitleLabel != null)
+            {
+                bool hasSubtitle = !string.IsNullOrEmpty(subtitle);
+                subtitleLabel.text = hasSubtitle ? subtitle.ToUpper() : "";
+                subtitleLabel.style.display = hasSubtitle ? DisplayStyle.Flex : DisplayStyle.None;
+            }
+
             cardsContainer.Clear();
 
             overlay.style.display = DisplayStyle.Flex;
@@ -61,17 +75,93 @@ namespace Garden
             StartCoroutine(RevealCards(MergeRewards(rewards)));
         }
 
+        // Backwards-compatible overload
+        public void Show(string title, List<RewardEntry> rewards, Action onCollectCallback)
+        {
+            Show(title, null, rewards, onCollectCallback);
+        }
+
         public void Hide()
         {
             if (overlay == null) return;
             overlay.RemoveFromClassList("reward-reveal--visible");
             overlay.style.display = DisplayStyle.None;
             cardsContainer.Clear();
+
+            // Reset any inline opacity overrides from fly-out
+            if (titleGroup != null) titleGroup.style.opacity = StyleKeyword.Null;
+            if (subtitleLabel != null) subtitleLabel.style.opacity = StyleKeyword.Null;
+            if (collectBtn != null)
+            {
+                collectBtn.style.opacity = StyleKeyword.Null;
+                collectBtn.SetEnabled(true);
+            }
         }
 
         private void Collect()
         {
-            AudioManager.Instance?.PlaySFX("ui_panel_close");
+            collectBtn.SetEnabled(false);
+            StartCoroutine(FlyCardsAndClose());
+        }
+
+        private IEnumerator FlyCardsAndClose()
+        {
+            var targetBtn = root.Q("btn-seeds");
+
+            // Fallback: if target not found, close immediately
+            if (targetBtn == null)
+            {
+                CloseImmediate();
+                yield break;
+            }
+
+            // Wait one frame to ensure layout is current
+            yield return null;
+
+            var targetBound = targetBtn.worldBound;
+            float targetCX = targetBound.center.x;
+            float targetCY = targetBound.center.y;
+
+            // Fade out title, subtitle, and button
+            if (titleGroup != null) titleGroup.style.opacity = 0;
+            if (subtitleLabel != null) subtitleLabel.style.opacity = 0;
+            collectBtn.style.opacity = 0;
+
+            // Collect card elements
+            var cards = new List<VisualElement>();
+            foreach (var child in cardsContainer.Children())
+            {
+                if (child.ClassListContains("reward-card"))
+                    cards.Add(child);
+            }
+
+            const float staggerDelay = 0.08f;
+            const float transitionDuration = 0.35f;
+
+            foreach (var card in cards)
+            {
+                var cardBound = card.worldBound;
+                float dx = targetCX - cardBound.center.x;
+                float dy = targetCY - cardBound.center.y;
+
+                card.style.translate = new StyleTranslate(
+                    new Translate(new Length(dx, LengthUnit.Pixel), new Length(dy, LengthUnit.Pixel)));
+                card.AddToClassList("reward-card--flying");
+
+                yield return new WaitForSeconds(staggerDelay);
+            }
+
+            // Wait for the last card's transition to complete
+            yield return new WaitForSeconds(transitionDuration);
+
+            var callback = onCollect;
+            onCollect = null;
+            Hide();
+            callback?.Invoke();
+        }
+
+        private void CloseImmediate()
+        {
             var callback = onCollect;
             onCollect = null;
             Hide();
@@ -103,7 +193,7 @@ namespace Garden
                 yield return null;
                 card.AddToClassList("reward-card--visible");
 
-                yield return new WaitForSeconds(0.1f);
+                yield return new WaitForSeconds(0.12f);
             }
         }
 
@@ -118,10 +208,15 @@ namespace Garden
             card.AddToClassList("reward-card");
             card.AddToClassList(tierClass);
 
-            // Glow element behind card
+            // Glow ring behind card
             var glow = new VisualElement();
             glow.AddToClassList("reward-card-glow");
             card.Add(glow);
+
+            // Inner glow overlay
+            var innerGlow = new VisualElement();
+            innerGlow.AddToClassList("reward-card-inner-glow");
+            card.Add(innerGlow);
 
             // Item sprite
             var sprite = new VisualElement();
@@ -137,13 +232,10 @@ namespace Garden
             nameLabel.AddToClassList("reward-card-name");
             card.Add(nameLabel);
 
-            // Count badge (only if > 1)
-            if (reward.count > 1)
-            {
-                var countLabel = new Label($"x{reward.count}");
-                countLabel.AddToClassList("reward-card-count");
-                card.Add(countLabel);
-            }
+            // Count — always shown
+            var countLabel = new Label($"x{reward.count}");
+            countLabel.AddToClassList("reward-card-count");
+            card.Add(countLabel);
 
             return card;
         }
