@@ -271,14 +271,15 @@ namespace Garden
                 icon.style.backgroundImage = new StyleBackground(sprite);
             header.Add(icon);
 
+            var countLabel = new Label($"x{entry.count}");
+            countLabel.AddToClassList("seed-count");
+            header.Add(countLabel);
+
             var info = new VisualElement();
             info.AddToClassList("seed-info");
             var nameLabel = new Label(ConfigService.Instance.GetItemDisplayName(entry.itemKey));
             nameLabel.AddToClassList("seed-name");
             info.Add(nameLabel);
-            var countLabel = new Label($"x{entry.count}");
-            countLabel.AddToClassList("seed-count");
-            info.Add(countLabel);
             header.Add(info);
 
             card.Add(header);
@@ -313,14 +314,15 @@ namespace Garden
             }
             header.Add(icon);
 
+            var countLabel = new Label($"x{entry.count}");
+            countLabel.AddToClassList("seed-count");
+            header.Add(countLabel);
+
             var info = new VisualElement();
             info.AddToClassList("seed-info");
             var nameLabel = new Label(ConfigService.Instance.GetItemDisplayName(entry.itemKey));
             nameLabel.AddToClassList("seed-name");
             info.Add(nameLabel);
-            var countLabel = new Label($"x{entry.count}");
-            countLabel.AddToClassList("seed-count");
-            info.Add(countLabel);
             header.Add(info);
 
             card.Add(header);

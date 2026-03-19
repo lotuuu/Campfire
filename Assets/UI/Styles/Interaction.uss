@@ -150,16 +150,24 @@
     padding: var(--spacing-xs) 0;
 }
 
+.seed-picker-empty {
+    -unity-text-align: middle-center;
+    color: var(--color-text-muted);
+    font-size: var(--font-sm);
+    padding: var(--spacing-lg) var(--spacing-md);
+    white-space: normal;
+}
+
 .seed-card {
     flex-direction: row;
     align-items: stretch;
     background-color: rgba(50, 35, 18, 0.7);
     border-width: 1px;
     border-color: rgba(140, 100, 50, 0.3);
-    border-left-width: 6px;
+    border-left-width: 8px;
     border-radius: var(--radius-md);
     padding: 0;
-    margin-bottom: var(--spacing-xs);
+    margin-bottom: var(--spacing-sm);
     transition-property: background-color, border-color;
     transition-duration: 0.15s;
 }
@@ -171,13 +179,13 @@
 
 /* Hero seed icon area */
 .seed-card--icon {
-    width: 120px;
-    height: 120px;
-    border-radius: 12px;
+    width: 160px;
+    height: 160px;
+    border-radius: 14px;
     background-color: rgba(40, 28, 15, 0.6);
     border-width: 1px;
     border-color: rgba(180, 130, 60, 0.25);
-    margin: var(--spacing-xs);
+    margin: var(--spacing-sm);
     margin-left: var(--spacing-sm);
     flex-shrink: 0;
     align-self: center;
@@ -188,7 +196,7 @@
     flex-grow: 1;
     flex-direction: column;
     justify-content: center;
-    padding: var(--spacing-sm);
+    padding: var(--spacing-md);
     padding-left: var(--spacing-sm);
 }
 
@@ -196,11 +204,11 @@
 .seed-card--title-row {
     flex-direction: row;
     align-items: flex-end;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
 }
 
 .seed-card--name {
-    font-size: var(--font-md);
+    font-size: var(--font-lg);
     color: rgb(240, 220, 180);
     -unity-font-style: bold;
 }
@@ -213,13 +221,13 @@
 }
 
 .seed-card--stats-line {
-    font-size: var(--font-xs);
+    font-size: var(--font-sm);
     color: rgb(140, 125, 95);
     margin-right: var(--spacing-xs);
 }
 
 .seed-card--count {
-    font-size: var(--font-xs);
+    font-size: var(--font-md);
     color: rgb(160, 140, 100);
     -unity-font-style: bold;
 }
@@ -232,22 +240,22 @@
 
 .seed-card--tag {
     background-color: rgba(100, 75, 35, 0.5);
-    border-radius: 6px;
-    padding: 4px 8px;
-    margin-right: 8px;
-    margin-bottom: 4px;
+    border-radius: 8px;
+    padding: 6px 12px;
+    margin-right: 10px;
+    margin-bottom: 6px;
 }
 
 .seed-card--tag Label {
-    font-size: var(--font-xs);
+    font-size: var(--font-sm);
     color: rgb(200, 170, 110);
 }
 
 .seed-card--weather-match {
-    font-size: var(--font-xs);
+    font-size: var(--font-sm);
     color: rgb(120, 200, 80);
     -unity-font-style: bold;
-    margin-top: 4px;
+    margin-top: 6px;
 }
 
 .seed-card--plant-btn {

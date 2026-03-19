@@ -658,7 +658,7 @@ namespace Garden
                 case CampBuildingType.Flame:
                     cell.AddToClassList("grid-cell--flame");
                     TrySetHexSprite(cell, "hex/flame");
-                    if (label != null) label.text = $"Lv.{FlameManager.Instance.Level}";
+                    if (label != null) label.text = string.Format(Loc.Get("ui.label.lv", "Lv {0}"), FlameManager.Instance.Level);
                     if (status != null) status.text = Loc.Get("ui.label.spark_of_ara", "Spark of Ara");
                     break;
 
@@ -768,7 +768,7 @@ namespace Garden
                     TrySetHexSprite(cell, "hex/bird");
                     var bird = SaveManager.Instance.Data.birds[index];
                     if (label != null) label.text = Loc.Get("ui.label.bird", "Bird");
-                    if (status != null) status.text = $"{bird.itemCount}x {ConfigService.Instance.GetItemDisplayName(bird.itemKey)}";
+                    if (status != null) status.text = string.Format(Loc.Get("ui.label.item_count", "{0}x {1}"), bird.itemCount, ConfigService.Instance.GetItemDisplayName(bird.itemKey));
                     break;
 
                 case CampBuildingType.Visitor:
@@ -1343,7 +1343,7 @@ namespace Garden
                 case CampBuildingType.Flame:
                     cell.AddToClassList("grid-cell--flame");
                     TrySetHexSprite(cell, "hex/flame");
-                    if (label != null) label.text = $"Lv.{visitSnapshot.flameLevel}";
+                    if (label != null) label.text = string.Format(Loc.Get("ui.label.lv", "Lv {0}"), visitSnapshot.flameLevel);
                     if (status != null) status.text = Loc.Get("ui.label.spark_of_ara", "Spark of Ara");
                     break;
 
@@ -2517,6 +2517,13 @@ namespace Garden
 
                 card.Add(info);
                 list.Add(card);
+            }
+
+            if (list.childCount == 0)
+            {
+                var emptyMsg = new Label(Loc.Get("ui.label.no_seeds", "You have no more seeds, send a Mallum on a Quest!"));
+                emptyMsg.AddToClassList("seed-picker-empty");
+                list.Add(emptyMsg);
             }
 
             scroll.Add(list);
