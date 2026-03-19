@@ -632,10 +632,11 @@ defmodule CampFireWeb.GameController do
     conn |> put_status(400) |> json(%{error: "Missing 'gardenId'"})
   end
 
-  def fertilize_garden(conn, %{"gardenId" => garden_id}) do
+  def fertilize_garden(conn, %{"gardenId" => garden_id} = params) do
     uid = conn.assigns.current_player.uid
+    opts = free_mode_opts(params)
 
-    case Gardens.fertilize(uid, garden_id) do
+    case Gardens.fertilize(uid, garden_id, opts) do
       {:ok, garden} ->
         conn |> put_status(200) |> json(serialize_garden(garden))
 
@@ -698,10 +699,11 @@ defmodule CampFireWeb.GameController do
     conn |> put_status(400) |> json(%{error: "Missing 'questName'"})
   end
 
-  def speed_up_quest(conn, %{"questName" => quest_name}) do
+  def speed_up_quest(conn, %{"questName" => quest_name} = params) do
     uid = conn.assigns.current_player.uid
+    opts = free_mode_opts(params)
 
-    case Mallums.speed_up_quest(uid, quest_name) do
+    case Mallums.speed_up_quest(uid, quest_name, opts) do
       {:ok, mallum} ->
         conn |> put_status(200) |> json(serialize_mallum(mallum))
 

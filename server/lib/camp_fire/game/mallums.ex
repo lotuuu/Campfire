@@ -145,14 +145,14 @@ defmodule CampFire.Game.Mallums do
     end
   end
 
-  def speed_up_quest(player_uid, quest_name) do
+  def speed_up_quest(player_uid, quest_name, opts \\ []) do
     case find_mallum_on_quest(player_uid, quest_name) do
       nil ->
         {:error, :not_found}
 
       mallum ->
         quest_speed_item = (CampFire.ConfigCache.get("mallum_house_config") || raise "mallum_house_config not loaded")["quest_speed_item"]
-        case Economy.spend_item(player_uid, quest_speed_item, 1) do
+        case Economy.spend_item(player_uid, quest_speed_item, 1, opts) do
           {:error, reason} ->
             {:error, reason}
 

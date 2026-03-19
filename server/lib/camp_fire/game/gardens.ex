@@ -82,12 +82,12 @@ defmodule CampFire.Game.Gardens do
 
   # --- Fertilize ---
 
-  def fertilize(player_uid, garden_id) do
+  def fertilize(player_uid, garden_id, opts \\ []) do
     with %PlayerGarden{} = garden <- Repo.get(PlayerGarden, garden_id),
          true <- garden.player_uid == player_uid || {:error, :not_owned},
          true <- garden.mature || {:error, :not_mature},
          true <- not garden.fertilized || {:error, :already_fertilized} do
-      case Economy.spend_item(player_uid, "fertilizer", 1) do
+      case Economy.spend_item(player_uid, "fertilizer", 1, opts) do
         {:ok, _} ->
           garden
           |> PlayerGarden.changeset(%{fertilized: true})

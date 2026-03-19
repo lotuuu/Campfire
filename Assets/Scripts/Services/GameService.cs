@@ -593,7 +593,7 @@ namespace Garden
             if (!IsOnline) return null;
             try
             {
-                var body = JsonUtility.ToJson(new FertilizePlotRequest { plotId = plotId });
+                var body = JsonUtility.ToJson(new FertilizePlotRequest { plotId = plotId, freeMode = CurrencyManager.FreeMode });
                 using var req = PostJson("/game/plot/fertilize", body);
                 await SendAsync(req);
 
@@ -611,7 +611,7 @@ namespace Garden
             if (!IsOnline) return null;
             try
             {
-                var body = JsonUtility.ToJson(new ApplyPotionRequest { plotId = plotId, potionItemKey = potionItemKey });
+                var body = JsonUtility.ToJson(new ApplyPotionRequest { plotId = plotId, potionItemKey = potionItemKey, freeMode = CurrencyManager.FreeMode });
                 using var req = PostJson("/game/plot/apply-potion", body);
                 await SendAsync(req);
 
@@ -703,7 +703,7 @@ namespace Garden
             if (!IsOnline) return null;
             try
             {
-                var body = JsonUtility.ToJson(new InstantFinishPlotRequest { plotId = plotId });
+                var body = JsonUtility.ToJson(new InstantFinishPlotRequest { plotId = plotId, freeMode = CurrencyManager.FreeMode });
                 using var req = PostJson("/game/plot/instant-finish", body);
                 await SendAsync(req);
 
@@ -721,7 +721,7 @@ namespace Garden
             if (!IsOnline) return null;
             try
             {
-                var body = JsonUtility.ToJson(new InstantFinishVaseRequest { vaseId = vaseId });
+                var body = JsonUtility.ToJson(new InstantFinishVaseRequest { vaseId = vaseId, freeMode = CurrencyManager.FreeMode });
                 using var req = PostJson("/game/vase/instant-finish", body);
                 await SendAsync(req);
 
@@ -777,7 +777,7 @@ namespace Garden
             if (!IsOnline) return null;
             try
             {
-                var body = JsonUtility.ToJson(new FertilizeGardenRequest { gardenId = gardenId });
+                var body = JsonUtility.ToJson(new FertilizeGardenRequest { gardenId = gardenId, freeMode = CurrencyManager.FreeMode });
                 using var req = PostJson("/game/garden/fertilize", body);
                 await SendAsync(req);
 
@@ -851,7 +851,7 @@ namespace Garden
             if (!IsOnline) return null;
             try
             {
-                var body = JsonUtility.ToJson(new QuestRequest { questName = questName });
+                var body = JsonUtility.ToJson(new QuestRequest { questName = questName, freeMode = CurrencyManager.FreeMode });
                 using var req = PostJson("/game/quest/speed-up", body);
                 await SendAsync(req);
 

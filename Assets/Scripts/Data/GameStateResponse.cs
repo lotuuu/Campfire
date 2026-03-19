@@ -127,8 +127,8 @@ namespace Garden
     [Serializable] public class HarvestRequest { public int plotId; }
     [Serializable] public class FillVaseRequest { public int vaseId; }
     [Serializable] public class CheckVaseRequest { public int vaseId; }
-    [Serializable] public class InstantFinishPlotRequest { public int plotId; }
-    [Serializable] public class InstantFinishVaseRequest { public int vaseId; }
+    [Serializable] public class InstantFinishPlotRequest { public int plotId; public bool freeMode; }
+    [Serializable] public class InstantFinishVaseRequest { public int vaseId; public bool freeMode; }
     [Serializable] public class MoveBuildingRequest { public string type; public int id; public int gridX; public int gridY; }
     [Serializable] public class PlantGardenRequest { public string plantName; public int gridX; public int gridY; public bool freeMode; }
     [Serializable] public class CollectGardenRequest { public int gardenId; }
@@ -171,9 +171,9 @@ namespace Garden
     [Serializable] public class BirdCollectResponse { public string itemKey; public int itemCount; }
     [Serializable] public class HouseSkinRequest { public int houseId; public string skinName; }
     [Serializable] public class LocationRequest { public float lat; public float lon; }
-    [Serializable] public class FertilizePlotRequest { public int plotId; }
-    [Serializable] public class ApplyPotionRequest { public int plotId; public string potionItemKey; }
-    [Serializable] public class FertilizeGardenRequest { public int gardenId; }
+    [Serializable] public class FertilizePlotRequest { public int plotId; public bool freeMode; }
+    [Serializable] public class ApplyPotionRequest { public int plotId; public string potionItemKey; public bool freeMode; }
+    [Serializable] public class FertilizeGardenRequest { public int gardenId; public bool freeMode; }
     [Serializable] public class HarvestResponse { public float score; public int drops; public int bonusDrops; public string itemKey; }
     [Serializable] public class UpgradeFlameResponse { public int flameLevel; }
     [Serializable] public class CollectGardenResponse { public ServerGarden garden; public string yieldItem; public int yieldAmount; }
