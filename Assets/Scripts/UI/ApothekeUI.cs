@@ -582,7 +582,7 @@ namespace Garden
                 }
                 bool satisfied = owned >= ing.count;
 
-                var chipCount = new Label(satisfied ? $"{owned}" : $"{owned}/{ing.count}");
+                var chipCount = new Label($"{owned}/{ing.count}");
                 chipCount.AddToClassList("recipe-card-chip-count");
                 chipCount.AddToClassList(satisfied ? "recipe-card-chip-count--ok" : "recipe-card-chip-count--missing");
                 chip.Add(chipCount);
