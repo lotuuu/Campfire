@@ -186,7 +186,7 @@
 }
 
 .recipe-category-label {
-    font-size: var(--font-xs);
+    font-size: var(--font-sm);
     color: rgb(180, 150, 100);
     -unity-text-align: middle-center;
     padding: 0 var(--spacing-sm);
@@ -199,8 +199,8 @@
     border-width: 1px;
     border-color: rgba(120, 90, 45, 0.25);
     border-radius: var(--radius-md);
-    padding: var(--spacing-sm);
-    margin-bottom: var(--spacing-xs);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
     transition-property: background-color, border-color;
     transition-duration: 0.15s;
 }
@@ -230,9 +230,9 @@
 }
 
 .recipe-card-result-icon {
-    width: 64px;
-    height: 64px;
-    border-radius: 10px;
+    width: 88px;
+    height: 88px;
+    border-radius: 12px;
     background-color: rgba(40, 28, 15, 0.6);
     border-width: 1px;
     border-color: rgba(140, 100, 50, 0.2);
@@ -248,10 +248,10 @@
 }
 
 .recipe-card-name {
-    font-size: var(--font-md);
+    font-size: var(--font-lg);
     color: rgb(240, 220, 170);
     -unity-font-style: bold;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
 }
 
 /* ── Ingredient chips ── */
@@ -267,10 +267,10 @@
     background-color: rgba(40, 28, 15, 0.6);
     border-width: 1px;
     border-color: rgba(140, 200, 70, 0.3);
-    border-radius: 6px;
-    padding: 2px 6px;
-    margin-right: 4px;
-    margin-bottom: 4px;
+    border-radius: 8px;
+    padding: 4px 8px;
+    margin-right: 6px;
+    margin-bottom: 6px;
 }
 
 .recipe-card-chip--missing {
@@ -278,14 +278,14 @@
 }
 
 .recipe-card-chip-icon {
-    width: 28px;
-    height: 28px;
+    width: 36px;
+    height: 36px;
     -unity-background-scale-mode: scale-to-fit;
-    margin-right: 4px;
+    margin-right: 6px;
 }
 
 .recipe-card-chip-count {
-    font-size: var(--font-xs);
+    font-size: var(--font-sm);
     -unity-font-style: bold;
 }
 
@@ -298,9 +298,9 @@
 }
 
 .recipe-card-chip-plus {
-    font-size: var(--font-sm);
+    font-size: var(--font-md);
     color: rgba(180, 150, 100, 0.4);
-    margin: 0 2px;
+    margin: 0 4px;
 }
 
 /* ── Inline craft button (collapsed) ── */
@@ -308,10 +308,10 @@
     background-color: rgba(80, 130, 40, 0.5);
     border-width: 1px;
     border-color: rgba(120, 180, 60, 0.5);
-    border-radius: 8px;
-    padding: 8px 16px;
+    border-radius: 10px;
+    padding: 12px 20px;
     color: rgb(200, 240, 150);
-    font-size: var(--font-sm);
+    font-size: var(--font-md);
     -unity-font-style: bold;
     flex-shrink: 0;
     margin-left: var(--spacing-xs);
@@ -343,32 +343,32 @@
 }
 
 .recipe-card-flavor {
-    font-size: var(--font-sm);
+    font-size: var(--font-md);
     color: rgb(170, 150, 115);
     -unity-font-style: italic;
-    margin-bottom: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
     white-space: normal;
 }
 
 .recipe-card-ing-title {
-    font-size: var(--font-xs);
+    font-size: var(--font-sm);
     color: rgb(150, 130, 100);
-    margin-bottom: var(--spacing-xs);
+    margin-bottom: var(--spacing-sm);
 }
 
 .recipe-card-ing-row {
     flex-direction: row;
     align-items: center;
-    padding: var(--spacing-xs);
+    padding: var(--spacing-sm);
     background-color: rgba(40, 30, 18, 0.5);
-    border-radius: 8px;
-    margin-bottom: var(--spacing-xxs);
+    border-radius: 10px;
+    margin-bottom: var(--spacing-xs);
 }
 
 .recipe-card-ing-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
+    width: 52px;
+    height: 52px;
+    border-radius: 10px;
     background-color: rgba(40, 28, 15, 0.8);
     border-width: 1px;
     border-color: rgba(140, 100, 50, 0.2);
@@ -383,12 +383,12 @@
 }
 
 .recipe-card-ing-name {
-    font-size: var(--font-sm);
+    font-size: var(--font-md);
     color: rgb(220, 200, 165);
 }
 
 .recipe-card-ing-category {
-    font-size: var(--font-xs);
+    font-size: var(--font-sm);
     color: rgb(140, 120, 90);
 }
 
@@ -400,19 +400,19 @@
 }
 
 .recipe-card-ing-owned--ok {
-    font-size: var(--font-md);
+    font-size: var(--font-lg);
     color: rgb(140, 200, 80);
     -unity-font-style: bold;
 }
 
 .recipe-card-ing-owned--missing {
-    font-size: var(--font-md);
+    font-size: var(--font-lg);
     color: rgb(200, 120, 60);
     -unity-font-style: bold;
 }
 
 .recipe-card-ing-needed {
-    font-size: var(--font-xs);
+    font-size: var(--font-sm);
     color: rgb(140, 120, 90);
 }
 
@@ -427,34 +427,34 @@
 }
 
 .recipe-card-result-label {
-    font-size: var(--font-xs);
+    font-size: var(--font-sm);
     color: rgb(150, 130, 100);
-    margin-right: var(--spacing-xs);
+    margin-right: var(--spacing-sm);
 }
 
 .recipe-card-result-small-icon {
-    width: 24px;
-    height: 24px;
+    width: 32px;
+    height: 32px;
     -unity-background-scale-mode: scale-to-fit;
-    margin-right: var(--spacing-xxs);
+    margin-right: var(--spacing-xs);
 }
 
 .recipe-card-result-name {
-    font-size: var(--font-sm);
+    font-size: var(--font-md);
     color: rgb(180, 220, 120);
     -unity-font-style: bold;
 }
 
 /* ── Full-width craft button (expanded) ── */
 .recipe-card-craft-full {
-    min-height: 52px;
-    margin-top: var(--spacing-sm);
+    min-height: 64px;
+    margin-top: var(--spacing-md);
     background-color: rgba(80, 130, 40, 0.5);
     border-width: 1px;
     border-color: rgba(120, 180, 60, 0.5);
     border-radius: 8px;
     color: rgb(200, 240, 150);
-    font-size: var(--font-md);
+    font-size: var(--font-lg);
     -unity-text-align: middle-center;
     -unity-font-style: bold;
 }
