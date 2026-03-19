@@ -31,6 +31,7 @@
 .inventory-grid {
     flex-direction: row;
     flex-wrap: wrap;
+    justify-content: center;
     margin-bottom: var(--spacing-xs);
 }
 
