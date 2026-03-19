@@ -410,21 +410,23 @@ namespace Garden
         }
 
         // Sort order for recipe categories (string-based, replacing the old enum)
-        private static readonly Dictionary<string, int> CategorySortOrder = new()
+        private static readonly Dictionary<string, int> CategorySortOrder = new(System.StringComparer.OrdinalIgnoreCase)
         {
-            { "pigment", 0 },
-            { "consumable", 1 },
-            { "material", 2 }
+            { "Pigment", 0 },
+            { "Consumable", 1 },
+            { "Material", 2 }
         };
 
         private static string RecipeCategoryLabel(string category)
         {
-            return category switch
+            if (category == null) return "Other";
+            var lower = category.ToLowerInvariant();
+            return lower switch
             {
                 "pigment" => Loc.Get("ui.apotheke.pigments", "Pigments"),
                 "consumable" => Loc.Get("ui.apotheke.consumables", "Consumables"),
                 "material" => Loc.Get("ui.apotheke.materials", "Materials"),
-                _ => category ?? "Other"
+                _ => category
             };
         }
 
