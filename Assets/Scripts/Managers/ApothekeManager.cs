@@ -8,16 +8,22 @@ namespace Garden
     {
         public static ApothekeManager Instance { get; private set; }
 
-        private RecipeData[] allRecipes;
+        public ServerRecipeConfig[] AllRecipes { get; private set; } = System.Array.Empty<ServerRecipeConfig>();
 
         private void Awake()
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
-            allRecipes = Resources.LoadAll<RecipeData>("Recipes");
         }
 
-        public RecipeData[] AllRecipes => allRecipes;
+        public void LoadRecipesFromConfig()
+        {
+            var all = ConfigService.Instance?.GetAllRecipes();
+            if (all != null)
+                AllRecipes = new List<ServerRecipeConfig>(all.Values).ToArray();
+            else
+                AllRecipes = System.Array.Empty<ServerRecipeConfig>();
+        }
 
         public List<InventoryItem> Seeds =>
             SaveManager.Instance.Data.inventory.FindAll(i =>
@@ -25,19 +31,19 @@ namespace Garden
 
         public List<InventoryItem> Items => SaveManager.Instance.Data.inventory;
 
-        public bool CanMix(RecipeData recipe)
+        public bool CanMix(ServerRecipeConfig recipe)
         {
             if (CurrencyManager.FreeMode) return true;
             var data = SaveManager.Instance.Data;
             foreach (var ing in recipe.ingredients)
             {
                 var item = data.inventory.Find(i => i.itemKey == ing.itemKey);
-                if (item == null || item.count < ing.quantity) return false;
+                if (item == null || item.count < ing.count) return false;
             }
             return true;
         }
 
-        public bool Mix(RecipeData recipe)
+        public bool Mix(ServerRecipeConfig recipe)
         {
             if (!CanMix(recipe)) return false;
             var data = SaveManager.Instance.Data;
@@ -47,54 +53,50 @@ namespace Garden
             {
                 var item = data.inventory.Find(i => i.itemKey == ing.itemKey);
                 if (item == null) continue;
-                item.count -= ing.quantity;
+                item.count -= ing.count;
                 if (item.count <= 0) data.inventory.Remove(item);
             }
 
-            var existing = data.inventory.Find(i => i.itemKey == recipe.result);
+            var existing = data.inventory.Find(i => i.itemKey == recipe.resultItem);
             if (existing != null)
                 existing.count += recipe.resultQuantity;
             else
-                data.inventory.Add(new InventoryItem { itemKey = recipe.result, count = recipe.resultQuantity });
+                data.inventory.Add(new InventoryItem { itemKey = recipe.resultItem, count = recipe.resultQuantity });
 
             SaveManager.Instance.Save();
             AudioManager.Instance?.PlaySFX("apotheke_mix");
             if (EconomyService.Instance != null && !CurrencyManager.FreeMode)
             {
-                // Report consumed ingredients
                 foreach (var ing in recipe.ingredients)
                 {
                     var spendItems = new SpendItemsRequest
                     {
-                        items = new List<SpendItemEntry> { new SpendItemEntry { item_key = ing.itemKey, count = ing.quantity } },
+                        items = new List<SpendItemEntry> { new SpendItemEntry { item_key = ing.itemKey, count = ing.count } },
                         freeMode = CurrencyManager.FreeMode
                     };
                     EconomyService.Instance.Enqueue("spend-items", JsonUtility.ToJson(spendItems));
                 }
-                // Report produced result
                 EconomyService.Instance.Enqueue("add-items",
-                    JsonUtility.ToJson(new AddItemRequest { item_key = recipe.result, count = recipe.resultQuantity }));
+                    JsonUtility.ToJson(new AddItemRequest { item_key = recipe.resultItem, count = recipe.resultQuantity }));
             }
             return true;
         }
 
-        public async Task<bool> CraftOnServer(RecipeData recipe)
+        public async Task<bool> CraftOnServer(ServerRecipeConfig recipe)
         {
             if (!CanMix(recipe)) return false;
 
             if (GameService.Instance != null && GameService.Instance.IsOnline)
             {
-                var result = await GameService.Instance.CraftApotheke(recipe.recipeName);
+                var result = await GameService.Instance.CraftApotheke(recipe.name);
                 if (result == null) return false;
 
-                // Server succeeded — sync inventory from economy service
                 if (EconomyService.Instance != null)
                     EconomyService.Instance.Initialize();
 
                 return true;
             }
 
-            // Offline fallback: use existing local Mix
             return Mix(recipe);
         }
 

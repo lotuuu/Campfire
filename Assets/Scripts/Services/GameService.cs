@@ -134,6 +134,7 @@ namespace Garden
                         return;
                     }
                 }
+                ApothekeManager.Instance?.LoadRecipesFromConfig();
                 CompletedSteps++; // 1: config fetched
 
                 // Download sprites from server
