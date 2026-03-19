@@ -1015,7 +1015,7 @@ defmodule CampFireWeb.GameController do
       plantTimeUtc: format_datetime(plot.plant_time_utc),
       waterCount: plot.water_count,
       lastWateredUtc: format_datetime(plot.last_watered_utc),
-      snapshots: plot.snapshots,
+      snapshots: aggregate_snapshots(plot.snapshots),
       gridX: plot.grid_x,
       gridY: plot.grid_y,
       skinName: plot.skin_name,
@@ -1025,6 +1025,44 @@ defmodule CampFireWeb.GameController do
         Map.get(@potion_type_to_item_key, p["type"], p["type"])
       end)
     }
+  end
+
+  defp aggregate_snapshots(nil), do: %{}
+  defp aggregate_snapshots(s) when s == %{}, do: %{}
+  defp aggregate_snapshots(s) do
+    count = s["snapshot_count"] || 0
+    if count == 0 do
+      %{}
+    else
+      temps = s["temperatures"] || []
+      winds = s["wind_speeds"] || []
+      humids = s["humidities"] || []
+      clouds = s["cloud_covers"] || []
+      rains = s["rain_snapshots"] || []
+      moons = s["moon_phase_snapshots"] || []
+
+      %{
+        snapshotCount: count,
+        sumTemp: Enum.sum(temps),
+        sumWind: Enum.sum(winds),
+        sumHumidity: Enum.sum(humids),
+        sumSunlight: Enum.sum(Enum.map(clouds, fn c -> 100.0 - c end)),
+        rainSnapshots: Enum.count(rains, fn r -> r > 0 end),
+        moonPhaseSnapshots: aggregate_moon_phases(moons)
+      }
+    end
+  end
+
+  defp aggregate_moon_phases(moons) do
+    counts = Enum.reduce(moons, List.duplicate(0, 8), fn phase, acc ->
+      idx = trunc(phase)
+      if idx >= 0 and idx < 8 do
+        List.update_at(acc, idx, &(&1 + 1))
+      else
+        acc
+      end
+    end)
+    counts
   end
 
   defp serialize_vase(vase) do

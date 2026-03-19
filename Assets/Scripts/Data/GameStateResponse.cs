@@ -33,6 +33,7 @@ namespace Garden
         public List<string> unlockedSkins = new();
         public bool fertilized;
         public List<string> potionItemKeys = new();
+        public GrowthSnapshots snapshots;
     }
 
     [Serializable]

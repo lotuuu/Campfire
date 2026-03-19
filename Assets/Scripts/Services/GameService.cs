@@ -290,6 +290,7 @@ namespace Garden
                         unlockedSkins = sp.unlockedSkins ?? new List<string>(),
                         fertilized = sp.fertilized,
                         potions = sp.potionItemKeys ?? new List<string>(),
+                        snapshots = sp.snapshots ?? new GrowthSnapshots(),
                     });
                 }
             }
