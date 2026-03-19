@@ -31,7 +31,8 @@
 .inventory-grid {
     flex-direction: row;
     flex-wrap: wrap;
-    justify-content: center;
+    justify-content: flex-start;
+    align-self: center;
     margin-bottom: var(--spacing-xs);
 }
 
@@ -43,8 +44,8 @@
     border-color: rgba(140, 100, 50, 0.25);
     border-radius: var(--radius-md);
     padding: var(--spacing-xs);
-    margin: var(--spacing-xxs);
-    width: 31%;
+    margin: var(--spacing-xs);
+    width: 29%;
     transition-property: background-color, border-color;
     transition-duration: 0.15s;
 }
