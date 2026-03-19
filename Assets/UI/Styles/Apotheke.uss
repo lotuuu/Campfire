@@ -31,9 +31,8 @@
 .inventory-grid {
     flex-direction: row;
     flex-wrap: wrap;
-    justify-content: flex-start;
-    align-self: center;
     margin-bottom: var(--spacing-xs);
+    padding: 0 var(--spacing-xs);
 }
 
 #seed-list .seed-card {
@@ -43,9 +42,10 @@
     border-width: 1px;
     border-color: rgba(140, 100, 50, 0.25);
     border-radius: var(--radius-md);
-    padding: var(--spacing-xs);
-    margin: var(--spacing-xs);
-    width: 29%;
+    padding: var(--spacing-sm);
+    margin: 1%;
+    width: 31%;
+    overflow: hidden;
     transition-property: background-color, border-color;
     transition-duration: 0.15s;
 }
@@ -57,7 +57,7 @@
 
 #seed-list .seed-card--expanded {
     border-color: rgba(220, 150, 50, 0.4);
-    width: 48%;
+    width: 98%;
 }
 
 #seed-list .seed-card-header {
@@ -67,8 +67,8 @@
 }
 
 #seed-list .seed-icon {
-    width: 160px;
-    height: 160px;
+    width: 140px;
+    height: 140px;
     border-radius: var(--radius-sm);
     background-color: rgba(40, 28, 15, 0.6);
     flex-shrink: 0;
