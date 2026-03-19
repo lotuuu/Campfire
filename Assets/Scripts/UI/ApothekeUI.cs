@@ -448,23 +448,24 @@ namespace Garden
 
             var items = SaveManager.Instance?.Data?.inventory;
 
-            // Group by category, using sort order as key for ordering
+            // Group by category
             var grouped = new SortedDictionary<int, (string category, List<ServerRecipeConfig> recipes)>();
             foreach (var r in recipes)
             {
-                int order = GetCategorySortOrder(r.category);
-                if (!grouped.ContainsKey(order))
-                    grouped[order] = (r.category, new List<ServerRecipeConfig>());
-                grouped[order].recipes.Add(r);
+                int sortKey = GetCategorySortOrder(r.category);
+                if (!grouped.ContainsKey(sortKey))
+                    grouped[sortKey] = (r.category, new List<ServerRecipeConfig>());
+                grouped[sortKey].recipes.Add(r);
             }
 
-            // Build the new elements into a flat list (headers + cards interleaved)
             var newElements = new List<VisualElement>();
 
             foreach (var kvp in grouped)
             {
+                var (category, list) = kvp.Value;
+
                 // Sort: craftable first, then alphabetical
-                kvp.Value.recipes.Sort((a, b) =>
+                list.Sort((a, b) =>
                 {
                     bool canA = ApothekeManager.Instance.CanMix(a);
                     bool canB = ApothekeManager.Instance.CanMix(b);
@@ -472,24 +473,31 @@ namespace Garden
                     return string.Compare(a.name, b.name, System.StringComparison.Ordinal);
                 });
 
-                // Category header
-                var header = new Label(RecipeCategoryLabel(kvp.Value.category));
-                header.AddToClassList("recipe-category-header");
-                newElements.Add(header);
+                // Decorative category divider
+                var divider = new VisualElement();
+                divider.AddToClassList("recipe-category-divider");
 
-                foreach (var recipe in kvp.Value.recipes)
-                {
-                    var card = BuildRecipeCard(recipe, items);
-                    newElements.Add(card);
-                }
+                var lineLeft = new VisualElement();
+                lineLeft.AddToClassList("recipe-category-line");
+                divider.Add(lineLeft);
+
+                var label = new Label(RecipeCategoryLabel(category).ToUpper());
+                label.AddToClassList("recipe-category-label");
+                divider.Add(label);
+
+                var lineRight = new VisualElement();
+                lineRight.AddToClassList("recipe-category-line");
+                divider.Add(lineRight);
+
+                newElements.Add(divider);
+
+                foreach (var recipe in list)
+                    newElements.Add(BuildRecipeCard(recipe, items));
             }
 
-            // Sync pool count then replace each element in place
             SyncPoolCount(recipeList, recipePool, newElements.Count);
             for (int i = 0; i < newElements.Count; i++)
-            {
                 ReplacePoolElement(recipeList, recipePool, i, newElements[i]);
-            }
         }
 
         private VisualElement BuildRecipeCard(ServerRecipeConfig recipe, List<InventoryItem> items)
@@ -502,84 +510,192 @@ namespace Garden
             card.AddToClassList("recipe-card");
             if (isExpanded) card.AddToClassList("recipe-card--expanded");
             if (canMix) card.AddToClassList("recipe-card--craftable");
+            else card.AddToClassList("recipe-card--uncraftable");
 
-            // Header row (always visible)
+            // ── Header row (always visible) ──
             var headerRow = new VisualElement();
             headerRow.AddToClassList("recipe-card-header");
 
+            // Result icon (64px)
+            var resultIcon = new VisualElement();
+            resultIcon.AddToClassList("recipe-card-result-icon");
+            var resultSprite = LoadItemSprite(recipe.resultItem);
+            if (resultSprite != null)
+                resultIcon.style.backgroundImage = new StyleBackground(resultSprite);
+            headerRow.Add(resultIcon);
+
+            // Name + ingredient chips column
+            var infoCol = new VisualElement();
+            infoCol.AddToClassList("recipe-card-info");
+
             var nameLabel = new Label(ConfigService.Instance.GetItemDisplayName(recipe.resultItem));
             nameLabel.AddToClassList("recipe-card-name");
-            headerRow.Add(nameLabel);
+            infoCol.Add(nameLabel);
 
-            var status = new VisualElement();
-            status.AddToClassList("recipe-card-status");
-            status.AddToClassList(canMix ? "recipe-card-status--ready" : "recipe-card-status--missing");
-            headerRow.Add(status);
+            // Ingredient chips row
+            var chipsRow = new VisualElement();
+            chipsRow.AddToClassList("recipe-card-chips");
+
+            for (int i = 0; i < recipe.ingredients.Count; i++)
+            {
+                var ing = recipe.ingredients[i];
+                if (i > 0)
+                {
+                    var plus = new Label("+");
+                    plus.AddToClassList("recipe-card-chip-plus");
+                    chipsRow.Add(plus);
+                }
+
+                var chip = new VisualElement();
+                chip.AddToClassList("recipe-card-chip");
+
+                var chipIcon = new VisualElement();
+                chipIcon.AddToClassList("recipe-card-chip-icon");
+                var ingSprite = LoadItemSprite(ing.itemKey);
+                if (ingSprite != null)
+                    chipIcon.style.backgroundImage = new StyleBackground(ingSprite);
+                chip.Add(chipIcon);
+
+                int owned = 0;
+                if (items != null)
+                {
+                    var inv = items.Find(it => it.itemKey == ing.itemKey);
+                    if (inv != null) owned = inv.count;
+                }
+                bool satisfied = owned >= ing.count;
+
+                var chipCount = new Label(satisfied ? $"{owned}" : $"{owned}/{ing.count}");
+                chipCount.AddToClassList("recipe-card-chip-count");
+                chipCount.AddToClassList(satisfied ? "recipe-card-chip-count--ok" : "recipe-card-chip-count--missing");
+                chip.Add(chipCount);
+
+                if (!satisfied) chip.AddToClassList("recipe-card-chip--missing");
+
+                chipsRow.Add(chip);
+            }
+            infoCol.Add(chipsRow);
+            headerRow.Add(infoCol);
+
+            // Inline craft button (collapsed state, only when craftable)
+            if (canMix && !isExpanded)
+            {
+                var inlineCraft = new Button();
+                inlineCraft.clickable = new Clickable(() =>
+                {
+                    ApothekeManager.Instance.Mix(recipe);
+                    Refresh();
+                });
+                inlineCraft.text = Loc.Get("ui.button.craft", "Craft");
+                inlineCraft.AddToClassList("recipe-card-craft-inline");
+                headerRow.Add(inlineCraft);
+            }
 
             card.Add(headerRow);
 
-            // Details (shown when expanded)
+            // ── Expanded details ──
             var details = new VisualElement();
             details.AddToClassList("recipe-card-details");
 
-            var ingTitle = new Label(Loc.Get("ui.apotheke.needs", "Needs:"));
-            ingTitle.AddToClassList("recipe-ingredients-title");
+            // Flavor text
+            string desc = Loc.Get(recipe.descriptionKey ?? "", "");
+            if (!string.IsNullOrEmpty(desc))
+            {
+                var flavorLabel = new Label(desc);
+                flavorLabel.AddToClassList("recipe-card-flavor");
+                details.Add(flavorLabel);
+            }
+
+            // Ingredients section
+            var ingTitle = new Label(Loc.Get("ui.apotheke.ingredients", "Ingredients").ToUpper());
+            ingTitle.AddToClassList("recipe-card-ing-title");
             details.Add(ingTitle);
 
             foreach (var ing in recipe.ingredients)
             {
                 var row = new VisualElement();
-                row.AddToClassList("recipe-ingredient-row");
+                row.AddToClassList("recipe-card-ing-row");
+
+                var rowIcon = new VisualElement();
+                rowIcon.AddToClassList("recipe-card-ing-icon");
+                var sprite = LoadItemSprite(ing.itemKey);
+                if (sprite != null)
+                    rowIcon.style.backgroundImage = new StyleBackground(sprite);
+                row.Add(rowIcon);
+
+                var rowInfo = new VisualElement();
+                rowInfo.AddToClassList("recipe-card-ing-info");
 
                 var ingName = new Label(ConfigService.Instance.GetItemDisplayName(ing.itemKey));
-                ingName.AddToClassList("recipe-ingredient-name");
-                row.Add(ingName);
+                ingName.AddToClassList("recipe-card-ing-name");
+                rowInfo.Add(ingName);
+
+                var ingCat = ConfigService.Instance.GetItem(ing.itemKey)?.category ?? "";
+                if (!string.IsNullOrEmpty(ingCat))
+                {
+                    var catLabel = new Label(ingCat.Substring(0, 1).ToUpper() + ingCat.Substring(1));
+                    catLabel.AddToClassList("recipe-card-ing-category");
+                    rowInfo.Add(catLabel);
+                }
+                row.Add(rowInfo);
 
                 int owned = 0;
                 if (items != null)
                 {
-                    var item = items.Find(i => i.itemKey == ing.itemKey);
-                    if (item != null) owned = item.count;
+                    var inv = items.Find(it => it.itemKey == ing.itemKey);
+                    if (inv != null) owned = inv.count;
                 }
                 bool satisfied = owned >= ing.count;
 
-                string prefix = satisfied ? "+ " : "x ";
-                var countLabel = new Label($"{prefix}{owned}/{ing.count}");
-                countLabel.AddToClassList("recipe-ingredient-count");
-                countLabel.AddToClassList(satisfied
-                    ? "recipe-ingredient-count--satisfied"
-                    : "recipe-ingredient-count--missing");
-                row.Add(countLabel);
+                var countEl = new VisualElement();
+                countEl.AddToClassList("recipe-card-ing-count");
 
+                var ownedLabel = new Label($"{owned}");
+                ownedLabel.AddToClassList(satisfied ? "recipe-card-ing-owned--ok" : "recipe-card-ing-owned--missing");
+                countEl.Add(ownedLabel);
+
+                var neededLabel = new Label($" / {ing.count}");
+                neededLabel.AddToClassList("recipe-card-ing-needed");
+                countEl.Add(neededLabel);
+
+                row.Add(countEl);
                 details.Add(row);
             }
 
             // Result row
             var resultRow = new VisualElement();
-            resultRow.AddToClassList("recipe-result-row");
-            var resultLbl = new Label(Loc.Get("ui.apotheke.makes", "Makes:"));
-            resultLbl.AddToClassList("recipe-result-label");
-            resultRow.Add(resultLbl);
+            resultRow.AddToClassList("recipe-card-result-row");
+
+            var makesLabel = new Label(Loc.Get("ui.apotheke.makes", "Makes").ToUpper());
+            makesLabel.AddToClassList("recipe-card-result-label");
+            resultRow.Add(makesLabel);
+
+            var resultSmallIcon = new VisualElement();
+            resultSmallIcon.AddToClassList("recipe-card-result-small-icon");
+            if (resultSprite != null)
+                resultSmallIcon.style.backgroundImage = new StyleBackground(resultSprite);
+            resultRow.Add(resultSmallIcon);
+
             var resultName = new Label($"{recipe.resultQuantity}x {ConfigService.Instance.GetItemDisplayName(recipe.resultItem)}");
-            resultName.AddToClassList("recipe-result-name");
+            resultName.AddToClassList("recipe-card-result-name");
             resultRow.Add(resultName);
+
             details.Add(resultRow);
 
-            // Mix button — use clickable assignment to avoid handler accumulation on reuse
-            var mixBtn = new Button();
-            mixBtn.clickable = new Clickable(() =>
+            // Full-width craft button
+            var craftBtn = new Button();
+            craftBtn.clickable = new Clickable(() =>
             {
                 ApothekeManager.Instance.Mix(recipe);
                 Refresh();
             });
-            mixBtn.text = Loc.Get("ui.button.craft", "Craft");
-            mixBtn.AddToClassList("recipe-action");
-            mixBtn.SetEnabled(canMix);
-            details.Add(mixBtn);
+            craftBtn.text = Loc.Get("ui.button.craft", "Craft");
+            craftBtn.AddToClassList("recipe-card-craft-full");
+            craftBtn.SetEnabled(canMix);
+            details.Add(craftBtn);
 
             card.Add(details);
 
-            // Tap to expand/collapse — generous threshold so taps aren't eaten by scroll
+            // Tap to expand/collapse
             int idx = recipeIndex;
             RegisterTapInScrollView(headerRow, () =>
             {
@@ -588,6 +704,17 @@ namespace Garden
             });
 
             return card;
+        }
+
+        private static Sprite LoadItemSprite(string itemKey)
+        {
+            string key = SpriteService.ItemToSpriteKey(itemKey);
+            if (key != null)
+            {
+                var sprite = SpriteService.Instance?.GetSprite(key);
+                if (sprite != null) return sprite;
+            }
+            return null;
         }
 
     }
