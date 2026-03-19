@@ -409,6 +409,32 @@ namespace Garden
             container.Add(row);
         }
 
+        // Sort order for recipe categories (string-based, replacing the old enum)
+        private static readonly Dictionary<string, int> CategorySortOrder = new()
+        {
+            { "pigment", 0 },
+            { "consumable", 1 },
+            { "material", 2 }
+        };
+
+        private static string RecipeCategoryLabel(string category)
+        {
+            return category switch
+            {
+                "pigment" => Loc.Get("ui.apotheke.pigments", "Pigments"),
+                "consumable" => Loc.Get("ui.apotheke.consumables", "Consumables"),
+                "material" => Loc.Get("ui.apotheke.materials", "Materials"),
+                _ => category ?? "Other"
+            };
+        }
+
+        private static int GetCategorySortOrder(string category)
+        {
+            if (category != null && CategorySortOrder.TryGetValue(category, out var order))
+                return order;
+            return 99;
+        }
+
         private void RefreshRecipes()
         {
             if (recipeList == null || ApothekeManager.Instance == null) return;
@@ -422,14 +448,14 @@ namespace Garden
 
             var items = SaveManager.Instance?.Data?.inventory;
 
-            // Group by category, craftable first within each group
-            var grouped = new System.Collections.Generic.SortedDictionary<RecipeCategory,
-                List<RecipeData>>();
+            // Group by category, using sort order as key for ordering
+            var grouped = new SortedDictionary<int, (string category, List<ServerRecipeConfig> recipes)>();
             foreach (var r in recipes)
             {
-                if (!grouped.ContainsKey(r.category))
-                    grouped[r.category] = new List<RecipeData>();
-                grouped[r.category].Add(r);
+                int order = GetCategorySortOrder(r.category);
+                if (!grouped.ContainsKey(order))
+                    grouped[order] = (r.category, new List<ServerRecipeConfig>());
+                grouped[order].recipes.Add(r);
             }
 
             // Build the new elements into a flat list (headers + cards interleaved)
@@ -438,20 +464,20 @@ namespace Garden
             foreach (var kvp in grouped)
             {
                 // Sort: craftable first, then alphabetical
-                kvp.Value.Sort((a, b) =>
+                kvp.Value.recipes.Sort((a, b) =>
                 {
                     bool canA = ApothekeManager.Instance.CanMix(a);
                     bool canB = ApothekeManager.Instance.CanMix(b);
                     if (canA != canB) return canA ? -1 : 1;
-                    return string.Compare(a.recipeName, b.recipeName, System.StringComparison.Ordinal);
+                    return string.Compare(a.name, b.name, System.StringComparison.Ordinal);
                 });
 
                 // Category header
-                var header = new Label(CategoryLabel(kvp.Key));
+                var header = new Label(RecipeCategoryLabel(kvp.Value.category));
                 header.AddToClassList("recipe-category-header");
                 newElements.Add(header);
 
-                foreach (var recipe in kvp.Value)
+                foreach (var recipe in kvp.Value.recipes)
                 {
                     var card = BuildRecipeCard(recipe, items);
                     newElements.Add(card);
@@ -466,18 +492,7 @@ namespace Garden
             }
         }
 
-        private static string CategoryLabel(RecipeCategory cat)
-        {
-            return cat switch
-            {
-                RecipeCategory.Pigment => Loc.Get("ui.apotheke.pigments", "Pigments"),
-                RecipeCategory.Consumable => Loc.Get("ui.apotheke.consumables", "Consumables"),
-                RecipeCategory.Material => Loc.Get("ui.apotheke.materials", "Materials"),
-                _ => cat.ToString()
-            };
-        }
-
-        private VisualElement BuildRecipeCard(RecipeData recipe, List<InventoryItem> items)
+        private VisualElement BuildRecipeCard(ServerRecipeConfig recipe, List<InventoryItem> items)
         {
             bool canMix = ApothekeManager.Instance.CanMix(recipe);
             int recipeIndex = System.Array.IndexOf(ApothekeManager.Instance.AllRecipes, recipe);
@@ -492,7 +507,7 @@ namespace Garden
             var headerRow = new VisualElement();
             headerRow.AddToClassList("recipe-card-header");
 
-            var nameLabel = new Label(recipe.recipeName);
+            var nameLabel = new Label(ConfigService.Instance.GetItemDisplayName(recipe.resultItem));
             nameLabel.AddToClassList("recipe-card-name");
             headerRow.Add(nameLabel);
 
@@ -526,10 +541,10 @@ namespace Garden
                     var item = items.Find(i => i.itemKey == ing.itemKey);
                     if (item != null) owned = item.count;
                 }
-                bool satisfied = owned >= ing.quantity;
+                bool satisfied = owned >= ing.count;
 
                 string prefix = satisfied ? "+ " : "x ";
-                var countLabel = new Label($"{prefix}{owned}/{ing.quantity}");
+                var countLabel = new Label($"{prefix}{owned}/{ing.count}");
                 countLabel.AddToClassList("recipe-ingredient-count");
                 countLabel.AddToClassList(satisfied
                     ? "recipe-ingredient-count--satisfied"
@@ -545,7 +560,7 @@ namespace Garden
             var resultLbl = new Label(Loc.Get("ui.apotheke.makes", "Makes:"));
             resultLbl.AddToClassList("recipe-result-label");
             resultRow.Add(resultLbl);
-            var resultName = new Label($"{recipe.resultQuantity}x {ConfigService.Instance.GetItemDisplayName(recipe.result)}");
+            var resultName = new Label($"{recipe.resultQuantity}x {ConfigService.Instance.GetItemDisplayName(recipe.resultItem)}");
             resultName.AddToClassList("recipe-result-name");
             resultRow.Add(resultName);
             details.Add(resultRow);
