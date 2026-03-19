@@ -576,8 +576,8 @@ namespace Garden
             infoCol.Add(chipsRow);
             headerRow.Add(infoCol);
 
-            // Inline craft button (collapsed state, only when craftable)
-            if (canMix && !isExpanded)
+            // Inline craft button (collapsed state, always visible)
+            if (!isExpanded)
             {
                 var inlineCraft = new Button();
                 inlineCraft.clickable = new Clickable(() =>
@@ -587,6 +587,7 @@ namespace Garden
                 });
                 inlineCraft.text = Loc.Get("ui.button.craft", "Craft");
                 inlineCraft.AddToClassList("recipe-card-craft-inline");
+                inlineCraft.SetEnabled(canMix);
                 headerRow.Add(inlineCraft);
             }
 
