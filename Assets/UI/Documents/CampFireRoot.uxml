@@ -141,7 +141,7 @@
 
                         <!-- Craft view (mixing recipes) -->
                         <ui:VisualElement name="apotheke-craft">
-                            <ui:ScrollView name="recipe-list" touch-scroll-type="Clamped" elasticity="0" />
+                            <ui:ScrollView name="recipe-list" touch-scroll-type="Clamped" elasticity="0" vertical-scroller-visibility="Hidden" />
                         </ui:VisualElement>
                     </ui:VisualElement>
 
