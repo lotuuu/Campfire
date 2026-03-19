@@ -145,7 +145,7 @@
     align-self: stretch;
 }
 
-.seed-picker-scroll > .unity-scroller--vertical {
+.seed-picker-scroll .unity-scroller--vertical {
     display: none;
 }
 
