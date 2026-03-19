@@ -725,7 +725,7 @@ namespace Garden
             }
 
             // Recipes
-            if (root.TryGetValue("recipes", out var recipesObj) && recipesObj is Dictionary<string, object> recipesDict)
+            if (root.TryGetValue("recipes", out var craftRecipesObj) && craftRecipesObj is Dictionary<string, object> recipesDict)
             {
                 _recipeConfigs = new Dictionary<string, ServerRecipeConfig>();
                 foreach (var kv in recipesDict)
