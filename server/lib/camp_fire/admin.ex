@@ -276,6 +276,70 @@ defmodule CampFire.Admin do
     end
   end
 
+  def update_player_name(uid, display_name) do
+    case Repo.get_by(Player, uid: uid) do
+      nil -> {:error, :not_found}
+      player -> player |> change(%{display_name: display_name}) |> Repo.update()
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # Inventory (admin)
+  # ---------------------------------------------------------------------------
+
+  def list_all_items do
+    Repo.all(from i in CampFire.Game.Item, order_by: i.item_key)
+  end
+
+  def set_inventory_count(uid, item_key, count) do
+    item = Repo.get_by!(CampFire.Game.Item, item_key: item_key)
+
+    case Repo.get_by(CampFire.Economy.PlayerInventory, player_uid: uid, item_id: item.id) do
+      nil when count > 0 ->
+        %CampFire.Economy.PlayerInventory{}
+        |> CampFire.Economy.PlayerInventory.changeset(%{player_uid: uid, item_id: item.id, count: count})
+        |> Repo.insert()
+
+      nil ->
+        {:ok, nil}
+
+      inv when count <= 0 ->
+        Repo.delete(inv)
+
+      inv ->
+        inv |> CampFire.Economy.PlayerInventory.changeset(%{count: count}) |> Repo.update()
+    end
+  end
+
+  def delete_inventory_item(uid, item_key) do
+    item = Repo.get_by!(CampFire.Game.Item, item_key: item_key)
+
+    case Repo.get_by(CampFire.Economy.PlayerInventory, player_uid: uid, item_id: item.id) do
+      nil -> {:ok, nil}
+      inv -> Repo.delete(inv)
+    end
+  end
+
+  # ---------------------------------------------------------------------------
+  # Player entities (admin CRUD)
+  # ---------------------------------------------------------------------------
+
+  def create_player_plot(attrs), do: %PlayerPlot{} |> PlayerPlot.changeset(attrs) |> Repo.insert()
+  def update_plot(id, attrs), do: Repo.get!(PlayerPlot, id) |> PlayerPlot.changeset(attrs) |> Repo.update()
+  def delete_plot(id), do: Repo.get!(PlayerPlot, id) |> Repo.delete()
+
+  def create_player_vase(attrs), do: %PlayerVase{} |> PlayerVase.changeset(attrs) |> Repo.insert()
+  def update_vase(id, attrs), do: Repo.get!(PlayerVase, id) |> PlayerVase.changeset(attrs) |> Repo.update()
+  def delete_vase(id), do: Repo.get!(PlayerVase, id) |> Repo.delete()
+
+  def create_player_garden(attrs), do: %PlayerGarden{} |> PlayerGarden.changeset(attrs) |> Repo.insert()
+  def update_player_garden(id, attrs), do: Repo.get!(PlayerGarden, id) |> PlayerGarden.changeset(attrs) |> Repo.update()
+  def delete_player_garden(id), do: Repo.get!(PlayerGarden, id) |> Repo.delete()
+
+  def create_player_mallum(attrs), do: %PlayerMallum{} |> PlayerMallum.changeset(attrs) |> Repo.insert()
+  def update_mallum(id, attrs), do: Repo.get!(PlayerMallum, id) |> PlayerMallum.changeset(attrs) |> Repo.update()
+  def delete_mallum(id), do: Repo.get!(PlayerMallum, id) |> Repo.delete()
+
   # ---------------------------------------------------------------------------
   # Weather
   # ---------------------------------------------------------------------------
