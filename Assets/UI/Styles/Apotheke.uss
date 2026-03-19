@@ -65,8 +65,8 @@
 }
 
 #seed-list .seed-icon {
-    width: 120px;
-    height: 120px;
+    width: 160px;
+    height: 160px;
     border-radius: var(--radius-sm);
     background-color: rgba(40, 28, 15, 0.6);
     flex-shrink: 0;
