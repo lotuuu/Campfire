@@ -340,7 +340,7 @@ namespace Garden
                 if (giftTemplate == null) break;
                 var el = giftTemplate.CloneTree();
                 var fromLabel = el.Q<Label>(className: "gift-from");
-                if (fromLabel != null) fromLabel.text = $"From {gift.fromName}";
+                if (fromLabel != null) fromLabel.text = string.Format(Loc.Get("ui.letters.from", "From {0}"), gift.fromName);
 
                 var contentsLabel = el.Q<Label>(className: "gift-contents");
                 if (contentsLabel != null)
@@ -590,7 +590,7 @@ namespace Garden
             addView.style.display = DisplayStyle.None;
             giftPickerView.style.display = DisplayStyle.Flex;
 
-            if (giftPickerTo != null) giftPickerTo.text = $"To: {friendName}";
+            if (giftPickerTo != null) giftPickerTo.text = string.Format(Loc.Get("ui.letters.to", "To: {0}"), friendName);
             UpdateGiftSelectedLabel();
             PopulateGiftInventory();
         }
@@ -656,7 +656,7 @@ namespace Garden
             var parts = new List<string>();
             foreach (var item in selectedGiftItems)
                 parts.Add($"{item.name} x{item.count}");
-            giftSelectedLabel.text = $"Selected: {string.Join(", ", parts)}";
+            giftSelectedLabel.text = string.Format(Loc.Get("ui.letters.selected", "Selected: {0}"), string.Join(", ", parts));
         }
 
         private async void OnConfirmGift()

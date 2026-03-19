@@ -235,8 +235,8 @@ namespace Garden
                 mallumStatusContainer.Add(mallumStatusLabel);
             }
             int busy = total - available;
-            mallumStatusLabel.text = $"{available} Idle / {total} Total";
-            if (busy > 0) mallumStatusLabel.text += $"  ({busy} on task)";
+            mallumStatusLabel.text = string.Format(Loc.Get("ui.quest.mallum_status", "{0} Idle / {1} Total"), available, total);
+            if (busy > 0) mallumStatusLabel.text += "  " + string.Format(Loc.Get("ui.quest.mallum_on_task", "({0} on task)"), busy);
 
             // Sync dot count
             var data = SaveManager.Instance.Data;
@@ -458,7 +458,7 @@ namespace Garden
 
                 accentStrip.AddToClassList(TierClass(quest.requiredFlameLevel));
                 nameLabel.text = quest.questName;
-                levelBadge.text = $"Lv {quest.requiredFlameLevel}";
+                levelBadge.text = string.Format(Loc.Get("ui.label.lv", "Lv {0}"), quest.requiredFlameLevel);
                 durationLabel.text = FormatDuration(quest.durationMinutes);
                 descLabel.text = quest.description;
                 progressContainer.style.display = DisplayStyle.None;
@@ -517,7 +517,7 @@ namespace Garden
                 cardRoot.AddToClassList("quest-card--locked");
                 accentStrip.AddToClassList(TierClass(quest.requiredFlameLevel));
                 nameLabel.text = quest.questName;
-                levelBadge.text = $"Lv {quest.requiredFlameLevel}";
+                levelBadge.text = string.Format(Loc.Get("ui.label.lv", "Lv {0}"), quest.requiredFlameLevel);
                 durationLabel.text = FormatDuration(quest.durationMinutes);
                 descLabel.text = quest.description;
                 progressContainer.style.display = DisplayStyle.None;

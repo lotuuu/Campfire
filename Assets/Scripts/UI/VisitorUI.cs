@@ -179,7 +179,7 @@ namespace Garden
                 if (visitor.giftAmount <= 0)
                     Debug.LogWarning($"[VisitorUI] Gift amount is {visitor.giftAmount} for visitor '{visitor.visitorId}' — likely a server data issue");
 
-                if (giftName != null) giftName.text = $"{visitor.giftAmount}x {itemName}";
+                if (giftName != null) giftName.text = string.Format(Loc.Get("ui.label.item_count", "{0}x {1}"), visitor.giftAmount, itemName);
                 if (giftDesc != null)
                     giftDesc.text = visitor.giftType switch
                     {
@@ -222,7 +222,7 @@ namespace Garden
                         bool enough = have >= cost.count;
 
                         string prefix = enough ? "+ " : "x ";
-                        var costLabel = new Label($"{prefix}{cost.count}x {displayName} ({have})");
+                        var costLabel = new Label($"{prefix}" + string.Format(Loc.Get("ui.visitor.merchant_cost", "{0}x {1} ({2})"), cost.count, displayName, have));
                         costLabel.AddToClassList("merchant-cost-item");
                         if (!enough) costLabel.AddToClassList("merchant-cost-item--insufficient");
                         costsContainer.Add(costLabel);
@@ -230,7 +230,7 @@ namespace Garden
                 }
 
                 if (rewardText != null)
-                    rewardText.text = $"{offer.rewardCount}x {ConfigService.Instance.GetItemDisplayName(offer.rewardItemKey)}";
+                    rewardText.text = string.Format(Loc.Get("ui.label.item_count", "{0}x {1}"), offer.rewardCount, ConfigService.Instance.GetItemDisplayName(offer.rewardItemKey));
 
                 if (tradeBtn != null)
                 {
@@ -267,7 +267,7 @@ namespace Garden
                 int have = item?.count ?? 0;
 
                 if (questLabel != null) questLabel.text = Loc.Get("ui.visitor.requesting", "Requesting:");
-                if (questValue != null) questValue.text = $"{visitor.requestCount}x {visitor.requestItem} (you have {have})";
+                if (questValue != null) questValue.text = string.Format(Loc.Get("ui.visitor.request_have", "{0}x {1} (you have {2})"), visitor.requestCount, visitor.requestItem, have);
 
                 SetDisplay(acceptQuestBtn, false);
                 bool canTurnIn = have >= visitor.requestCount;
@@ -284,7 +284,7 @@ namespace Garden
             else
             {
                 if (questLabel != null) questLabel.text = Loc.Get("ui.visitor.request", "Request:");
-                if (questValue != null) questValue.text = $"{visitor.requestCount}x {visitor.requestItem}";
+                if (questValue != null) questValue.text = string.Format(Loc.Get("ui.label.item_count", "{0}x {1}"), visitor.requestCount, visitor.requestItem);
                 SetDisplay(acceptQuestBtn, true);
                 SetDisplay(turninQuestBtn, false);
             }
