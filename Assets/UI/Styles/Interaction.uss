@@ -145,6 +145,10 @@
     align-self: stretch;
 }
 
+.seed-picker-scroll > .unity-scroller--vertical {
+    display: none;
+}
+
 .seed-picker-list {
     flex-direction: column;
     padding: var(--spacing-xs) 0;
@@ -513,14 +517,14 @@
 .harvest-glow--tier4 { border-color: rgba(255, 200, 60, 0.7); }
 
 .harvest-hero-icon {
-    width: 120px;
-    height: 120px;
+    width: 160px;
+    height: 160px;
     -unity-background-scale-mode: scale-to-fit;
 }
 
 /* ── Item name ── */
 .harvest-result-name {
-    font-size: var(--font-lg);
+    font-size: var(--font-xl);
     color: rgb(240, 220, 180);
     -unity-font-style: bold;
     -unity-text-align: upper-center;
@@ -548,13 +552,13 @@
 }
 
 .harvest-yield-count {
-    font-size: var(--font-xxl);
+    font-size: 80px;
     color: var(--color-text-accent);
     -unity-font-style: bold;
 }
 
 .harvest-bonus-label {
-    font-size: var(--font-xl);
+    font-size: var(--font-xxl);
     color: rgb(130, 220, 110);
     -unity-font-style: bold;
     margin-left: var(--spacing-xs);
@@ -576,7 +580,7 @@
 
 /* ── Harvest "tap to close" hint ── */
 .harvest-tap-hint {
-    font-size: var(--font-xs);
+    font-size: var(--font-sm);
     color: rgb(140, 120, 90);
     -unity-text-align: upper-center;
     margin-top: var(--spacing-md);
@@ -593,7 +597,7 @@
 }
 
 .harvest-match-badge {
-    font-size: var(--font-md);
+    font-size: var(--font-lg);
     -unity-font-style: bold;
     padding: var(--spacing-xs) var(--spacing-md);
     border-radius: var(--radius-sm);
@@ -601,7 +605,7 @@
 }
 
 .harvest-match-pct {
-    font-size: var(--font-xl);
+    font-size: var(--font-xxl);
     -unity-font-style: bold;
     margin-left: var(--spacing-sm);
 }
@@ -629,7 +633,7 @@
 /* ── Animated quality bar ── */
 .harvest-quality-track {
     align-self: stretch;
-    height: 16px;
+    height: 22px;
     background-color: rgba(40, 30, 15, 0.5);
     border-radius: 8px;
     border-width: 1px;
@@ -671,7 +675,7 @@
 }
 
 .harvest-axis-header {
-    font-size: var(--font-xs);
+    font-size: var(--font-sm);
     color: var(--color-text-dim);
     letter-spacing: 2px;
     -unity-text-align: upper-center;
@@ -708,13 +712,13 @@
 }
 
 .harvest-axis-name {
-    font-size: var(--font-xs);
+    font-size: var(--font-sm);
     color: rgb(180, 160, 130);
     width: 25%;
 }
 
 .harvest-axis-actual {
-    font-size: var(--font-xs);
+    font-size: var(--font-sm);
     color: rgb(220, 200, 160);
     -unity-font-style: bold;
     width: 25%;
@@ -722,7 +726,7 @@
 }
 
 .harvest-axis-ideal {
-    font-size: var(--font-xs);
+    font-size: var(--font-sm);
     color: rgb(140, 120, 90);
     width: 30%;
     -unity-text-align: upper-center;
