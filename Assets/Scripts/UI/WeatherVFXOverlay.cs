@@ -83,12 +83,18 @@ namespace Garden
 
             // Generate shared particle texture and material
             circleTexture = CreateCircleTexture(32);
-            particleMaterial = new Material(Shader.Find("Particles/Standard Unlit"));
+            // URP particle shader
+            var shader = Shader.Find("Universal Render Pipeline/Particles/Unlit");
+            if (shader == null) shader = Shader.Find("Particles/Standard Unlit"); // fallback
+            particleMaterial = new Material(shader);
             particleMaterial.mainTexture = circleTexture;
+            // Set surface type to Transparent
+            particleMaterial.SetFloat("_Surface", 1); // 0=Opaque, 1=Transparent
+            particleMaterial.SetFloat("_Blend", 0);   // 0=Alpha, 1=Premultiply, 2=Additive
             particleMaterial.SetFloat("_ColorMode", 1); // Multiply
-            particleMaterial.SetInt("_SrcBlend", (int)BlendMode.SrcAlpha);
-            particleMaterial.SetInt("_DstBlend", (int)BlendMode.OneMinusSrcAlpha);
             particleMaterial.renderQueue = 3000;
+            particleMaterial.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+            particleMaterial.EnableKeyword("_ALPHABLEND_ON");
 
             // Read initial dimensions
             float vw = viewport.resolvedStyle.width;
