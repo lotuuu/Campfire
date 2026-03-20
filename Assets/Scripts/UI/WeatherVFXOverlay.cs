@@ -46,11 +46,11 @@ namespace Garden
         // Snow config
         private const float SnowFgAlphaMin = 0.45f, SnowFgAlphaMax = 0.6f;
         private const float SnowBgAlphaMin = 0.25f, SnowBgAlphaMax = 0.4f;
-        private const float SnowFgRadiusMin = 2f, SnowFgRadiusMax = 4f;
-        private const float SnowBgRadiusMin = 1f, SnowBgRadiusMax = 3f;
+        private const float SnowFgRadiusMin = 3f, SnowFgRadiusMax = 5f;
+        private const float SnowBgRadiusMin = 2f, SnowBgRadiusMax = 4f;
         private const float SnowFgSpeedMin = 50f, SnowFgSpeedMax = 80f;
         private const float SnowBgSpeedMin = 40f, SnowBgSpeedMax = 60f;
-        private const float SnowFlakeRadiusMin = 4f, SnowFlakeRadiusMax = 7f;
+        private const float SnowFlakeRadiusMin = 5f, SnowFlakeRadiusMax = 9f;
         private const float SnowFlakeChance = 0.15f;
         private const float SnowSwayFreqMin = 0.5f, SnowSwayFreqMax = 1.5f;
         private const float SnowSwayAmpMin = 10f, SnowSwayAmpMax = 25f;
@@ -495,6 +495,14 @@ namespace Garden
 
         private void DrawSnowDot(Painter2D painter, Vector2 pos, ref WeatherParticle p)
         {
+            // Soft glow halo
+            painter.BeginPath();
+            painter.Arc(pos, p.size * 2f, 0f, 360f);
+            painter.ClosePath();
+            painter.fillColor = new Color(SnowColor.r, SnowColor.g, SnowColor.b, p.alpha * 0.15f);
+            painter.Fill();
+
+            // Core dot
             painter.BeginPath();
             painter.Arc(pos, p.size, 0f, 360f);
             painter.ClosePath();
@@ -507,6 +515,14 @@ namespace Garden
             float r = p.size;
             float rotRad = p.rotation * Mathf.Deg2Rad;
 
+            // Soft glow halo
+            painter.BeginPath();
+            painter.Arc(pos, r * 1.5f, 0f, 360f);
+            painter.ClosePath();
+            painter.fillColor = new Color(SnowColor.r, SnowColor.g, SnowColor.b, p.alpha * 0.12f);
+            painter.Fill();
+
+            // Flake arms
             for (int arm = 0; arm < 3; arm++)
             {
                 float armAngle = rotRad + arm * Mathf.PI / 3f;
@@ -517,7 +533,7 @@ namespace Garden
                 painter.MoveTo(new Vector2(pos.x - cos * r, pos.y - sin * r));
                 painter.LineTo(new Vector2(pos.x + cos * r, pos.y + sin * r));
                 painter.strokeColor = new Color(SnowColor.r, SnowColor.g, SnowColor.b, p.alpha);
-                painter.lineWidth = 1f;
+                painter.lineWidth = 1.8f;
                 painter.Stroke();
             }
         }
