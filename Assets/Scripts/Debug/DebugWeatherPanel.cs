@@ -81,6 +81,8 @@ namespace Garden
 
             // Wire weather buttons
             root.Q<Button>("apply-button")?.RegisterCallback<ClickEvent>(_ => ApplySettings());
+            root.Q<Button>("clear-weather-button")?.RegisterCallback<ClickEvent>(_ =>
+                WeatherService.Instance?.ClearDebugWeather());
 
             root.Q<Button>("blizzard-button")?.RegisterCallback<ClickEvent>(_ =>
                 ApplyPreset(-5, 60, 15, 4, 0, 4));

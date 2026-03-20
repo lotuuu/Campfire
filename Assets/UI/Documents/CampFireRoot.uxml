@@ -315,6 +315,7 @@
                         </ui:VisualElement>
 
                         <ui:Button name="apply-button" text="Apply Weather" />
+                        <ui:Button name="clear-weather-button" text="Clear Weather Override" class="btn-danger" />
 
                         <ui:Label text="Time" class="debug-section-header" />
                         <ui:VisualElement class="debug-row">

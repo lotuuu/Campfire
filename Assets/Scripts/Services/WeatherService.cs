@@ -280,6 +280,13 @@ namespace Garden
             ApplyDebugWeather();
         }
 
+        public void ClearDebugWeather()
+        {
+            useDebugOverride = false;
+            // Re-fetch server weather to restore real state
+            GameService.Instance?.Initialize();
+        }
+
         public void SetDebugMode(bool enabled)
         {
             useDebugOverride = enabled;
