@@ -22,7 +22,7 @@ No external test runner or CI pipeline exists. The test assembly (`Garden.Tests.
 
 All managers and services are MonoBehaviour singletons with duplicate-destroy guards in `Awake()`. They are **scene-bound** (no `DontDestroyOnLoad`). Access via `ClassName.Instance`.
 
-- **Services** (`Scripts/Services/`): `WeatherService`, `SaveManager`, `SocialSaveManager`, `SocialService`, `CurrencyManager`, `NotificationService`, `ConfigService`, `EconomyService`, `GameService`, `SpriteService`, `AudioManager`, `DeepLinkService`
+- **Services** (`Scripts/Services/`): `WeatherService`, `SaveManager`, `SocialSaveManager`, `SocialService`, `CurrencyManager`, `NotificationService`, `ConfigService`, `EconomyService`, `GameService`, `SpriteService`, `AudioManager`, `DeepLinkService`, `LocalizationService`, `DebugService`
 - **Managers** (`Scripts/Managers/`): `FlameManager`, `PlotManager`, `VaseManager`, `GardenManager`, `ApothekeManager`, `MallumManager`, `GameManager`, `VisitorManager`, `BirdManager`, `SkinManager`, `TutorialManager`
 
 ### Resources (Economy)
@@ -125,6 +125,10 @@ The campsite uses a hex grid with flat-top layout. `HexGridUtil.HexToPixel(q, r,
 
 `GameTime` wraps `DateTime` with a debug offset and `TimeScale` property for debug time acceleration — all plant timers use `GameTime.UtcNow`. Calendar events (equinoxes, lunar eclipses) are hardcoded in `CalendarEvents.cs` through 2028.
 
+### Localization
+
+`LocalizationService` fetches locale strings from the server. `Loc.Get(key, fallback)` is the shorthand used throughout UI code — returns the localized string or the fallback if the service isn't loaded.
+
 ### JSON Parsing
 
 `MiniJson` (in `Utils/`) is a lightweight public-domain JSON parser for `Dictionary`/`List`/primitives. Complements `JsonUtility` (which requires `[Serializable]` classes) and is used for flexible config/response parsing.
@@ -141,9 +145,11 @@ An Elixir/Phoenix backend lives in `server/` (routes: `/auth`, `/friends`, `/vil
 
 **Server commands** (run from `server/`):
 - `make setup` — start DB, install deps, create + migrate + seed
-- `make dev` — start Phoenix server (port 4000)
+- `make dev` — start Phoenix server with ngrok tunnel (port 4000)
+- `make start` — start Phoenix server without tunnel
 - `make psql` — open psql shell
 - `make tunnel` / `make tunnel-stop` — ngrok tunnel for device testing (writes URL into `DevServerConfig.cs`)
+- `make remote-use` — point `DevServerConfig.cs` at Gigalixir production URL
 
 - Phoenix contexts: `Accounts`, `Social`, `Villages`, `Gifts`, `Visitors`, `Economy`, `Game`, `Admin`, `ConfigCache`, `Sprites`, `SpriteManifest`
 - Admin dashboard via Phoenix LiveView at `/admin/*` (seeds, quests, players, economy, weather, visitors, sprites)
@@ -161,7 +167,7 @@ An Elixir/Phoenix backend lives in `server/` (routes: `/auth`, `/friends`, `/vil
 - **Single campsite view** with slide-up overlay panels (Apotheke, Letters, Build/Craft)
 - **Top bar**: weather display + resource counters (mana, water, gems)
 - **Bottom nav**: buttons opening overlay panels
-- Sub-controllers: `WeatherBarUI`, `ResourceDisplayUI`, `BottomNavUI`, `CampsiteViewUI`, `ApothekeUI`, `BuildUI`, `LettersUI`, `QuestUI`, `QuestButtonUI`, `SafeAreaController`, `DialogueUI`, `VisitorUI`, `TutorialUI`, `SettingsUI`
+- Sub-controllers: `WeatherBarUI`, `ResourceDisplayUI`, `BottomNavUI`, `CampsiteViewUI`, `ApothekeUI`, `BuildUI`, `LettersUI`, `QuestUI`, `QuestButtonUI`, `SafeAreaController`, `DialogueUI`, `VisitorUI`, `TutorialUI`, `SettingsUI`, `RewardRevealUI`, `FlameLevelUpAnimator`, `BuildCardHelper`, `CampsiteLightingOverlay`, `WeatherVFXOverlay`
 - All controllers are MonoBehaviours on the same GameObject, initialized via `Initialize(VisualElement root)` where they cache element refs with `root.Q<>()`
 - Dynamic list items use `VisualTreeAsset.CloneTree()` from templates in `Assets/Resources/UI/Templates/`
 - Stylesheets in `Assets/UI/Styles/`; `Variables.uss` defines shared CSS custom properties
