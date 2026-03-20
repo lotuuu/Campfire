@@ -84,7 +84,7 @@ namespace Garden
         private WeatherCondition targetCondition = WeatherCondition.Clear;
         private float spawnAccumulator;
         private float viewportWidth, viewportHeight;
-        private float lastPanX, lastPanY; // previous frame canvas translate
+        private float panOffsetX, panOffsetY; // current canvas translate, read at draw time
         private float elapsedTime;
 
         // Lightning state
@@ -156,19 +156,20 @@ namespace Garden
             viewportWidth = vw;
             viewportHeight = vh;
 
-            // Init pan tracking
+            // Init pan offset
             var translate = canvas.resolvedStyle.translate;
-            lastPanX = translate.x;
-            lastPanY = translate.y;
+            panOffsetX = translate.x;
+            panOffsetY = translate.y;
 
             bool isRain = targetCondition == WeatherCondition.Rain || targetCondition == WeatherCondition.Storm;
+            float oy = -panOffsetY; // canvas-space origin
             for (int i = 0; i < targetParticleCount && i < MaxParticles; i++)
             {
                 SpawnParticle(isRain);
                 if (!isRain)
                 {
-                    // Scatter snow Y across viewport
-                    particles[i].position.y = Random.Range(0f, viewportHeight);
+                    // Scatter snow Y across viewport (in canvas space)
+                    particles[i].position.y = oy + Random.Range(0f, viewportHeight);
                 }
                 else
                 {
@@ -216,25 +217,10 @@ namespace Garden
             if (!float.IsNaN(vh) && vh > 0) viewportHeight = vh;
             if (viewportWidth <= 0 || viewportHeight <= 0) return;
 
-            // Track canvas pan and shift all particles by the delta so they
-            // appear anchored to the grid even though the overlay is on the viewport.
+            // Read canvas translate for draw-time offset (particles stored in canvas space)
             var translate = canvas.resolvedStyle.translate;
-            float panX = translate.x;
-            float panY = translate.y;
-            float panDeltaX = panX - lastPanX;
-            float panDeltaY = panY - lastPanY;
-            lastPanX = panX;
-            lastPanY = panY;
-
-            if (Mathf.Abs(panDeltaX) > 0.01f || Mathf.Abs(panDeltaY) > 0.01f)
-            {
-                for (int i = 0; i < MaxParticles; i++)
-                {
-                    if (!particles[i].alive) continue;
-                    particles[i].position.x += panDeltaX;
-                    particles[i].position.y += panDeltaY;
-                }
-            }
+            panOffsetX = translate.x;
+            panOffsetY = translate.y;
 
             activeParticleCount = 0;
             for (int i = 0; i < MaxParticles; i++)
@@ -290,14 +276,18 @@ namespace Garden
             }
             if (slot < 0) return;
 
+            // Positions stored in canvas space; convert viewport random coords
+            float ox = -panOffsetX; // canvas-space origin of visible area
+            float oy = -panOffsetY;
+
             if (isRain)
             {
                 // Top-down rain: impact appears at random position, plays dot → ripple → fade
                 particles[slot] = new WeatherParticle
                 {
                     position = new Vector2(
-                        Random.Range(0f, viewportWidth),
-                        Random.Range(0f, viewportHeight)),
+                        ox + Random.Range(0f, viewportWidth),
+                        oy + Random.Range(0f, viewportHeight)),
                     age = 0f,
                     lifetime = RainImpactLifetime + Random.Range(-0.1f, 0.15f),
                     size = RainImpactRippleMaxRadius + Random.Range(-2f, 2f),
@@ -320,8 +310,8 @@ namespace Garden
                 particles[slot] = new WeatherParticle
                 {
                     position = new Vector2(
-                        Random.Range(0f, viewportWidth),
-                        Random.Range(-30f, -10f)),
+                        ox + Random.Range(0f, viewportWidth),
+                        oy + Random.Range(-30f, -10f)),
                     speed = isForeground
                         ? Random.Range(SnowFgSpeedMin, SnowFgSpeedMax)
                         : Random.Range(SnowBgSpeedMin, SnowBgSpeedMax),
@@ -354,24 +344,28 @@ namespace Garden
             }
             else
             {
-                // Snow: drift downward with sway
+                // Snow: drift downward with sway (positions in canvas space)
                 p.position.x += Mathf.Sin(elapsedTime * p.swayFreq + p.swayPhase) * p.swayAmplitude * dt;
                 p.position.y += p.speed * dt;
                 p.rotation += p.rotationSpeed * dt;
 
+                // Convert to viewport space for bounds checks
+                float screenY = p.position.y + panOffsetY;
+                float screenX = p.position.x + panOffsetX;
+
                 float fadeStart = viewportHeight * (1f - SnowFadeZoneRatio);
-                if (p.position.y > fadeStart)
+                if (screenY > fadeStart)
                 {
-                    float fadeProgress = (p.position.y - fadeStart) / (viewportHeight * SnowFadeZoneRatio);
+                    float fadeProgress = (screenY - fadeStart) / (viewportHeight * SnowFadeZoneRatio);
                     p.alpha = Mathf.Max(0f, p.alpha - fadeProgress * dt * 3f);
                     if (p.alpha <= 0.01f)
                         p.alive = false;
                 }
 
-                if (p.position.y > viewportHeight + 50f)
+                if (screenY > viewportHeight + 50f)
                     p.alive = false;
 
-                if (p.position.x < -50f || p.position.x > viewportWidth + 50f)
+                if (screenX < -50f || screenX > viewportWidth + 50f)
                     p.alive = false;
             }
         }
@@ -456,33 +450,34 @@ namespace Garden
 
         private void DrawParticle(Painter2D painter, ref WeatherParticle p)
         {
+            // Convert canvas-space position to viewport-space for drawing
+            Vector2 drawPos = new(p.position.x + panOffsetX, p.position.y + panOffsetY);
+
             switch (p.type)
             {
-                case ParticleType.RainImpact: DrawRainImpact(painter, ref p); break;
-                case ParticleType.SnowDot: DrawSnowDot(painter, ref p); break;
-                case ParticleType.SnowFlake: DrawSnowFlake(painter, ref p); break;
+                case ParticleType.RainImpact: DrawRainImpact(painter, drawPos, ref p); break;
+                case ParticleType.SnowDot: DrawSnowDot(painter, drawPos, ref p); break;
+                case ParticleType.SnowFlake: DrawSnowFlake(painter, drawPos, ref p); break;
             }
         }
 
-        private void DrawRainImpact(Painter2D painter, ref WeatherParticle p)
+        private void DrawRainImpact(Painter2D painter, Vector2 pos, ref WeatherParticle p)
         {
             float t = p.age / p.lifetime;
 
             if (t < RainImpactDotDuration / p.lifetime)
             {
-                // Phase 1: bright impact dot
                 float dotT = p.age / RainImpactDotDuration;
                 float dotAlpha = RainImpactDotAlpha * (1f - dotT * 0.5f);
                 float dotRadius = RainImpactDotRadius * (0.5f + dotT * 0.5f);
 
                 painter.BeginPath();
-                painter.Arc(new Vector2(p.position.x, p.position.y), dotRadius, 0f, 360f);
+                painter.Arc(pos, dotRadius, 0f, 360f);
                 painter.ClosePath();
                 painter.fillColor = new Color(RainColor.r, RainColor.g, RainColor.b, dotAlpha);
                 painter.Fill();
             }
 
-            // Phase 2: expanding ripple ring (starts immediately, overlaps with dot)
             float rippleT = t;
             float rippleRadius = rippleT * p.size;
             float rippleAlpha = RainImpactRippleAlpha * (1f - rippleT);
@@ -490,7 +485,7 @@ namespace Garden
             if (rippleAlpha > 0.01f && rippleRadius > 0.5f)
             {
                 painter.BeginPath();
-                painter.Arc(new Vector2(p.position.x, p.position.y), rippleRadius, 0f, 360f);
+                painter.Arc(pos, rippleRadius, 0f, 360f);
                 painter.ClosePath();
                 painter.strokeColor = new Color(RainColor.r, RainColor.g, RainColor.b, rippleAlpha);
                 painter.lineWidth = p.isForeground ? 1.2f : 0.8f;
@@ -498,16 +493,16 @@ namespace Garden
             }
         }
 
-        private void DrawSnowDot(Painter2D painter, ref WeatherParticle p)
+        private void DrawSnowDot(Painter2D painter, Vector2 pos, ref WeatherParticle p)
         {
             painter.BeginPath();
-            painter.Arc(new Vector2(p.position.x, p.position.y), p.size, 0f, 360f);
+            painter.Arc(pos, p.size, 0f, 360f);
             painter.ClosePath();
             painter.fillColor = new Color(SnowColor.r, SnowColor.g, SnowColor.b, p.alpha);
             painter.Fill();
         }
 
-        private void DrawSnowFlake(Painter2D painter, ref WeatherParticle p)
+        private void DrawSnowFlake(Painter2D painter, Vector2 pos, ref WeatherParticle p)
         {
             float r = p.size;
             float rotRad = p.rotation * Mathf.Deg2Rad;
@@ -519,8 +514,8 @@ namespace Garden
                 float sin = Mathf.Sin(armAngle);
 
                 painter.BeginPath();
-                painter.MoveTo(new Vector2(p.position.x - cos * r, p.position.y - sin * r));
-                painter.LineTo(new Vector2(p.position.x + cos * r, p.position.y + sin * r));
+                painter.MoveTo(new Vector2(pos.x - cos * r, pos.y - sin * r));
+                painter.LineTo(new Vector2(pos.x + cos * r, pos.y + sin * r));
                 painter.strokeColor = new Color(SnowColor.r, SnowColor.g, SnowColor.b, p.alpha);
                 painter.lineWidth = 1f;
                 painter.Stroke();
