@@ -215,8 +215,10 @@ namespace Garden
 
             // Position at canvas center initially
             var translate = canvas.resolvedStyle.translate;
-            float cx = canvasW / 2f + translate.x;
-            float cy = -(canvasH / 2f + translate.y);
+            // Visible center in canvas coords: -translate + viewport/2
+            // In world coords: X = canvas X, Y = -canvas Y
+            float cx = -translate.x + viewportWidth / 2f;
+            float cy = -(-translate.y + viewportHeight / 2f);
             vfxCamera.transform.position = new Vector3(cx, cy, -10f);
         }
 
@@ -271,29 +273,36 @@ namespace Garden
             var go = new GameObject("SnowParticles");
             go.transform.SetParent(vfxRoot.transform);
             go.layer = VfxLayer;
-            go.transform.position = new Vector3(canvasW / 2f, 0f, 0f);
-            // Rotate so particles emit downward (-Y in world)
-            go.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
+            // Same box as rain — snow appears everywhere, drifts downward
+            go.transform.position = new Vector3(canvasW / 2f, -canvasH / 2f, 0f);
 
             snowPS = go.AddComponent<ParticleSystem>();
             var main = snowPS.main;
             main.simulationSpace = ParticleSystemSimulationSpace.World;
-            main.startLifetime = canvasH / 60f;
+            main.startLifetime = new ParticleSystem.MinMaxCurve(3f, 6f);
             main.startSize = new ParticleSystem.MinMaxCurve(14f, 24f);
-            main.startSpeed = new ParticleSystem.MinMaxCurve(40f, 80f);
+            main.startSpeed = 0f; // movement via velocity over lifetime
             main.startColor = new Color(0.90f, 0.92f, 1f, 0.55f);
             main.maxParticles = 1000;
             main.playOnAwake = false;
             main.loop = true;
-            main.gravityModifier = 0f;
 
+            // Box shape covering entire canvas
             var shape = snowPS.shape;
             shape.enabled = true;
-            shape.shapeType = ParticleSystemShapeType.SingleSidedEdge;
-            shape.radius = canvasW / 2f;
+            shape.shapeType = ParticleSystemShapeType.Box;
+            shape.scale = new Vector3(canvasW, canvasH, 1f);
 
             var emission = snowPS.emission;
             emission.rateOverTime = 0f;
+
+            // Constant downward drift via velocity over lifetime
+            var vel = snowPS.velocityOverLifetime;
+            vel.enabled = true;
+            vel.space = ParticleSystemSimulationSpace.World;
+            vel.x = 0f;
+            vel.y = new ParticleSystem.MinMaxCurve(-80f, -40f); // drift down in world -Y
+            vel.z = 0f;
 
             // Noise for horizontal sway
             var noise = snowPS.noise;
@@ -320,8 +329,8 @@ namespace Garden
                 new[] { new GradientColorKey(Color.white, 0f), new GradientColorKey(Color.white, 1f) },
                 new[] {
                     new GradientAlphaKey(0f, 0f),
-                    new GradientAlphaKey(1f, 0.05f),
-                    new GradientAlphaKey(1f, 0.9f),
+                    new GradientAlphaKey(1f, 0.1f),
+                    new GradientAlphaKey(1f, 0.8f),
                     new GradientAlphaKey(0f, 1f)
                 });
             col.color = gradient;
@@ -380,7 +389,7 @@ namespace Garden
                     break;
                 case WeatherCondition.Snow:
                     rainEmission.rateOverTime = 0f;
-                    snowEmission.rateOverTime = widthRatio * SnowBaseEmission;
+                    snowEmission.rateOverTime = areaRatio * SnowBaseEmission;
                     if (!snowPS.isPlaying) snowPS.Play();
                     if (snowPS.particleCount == 0)
                     {
@@ -412,8 +421,10 @@ namespace Garden
 
             // Sync camera with canvas pan
             var translate = canvas.resolvedStyle.translate;
-            float cx = canvasW / 2f + translate.x;
-            float cy = -(canvasH / 2f + translate.y);
+            // Visible center in canvas coords: -translate + viewport/2
+            // In world coords: X = canvas X, Y = -canvas Y
+            float cx = -translate.x + viewportWidth / 2f;
+            float cy = -(-translate.y + viewportHeight / 2f);
             vfxCamera.transform.position = new Vector3(cx, cy, -10f);
             vfxCamera.orthographicSize = viewportHeight / 2f;
             vfxCamera.aspect = viewportWidth / viewportHeight;
@@ -461,10 +472,8 @@ namespace Garden
             if (snowPS != null)
             {
                 var shape = snowPS.shape;
-                shape.radius = canvasW / 2f;
-                snowPS.transform.position = new Vector3(canvasW / 2f, 0f, 0f);
-                var main = snowPS.main;
-                main.startLifetime = canvasH / 60f;
+                shape.scale = new Vector3(canvasW, canvasH, 1f);
+                snowPS.transform.position = new Vector3(canvasW / 2f, -canvasH / 2f, 0f);
             }
 
             UpdateEmission();
