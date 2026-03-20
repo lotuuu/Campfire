@@ -233,7 +233,7 @@ namespace Garden
             var main = rainPS.main;
             main.simulationSpace = ParticleSystemSimulationSpace.World;
             main.startLifetime = new ParticleSystem.MinMaxCurve(0.5f, 0.7f);
-            main.startSize = new ParticleSystem.MinMaxCurve(20f, 40f);
+            main.startSize = new ParticleSystem.MinMaxCurve(14f, 28f);
             main.startSpeed = 0f;
             main.startColor = new Color(0.71f, 0.78f, 1f, 0.65f);
             main.maxParticles = 1000;
@@ -377,13 +377,13 @@ namespace Garden
             {
                 case WeatherCondition.Rain:
                     rainEmission.rateOverTime = areaRatio * RainBaseEmission;
-                    rainMain.startSize = new ParticleSystem.MinMaxCurve(20f, 40f);
+                    rainMain.startSize = new ParticleSystem.MinMaxCurve(14f, 28f);
                     snowEmission.rateOverTime = 0f;
                     if (!rainPS.isPlaying) rainPS.Play();
                     break;
                 case WeatherCondition.Storm:
                     rainEmission.rateOverTime = areaRatio * RainBaseEmission * StormEmissionMultiplier;
-                    rainMain.startSize = new ParticleSystem.MinMaxCurve(25f, 50f);
+                    rainMain.startSize = new ParticleSystem.MinMaxCurve(18f, 35f);
                     snowEmission.rateOverTime = 0f;
                     if (!rainPS.isPlaying) rainPS.Play();
                     break;
