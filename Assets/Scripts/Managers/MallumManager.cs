@@ -144,7 +144,7 @@ namespace Garden
 
             SaveManager.Instance.Save();
             OnMallumsChanged?.Invoke();
-            AudioManager.Instance?.PlaySFX("mallum_footsteps");
+            AudioManager.Instance?.PlaySFXWithFadeOut("mallum_footsteps", 1.5f);
 
             // Note: VaseManager.SendToCollect already notifies server via GameService.FillVase
 
