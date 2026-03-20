@@ -22,6 +22,7 @@ namespace Garden
             public float swayAmplitude;
             public float rotation;
             public float rotationSpeed;
+            public float despawnY;         // randomized per-particle so splashes don't form a line
             public ParticleType type;
             public bool isForeground;
             public bool alive;
@@ -299,6 +300,7 @@ namespace Garden
                             ? Random.Range(RainFgStreakLenMin, RainFgStreakLenMax)
                             : Random.Range(RainBgStreakLenMin, RainBgStreakLenMax))
                         : (isForeground ? RainFgDropRy : RainBgDropRy),
+                    despawnY = viewportHeight * (1f - SplashZoneRatio + Random.Range(0f, SplashZoneRatio)),
                     type = isStreak ? ParticleType.RainStreak : ParticleType.RainDrop,
                     isForeground = isForeground,
                     alive = true
@@ -345,7 +347,7 @@ namespace Garden
                 p.position.x += Mathf.Sin(p.angle) * p.speed * dt;
                 p.position.y += Mathf.Cos(p.angle) * p.speed * dt;
 
-                if (p.position.y > viewportHeight * (1f - SplashZoneRatio))
+                if (p.position.y > p.despawnY)
                 {
                     TrySpawnSplash(p.position);
                     p.alive = false;
