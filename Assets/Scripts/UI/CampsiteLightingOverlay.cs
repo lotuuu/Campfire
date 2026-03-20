@@ -475,9 +475,10 @@ namespace Garden
                         float illum = falloff * light.intensity;
                         totalIllum += illum;
 
-                        warmAccum.r += light.color.r * illum * 0.8f;
-                        warmAccum.g += light.color.g * illum * 0.3f;
-                        warmAccum.b += light.color.b * illum * 0.05f;
+                        // Use max blending so overlapping lights don't compound warm tint
+                        warmAccum.r = Mathf.Max(warmAccum.r, light.color.r * illum * 0.8f);
+                        warmAccum.g = Mathf.Max(warmAccum.g, light.color.g * illum * 0.3f);
+                        warmAccum.b = Mathf.Max(warmAccum.b, light.color.b * illum * 0.05f);
                     }
 
                     totalIllum = Mathf.Clamp01(totalIllum);
