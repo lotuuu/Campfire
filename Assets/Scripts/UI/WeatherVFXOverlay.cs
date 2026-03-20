@@ -273,55 +273,58 @@ namespace Garden
             var go = new GameObject("SnowParticles");
             go.transform.SetParent(vfxRoot.transform);
             go.layer = VfxLayer;
-            // Same box as rain — snow appears everywhere, drifts downward
-            go.transform.position = new Vector3(canvasW / 2f, -canvasH / 2f, 0f);
+            // Edge at top of canvas (world Y=0 = canvas top)
+            go.transform.position = new Vector3(canvasW / 2f, 0f, 0f);
 
             snowPS = go.AddComponent<ParticleSystem>();
             var main = snowPS.main;
             main.simulationSpace = ParticleSystemSimulationSpace.World;
-            main.startLifetime = new ParticleSystem.MinMaxCurve(3f, 6f);
+            // Lifetime = time to cross canvas at avg speed (60 px/s)
+            float lifetime = Mathf.Max(canvasH / 60f, 10f);
+            main.startLifetime = lifetime;
             main.startSize = new ParticleSystem.MinMaxCurve(14f, 24f);
-            main.startSpeed = 0f; // movement via velocity over lifetime
+            main.startSpeed = 0f;
             main.startColor = new Color(0.90f, 0.92f, 1f, 0.55f);
-            main.maxParticles = 1000;
+            main.maxParticles = 2000;
             main.playOnAwake = false;
             main.loop = true;
 
-            // Box shape covering entire canvas
+            // Edge shape spanning canvas width — snow falls from top
             var shape = snowPS.shape;
             shape.enabled = true;
-            shape.shapeType = ParticleSystemShapeType.Box;
-            shape.scale = new Vector3(canvasW, canvasH, 1f);
+            shape.shapeType = ParticleSystemShapeType.SingleSidedEdge;
+            shape.radius = canvasW / 2f;
 
             var emission = snowPS.emission;
             emission.rateOverTime = 0f;
 
-            // Constant downward drift via velocity over lifetime
+            // Downward drift (world -Y = canvas downward), speed 40-80 matching old impl
             var vel = snowPS.velocityOverLifetime;
             vel.enabled = true;
             vel.space = ParticleSystemSimulationSpace.World;
-            vel.x = 0f;
-            vel.y = new ParticleSystem.MinMaxCurve(-80f, -40f); // drift down in world -Y
-            vel.z = 0f;
+            vel.x = new ParticleSystem.MinMaxCurve(0f, 0f);
+            vel.y = new ParticleSystem.MinMaxCurve(-80f, -40f);
+            vel.z = new ParticleSystem.MinMaxCurve(0f, 0f);
 
-            // Noise for horizontal sway
+            // Horizontal sway via noise (replaces old sinusoidal sway)
             var noise = snowPS.noise;
             noise.enabled = true;
             noise.separateAxes = true;
-            noise.strengthX = new ParticleSystem.MinMaxCurve(15f);
+            noise.strengthX = new ParticleSystem.MinMaxCurve(20f);
             noise.strengthY = new ParticleSystem.MinMaxCurve(0f);
             noise.strengthZ = new ParticleSystem.MinMaxCurve(0f);
-            noise.frequency = 1f;
+            noise.frequency = 0.8f;
             noise.scrollSpeed = 0.1f;
             noise.octaveCount = 2;
 
-            // Rotation over lifetime
+            // Slow rotation (matching old 15-30 deg/sec)
             var rot = snowPS.rotationOverLifetime;
             rot.enabled = true;
             rot.z = new ParticleSystem.MinMaxCurve(
-                15f * Mathf.Deg2Rad, 30f * Mathf.Deg2Rad);
+                -30f * Mathf.Deg2Rad, 30f * Mathf.Deg2Rad);
 
-            // Color over lifetime: fade in/out
+            // Color over lifetime: fade in briefly, hold, fade out at bottom
+            // Matches old impl: SnowFadeZoneRatio = 0.1 (last 10% fades out)
             var col = snowPS.colorOverLifetime;
             col.enabled = true;
             var gradient = new Gradient();
@@ -329,8 +332,8 @@ namespace Garden
                 new[] { new GradientColorKey(Color.white, 0f), new GradientColorKey(Color.white, 1f) },
                 new[] {
                     new GradientAlphaKey(0f, 0f),
-                    new GradientAlphaKey(1f, 0.1f),
-                    new GradientAlphaKey(1f, 0.8f),
+                    new GradientAlphaKey(1f, 0.03f),
+                    new GradientAlphaKey(1f, 0.9f),
                     new GradientAlphaKey(0f, 1f)
                 });
             col.color = gradient;
@@ -389,11 +392,13 @@ namespace Garden
                     break;
                 case WeatherCondition.Snow:
                     rainEmission.rateOverTime = 0f;
-                    snowEmission.rateOverTime = areaRatio * SnowBaseEmission;
+                    snowEmission.rateOverTime = widthRatio * SnowBaseEmission;
                     if (!snowPS.isPlaying) snowPS.Play();
                     if (snowPS.particleCount == 0)
                     {
-                        snowPS.Simulate(canvasH / 60f, true, true);
+                        // Pre-fill: simulate long enough for snow to cross the full canvas
+                        float simTime = Mathf.Max(canvasH / 60f, 10f);
+                        snowPS.Simulate(simTime, true, true);
                         snowPS.Play();
                     }
                     break;
@@ -472,8 +477,10 @@ namespace Garden
             if (snowPS != null)
             {
                 var shape = snowPS.shape;
-                shape.scale = new Vector3(canvasW, canvasH, 1f);
-                snowPS.transform.position = new Vector3(canvasW / 2f, -canvasH / 2f, 0f);
+                shape.radius = canvasW / 2f;
+                snowPS.transform.position = new Vector3(canvasW / 2f, 0f, 0f);
+                var main = snowPS.main;
+                main.startLifetime = Mathf.Max(canvasH / 60f, 10f);
             }
 
             UpdateEmission();
