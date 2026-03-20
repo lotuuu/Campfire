@@ -24,7 +24,7 @@ MonoBehaviour:
     pitchMin: 1
     pitchMax: 1
   - key: flame_upgrade
-    clip: {fileID: 8300000, guid: fe4df92d1ce52430384bbce170f9a541, type: 3}
+    clip: {fileID: 8300000, guid: 41df07c73a1e4457e9c7fcbdc81d7fa9, type: 3}
     volume: 1
     pitchMin: 1
     pitchMax: 1
@@ -126,5 +126,15 @@ MonoBehaviour:
   - key: music_main
     clip: {fileID: 8300000, guid: 260d24687218e42b2892485c83736796, type: 3}
     volume: 0.5
+    pitchMin: 1
+    pitchMax: 1
+  - key: fire_upgrade
+    clip: {fileID: 8300000, guid: 903a65740e8004954bb7c1660a61c94f, type: 3}
+    volume: 1
+    pitchMin: 1
+    pitchMax: 1
+  - key: grid_expand
+    clip: {fileID: 8300000, guid: 49fa67375a1ba4290b42695ab692431a, type: 3}
+    volume: 1
     pitchMin: 1
     pitchMax: 1

@@ -127,6 +127,8 @@ namespace Garden
             if (IsPlaying) return;
             IsPlaying = true;
 
+            AudioManager.Instance?.PlaySFX("fire_upgrade");
+
             var state = new AnimationState();
             IVisualElementScheduledItem updater = null;
             var createdElements = new List<VisualElement>();
@@ -381,6 +383,8 @@ namespace Garden
             int oldRadius, VisualElement viewport, Action onComplete = null)
         {
             if (oldRadius <= 0) { onComplete?.Invoke(); return; }
+
+            AudioManager.Instance?.PlaySFX("grid_expand");
 
             var newCells = new List<(VisualElement cell, float angle)>();
 
