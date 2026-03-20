@@ -75,9 +75,9 @@ namespace Garden
         private IEnumerator InitializeLocation()
         {
 #if UNITY_EDITOR
-            // In editor, use a default location (Berlin) so server weather/forecast works.
-            latitude = 52.52f;
-            longitude = 13.405f;
+            // In editor, use a default location (Villa Crespo, Buenos Aires) so server weather/forecast works.
+            latitude = -34.59f;
+            longitude = -58.44f;
             hasLocation = true;
             IsLocationResolved = true;
             OnLocationResolved?.Invoke(true);
