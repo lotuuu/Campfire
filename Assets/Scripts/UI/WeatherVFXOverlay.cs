@@ -66,10 +66,7 @@ namespace Garden
         private const float LightningClusterChance = 0.3f;
         private const float LightningClusterDelay = 1f;
 
-        // Spawn margin beyond viewport edges (so panning reveals existing particles)
-        private const float SpawnMargin = 200f;
-
-        // Particle counts per weather type (covers viewport + margins)
+        // Particle counts (covers entire canvas)
         private const int RainParticleCount = 120;
         private const int StormParticleCount = 150;
         private const int SnowParticleCount = 180;
@@ -87,6 +84,7 @@ namespace Garden
         private WeatherCondition targetCondition = WeatherCondition.Clear;
         private float spawnAccumulator;
         private float viewportWidth, viewportHeight;
+        private float canvasW, canvasH;
         private float panOffsetX, panOffsetY; // current canvas translate, read at draw time
         private float elapsedTime;
 
@@ -164,15 +162,20 @@ namespace Garden
             panOffsetX = translate.x;
             panOffsetY = translate.y;
 
+            float cw = canvas.resolvedStyle.width;
+            float ch = canvas.resolvedStyle.height;
+            if (!float.IsNaN(cw) && cw > 0) canvasW = cw;
+            if (!float.IsNaN(ch) && ch > 0) canvasH = ch;
+
             bool isRain = targetCondition == WeatherCondition.Rain || targetCondition == WeatherCondition.Storm;
             for (int i = 0; i < targetParticleCount && i < MaxParticles; i++)
             {
                 SpawnParticle(isRain);
                 if (!isRain)
                 {
-                    // Scatter snow Y across viewport + margin (in canvas space)
-                    float oy = -panOffsetY - SpawnMargin;
-                    particles[i].position.y = oy + Random.Range(0f, viewportHeight + SpawnMargin * 2f);
+                    // Scatter snow Y across entire canvas
+                    float sh = canvasH > 0 ? canvasH : viewportHeight;
+                    particles[i].position.y = Random.Range(0f, sh);
                 }
                 else
                 {
@@ -219,6 +222,11 @@ namespace Garden
             if (!float.IsNaN(vw) && vw > 0) viewportWidth = vw;
             if (!float.IsNaN(vh) && vh > 0) viewportHeight = vh;
             if (viewportWidth <= 0 || viewportHeight <= 0) return;
+
+            float cw = canvas.resolvedStyle.width;
+            float ch = canvas.resolvedStyle.height;
+            if (!float.IsNaN(cw) && cw > 0) canvasW = cw;
+            if (!float.IsNaN(ch) && ch > 0) canvasH = ch;
 
             // Read canvas translate for draw-time offset (particles stored in canvas space)
             var translate = canvas.resolvedStyle.translate;
@@ -279,11 +287,9 @@ namespace Garden
             }
             if (slot < 0) return;
 
-            // Positions stored in canvas space; spawn within viewport + margin
-            float ox = -panOffsetX - SpawnMargin;
-            float oy = -panOffsetY - SpawnMargin;
-            float spawnW = viewportWidth + SpawnMargin * 2f;
-            float spawnH = viewportHeight + SpawnMargin * 2f;
+            // Positions in canvas space; spawn across entire canvas
+            float spawnW = canvasW > 0 ? canvasW : viewportWidth;
+            float spawnH = canvasH > 0 ? canvasH : viewportHeight;
 
             if (isRain)
             {
@@ -291,8 +297,8 @@ namespace Garden
                 particles[slot] = new WeatherParticle
                 {
                     position = new Vector2(
-                        ox + Random.Range(0f, spawnW),
-                        oy + Random.Range(0f, spawnH)),
+                        Random.Range(0f, spawnW),
+                        Random.Range(0f, spawnH)),
                     age = 0f,
                     lifetime = RainImpactLifetime + Random.Range(-0.1f, 0.15f),
                     size = RainImpactRippleMaxRadius + Random.Range(-2f, 2f),
@@ -315,8 +321,8 @@ namespace Garden
                 particles[slot] = new WeatherParticle
                 {
                     position = new Vector2(
-                        ox + Random.Range(0f, spawnW),
-                        oy + Random.Range(-30f, -10f)),
+                        Random.Range(0f, spawnW),
+                        Random.Range(-30f, -10f)),
                     speed = isForeground
                         ? Random.Range(SnowFgSpeedMin, SnowFgSpeedMax)
                         : Random.Range(SnowBgSpeedMin, SnowBgSpeedMax),
@@ -367,10 +373,13 @@ namespace Garden
                         p.alive = false;
                 }
 
-                if (screenY > viewportHeight + SpawnMargin + 50f)
+                // Kill when off the canvas entirely
+                float cw = canvasW > 0 ? canvasW : viewportWidth;
+                float ch = canvasH > 0 ? canvasH : viewportHeight;
+                if (p.position.y > ch + 50f)
                     p.alive = false;
 
-                if (screenX < -SpawnMargin - 50f || screenX > viewportWidth + SpawnMargin + 50f)
+                if (p.position.x < -50f || p.position.x > cw + 50f)
                     p.alive = false;
             }
         }
