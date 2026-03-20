@@ -30,7 +30,7 @@ namespace Garden
 
         // ── Configuration ──
 
-        private const int MaxParticles = 200;
+        private const int MaxParticles = 250;
         private static readonly Color RainColor = new(0.71f, 0.78f, 1f);
         private static readonly Color SnowColor = new(0.90f, 0.92f, 1f);
         private static readonly Color LightningColor = new(0.78f, 0.82f, 1f);
@@ -66,10 +66,13 @@ namespace Garden
         private const float LightningClusterChance = 0.3f;
         private const float LightningClusterDelay = 1f;
 
-        // Particle counts per weather type
-        private const int RainParticleCount = 80;
-        private const int StormParticleCount = 100;
-        private const int SnowParticleCount = 120;
+        // Spawn margin beyond viewport edges (so panning reveals existing particles)
+        private const float SpawnMargin = 200f;
+
+        // Particle counts per weather type (covers viewport + margins)
+        private const int RainParticleCount = 120;
+        private const int StormParticleCount = 150;
+        private const int SnowParticleCount = 180;
         private const float TransitionDuration = 2f;
 
         // ── State ──
@@ -162,14 +165,14 @@ namespace Garden
             panOffsetY = translate.y;
 
             bool isRain = targetCondition == WeatherCondition.Rain || targetCondition == WeatherCondition.Storm;
-            float oy = -panOffsetY; // canvas-space origin
             for (int i = 0; i < targetParticleCount && i < MaxParticles; i++)
             {
                 SpawnParticle(isRain);
                 if (!isRain)
                 {
-                    // Scatter snow Y across viewport (in canvas space)
-                    particles[i].position.y = oy + Random.Range(0f, viewportHeight);
+                    // Scatter snow Y across viewport + margin (in canvas space)
+                    float oy = -panOffsetY - SpawnMargin;
+                    particles[i].position.y = oy + Random.Range(0f, viewportHeight + SpawnMargin * 2f);
                 }
                 else
                 {
@@ -276,9 +279,11 @@ namespace Garden
             }
             if (slot < 0) return;
 
-            // Positions stored in canvas space; convert viewport random coords
-            float ox = -panOffsetX; // canvas-space origin of visible area
-            float oy = -panOffsetY;
+            // Positions stored in canvas space; spawn within viewport + margin
+            float ox = -panOffsetX - SpawnMargin;
+            float oy = -panOffsetY - SpawnMargin;
+            float spawnW = viewportWidth + SpawnMargin * 2f;
+            float spawnH = viewportHeight + SpawnMargin * 2f;
 
             if (isRain)
             {
@@ -286,8 +291,8 @@ namespace Garden
                 particles[slot] = new WeatherParticle
                 {
                     position = new Vector2(
-                        ox + Random.Range(0f, viewportWidth),
-                        oy + Random.Range(0f, viewportHeight)),
+                        ox + Random.Range(0f, spawnW),
+                        oy + Random.Range(0f, spawnH)),
                     age = 0f,
                     lifetime = RainImpactLifetime + Random.Range(-0.1f, 0.15f),
                     size = RainImpactRippleMaxRadius + Random.Range(-2f, 2f),
@@ -310,7 +315,7 @@ namespace Garden
                 particles[slot] = new WeatherParticle
                 {
                     position = new Vector2(
-                        ox + Random.Range(0f, viewportWidth),
+                        ox + Random.Range(0f, spawnW),
                         oy + Random.Range(-30f, -10f)),
                     speed = isForeground
                         ? Random.Range(SnowFgSpeedMin, SnowFgSpeedMax)
@@ -362,10 +367,10 @@ namespace Garden
                         p.alive = false;
                 }
 
-                if (screenY > viewportHeight + 50f)
+                if (screenY > viewportHeight + SpawnMargin + 50f)
                     p.alive = false;
 
-                if (screenX < -50f || screenX > viewportWidth + 50f)
+                if (screenX < -SpawnMargin - 50f || screenX > viewportWidth + SpawnMargin + 50f)
                     p.alive = false;
             }
         }
