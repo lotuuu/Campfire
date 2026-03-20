@@ -27,7 +27,7 @@ namespace Garden
         public List<BirdSave> birds = new();
         public string lastBirdCheckHourUtc;
         public List<string> discoveredSeeds = new();
-        public float musicVolume = 1f;
+        public float musicVolume = 0.6f;
         public float sfxVolume = 1f;
         public int tutorialStep;
         public string locale;
