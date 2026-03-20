@@ -23,6 +23,7 @@ namespace Garden
         {
             public Sprite icon;
             public string amount;
+            public string name;
         }
 
         public static VisualElement CreateBuildCard(
@@ -77,6 +78,13 @@ namespace Garden
                     chipLabel.AddToClassList("build-card__cost-chip-label");
                     chipEl.Add(chipLabel);
 
+                    if (!string.IsNullOrEmpty(chip.name))
+                    {
+                        var chipName = new Label(chip.name);
+                        chipName.AddToClassList("build-card__cost-chip-name");
+                        chipEl.Add(chipName);
+                    }
+
                     costsRow.Add(chipEl);
                 }
             }
@@ -124,7 +132,8 @@ namespace Garden
                 chips.Add(new CostChip
                 {
                     icon = LoadManaIcon(),
-                    amount = $"{cost.manaCost:F0}"
+                    amount = $"{cost.manaCost:F0}",
+                    name = Loc.Get("ui.resource.mana", "Mana")
                 });
             }
 
@@ -133,7 +142,8 @@ namespace Garden
                 chips.Add(new CostChip
                 {
                     icon = LoadHarvestIcon(hc.itemKey),
-                    amount = $"{hc.count}"
+                    amount = $"{hc.count}",
+                    name = FormatItemName(hc.itemKey)
                 });
             }
 
@@ -151,7 +161,8 @@ namespace Garden
                 chips.Add(new CostChip
                 {
                     icon = LoadManaIcon(),
-                    amount = $"{cost.manaCost:F0}"
+                    amount = $"{cost.manaCost:F0}",
+                    name = Loc.Get("ui.resource.mana", "Mana")
                 });
             }
 
@@ -160,7 +171,8 @@ namespace Garden
                 chips.Add(new CostChip
                 {
                     icon = LoadHarvestIcon(yieldItem),
-                    amount = $"{cost.seedCost}"
+                    amount = $"{cost.seedCost}",
+                    name = FormatItemName(yieldItem)
                 });
             }
 
@@ -177,11 +189,25 @@ namespace Garden
                 chips.Add(new CostChip
                 {
                     icon = LoadHarvestIcon(ing.itemKey),
-                    amount = $"{ing.count}"
+                    amount = $"{ing.count}",
+                    name = FormatItemName(ing.itemKey)
                 });
             }
 
             return chips;
+        }
+
+        private static string FormatItemName(string itemKey)
+        {
+            if (string.IsNullOrEmpty(itemKey)) return "";
+            // Convert snake_case key like "sprouts_harvest" to "Sprouts Harvest"
+            var parts = itemKey.Split('_');
+            for (int i = 0; i < parts.Length; i++)
+            {
+                if (parts[i].Length > 0)
+                    parts[i] = char.ToUpper(parts[i][0]) + parts[i].Substring(1);
+            }
+            return string.Join(" ", parts);
         }
 
         private static Sprite LoadManaIcon()

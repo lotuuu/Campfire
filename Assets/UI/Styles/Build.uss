@@ -50,6 +50,10 @@
     color: rgb(160, 130, 80);
 }
 
+.build-card:disabled .build-card__cost-chip-name {
+    color: rgb(140, 130, 110);
+}
+
 /* Shown on disabled cards to explain why */
 .build-card__locked-label {
     font-size: var(--font-sm);
@@ -109,6 +113,12 @@
     font-size: var(--font-sm);
     color: rgb(255, 200, 80);
     -unity-font-style: bold;
+}
+
+.build-card__cost-chip-name {
+    font-size: var(--font-xs);
+    color: rgb(200, 180, 140);
+    margin-left: 2px;
 }
 
 .build-card__cap {
