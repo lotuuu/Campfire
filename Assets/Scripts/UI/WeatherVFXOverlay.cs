@@ -1,63 +1,17 @@
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.UIElements;
 
 namespace Garden
 {
     public class WeatherVFXOverlay : MonoBehaviour
     {
-        // ── Particle types ──
-
-        private enum ParticleType { RainImpact, SnowDot, SnowFlake }
-
-        private struct WeatherParticle
-        {
-            public Vector2 position;
-            public float speed;          // px/sec downward (snow only)
-            public float alpha;
-            public float size;
-            public float age;            // seconds since spawn
-            public float lifetime;       // total lifetime
-            public float swayPhase;      // snow sway
-            public float swayFreq;
-            public float swayAmplitude;
-            public float rotation;       // snowflakes
-            public float rotationSpeed;
-            public ParticleType type;
-            public bool isForeground;
-            public bool alive;
-        }
-
         // ── Configuration ──
 
-        private const int MaxParticles = 600;
-        private static readonly Color RainColor = new(0.71f, 0.78f, 1f);
-        private static readonly Color SnowColor = new(0.90f, 0.92f, 1f);
-        private static readonly Color LightningColor = new(0.78f, 0.82f, 1f);
-
-        // Rain impact config (top-down: drops hitting the ground)
-        private const float RainImpactLifetime = 0.6f;       // total lifecycle of one impact
-        private const float RainImpactDotDuration = 0.1f;     // brief bright dot before ripple
-        private const float RainImpactDotRadius = 3.5f;
-        private const float RainImpactRippleMaxRadius = 14f;
-        private const float RainImpactDotAlpha = 0.65f;
-        private const float RainImpactRippleAlpha = 0.45f;
-
-        // Snow config
-        private const float SnowFgAlphaMin = 0.45f, SnowFgAlphaMax = 0.6f;
-        private const float SnowBgAlphaMin = 0.25f, SnowBgAlphaMax = 0.4f;
-        private const float SnowFgRadiusMin = 3f, SnowFgRadiusMax = 5f;
-        private const float SnowBgRadiusMin = 2f, SnowBgRadiusMax = 4f;
-        private const float SnowFgSpeedMin = 50f, SnowFgSpeedMax = 80f;
-        private const float SnowBgSpeedMin = 40f, SnowBgSpeedMax = 60f;
-        private const float SnowFlakeRadiusMin = 5f, SnowFlakeRadiusMax = 9f;
-        private const float SnowFlakeChance = 0.15f;
-        private const float SnowSwayFreqMin = 0.5f, SnowSwayFreqMax = 1.5f;
-        private const float SnowSwayAmpMin = 10f, SnowSwayAmpMax = 25f;
-        private const float SnowRotSpeedMin = 15f, SnowRotSpeedMax = 30f;
-        private const float SnowFadeZoneRatio = 0.1f;
+        private const int VfxLayer = 6;
 
         // Lightning config
+        private static readonly Color LightningColor = new(0.78f, 0.82f, 1f);
         private const float LightningFlashAlpha = 0.3f;
         private const float LightningPulseDuration = 0.15f;
         private const float LightningPulseGap = 0.1f;
@@ -66,27 +20,30 @@ namespace Garden
         private const float LightningClusterChance = 0.3f;
         private const float LightningClusterDelay = 1f;
 
-        // Base particle density per viewport-area (scaled by canvas/viewport ratio)
-        private const int RainDensity = 80;
-        private const int StormDensity = 100;
-        private const int SnowDensity = 120;
-        private const float TransitionDuration = 2f;
+        // Particle density
+        private const float RainBaseEmission = 80f;
+        private const float StormEmissionMultiplier = 1.25f;
+        private const float SnowBaseEmission = 4f;
 
         // ── State ──
 
         private VisualElement canvas;
         private VisualElement viewport;
-        private VisualElement particleOverlay;
+        private VisualElement rtOverlay;
         private VisualElement lightningOverlay;
-        private readonly WeatherParticle[] particles = new WeatherParticle[MaxParticles];
-        private int activeParticleCount;
-        private int targetParticleCount;
-        private WeatherCondition targetCondition = WeatherCondition.Clear;
-        private float spawnAccumulator;
+
+        private RenderTexture renderTexture;
+        private Camera vfxCamera;
+        private GameObject vfxRoot;
+        private ParticleSystem rainPS;
+        private ParticleSystem snowPS;
+        private Texture2D circleTexture;
+        private Material particleMaterial;
+
         private float viewportWidth, viewportHeight;
         private float canvasW, canvasH;
-        private float panOffsetX, panOffsetY; // current canvas translate, read at draw time
-        private float elapsedTime;
+        private float lastCanvasW, lastCanvasH;
+        private WeatherCondition targetCondition = WeatherCondition.Clear;
 
         // Lightning state
         private float nextLightningTime;
@@ -96,6 +53,27 @@ namespace Garden
         private bool lightningClusterPending;
         private float lightningClusterTimer;
 
+        // ── Texture generation ──
+
+        private Texture2D CreateCircleTexture(int size)
+        {
+            var tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            float center = size / 2f;
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    float dist = Vector2.Distance(new Vector2(x, y), new Vector2(center, center));
+                    float alpha = Mathf.Clamp01(1f - (dist / center));
+                    alpha *= alpha;
+                    tex.SetPixel(x, y, new Color(1f, 1f, 1f, alpha));
+                }
+            }
+            tex.Apply();
+            tex.filterMode = FilterMode.Bilinear;
+            return tex;
+        }
+
         // ── Public API ──
 
         public void Initialize(VisualElement canvasElement)
@@ -103,20 +81,56 @@ namespace Garden
             canvas = canvasElement;
             viewport = canvas.parent;
 
-            // Overlays on viewport for correct sizing. Pan tracking is done by
-            // shifting particle positions by the canvas translate delta each frame.
-            particleOverlay = new VisualElement();
-            particleOverlay.name = "weather-vfx-overlay";
-            particleOverlay.pickingMode = PickingMode.Ignore;
-            particleOverlay.style.position = Position.Absolute;
-            particleOverlay.style.left = 0;
-            particleOverlay.style.top = 0;
-            particleOverlay.style.right = 0;
-            particleOverlay.style.bottom = 0;
-            particleOverlay.style.display = DisplayStyle.None;
-            particleOverlay.generateVisualContent += DrawParticles;
-            viewport.Add(particleOverlay);
+            // Generate shared particle texture and material
+            circleTexture = CreateCircleTexture(32);
+            particleMaterial = new Material(Shader.Find("Particles/Standard Unlit"));
+            particleMaterial.mainTexture = circleTexture;
+            particleMaterial.SetFloat("_ColorMode", 1); // Multiply
+            particleMaterial.SetInt("_SrcBlend", (int)BlendMode.SrcAlpha);
+            particleMaterial.SetInt("_DstBlend", (int)BlendMode.OneMinusSrcAlpha);
+            particleMaterial.renderQueue = 3000;
 
+            // Read initial dimensions
+            float vw = viewport.resolvedStyle.width;
+            float vh = viewport.resolvedStyle.height;
+            if (float.IsNaN(vw) || vw <= 0) vw = 540f;
+            if (float.IsNaN(vh) || vh <= 0) vh = 960f;
+            viewportWidth = vw;
+            viewportHeight = vh;
+
+            float cw = canvas.resolvedStyle.width;
+            float ch = canvas.resolvedStyle.height;
+            if (!float.IsNaN(cw) && cw > 0) canvasW = cw;
+            if (!float.IsNaN(ch) && ch > 0) canvasH = ch;
+            if (canvasW <= 0) canvasW = viewportWidth;
+            if (canvasH <= 0) canvasH = viewportHeight;
+
+            // Create RenderTexture
+            float dpiScale = Mathf.Clamp(Screen.dpi / 96f, 1f, 3f);
+            if (dpiScale <= 0) dpiScale = 1f;
+            int rtW = Mathf.Max(1, (int)(vw * dpiScale));
+            int rtH = Mathf.Max(1, (int)(vh * dpiScale));
+            renderTexture = new RenderTexture(rtW, rtH, 0, RenderTextureFormat.ARGB32);
+            renderTexture.Create();
+
+            // Create scene objects
+            CreateVFXCamera();
+            CreateRainPS();
+            CreateSnowPS();
+
+            // RenderTexture display element on viewport
+            rtOverlay = new VisualElement();
+            rtOverlay.name = "weather-vfx-overlay";
+            rtOverlay.pickingMode = PickingMode.Ignore;
+            rtOverlay.style.position = Position.Absolute;
+            rtOverlay.style.left = 0;
+            rtOverlay.style.top = 0;
+            rtOverlay.style.right = 0;
+            rtOverlay.style.bottom = 0;
+            rtOverlay.style.backgroundImage = Background.FromRenderTexture(renderTexture);
+            viewport.Add(rtOverlay);
+
+            // Lightning flash overlay
             lightningOverlay = new VisualElement();
             lightningOverlay.name = "weather-lightning-overlay";
             lightningOverlay.pickingMode = PickingMode.Ignore;
@@ -125,85 +139,165 @@ namespace Garden
             lightningOverlay.style.top = 0;
             lightningOverlay.style.right = 0;
             lightningOverlay.style.bottom = 0;
-            lightningOverlay.style.backgroundColor = new Color(LightningColor.r, LightningColor.g, LightningColor.b, 0f);
+            lightningOverlay.style.backgroundColor =
+                new Color(LightningColor.r, LightningColor.g, LightningColor.b, 0f);
             viewport.Add(lightningOverlay);
 
+            // Subscribe to weather
             if (WeatherService.Instance != null)
             {
                 WeatherService.Instance.OnWeatherUpdated += OnWeatherUpdated;
                 if (WeatherService.Instance.HasWeather)
-                {
                     OnWeatherUpdated(WeatherService.Instance.CurrentWeather);
-                    if (targetParticleCount > 0)
-                        PreSeedParticles();
-                }
             }
         }
 
-        private void OnDestroy()
+        private void CreateVFXCamera()
         {
-            if (WeatherService.Instance != null)
-                WeatherService.Instance.OnWeatherUpdated -= OnWeatherUpdated;
-            particleOverlay?.RemoveFromHierarchy();
-            lightningOverlay?.RemoveFromHierarchy();
-        }
+            vfxRoot = new GameObject("WeatherVFX");
+            vfxRoot.layer = VfxLayer;
 
-        private void PreSeedParticles()
-        {
-            float vw = viewport.resolvedStyle.width;
-            float vh = viewport.resolvedStyle.height;
-            if (float.IsNaN(vw) || vw <= 0) vw = 1080f;
-            if (float.IsNaN(vh) || vh <= 0) vh = 1920f;
-            viewportWidth = vw;
-            viewportHeight = vh;
+            var camGO = new GameObject("WeatherVFXCamera");
+            camGO.transform.SetParent(vfxRoot.transform);
+            camGO.layer = VfxLayer;
 
-            // Init pan offset
+            vfxCamera = camGO.AddComponent<Camera>();
+            vfxCamera.orthographic = true;
+            vfxCamera.orthographicSize = viewportHeight / 2f;
+            vfxCamera.nearClipPlane = 0.1f;
+            vfxCamera.farClipPlane = 100f;
+            vfxCamera.depth = -10;
+            vfxCamera.clearFlags = CameraClearFlags.SolidColor;
+            vfxCamera.backgroundColor = Color.clear;
+            vfxCamera.cullingMask = 1 << VfxLayer;
+            vfxCamera.targetTexture = renderTexture;
+            vfxCamera.aspect = viewportWidth / viewportHeight;
+
+            // Position at canvas center initially
             var translate = canvas.resolvedStyle.translate;
-            panOffsetX = translate.x;
-            panOffsetY = translate.y;
-
-            float cw = canvas.resolvedStyle.width;
-            float ch = canvas.resolvedStyle.height;
-            if (!float.IsNaN(cw) && cw > 0) canvasW = cw;
-            if (!float.IsNaN(ch) && ch > 0) canvasH = ch;
-
-            bool isRain = targetCondition == WeatherCondition.Rain || targetCondition == WeatherCondition.Storm;
-            for (int i = 0; i < targetParticleCount && i < MaxParticles; i++)
-            {
-                SpawnParticle(isRain);
-                if (!isRain)
-                {
-                    // Scatter snow Y across entire canvas
-                    float sh = canvasH > 0 ? canvasH : viewportHeight;
-                    particles[i].position.y = Random.Range(0f, sh);
-                }
-                else
-                {
-                    // Stagger rain impact ages so they don't all appear at once
-                    particles[i].age = Random.Range(0f, particles[i].lifetime);
-                }
-            }
+            float cx = canvasW / 2f + translate.x;
+            float cy = -(canvasH / 2f + translate.y);
+            vfxCamera.transform.position = new Vector3(cx, cy, -10f);
         }
 
-        private int ScaledCount(int baseDensity)
+        private void CreateRainPS()
         {
-            // Scale particle count by canvas area relative to viewport
-            float vpArea = Mathf.Max(viewportWidth, 1f) * Mathf.Max(viewportHeight, 1f);
-            float cvArea = Mathf.Max(canvasW, viewportWidth) * Mathf.Max(canvasH, viewportHeight);
-            float ratio = Mathf.Max(1f, cvArea / vpArea);
-            return Mathf.Min((int)(baseDensity * ratio), MaxParticles);
+            var go = new GameObject("RainParticles");
+            go.transform.SetParent(vfxRoot.transform);
+            go.layer = VfxLayer;
+            go.transform.position = new Vector3(canvasW / 2f, -canvasH / 2f, 0f);
+
+            rainPS = go.AddComponent<ParticleSystem>();
+            var main = rainPS.main;
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
+            main.startLifetime = new ParticleSystem.MinMaxCurve(0.5f, 0.7f);
+            main.startSize = new ParticleSystem.MinMaxCurve(6f, 14f);
+            main.startSpeed = 0f;
+            main.startColor = new Color(0.71f, 0.78f, 1f, 0.65f);
+            main.maxParticles = 1000;
+            main.playOnAwake = false;
+            main.loop = true;
+
+            var shape = rainPS.shape;
+            shape.enabled = true;
+            shape.shapeType = ParticleSystemShapeType.Box;
+            shape.scale = new Vector3(canvasW, canvasH, 1f);
+
+            var emission = rainPS.emission;
+            emission.rateOverTime = 0f;
+
+            var sol = rainPS.sizeOverLifetime;
+            sol.enabled = true;
+            sol.size = new ParticleSystem.MinMaxCurve(1f, new AnimationCurve(
+                new Keyframe(0f, 0.2f),
+                new Keyframe(1f, 1f)));
+
+            var col = rainPS.colorOverLifetime;
+            col.enabled = true;
+            var gradient = new Gradient();
+            gradient.SetKeys(
+                new[] { new GradientColorKey(Color.white, 0f), new GradientColorKey(Color.white, 1f) },
+                new[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(0f, 1f) });
+            col.color = gradient;
+
+            var renderer = go.GetComponent<ParticleSystemRenderer>();
+            renderer.renderMode = ParticleSystemRenderMode.Billboard;
+            renderer.material = particleMaterial;
+            renderer.sortingOrder = 100;
         }
+
+        private void CreateSnowPS()
+        {
+            var go = new GameObject("SnowParticles");
+            go.transform.SetParent(vfxRoot.transform);
+            go.layer = VfxLayer;
+            go.transform.position = new Vector3(canvasW / 2f, 0f, 0f);
+            // Rotate so particles emit downward (-Y in world)
+            go.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
+
+            snowPS = go.AddComponent<ParticleSystem>();
+            var main = snowPS.main;
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
+            main.startLifetime = canvasH / 60f;
+            main.startSize = new ParticleSystem.MinMaxCurve(6f, 12f);
+            main.startSpeed = new ParticleSystem.MinMaxCurve(40f, 80f);
+            main.startColor = new Color(0.90f, 0.92f, 1f, 0.55f);
+            main.maxParticles = 1000;
+            main.playOnAwake = false;
+            main.loop = true;
+            main.gravityModifier = 0f;
+
+            var shape = snowPS.shape;
+            shape.enabled = true;
+            shape.shapeType = ParticleSystemShapeType.SingleSidedEdge;
+            shape.radius = canvasW / 2f;
+
+            var emission = snowPS.emission;
+            emission.rateOverTime = 0f;
+
+            // Noise for horizontal sway
+            var noise = snowPS.noise;
+            noise.enabled = true;
+            noise.separateAxes = true;
+            noise.strengthX = new ParticleSystem.MinMaxCurve(15f);
+            noise.strengthY = new ParticleSystem.MinMaxCurve(0f);
+            noise.strengthZ = new ParticleSystem.MinMaxCurve(0f);
+            noise.frequency = 1f;
+            noise.scrollSpeed = 0.1f;
+            noise.octaveCount = 2;
+
+            // Rotation over lifetime
+            var rot = snowPS.rotationOverLifetime;
+            rot.enabled = true;
+            rot.z = new ParticleSystem.MinMaxCurve(
+                15f * Mathf.Deg2Rad, 30f * Mathf.Deg2Rad);
+
+            // Color over lifetime: fade in/out
+            var col = snowPS.colorOverLifetime;
+            col.enabled = true;
+            var gradient = new Gradient();
+            gradient.SetKeys(
+                new[] { new GradientColorKey(Color.white, 0f), new GradientColorKey(Color.white, 1f) },
+                new[] {
+                    new GradientAlphaKey(0f, 0f),
+                    new GradientAlphaKey(1f, 0.05f),
+                    new GradientAlphaKey(1f, 0.9f),
+                    new GradientAlphaKey(0f, 1f)
+                });
+            col.color = gradient;
+
+            var renderer = go.GetComponent<ParticleSystemRenderer>();
+            renderer.renderMode = ParticleSystemRenderMode.Billboard;
+            renderer.material = particleMaterial;
+            renderer.sortingOrder = 100;
+        }
+
+        // ── Weather control ──
 
         private void OnWeatherUpdated(WeatherData weather)
         {
             targetCondition = weather.condition;
-            targetParticleCount = weather.condition switch
-            {
-                WeatherCondition.Rain => ScaledCount(RainDensity),
-                WeatherCondition.Storm => ScaledCount(StormDensity),
-                WeatherCondition.Snow => ScaledCount(SnowDensity),
-                _ => 0
-            };
+            UpdateEmission();
 
             if (weather.condition != WeatherCondition.Storm)
             {
@@ -217,182 +311,147 @@ namespace Garden
             }
         }
 
-        // ── Update / Simulation ──
+        private void UpdateEmission()
+        {
+            if (rainPS == null || snowPS == null) return;
+
+            float vpArea = Mathf.Max(viewportWidth * viewportHeight, 1f);
+            float cvArea = Mathf.Max(canvasW * canvasH, vpArea);
+            float areaRatio = cvArea / vpArea;
+            float widthRatio = Mathf.Max(canvasW / Mathf.Max(viewportWidth, 1f), 1f);
+
+            var rainEmission = rainPS.emission;
+            var snowEmission = snowPS.emission;
+            var rainMain = rainPS.main;
+
+            switch (targetCondition)
+            {
+                case WeatherCondition.Rain:
+                    rainEmission.rateOverTime = areaRatio * RainBaseEmission;
+                    rainMain.startSize = new ParticleSystem.MinMaxCurve(6f, 14f);
+                    snowEmission.rateOverTime = 0f;
+                    if (!rainPS.isPlaying) rainPS.Play();
+                    break;
+                case WeatherCondition.Storm:
+                    rainEmission.rateOverTime = areaRatio * RainBaseEmission * StormEmissionMultiplier;
+                    rainMain.startSize = new ParticleSystem.MinMaxCurve(8f, 18f);
+                    snowEmission.rateOverTime = 0f;
+                    if (!rainPS.isPlaying) rainPS.Play();
+                    break;
+                case WeatherCondition.Snow:
+                    rainEmission.rateOverTime = 0f;
+                    snowEmission.rateOverTime = widthRatio * SnowBaseEmission;
+                    if (!snowPS.isPlaying) snowPS.Play();
+                    if (snowPS.particleCount == 0)
+                    {
+                        snowPS.Simulate(canvasH / 60f, true, true);
+                        snowPS.Play();
+                    }
+                    break;
+                default:
+                    rainEmission.rateOverTime = 0f;
+                    snowEmission.rateOverTime = 0f;
+                    break;
+            }
+        }
+
+        // ── Update ──
 
         private void Update()
         {
-            if (particleOverlay == null) return;
-
-            float dt = Time.deltaTime;
-            elapsedTime += dt;
+            if (vfxCamera == null) return;
 
             float vw = viewport.resolvedStyle.width;
             float vh = viewport.resolvedStyle.height;
             if (!float.IsNaN(vw) && vw > 0) viewportWidth = vw;
             if (!float.IsNaN(vh) && vh > 0) viewportHeight = vh;
-            if (viewportWidth <= 0 || viewportHeight <= 0) return;
-
             float cw = canvas.resolvedStyle.width;
             float ch = canvas.resolvedStyle.height;
             if (!float.IsNaN(cw) && cw > 0) canvasW = cw;
             if (!float.IsNaN(ch) && ch > 0) canvasH = ch;
 
-            // Read canvas translate for draw-time offset (particles stored in canvas space)
+            // Sync camera with canvas pan
             var translate = canvas.resolvedStyle.translate;
-            panOffsetX = translate.x;
-            panOffsetY = translate.y;
+            float cx = canvasW / 2f + translate.x;
+            float cy = -(canvasH / 2f + translate.y);
+            vfxCamera.transform.position = new Vector3(cx, cy, -10f);
+            vfxCamera.orthographicSize = viewportHeight / 2f;
+            vfxCamera.aspect = viewportWidth / viewportHeight;
 
-            activeParticleCount = 0;
-            for (int i = 0; i < MaxParticles; i++)
-                if (particles[i].alive) activeParticleCount++;
+            // Update particle shapes if canvas changed
+            UpdateParticleShapes();
 
-            bool isRain = targetCondition == WeatherCondition.Rain || targetCondition == WeatherCondition.Storm;
-            bool isSnow = targetCondition == WeatherCondition.Snow;
-            if (activeParticleCount < targetParticleCount && (isRain || isSnow))
+            // Recreate RT if viewport size changed significantly
+            if (renderTexture != null)
             {
-                // Snow spawns slowly so particles spread out as they fall;
-                // rain spawns fast since impacts are instant and stationary
-                float spawnDuration = isSnow ? 30f : TransitionDuration;
-                float spawnRate = targetParticleCount / spawnDuration;
-                spawnAccumulator += spawnRate * dt;
-                while (spawnAccumulator >= 1f && activeParticleCount < targetParticleCount)
+                float dpiScale = Mathf.Clamp(Screen.dpi / 96f, 1f, 3f);
+                if (dpiScale <= 0) dpiScale = 1f;
+                int targetW = Mathf.Max(1, (int)(viewportWidth * dpiScale));
+                int targetH = Mathf.Max(1, (int)(viewportHeight * dpiScale));
+                if (Mathf.Abs(renderTexture.width - targetW) > targetW * 0.1f ||
+                    Mathf.Abs(renderTexture.height - targetH) > targetH * 0.1f)
                 {
-                    SpawnParticle(isRain);
-                    spawnAccumulator -= 1f;
-                    activeParticleCount++;
+                    renderTexture.Release();
+                    renderTexture.width = targetW;
+                    renderTexture.height = targetH;
+                    renderTexture.Create();
+                    vfxCamera.targetTexture = renderTexture;
+                    rtOverlay.style.backgroundImage = Background.FromRenderTexture(renderTexture);
                 }
             }
-            else
-            {
-                spawnAccumulator = 0f;
-            }
 
-            for (int i = 0; i < MaxParticles; i++)
-            {
-                if (!particles[i].alive) continue;
-                SimulateParticle(ref particles[i], dt);
-            }
-
+            // Lightning
             if (targetCondition == WeatherCondition.Storm)
-                UpdateLightning(dt);
-
-            bool hasAnything = activeParticleCount > 0;
-            if (hasAnything)
-            {
-                if (particleOverlay.style.display == DisplayStyle.None)
-                    particleOverlay.style.display = DisplayStyle.Flex;
-                particleOverlay.MarkDirtyRepaint();
-            }
-            else if (targetParticleCount == 0)
-            {
-                if (particleOverlay.style.display != DisplayStyle.None)
-                    particleOverlay.style.display = DisplayStyle.None;
-            }
+                UpdateLightning(Time.deltaTime);
         }
 
-        private void SpawnParticle(bool isRain)
+        private void UpdateParticleShapes()
         {
-            int slot = -1;
-            for (int i = 0; i < MaxParticles; i++)
-            {
-                if (!particles[i].alive) { slot = i; break; }
-            }
-            if (slot < 0) return;
+            if (Mathf.Approximately(canvasW, lastCanvasW) && Mathf.Approximately(canvasH, lastCanvasH))
+                return;
+            lastCanvasW = canvasW;
+            lastCanvasH = canvasH;
 
-            // Positions in canvas space; spawn across entire canvas
-            float spawnW = canvasW > 0 ? canvasW : viewportWidth;
-            float spawnH = canvasH > 0 ? canvasH : viewportHeight;
+            if (rainPS != null)
+            {
+                var shape = rainPS.shape;
+                shape.scale = new Vector3(canvasW, canvasH, 1f);
+                rainPS.transform.position = new Vector3(canvasW / 2f, -canvasH / 2f, 0f);
+            }
+            if (snowPS != null)
+            {
+                var shape = snowPS.shape;
+                shape.radius = canvasW / 2f;
+                snowPS.transform.position = new Vector3(canvasW / 2f, 0f, 0f);
+                var main = snowPS.main;
+                main.startLifetime = canvasH / 60f;
+            }
 
-            if (isRain)
-            {
-                // Top-down rain: impact appears at random position, plays dot → ripple → fade
-                particles[slot] = new WeatherParticle
-                {
-                    position = new Vector2(
-                        Random.Range(0f, spawnW),
-                        Random.Range(0f, spawnH)),
-                    age = 0f,
-                    lifetime = RainImpactLifetime + Random.Range(-0.1f, 0.15f),
-                    size = RainImpactRippleMaxRadius + Random.Range(-2f, 2f),
-                    alpha = RainImpactDotAlpha,
-                    type = ParticleType.RainImpact,
-                    isForeground = Random.value < 0.4f,
-                    alive = true
-                };
-            }
-            else
-            {
-                // Snow: falls from top, drifts with sway
-                bool isForeground = Random.value < 0.35f;
-                bool isFlake = Random.value < SnowFlakeChance;
-                float radius = isFlake
-                    ? Random.Range(SnowFlakeRadiusMin, SnowFlakeRadiusMax)
-                    : (isForeground
-                        ? Random.Range(SnowFgRadiusMin, SnowFgRadiusMax)
-                        : Random.Range(SnowBgRadiusMin, SnowBgRadiusMax));
-                particles[slot] = new WeatherParticle
-                {
-                    position = new Vector2(
-                        Random.Range(0f, spawnW),
-                        Random.Range(-30f, -10f)),
-                    speed = isForeground
-                        ? Random.Range(SnowFgSpeedMin, SnowFgSpeedMax)
-                        : Random.Range(SnowBgSpeedMin, SnowBgSpeedMax),
-                    alpha = isForeground
-                        ? Random.Range(SnowFgAlphaMin, SnowFgAlphaMax)
-                        : Random.Range(SnowBgAlphaMin, SnowBgAlphaMax),
-                    size = radius,
-                    swayPhase = Random.Range(0f, Mathf.PI * 2f),
-                    swayFreq = Random.Range(SnowSwayFreqMin, SnowSwayFreqMax),
-                    swayAmplitude = Random.Range(SnowSwayAmpMin, SnowSwayAmpMax),
-                    rotation = Random.Range(0f, 360f),
-                    rotationSpeed = isFlake
-                        ? Random.Range(SnowRotSpeedMin, SnowRotSpeedMax) * (Random.value < 0.5f ? 1f : -1f)
-                        : 0f,
-                    type = isFlake ? ParticleType.SnowFlake : ParticleType.SnowDot,
-                    isForeground = isForeground,
-                    alive = true
-                };
-            }
+            UpdateEmission();
         }
 
-        private void SimulateParticle(ref WeatherParticle p, float dt)
+        // ── Cleanup ──
+
+        private void OnDestroy()
         {
-            if (p.type == ParticleType.RainImpact)
+            if (WeatherService.Instance != null)
+                WeatherService.Instance.OnWeatherUpdated -= OnWeatherUpdated;
+            rtOverlay?.RemoveFromHierarchy();
+            lightningOverlay?.RemoveFromHierarchy();
+            if (renderTexture != null)
             {
-                // Rain impact: age-based lifecycle, no movement
-                p.age += dt;
-                if (p.age >= p.lifetime)
-                    p.alive = false;
+                renderTexture.Release();
+                Destroy(renderTexture);
             }
-            else
-            {
-                // Snow: drift downward with sway (positions in canvas space)
-                p.position.x += Mathf.Sin(elapsedTime * p.swayFreq + p.swayPhase) * p.swayAmplitude * dt;
-                p.position.y += p.speed * dt;
-                p.rotation += p.rotationSpeed * dt;
-
-                // Bounds checks in canvas space
-                float ch = canvasH > 0 ? canvasH : viewportHeight;
-                float cw = canvasW > 0 ? canvasW : viewportWidth;
-
-                // Fade out near canvas bottom
-                float fadeStart = ch * (1f - SnowFadeZoneRatio);
-                if (p.position.y > fadeStart)
-                {
-                    float fadeProgress = (p.position.y - fadeStart) / (ch * SnowFadeZoneRatio);
-                    p.alpha = Mathf.Max(0f, p.alpha - fadeProgress * dt * 3f);
-                    if (p.alpha <= 0.01f)
-                        p.alive = false;
-                }
-
-                if (p.position.y > ch + 50f)
-                    p.alive = false;
-
-                if (p.position.x < -50f || p.position.x > cw + 50f)
-                    p.alive = false;
-            }
+            if (vfxRoot != null)
+                Destroy(vfxRoot);
+            if (circleTexture != null)
+                Destroy(circleTexture);
+            if (particleMaterial != null)
+                Destroy(particleMaterial);
         }
+
+        // ── Lightning (retained from previous implementation) ──
 
         private void UpdateLightning(float dt)
         {
@@ -451,115 +510,6 @@ namespace Garden
             lightningPulseTimer = LightningPulseDuration;
             lightningOverlay.style.backgroundColor =
                 new Color(LightningColor.r, LightningColor.g, LightningColor.b, LightningFlashAlpha);
-        }
-
-        // ── Rendering ──
-
-        private void DrawParticles(MeshGenerationContext ctx)
-        {
-            var painter = ctx.painter2D;
-
-            // Background layer first, then foreground
-            for (int layer = 0; layer < 2; layer++)
-            {
-                bool drawForeground = layer == 1;
-                for (int i = 0; i < MaxParticles; i++)
-                {
-                    if (!particles[i].alive) continue;
-                    if (particles[i].isForeground != drawForeground) continue;
-                    DrawParticle(painter, ref particles[i]);
-                }
-            }
-        }
-
-        private void DrawParticle(Painter2D painter, ref WeatherParticle p)
-        {
-            // Convert canvas-space position to viewport-space for drawing
-            Vector2 drawPos = new(p.position.x + panOffsetX, p.position.y + panOffsetY);
-
-            switch (p.type)
-            {
-                case ParticleType.RainImpact: DrawRainImpact(painter, drawPos, ref p); break;
-                case ParticleType.SnowDot: DrawSnowDot(painter, drawPos, ref p); break;
-                case ParticleType.SnowFlake: DrawSnowFlake(painter, drawPos, ref p); break;
-            }
-        }
-
-        private void DrawRainImpact(Painter2D painter, Vector2 pos, ref WeatherParticle p)
-        {
-            float t = p.age / p.lifetime;
-
-            if (t < RainImpactDotDuration / p.lifetime)
-            {
-                float dotT = p.age / RainImpactDotDuration;
-                float dotAlpha = RainImpactDotAlpha * (1f - dotT * 0.5f);
-                float dotRadius = RainImpactDotRadius * (0.5f + dotT * 0.5f);
-
-                painter.BeginPath();
-                painter.Arc(pos, dotRadius, 0f, 360f);
-                painter.ClosePath();
-                painter.fillColor = new Color(RainColor.r, RainColor.g, RainColor.b, dotAlpha);
-                painter.Fill();
-            }
-
-            float rippleT = t;
-            float rippleRadius = rippleT * p.size;
-            float rippleAlpha = RainImpactRippleAlpha * (1f - rippleT);
-
-            if (rippleAlpha > 0.01f && rippleRadius > 0.5f)
-            {
-                painter.BeginPath();
-                painter.Arc(pos, rippleRadius, 0f, 360f);
-                painter.ClosePath();
-                painter.strokeColor = new Color(RainColor.r, RainColor.g, RainColor.b, rippleAlpha);
-                painter.lineWidth = p.isForeground ? 1.2f : 0.8f;
-                painter.Stroke();
-            }
-        }
-
-        private void DrawSnowDot(Painter2D painter, Vector2 pos, ref WeatherParticle p)
-        {
-            // Soft glow halo
-            painter.BeginPath();
-            painter.Arc(pos, p.size * 2f, 0f, 360f);
-            painter.ClosePath();
-            painter.fillColor = new Color(SnowColor.r, SnowColor.g, SnowColor.b, p.alpha * 0.15f);
-            painter.Fill();
-
-            // Core dot
-            painter.BeginPath();
-            painter.Arc(pos, p.size, 0f, 360f);
-            painter.ClosePath();
-            painter.fillColor = new Color(SnowColor.r, SnowColor.g, SnowColor.b, p.alpha);
-            painter.Fill();
-        }
-
-        private void DrawSnowFlake(Painter2D painter, Vector2 pos, ref WeatherParticle p)
-        {
-            float r = p.size;
-            float rotRad = p.rotation * Mathf.Deg2Rad;
-
-            // Soft glow halo
-            painter.BeginPath();
-            painter.Arc(pos, r * 1.5f, 0f, 360f);
-            painter.ClosePath();
-            painter.fillColor = new Color(SnowColor.r, SnowColor.g, SnowColor.b, p.alpha * 0.12f);
-            painter.Fill();
-
-            // Flake arms
-            for (int arm = 0; arm < 3; arm++)
-            {
-                float armAngle = rotRad + arm * Mathf.PI / 3f;
-                float cos = Mathf.Cos(armAngle);
-                float sin = Mathf.Sin(armAngle);
-
-                painter.BeginPath();
-                painter.MoveTo(new Vector2(pos.x - cos * r, pos.y - sin * r));
-                painter.LineTo(new Vector2(pos.x + cos * r, pos.y + sin * r));
-                painter.strokeColor = new Color(SnowColor.r, SnowColor.g, SnowColor.b, p.alpha);
-                painter.lineWidth = 1.8f;
-                painter.Stroke();
-            }
         }
     }
 }
