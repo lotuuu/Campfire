@@ -238,8 +238,8 @@ namespace Garden
             if (response.dialogue != null)
                 save.dialogueLines = new List<string>(response.dialogue);
 
-            // Merchant offers
-            if (response.offers != null)
+            // Merchant offers — List<> is empty (not null) when absent from JSON
+            if (response.offers != null && response.offers.Count > 0)
             {
                 save.offers = new List<MerchantOfferSave>();
                 foreach (var offer in response.offers)
@@ -255,8 +255,11 @@ namespace Garden
                 }
             }
 
-            // Gift
-            if (response.gift != null)
+            // Gift — JsonUtility never returns null for nested [Serializable] fields,
+            // so check whether any gift data is actually present.
+            bool hasGift = response.gift != null &&
+                (!string.IsNullOrEmpty(response.gift.type) || !string.IsNullOrEmpty(response.gift.name) || response.gift.amount > 0);
+            if (hasGift)
             {
                 if (string.IsNullOrEmpty(response.gift.type))
                     Debug.LogWarning($"[VisitorManager] Gift missing 'type' field for visitor '{response.visitor_id}'");
@@ -269,8 +272,11 @@ namespace Garden
                 save.giftAmount = response.gift.amount;
             }
 
-            // Quest
-            if (response.quest != null)
+            // Quest — JsonUtility never returns null for nested [Serializable] fields,
+            // so check whether any quest data is actually present.
+            bool hasQuest = response.quest != null &&
+                (!string.IsNullOrEmpty(response.quest.request_item) || response.quest.is_return || response.quest.quest_id > 0);
+            if (hasQuest)
             {
                 if (string.IsNullOrEmpty(response.quest.request_item) && !response.quest.is_return)
                     Debug.LogWarning($"[VisitorManager] Quest missing 'request_item' for visitor '{response.visitor_id}'");
