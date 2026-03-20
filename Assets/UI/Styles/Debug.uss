@@ -3,143 +3,182 @@
 #debug-panel {
     display: none;
     flex-grow: 1;
+    padding: 12px 16px;
 }
 
 #debug-panel .debug-row {
     flex-direction: row;
     align-items: center;
-    margin-bottom: var(--spacing-md);
-    min-height: 96px;
+    margin-bottom: 16px;
+    min-height: 110px;
 }
 
 #debug-panel .debug-label {
-    width: 180px;
+    width: 220px;
     color: rgb(160, 140, 110);
-    font-size: var(--font-md);
+    font-size: 40px;
 }
 
 #debug-panel .debug-value {
-    width: 150px;
+    width: 180px;
     color: rgb(230, 210, 180);
-    font-size: var(--font-md);
+    font-size: 40px;
     -unity-text-align: middle-right;
-    margin-left: var(--spacing-sm);
+    margin-left: 12px;
 }
 
 /* Sliders */
 #debug-panel .unity-base-slider {
     flex-grow: 1;
-    min-height: 80px;
+    min-height: 96px;
 }
 
 #debug-panel .unity-base-slider .unity-base-slider__dragger {
-    width: 64px;
-    height: 64px;
-    border-radius: 32px;
+    width: 80px;
+    height: 80px;
+    border-radius: 40px;
     background-color: rgb(255, 170, 60);
 }
 
 #debug-panel .unity-base-slider .unity-base-slider__tracker {
-    height: 12px;
+    height: 16px;
     background-color: rgba(180, 120, 60, 0.3);
-    border-radius: 6px;
+    border-radius: 8px;
 }
 
 /* Shared field label */
 #debug-panel .unity-base-field__label {
-    min-width: 180px;
+    min-width: 220px;
     color: rgb(160, 140, 110);
-    font-size: var(--font-md);
+    font-size: 40px;
 }
 
 /* Dropdowns */
 #debug-panel .unity-popup-field {
-    margin-bottom: var(--spacing-md);
-    min-height: 96px;
+    margin-bottom: 16px;
+    min-height: 110px;
 }
 
 #debug-panel .unity-popup-field .unity-base-field__label {
-    min-width: 180px;
-    font-size: var(--font-md);
+    min-width: 220px;
+    font-size: 40px;
 }
 
 #debug-panel .unity-popup-field .unity-base-popup-field__text {
-    font-size: var(--font-md);
+    font-size: 40px;
 }
 
 #debug-panel .unity-popup-field .unity-base-popup-field__input {
-    min-height: 72px;
-    padding: var(--spacing-xs) var(--spacing-sm);
-    border-radius: var(--radius-sm);
+    min-height: 88px;
+    padding: 8px 16px;
+    border-radius: 12px;
 }
 
 /* All debug panel buttons */
 #debug-panel Button {
-    min-height: 96px;
-    min-width: 160px;
-    font-size: var(--font-md);
-    padding: var(--spacing-sm) var(--spacing-md);
-    margin-bottom: var(--spacing-xs);
+    min-height: 110px;
+    min-width: 180px;
+    font-size: 40px;
+    padding: 12px 20px;
+    margin-bottom: 8px;
+    border-radius: 12px;
 }
 
 /* Preset buttons */
 #preset-buttons {
     flex-direction: row;
     flex-wrap: wrap;
-    margin-top: var(--spacing-md);
-    margin-bottom: var(--spacing-md);
+    margin-top: 16px;
+    margin-bottom: 16px;
 }
 
 .preset-btn {
-    margin: var(--spacing-xs);
-    font-size: var(--font-sm);
-    padding: var(--spacing-sm) var(--spacing-lg);
-    min-height: 88px;
+    margin: 8px;
+    font-size: 36px;
+    padding: 12px 24px;
+    min-height: 100px;
+    border-radius: 12px;
 }
 
 /* Text and integer fields */
 #debug-panel .unity-text-field,
-#debug-panel .unity-integer-field {
+#debug-panel .unity-integer-field,
+#debug-panel .unity-float-field {
     flex-grow: 1;
-    min-height: 80px;
+    min-height: 96px;
     margin-bottom: 0;
 }
 
-#debug-panel .unity-text-field .unity-text-input,
-#debug-panel .unity-integer-field .unity-text-input {
-    font-size: var(--font-md);
-    min-height: 72px;
-    padding: var(--spacing-xs) var(--spacing-sm);
+#debug-panel TextField > #unity-text-input,
+#debug-panel IntegerField > #unity-text-input,
+#debug-panel FloatField > #unity-text-input {
+    font-size: 40px;
+    min-height: 88px;
+    padding: 8px 16px;
     color: rgb(230, 210, 180);
     background-color: rgba(40, 25, 15, 0.6);
     border-width: 1px;
     border-color: rgba(180, 120, 60, 0.2);
-    border-radius: var(--radius-sm);
+    border-radius: 12px;
+    -unity-text-align: middle-left;
 }
 
 #debug-panel .unity-text-field .unity-base-field__label,
-#debug-panel .unity-integer-field .unity-base-field__label {
+#debug-panel .unity-integer-field .unity-base-field__label,
+#debug-panel .unity-float-field .unity-base-field__label {
     display: none;
 }
 
 /* Current time label */
 #current-time-label {
-    font-size: var(--font-sm);
+    font-size: 36px;
     color: rgb(160, 140, 110);
-    margin-top: var(--spacing-xs);
-    margin-bottom: var(--spacing-sm);
+    margin-top: 8px;
+    margin-bottom: 12px;
 }
 
 /* Section headers */
 .debug-section-header {
-    font-size: var(--font-lg);
+    font-size: 48px;
     color: rgb(230, 210, 180);
     -unity-font-style: bold;
-    margin-top: var(--spacing-lg);
-    margin-bottom: var(--spacing-sm);
-    padding-bottom: var(--spacing-xs);
+    margin-top: 32px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
     border-bottom-width: 1px;
     border-bottom-color: rgba(180, 120, 60, 0.2);
+}
+
+/* Toggle */
+#debug-panel .unity-toggle {
+    min-height: 110px;
+    margin-bottom: 16px;
+}
+
+#debug-panel .unity-toggle .unity-toggle__label {
+    font-size: 40px;
+    color: rgb(160, 140, 110);
+    min-width: 220px;
+}
+
+#debug-panel .unity-toggle .unity-toggle__checkmark {
+    width: 64px;
+    height: 64px;
+    border-radius: 8px;
+}
+
+/* Server selector buttons */
+.server-btn {
+    font-size: 36px;
+    min-height: 100px;
+    padding: 12px 20px;
+    margin-right: 8px;
+    border-radius: 12px;
+}
+
+.server-active {
+    background-color: rgba(255, 170, 60, 0.3);
+    border-color: rgb(255, 170, 60);
 }
 
 /* Danger buttons */
