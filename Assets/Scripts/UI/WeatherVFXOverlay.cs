@@ -36,12 +36,12 @@ namespace Garden
         private static readonly Color LightningColor = new(0.78f, 0.82f, 1f);
 
         // Rain impact config (top-down: drops hitting the ground)
-        private const float RainImpactLifetime = 0.5f;       // total lifecycle of one impact
-        private const float RainImpactDotDuration = 0.08f;    // brief bright dot before ripple
-        private const float RainImpactDotRadius = 2f;
-        private const float RainImpactRippleMaxRadius = 8f;
-        private const float RainImpactDotAlpha = 0.5f;
-        private const float RainImpactRippleAlpha = 0.3f;
+        private const float RainImpactLifetime = 0.6f;       // total lifecycle of one impact
+        private const float RainImpactDotDuration = 0.1f;     // brief bright dot before ripple
+        private const float RainImpactDotRadius = 3.5f;
+        private const float RainImpactRippleMaxRadius = 14f;
+        private const float RainImpactDotAlpha = 0.65f;
+        private const float RainImpactRippleAlpha = 0.45f;
 
         // Snow config
         private const float SnowFgAlphaMin = 0.45f, SnowFgAlphaMax = 0.6f;
