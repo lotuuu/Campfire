@@ -425,7 +425,6 @@ namespace Garden
 
             OnPlotChanged?.Invoke(plotIndex);
             OnHarvested?.Invoke(plotIndex, result);
-            AudioManager.Instance?.PlaySFX("plot_harvest");
 
             NotificationService.Instance?.CancelPlantNotification(plotIndex);
             NotificationService.Instance?.CancelWaterNotification(plotIndex);

@@ -39,15 +39,10 @@ MonoBehaviour:
     pitchMin: 0.9
     pitchMax: 1.1
   - key: plot_water
-    clip: {fileID: 8300000, guid: 86c679e6e5bc04c51baf8f4726700597, type: 3}
+    clip: {fileID: 8300000, guid: a990787a53029445089b4d277bfa00b6, type: 3}
     volume: 1
     pitchMin: 0.9
     pitchMax: 1.1
-  - key: plot_harvest
-    clip: {fileID: 8300000, guid: b3b91b7827f4244fcb64120b90b7d892, type: 3}
-    volume: 1
-    pitchMin: 1
-    pitchMax: 1
   - key: vase_craft
     clip: {fileID: 8300000, guid: 9a5dfc8b6a09d409e8ecc2fdb32ace83, type: 3}
     volume: 1
@@ -58,11 +53,6 @@ MonoBehaviour:
     volume: 1
     pitchMin: 1
     pitchMax: 1
-  - key: mallum_dispatch_water
-    clip: {fileID: 8300000, guid: 09737d54b617e4d51842a47e7f1e149f, type: 3}
-    volume: 1
-    pitchMin: 0.95
-    pitchMax: 1.05
   - key: mallum_gear_up
     clip: {fileID: 8300000, guid: 8b7712766463a48a59043073d3fa6972, type: 3}
     volume: 1
