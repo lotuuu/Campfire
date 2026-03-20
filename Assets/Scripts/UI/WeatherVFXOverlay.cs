@@ -250,7 +250,10 @@ namespace Garden
             bool isSnow = targetCondition == WeatherCondition.Snow;
             if (activeParticleCount < targetParticleCount && (isRain || isSnow))
             {
-                float spawnRate = targetParticleCount / TransitionDuration;
+                // Snow spawns slowly so particles spread out as they fall;
+                // rain spawns fast since impacts are instant and stationary
+                float spawnDuration = isSnow ? 30f : TransitionDuration;
+                float spawnRate = targetParticleCount / spawnDuration;
                 spawnAccumulator += spawnRate * dt;
                 while (spawnAccumulator >= 1f && activeParticleCount < targetParticleCount)
                 {
