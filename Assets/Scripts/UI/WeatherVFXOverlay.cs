@@ -110,7 +110,7 @@ namespace Garden
             if (dpiScale <= 0) dpiScale = 1f;
             int rtW = Mathf.Max(1, (int)(vw * dpiScale));
             int rtH = Mathf.Max(1, (int)(vh * dpiScale));
-            renderTexture = new RenderTexture(rtW, rtH, 0, RenderTextureFormat.ARGB32);
+            renderTexture = new RenderTexture(rtW, rtH, 16, RenderTextureFormat.ARGB32);
             renderTexture.Create();
 
             // Create scene objects
