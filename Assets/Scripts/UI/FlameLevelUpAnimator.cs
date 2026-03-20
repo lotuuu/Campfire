@@ -127,8 +127,16 @@ namespace Garden
             if (IsPlaying) return;
             IsPlaying = true;
 
+            // Start animation after 0.5s delay (SFX plays immediately)
             AudioManager.Instance?.PlaySFX("fire_upgrade");
 
+            root.schedule.Execute(() => PlayAnimation(root, flameCell, gridContainer, viewport, newLevel, onComplete))
+                .StartingIn(500);
+        }
+
+        private static void PlayAnimation(VisualElement root, VisualElement flameCell,
+            VisualElement gridContainer, VisualElement viewport, int newLevel, Action onComplete)
+        {
             var state = new AnimationState();
             IVisualElementScheduledItem updater = null;
             var createdElements = new List<VisualElement>();

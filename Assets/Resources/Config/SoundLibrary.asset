@@ -138,3 +138,13 @@ MonoBehaviour:
     volume: 1
     pitchMin: 1
     pitchMax: 1
+  - key: dialogue_tick
+    clip: {fileID: 8300000, guid: 54730ba9d69b54a82bb833f7d13afbca, type: 3}
+    volume: 0.5
+    pitchMin: 0.9
+    pitchMax: 1.1
+  - key: visitor_interact
+    clip: {fileID: 8300000, guid: 0ffa3183bde2044e0825b18c45f7abea, type: 3}
+    volume: 1
+    pitchMin: 1
+    pitchMax: 1

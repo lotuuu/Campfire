@@ -116,7 +116,7 @@ namespace Garden
                     break;
             }
 
-            AudioManager.Instance?.PlaySFX("ui_panel_open");
+            AudioManager.Instance?.PlaySFX("visitor_interact");
             if (modal != null) modal.style.display = DisplayStyle.Flex;
         }
 
