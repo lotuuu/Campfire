@@ -30,7 +30,7 @@ namespace Garden
 
         // ── Configuration ──
 
-        private const int MaxParticles = 120;
+        private const int MaxParticles = 200;
         private static readonly Color RainColor = new(0.71f, 0.78f, 1f);
         private static readonly Color SnowColor = new(0.90f, 0.92f, 1f);
         private static readonly Color LightningColor = new(0.78f, 0.82f, 1f);
@@ -74,7 +74,7 @@ namespace Garden
 
         // ── State ──
 
-        private VisualElement viewport;
+        private VisualElement canvas;
         private VisualElement particleOverlay;
         private VisualElement lightningOverlay;
         private readonly WeatherParticle[] particles = new WeatherParticle[MaxParticles];
@@ -95,9 +95,9 @@ namespace Garden
 
         // ── Public API ──
 
-        public void Initialize(VisualElement viewportElement)
+        public void Initialize(VisualElement canvasElement)
         {
-            viewport = viewportElement;
+            canvas = canvasElement;
 
             particleOverlay = new VisualElement();
             particleOverlay.name = "weather-vfx-overlay";
@@ -109,7 +109,7 @@ namespace Garden
             particleOverlay.style.bottom = 0;
             particleOverlay.style.display = DisplayStyle.None;
             particleOverlay.generateVisualContent += DrawParticles;
-            viewport.Add(particleOverlay);
+            canvas.Add(particleOverlay);
 
             lightningOverlay = new VisualElement();
             lightningOverlay.name = "weather-lightning-overlay";
@@ -120,7 +120,7 @@ namespace Garden
             lightningOverlay.style.right = 0;
             lightningOverlay.style.bottom = 0;
             lightningOverlay.style.backgroundColor = new Color(LightningColor.r, LightningColor.g, LightningColor.b, 0f);
-            viewport.Add(lightningOverlay);
+            canvas.Add(lightningOverlay);
 
             if (WeatherService.Instance != null)
             {
@@ -144,8 +144,8 @@ namespace Garden
 
         private void PreSeedParticles()
         {
-            float vw = viewport.resolvedStyle.width;
-            float vh = viewport.resolvedStyle.height;
+            float vw = canvas.resolvedStyle.width;
+            float vh = canvas.resolvedStyle.height;
             if (float.IsNaN(vw) || vw <= 0) vw = 1080f;
             if (float.IsNaN(vh) || vh <= 0) vh = 1920f;
             viewportWidth = vw;
@@ -200,8 +200,8 @@ namespace Garden
             float dt = Time.deltaTime;
             elapsedTime += dt;
 
-            float vw = viewport.resolvedStyle.width;
-            float vh = viewport.resolvedStyle.height;
+            float vw = canvas.resolvedStyle.width;
+            float vh = canvas.resolvedStyle.height;
             if (!float.IsNaN(vw) && vw > 0) viewportWidth = vw;
             if (!float.IsNaN(vh) && vh > 0) viewportHeight = vh;
             if (viewportWidth <= 0 || viewportHeight <= 0) return;

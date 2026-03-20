@@ -209,11 +209,11 @@ namespace Garden
                 lightingOverlay = gameObject.AddComponent<CampsiteLightingOverlay>();
             lightingOverlay.Initialize(canvas);
 
-            // Initialize viewport-level weather VFX overlay (rain, snow, lightning)
+            // Initialize canvas-level weather VFX overlay (rain, snow, lightning)
             weatherVFXOverlay = GetComponent<WeatherVFXOverlay>();
             if (weatherVFXOverlay == null)
                 weatherVFXOverlay = gameObject.AddComponent<WeatherVFXOverlay>();
-            weatherVFXOverlay.Initialize(viewport);
+            weatherVFXOverlay.Initialize(canvas);
 
             // Tap backdrop to close interaction panel (consumes the tap)
             interactionBackdrop?.RegisterCallback<ClickEvent>(evt =>
