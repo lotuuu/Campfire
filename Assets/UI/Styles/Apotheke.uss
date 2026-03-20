@@ -45,6 +45,7 @@
     padding: var(--spacing-sm);
     margin: 1%;
     width: 31%;
+    flex-grow: 0;
     overflow: hidden;
     transition-property: background-color, border-color;
     transition-duration: 0.15s;
