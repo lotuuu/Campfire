@@ -143,7 +143,12 @@ namespace Garden
             {
                 WeatherService.Instance.OnWeatherUpdated += OnWeatherUpdated;
                 if (WeatherService.Instance.HasWeather)
+                {
                     OnWeatherUpdated(WeatherService.Instance.CurrentWeather);
+                    // If weather is already active, pre-seed particles so they're visible immediately
+                    if (targetParticleCount > 0)
+                        PreSeedParticles();
+                }
             }
         }
 
@@ -151,6 +156,26 @@ namespace Garden
         {
             if (WeatherService.Instance != null)
                 WeatherService.Instance.OnWeatherUpdated -= OnWeatherUpdated;
+            particleOverlay?.RemoveFromHierarchy();
+            lightningOverlay?.RemoveFromHierarchy();
+        }
+
+        private void PreSeedParticles()
+        {
+            float vw = viewport.resolvedStyle.width;
+            float vh = viewport.resolvedStyle.height;
+            if (float.IsNaN(vw) || vw <= 0) vw = 1080f;
+            if (float.IsNaN(vh) || vh <= 0) vh = 1920f;
+            viewportWidth = vw;
+            viewportHeight = vh;
+
+            bool isRain = targetCondition == WeatherCondition.Rain || targetCondition == WeatherCondition.Storm;
+            // SpawnParticle fills slots sequentially (all start dead), so slot i matches iteration i
+            for (int i = 0; i < targetParticleCount && i < MaxParticles; i++)
+            {
+                SpawnParticle(isRain);
+                particles[i].position.y = Random.Range(0f, viewportHeight);
+            }
         }
 
         private void OnWeatherUpdated(WeatherData weather)
