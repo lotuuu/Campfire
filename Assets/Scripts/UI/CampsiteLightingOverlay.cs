@@ -150,13 +150,15 @@ namespace Garden
         private void UpdateTargets(WeatherData w)
         {
             // Time-of-day determines overlay strength and fire behavior
+            // Fire glow is always visible
+            targetFireGlow = true;
+
             if (w.isNight)
             {
                 targetBaseColor = new Color(0.01f, 0.02f, 0.08f);
                 targetBaseAlpha = 0.92f;
                 targetOverlayAlpha = 1f;
                 targetFireflyAlpha = 1f;
-                targetFireGlow = true;
             }
             else if (w.isGoldenHour)
             {
@@ -164,13 +166,14 @@ namespace Garden
                 targetBaseAlpha = 0.18f;
                 targetOverlayAlpha = 1f;
                 targetFireflyAlpha = 0.3f;
-                targetFireGlow = false;
             }
             else
             {
-                targetOverlayAlpha = 0f;
+                // Minimal overlay so fire glow is still visible during clear day
+                targetBaseColor = new Color(0f, 0f, 0f);
+                targetBaseAlpha = 0f;
+                targetOverlayAlpha = 1f;
                 targetFireflyAlpha = 0f;
-                targetFireGlow = false;
             }
 
             // Weather condition modifies the base color (composited on top of time-of-day)
