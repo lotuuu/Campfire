@@ -332,6 +332,8 @@ namespace Garden
             var data = SaveManager.Instance.Data;
             if (plotIndex < 0 || plotIndex >= data.plots.Count) return 0f;
             var plot = data.plots[plotIndex];
+            if (plot.state == PlotState.Mature)
+                return 1f;
             if (plot.state != PlotState.Growing || string.IsNullOrEmpty(plot.plantTimeUtc))
                 return 0f;
 
