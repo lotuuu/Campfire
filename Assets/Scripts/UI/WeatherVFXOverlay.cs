@@ -84,6 +84,7 @@ namespace Garden
         private WeatherCondition targetCondition = WeatherCondition.Clear;
         private float spawnAccumulator;
         private float viewportWidth, viewportHeight;
+        private float visibleX, visibleY; // top-left of visible rect in canvas coords
         private float elapsedTime;
 
         // Lightning state
@@ -101,20 +102,20 @@ namespace Garden
             canvas = canvasElement;
             viewport = canvas.parent;
 
-            // Overlays live on the viewport (not canvas) for correct sizing.
-            // Rain impacts and snow are screen-space effects — they don't need
-            // to pan with the grid since they represent weather falling from above.
+            // Overlays on canvas so they pan with the grid.
+            // Sized explicitly to canvas dimensions; particles spawn in the
+            // visible rect derived from the canvas translate (pan offset).
             particleOverlay = new VisualElement();
             particleOverlay.name = "weather-vfx-overlay";
             particleOverlay.pickingMode = PickingMode.Ignore;
             particleOverlay.style.position = Position.Absolute;
             particleOverlay.style.left = 0;
             particleOverlay.style.top = 0;
-            particleOverlay.style.right = 0;
-            particleOverlay.style.bottom = 0;
+            particleOverlay.style.width = Length.Percent(100);
+            particleOverlay.style.height = Length.Percent(100);
             particleOverlay.style.display = DisplayStyle.None;
             particleOverlay.generateVisualContent += DrawParticles;
-            viewport.Add(particleOverlay);
+            canvas.Add(particleOverlay);
 
             lightningOverlay = new VisualElement();
             lightningOverlay.name = "weather-lightning-overlay";
@@ -122,10 +123,10 @@ namespace Garden
             lightningOverlay.style.position = Position.Absolute;
             lightningOverlay.style.left = 0;
             lightningOverlay.style.top = 0;
-            lightningOverlay.style.right = 0;
-            lightningOverlay.style.bottom = 0;
+            lightningOverlay.style.width = Length.Percent(100);
+            lightningOverlay.style.height = Length.Percent(100);
             lightningOverlay.style.backgroundColor = new Color(LightningColor.r, LightningColor.g, LightningColor.b, 0f);
-            viewport.Add(lightningOverlay);
+            canvas.Add(lightningOverlay);
 
             if (WeatherService.Instance != null)
             {
@@ -156,14 +157,18 @@ namespace Garden
             viewportWidth = vw;
             viewportHeight = vh;
 
+            var translate = canvas.resolvedStyle.translate;
+            visibleX = -translate.x;
+            visibleY = -translate.y;
+
             bool isRain = targetCondition == WeatherCondition.Rain || targetCondition == WeatherCondition.Storm;
             for (int i = 0; i < targetParticleCount && i < MaxParticles; i++)
             {
                 SpawnParticle(isRain);
                 if (!isRain)
                 {
-                    // Scatter snow Y across viewport
-                    particles[i].position.y = Random.Range(0f, viewportHeight);
+                    // Scatter snow Y across visible area
+                    particles[i].position.y = Random.Range(visibleY, visibleY + viewportHeight);
                 }
                 else
                 {
@@ -210,6 +215,11 @@ namespace Garden
             if (!float.IsNaN(vw) && vw > 0) viewportWidth = vw;
             if (!float.IsNaN(vh) && vh > 0) viewportHeight = vh;
             if (viewportWidth <= 0 || viewportHeight <= 0) return;
+
+            // Visible rect in canvas coordinates (from pan offset)
+            var translate = canvas.resolvedStyle.translate;
+            visibleX = -translate.x;
+            visibleY = -translate.y;
 
             activeParticleCount = 0;
             for (int i = 0; i < MaxParticles; i++)
@@ -270,7 +280,9 @@ namespace Garden
                 // Top-down rain: impact appears at random position, plays dot → ripple → fade
                 particles[slot] = new WeatherParticle
                 {
-                    position = new Vector2(Random.Range(0f, viewportWidth), Random.Range(0f, viewportHeight)),
+                    position = new Vector2(
+                        Random.Range(visibleX, visibleX + viewportWidth),
+                        Random.Range(visibleY, visibleY + viewportHeight)),
                     age = 0f,
                     lifetime = RainImpactLifetime + Random.Range(-0.1f, 0.15f),
                     size = RainImpactRippleMaxRadius + Random.Range(-2f, 2f),
@@ -292,7 +304,9 @@ namespace Garden
                         : Random.Range(SnowBgRadiusMin, SnowBgRadiusMax));
                 particles[slot] = new WeatherParticle
                 {
-                    position = new Vector2(Random.Range(0f, viewportWidth), Random.Range(-30f, -10f)),
+                    position = new Vector2(
+                        Random.Range(visibleX, visibleX + viewportWidth),
+                        visibleY + Random.Range(-30f, -10f)),
                     speed = isForeground
                         ? Random.Range(SnowFgSpeedMin, SnowFgSpeedMax)
                         : Random.Range(SnowBgSpeedMin, SnowBgSpeedMax),
@@ -330,7 +344,8 @@ namespace Garden
                 p.position.y += p.speed * dt;
                 p.rotation += p.rotationSpeed * dt;
 
-                float fadeStart = viewportHeight * (1f - SnowFadeZoneRatio);
+                float visibleBottom = visibleY + viewportHeight;
+                float fadeStart = visibleBottom - viewportHeight * SnowFadeZoneRatio;
                 if (p.position.y > fadeStart)
                 {
                     float fadeProgress = (p.position.y - fadeStart) / (viewportHeight * SnowFadeZoneRatio);
@@ -339,10 +354,10 @@ namespace Garden
                         p.alive = false;
                 }
 
-                if (p.position.y > viewportHeight)
+                if (p.position.y > visibleBottom + 50f)
                     p.alive = false;
 
-                if (p.position.x < -50f || p.position.x > viewportWidth + 50f)
+                if (p.position.x < visibleX - 50f || p.position.x > visibleX + viewportWidth + 50f)
                     p.alive = false;
             }
         }
