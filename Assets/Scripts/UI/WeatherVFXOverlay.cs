@@ -100,16 +100,10 @@ namespace Garden
             return tex;
         }
 
-        private Material CreateParticleMaterial(Shader shader, Texture2D texture)
+        private Material CreateParticleMaterial(Material baseMat, Texture2D texture)
         {
-            var mat = new Material(shader);
+            var mat = new Material(baseMat);
             mat.mainTexture = texture;
-            mat.SetFloat("_Surface", 1);
-            mat.SetFloat("_Blend", 0);
-            mat.SetFloat("_ColorMode", 1);
-            mat.renderQueue = 3000;
-            mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
-            mat.EnableKeyword("_ALPHABLEND_ON");
             return mat;
         }
 
@@ -120,15 +114,20 @@ namespace Garden
             canvas = canvasElement;
             viewport = canvas.parent;
 
-            // Generate particle textures and materials
+            // Generate particle textures and materials from pre-made base material
+            // (Shader.Find fails on mobile if shader isn't referenced in the build)
             circleTexture = CreateCircleTexture(32);
             var ringTexture = CreateRingTexture(32);
 
-            var shader = Shader.Find("Universal Render Pipeline/Particles/Unlit");
-            if (shader == null) shader = Shader.Find("Particles/Standard Unlit");
+            var baseMat = Resources.Load<Material>("VFX/WeatherParticle");
+            if (baseMat == null)
+            {
+                Debug.LogError("[WeatherVFX] WeatherParticle material not found in Resources/VFX/");
+                return;
+            }
 
-            rainMaterial = CreateParticleMaterial(shader, ringTexture);
-            snowMaterial = CreateParticleMaterial(shader, circleTexture);
+            rainMaterial = CreateParticleMaterial(baseMat, ringTexture);
+            snowMaterial = CreateParticleMaterial(baseMat, circleTexture);
 
             // Read initial dimensions
             float vw = viewport.resolvedStyle.width;
