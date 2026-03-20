@@ -101,6 +101,9 @@ namespace Garden
             canvas = canvasElement;
             viewport = canvas.parent;
 
+            // Overlays live on the viewport (not canvas) for correct sizing.
+            // Rain impacts and snow are screen-space effects — they don't need
+            // to pan with the grid since they represent weather falling from above.
             particleOverlay = new VisualElement();
             particleOverlay.name = "weather-vfx-overlay";
             particleOverlay.pickingMode = PickingMode.Ignore;
@@ -111,7 +114,7 @@ namespace Garden
             particleOverlay.style.bottom = 0;
             particleOverlay.style.display = DisplayStyle.None;
             particleOverlay.generateVisualContent += DrawParticles;
-            canvas.Add(particleOverlay);
+            viewport.Add(particleOverlay);
 
             lightningOverlay = new VisualElement();
             lightningOverlay.name = "weather-lightning-overlay";
@@ -122,7 +125,7 @@ namespace Garden
             lightningOverlay.style.right = 0;
             lightningOverlay.style.bottom = 0;
             lightningOverlay.style.backgroundColor = new Color(LightningColor.r, LightningColor.g, LightningColor.b, 0f);
-            canvas.Add(lightningOverlay);
+            viewport.Add(lightningOverlay);
 
             if (WeatherService.Instance != null)
             {
