@@ -585,14 +585,6 @@ namespace Garden
             var data = SaveManager.Instance.Data;
             switch (CurrentStep)
             {
-                case StepBuildHouse:
-                    if (data.mallumHouses.Count > 0)
-                    {
-                        ShowDialogue(Loc.Get("ui.label.spark_of_ara", "Spark of Ara"), new List<string> {
-                            Loc.Get("tutorial.dialogue.mallum_intro", "Your Mallum can fetch water and go on quests!")
-                        }, () => AdvanceWhenPanelCloses(StepPlantAgain));
-                    }
-                    break;
                 case StepBuildSecondPlot:
                     if (data.plots.Count >= 2)
                         AdvanceTo(StepUpgradeFlame);
