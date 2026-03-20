@@ -185,8 +185,8 @@ namespace Garden
                         targetOverlayAlpha = 1f;
                         break;
                     case WeatherCondition.Snow:
-                        targetBaseColor = new Color(0.4f, 0.45f, 0.55f);
-                        targetBaseAlpha = 0.15f;
+                        targetBaseColor = new Color(0.7f, 0.75f, 0.82f);
+                        targetBaseAlpha = 0.25f;
                         targetOverlayAlpha = 1f;
                         break;
                     case WeatherCondition.Cloudy:
