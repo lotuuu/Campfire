@@ -21,6 +21,15 @@ namespace Garden
         private int currentIndex;
         private Action onComplete;
 
+        // Typewriter state
+        private const float CharsPerSecond = 30f;
+        private const int CharsPerTick = 3;
+        private string fullLineText;
+        private int revealedChars;
+        private float charTimer;
+        private bool isAnimating;
+        private int nextTickAt;
+
         public void Initialize(VisualElement root)
         {
             overlay = root.Q("dialogue-overlay");
@@ -96,10 +105,45 @@ namespace Garden
             if (overlay != null) overlay.style.display = DisplayStyle.None;
             if (dialogueBox != null) dialogueBox.style.display = DisplayStyle.None;
             if (bottomNav != null) bottomNav.style.display = DisplayStyle.Flex;
+            isAnimating = false;
+        }
+
+        private void Update()
+        {
+            if (!isAnimating) return;
+
+            charTimer += Time.deltaTime * CharsPerSecond;
+            int newChars = Mathf.FloorToInt(charTimer);
+            if (newChars <= 0) return;
+
+            charTimer -= newChars;
+            int prevChars = revealedChars;
+            revealedChars = Mathf.Min(revealedChars + newChars, fullLineText.Length);
+
+            if (textLabel != null)
+                textLabel.text = fullLineText.Substring(0, revealedChars);
+
+            if (revealedChars >= nextTickAt && prevChars < nextTickAt)
+            {
+                AudioManager.Instance?.PlaySFX("dialogue_tick");
+                nextTickAt += CharsPerTick;
+            }
+
+            if (revealedChars >= fullLineText.Length)
+                FinishAnimation();
         }
 
         private void Advance()
         {
+            if (isAnimating)
+            {
+                // Tap during animation: reveal full line instantly
+                FinishAnimation();
+                if (textLabel != null)
+                    textLabel.text = fullLineText;
+                return;
+            }
+
             currentIndex++;
             if (currentIndex < lines.Count)
             {
@@ -114,10 +158,28 @@ namespace Garden
 
         private void ShowCurrentLine()
         {
+            fullLineText = lines[currentIndex];
+            revealedChars = 0;
+            charTimer = 0f;
+            nextTickAt = CharsPerTick;
+            isAnimating = true;
+
             if (textLabel != null)
-                textLabel.text = lines[currentIndex];
+                textLabel.text = "";
             if (tapHint != null)
-                tapHint.text = currentIndex < lines.Count - 1 ? Loc.Get("ui.dialogue.tap_continue", "Tap to continue") : Loc.Get("ui.dialogue.tap_close", "Tap to close");
+                tapHint.style.opacity = 0f;
+        }
+
+        private void FinishAnimation()
+        {
+            isAnimating = false;
+            if (tapHint != null)
+            {
+                tapHint.text = currentIndex < lines.Count - 1
+                    ? Loc.Get("ui.dialogue.tap_continue", "Tap to continue")
+                    : Loc.Get("ui.dialogue.tap_close", "Tap to close");
+                tapHint.style.opacity = 1f;
+            }
         }
 
         private void RefreshLocale()
@@ -125,8 +187,7 @@ namespace Garden
             if (overlay == null || overlay.style.display == DisplayStyle.None) return;
             if (!string.IsNullOrEmpty(speakerLocKey) && speakerLabel != null)
                 speakerLabel.text = Loc.Get(speakerLocKey, speaker);
-            // Refresh tap hint
-            if (tapHint != null && lines != null && currentIndex < lines.Count)
+            if (tapHint != null && !isAnimating && lines != null && currentIndex < lines.Count)
                 tapHint.text = currentIndex < lines.Count - 1 ? Loc.Get("ui.dialogue.tap_continue", "Tap to continue") : Loc.Get("ui.dialogue.tap_close", "Tap to close");
         }
 
