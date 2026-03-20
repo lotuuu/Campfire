@@ -372,22 +372,20 @@ namespace Garden
                 p.position.y += p.speed * dt;
                 p.rotation += p.rotationSpeed * dt;
 
-                // Convert to viewport space for bounds checks
-                float screenY = p.position.y + panOffsetY;
-                float screenX = p.position.x + panOffsetX;
+                // Bounds checks in canvas space
+                float ch = canvasH > 0 ? canvasH : viewportHeight;
+                float cw = canvasW > 0 ? canvasW : viewportWidth;
 
-                float fadeStart = viewportHeight * (1f - SnowFadeZoneRatio);
-                if (screenY > fadeStart)
+                // Fade out near canvas bottom
+                float fadeStart = ch * (1f - SnowFadeZoneRatio);
+                if (p.position.y > fadeStart)
                 {
-                    float fadeProgress = (screenY - fadeStart) / (viewportHeight * SnowFadeZoneRatio);
+                    float fadeProgress = (p.position.y - fadeStart) / (ch * SnowFadeZoneRatio);
                     p.alpha = Mathf.Max(0f, p.alpha - fadeProgress * dt * 3f);
                     if (p.alpha <= 0.01f)
                         p.alive = false;
                 }
 
-                // Kill when off the canvas entirely
-                float cw = canvasW > 0 ? canvasW : viewportWidth;
-                float ch = canvasH > 0 ? canvasH : viewportHeight;
                 if (p.position.y > ch + 50f)
                     p.alive = false;
 
