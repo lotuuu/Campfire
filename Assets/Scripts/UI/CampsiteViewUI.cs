@@ -1559,9 +1559,9 @@ namespace Garden
             ShowInteractionPanel();
         }
 
-        private void ShowInteractionPanel()
+        private void ShowInteractionPanel(bool silent = false)
         {
-            AudioManager.Instance?.PlaySFX("ui_panel_open");
+            if (!silent) AudioManager.Instance?.PlaySFX("ui_panel_open");
             if (interactionBackdrop != null)
                 interactionBackdrop.style.display = DisplayStyle.Flex;
             interactionPanel.style.display = DisplayStyle.Flex;
@@ -2188,7 +2188,7 @@ namespace Garden
             {
                 RebuildGrid();
                 ShowHarvestResult(result);
-                ShowInteractionPanel();
+                ShowInteractionPanel(silent: true);
             }
             else
             {
@@ -2196,7 +2196,7 @@ namespace Garden
                 interactionBody.Clear();
                 interactionActions.Clear();
                 interactionTitle.text = Loc.Get("ui.interaction.waiting_server", "Waiting for server...");
-                ShowInteractionPanel();
+                ShowInteractionPanel(silent: true);
 
                 // Block until we can resync
                 if (GameService.Instance != null)
