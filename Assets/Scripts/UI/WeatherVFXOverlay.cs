@@ -8,7 +8,7 @@ namespace Garden
     {
         // ── Configuration ──
 
-        private const int VfxLayer = 6;
+        private const int VfxLayer = 8;
 
         // Lightning config
         private static readonly Color LightningColor = new(0.78f, 0.82f, 1f);
