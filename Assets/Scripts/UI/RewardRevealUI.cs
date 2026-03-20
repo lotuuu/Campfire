@@ -70,7 +70,7 @@ namespace Garden
             // Trigger fade-in on next frame so transition plays
             overlay.schedule.Execute(() => overlay.AddToClassList("reward-reveal--visible"));
 
-            AudioManager.Instance?.PlaySFX("ui_panel_open");
+            AudioManager.Instance?.PlaySFX("quest_reward_open");
             StartCoroutine(RevealCards(MergeRewards(rewards)));
         }
 

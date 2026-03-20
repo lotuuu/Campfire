@@ -108,6 +108,11 @@ MonoBehaviour:
     volume: 1
     pitchMin: 1
     pitchMax: 1
+  - key: quest_reward_open
+    clip: {fileID: 8300000, guid: 7b1042f04cc5b44d5a2527164209f196, type: 3}
+    volume: 1
+    pitchMin: 1
+    pitchMax: 1
   - key: harvest_reveal
     clip: {fileID: 8300000, guid: 529499bf61ef044fd83c0a387ca27e09, type: 3}
     volume: 1
