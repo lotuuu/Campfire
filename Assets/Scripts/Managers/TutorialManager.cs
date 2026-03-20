@@ -483,7 +483,7 @@ namespace Garden
                         }
                         if (stillOnQuest)
                         {
-                            tutorialUI?.ShowHint(Loc.Get("tutorial.hint.quest_speed_up", "Use an Energy Drink to speed up the quest"));
+                            tutorialUI?.ShowHint(Loc.Get("tutorial.hint.quest_speed_up", "Use an Energy Drink to speed up the quest"), centered: true);
                             tutorialUI?.HighlightElementByClass("quest-speedup-btn", "btn-quest");
                         }
                         else
