@@ -38,7 +38,8 @@ namespace Garden
         private ParticleSystem rainPS;
         private ParticleSystem snowPS;
         private Texture2D circleTexture;
-        private Material particleMaterial;
+        private Material rainMaterial;
+        private Material snowMaterial;
 
         private float viewportWidth, viewportHeight;
         private float canvasW, canvasH;
@@ -74,6 +75,44 @@ namespace Garden
             return tex;
         }
 
+        private Texture2D CreateRingTexture(int size)
+        {
+            var tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            float center = size / 2f;
+            float ringRadius = center * 0.75f;
+            float ringWidth = center * 0.25f;
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    float dist = Vector2.Distance(new Vector2(x, y), new Vector2(center, center));
+                    float distFromRing = Mathf.Abs(dist - ringRadius);
+                    float alpha = Mathf.Clamp01(1f - (distFromRing / ringWidth));
+                    alpha *= alpha;
+                    // Also fade out at outer edge
+                    float outerFade = Mathf.Clamp01(1f - (dist / center));
+                    alpha *= Mathf.Clamp01(outerFade * 3f);
+                    tex.SetPixel(x, y, new Color(1f, 1f, 1f, alpha));
+                }
+            }
+            tex.Apply();
+            tex.filterMode = FilterMode.Bilinear;
+            return tex;
+        }
+
+        private Material CreateParticleMaterial(Shader shader, Texture2D texture)
+        {
+            var mat = new Material(shader);
+            mat.mainTexture = texture;
+            mat.SetFloat("_Surface", 1);
+            mat.SetFloat("_Blend", 0);
+            mat.SetFloat("_ColorMode", 1);
+            mat.renderQueue = 3000;
+            mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+            mat.EnableKeyword("_ALPHABLEND_ON");
+            return mat;
+        }
+
         // ── Public API ──
 
         public void Initialize(VisualElement canvasElement)
@@ -81,20 +120,15 @@ namespace Garden
             canvas = canvasElement;
             viewport = canvas.parent;
 
-            // Generate shared particle texture and material
+            // Generate particle textures and materials
             circleTexture = CreateCircleTexture(32);
-            // URP particle shader
+            var ringTexture = CreateRingTexture(32);
+
             var shader = Shader.Find("Universal Render Pipeline/Particles/Unlit");
-            if (shader == null) shader = Shader.Find("Particles/Standard Unlit"); // fallback
-            particleMaterial = new Material(shader);
-            particleMaterial.mainTexture = circleTexture;
-            // Set surface type to Transparent
-            particleMaterial.SetFloat("_Surface", 1); // 0=Opaque, 1=Transparent
-            particleMaterial.SetFloat("_Blend", 0);   // 0=Alpha, 1=Premultiply, 2=Additive
-            particleMaterial.SetFloat("_ColorMode", 1); // Multiply
-            particleMaterial.renderQueue = 3000;
-            particleMaterial.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
-            particleMaterial.EnableKeyword("_ALPHABLEND_ON");
+            if (shader == null) shader = Shader.Find("Particles/Standard Unlit");
+
+            rainMaterial = CreateParticleMaterial(shader, ringTexture);
+            snowMaterial = CreateParticleMaterial(shader, circleTexture);
 
             // Read initial dimensions
             float vw = viewport.resolvedStyle.width;
@@ -228,7 +262,7 @@ namespace Garden
 
             var renderer = go.GetComponent<ParticleSystemRenderer>();
             renderer.renderMode = ParticleSystemRenderMode.Billboard;
-            renderer.material = particleMaterial;
+            renderer.material = rainMaterial;
             renderer.sortingOrder = 100;
         }
 
@@ -294,7 +328,7 @@ namespace Garden
 
             var renderer = go.GetComponent<ParticleSystemRenderer>();
             renderer.renderMode = ParticleSystemRenderMode.Billboard;
-            renderer.material = particleMaterial;
+            renderer.material = snowMaterial;
             renderer.sortingOrder = 100;
         }
 
@@ -453,8 +487,10 @@ namespace Garden
                 Destroy(vfxRoot);
             if (circleTexture != null)
                 Destroy(circleTexture);
-            if (particleMaterial != null)
-                Destroy(particleMaterial);
+            if (rainMaterial != null)
+                Destroy(rainMaterial);
+            if (snowMaterial != null)
+                Destroy(snowMaterial);
         }
 
         // ── Lightning (retained from previous implementation) ──
