@@ -343,7 +343,7 @@ namespace Garden
                         int waterDrinkCount = MallumManager.Instance.GetVaseSpeedItemCount();
                         actionBtn.text = waterDrinkCount > 0 ? string.Format(Loc.Get("ui.button.speed_up", "Speed Up ({0})"), waterDrinkCount) : Loc.Get("ui.button.speed_up_plain", "Speed Up");
                         actionBtn.AddToClassList("quest-speedup-btn");
-                        actionBtn.SetEnabled(waterDrinkCount > 0);
+                        actionBtn.SetEnabled(waterDrinkCount > 0 || CurrencyManager.FreeMode);
                         actionBtn.clickable = new Clickable(() =>
                         {
                             MallumManager.Instance.SpeedUpWaterFetch(capturedIndex);
@@ -378,7 +378,7 @@ namespace Garden
                         int drinkCount = MallumManager.Instance.GetQuestSpeedItemCount();
                         actionBtn.text = drinkCount > 0 ? string.Format(Loc.Get("ui.button.speed_up", "Speed Up ({0})"), drinkCount) : Loc.Get("ui.button.speed_up_plain", "Speed Up");
                         actionBtn.AddToClassList("quest-speedup-btn");
-                        actionBtn.SetEnabled(drinkCount > 0);
+                        actionBtn.SetEnabled(drinkCount > 0 || CurrencyManager.FreeMode);
                         var capturedQuestName = questData?.questName ?? mallum.assignedQuestName;
                         actionBtn.clickable = new Clickable(() =>
                         {
