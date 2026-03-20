@@ -36,6 +36,7 @@ namespace Garden
         /// <summary>Canvas center in local coords, for lighting overlay.</summary>
         private static Vector2 canvasCenter;
         private CampsiteLightingOverlay lightingOverlay;
+        private WeatherVFXOverlay weatherVFXOverlay;
 
         // Mode state machine
         private enum CampsiteMode { Normal, Placing, Watering, Visiting, Moving, Tutorial }
@@ -207,6 +208,12 @@ namespace Garden
             if (lightingOverlay == null)
                 lightingOverlay = gameObject.AddComponent<CampsiteLightingOverlay>();
             lightingOverlay.Initialize(canvas);
+
+            // Initialize viewport-level weather VFX overlay (rain, snow, lightning)
+            weatherVFXOverlay = GetComponent<WeatherVFXOverlay>();
+            if (weatherVFXOverlay == null)
+                weatherVFXOverlay = gameObject.AddComponent<WeatherVFXOverlay>();
+            weatherVFXOverlay.Initialize(viewport);
 
             // Tap backdrop to close interaction panel (consumes the tap)
             interactionBackdrop?.RegisterCallback<ClickEvent>(evt =>
