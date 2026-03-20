@@ -86,7 +86,7 @@ namespace Garden
         private const float StormSpeedMultiplier = 1.2f;
         private const int RainParticleCount = 80;
         private const int StormParticleCount = 100;
-        private const int SnowParticleCount = 60;
+        private const int SnowParticleCount = 120;
         private const float TransitionDuration = 2f;
 
         // ── State ──
