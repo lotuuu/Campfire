@@ -411,7 +411,7 @@ namespace Garden
 
         // ── Update ──
 
-        private void Update()
+        private void LateUpdate()
         {
             if (vfxCamera == null) return;
 
