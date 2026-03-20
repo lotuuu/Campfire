@@ -75,6 +75,7 @@ namespace Garden
         // ── State ──
 
         private VisualElement canvas;
+        private VisualElement viewport;
         private VisualElement particleOverlay;
         private VisualElement lightningOverlay;
         private readonly WeatherParticle[] particles = new WeatherParticle[MaxParticles];
@@ -98,6 +99,7 @@ namespace Garden
         public void Initialize(VisualElement canvasElement)
         {
             canvas = canvasElement;
+            viewport = canvas.parent;
 
             particleOverlay = new VisualElement();
             particleOverlay.name = "weather-vfx-overlay";
@@ -144,8 +146,8 @@ namespace Garden
 
         private void PreSeedParticles()
         {
-            float vw = canvas.resolvedStyle.width;
-            float vh = canvas.resolvedStyle.height;
+            float vw = viewport.resolvedStyle.width;
+            float vh = viewport.resolvedStyle.height;
             if (float.IsNaN(vw) || vw <= 0) vw = 1080f;
             if (float.IsNaN(vh) || vh <= 0) vh = 1920f;
             viewportWidth = vw;
@@ -200,8 +202,8 @@ namespace Garden
             float dt = Time.deltaTime;
             elapsedTime += dt;
 
-            float vw = canvas.resolvedStyle.width;
-            float vh = canvas.resolvedStyle.height;
+            float vw = viewport.resolvedStyle.width;
+            float vh = viewport.resolvedStyle.height;
             if (!float.IsNaN(vw) && vw > 0) viewportWidth = vw;
             if (!float.IsNaN(vh) && vh > 0) viewportHeight = vh;
             if (viewportWidth <= 0 || viewportHeight <= 0) return;
