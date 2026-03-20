@@ -218,6 +218,10 @@ namespace Garden
             // Prevent clicks on interaction panel from falling through
             interactionPanel?.RegisterCallback<ClickEvent>(evt => evt.StopPropagation());
 
+            // Hide interaction panel on init (skip CloseInteractionPanel to avoid playing sound)
+            if (interactionBackdrop != null) interactionBackdrop.style.display = DisplayStyle.None;
+            if (interactionPanel != null) interactionPanel.style.display = DisplayStyle.None;
+
             // Defer initial build so viewport has resolved dimensions
             viewport.RegisterCallback<GeometryChangedEvent>(_ => RebuildGrid());
         }

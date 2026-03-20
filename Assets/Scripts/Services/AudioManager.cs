@@ -15,10 +15,12 @@ namespace Garden
         private AudioSource _musicSource;
         private AudioSource[] _sfxSources;
         private int _sfxIndex;
+        private int[] _sfxGeneration;
         private Dictionary<string, SoundLibrary.SoundEntry> _lookup;
 
         private const int SfxPoolSize = 4;
         private const float MinDb = -80f;
+        private bool _sfxReady;
 
         private void Awake()
         {
@@ -35,6 +37,7 @@ namespace Garden
             }
 
             _sfxSources = new AudioSource[SfxPoolSize];
+            _sfxGeneration = new int[SfxPoolSize];
             var sfxGroups = mixer != null ? mixer.FindMatchingGroups("SFX") : null;
             for (int i = 0; i < SfxPoolSize; i++)
             {
@@ -57,6 +60,14 @@ namespace Garden
             }
 
             PlayMusic();
+            StartCoroutine(EnableSfxNextFrame());
+        }
+
+        private System.Collections.IEnumerator EnableSfxNextFrame()
+        {
+            yield return null;
+            yield return null;
+            _sfxReady = true;
         }
 
         private void BuildLookup()
@@ -72,43 +83,54 @@ namespace Garden
 
         public void PlaySFX(string key)
         {
+            if (!_sfxReady) return;
             if (_lookup == null || !_lookup.TryGetValue(key, out var entry)) return;
             if (entry.clip == null) return;
 
-            var source = _sfxSources[_sfxIndex];
+            int idx = _sfxIndex;
             _sfxIndex = (_sfxIndex + 1) % SfxPoolSize;
+            _sfxGeneration[idx]++;
 
+            var source = _sfxSources[idx];
+            source.volume = 1f;
             source.pitch = Random.Range(entry.pitchMin, entry.pitchMax);
             source.PlayOneShot(entry.clip, entry.volume);
         }
 
         public void PlaySFXWithFadeOut(string key, float fadeDuration)
         {
+            if (!_sfxReady) return;
             if (_lookup == null || !_lookup.TryGetValue(key, out var entry)) return;
             if (entry.clip == null) return;
 
-            var source = _sfxSources[_sfxIndex];
+            int idx = _sfxIndex;
             _sfxIndex = (_sfxIndex + 1) % SfxPoolSize;
+            _sfxGeneration[idx]++;
+            int gen = _sfxGeneration[idx];
 
+            var source = _sfxSources[idx];
             source.Stop();
             source.clip = entry.clip;
             source.volume = entry.volume;
             source.pitch = Random.Range(entry.pitchMin, entry.pitchMax);
             source.Play();
-            StartCoroutine(FadeOutSource(source, entry.volume, fadeDuration));
+            StartCoroutine(FadeOutSource(source, idx, gen, entry.volume, fadeDuration));
         }
 
-        private IEnumerator FadeOutSource(AudioSource source, float startVolume, float duration)
+        private IEnumerator FadeOutSource(AudioSource source, int idx, int gen, float startVolume, float duration)
         {
             float elapsed = 0f;
-            while (elapsed < duration && source.isPlaying)
+            while (elapsed < duration && _sfxGeneration[idx] == gen && source.isPlaying)
             {
                 elapsed += Time.deltaTime;
                 source.volume = Mathf.Lerp(startVolume, 0f, elapsed / duration);
                 yield return null;
             }
-            source.Stop();
-            source.clip = null;
+            if (_sfxGeneration[idx] == gen)
+            {
+                source.Stop();
+                source.clip = null;
+            }
         }
 
         public void PlayMusic()

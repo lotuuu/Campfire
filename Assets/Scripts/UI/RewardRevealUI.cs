@@ -71,7 +71,6 @@ namespace Garden
             overlay.schedule.Execute(() => overlay.AddToClassList("reward-reveal--visible"));
 
             AudioManager.Instance?.PlaySFX("ui_panel_open");
-
             StartCoroutine(RevealCards(MergeRewards(rewards)));
         }
 
@@ -138,6 +137,7 @@ namespace Garden
             const float staggerDelay = 0.08f;
             const float transitionDuration = 0.35f;
 
+            bool firstCard = true;
             foreach (var card in cards)
             {
                 var cardBound = card.worldBound;
@@ -147,6 +147,12 @@ namespace Garden
                 card.style.translate = new StyleTranslate(
                     new Translate(new Length(dx, LengthUnit.Pixel), new Length(dy, LengthUnit.Pixel)));
                 card.AddToClassList("reward-card--flying");
+
+                if (firstCard)
+                {
+                    StartCoroutine(PlayDelayed("mallum_gear_up", transitionDuration));
+                    firstCard = false;
+                }
 
                 yield return new WaitForSeconds(staggerDelay);
             }
@@ -158,6 +164,12 @@ namespace Garden
             onCollect = null;
             Hide();
             callback?.Invoke();
+        }
+
+        private IEnumerator PlayDelayed(string key, float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            AudioManager.Instance?.PlaySFX(key);
         }
 
         private void CloseImmediate()

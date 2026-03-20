@@ -34,7 +34,7 @@ MonoBehaviour:
     pitchMin: 1
     pitchMax: 1
   - key: plot_plant
-    clip: {fileID: 8300000, guid: 1a08f705f34954c3ebe208fc839e285b, type: 3}
+    clip: {fileID: 8300000, guid: 53c3c86ef1dce476d90c58aa8007ceda, type: 3}
     volume: 1
     pitchMin: 0.9
     pitchMax: 1.1
@@ -79,7 +79,7 @@ MonoBehaviour:
     pitchMin: 1
     pitchMax: 1
   - key: quest_collect_rewards
-    clip: {fileID: 8300000, guid: 1c68e77df02654754bc608b3b1d4ff75, type: 3}
+    clip: {fileID: 8300000, guid: 604b18662b71c4dce94184679c9751cc, type: 3}
     volume: 1
     pitchMin: 1
     pitchMax: 1
