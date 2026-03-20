@@ -30,7 +30,7 @@ namespace Garden
 
         // ── Configuration ──
 
-        private const int MaxParticles = 250;
+        private const int MaxParticles = 600;
         private static readonly Color RainColor = new(0.71f, 0.78f, 1f);
         private static readonly Color SnowColor = new(0.90f, 0.92f, 1f);
         private static readonly Color LightningColor = new(0.78f, 0.82f, 1f);
@@ -66,10 +66,10 @@ namespace Garden
         private const float LightningClusterChance = 0.3f;
         private const float LightningClusterDelay = 1f;
 
-        // Particle counts (covers entire canvas)
-        private const int RainParticleCount = 120;
-        private const int StormParticleCount = 150;
-        private const int SnowParticleCount = 180;
+        // Base particle density per viewport-area (scaled by canvas/viewport ratio)
+        private const int RainDensity = 80;
+        private const int StormDensity = 100;
+        private const int SnowDensity = 120;
         private const float TransitionDuration = 2f;
 
         // ── State ──
@@ -185,14 +185,23 @@ namespace Garden
             }
         }
 
+        private int ScaledCount(int baseDensity)
+        {
+            // Scale particle count by canvas area relative to viewport
+            float vpArea = Mathf.Max(viewportWidth, 1f) * Mathf.Max(viewportHeight, 1f);
+            float cvArea = Mathf.Max(canvasW, viewportWidth) * Mathf.Max(canvasH, viewportHeight);
+            float ratio = Mathf.Max(1f, cvArea / vpArea);
+            return Mathf.Min((int)(baseDensity * ratio), MaxParticles);
+        }
+
         private void OnWeatherUpdated(WeatherData weather)
         {
             targetCondition = weather.condition;
             targetParticleCount = weather.condition switch
             {
-                WeatherCondition.Rain => RainParticleCount,
-                WeatherCondition.Storm => StormParticleCount,
-                WeatherCondition.Snow => SnowParticleCount,
+                WeatherCondition.Rain => ScaledCount(RainDensity),
+                WeatherCondition.Storm => ScaledCount(StormDensity),
+                WeatherCondition.Snow => ScaledCount(SnowDensity),
                 _ => 0
             };
 
