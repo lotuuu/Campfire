@@ -79,8 +79,9 @@ namespace Garden
                 return;
             }
 
-            // Arrival: fetch if in visitor hour, no current visitor, and not already fetched today
-            if (IsVisitorHour(now) && data.currentVisitor == null && !_fetching)
+            // Arrival: fetch if in visitor hour, no current visitor, not already fetched today, and tutorial complete
+            if (IsVisitorHour(now) && data.currentVisitor == null && !_fetching
+                && (TutorialManager.Instance == null || TutorialManager.Instance.IsComplete))
             {
                 string todayUtc = utcNow.Date.ToString("o");
                 if (data.lastVisitorFetchDateUtc == todayUtc) return;
