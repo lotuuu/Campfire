@@ -412,6 +412,9 @@ namespace Garden
                         data.inventory.Add(new InventoryItem { itemKey = i.itemKey, count = i.count });
             }
 
+            // Tutorial step (server-authoritative after wipe/re-registration)
+            data.tutorialStep = state.tutorialStep;
+
             // Apply server weather if available
             if (state.weather != null && WeatherService.Instance != null)
                 WeatherService.Instance.ApplyServerWeather(state.weather);

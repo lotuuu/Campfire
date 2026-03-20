@@ -124,9 +124,10 @@ namespace Garden
                 Data = new SaveData();
             }
 
-            // If tutorial was never completed, discard the stale local save immediately
+            // If tutorial was started but never completed, discard the stale local save
             // so the UI never renders old positions. Server wipe happens later in GameService.
-            if (Data.tutorialStep < TutorialManager.StepComplete && Data.vases.Count > 0)
+            // Step 0 is excluded: brand-new saves default to 0 and should not be wiped.
+            if (Data.tutorialStep > 0 && Data.tutorialStep < TutorialManager.StepComplete)
             {
                 Debug.Log("[SaveManager] Tutorial incomplete on load — discarding local save");
                 Data = new SaveData();
