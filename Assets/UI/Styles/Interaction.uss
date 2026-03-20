@@ -152,7 +152,7 @@
 
 .seed-picker-empty {
     -unity-text-align: middle-center;
-    color: var(--color-text-muted);
+    color: var(--color-text-dim);
     font-size: var(--font-sm);
     padding: var(--spacing-lg) var(--spacing-md);
     white-space: normal;

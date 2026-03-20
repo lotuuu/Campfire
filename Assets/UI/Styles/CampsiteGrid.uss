@@ -324,10 +324,8 @@
 
 /* ── Skin Selector ── */
 
-/* Panel override: pin to top instead of center */
+/* Skin panel inherits centered positioning from #interaction-backdrop */
 .skin-panel {
-    margin-top: 0;
-    margin-bottom: auto;
 }
 
 /* Header row with back arrow + title */
