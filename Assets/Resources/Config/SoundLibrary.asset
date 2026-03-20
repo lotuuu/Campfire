@@ -19,7 +19,7 @@ MonoBehaviour:
     pitchMin: 1
     pitchMax: 1
   - key: ui_panel_close
-    clip: {fileID: 8300000, guid: 98127393842ff4c95b5f54116e550087, type: 3}
+    clip: {fileID: 8300000, guid: 83c4cd2e6a553409cb1d39711eb7fa86, type: 3}
     volume: 1
     pitchMin: 1
     pitchMax: 1
