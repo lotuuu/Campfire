@@ -493,6 +493,11 @@ namespace Garden
                 loadingGate.RemoveFromHierarchy();
                 loadingGate = null;
 
+                // Show floating HUD now that loading is complete
+                var floatingHud = root.Q("floating-hud");
+                if (floatingHud != null)
+                    floatingHud.style.display = DisplayStyle.Flex;
+
                 // Refresh all UI now that server state is fully loaded
                 resourceDisplay?.Refresh();
                 campsiteView?.RebuildGrid();
