@@ -162,7 +162,7 @@ namespace Garden
                 displayNameInput.RegisterValueChangedCallback(evt =>
                 {
                     if (SocialService.Instance != null)
-                        SocialService.Instance.UpdateDisplayName(evt.newValue);
+                        _ = SocialService.Instance.UpdateDisplayName(evt.newValue);
                 });
             }
 

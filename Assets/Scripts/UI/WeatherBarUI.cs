@@ -169,8 +169,10 @@ namespace Garden
                 var icon = new VisualElement();
                 icon.style.width = 24;
                 icon.style.height = 24;
-                icon.style.unityBackgroundScaleMode = ScaleMode.ScaleToFit;
                 icon.style.backgroundImage = iconTex;
+                icon.style.backgroundPositionX = new BackgroundPosition(BackgroundPositionKeyword.Center);
+                icon.style.backgroundPositionY = new BackgroundPosition(BackgroundPositionKeyword.Center);
+                icon.style.backgroundSize = new BackgroundSize(BackgroundSizeType.Contain);
                 row.Add(icon);
             }
             else

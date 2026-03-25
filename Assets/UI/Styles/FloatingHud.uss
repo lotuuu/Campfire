@@ -9,7 +9,7 @@
     flex-direction: row;
     align-items: flex-start;
     padding: 0 var(--spacing-sm);
-    z-index: 100;
+    /* z-index not supported in UI Toolkit — use UXML element order for layering */
     display: none;
 }
 
@@ -132,7 +132,7 @@
     overflow: hidden;
     opacity: 0;
     scale: 0.8 0.8;
-    z-index: 200;
+    /* layering via UXML element order */
 
     transition-property: width, height, border-radius, opacity, scale;
     transition-duration: 400ms, 400ms, 400ms, 200ms, 400ms;
@@ -517,7 +517,7 @@
     right: 0;
     top: 0;
     bottom: 0;
-    z-index: 150;
+    /* layering via UXML element order */
 }
 
 #bloom-dismiss.bloom-dismiss-active {
