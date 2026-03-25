@@ -25,14 +25,18 @@ namespace Garden
             campRoot.style.paddingTop = topBleed;
             campRoot.style.paddingBottom = bottomBleed;
 
-            // Pull top-bar background up into the safe area with negative margin,
-            // then add matching internal padding so content stays below the notch
-            var topBar = root.Q("top-bar");
-            if (topBar != null)
-            {
-                topBar.style.marginTop = -topBleed;
-                topBar.style.paddingTop = topBleed;
-            }
+            // Shift floating HUD down by safe area inset
+            var floatingHud = root.Q("floating-hud");
+            if (floatingHud != null)
+                floatingHud.style.top = 10 + topBleed;
+
+            // Also shift bloom cards down
+            var forecastBloom = root.Q("forecast-bloom");
+            if (forecastBloom != null)
+                forecastBloom.style.top = 10 + topBleed;
+            var profileBloom = root.Q("profile-bloom");
+            if (profileBloom != null)
+                profileBloom.style.top = 10 + topBleed;
 
             // Pull bottom-nav background down into the bottom bleed area
             var bottomNav = root.Q("bottom-nav");
