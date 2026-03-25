@@ -1,0 +1,427 @@
+/* FloatingHud.uss — Floating HUD elements + bloom card animations */
+
+/* ── Floating HUD container ── */
+#floating-hud {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 10px;
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 0 12px;
+    z-index: 100;
+}
+
+/* ── Shared circle style ── */
+.hud-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 18px;
+    background-color: rgba(20, 40, 20, 0.65);
+    border-width: 1px;
+    border-color: rgba(214, 154, 53, 0.2);
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* ── Profile circle (left) ── */
+.hud-left {
+    margin-right: auto;
+}
+
+#hud-profile-pic {
+    width: 32px;
+    height: 32px;
+    border-radius: 16px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+#hud-visiting-name {
+    display: none;
+    position: absolute;
+    top: 40px;
+    left: 0;
+    background-color: rgba(20, 40, 20, 0.75);
+    border-radius: 8px;
+    padding: 2px 8px;
+    white-space: nowrap;
+}
+
+#hud-visiting-name Label {
+    font-size: 18px;
+    color: var(--color-text-bright);
+}
+
+/* ── Resource pill (center) ── */
+.hud-pill {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(20, 40, 20, 0.65);
+    border-radius: 16px;
+    border-width: 1px;
+    border-color: rgba(214, 154, 53, 0.2);
+    padding: 5px 14px;
+}
+
+.hud-res {
+    flex-direction: row;
+    align-items: center;
+}
+
+.hud-res-icon {
+    width: 16px;
+    height: 16px;
+    -unity-background-scale-mode: scale-to-fit;
+    margin-right: 3px;
+}
+
+.hud-res Label {
+    font-size: 24px;
+    -unity-font-style: bold;
+}
+
+#hud-mana {
+    color: var(--color-mana);
+}
+
+#hud-water {
+    color: var(--color-water);
+}
+
+#hud-mallum {
+    color: var(--color-text);
+}
+
+.hud-res-divider {
+    width: 1px;
+    height: 14px;
+    background-color: rgba(255, 255, 255, 0.1);
+    margin: 0 8px;
+}
+
+/* ── Weather circle (right) ── */
+.hud-right {
+    margin-left: auto;
+}
+
+#hud-weather-icon {
+    width: 24px;
+    height: 24px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* ── Bloom card base (collapsed = circle-sized, hidden) ── */
+.bloom-card {
+    position: absolute;
+    width: 36px;
+    height: 36px;
+    border-radius: 18px;
+    background-color: rgba(20, 40, 20, 0.85);
+    border-width: 1px;
+    border-color: rgba(214, 154, 53, 0.3);
+    overflow: hidden;
+    opacity: 0;
+    scale: 0.8 0.8;
+    z-index: 200;
+
+    transition-property: width, height, border-radius, opacity, scale;
+    transition-duration: 400ms, 400ms, 400ms, 200ms, 400ms;
+    transition-timing-function: ease-out-back, ease-out-back, ease, ease, ease-out-back;
+}
+
+.bloom-card.bloom-open {
+    opacity: 1;
+    scale: 1 1;
+}
+
+/* ── Bloom content (delayed fade-in) ── */
+.bloom-content {
+    opacity: 0;
+    translate: 0 8px;
+    transition-property: opacity, translate;
+    transition-duration: 300ms, 300ms;
+    transition-delay: 150ms, 150ms;
+    transition-timing-function: ease, ease;
+    padding: 14px;
+}
+
+.bloom-card.bloom-open .bloom-content {
+    opacity: 1;
+    translate: 0 0;
+}
+
+/* ── Forecast bloom: anchored top-right ── */
+.bloom-right {
+    top: 10px;
+    right: 12px;
+}
+
+.bloom-right.bloom-open {
+    width: 280px;
+    height: 420px;
+    border-radius: 16px;
+}
+
+/* ── Profile bloom: anchored top-left ── */
+.bloom-left {
+    top: 10px;
+    left: 12px;
+}
+
+.bloom-left.bloom-open {
+    width: 320px;
+    height: 520px;
+    border-radius: 16px;
+}
+
+/* ── Forecast card content ── */
+.forecast-bloom-title {
+    color: rgb(214, 154, 53);
+    font-size: var(--font-md);
+    -unity-font-style: bold;
+    margin-bottom: var(--spacing-sm);
+}
+
+.forecast-stat-row {
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+.forecast-stat-label {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 22px;
+}
+
+.forecast-stat-value {
+    color: rgb(232, 220, 200);
+    font-size: 22px;
+    -unity-font-style: bold;
+}
+
+.forecast-section-label {
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.3);
+    margin-top: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
+}
+
+.forecast-day-row {
+    flex-direction: row;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+.forecast-day-name {
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.5);
+    width: 50px;
+}
+
+.forecast-day-icon {
+    width: 24px;
+    height: 24px;
+    -unity-background-scale-mode: scale-to-fit;
+    margin-right: var(--spacing-xs);
+}
+
+.forecast-day-temp {
+    font-size: 22px;
+    color: rgb(232, 220, 200);
+    margin-left: auto;
+}
+
+/* ── Outlier color classes (kept from Forecast.uss) ── */
+.stat-hot { color: rgb(255, 110, 60); }
+.stat-cold { color: rgb(100, 175, 235); }
+.stat-dry { color: rgb(230, 145, 55); }
+.stat-humid { color: rgb(100, 175, 235); }
+.stat-windy { color: rgb(200, 210, 220); }
+
+/* ── Profile bloom content ── */
+.profile-section-header {
+    font-size: var(--font-xs);
+    color: rgb(160, 140, 110);
+    -unity-font-style: bold;
+    letter-spacing: 3px;
+    margin-top: var(--spacing-lg);
+    margin-bottom: var(--spacing-sm);
+    padding-bottom: var(--spacing-xs);
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(180, 120, 60, 0.25);
+}
+
+#profile-pic-large {
+    width: 64px;
+    height: 64px;
+    border-radius: 32px;
+    -unity-background-scale-mode: scale-to-fit;
+    background-color: rgb(60, 95, 45);
+    border-width: 2px;
+    border-color: rgb(214, 154, 53);
+    margin-bottom: var(--spacing-sm);
+}
+
+#profile-identity {
+    align-items: center;
+    margin-bottom: var(--spacing-sm);
+}
+
+#profile-friend-code {
+    font-size: 20px;
+    color: var(--color-text-dim);
+    margin-top: var(--spacing-xs);
+}
+
+#profile-stats Label {
+    font-size: 22px;
+    color: var(--color-text);
+    margin-bottom: var(--spacing-xxs);
+}
+
+#profile-flame-level {
+    font-size: var(--font-sm);
+    color: var(--color-text-accent);
+    -unity-font-style: bold;
+}
+
+.profile-toggle-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-sm);
+    min-height: 56px;
+}
+
+.profile-toggle-row Label {
+    color: rgb(160, 140, 110);
+    font-size: 22px;
+}
+
+.profile-slider-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: var(--spacing-sm);
+    min-height: 56px;
+}
+
+.profile-slider-row Label {
+    color: rgb(160, 140, 110);
+    font-size: 22px;
+}
+
+.profile-slider-row .unity-base-slider {
+    flex-grow: 1;
+    margin: 0 var(--spacing-xs);
+    min-height: 48px;
+}
+
+.profile-slider-row .unity-base-slider .unity-base-slider__dragger {
+    width: 40px;
+    height: 40px;
+    border-radius: 20px;
+    background-color: rgb(255, 170, 60);
+}
+
+.profile-slider-row .unity-base-slider .unity-base-slider__tracker {
+    height: 8px;
+    background-color: rgba(180, 120, 60, 0.3);
+    border-radius: 4px;
+}
+
+#profile-bloom .unity-toggle .unity-toggle__checkmark {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+}
+
+#profile-account Label {
+    font-size: 20px;
+    color: var(--color-text-dim);
+    margin-bottom: var(--spacing-xxs);
+}
+
+/* Delete button in profile */
+#profile-delete-btn {
+    min-height: 56px;
+    background-color: rgba(140, 40, 30, 0.7);
+    border-width: 1px;
+    border-color: rgba(200, 80, 60, 0.4);
+    border-radius: var(--radius-sm);
+    color: rgb(255, 220, 200);
+    font-size: 22px;
+    -unity-text-align: middle-center;
+    margin-top: var(--spacing-sm);
+}
+
+#profile-delete-btn:hover {
+    background-color: rgba(160, 50, 35, 0.85);
+}
+
+#profile-confirm-row {
+    flex-direction: row;
+    align-items: center;
+    margin-top: var(--spacing-xs);
+}
+
+#profile-confirm-row Label {
+    flex-grow: 1;
+    color: rgb(220, 90, 70);
+    font-size: 22px;
+    -unity-font-style: bold;
+}
+
+#profile-confirm-cancel {
+    min-height: 48px;
+    min-width: 100px;
+    background-color: rgba(60, 40, 20, 0.6);
+    border-width: 1px;
+    border-color: rgba(140, 100, 50, 0.3);
+    border-radius: var(--radius-sm);
+    color: rgb(220, 200, 160);
+    font-size: 22px;
+    -unity-text-align: middle-center;
+    margin-right: var(--spacing-xs);
+}
+
+#profile-confirm-delete {
+    min-height: 48px;
+    min-width: 100px;
+    background-color: rgba(180, 40, 30, 0.8);
+    border-width: 1px;
+    border-color: rgba(220, 80, 60, 0.5);
+    border-radius: var(--radius-sm);
+    color: rgb(255, 220, 200);
+    font-size: 22px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+#profile-debug-btn {
+    min-height: 48px;
+    margin-top: var(--spacing-sm);
+    background-color: transparent;
+    border-width: 0;
+    color: var(--color-text-dim);
+    font-size: 20px;
+}
+
+/* ── Bloom dismiss backdrop ── */
+#bloom-dismiss {
+    display: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 150;
+}
+
+#bloom-dismiss.bloom-dismiss-active {
+    display: flex;
+}
