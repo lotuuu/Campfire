@@ -131,7 +131,7 @@ defmodule CampFireWeb.Router do
     put "/state", GameController, :save_state
     post "/tutorial-step", GameController, :save_tutorial_step
     get "/plots", GameController, :list_plots
-    post "/plot/craft", GameController, :craft_plot
+    post "/plot/build", GameController, :build_plot
     post "/plot/plant", GameController, :plant_seed
     post "/plot/water", GameController, :water_plot
     post "/plot/harvest-preview", GameController, :harvest_preview
@@ -141,12 +141,13 @@ defmodule CampFireWeb.Router do
     post "/plot/apply-potion", GameController, :apply_potion
     post "/plot/set-skin", GameController, :set_plot_skin
     get "/vases", GameController, :list_vases
-    post "/vase/craft", GameController, :craft_vase
+    post "/vase/build", GameController, :build_vase
     post "/vase/fill", GameController, :fill_vase
     post "/vase/check", GameController, :check_vase
     post "/vase/set-skin", GameController, :set_vase_skin
     post "/vase/instant-finish", GameController, :instant_finish_vase
     get "/gardens", GameController, :list_gardens
+    post "/garden/build", GameController, :build_garden
     post "/garden/plant", GameController, :plant_garden
     post "/garden/collect", GameController, :collect_garden
     post "/garden/fertilize", GameController, :fertilize_garden
@@ -154,7 +155,7 @@ defmodule CampFireWeb.Router do
     post "/quest/check", GameController, :check_quest
     post "/quest/collect", GameController, :collect_quest
     post "/quest/speed-up", GameController, :speed_up_quest
-    post "/mallum-house/craft", GameController, :craft_mallum_house
+    post "/mallum-house/build", GameController, :build_mallum_house
     post "/mallum-house/set-skin", GameController, :set_mallum_house_skin
     post "/apotheke/craft", GameController, :craft_apotheke
     post "/bird/check", GameController, :check_birds

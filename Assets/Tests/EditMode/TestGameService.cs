@@ -24,9 +24,9 @@ public class TestGameService
     }
 
     [Test]
-    public void CraftRequest_Serializes()
+    public void BuildRequest_Serializes()
     {
-        var req = new CraftRequest { gridX = 2, gridY = -1 };
+        var req = new BuildRequest { gridX = 2, gridY = -1 };
         string json = UnityEngine.JsonUtility.ToJson(req);
         Assert.IsTrue(json.Contains("2"));
         Assert.IsTrue(json.Contains("-1"));

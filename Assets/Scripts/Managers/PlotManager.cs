@@ -165,7 +165,7 @@ namespace Garden
             return ConfigService.Instance?.GetPlotCost(SaveManager.Instance.Data.plots.Count - 1);
         }
 
-        public async Task<bool> CraftPlot(int gridX, int gridY)
+        public async Task<bool> BuildPlot(int gridX, int gridY)
         {
             if (!FlameManager.Instance.CanPlaceEntity) return false;
 
@@ -183,7 +183,7 @@ namespace Garden
                 return false;
             }
 
-            var result = await GameService.Instance.CraftPlot(gridX, gridY);
+            var result = await GameService.Instance.BuildPlot(gridX, gridY);
             if (result == null)
             {
                 CampFireUI.Instance?.ShowToast("Could not reach server");
@@ -206,7 +206,7 @@ namespace Garden
             SaveManager.Instance.Save();
             int newIndex = data.plots.Count - 1;
             OnPlotChanged?.Invoke(newIndex);
-            AudioManager.Instance?.PlaySFX("plot_craft");
+            AudioManager.Instance?.PlaySFX("plot_build");
 
             return true;
         }

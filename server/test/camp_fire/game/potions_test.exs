@@ -30,7 +30,7 @@ defmodule CampFire.Game.PotionsTest do
     Economy.upsert_item(player.uid, "basil_seed", 5)
     Economy.upsert_item(player.uid, "cress", 10)
     [pos | _] = free_positions(player.uid)
-    {:ok, plot} = Plots.craft_plot(player.uid, elem(pos, 0), elem(pos, 1))
+    {:ok, plot} = Plots.build_plot(player.uid, elem(pos, 0), elem(pos, 1))
     {:ok, plot} = Plots.plant(player.uid, plot.id, "basil")
     {player, plot}
   end
@@ -77,7 +77,7 @@ defmodule CampFire.Game.PotionsTest do
       Economy.upsert_item(player.uid, "hot_potion", 1)
 
       [pos | _] = free_positions(player.uid)
-      {:ok, plot} = Plots.craft_plot(player.uid, elem(pos, 0), elem(pos, 1))
+      {:ok, plot} = Plots.build_plot(player.uid, elem(pos, 0), elem(pos, 1))
       # Plot is "empty", not "growing"
 
       assert {:error, :not_growing} = Plots.apply_potion(player.uid, plot.id, "hot_potion")
@@ -256,7 +256,7 @@ defmodule CampFire.Game.PotionsTest do
       Economy.upsert_item(player.uid, "cress", 10)
 
       [pos | _] = free_positions(player.uid)
-      {:ok, plot} = Plots.craft_plot(player.uid, elem(pos, 0), elem(pos, 1))
+      {:ok, plot} = Plots.build_plot(player.uid, elem(pos, 0), elem(pos, 1))
       {:ok, plot} = Plots.plant(player.uid, plot.id, "basil")
 
       # Add moon potion directly

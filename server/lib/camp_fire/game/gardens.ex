@@ -42,6 +42,62 @@ defmodule CampFire.Game.Gardens do
 
   def get_plant_configs, do: get_all_plant_configs()
 
+  def count_gardens(player_uid) do
+    from(g in PlayerGarden, where: g.player_uid == ^player_uid, select: count(g.id))
+    |> Repo.one()
+  end
+
+  defp get_garden_cost(garden_count) do
+    case CampFire.ConfigCache.get("flame_config") do
+      nil -> nil
+      config ->
+        costs = config["garden_costs"]
+        if costs && length(costs) > 0 do
+          idx = min(garden_count, length(costs) - 1)
+          Enum.at(costs, idx)
+        else
+          nil
+        end
+    end
+  end
+
+  # --- Build ---
+
+  def build_garden(player_uid, grid_x, grid_y, opts \\ []) do
+    with :ok <- GridValidation.check_entity_cap(player_uid, opts),
+         :ok <- GridValidation.validate_grid_placement(player_uid, grid_x, grid_y) do
+      garden_count = count_gardens(player_uid)
+
+      case get_garden_cost(garden_count) do
+        nil -> {:error, :config_not_loaded}
+        cost ->
+          Repo.transaction(fn ->
+            case Economy.spend_mana(player_uid, cost["manaCost"], opts) do
+              {:ok, _economy} -> :ok
+              {:error, reason} -> Repo.rollback(reason)
+            end
+
+            harvest_costs = cost["harvestCosts"] || []
+
+            Enum.each(harvest_costs, fn %{"itemKey" => key, "count" => count} ->
+              case Economy.spend_item(player_uid, key, count, opts) do
+                {:ok, _} -> :ok
+                {:error, reason} -> Repo.rollback(reason)
+              end
+            end)
+
+            %PlayerGarden{}
+            |> PlayerGarden.changeset(%{
+              player_uid: player_uid,
+              grid_x: grid_x,
+              grid_y: grid_y
+            })
+            |> Repo.insert!()
+          end)
+      end
+    end
+  end
+
   # --- Plant ---
 
   def plant(player_uid, plant_name, grid_x, grid_y, opts \\ []) do

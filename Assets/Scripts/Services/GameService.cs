@@ -536,21 +536,21 @@ namespace Garden
 
         // ── Plot Endpoints ──
 
-        public async Task<ServerPlot> CraftPlot(int gridX, int gridY)
+        public async Task<ServerPlot> BuildPlot(int gridX, int gridY)
         {
             if (!IsOnline) return null;
             try
             {
-                var body = JsonUtility.ToJson(new CraftRequest { gridX = gridX, gridY = gridY, freeMode = CurrencyManager.FreeMode });
-                using var req = PostJson("/game/plot/craft", body);
+                var body = JsonUtility.ToJson(new BuildRequest { gridX = gridX, gridY = gridY, freeMode = CurrencyManager.FreeMode });
+                using var req = PostJson("/game/plot/build", body);
                 await SendAsync(req);
 
                 if (req.responseCode >= 200 && req.responseCode < 300)
                     return JsonUtility.FromJson<ServerPlot>(req.downloadHandler.text);
 
-                Debug.LogWarning($"GameService: CraftPlot failed (HTTP {req.responseCode}): {req.downloadHandler.text}");
+                Debug.LogWarning($"GameService: BuildPlot failed (HTTP {req.responseCode}): {req.downloadHandler.text}");
             }
-            catch (Exception e) { Debug.LogWarning($"GameService: CraftPlot failed: {e.Message}"); }
+            catch (Exception e) { Debug.LogWarning($"GameService: BuildPlot failed: {e.Message}"); }
             return null;
         }
 
@@ -682,21 +682,21 @@ namespace Garden
 
         // ── Vase Endpoints ──
 
-        public async Task<ServerVase> CraftVase(int gridX, int gridY)
+        public async Task<ServerVase> BuildVase(int gridX, int gridY)
         {
             if (!IsOnline) return null;
             try
             {
-                var body = JsonUtility.ToJson(new CraftRequest { gridX = gridX, gridY = gridY, freeMode = CurrencyManager.FreeMode });
-                using var req = PostJson("/game/vase/craft", body);
+                var body = JsonUtility.ToJson(new BuildRequest { gridX = gridX, gridY = gridY, freeMode = CurrencyManager.FreeMode });
+                using var req = PostJson("/game/vase/build", body);
                 await SendAsync(req);
 
                 if (req.responseCode >= 200 && req.responseCode < 300)
                     return JsonUtility.FromJson<ServerVase>(req.downloadHandler.text);
 
-                Debug.LogWarning($"GameService: CraftVase failed (HTTP {req.responseCode}): {req.downloadHandler.text}");
+                Debug.LogWarning($"GameService: BuildVase failed (HTTP {req.responseCode}): {req.downloadHandler.text}");
             }
-            catch (Exception e) { Debug.LogWarning($"GameService: CraftVase failed: {e.Message}"); }
+            catch (Exception e) { Debug.LogWarning($"GameService: BuildVase failed: {e.Message}"); }
             return null;
         }
 
@@ -791,6 +791,24 @@ namespace Garden
         }
 
         // ── Garden Endpoints ──
+
+        public async Task<ServerGarden> BuildGarden(int gridX, int gridY)
+        {
+            if (!IsOnline) return null;
+            try
+            {
+                var body = JsonUtility.ToJson(new BuildRequest { gridX = gridX, gridY = gridY, freeMode = CurrencyManager.FreeMode });
+                using var req = PostJson("/game/garden/build", body);
+                await SendAsync(req);
+
+                if (req.responseCode >= 200 && req.responseCode < 300)
+                    return JsonUtility.FromJson<ServerGarden>(req.downloadHandler.text);
+
+                Debug.LogWarning($"GameService: BuildGarden failed (HTTP {req.responseCode}): {req.downloadHandler.text}");
+            }
+            catch (Exception e) { Debug.LogWarning($"GameService: BuildGarden failed: {e.Message}"); }
+            return null;
+        }
 
         public async Task<ServerGarden> PlantGarden(string plantName, int gridX, int gridY)
         {
@@ -922,21 +940,21 @@ namespace Garden
 
         // ── Mallum House Endpoints ──
 
-        public async Task<ServerMallumHouse> CraftMallumHouse(int gridX, int gridY)
+        public async Task<ServerMallumHouse> BuildMallumHouse(int gridX, int gridY)
         {
             if (!IsOnline) return null;
             try
             {
-                var body = JsonUtility.ToJson(new CraftRequest { gridX = gridX, gridY = gridY, freeMode = CurrencyManager.FreeMode });
-                using var req = PostJson("/game/mallum-house/craft", body);
+                var body = JsonUtility.ToJson(new BuildRequest { gridX = gridX, gridY = gridY, freeMode = CurrencyManager.FreeMode });
+                using var req = PostJson("/game/mallum-house/build", body);
                 await SendAsync(req);
 
                 if (req.responseCode >= 200 && req.responseCode < 300)
                     return JsonUtility.FromJson<ServerMallumHouse>(req.downloadHandler.text);
 
-                Debug.LogWarning($"GameService: CraftMallumHouse failed (HTTP {req.responseCode}): {req.downloadHandler.text}");
+                Debug.LogWarning($"GameService: BuildMallumHouse failed (HTTP {req.responseCode}): {req.downloadHandler.text}");
             }
-            catch (Exception e) { Debug.LogWarning($"GameService: CraftMallumHouse failed: {e.Message}"); }
+            catch (Exception e) { Debug.LogWarning($"GameService: BuildMallumHouse failed: {e.Message}"); }
             return null;
         }
 

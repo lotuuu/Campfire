@@ -20,6 +20,6 @@ defmodule CampFire.Game.PlayerGarden do
       :player_uid, :plant_name, :plant_time_utc, :last_yield_time_utc,
       :mature, :grid_x, :grid_y, :fertilized
     ])
-    |> validate_required([:player_uid, :plant_name, :plant_time_utc, :grid_x, :grid_y])
+    |> validate_required([:player_uid, :grid_x, :grid_y])
   end
 end

@@ -21,7 +21,7 @@ defmodule CampFire.Game.Vases do
     from(v in PlayerVase, where: v.player_uid == ^player_uid) |> Repo.all()
   end
 
-  # --- Craft ---
+  # --- Build ---
 
   def count_vases(player_uid) do
     from(v in PlayerVase, where: v.player_uid == ^player_uid, select: count(v.id))
@@ -38,7 +38,7 @@ defmodule CampFire.Game.Vases do
     end
   end
 
-  def craft_vase(player_uid, grid_x, grid_y, opts \\ []) do
+  def build_vase(player_uid, grid_x, grid_y, opts \\ []) do
     with :ok <- GridValidation.check_entity_cap(player_uid, opts),
          :ok <- GridValidation.validate_grid_placement(player_uid, grid_x, grid_y) do
       # Subtract 1 for the free starter vase so cost index is based on purchased vases

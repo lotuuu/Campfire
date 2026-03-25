@@ -128,7 +128,7 @@ namespace Garden
             return ConfigService.Instance?.GetVaseCost(SaveManager.Instance.Data.vases.Count - 1);
         }
 
-        public async Task<bool> CraftVase(int gridX, int gridY)
+        public async Task<bool> BuildVase(int gridX, int gridY)
         {
             if (FlameManager.Instance.Level < VaseUnlockLevel) return false;
             if (!FlameManager.Instance.CanPlaceEntity) return false;
@@ -146,7 +146,7 @@ namespace Garden
                 return false;
             }
 
-            var result = await GameService.Instance.CraftVase(gridX, gridY);
+            var result = await GameService.Instance.BuildVase(gridX, gridY);
             if (result == null)
             {
                 CampFireUI.Instance?.ShowToast("Could not reach server");
@@ -167,7 +167,7 @@ namespace Garden
             data.vases.Add(new VaseSave { capacity = BaseCapacity, state = VaseState.Empty, gridX = gridX, gridY = gridY, serverId = result.id });
             SaveManager.Instance.Save();
             OnVasesChanged?.Invoke();
-            AudioManager.Instance?.PlaySFX("vase_craft");
+            AudioManager.Instance?.PlaySFX("vase_build");
 
             return true;
         }

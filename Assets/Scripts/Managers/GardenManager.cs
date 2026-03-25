@@ -247,26 +247,33 @@ namespace Garden
             return ConfigService.Instance?.GetGardenCost(SaveManager.Instance.Data.gardens.Count);
         }
 
-        public Task<bool> CraftEmptyGarden(int gridX, int gridY)
+        public async Task<bool> BuildEmptyGarden(int gridX, int gridY)
         {
-            if (FlameManager.Instance.Level < GardenUnlockLevel) return Task.FromResult(false);
-            if (!FlameManager.Instance.CanPlaceEntity) return Task.FromResult(false);
+            if (FlameManager.Instance.Level < GardenUnlockLevel) return false;
+            if (!FlameManager.Instance.CanPlaceEntity) return false;
 
             var data = SaveManager.Instance.Data;
             var cost = GetNextGardenCost();
-            if (cost == null) return Task.FromResult(false);
+            if (cost == null) return false;
 
-            if (!CurrencyManager.Instance.CanAffordMana(cost.manaCost)) return Task.FromResult(false);
-            if (!MallumManager.CanAffordHarvests(data.inventory, cost.harvestCosts)) return Task.FromResult(false);
+            if (!CurrencyManager.Instance.CanAffordMana(cost.manaCost)) return false;
+            if (!MallumManager.CanAffordHarvests(data.inventory, cost.harvestCosts)) return false;
 
-            // No dedicated craft-garden endpoint exists yet, so we require online
-            // and rely on the resync after local creation to sync the serverId.
+            // Server-first: call server before spending resources locally
             if (GameService.Instance == null || !GameService.Instance.IsOnline)
             {
                 CampFireUI.Instance?.ShowToast("Could not reach server");
-                return Task.FromResult(false);
+                return false;
             }
 
+            var result = await GameService.Instance.BuildGarden(gridX, gridY);
+            if (result == null)
+            {
+                CampFireUI.Instance?.ShowToast("Could not reach server");
+                return false;
+            }
+
+            // Server confirmed — spend resources locally
             CurrencyManager.Instance.SpendMana(cost.manaCost);
 
             if (!CurrencyManager.FreeMode)
@@ -280,6 +287,7 @@ namespace Garden
 
             data.gardens.Add(new GardenSave
             {
+                serverId = result.id,
                 gridX = gridX,
                 gridY = gridY
             });
@@ -287,13 +295,9 @@ namespace Garden
             SaveManager.Instance.Save();
             int newIndex = data.gardens.Count - 1;
             OnGardenChanged?.Invoke(newIndex);
-            AudioManager.Instance?.PlaySFX("garden_craft");
+            AudioManager.Instance?.PlaySFX("garden_build");
 
-            // Resync to pick up the server-assigned garden ID
-            // (no dedicated craft endpoint — server creates garden during resync)
-            _ = GameService.Instance.ResyncFullState();
-
-            return Task.FromResult(true);
+            return true;
         }
 
         // ── Helpers ─────────────────────────────────────────────────

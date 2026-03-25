@@ -15,7 +15,7 @@ defmodule CampFire.Game.PlotsTest do
   }
 
   # init_economy creates 1 starter plot + 1 starter vase + 1 apotheke (3 entities, no house)
-  # craft_plot subtracts 1 for the free starter, so first crafted = cost index 0:
+  # build_plot subtracts 1 for the free starter, so first crafted = cost index 0:
   #   plot_costs[0] = 150 mana + 1 sprouts
   # Second crafted = cost index 1 = 200 mana + 1 basil
 
@@ -44,12 +44,12 @@ defmodule CampFire.Game.PlotsTest do
     player
   end
 
-  describe "craft_plot/3" do
+  describe "build_plot/3" do
     test "creates empty plot and deducts mana + harvest items" do
       player = setup_player()
       [pos1 | _] = free_positions(player.uid)
 
-      {:ok, plot} = Plots.craft_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:ok, plot} = Plots.build_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
 
       assert plot.state == "empty"
       assert plot.grid_x == elem(pos1, 0)
@@ -69,8 +69,8 @@ defmodule CampFire.Game.PlotsTest do
       player = setup_player()
       [pos1, pos2 | _] = free_positions(player.uid)
 
-      {:ok, _} = Plots.craft_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
-      {:ok, _} = Plots.craft_plot(player.uid, elem(pos2, 0), elem(pos2, 1))
+      {:ok, _} = Plots.build_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:ok, _} = Plots.build_plot(player.uid, elem(pos2, 0), elem(pos2, 1))
 
       economy = Economy.get_economy(player.uid)
       # 1000 - 150 (index 0) - 200 (index 1) = 650
@@ -94,7 +94,7 @@ defmodule CampFire.Game.PlotsTest do
       Economy.upsert_item(player.uid, "basil", 10)
 
       [pos1 | _] = free_positions(player.uid)
-      {:error, :insufficient_mana} = Plots.craft_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:error, :insufficient_mana} = Plots.build_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
     end
 
     test "fails with insufficient harvest items" do
@@ -110,7 +110,7 @@ defmodule CampFire.Game.PlotsTest do
       # No basil given — 2nd plot (index 1) needs 1 basil
 
       [pos1 | _] = free_positions(player.uid)
-      {:error, :insufficient_items} = Plots.craft_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:error, :insufficient_items} = Plots.build_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
     end
   end
 
@@ -118,7 +118,7 @@ defmodule CampFire.Game.PlotsTest do
     test "sets plot to growing with seed and initializes snapshots" do
       player = setup_player()
       [pos1 | _] = free_positions(player.uid)
-      {:ok, plot} = Plots.craft_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:ok, plot} = Plots.build_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
 
       {:ok, planted} = Plots.plant(player.uid, plot.id, "basil")
 
@@ -132,7 +132,7 @@ defmodule CampFire.Game.PlotsTest do
     test "fails on non-empty plot" do
       player = setup_player()
       [pos1 | _] = free_positions(player.uid)
-      {:ok, plot} = Plots.craft_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:ok, plot} = Plots.build_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
       {:ok, _} = Plots.plant(player.uid, plot.id, "basil")
 
       {:error, :plot_not_empty} = Plots.plant(player.uid, plot.id, "basil")
@@ -141,7 +141,7 @@ defmodule CampFire.Game.PlotsTest do
     test "fails with no seeds" do
       player = setup_player()
       [pos1 | _] = free_positions(player.uid)
-      {:ok, plot} = Plots.craft_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:ok, plot} = Plots.build_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
 
       # Sprouts is in seed_configs but the player has none left after init
       {:ok, _} = Economy.spend_item(player.uid, "sprouts_seed", 5)
@@ -153,12 +153,12 @@ defmodule CampFire.Game.PlotsTest do
     test "increments water_count" do
       player = setup_player()
       [pos1, pos2, pos3 | _] = free_positions(player.uid)
-      {:ok, plot} = Plots.craft_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:ok, plot} = Plots.build_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
       {:ok, _} = Plots.plant(player.uid, plot.id, "basil")
 
       # Create a mallum house so we have mallums
       {:ok, _house} = MallumHouses.craft_house(player.uid, elem(pos2, 0), elem(pos2, 1), [free_mode: true])
-      {:ok, vase} = Vases.craft_vase(player.uid, elem(pos3, 0), elem(pos3, 1))
+      {:ok, vase} = Vases.build_vase(player.uid, elem(pos3, 0), elem(pos3, 1))
       {:ok, _} = Vases.set_water(vase.id, 5)
 
       {:ok, watered} = Plots.water(player.uid, plot.id, vase.id)
@@ -170,11 +170,11 @@ defmodule CampFire.Game.PlotsTest do
     test "fails during cooldown" do
       player = setup_player()
       [pos1, pos2, pos3 | _] = free_positions(player.uid)
-      {:ok, plot} = Plots.craft_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:ok, plot} = Plots.build_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
       {:ok, _} = Plots.plant(player.uid, plot.id, "basil")
 
       {:ok, _house} = MallumHouses.craft_house(player.uid, elem(pos2, 0), elem(pos2, 1), [free_mode: true])
-      {:ok, vase} = Vases.craft_vase(player.uid, elem(pos3, 0), elem(pos3, 1))
+      {:ok, vase} = Vases.build_vase(player.uid, elem(pos3, 0), elem(pos3, 1))
       {:ok, _} = Vases.set_water(vase.id, 5)
 
       {:ok, _} = Plots.water(player.uid, plot.id, vase.id)
@@ -190,7 +190,7 @@ defmodule CampFire.Game.PlotsTest do
       [pos1 | _] = free_positions(player.uid)
 
       {:ok, _} = Economy.upsert_item(player.uid, "harvesttest_seed", 1)
-      {:ok, plot} = Plots.craft_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:ok, plot} = Plots.build_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
       {:ok, _} = Plots.plant(player.uid, plot.id, "harvesttest")
 
       # Force the plot to mature
@@ -208,7 +208,7 @@ defmodule CampFire.Game.PlotsTest do
       [pos1 | _] = free_positions(player.uid)
 
       {:ok, _} = Economy.upsert_item(player.uid, "simpleseed_seed", 1)
-      {:ok, plot} = Plots.craft_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:ok, plot} = Plots.build_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
       {:ok, _} = Plots.plant(player.uid, plot.id, "simpleseed")
       {:ok, _} = Plots.force_mature(plot.id)
 
@@ -223,7 +223,7 @@ defmodule CampFire.Game.PlotsTest do
     test "fails when not mature" do
       player = setup_player()
       [pos1 | _] = free_positions(player.uid)
-      {:ok, plot} = Plots.craft_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:ok, plot} = Plots.build_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
       {:ok, _} = Plots.plant(player.uid, plot.id, "basil")
 
       {:error, {:not_mature, "growing"}} = Plots.harvest(player.uid, plot.id)
@@ -236,7 +236,7 @@ defmodule CampFire.Game.PlotsTest do
       [pos1 | _] = free_positions(player.uid)
 
       {:ok, _} = Economy.upsert_item(player.uid, "harvesttest_seed", 1)
-      {:ok, plot} = Plots.craft_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:ok, plot} = Plots.build_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
       {:ok, _} = Plots.plant(player.uid, plot.id, "harvesttest")
       {:ok, _} = Plots.force_mature(plot.id)
 
@@ -254,7 +254,7 @@ defmodule CampFire.Game.PlotsTest do
     test "fails when not mature" do
       player = setup_player()
       [pos1 | _] = free_positions(player.uid)
-      {:ok, plot} = Plots.craft_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:ok, plot} = Plots.build_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
       {:ok, _} = Plots.plant(player.uid, plot.id, "basil")
 
       {:error, {:not_mature, "growing"}} = Plots.harvest_preview(player.uid, plot.id)
@@ -265,7 +265,7 @@ defmodule CampFire.Game.PlotsTest do
     test "transitions growing to mature when time elapsed" do
       player = setup_player()
       [pos1 | _] = free_positions(player.uid)
-      {:ok, plot} = Plots.craft_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:ok, plot} = Plots.build_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
       {:ok, planted} = Plots.plant(player.uid, plot.id, "basil")
 
       # Set plant_time_utc far in the past (basil growth_duration_hours is 2.0)
@@ -284,7 +284,7 @@ defmodule CampFire.Game.PlotsTest do
       [pos1 | _] = free_positions(player.uid)
 
       {:ok, _} = Economy.upsert_item(player.uid, "slowplant_seed", 1)
-      {:ok, plot} = Plots.craft_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:ok, plot} = Plots.build_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
       {:ok, _} = Plots.plant(player.uid, plot.id, "slowplant")
 
       {:ok, still_growing} = Plots.check_maturity(plot.id)
@@ -296,7 +296,7 @@ defmodule CampFire.Game.PlotsTest do
     test "appends to snapshot arrays" do
       player = setup_player()
       [pos1 | _] = free_positions(player.uid)
-      {:ok, plot} = Plots.craft_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:ok, plot} = Plots.build_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
       {:ok, _} = Plots.plant(player.uid, plot.id, "basil")
 
       weather = %{
@@ -322,13 +322,13 @@ defmodule CampFire.Game.PlotsTest do
     test "fails for locked skin" do
       player = setup_player()
       [pos1 | _] = free_positions(player.uid)
-      {:ok, plot} = Plots.craft_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:ok, plot} = Plots.build_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
 
       {:error, :skin_not_unlocked} = Plots.set_skin(player.uid, plot.id, "fancy_skin")
     end
   end
 
-  describe "craft_plot/3 grid validation" do
+  describe "build_plot/3 grid validation" do
     test "rejects when entity cap reached" do
       seed_items()
       seed_flame_config_with_low_cap()
@@ -350,25 +350,25 @@ defmodule CampFire.Game.PlotsTest do
       # low_cap at level 1 = 4, init_economy creates 1 plot + 1 vase + 1 apotheke = 3 entities
       # So we can craft 1 more, then the next should fail
       [pos1, pos2 | _] = free_positions(player.uid)
-      {:ok, _} = Plots.craft_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
-      {:error, :entity_cap_reached} = Plots.craft_plot(player.uid, elem(pos2, 0), elem(pos2, 1))
+      {:ok, _} = Plots.build_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:error, :entity_cap_reached} = Plots.build_plot(player.uid, elem(pos2, 0), elem(pos2, 1))
     end
 
     test "rejects out-of-bounds coordinates" do
       player = setup_player()
 
       # Grid radius at level 1 = 2, hex_distance(10, 0) = 10 > 2
-      {:error, :out_of_bounds} = Plots.craft_plot(player.uid, 10, 0)
+      {:error, :out_of_bounds} = Plots.build_plot(player.uid, 10, 0)
     end
 
     test "rejects occupied hex" do
       player = setup_player()
       [pos1 | _] = free_positions(player.uid)
 
-      {:ok, _plot} = Plots.craft_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:ok, _plot} = Plots.build_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
 
       # Try to place another entity at the same hex
-      {:error, :hex_occupied} = Plots.craft_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:error, :hex_occupied} = Plots.build_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
     end
   end
 
@@ -376,7 +376,7 @@ defmodule CampFire.Game.PlotsTest do
     test "rejects unknown seed name" do
       player = setup_player()
       [pos1 | _] = free_positions(player.uid)
-      {:ok, plot} = Plots.craft_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:ok, plot} = Plots.build_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
 
       {:error, :unknown_seed} = Plots.plant(player.uid, plot.id, "nonexistentseed")
     end
@@ -395,13 +395,13 @@ defmodule CampFire.Game.PlotsTest do
 
       # Create and plant on player1's plot
       [p1_pos1 | _] = free_positions(player1.uid)
-      {:ok, plot} = Plots.craft_plot(player1.uid, elem(p1_pos1, 0), elem(p1_pos1, 1))
+      {:ok, plot} = Plots.build_plot(player1.uid, elem(p1_pos1, 0), elem(p1_pos1, 1))
       {:ok, _} = Plots.plant(player1.uid, plot.id, "basil")
 
       # Create player2's mallum house and vase, fill it
       [p2_pos1, p2_pos2 | _] = free_positions(player2.uid)
       {:ok, _house} = MallumHouses.craft_house(player2.uid, elem(p2_pos1, 0), elem(p2_pos1, 1), [free_mode: true])
-      {:ok, vase2} = Vases.craft_vase(player2.uid, elem(p2_pos2, 0), elem(p2_pos2, 1))
+      {:ok, vase2} = Vases.build_vase(player2.uid, elem(p2_pos2, 0), elem(p2_pos2, 1))
       {:ok, _} = Vases.set_water(vase2.id, 5)
 
       # Player1 tries to use player2's vase

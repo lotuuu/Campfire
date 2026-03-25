@@ -208,7 +208,7 @@ namespace Garden
             return rewards;
         }
 
-        public async Task<bool> CraftMallumHouse(int gridX, int gridY)
+        public async Task<bool> BuildMallumHouse(int gridX, int gridY)
         {
             if (!FlameManager.Instance.CanPlaceEntity) return false;
 
@@ -222,14 +222,14 @@ namespace Garden
             // Check harvests
             if (!CanAffordHarvests(data.inventory, cost.harvestCosts)) return false;
 
-            // Server-first: call server to craft house
+            // Server-first: call server to build house
             if (GameService.Instance == null || !GameService.Instance.IsOnline)
             {
                 CampFireUI.Instance?.ShowToast("Could not reach server");
                 return false;
             }
 
-            var serverResult = await GameService.Instance.CraftMallumHouse(gridX, gridY);
+            var serverResult = await GameService.Instance.BuildMallumHouse(gridX, gridY);
             if (serverResult == null)
             {
                 CampFireUI.Instance?.ShowToast("Could not reach server");

@@ -76,12 +76,12 @@ defmodule CampFireWeb.GameControllerTest do
     end
   end
 
-  describe "POST /game/plot/craft" do
+  describe "POST /game/plot/build" do
     test "returns 201 with plot", %{conn: conn} do
       {player, conn} = setup_player(conn)
       [pos1 | _] = free_positions(player.uid)
 
-      conn = post(conn, "/game/plot/craft", %{gridX: elem(pos1, 0), gridY: elem(pos1, 1)})
+      conn = post(conn, "/game/plot/build", %{gridX: elem(pos1, 0), gridY: elem(pos1, 1)})
       body = json_response(conn, 201)
 
       assert body["state"] == "empty"
@@ -97,7 +97,7 @@ defmodule CampFireWeb.GameControllerTest do
       [pos1, pos2, pos3 | _] = free_positions(player.uid)
 
       # Craft plot
-      conn1 = post(conn, "/game/plot/craft", %{gridX: elem(pos1, 0), gridY: elem(pos1, 1)})
+      conn1 = post(conn, "/game/plot/build", %{gridX: elem(pos1, 0), gridY: elem(pos1, 1)})
       plot = json_response(conn1, 201)
       plot_id = plot["id"]
       assert plot["state"] == "empty"
@@ -106,7 +106,7 @@ defmodule CampFireWeb.GameControllerTest do
       {:ok, _house} = MallumHouses.craft_house(player.uid, elem(pos2, 0), elem(pos2, 1), [free_mode: true])
 
       # Craft vase and fill it with water
-      conn2 = build_conn() |> authed_conn(player) |> post("/game/vase/craft", %{gridX: elem(pos3, 0), gridY: elem(pos3, 1)})
+      conn2 = build_conn() |> authed_conn(player) |> post("/game/vase/build", %{gridX: elem(pos3, 0), gridY: elem(pos3, 1)})
       vase = json_response(conn2, 201)
       vase_id = vase["id"]
 
@@ -136,12 +136,12 @@ defmodule CampFireWeb.GameControllerTest do
     end
   end
 
-  describe "POST /game/vase/craft" do
+  describe "POST /game/vase/build" do
     test "returns 201", %{conn: conn} do
       {player, conn} = setup_player(conn)
       [pos1 | _] = free_positions(player.uid)
 
-      conn = post(conn, "/game/vase/craft", %{gridX: elem(pos1, 0), gridY: elem(pos1, 1)})
+      conn = post(conn, "/game/vase/build", %{gridX: elem(pos1, 0), gridY: elem(pos1, 1)})
       body = json_response(conn, 201)
 
       assert body["state"] == "empty"
@@ -159,7 +159,7 @@ defmodule CampFireWeb.GameControllerTest do
       {:ok, _house} = MallumHouses.craft_house(player.uid, elem(pos1, 0), elem(pos1, 1), [free_mode: true])
 
       # Craft vase
-      conn1 = post(conn, "/game/vase/craft", %{gridX: elem(pos2, 0), gridY: elem(pos2, 1)})
+      conn1 = post(conn, "/game/vase/build", %{gridX: elem(pos2, 0), gridY: elem(pos2, 1)})
       vase = json_response(conn1, 201)
 
       # Start fill
@@ -271,12 +271,12 @@ defmodule CampFireWeb.GameControllerTest do
     end
   end
 
-  describe "POST /game/mallum-house/craft" do
+  describe "POST /game/mallum-house/build" do
     test "creates house and returns serialized response", %{conn: conn} do
       {player, conn} = setup_player(conn)
       [pos1 | _] = free_positions(player.uid)
 
-      conn = post(conn, "/game/mallum-house/craft", %{gridX: elem(pos1, 0), gridY: elem(pos1, 1)})
+      conn = post(conn, "/game/mallum-house/build", %{gridX: elem(pos1, 0), gridY: elem(pos1, 1)})
       body = json_response(conn, 201)
       assert body["gridX"] == elem(pos1, 0)
       assert body["gridY"] == elem(pos1, 1)
@@ -346,7 +346,7 @@ defmodule CampFireWeb.GameControllerTest do
   end
 
   describe "entity cap validation" do
-    test "craft_plot returns error when at cap", %{conn: conn} do
+    test "build_plot returns error when at cap", %{conn: conn} do
       {player, conn} = setup_player(conn)
       seed_flame_config_with_low_cap()
       seed_building_costs()
@@ -354,9 +354,9 @@ defmodule CampFireWeb.GameControllerTest do
       # low_cap at level 1 = 4, init creates 3 entities
       # Need to craft 1 more to reach cap
       [pos1, pos2 | _] = free_positions(player.uid)
-      {:ok, _} = Plots.craft_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:ok, _} = Plots.build_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
 
-      conn = post(conn, "/game/plot/craft", %{gridX: elem(pos2, 0), gridY: elem(pos2, 1)})
+      conn = post(conn, "/game/plot/build", %{gridX: elem(pos2, 0), gridY: elem(pos2, 1)})
       body = json_response(conn, 422)
       assert body["error"] =~ "entity_cap"
     end

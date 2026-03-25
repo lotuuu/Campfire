@@ -5,7 +5,7 @@ defmodule CampFire.Game.VasesTest do
   alias CampFire.Economy
 
   # init_economy creates 1 starter vase + 1 starter plot + 1 apotheke (3 entities, no house)
-  # craft_vase subtracts 1 for the free starter, so first crafted = cost index 0:
+  # build_vase subtracts 1 for the free starter, so first crafted = cost index 0:
   #   vase_costs[0] = 100 mana + 1 cress
   # Second crafted = cost index 1 = 120 mana + 2 basil
 
@@ -32,12 +32,12 @@ defmodule CampFire.Game.VasesTest do
     {player, mallum}
   end
 
-  describe "craft_vase/3" do
+  describe "build_vase/3" do
     test "creates empty vase and deducts mana + harvest items" do
       {player, _mallum} = setup_player()
       [pos1 | _] = free_positions(player.uid)
 
-      {:ok, vase} = Vases.craft_vase(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:ok, vase} = Vases.build_vase(player.uid, elem(pos1, 0), elem(pos1, 1))
 
       assert vase.state == "empty"
       assert vase.capacity == 5
@@ -58,8 +58,8 @@ defmodule CampFire.Game.VasesTest do
       {player, _mallum} = setup_player()
       [pos1, pos2 | _] = free_positions(player.uid)
 
-      {:ok, _} = Vases.craft_vase(player.uid, elem(pos1, 0), elem(pos1, 1))
-      {:ok, _} = Vases.craft_vase(player.uid, elem(pos2, 0), elem(pos2, 1))
+      {:ok, _} = Vases.build_vase(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:ok, _} = Vases.build_vase(player.uid, elem(pos2, 0), elem(pos2, 1))
 
       economy = Economy.get_economy(player.uid)
       # 1000 - 100 (index 0) - 120 (index 1) = 780
@@ -83,7 +83,7 @@ defmodule CampFire.Game.VasesTest do
       Economy.upsert_item(player.uid, "basil", 10)
 
       [pos1 | _] = free_positions(player.uid)
-      {:error, :insufficient_mana} = Vases.craft_vase(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:error, :insufficient_mana} = Vases.build_vase(player.uid, elem(pos1, 0), elem(pos1, 1))
     end
 
     test "fails with insufficient harvest items" do
@@ -99,7 +99,7 @@ defmodule CampFire.Game.VasesTest do
       # No basil given — 2nd vase (index 1) needs 2 basil
 
       [pos1 | _] = free_positions(player.uid)
-      {:error, :insufficient_items} = Vases.craft_vase(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:error, :insufficient_items} = Vases.build_vase(player.uid, elem(pos1, 0), elem(pos1, 1))
     end
   end
 
@@ -107,7 +107,7 @@ defmodule CampFire.Game.VasesTest do
     test "claims mallum and sets filling state" do
       {player, _mallum} = setup_player()
       [pos1 | _] = free_positions(player.uid)
-      {:ok, vase} = Vases.craft_vase(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:ok, vase} = Vases.build_vase(player.uid, elem(pos1, 0), elem(pos1, 1))
 
       {:ok, filling_vase} = Vases.start_fill(player.uid, vase.id)
 
@@ -124,7 +124,7 @@ defmodule CampFire.Game.VasesTest do
     test "fails with no idle mallum" do
       {player, _mallum} = setup_player()
       [pos1 | _] = free_positions(player.uid)
-      {:ok, vase} = Vases.craft_vase(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:ok, vase} = Vases.build_vase(player.uid, elem(pos1, 0), elem(pos1, 1))
 
       # Put all mallums on quest so none are idle
       mallums = Mallums.list_mallums(player.uid)
@@ -141,7 +141,7 @@ defmodule CampFire.Game.VasesTest do
     test "fails when already filling" do
       {player, _mallum} = setup_player()
       [pos1 | _] = free_positions(player.uid)
-      {:ok, vase} = Vases.craft_vase(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:ok, vase} = Vases.build_vase(player.uid, elem(pos1, 0), elem(pos1, 1))
       {:ok, _} = Vases.start_fill(player.uid, vase.id)
 
       {:error, :already_filling} = Vases.start_fill(player.uid, vase.id)
@@ -152,7 +152,7 @@ defmodule CampFire.Game.VasesTest do
     test "transitions to full when time elapsed" do
       {player, _mallum} = setup_player()
       [pos1 | _] = free_positions(player.uid)
-      {:ok, vase} = Vases.craft_vase(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:ok, vase} = Vases.build_vase(player.uid, elem(pos1, 0), elem(pos1, 1))
       {:ok, filling} = Vases.start_fill(player.uid, vase.id)
 
       # Set fill_start_time_utc far in the past
@@ -172,7 +172,7 @@ defmodule CampFire.Game.VasesTest do
     test "frees mallum on completion" do
       {player, _mallum} = setup_player()
       [pos1 | _] = free_positions(player.uid)
-      {:ok, vase} = Vases.craft_vase(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:ok, vase} = Vases.build_vase(player.uid, elem(pos1, 0), elem(pos1, 1))
       {:ok, filling} = Vases.start_fill(player.uid, vase.id)
 
       past = DateTime.add(DateTime.utc_now(), -3600, :second) |> DateTime.truncate(:second)
@@ -190,7 +190,7 @@ defmodule CampFire.Game.VasesTest do
     test "returns unchanged vase when fill not complete" do
       {player, _mallum} = setup_player()
       [pos1 | _] = free_positions(player.uid)
-      {:ok, vase} = Vases.craft_vase(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:ok, vase} = Vases.build_vase(player.uid, elem(pos1, 0), elem(pos1, 1))
       {:ok, _} = Vases.start_fill(player.uid, vase.id)
 
       # Don't manipulate time — fill just started
@@ -203,7 +203,7 @@ defmodule CampFire.Game.VasesTest do
     test "deducts water" do
       {player, _mallum} = setup_player()
       [pos1 | _] = free_positions(player.uid)
-      {:ok, vase} = Vases.craft_vase(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:ok, vase} = Vases.build_vase(player.uid, elem(pos1, 0), elem(pos1, 1))
       {:ok, _} = Vases.set_water(vase.id, 5)
 
       {:ok, updated} = Vases.use_water(vase.id, 2)
@@ -214,7 +214,7 @@ defmodule CampFire.Game.VasesTest do
     test "fails with insufficient water" do
       {player, _mallum} = setup_player()
       [pos1 | _] = free_positions(player.uid)
-      {:ok, vase} = Vases.craft_vase(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:ok, vase} = Vases.build_vase(player.uid, elem(pos1, 0), elem(pos1, 1))
 
       {:error, :insufficient_water} = Vases.use_water(vase.id, 1)
     end
@@ -222,7 +222,7 @@ defmodule CampFire.Game.VasesTest do
     test "sets state to empty when water reaches zero" do
       {player, _mallum} = setup_player()
       [pos1 | _] = free_positions(player.uid)
-      {:ok, vase} = Vases.craft_vase(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:ok, vase} = Vases.build_vase(player.uid, elem(pos1, 0), elem(pos1, 1))
       {:ok, _} = Vases.set_water(vase.id, 1)
 
       {:ok, empty} = Vases.use_water(vase.id, 1)
@@ -235,8 +235,8 @@ defmodule CampFire.Game.VasesTest do
     test "fills all vases and frees mallums" do
       {player, _mallum} = setup_player()
       [pos1, pos2 | _] = free_positions(player.uid)
-      {:ok, vase1} = Vases.craft_vase(player.uid, elem(pos1, 0), elem(pos1, 1))
-      {:ok, vase2} = Vases.craft_vase(player.uid, elem(pos2, 0), elem(pos2, 1))
+      {:ok, vase1} = Vases.build_vase(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:ok, vase2} = Vases.build_vase(player.uid, elem(pos2, 0), elem(pos2, 1))
       {:ok, _} = Vases.start_fill(player.uid, vase1.id)
 
       :ok = Vases.rain_fill_all(player.uid)
@@ -255,7 +255,7 @@ defmodule CampFire.Game.VasesTest do
     end
   end
 
-  describe "craft_vase/3 grid validation" do
+  describe "build_vase/3 grid validation" do
     test "rejects when entity cap reached" do
       seed_items()
       seed_flame_config_with_low_cap()
@@ -275,18 +275,18 @@ defmodule CampFire.Game.VasesTest do
       # low_cap at level 1 = 4, init_economy creates 1 plot + 1 vase + 1 apotheke = 3 entities
       # So we can craft 1 more, then the next should fail
       [pos1, pos2 | _] = free_positions(player.uid)
-      {:ok, _} = Vases.craft_vase(player.uid, elem(pos1, 0), elem(pos1, 1))
-      {:error, :entity_cap_reached} = Vases.craft_vase(player.uid, elem(pos2, 0), elem(pos2, 1))
+      {:ok, _} = Vases.build_vase(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:error, :entity_cap_reached} = Vases.build_vase(player.uid, elem(pos2, 0), elem(pos2, 1))
     end
 
     test "rejects occupied hex" do
       {player, _mallum} = setup_player()
       [pos1 | _] = free_positions(player.uid)
 
-      {:ok, _vase} = Vases.craft_vase(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:ok, _vase} = Vases.build_vase(player.uid, elem(pos1, 0), elem(pos1, 1))
 
       # Try to place another vase at the same hex
-      {:error, :hex_occupied} = Vases.craft_vase(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:error, :hex_occupied} = Vases.build_vase(player.uid, elem(pos1, 0), elem(pos1, 1))
     end
   end
 end

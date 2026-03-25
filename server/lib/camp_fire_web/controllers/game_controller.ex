@@ -332,11 +332,11 @@ defmodule CampFireWeb.GameController do
     conn |> put_status(200) |> json(%{plots: Enum.map(plots, &serialize_plot/1)})
   end
 
-  def craft_plot(conn, %{"gridX" => x, "gridY" => y} = params) do
+  def build_plot(conn, %{"gridX" => x, "gridY" => y} = params) do
     uid = conn.assigns.current_player.uid
     opts = free_mode_opts(params)
 
-    case Plots.craft_plot(uid, x, y, opts) do
+    case Plots.build_plot(uid, x, y, opts) do
       {:ok, plot} ->
         conn |> put_status(201) |> json(serialize_plot(plot))
 
@@ -345,7 +345,7 @@ defmodule CampFireWeb.GameController do
     end
   end
 
-  def craft_plot(conn, _params) do
+  def build_plot(conn, _params) do
     conn |> put_status(400) |> json(%{error: "Missing 'gridX' and 'gridY'"})
   end
 
@@ -450,11 +450,11 @@ defmodule CampFireWeb.GameController do
     conn |> put_status(200) |> json(%{vases: Enum.map(vases, &serialize_vase/1)})
   end
 
-  def craft_vase(conn, %{"gridX" => x, "gridY" => y} = params) do
+  def build_vase(conn, %{"gridX" => x, "gridY" => y} = params) do
     uid = conn.assigns.current_player.uid
     opts = free_mode_opts(params)
 
-    case Vases.craft_vase(uid, x, y, opts) do
+    case Vases.build_vase(uid, x, y, opts) do
       {:ok, vase} ->
         conn |> put_status(201) |> json(serialize_vase(vase))
 
@@ -463,7 +463,7 @@ defmodule CampFireWeb.GameController do
     end
   end
 
-  def craft_vase(conn, _params) do
+  def build_vase(conn, _params) do
     conn |> put_status(400) |> json(%{error: "Missing 'gridX' and 'gridY'"})
   end
 
@@ -585,6 +585,23 @@ defmodule CampFireWeb.GameController do
     uid = conn.assigns.current_player.uid
     gardens = Gardens.list_gardens(uid)
     conn |> put_status(200) |> json(%{gardens: Enum.map(gardens, &serialize_garden/1)})
+  end
+
+  def build_garden(conn, %{"gridX" => x, "gridY" => y} = params) do
+    uid = conn.assigns.current_player.uid
+    opts = free_mode_opts(params)
+
+    case Gardens.build_garden(uid, x, y, opts) do
+      {:ok, garden} ->
+        conn |> put_status(201) |> json(serialize_garden(garden))
+
+      {:error, reason} ->
+        conn |> put_status(422) |> json(%{error: format_error(reason)})
+    end
+  end
+
+  def build_garden(conn, _params) do
+    conn |> put_status(400) |> json(%{error: "Missing 'gridX' and 'gridY'"})
   end
 
   def plant_garden(conn, %{"plantName" => name, "gridX" => x, "gridY" => y} = params) do
@@ -718,7 +735,7 @@ defmodule CampFireWeb.GameController do
 
   # ── Mallum Houses ─────────────────────────────────────────────
 
-  def craft_mallum_house(conn, %{"gridX" => gx, "gridY" => gy} = params) do
+  def build_mallum_house(conn, %{"gridX" => gx, "gridY" => gy} = params) do
     uid = conn.assigns.current_player.uid
     opts = free_mode_opts(params)
 
@@ -728,7 +745,7 @@ defmodule CampFireWeb.GameController do
     end
   end
 
-  def craft_mallum_house(conn, _params) do
+  def build_mallum_house(conn, _params) do
     conn |> put_status(400) |> json(%{error: "Missing 'gridX' and 'gridY'"})
   end
 

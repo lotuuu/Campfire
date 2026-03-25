@@ -128,7 +128,7 @@ defmodule CampFire.Game.GridValidationTest do
       Economy.upsert_item(player.uid, "sprouts", 50)
 
       [pos1 | _] = free_positions(player.uid)
-      {:ok, _} = CampFire.Game.Plots.craft_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
+      {:ok, _} = CampFire.Game.Plots.build_plot(player.uid, elem(pos1, 0), elem(pos1, 1))
 
       assert {:error, :entity_cap_reached} = GridValidation.check_entity_cap(player.uid)
     end

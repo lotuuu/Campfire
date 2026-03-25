@@ -40,7 +40,7 @@ defmodule CampFire.Game.Plots do
     from(p in PlayerPlot, where: p.player_uid == ^player_uid) |> Repo.all()
   end
 
-  # --- Craft ---
+  # --- Build ---
 
   def count_plots(player_uid) do
     from(p in PlayerPlot, where: p.player_uid == ^player_uid, select: count(p.id))
@@ -57,7 +57,7 @@ defmodule CampFire.Game.Plots do
     end
   end
 
-  def craft_plot(player_uid, grid_x, grid_y, opts \\ []) do
+  def build_plot(player_uid, grid_x, grid_y, opts \\ []) do
     with :ok <- GridValidation.check_entity_cap(player_uid, opts),
          :ok <- GridValidation.validate_grid_placement(player_uid, grid_x, grid_y) do
       # Subtract 1 for the free starter plot so cost index is based on purchased plots

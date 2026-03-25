@@ -121,7 +121,7 @@ namespace Garden
     }
 
     // Request DTOs
-    [Serializable] public class CraftRequest { public int gridX; public int gridY; public bool freeMode; }
+    [Serializable] public class BuildRequest { public int gridX; public int gridY; public bool freeMode; }
     [Serializable] public class PlantRequest { public int plotId; public string seedItemKey; public bool freeMode; }
     [Serializable] public class WaterRequest { public int plotId; public int vaseId; }
     [Serializable] public class HarvestRequest { public int plotId; }
