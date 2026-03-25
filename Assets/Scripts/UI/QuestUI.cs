@@ -364,7 +364,7 @@ namespace Garden
                     case MallumState.OnQuest:
                         cardRoot.AddToClassList("quest-card--active");
                         var questData = FindQuestByName(mallum.assignedQuestName);
-                        nameLabel.text = questData?.questName ?? mallum.assignedQuestName;
+                        nameLabel.text = FormatQuestName(questData?.questName ?? mallum.assignedQuestName);
                         if (questData != null)
                             accentStrip.AddToClassList(TierClass(questData.requiredFlameLevel));
 
@@ -379,7 +379,7 @@ namespace Garden
                         actionBtn.text = drinkCount > 0 ? string.Format(Loc.Get("ui.button.speed_up", "Speed Up ({0})"), drinkCount) : Loc.Get("ui.button.speed_up_plain", "Speed Up");
                         actionBtn.AddToClassList("quest-speedup-btn");
                         actionBtn.SetEnabled(drinkCount > 0 || CurrencyManager.FreeMode);
-                        var capturedQuestName = questData?.questName ?? mallum.assignedQuestName;
+                        var capturedQuestName = FormatQuestName(questData?.questName ?? mallum.assignedQuestName);
                         actionBtn.clickable = new Clickable(() =>
                         {
                             var rewards = MallumManager.Instance.SpeedUpAndCollectQuest(capturedIndex);
@@ -405,7 +405,7 @@ namespace Garden
                     case MallumState.QuestComplete:
                         cardRoot.AddToClassList("quest-card--complete");
                         var completeQuest = FindQuestByName(mallum.assignedQuestName);
-                        nameLabel.text = completeQuest?.questName ?? mallum.assignedQuestName;
+                        nameLabel.text = FormatQuestName(completeQuest?.questName ?? mallum.assignedQuestName);
                         durationLabel.text = Loc.Get("ui.quest.complete", "Complete!");
                         durationLabel.style.color = new StyleColor(new Color32(80, 190, 100, 255));
                         if (completeQuest != null)
@@ -416,7 +416,7 @@ namespace Garden
 
                         actionBtn.text = Loc.Get("ui.quest.collect_rewards", "Collect Rewards");
                         actionBtn.AddToClassList("quest-collect-btn");
-                        var capturedQuestName2 = completeQuest?.questName ?? mallum.assignedQuestName;
+                        var capturedQuestName2 = FormatQuestName(completeQuest?.questName ?? mallum.assignedQuestName);
                         actionBtn.clickable = new Clickable(() =>
                         {
                             var rewards = new List<RewardEntry>(mallum.pendingRewards);
@@ -459,7 +459,7 @@ namespace Garden
                 var lockedLabel = card.Q<Label>("quest-locked");
 
                 accentStrip.AddToClassList(TierClass(quest.requiredFlameLevel));
-                nameLabel.text = quest.questName;
+                nameLabel.text = FormatQuestName(quest.questName);
                 levelBadge.text = string.Format(Loc.Get("ui.label.lv", "Lv {0}"), quest.requiredFlameLevel);
                 durationLabel.text = FormatDuration(quest.durationMinutes);
                 descLabel.text = quest.description;
@@ -518,7 +518,7 @@ namespace Garden
 
                 cardRoot.AddToClassList("quest-card--locked");
                 accentStrip.AddToClassList(TierClass(quest.requiredFlameLevel));
-                nameLabel.text = quest.questName;
+                nameLabel.text = FormatQuestName(quest.questName);
                 levelBadge.text = string.Format(Loc.Get("ui.label.lv", "Lv {0}"), quest.requiredFlameLevel);
                 durationLabel.text = FormatDuration(quest.durationMinutes);
                 descLabel.text = quest.description;
@@ -544,6 +544,20 @@ namespace Garden
             if (h > 0) return $"{h}h {m}m";
             if (m > 0) return $"{m}m {s}s";
             return $"{s}s";
+        }
+
+        private static string FormatQuestName(string name)
+        {
+            if (string.IsNullOrEmpty(name)) return name;
+            var sb = new System.Text.StringBuilder(name.Length + 4);
+            sb.Append(name[0]);
+            for (int i = 1; i < name.Length; i++)
+            {
+                if (char.IsUpper(name[i]) && !char.IsUpper(name[i - 1]))
+                    sb.Append(' ');
+                sb.Append(name[i]);
+            }
+            return sb.ToString();
         }
 
         private static string FormatDuration(int minutes)
