@@ -121,6 +121,15 @@ namespace Garden
                 profilePopup?.CloseBloom();
             }, TrickleDown.TrickleDown);
 
+            // Dismiss backdrop — tap outside any bloom to close it
+            var bloomDismiss = root.Q("bloom-dismiss");
+            bloomDismiss?.RegisterCallback<ClickEvent>(_ =>
+            {
+                profilePopup?.CloseBloom();
+                if (weatherBar != null && weatherBar.IsOpen)
+                    weatherBar.CloseBloom();
+            });
+
             if (LocalizationService.Instance != null)
                 LocalizationService.Instance.OnLocaleChanged += OnLocaleChanged;
 
