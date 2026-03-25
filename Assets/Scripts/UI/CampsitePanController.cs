@@ -34,6 +34,18 @@ namespace Garden
             viewport.RegisterCallback<PointerCancelEvent>(OnPointerCancel);
         }
 
+        /// <summary>
+        /// Update stored canvas dimensions and re-clamp without moving to a new focus point.
+        /// Use after grid expansion when the camera is already centered.
+        /// </summary>
+        public void UpdateCanvasSize(float canvasWidth, float canvasHeight)
+        {
+            storedCanvasW = canvasWidth;
+            storedCanvasH = canvasHeight;
+            ClampPan();
+            ApplyPan();
+        }
+
         public void CenterOnPoint(float focusX, float focusY, float canvasWidth, float canvasHeight)
         {
             focusPtX = focusX;

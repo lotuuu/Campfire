@@ -1705,7 +1705,15 @@ namespace Garden
                         bool gridExpanded = newRadius > oldRadius;
                         if (gridExpanded)
                             _revealOuterBeyondRadius = oldRadius;
+                        // Pre-set grid size so RebuildGrid won't snap-recenter
+                        // (we already animated to center before the level-up animation)
+                        currentGridSize = newRadius;
                         RebuildGrid();
+                        // Update pan controller with new canvas dimensions (grid may have grown)
+                        float newCW = canvas.resolvedStyle.width;
+                        float newCH = canvas.resolvedStyle.height;
+                        if (!float.IsNaN(newCW) && newCW > 0)
+                            panController.UpdateCanvasSize(newCW, newCH);
                         _revealOuterBeyondRadius = -1;
                         if (gridExpanded)
                             FlameLevelUpAnimator.AnimateNewCells(cellLookup, oldRadius, viewport, RestoreBars);
