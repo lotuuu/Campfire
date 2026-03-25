@@ -21,97 +21,6 @@
     <!-- Root container -->
     <ui:VisualElement name="camp-root">
 
-        <!-- Floating HUD -->
-        <ui:VisualElement name="floating-hud" picking-mode="Ignore">
-            <ui:VisualElement name="hud-profile" class="hud-circle hud-left">
-                <ui:VisualElement name="hud-profile-pic" />
-            </ui:VisualElement>
-            <ui:VisualElement name="hud-resources" class="hud-pill">
-                <ui:VisualElement class="hud-res">
-                    <ui:VisualElement name="hud-mana-icon" class="hud-res-icon" />
-                    <ui:Label name="hud-mana" text="0" />
-                </ui:VisualElement>
-                <ui:VisualElement class="hud-res-divider" />
-                <ui:VisualElement class="hud-res">
-                    <ui:VisualElement name="hud-water-icon" class="hud-res-icon" />
-                    <ui:Label name="hud-water" text="0" />
-                </ui:VisualElement>
-                <ui:VisualElement class="hud-res-divider" />
-                <ui:VisualElement class="hud-res">
-                    <ui:VisualElement name="hud-mallum-icon" class="hud-res-icon" />
-                    <ui:Label name="hud-mallum" text="0/0" />
-                </ui:VisualElement>
-            </ui:VisualElement>
-            <ui:VisualElement name="hud-weather" class="hud-circle hud-right">
-                <ui:VisualElement name="hud-weather-icon" />
-            </ui:VisualElement>
-        </ui:VisualElement>
-
-        <!-- Bloom dismiss backdrop (click-outside-to-close) -->
-        <ui:VisualElement name="bloom-dismiss" />
-
-        <!-- Forecast bloom card -->
-        <ui:VisualElement name="forecast-bloom" class="bloom-card bloom-right">
-            <ui:VisualElement name="forecast-bloom-content" class="bloom-content">
-                <ui:Label name="forecast-bloom-title" class="forecast-bloom-title" />
-                <ui:VisualElement name="forecast-bloom-stats" />
-                <ui:Label text="" class="forecast-section-label" name="forecast-section-label" />
-                <ui:VisualElement name="forecast-bloom-days" />
-            </ui:VisualElement>
-        </ui:VisualElement>
-
-        <!-- Profile bloom popup -->
-        <ui:VisualElement name="profile-bloom" class="bloom-card bloom-left">
-            <ui:ScrollView name="profile-bloom-content" class="bloom-content"
-                touch-scroll-type="Clamped" elasticity="0"
-                vertical-scroller-visibility="Hidden">
-                <ui:VisualElement name="profile-identity">
-                    <ui:VisualElement name="profile-pic-large" />
-                    <ui:TextField name="profile-display-name" label="Name" max-length="20" />
-                    <ui:Label name="profile-friend-code" text="Code: ---" />
-                </ui:VisualElement>
-                <ui:VisualElement name="profile-stats">
-                    <ui:Label name="profile-flame-level" text="Flame Level 1" />
-                    <ui:Label name="profile-date-time" text="--" />
-                    <ui:Label name="profile-weather-summary" text="--" />
-                </ui:VisualElement>
-                <ui:VisualElement name="profile-settings">
-                    <ui:Label text="SETTINGS" class="profile-section-header" />
-                    <ui:DropdownField name="profile-language-dropdown" label="Language" />
-                    <ui:VisualElement class="profile-toggle-row">
-                        <ui:Label text="Vibration" />
-                        <ui:Toggle name="profile-vibration-toggle" />
-                    </ui:VisualElement>
-                    <ui:VisualElement class="profile-slider-row">
-                        <ui:Label text="Music" />
-                        <ui:Slider name="profile-music-slider" low-value="0" high-value="100" value="100" />
-                        <ui:Label name="profile-music-value" text="100%" />
-                    </ui:VisualElement>
-                    <ui:VisualElement class="profile-slider-row">
-                        <ui:Label text="Sound FX" />
-                        <ui:Slider name="profile-sfx-slider" low-value="0" high-value="100" value="100" />
-                        <ui:Label name="profile-sfx-value" text="100%" />
-                    </ui:VisualElement>
-                </ui:VisualElement>
-                <ui:VisualElement name="profile-account">
-                    <ui:Label text="ACCOUNT" class="profile-section-header" />
-                    <ui:Label name="profile-player-id" text="Player: ---" />
-                    <ui:Label name="profile-server" text="Server: ---" />
-                    <ui:Label name="profile-version" text="Version: ---" />
-                </ui:VisualElement>
-                <ui:VisualElement name="profile-danger">
-                    <ui:Label text="DANGER ZONE" class="profile-section-header" />
-                    <ui:Button name="profile-delete-btn" text="Delete Save Data" />
-                    <ui:VisualElement name="profile-confirm-row" style="display: none;">
-                        <ui:Label text="Are you sure?" />
-                        <ui:Button name="profile-confirm-cancel" text="Cancel" />
-                        <ui:Button name="profile-confirm-delete" text="Delete" />
-                    </ui:VisualElement>
-                </ui:VisualElement>
-                <ui:Button name="profile-debug-btn" text="DEBUG" style="display: none;" />
-            </ui:ScrollView>
-        </ui:VisualElement>
-
         <!-- Main campsite grid view -->
         <ui:VisualElement name="campsite-viewport">
             <ui:VisualElement name="campsite-canvas" />
@@ -482,4 +391,96 @@
         </ui:VisualElement>
 
     </ui:VisualElement>
+
+    <!-- Floating HUD (outside camp-root so paddingTop doesn't affect absolute positioning) -->
+    <ui:VisualElement name="floating-hud" picking-mode="Ignore">
+        <ui:VisualElement name="hud-profile" class="hud-circle hud-left">
+            <ui:VisualElement name="hud-profile-pic" />
+        </ui:VisualElement>
+        <ui:VisualElement name="hud-resources" class="hud-pill">
+            <ui:VisualElement class="hud-res">
+                <ui:VisualElement name="hud-mana-icon" class="hud-res-icon" />
+                <ui:Label name="hud-mana" text="0" />
+            </ui:VisualElement>
+            <ui:VisualElement class="hud-res-divider" />
+            <ui:VisualElement class="hud-res">
+                <ui:VisualElement name="hud-water-icon" class="hud-res-icon" />
+                <ui:Label name="hud-water" text="0" />
+            </ui:VisualElement>
+            <ui:VisualElement class="hud-res-divider" />
+            <ui:VisualElement class="hud-res">
+                <ui:VisualElement name="hud-mallum-icon" class="hud-res-icon" />
+                <ui:Label name="hud-mallum" text="0/0" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="hud-weather" class="hud-circle hud-right">
+            <ui:VisualElement name="hud-weather-icon" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- Bloom dismiss backdrop -->
+    <ui:VisualElement name="bloom-dismiss" />
+
+    <!-- Forecast bloom card -->
+    <ui:VisualElement name="forecast-bloom" class="bloom-card bloom-right">
+        <ui:VisualElement name="forecast-bloom-content" class="bloom-content">
+            <ui:Label name="forecast-bloom-title" class="forecast-bloom-title" />
+            <ui:VisualElement name="forecast-bloom-stats" />
+            <ui:Label text="" class="forecast-section-label" name="forecast-section-label" />
+            <ui:VisualElement name="forecast-bloom-days" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- Profile bloom popup -->
+    <ui:VisualElement name="profile-bloom" class="bloom-card bloom-left">
+        <ui:ScrollView name="profile-bloom-content" class="bloom-content"
+            touch-scroll-type="Clamped" elasticity="0"
+            vertical-scroller-visibility="Hidden">
+            <ui:VisualElement name="profile-identity">
+                <ui:VisualElement name="profile-pic-large" />
+                <ui:TextField name="profile-display-name" label="Name" max-length="20" />
+                <ui:Label name="profile-friend-code" text="Code: ---" />
+            </ui:VisualElement>
+            <ui:VisualElement name="profile-stats">
+                <ui:Label name="profile-flame-level" text="Flame Level 1" />
+                <ui:Label name="profile-date-time" text="--" />
+                <ui:Label name="profile-weather-summary" text="--" />
+            </ui:VisualElement>
+            <ui:VisualElement name="profile-settings">
+                <ui:Label text="SETTINGS" class="profile-section-header" />
+                <ui:DropdownField name="profile-language-dropdown" label="Language" />
+                <ui:VisualElement class="profile-toggle-row">
+                    <ui:Label text="Vibration" />
+                    <ui:Toggle name="profile-vibration-toggle" />
+                </ui:VisualElement>
+                <ui:VisualElement class="profile-slider-row">
+                    <ui:Label text="Music" />
+                    <ui:Slider name="profile-music-slider" low-value="0" high-value="100" value="100" />
+                    <ui:Label name="profile-music-value" text="100%" />
+                </ui:VisualElement>
+                <ui:VisualElement class="profile-slider-row">
+                    <ui:Label text="Sound FX" />
+                    <ui:Slider name="profile-sfx-slider" low-value="0" high-value="100" value="100" />
+                    <ui:Label name="profile-sfx-value" text="100%" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="profile-account">
+                <ui:Label text="ACCOUNT" class="profile-section-header" />
+                <ui:Label name="profile-player-id" text="Player: ---" />
+                <ui:Label name="profile-server" text="Server: ---" />
+                <ui:Label name="profile-version" text="Version: ---" />
+            </ui:VisualElement>
+            <ui:VisualElement name="profile-danger">
+                <ui:Label text="DANGER ZONE" class="profile-section-header" />
+                <ui:Button name="profile-delete-btn" text="Delete Save Data" />
+                <ui:VisualElement name="profile-confirm-row" style="display: none;">
+                    <ui:Label text="Are you sure?" />
+                    <ui:Button name="profile-confirm-cancel" text="Cancel" />
+                    <ui:Button name="profile-confirm-delete" text="Delete" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:Button name="profile-debug-btn" text="DEBUG" style="display: none;" />
+        </ui:ScrollView>
+    </ui:VisualElement>
+
 </ui:UXML>
