@@ -163,7 +163,10 @@ defmodule CampFireWeb.LogsLive do
           <tbody class="divide-y">
             <%= for entry <- @entries do %>
               <tr class="hover:bg-gray-50">
-                <td class="px-3 py-2 font-mono text-xs text-gray-500">
+                <td class="px-3 py-2 font-mono text-xs text-gray-500"
+                    id={"log-time-#{entry.id}"}
+                    phx-hook="LocalTime"
+                    data-utc={DateTime.to_iso8601(entry.timestamp)}>
                   {format_time(entry.timestamp)}
                 </td>
                 <td class="px-3 py-2">

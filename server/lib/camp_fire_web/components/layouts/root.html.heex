@@ -121,11 +121,26 @@
         }
       };
 
+      const LocalTime = {
+        mounted() { this.formatTime(); },
+        updated() { this.formatTime(); },
+        formatTime() {
+          const utc = this.el.getAttribute("data-utc");
+          if (!utc) return;
+          const d = new Date(utc);
+          const hh = String(d.getHours()).padStart(2, "0");
+          const mm = String(d.getMinutes()).padStart(2, "0");
+          const ss = String(d.getSeconds()).padStart(2, "0");
+          const ms = String(d.getMilliseconds()).padStart(3, "0");
+          this.el.textContent = `${hh}:${mm}:${ss}.${ms}`;
+        }
+      };
+
       window.addEventListener("DOMContentLoaded", () => {
         let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content");
         let liveSocket = new window.LiveView.LiveSocket("/live", window.Phoenix.Socket, {
           params: { _csrf_token: csrfToken },
-          hooks: { JsonEditor, RewardInput },
+          hooks: { JsonEditor, RewardInput, LocalTime },
           longPollFallbackMs: 2500
         });
         liveSocket.connect();
