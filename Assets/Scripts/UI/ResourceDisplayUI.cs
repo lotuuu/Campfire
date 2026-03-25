@@ -14,13 +14,13 @@ namespace Garden
 
         public void Initialize(VisualElement root)
         {
-            manaDisplay = root.Q<Label>("mana-display");
-            waterDisplay = root.Q<Label>("water-display");
-            mallumDisplay = root.Q<Label>("mallum-display");
+            manaDisplay = root.Q<Label>("hud-mana");
+            waterDisplay = root.Q<Label>("hud-water");
+            mallumDisplay = root.Q<Label>("hud-mallum");
 
-            manaIcon = root.Q("mana-icon");
-            waterIcon = root.Q("water-icon");
-            mallumIcon = root.Q("mallum-icon");
+            manaIcon = root.Q("hud-mana-icon");
+            waterIcon = root.Q("hud-water-icon");
+            mallumIcon = root.Q("hud-mallum-icon");
 
             if (CurrencyManager.Instance != null)
                 CurrencyManager.Instance.OnCurrencyChanged += OnCurrencyChanged;
