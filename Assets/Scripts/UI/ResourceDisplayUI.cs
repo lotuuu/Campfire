@@ -62,12 +62,28 @@ namespace Garden
 
         public void Refresh() => UpdateDisplay();
 
+        private static readonly Color WaterNormal = new Color(100f/255, 180f/255, 240f/255);
+        private static readonly Color WaterLow = new Color(240f/255, 200f/255, 60f/255);
+        private static readonly Color WaterCritical = new Color(220f/255, 70f/255, 50f/255);
+
         private void UpdateDisplay()
         {
             if (manaDisplay != null && SaveManager.Instance != null)
                 manaDisplay.text = $"{SaveManager.Instance.Data.mana:F0}";
-            if (waterDisplay != null && CurrencyManager.Instance != null)
-                waterDisplay.text = $"{CurrencyManager.Instance.TotalWater}";
+            if (waterDisplay != null && SaveManager.Instance != null)
+            {
+                int current = 0, max = 0;
+                foreach (var v in SaveManager.Instance.Data.vases)
+                {
+                    current += v.currentWater;
+                    max += v.capacity;
+                }
+                waterDisplay.text = $"{current}/{max}";
+                float pct = max > 0 ? (float)current / max : 1f;
+                waterDisplay.style.color = pct <= 0.2f ? WaterCritical
+                                         : pct <= 0.4f ? WaterLow
+                                         : WaterNormal;
+            }
             if (mallumDisplay != null && MallumManager.Instance != null)
                 mallumDisplay.text = $"{MallumManager.Instance.GetAvailableMallumCount()}/{MallumManager.Instance.GetTotalMallumCount()}";
         }

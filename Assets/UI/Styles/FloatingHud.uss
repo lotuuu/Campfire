@@ -5,12 +5,16 @@
     position: absolute;
     left: 0;
     right: 0;
-    top: 10px;
+    top: 0;
+    flex-direction: column;
+    padding: 0 var(--spacing-sm);
+    display: none;
+}
+
+/* ── Top row: profile | weather bar | menu ── */
+#hud-top-row {
     flex-direction: row;
     align-items: flex-start;
-    padding: 0 var(--spacing-sm);
-    /* z-index not supported in UI Toolkit — use UXML element order for layering */
-    display: none;
 }
 
 /* ── Shared circle style ── */
@@ -26,14 +30,13 @@
     flex-shrink: 0;
 }
 
-/* Profile circle is larger — primary action */
+/* Profile circle — larger, primary action */
 .hud-left {
     width: 256px;
     height: 256px;
     border-radius: 128px;
     border-width: 3px;
     border-color: rgba(214, 154, 53, 0.5);
-    margin-right: auto;
 }
 
 #hud-profile-pic {
@@ -59,7 +62,13 @@
     color: var(--color-text-bright);
 }
 
-/* ── Resource pill (center) ── */
+/* ── Weather bar (center pill) ── */
+#hud-weather-bar-wrapper {
+    flex-grow: 1;
+    align-items: center;
+    justify-content: flex-start;
+}
+
 .hud-pill {
     flex-direction: row;
     align-items: center;
@@ -68,21 +77,62 @@
     border-width: 2px;
     border-color: rgba(214, 154, 53, 0.3);
     padding: var(--spacing-xs) var(--spacing-md);
+    flex-shrink: 0;
 }
 
-.hud-res {
+#hud-weather-temp,
+#hud-weather-humidity,
+#hud-weather-status {
+    font-size: var(--font-sm);
+    -unity-font-style: bold;
+    color: var(--color-text-bright);
+}
+
+.hud-weather-divider {
+    width: 1px;
+    height: 24px;
+    background-color: rgba(255, 255, 255, 0.15);
+    margin: 0 var(--spacing-xs);
+}
+
+/* ── Menu circle (right) ── */
+.hud-right {
+    margin-left: auto;
+}
+
+#hud-menu-icon {
+    width: 96px;
+    height: 96px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* ── Resource pills (stacked below profile) ── */
+#hud-resources {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-top: var(--spacing-xs);
+    margin-left: var(--spacing-xs);
+}
+
+.hud-res-pill {
     flex-direction: row;
     align-items: center;
+    background-color: rgba(20, 40, 20, 0.65);
+    border-radius: 24px;
+    border-width: 2px;
+    border-color: rgba(214, 154, 53, 0.3);
+    padding: var(--spacing-xxs) var(--spacing-sm);
+    margin-bottom: var(--spacing-xxs);
 }
 
 .hud-res-icon {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     -unity-background-scale-mode: scale-to-fit;
     margin-right: var(--spacing-xxs);
 }
 
-.hud-res Label {
+.hud-res-pill Label {
     font-size: var(--font-md);
     -unity-font-style: bold;
 }
@@ -97,24 +147,6 @@
 
 #hud-mallum {
     color: var(--color-text);
-}
-
-.hud-res-divider {
-    width: 1px;
-    height: 24px;
-    background-color: rgba(255, 255, 255, 0.1);
-    margin: 0 var(--spacing-sm);
-}
-
-/* ── Weather circle (right) ── */
-.hud-right {
-    margin-left: auto;
-}
-
-#hud-weather-icon {
-    width: 144px;
-    height: 144px;
-    -unity-background-scale-mode: scale-to-fit;
 }
 
 /* ══════════════════════════════════════════════
@@ -161,14 +193,17 @@
     translate: 0 0;
 }
 
-/* ── Forecast bloom: anchored top-right ── */
-.bloom-right {
+/* ── Forecast bloom: anchored center-top (expands from weather bar) ── */
+.bloom-center {
     top: 10px;
-    right: 12px;
+    left: 5%;
+    right: 5%;
+    width: 90%;
+    height: 56px;
+    border-radius: 28px;
 }
 
-.bloom-right.bloom-open {
-    width: 90%;
+.bloom-center.bloom-open {
     height: 80%;
     border-radius: var(--radius-lg);
 }

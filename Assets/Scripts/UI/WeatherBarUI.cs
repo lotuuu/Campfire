@@ -5,8 +5,11 @@ namespace Garden
 {
     public class WeatherBarUI : MonoBehaviour
     {
-        private VisualElement hudWeather;
-        private VisualElement hudWeatherIcon;
+        private VisualElement hudWeatherBar;
+        private Label hudWeatherTemp;
+        private Label hudWeatherHumidity;
+        private Label hudWeatherStatus;
+        private VisualElement hudMenuIcon;
         private VisualElement forecastBloom;
         private VisualElement bloomDismiss;
         private Label forecastTitle;
@@ -19,6 +22,7 @@ namespace Garden
         private VisualElement hudProfile;
 
         private bool isOpen;
+        private bool menuIconLoaded;
 
         private static readonly int[] MoonPhaseToSpriteIndex = { 5, 6, 7, 8, 1, 2, 3, 4 };
 
@@ -26,9 +30,13 @@ namespace Garden
 
         public void Initialize(VisualElement root)
         {
-            hudWeather = root.Q("hud-weather");
-            hudWeatherIcon = root.Q("hud-weather-icon");
+            hudWeatherBar = root.Q("hud-weather-bar");
+            hudWeatherTemp = root.Q<Label>("hud-weather-temp");
+            hudWeatherHumidity = root.Q<Label>("hud-weather-humidity");
+            hudWeatherStatus = root.Q<Label>("hud-weather-status");
+            hudMenuIcon = root.Q("hud-menu-icon");
             forecastBloom = root.Q("forecast-bloom");
+            if (forecastBloom != null) forecastBloom.style.display = DisplayStyle.None;
             bloomDismiss = root.Q("bloom-dismiss");
             forecastTitle = root.Q<Label>("forecast-bloom-title");
             forecastStats = root.Q("forecast-bloom-stats");
@@ -36,13 +44,13 @@ namespace Garden
             forecastSectionLabel = root.Q<Label>("forecast-section-label");
             hudProfile = root.Q("hud-profile");
 
-            hudWeather?.RegisterCallback<ClickEvent>(OnWeatherClicked);
+            hudWeatherBar?.RegisterCallback<ClickEvent>(OnWeatherClicked);
 
             if (WeatherService.Instance != null)
             {
-                WeatherService.Instance.OnWeatherUpdated += UpdateWeatherIcon;
+                WeatherService.Instance.OnWeatherUpdated += UpdateWeatherDisplay;
                 WeatherService.Instance.OnForecastUpdated += PopulateForecast;
-                UpdateWeatherIcon(WeatherService.Instance.CurrentWeather);
+                UpdateWeatherDisplay(WeatherService.Instance.CurrentWeather);
                 if (WeatherService.Instance.Forecast.Count > 0)
                     PopulateForecast();
             }
@@ -52,8 +60,21 @@ namespace Garden
         {
             if (WeatherService.Instance != null)
             {
-                WeatherService.Instance.OnWeatherUpdated -= UpdateWeatherIcon;
+                WeatherService.Instance.OnWeatherUpdated -= UpdateWeatherDisplay;
                 WeatherService.Instance.OnForecastUpdated -= PopulateForecast;
+            }
+        }
+
+        private void Update()
+        {
+            if (!menuIconLoaded && SpriteService.Instance != null)
+            {
+                var tex = SpriteService.Instance.GetTexture("ui/delapouite-hamburger-menu");
+                if (tex != null && hudMenuIcon != null)
+                {
+                    hudMenuIcon.style.backgroundImage = tex;
+                    menuIconLoaded = true;
+                }
             }
         }
 
@@ -74,10 +95,9 @@ namespace Garden
             if (forecastBloom == null) return;
             isOpen = true;
             PopulateForecast();
-            forecastBloom.AddToClassList("bloom-open");
+            forecastBloom.style.display = DisplayStyle.Flex;
+            forecastBloom.schedule.Execute(() => forecastBloom.AddToClassList("bloom-open"));
             bloomDismiss?.AddToClassList("bloom-dismiss-active");
-            if (hudWeatherIcon != null)
-                hudWeatherIcon.style.rotate = new Rotate(180);
         }
 
         public void CloseBloom()
@@ -85,17 +105,23 @@ namespace Garden
             if (forecastBloom == null) return;
             isOpen = false;
             forecastBloom.RemoveFromClassList("bloom-open");
+            forecastBloom.style.display = DisplayStyle.None;
             bloomDismiss?.RemoveFromClassList("bloom-dismiss-active");
-            if (hudWeatherIcon != null)
-                hudWeatherIcon.style.rotate = new Rotate(0);
         }
 
-        private void UpdateWeatherIcon(WeatherData weather)
+        private void UpdateWeatherDisplay(WeatherData weather)
         {
-            if (hudWeatherIcon == null) return;
-            var tex = GetWeatherIcon(weather.condition);
-            if (tex != null)
-                hudWeatherIcon.style.backgroundImage = tex;
+            if (hudWeatherTemp != null)
+                hudWeatherTemp.text = $"{weather.temperature:F0}\u00b0C";
+
+            if (hudWeatherHumidity != null)
+                hudWeatherHumidity.text = $"{weather.humidity:F0}%";
+
+            if (hudWeatherStatus != null)
+            {
+                var condKey = $"ui.weather.{weather.condition.ToString().ToLower()}";
+                hudWeatherStatus.text = Loc.Get(condKey, weather.condition.ToString());
+            }
         }
 
         private void PopulateForecast()
@@ -117,6 +143,8 @@ namespace Garden
             AddStatRow(forecastStats, Loc.Get("ui.weather.temp", "Temp"), $"{weather.temperature:F0}\u00b0");
             AddStatRow(forecastStats, Loc.Get("ui.weather.humidity", "Humidity"), $"{weather.humidity:F0}%");
             AddStatRow(forecastStats, Loc.Get("ui.weather.wind", "Wind"), $"{weather.windSpeed:F1} m/s");
+            AddStatRow(forecastStats, Loc.Get("ui.weather.sunrise", "Sunrise"), FormatHour(weather.sunriseHour));
+            AddStatRow(forecastStats, Loc.Get("ui.weather.sunset", "Sunset"), FormatHour(weather.sunsetHour));
 
             var moonTex = GetMoonTexture((int)weather.moonPhase);
             if (moonTex != null)
@@ -205,6 +233,16 @@ namespace Garden
                 if (visitingNameLabel != null)
                     visitingNameLabel.style.display = DisplayStyle.None;
             }
+        }
+
+        private static string FormatHour(float fractionalHour)
+        {
+            int h = (int)fractionalHour;
+            int m = (int)((fractionalHour - h) * 60);
+            string ampm = h >= 12 ? "PM" : "AM";
+            int h12 = h % 12;
+            if (h12 == 0) h12 = 12;
+            return $"{h12}:{m:D2} {ampm}";
         }
 
         private Texture2D GetMoonTexture(int phaseIndex)

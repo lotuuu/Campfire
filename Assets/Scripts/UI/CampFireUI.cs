@@ -115,8 +115,8 @@ namespace Garden
                     weatherBar.CloseBloom();
             }, TrickleDown.TrickleDown);
 
-            var hudWeather = root.Q("hud-weather");
-            hudWeather?.RegisterCallback<ClickEvent>(_ =>
+            var hudWeatherBar = root.Q("hud-weather-bar");
+            hudWeatherBar?.RegisterCallback<ClickEvent>(_ =>
             {
                 profilePopup?.CloseBloom();
             }, TrickleDown.TrickleDown);

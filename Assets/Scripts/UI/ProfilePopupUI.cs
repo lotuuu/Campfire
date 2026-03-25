@@ -52,6 +52,7 @@ namespace Garden
         {
             hudProfile = root.Q("hud-profile");
             profileBloom = root.Q("profile-bloom");
+            if (profileBloom != null) profileBloom.style.display = DisplayStyle.None;
             bloomDismiss = root.Q("bloom-dismiss");
             hudProfilePic = root.Q("hud-profile-pic");
             profilePicLarge = root.Q("profile-pic-large");
@@ -383,7 +384,8 @@ namespace Garden
             if (profileBloom == null) return;
             isOpen = true;
             RefreshContent();
-            profileBloom.AddToClassList("bloom-open");
+            profileBloom.style.display = DisplayStyle.Flex;
+            profileBloom.schedule.Execute(() => profileBloom.AddToClassList("bloom-open"));
             bloomDismiss?.AddToClassList("bloom-dismiss-active");
         }
 
@@ -392,6 +394,7 @@ namespace Garden
             if (profileBloom == null) return;
             isOpen = false;
             profileBloom.RemoveFromClassList("bloom-open");
+            profileBloom.style.display = DisplayStyle.None;
             bloomDismiss?.RemoveFromClassList("bloom-dismiss-active");
 
             // Reset states

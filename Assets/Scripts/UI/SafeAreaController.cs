@@ -26,17 +26,17 @@ namespace Garden
             // since there's no top bar. The floating HUD still respects safe area.
             campRoot.style.paddingBottom = bottomBleed;
 
-            // Floating HUD and bloom cards use position: absolute.
-            // Absolute elements ignore parent padding, so apply safe area offset directly.
-            var floatingHud = root.Q("floating-hud");
-            if (floatingHud != null)
-                floatingHud.style.top = 10 + topBleed;
+            // Side HUD elements (profile, menu) can extend into Dynamic Island zone
+            // since they're at the edges. Only the center weather bar needs safe area offset.
+            var weatherBarWrapper = root.Q("hud-weather-bar-wrapper");
+            if (weatherBarWrapper != null)
+                weatherBarWrapper.style.paddingTop = topBleed;
             var forecastBloom = root.Q("forecast-bloom");
             if (forecastBloom != null)
-                forecastBloom.style.top = 10 + topBleed;
+                forecastBloom.style.top = topBleed;
             var profileBloom = root.Q("profile-bloom");
             if (profileBloom != null)
-                profileBloom.style.top = 10 + topBleed;
+                profileBloom.style.top = topBleed;
 
             // Pull bottom-nav background down into the bottom bleed area
             var bottomNav = root.Q("bottom-nav");
