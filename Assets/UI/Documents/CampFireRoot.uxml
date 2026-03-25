@@ -438,6 +438,7 @@
             vertical-scroller-visibility="Hidden">
             <ui:VisualElement name="profile-identity">
                 <ui:VisualElement name="profile-pic-large" />
+                <ui:VisualElement name="profile-pic-grid" />
                 <ui:TextField name="profile-display-name" label="Name" max-length="20" />
                 <ui:Label name="profile-friend-code" text="Code: ---" />
             </ui:VisualElement>

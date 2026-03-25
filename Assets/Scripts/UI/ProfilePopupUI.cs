@@ -35,7 +35,12 @@ namespace Garden
         private Button confirmDelete;
         private Button debugBtn;
 
+        private VisualElement profilePicGrid;
+
         private bool isOpen;
+
+        private static readonly string[] ProfilePicIds =
+            { "alchemist", "elder", "farmer", "herbalist", "traveler" };
 
         public void Initialize(VisualElement root)
         {
@@ -67,12 +72,14 @@ namespace Garden
             confirmCancel = root.Q<Button>("profile-confirm-cancel");
             confirmDelete = root.Q<Button>("profile-confirm-delete");
             debugBtn = root.Q<Button>("profile-debug-btn");
+            profilePicGrid = root.Q("profile-pic-grid");
 
             // Profile pic click -> toggle bloom
             hudProfile?.RegisterCallback<ClickEvent>(OnProfileClicked);
 
-            // Load profile pic
+            // Load profile pic and build picker
             LoadProfilePics();
+            BuildProfilePicGrid();
 
             // Settings: audio
             var data = SaveManager.Instance?.Data;
@@ -241,13 +248,70 @@ namespace Garden
 
         private void LoadProfilePics()
         {
-            var tex = SpriteService.Instance?.GetTexture("ui/profile");
+            var picId = SaveManager.Instance?.Data?.profilePicId ?? "farmer";
+            ApplyProfilePic(picId);
+        }
+
+        private void ApplyProfilePic(string picId)
+        {
+            var tex = SpriteService.Instance?.GetTexture($"ui/profile/{picId}");
             if (tex != null)
             {
                 if (hudProfilePic != null)
                     hudProfilePic.style.backgroundImage = tex;
                 if (profilePicLarge != null)
                     profilePicLarge.style.backgroundImage = tex;
+            }
+        }
+
+        private void BuildProfilePicGrid()
+        {
+            if (profilePicGrid == null || SpriteService.Instance == null) return;
+            profilePicGrid.Clear();
+
+            var currentId = SaveManager.Instance?.Data?.profilePicId ?? "farmer";
+
+            foreach (var picId in ProfilePicIds)
+            {
+                var option = new VisualElement();
+                option.AddToClassList("pfp-option");
+                if (picId == currentId)
+                    option.AddToClassList("pfp-selected");
+
+                var tex = SpriteService.Instance.GetTexture($"ui/profile/{picId}");
+                if (tex != null)
+                    option.style.backgroundImage = tex;
+
+                var capturedId = picId;
+                option.RegisterCallback<ClickEvent>(evt =>
+                {
+                    evt.StopPropagation();
+                    SelectProfilePic(capturedId);
+                });
+
+                profilePicGrid.Add(option);
+            }
+        }
+
+        private void SelectProfilePic(string picId)
+        {
+            if (SaveManager.Instance?.Data == null) return;
+            SaveManager.Instance.Data.profilePicId = picId;
+            SaveManager.Instance.Save();
+
+            ApplyProfilePic(picId);
+
+            // Update grid selection highlight
+            if (profilePicGrid != null)
+            {
+                foreach (var child in profilePicGrid.Children())
+                {
+                    child.RemoveFromClassList("pfp-selected");
+                }
+                // Re-highlight the selected one
+                int idx = System.Array.IndexOf(ProfilePicIds, picId);
+                if (idx >= 0 && idx < profilePicGrid.childCount)
+                    profilePicGrid[idx].AddToClassList("pfp-selected");
             }
         }
 

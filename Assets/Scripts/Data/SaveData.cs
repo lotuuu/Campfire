@@ -32,6 +32,7 @@ namespace Garden
         public int tutorialStep;
         public string locale;
         public bool vibrationEnabled = true;
+        public string profilePicId = "farmer";
     }
 
     [Serializable]

@@ -290,14 +290,45 @@
 }
 
 #profile-pic-large {
-    width: 120px;
-    height: 120px;
-    border-radius: 60px;
+    width: 160px;
+    height: 160px;
+    border-radius: 80px;
     -unity-background-scale-mode: scale-to-fit;
     background-color: rgb(60, 95, 45);
     border-width: 3px;
     border-color: rgb(214, 154, 53);
     margin-bottom: var(--spacing-md);
+}
+
+/* ── Profile pic picker grid ── */
+#profile-pic-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.pfp-option {
+    width: 96px;
+    height: 96px;
+    border-radius: 48px;
+    -unity-background-scale-mode: scale-to-fit;
+    background-color: rgb(40, 60, 35);
+    border-width: 2px;
+    border-color: rgba(140, 100, 50, 0.3);
+    margin: var(--spacing-xxs);
+    transition-property: border-color, scale;
+    transition-duration: 150ms;
+}
+
+.pfp-option:hover {
+    border-color: rgba(214, 154, 53, 0.6);
+    scale: 1.05 1.05;
+}
+
+.pfp-option.pfp-selected {
+    border-width: 3px;
+    border-color: rgb(214, 154, 53);
 }
 
 #profile-identity .unity-text-field {
