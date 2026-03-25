@@ -940,6 +940,7 @@ GameObject:
   - component: {fileID: 1564428258}
   - component: {fileID: 1564428259}
   - component: {fileID: 1564428260}
+  - component: {fileID: 1564428261}
   m_Layer: 0
   m_Name: --- UI ---
   m_TagString: Untagged
@@ -1225,6 +1226,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24573853cc16640899bfb2d5184c30d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Garden::Garden.ProfilePopupUI
+--- !u!114 &1564428261
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1564428222}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da3e68b5619044a6ba56859a468db644, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Garden::Garden.BottomNavUI
 --- !u!1 &1877059791
 GameObject:
   m_ObjectHideFlags: 0
