@@ -674,7 +674,20 @@ gardens = [
 for g <- gardens do
   %GardenConfig{}
   |> GardenConfig.changeset(g)
-  |> Repo.insert!(on_conflict: :nothing, conflict_target: :plant_name)
+  |> Repo.insert!(
+    on_conflict:
+      {:replace,
+       [
+         :growth_duration_hours,
+         :yield_item,
+         :yield_amount,
+         :yield_interval_hours,
+         :water_required,
+         :mana_cost,
+         :updated_at
+       ]},
+    conflict_target: :plant_name
+  )
 end
 
 # Game configs (economy constants)
