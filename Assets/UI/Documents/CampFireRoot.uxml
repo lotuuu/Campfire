@@ -393,7 +393,7 @@
     </ui:VisualElement>
 
     <!-- Floating HUD (outside camp-root so paddingTop doesn't affect absolute positioning) -->
-    <ui:VisualElement name="floating-hud" picking-mode="Ignore">
+    <ui:VisualElement name="floating-hud">
         <ui:VisualElement name="hud-profile" class="hud-circle hud-left">
             <ui:VisualElement name="hud-profile-pic" picking-mode="Ignore" />
         </ui:VisualElement>
