@@ -811,7 +811,7 @@ game_configs = [
       "vase_costs" => [
         %{
           "manaCost" => 100,
-          "harvestCosts" => [%{"itemKey" => item_key!.("cress"), "count" => 1}]
+          "harvestCosts" => [%{"itemKey" => item_key!.("basil"), "count" => 1}]
         },
         %{
           "manaCost" => 120,
@@ -823,13 +823,13 @@ game_configs = [
         },
         %{
           "manaCost" => 180,
-          "harvestCosts" => [%{"itemKey" => item_key!.("chamomile"), "count" => 1}]
+          "harvestCosts" => [%{"itemKey" => item_key!.("chamomile"), "count" => 2}]
         },
         %{
           "manaCost" => 220,
           "harvestCosts" => [
-            %{"itemKey" => item_key!.("chamomile"), "count" => 1},
-            %{"itemKey" => item_key!.("basil"), "count" => 1}
+            %{"itemKey" => item_key!.("chamomile"), "count" => 3},
+            %{"itemKey" => item_key!.("basil"), "count" => 10}
           ]
         },
         %{
@@ -907,11 +907,11 @@ game_configs = [
         },
         %{
           "manaCost" => 100,
-          "harvestCosts" => [%{"itemKey" => item_key!.("basil"), "count" => 2}]
+          "harvestCosts" => [%{"itemKey" => item_key!.("cress"), "count" => 1}]
         },
         %{
           "manaCost" => 500,
-          "harvestCosts" => [%{"itemKey" => item_key!.("lavender"), "count" => 3}]
+          "harvestCosts" => [%{"itemKey" => item_key!.("basil"), "count" => 3}]
         },
         %{
           "manaCost" => 1000,
@@ -926,7 +926,7 @@ game_configs = [
   %{
     key: "bird_config",
     value: %{
-      "spawn_base_chance" => 0.33,
+      "spawn_base_chance" => 0.5,
       "spawn_decay" => 0.5
     }
   },
