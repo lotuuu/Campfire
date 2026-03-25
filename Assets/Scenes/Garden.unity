@@ -934,7 +934,6 @@ GameObject:
   - component: {fileID: 1564428250}
   - component: {fileID: 1564428252}
   - component: {fileID: 1564428253}
-  - component: {fileID: 1564428254}
   - component: {fileID: 1564428256}
   - component: {fileID: 1564428255}
   - component: {fileID: 1564428257}
@@ -1089,7 +1088,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1564428222}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ecf70f54f2ccd498689fd90529df62bb, type: 3}
   m_Name: 
@@ -1154,18 +1153,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e1628699612a44f3b257b9589a3b6c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Garden::Garden.DialogueUI
---- !u!114 &1564428254
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1564428222}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e8a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Garden::Garden.SettingsUI
 --- !u!114 &1564428255
 MonoBehaviour:
   m_ObjectHideFlags: 0
