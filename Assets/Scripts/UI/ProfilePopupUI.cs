@@ -12,11 +12,13 @@ namespace Garden
         private VisualElement profilePicLarge;
         private VisualElement hudProfilePic;
 
+        // Name row
+        private Label displayNameLabel;
+        private Button nameEditBtn;
         private TextField displayNameInput;
+
         private Label friendCodeLabel;
         private Label flameLevelLabel;
-        private Label dateTimeLabel;
-        private Label weatherSummaryLabel;
 
         private Slider musicSlider;
         private Slider sfxSlider;
@@ -35,7 +37,11 @@ namespace Garden
         private Button confirmDelete;
         private Button debugBtn;
 
+        // Profile pic selector
+        private Button picEditBtn;
+        private VisualElement picSelector;
         private VisualElement profilePicGrid;
+        private Button picCloseBtn;
 
         private bool isOpen;
 
@@ -50,11 +56,13 @@ namespace Garden
             hudProfilePic = root.Q("hud-profile-pic");
             profilePicLarge = root.Q("profile-pic-large");
 
+            // Name row
+            displayNameLabel = root.Q<Label>("profile-display-name-label");
+            nameEditBtn = root.Q<Button>("profile-name-edit-btn");
             displayNameInput = root.Q<TextField>("profile-display-name");
+
             friendCodeLabel = root.Q<Label>("profile-friend-code");
             flameLevelLabel = root.Q<Label>("profile-flame-level");
-            dateTimeLabel = root.Q<Label>("profile-date-time");
-            weatherSummaryLabel = root.Q<Label>("profile-weather-summary");
 
             musicSlider = root.Q<Slider>("profile-music-slider");
             sfxSlider = root.Q<Slider>("profile-sfx-slider");
@@ -72,14 +80,45 @@ namespace Garden
             confirmCancel = root.Q<Button>("profile-confirm-cancel");
             confirmDelete = root.Q<Button>("profile-confirm-delete");
             debugBtn = root.Q<Button>("profile-debug-btn");
+
+            // Profile pic selector
+            picEditBtn = root.Q<Button>("profile-pic-edit-btn");
+            picSelector = root.Q("profile-pic-selector");
             profilePicGrid = root.Q("profile-pic-grid");
+            picCloseBtn = root.Q<Button>("profile-pic-close-btn");
 
             // Profile pic click -> toggle bloom
             hudProfile?.RegisterCallback<ClickEvent>(OnProfileClicked);
 
-            // Load profile pic and build picker
+            // Load profile pic
             LoadProfilePics();
-            BuildProfilePicGrid();
+
+            // Pic edit button -> show selector
+            if (picEditBtn != null)
+                picEditBtn.clicked += () => ShowPicSelector(true);
+            if (picCloseBtn != null)
+                picCloseBtn.clicked += () => ShowPicSelector(false);
+
+            // Name edit button -> toggle text field
+            if (nameEditBtn != null)
+                nameEditBtn.clicked += OnNameEditClicked;
+
+            // Display name: set initial value
+            var playerName = SocialSaveManager.Instance?.Data?.displayName;
+            if (displayNameLabel != null)
+                displayNameLabel.text = string.IsNullOrEmpty(playerName) ? "Camper" : playerName;
+            if (displayNameInput != null)
+            {
+                if (!string.IsNullOrEmpty(playerName))
+                    displayNameInput.SetValueWithoutNotify(playerName);
+                displayNameInput.RegisterValueChangedCallback(evt =>
+                {
+                    if (SocialService.Instance != null)
+                        _ = SocialService.Instance.UpdateDisplayName(evt.newValue);
+                    if (displayNameLabel != null)
+                        displayNameLabel.text = evt.newValue;
+                });
+            }
 
             // Settings: audio
             var data = SaveManager.Instance?.Data;
@@ -151,20 +190,7 @@ namespace Garden
 
             // Friend code
             if (friendCodeLabel != null && socialData != null)
-                friendCodeLabel.text = $"Code: {socialData.friendCode ?? "---"}";
-
-            // Display name
-            if (displayNameInput != null)
-            {
-                var name = SocialSaveManager.Instance?.Data?.displayName;
-                if (!string.IsNullOrEmpty(name))
-                    displayNameInput.SetValueWithoutNotify(name);
-                displayNameInput.RegisterValueChangedCallback(evt =>
-                {
-                    if (SocialService.Instance != null)
-                        _ = SocialService.Instance.UpdateDisplayName(evt.newValue);
-                });
-            }
+                friendCodeLabel.text = $"Friend Code: {socialData.friendCode ?? "---"}";
 
             // Delete save
             if (deleteBtn != null)
@@ -216,15 +242,6 @@ namespace Garden
                 LocalizationService.Instance.OnLocaleChanged -= OnLocaleChanged;
         }
 
-        private void Update()
-        {
-            if (isOpen && dateTimeLabel != null)
-            {
-                var now = GameTime.Now;
-                dateTimeLabel.text = now.ToString("dd MMM  h:mm tt").ToUpper();
-            }
-        }
-
         public void RefreshLanguageDropdown()
         {
             if (langDropdown == null || LocalizationService.Instance == null) return;
@@ -234,17 +251,11 @@ namespace Garden
 
         public void RefreshContent()
         {
-            // Flame level
             if (flameLevelLabel != null && SaveManager.Instance?.Data != null)
                 flameLevelLabel.text = $"Flame Level {SaveManager.Instance.Data.flameLevel}";
-
-            // Weather summary
-            if (weatherSummaryLabel != null && WeatherService.Instance != null)
-            {
-                var w = WeatherService.Instance.CurrentWeather;
-                weatherSummaryLabel.text = $"{w.condition} {w.temperature:F0}\u00b0";
-            }
         }
+
+        // ── Profile pic ──
 
         private void LoadProfilePics()
         {
@@ -261,6 +272,20 @@ namespace Garden
                     hudProfilePic.style.backgroundImage = tex;
                 if (profilePicLarge != null)
                     profilePicLarge.style.backgroundImage = tex;
+            }
+        }
+
+        private void ShowPicSelector(bool show)
+        {
+            if (picSelector == null) return;
+            if (show)
+            {
+                BuildProfilePicGrid();
+                picSelector.style.display = DisplayStyle.Flex;
+            }
+            else
+            {
+                picSelector.style.display = DisplayStyle.None;
             }
         }
 
@@ -305,15 +330,39 @@ namespace Garden
             if (profilePicGrid != null)
             {
                 foreach (var child in profilePicGrid.Children())
-                {
                     child.RemoveFromClassList("pfp-selected");
-                }
-                // Re-highlight the selected one
+
                 int idx = System.Array.IndexOf(ProfilePicIds, picId);
                 if (idx >= 0 && idx < profilePicGrid.childCount)
                     profilePicGrid[idx].AddToClassList("pfp-selected");
             }
         }
+
+        // ── Name editing ──
+
+        private void OnNameEditClicked()
+        {
+            if (displayNameInput == null || displayNameLabel == null) return;
+
+            // Show text field, hide label row
+            displayNameLabel.parent.style.display = DisplayStyle.None;
+            displayNameInput.style.display = DisplayStyle.Flex;
+            displayNameInput.Focus();
+
+            // When focus is lost, switch back to label
+            displayNameInput.RegisterCallback<FocusOutEvent>(OnNameEditDone);
+        }
+
+        private void OnNameEditDone(FocusOutEvent evt)
+        {
+            if (displayNameInput == null || displayNameLabel == null) return;
+            displayNameInput.UnregisterCallback<FocusOutEvent>(OnNameEditDone);
+
+            displayNameInput.style.display = DisplayStyle.None;
+            displayNameLabel.parent.style.display = DisplayStyle.Flex;
+        }
+
+        // ── Bloom open/close ──
 
         private void OnProfileClicked(ClickEvent evt)
         {
@@ -345,9 +394,16 @@ namespace Garden
             profileBloom.RemoveFromClassList("bloom-open");
             bloomDismiss?.RemoveFromClassList("bloom-dismiss-active");
 
-            // Reset delete confirm state
+            // Reset states
             if (deleteBtn != null) deleteBtn.style.display = DisplayStyle.Flex;
             if (confirmRow != null) confirmRow.style.display = DisplayStyle.None;
+            ShowPicSelector(false);
+
+            // Close name edit if open
+            if (displayNameInput != null)
+                displayNameInput.style.display = DisplayStyle.None;
+            if (displayNameLabel?.parent != null)
+                displayNameLabel.parent.style.display = DisplayStyle.Flex;
         }
 
         private void OnDebugClicked()

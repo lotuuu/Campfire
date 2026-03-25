@@ -437,15 +437,28 @@
             touch-scroll-type="Clamped" elasticity="0"
             vertical-scroller-visibility="Hidden">
             <ui:VisualElement name="profile-identity">
-                <ui:VisualElement name="profile-pic-large" />
-                <ui:VisualElement name="profile-pic-grid" />
-                <ui:TextField name="profile-display-name" label="Name" max-length="20" />
-                <ui:Label name="profile-friend-code" text="Code: ---" />
+                <!-- Profile pic with edit button overlay -->
+                <ui:VisualElement name="profile-pic-wrapper">
+                    <ui:VisualElement name="profile-pic-large" />
+                    <ui:Button name="profile-pic-edit-btn" class="profile-pic-edit" />
+                </ui:VisualElement>
+                <!-- Name row: label + edit button, toggles to text field -->
+                <ui:VisualElement name="profile-name-row">
+                    <ui:Label name="profile-display-name-label" text="Camper" />
+                    <ui:Button name="profile-name-edit-btn" class="profile-name-edit" />
+                </ui:VisualElement>
+                <ui:TextField name="profile-display-name" max-length="20" style="display: none;" />
+                <ui:Label name="profile-friend-code" text="Friend Code: ---" />
             </ui:VisualElement>
             <ui:VisualElement name="profile-stats">
                 <ui:Label name="profile-flame-level" text="Flame Level 1" />
-                <ui:Label name="profile-date-time" text="--" />
-                <ui:Label name="profile-weather-summary" text="--" />
+            </ui:VisualElement>
+
+            <!-- Profile pic selector popup (hidden, shown by edit button) -->
+            <ui:VisualElement name="profile-pic-selector" style="display: none;">
+                <ui:Label text="Choose Avatar" class="profile-section-header" />
+                <ui:VisualElement name="profile-pic-grid" />
+                <ui:Button name="profile-pic-close-btn" text="Done" class="profile-pic-done-btn" />
             </ui:VisualElement>
             <ui:VisualElement name="profile-settings">
                 <ui:Label text="SETTINGS" class="profile-section-header" />
