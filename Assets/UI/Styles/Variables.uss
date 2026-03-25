@@ -14,8 +14,7 @@
 #tutorial-hint-speaker,
 #tutorial-hint-centered-speaker,
 #visitor-modal-name,
-#reward-reveal-title,
-#player-name {
+#reward-reveal-title {
     -unity-font-definition: url('project://database/Assets/Fonts/Fredoka-SemiBold.ttf');
 }
 

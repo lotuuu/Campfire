@@ -2,7 +2,6 @@
     <Style src="project://database/Assets/UI/Styles/Variables.uss" />
     <Style src="project://database/Assets/UI/Styles/Common.uss" />
     <Style src="project://database/Assets/UI/Styles/CampSite.uss" />
-    <Style src="project://database/Assets/UI/Styles/WeatherBar.uss" />
     <Style src="project://database/Assets/UI/Styles/BottomNav.uss" />
     <Style src="project://database/Assets/UI/Styles/Overlay.uss" />
     <Style src="project://database/Assets/UI/Styles/Apotheke.uss" />
@@ -11,14 +10,12 @@
     <Style src="project://database/Assets/UI/Styles/Interaction.uss" />
     <Style src="project://database/Assets/UI/Styles/CampsiteGrid.uss" />
     <Style src="project://database/Assets/UI/Styles/Debug.uss" />
-    <Style src="project://database/Assets/UI/Styles/Forecast.uss" />
     <Style src="project://database/Assets/UI/Styles/Quest.uss" />
     <Style src="project://database/Assets/UI/Styles/Merchant.uss" />
     <Style src="project://database/Assets/UI/Styles/Dialogue.uss" />
     <Style src="project://database/Assets/UI/Styles/Visitor.uss" />
     <Style src="project://database/Assets/UI/Styles/Tutorial.uss" />
     <Style src="project://database/Assets/UI/Styles/RewardReveal.uss" />
-    <Style src="project://database/Assets/UI/Styles/Settings.uss" />
     <Style src="project://database/Assets/UI/Styles/FloatingHud.uss" />
 
     <!-- Root container -->
