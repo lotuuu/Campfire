@@ -554,7 +554,8 @@ quests = [
     reward_rolls: 3,
     reward_pool: [
       %{"itemKey" => "marigold_seed", "weight" => 3, "minCount" => 1, "maxCount" => 2},
-      %{"itemKey" => "snowdrop_seed", "weight" => 2, "minCount" => 1, "maxCount" => 2}
+      %{"itemKey" => "snowdrop_seed", "weight" => 2, "minCount" => 1, "maxCount" => 2},
+      %{"itemKey" => "berrybush_seed", "weight" => 1, "minCount" => 1, "maxCount" => 1}
     ]
   },
   %{
