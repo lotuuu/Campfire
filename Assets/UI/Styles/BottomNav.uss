@@ -1,12 +1,14 @@
 /* BottomNav.uss — Bottom navigation bar */
 
 #bottom-nav {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
     flex-direction: row;
     align-items: flex-start;
     flex-shrink: 0;
-    background-color: rgb(36, 61, 28);
-    border-top-width: 3px;
-    border-top-color: rgb(214, 154, 53);
+    background-color: transparent;
     padding: var(--spacing-sm) var(--spacing-md);
     transition-property: opacity;
     transition-duration: 300ms;
