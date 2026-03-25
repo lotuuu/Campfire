@@ -1582,7 +1582,6 @@ namespace Garden
                 interactionBackdrop.style.display = DisplayStyle.Flex;
             interactionPanel.style.display = DisplayStyle.Flex;
             interactionPanel.schedule.Execute(() => interactionPanel.AddToClassList("popup-visible"));
-            if (floatingHud != null) floatingHud.style.display = DisplayStyle.None;
         }
 
         private void ShowFlameInteraction()
@@ -3422,7 +3421,6 @@ namespace Garden
                 interactionPanel.style.display = DisplayStyle.None;
                 interactionPanel.RemoveFromClassList("skin-panel");
             }
-            if (floatingHud != null) floatingHud.style.display = DisplayStyle.Flex;
             if (interactionTitle != null)
                 interactionTitleRow.style.display = DisplayStyle.Flex;
             openInteractionType = null;
