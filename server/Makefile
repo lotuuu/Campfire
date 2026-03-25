@@ -1,4 +1,4 @@
-.PHONY: setup dev start test psql reset up down logs tunnel tunnel-stop deps deploy redeploy remote-use
+.PHONY: setup dev start test psql reset up down logs tunnel tunnel-stop deps deploy redeploy remote-use seed seed-remote
 
 DEV_CONFIG := ../Assets/Scripts/Services/DevServerConfig.cs
 PORT := 4000
@@ -36,6 +36,14 @@ dev: tunnel
 # Start server without tunnel
 start:
 	mix phx.server
+
+# Run seeds locally
+seed:
+	mix run priv/repo/seeds.exs
+
+# Run seeds on Gigalixir
+seed-remote:
+	printf '%s\n' 'CampFire.Release.seed()' | $(GIGALIXIR) ps:remote_console -a $(GIGALIXIR_APP) || true
 
 # Run tests
 test:
