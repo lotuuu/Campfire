@@ -103,8 +103,8 @@
     height: 128px;
     border-radius: 64px;
     margin-left: auto;
-    margin-top: var(--spacing-sm);
-    margin-right: var(--spacing-xs);
+    margin-top: var(--spacing-md);
+    margin-right: var(--spacing-sm);
 }
 
 #hud-menu-icon {
@@ -113,17 +113,17 @@
     -unity-background-scale-mode: scale-to-fit;
 }
 
-/* ── Resource panel (single card below profile, overlaps circle at mid-left) ── */
+/* ── Resource panel (sits just below profile circle) ── */
 #hud-resources {
     position: absolute;
-    top: 128px;
+    top: 248px;
     left: var(--spacing-sm);
     flex-direction: column;
     background-color: rgba(20, 40, 20, 0.82);
-    border-radius: 0 var(--radius-md) var(--radius-md) var(--radius-md);
+    border-radius: var(--radius-md);
     border-width: 2px;
     border-color: rgba(214, 154, 53, 0.3);
-    padding: 136px var(--spacing-sm) var(--spacing-xs) var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-sm) var(--spacing-xs) var(--spacing-sm);
 }
 
 .hud-res-pill {
