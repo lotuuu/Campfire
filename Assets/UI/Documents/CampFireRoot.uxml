@@ -454,12 +454,6 @@
                 <ui:Label name="profile-flame-level" text="Flame Level 1" />
             </ui:VisualElement>
 
-            <!-- Profile pic selector popup (hidden, shown by edit button) -->
-            <ui:VisualElement name="profile-pic-selector" style="display: none;">
-                <ui:Label text="Choose Avatar" class="profile-section-header" />
-                <ui:VisualElement name="profile-pic-grid" />
-                <ui:Button name="profile-pic-close-btn" text="Done" class="profile-pic-done-btn" />
-            </ui:VisualElement>
             <ui:VisualElement name="profile-settings">
                 <ui:Label text="SETTINGS" class="profile-section-header" />
                 <ui:DropdownField name="profile-language-dropdown" label="Language" />
@@ -495,6 +489,13 @@
             </ui:VisualElement>
             <ui:Button name="profile-debug-btn" text="DEBUG" style="display: none;" />
         </ui:ScrollView>
+
+        <!-- Profile pic selector overlay (above ScrollView, inside bloom card) -->
+        <ui:VisualElement name="profile-pic-selector" style="display: none;">
+            <ui:Label text="Choose Avatar" class="profile-section-header" />
+            <ui:VisualElement name="profile-pic-grid" />
+            <ui:Button name="profile-pic-close-btn" text="Done" class="profile-pic-done-btn" />
+        </ui:VisualElement>
     </ui:VisualElement>
 
 </ui:UXML>

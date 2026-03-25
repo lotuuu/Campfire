@@ -373,10 +373,11 @@
     right: 0;
     top: 0;
     bottom: 0;
-    background-color: rgba(20, 40, 20, 0.95);
+    background-color: rgba(20, 40, 20, 1.0);
     padding: var(--spacing-md);
     align-items: center;
     justify-content: center;
+    border-radius: var(--radius-lg);
 }
 
 #profile-pic-selector .profile-section-header {
