@@ -19,6 +19,25 @@ namespace Garden
             Instance = this;
         }
 
+        private void OnEnable()
+        {
+            Application.logMessageReceived += HandleUnityLog;
+        }
+
+        private void OnDisable()
+        {
+            Application.logMessageReceived -= HandleUnityLog;
+        }
+
+        private void HandleUnityLog(string message, string stackTrace, LogType type)
+        {
+            if (type == LogType.Error || type == LogType.Exception || type == LogType.Assert)
+            {
+                var msg = string.IsNullOrEmpty(stackTrace) ? message : message + "\n" + stackTrace;
+                QueueRemoteLog("error", msg, "unity", null);
+            }
+        }
+
         // --- Remote Debug Logging ---
         private const float FlushIntervalSeconds = 5f;
         private const int MaxQueueSize = 50;
