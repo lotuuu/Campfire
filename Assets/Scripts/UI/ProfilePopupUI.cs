@@ -20,13 +20,6 @@ namespace Garden
         private Label friendCodeLabel;
         private Label flameLevelLabel;
 
-        private Slider musicSlider;
-        private Slider sfxSlider;
-        private Label musicValue;
-        private Label sfxValue;
-        private DropdownField langDropdown;
-        private Toggle vibrationToggle;
-
         private Label playerIdLabel;
         private Label serverLabel;
         private Label versionLabel;
@@ -64,13 +57,6 @@ namespace Garden
 
             friendCodeLabel = root.Q<Label>("profile-friend-code");
             flameLevelLabel = root.Q<Label>("profile-flame-level");
-
-            musicSlider = root.Q<Slider>("profile-music-slider");
-            sfxSlider = root.Q<Slider>("profile-sfx-slider");
-            musicValue = root.Q<Label>("profile-music-value");
-            sfxValue = root.Q<Label>("profile-sfx-value");
-            langDropdown = root.Q<DropdownField>("profile-language-dropdown");
-            vibrationToggle = root.Q<Toggle>("profile-vibration-toggle");
 
             playerIdLabel = root.Q<Label>("profile-player-id");
             serverLabel = root.Q<Label>("profile-server");
@@ -118,65 +104,6 @@ namespace Garden
                         _ = SocialService.Instance.UpdateDisplayName(evt.newValue);
                     if (displayNameLabel != null)
                         displayNameLabel.text = evt.newValue;
-                });
-            }
-
-            // Settings: audio
-            var data = SaveManager.Instance?.Data;
-            if (data != null && musicSlider != null && sfxSlider != null)
-            {
-                musicSlider.value = data.musicVolume * 100f;
-                sfxSlider.value = data.sfxVolume * 100f;
-                if (musicValue != null) musicValue.text = $"{data.musicVolume * 100f:F0}%";
-                if (sfxValue != null) sfxValue.text = $"{data.sfxVolume * 100f:F0}%";
-            }
-
-            musicSlider?.RegisterValueChangedCallback(evt =>
-            {
-                float vol = evt.newValue / 100f;
-                AudioManager.Instance?.SetMusicVolume(vol);
-                if (musicValue != null) musicValue.text = $"{evt.newValue:F0}%";
-                if (SaveManager.Instance?.Data != null)
-                {
-                    SaveManager.Instance.Data.musicVolume = vol;
-                    SaveManager.Instance.Save();
-                }
-            });
-
-            sfxSlider?.RegisterValueChangedCallback(evt =>
-            {
-                float vol = evt.newValue / 100f;
-                AudioManager.Instance?.SetSFXVolume(vol);
-                if (sfxValue != null) sfxValue.text = $"{evt.newValue:F0}%";
-                if (SaveManager.Instance?.Data != null)
-                {
-                    SaveManager.Instance.Data.sfxVolume = vol;
-                    SaveManager.Instance.Save();
-                }
-            });
-
-            // Settings: vibration
-            if (vibrationToggle != null && data != null)
-            {
-                vibrationToggle.value = data.vibrationEnabled;
-                vibrationToggle.RegisterValueChangedCallback(evt =>
-                {
-                    if (SaveManager.Instance?.Data != null)
-                    {
-                        SaveManager.Instance.Data.vibrationEnabled = evt.newValue;
-                        SaveManager.Instance.Save();
-                    }
-                });
-            }
-
-            // Settings: language
-            if (langDropdown != null)
-            {
-                RefreshLanguageDropdown();
-                langDropdown.RegisterValueChangedCallback(evt =>
-                {
-                    if (LocalizationService.Instance != null)
-                        _ = LocalizationService.Instance.SwitchLocale(evt.newValue);
                 });
             }
 
@@ -232,22 +159,6 @@ namespace Garden
                 }
             }
 
-            // Locale changes
-            if (LocalizationService.Instance != null)
-                LocalizationService.Instance.OnLocaleChanged += OnLocaleChanged;
-        }
-
-        private void OnDestroy()
-        {
-            if (LocalizationService.Instance != null)
-                LocalizationService.Instance.OnLocaleChanged -= OnLocaleChanged;
-        }
-
-        public void RefreshLanguageDropdown()
-        {
-            if (langDropdown == null || LocalizationService.Instance == null) return;
-            langDropdown.choices = LocalizationService.Instance.SupportedLocales;
-            langDropdown.SetValueWithoutNotify(LocalizationService.Instance.CurrentLocale);
         }
 
         public void RefreshContent()
@@ -417,9 +328,5 @@ namespace Garden
                 CampFireUI.Instance?.OpenOverlay("Debug", debugPanelElement);
         }
 
-        private void OnLocaleChanged()
-        {
-            RefreshLanguageDropdown();
-        }
     }
 }

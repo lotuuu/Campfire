@@ -467,24 +467,6 @@
                 <ui:Label name="profile-flame-level" text="Flame Level 1" />
             </ui:VisualElement>
 
-            <ui:VisualElement name="profile-settings">
-                <ui:Label text="SETTINGS" class="profile-section-header" />
-                <ui:DropdownField name="profile-language-dropdown" label="Language" />
-                <ui:VisualElement class="profile-toggle-row">
-                    <ui:Label text="Vibration" />
-                    <ui:Toggle name="profile-vibration-toggle" />
-                </ui:VisualElement>
-                <ui:VisualElement class="profile-slider-row">
-                    <ui:Label text="Music" />
-                    <ui:Slider name="profile-music-slider" low-value="0" high-value="100" value="100" />
-                    <ui:Label name="profile-music-value" text="100%" />
-                </ui:VisualElement>
-                <ui:VisualElement class="profile-slider-row">
-                    <ui:Label text="Sound FX" />
-                    <ui:Slider name="profile-sfx-slider" low-value="0" high-value="100" value="100" />
-                    <ui:Label name="profile-sfx-value" text="100%" />
-                </ui:VisualElement>
-            </ui:VisualElement>
             <ui:VisualElement name="profile-account">
                 <ui:Label text="ACCOUNT" class="profile-section-header" />
                 <ui:Label name="profile-player-id" text="Player: ---" />
@@ -509,6 +491,30 @@
             <ui:VisualElement name="profile-pic-grid" />
             <ui:Button name="profile-pic-close-btn" text="Done" class="profile-pic-done-btn" />
         </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- Settings bloom card (anchored top-right, opened by menu button) -->
+    <ui:VisualElement name="settings-bloom" class="bloom-card bloom-right">
+        <ui:ScrollView name="settings-bloom-content" class="bloom-content"
+            touch-scroll-type="Clamped" elasticity="0"
+            vertical-scroller-visibility="Hidden">
+            <ui:Label text="SETTINGS" class="profile-section-header" />
+            <ui:DropdownField name="settings-language-dropdown" label="Language" />
+            <ui:VisualElement class="profile-toggle-row">
+                <ui:Label text="Vibration" />
+                <ui:Toggle name="settings-vibration-toggle" />
+            </ui:VisualElement>
+            <ui:VisualElement class="profile-slider-row">
+                <ui:Label text="Music" />
+                <ui:Slider name="settings-music-slider" low-value="0" high-value="100" value="100" />
+                <ui:Label name="settings-music-value" text="100%" />
+            </ui:VisualElement>
+            <ui:VisualElement class="profile-slider-row">
+                <ui:Label text="Sound FX" />
+                <ui:Slider name="settings-sfx-slider" low-value="0" high-value="100" value="100" />
+                <ui:Label name="settings-sfx-value" text="100%" />
+            </ui:VisualElement>
+        </ui:ScrollView>
     </ui:VisualElement>
 
 </ui:UXML>

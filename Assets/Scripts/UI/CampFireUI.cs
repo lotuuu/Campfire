@@ -27,6 +27,7 @@ namespace Garden
         private DialogueUI dialogueUI;
 
         private ProfilePopupUI profilePopup;
+        private SettingsPopupUI settingsPopup;
         private TutorialUI tutorialUI;
         private RewardRevealUI rewardRevealUI;
 
@@ -99,6 +100,8 @@ namespace Garden
             dialogueUI?.Initialize(root);
             profilePopup = GetComponent<ProfilePopupUI>();
             profilePopup?.Initialize(root);
+            settingsPopup = GetComponent<SettingsPopupUI>();
+            settingsPopup?.Initialize(root);
 
             tutorialUI = GetComponent<TutorialUI>();
             tutorialUI?.Initialize(root);
@@ -107,18 +110,28 @@ namespace Garden
             var transitionWipe = GetComponent<TransitionWipe>();
             transitionWipe?.Initialize(root);
 
-            // Coordinate bloom popups — opening one closes the other
+            // Coordinate bloom popups — opening one closes the others
             var hudProfile = root.Q("hud-profile");
             hudProfile?.RegisterCallback<ClickEvent>(_ =>
             {
                 if (weatherBar != null && weatherBar.IsOpen)
                     weatherBar.CloseBloom();
+                settingsPopup?.CloseBloom();
             }, TrickleDown.TrickleDown);
 
             var hudWeatherBar = root.Q("hud-weather-bar");
             hudWeatherBar?.RegisterCallback<ClickEvent>(_ =>
             {
                 profilePopup?.CloseBloom();
+                settingsPopup?.CloseBloom();
+            }, TrickleDown.TrickleDown);
+
+            var hudMenu = root.Q("hud-menu");
+            hudMenu?.RegisterCallback<ClickEvent>(_ =>
+            {
+                profilePopup?.CloseBloom();
+                if (weatherBar != null && weatherBar.IsOpen)
+                    weatherBar.CloseBloom();
             }, TrickleDown.TrickleDown);
 
             // Dismiss backdrop — tap outside any bloom to close it
@@ -128,6 +141,7 @@ namespace Garden
                 profilePopup?.CloseBloom();
                 if (weatherBar != null && weatherBar.IsOpen)
                     weatherBar.CloseBloom();
+                settingsPopup?.CloseBloom();
             });
 
             if (LocalizationService.Instance != null)
@@ -430,7 +444,7 @@ namespace Garden
                 GameService.Instance.OnStateLoaded -= OnGameReady;
             _gameDone = true;
             Debug.Log($"[INIT] Game ready at {_initStopwatch?.ElapsedMilliseconds ?? 0}ms");
-            profilePopup?.RefreshLanguageDropdown();
+            settingsPopup?.RefreshLanguageDropdown();
             UpdateLoadingGate();
         }
 

@@ -37,6 +37,9 @@ namespace Garden
             var profileBloom = root.Q("profile-bloom");
             if (profileBloom != null)
                 profileBloom.style.top = topBleed;
+            var settingsBloom = root.Q("settings-bloom");
+            if (settingsBloom != null)
+                settingsBloom.style.top = topBleed;
 
             // Pull bottom-nav background down into the bottom bleed area
             var bottomNav = root.Q("bottom-nav");
