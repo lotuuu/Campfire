@@ -22,7 +22,8 @@ namespace Garden
 
             // Use absolute point values — percentage padding resolves relative to
             // element width (CSS spec), which is wrong for vertical insets.
-            campRoot.style.paddingTop = topBleed;
+            // No top padding — campsite content extends into the Dynamic Island zone
+            // since there's no top bar. The floating HUD still respects safe area.
             campRoot.style.paddingBottom = bottomBleed;
 
             // Floating HUD and bloom cards use position: absolute.
