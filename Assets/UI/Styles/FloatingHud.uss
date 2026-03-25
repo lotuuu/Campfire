@@ -159,8 +159,8 @@
 }
 
 .bloom-right.bloom-open {
-    width: 280px;
-    height: 420px;
+    width: 90%;
+    height: 80%;
     border-radius: 16px;
 }
 
@@ -171,8 +171,8 @@
 }
 
 .bloom-left.bloom-open {
-    width: 320px;
-    height: 520px;
+    width: 90%;
+    height: 85%;
     border-radius: 16px;
 }
 
