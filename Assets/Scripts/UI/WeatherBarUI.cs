@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -6,375 +5,203 @@ namespace Garden
 {
     public class WeatherBarUI : MonoBehaviour
     {
-        private VisualElement weatherIcon;
-        private Label weatherConditionLabel;
-        private Label weatherHumidity;
-        private Label weatherTemp;
-        private VisualElement weatherMoon;
-        private Label playerName;
-        private Label dateTime;
-
-        private VisualElement weatherBar;
-        private VisualElement forecastPanel;
+        private VisualElement hudWeather;
+        private VisualElement hudWeatherIcon;
+        private VisualElement forecastBloom;
+        private VisualElement bloomDismiss;
+        private Label forecastTitle;
+        private VisualElement forecastStats;
         private VisualElement forecastDays;
-        private VisualElement campRoot;
-        private VisualElement questFloatBtn;
+        private Label forecastSectionLabel;
+
+        // Visiting name label (child of hud-profile)
+        private Label visitingNameLabel;
+        private VisualElement hudProfile;
+
+        private bool isOpen;
 
         private static readonly int[] MoonPhaseToSpriteIndex = { 5, 6, 7, 8, 1, 2, 3, 4 };
-        private bool iconsLoaded;
+
+        public bool IsOpen => isOpen;
 
         public void Initialize(VisualElement root)
         {
-            weatherIcon = root.Q("weather-icon");
-            weatherConditionLabel = root.Q<Label>("weather-condition-label");
-            weatherHumidity = root.Q<Label>("weather-humidity");
-            weatherTemp = root.Q<Label>("weather-temp");
-            weatherMoon = root.Q("weather-moon");
-            playerName = root.Q<Label>("player-name");
-            dateTime = root.Q<Label>("date-time");
+            hudWeather = root.Q("hud-weather");
+            hudWeatherIcon = root.Q("hud-weather-icon");
+            forecastBloom = root.Q("forecast-bloom");
+            bloomDismiss = root.Q("bloom-dismiss");
+            forecastTitle = root.Q<Label>("forecast-bloom-title");
+            forecastStats = root.Q("forecast-bloom-stats");
+            forecastDays = root.Q("forecast-bloom-days");
+            forecastSectionLabel = root.Q<Label>("forecast-section-label");
+            hudProfile = root.Q("hud-profile");
 
-            weatherBar = root.Q("weather-bar");
-            forecastPanel = root.Q("forecast-panel");
-            forecastDays = root.Q("forecast-days");
-            campRoot = root.Q("camp-root");
-            questFloatBtn = root.Q("quest-float-btn");
-
-            weatherBar?.RegisterCallback<ClickEvent>(OnWeatherBarClicked);
-            campRoot?.RegisterCallback<ClickEvent>(OnRootClicked);
-
-            UpdatePlayerName();
-            if (SocialService.Instance != null)
-                SocialService.Instance.OnDisplayNameUpdated += OnDisplayNameUpdated;
+            hudWeather?.RegisterCallback<ClickEvent>(OnWeatherClicked);
 
             if (WeatherService.Instance != null)
             {
-                WeatherService.Instance.OnWeatherUpdated += UpdateWeather;
+                WeatherService.Instance.OnWeatherUpdated += UpdateWeatherIcon;
                 WeatherService.Instance.OnForecastUpdated += PopulateForecast;
-                UpdateWeather(WeatherService.Instance.CurrentWeather);
+                UpdateWeatherIcon(WeatherService.Instance.CurrentWeather);
                 if (WeatherService.Instance.Forecast.Count > 0)
                     PopulateForecast();
             }
-
-            if (LocalizationService.Instance != null)
-                LocalizationService.Instance.OnLocaleChanged += OnLocaleChanged;
         }
 
         private void OnDestroy()
         {
             if (WeatherService.Instance != null)
             {
-                WeatherService.Instance.OnWeatherUpdated -= UpdateWeather;
+                WeatherService.Instance.OnWeatherUpdated -= UpdateWeatherIcon;
                 WeatherService.Instance.OnForecastUpdated -= PopulateForecast;
             }
-            if (SocialService.Instance != null)
-                SocialService.Instance.OnDisplayNameUpdated -= OnDisplayNameUpdated;
-            if (LocalizationService.Instance != null)
-                LocalizationService.Instance.OnLocaleChanged -= OnLocaleChanged;
         }
 
-        private void OnLocaleChanged()
+        private void OnWeatherClicked(ClickEvent evt)
         {
-            UpdatePlayerName();
-            if (WeatherService.Instance != null)
-                UpdateWeather(WeatherService.Instance.CurrentWeather);
-            PopulateForecast();
-        }
-
-        private void Update()
-        {
-            if (dateTime != null)
-            {
-                var now = GameTime.Now;
-                dateTime.text = now.ToString("dd MMM  h:mm tt").ToUpper();
-            }
-        }
-
-        private static readonly int BaseFontSize = 52;
-        private static readonly int MinFontSize = 30;
-        // Character count threshold at which we start shrinking
-        private static readonly int ShrinkThreshold = 14;
-
-        private static string TruncateName(string name, int max = 10)
-        {
-            if (string.IsNullOrEmpty(name)) return Loc.Get("ui.label.camper", "Camper");
-            return name.Length > max ? name[..max] : name;
-        }
-
-        private void SetPlayerNameText(string text)
-        {
-            if (playerName == null) return;
-            playerName.text = text;
-
-            // Find the longest line to determine if we need to shrink
-            int maxLineLen = 0;
-            foreach (var line in text.Split('\n'))
-            {
-                if (line.Length > maxLineLen)
-                    maxLineLen = line.Length;
-            }
-
-            if (maxLineLen > ShrinkThreshold)
-            {
-                float scale = (float)ShrinkThreshold / maxLineLen;
-                int size = Mathf.Max(MinFontSize, Mathf.RoundToInt(BaseFontSize * scale));
-                playerName.style.fontSize = size;
-            }
-            else
-            {
-                playerName.style.fontSize = BaseFontSize;
-            }
-        }
-
-        private void UpdatePlayerName()
-        {
-            if (playerName == null) return;
-            var name = SocialSaveManager.Instance?.Data?.displayName;
-            SetPlayerNameText(string.Format(Loc.Get("ui.label.camp_name", "{0}'s Camp"), TruncateName(name)));
-        }
-
-        private void OnDisplayNameUpdated(string newName)
-        {
-            SetPlayerNameText(string.Format(Loc.Get("ui.label.camp_name", "{0}'s Camp"), TruncateName(newName)));
-        }
-
-        public void SetVisitingName(string friendName)
-        {
-            if (playerName == null) return;
-            if (friendName != null)
-                SetPlayerNameText(string.Format(Loc.Get("ui.label.camp_name", "{0}'s Camp"), TruncateName(friendName)));
-            else
-                UpdatePlayerName();
-        }
-
-        private void OnWeatherBarClicked(ClickEvent evt)
-        {
-            if (forecastPanel == null) return;
-            forecastPanel.ToggleInClassList("forecast-visible");
-            bool visible = forecastPanel.ClassListContains("forecast-visible");
-            if (questFloatBtn != null)
-                questFloatBtn.style.display = visible ? DisplayStyle.None : DisplayStyle.Flex;
             evt.StopPropagation();
+            ToggleBloom();
         }
 
-        private void OnRootClicked(ClickEvent evt)
+        public void ToggleBloom()
         {
-            if (forecastPanel == null) return;
-            if (!forecastPanel.ClassListContains("forecast-visible")) return;
+            if (isOpen) CloseBloom();
+            else OpenBloom();
+        }
 
-            var target = evt.target as VisualElement;
-            while (target != null)
-            {
-                if (target == forecastPanel || target == weatherBar) return;
-                target = target.parent;
-            }
+        private void OpenBloom()
+        {
+            if (forecastBloom == null) return;
+            isOpen = true;
+            PopulateForecast();
+            forecastBloom.AddToClassList("bloom-open");
+            bloomDismiss?.AddToClassList("bloom-dismiss-active");
+            if (hudWeatherIcon != null)
+                hudWeatherIcon.style.rotate = new Rotate(180);
+        }
 
-            forecastPanel.RemoveFromClassList("forecast-visible");
-            if (questFloatBtn != null)
-                questFloatBtn.style.display = DisplayStyle.Flex;
+        public void CloseBloom()
+        {
+            if (forecastBloom == null) return;
+            isOpen = false;
+            forecastBloom.RemoveFromClassList("bloom-open");
+            bloomDismiss?.RemoveFromClassList("bloom-dismiss-active");
+            if (hudWeatherIcon != null)
+                hudWeatherIcon.style.rotate = new Rotate(0);
+        }
+
+        private void UpdateWeatherIcon(WeatherData weather)
+        {
+            if (hudWeatherIcon == null) return;
+            var tex = GetWeatherIcon(weather.condition);
+            if (tex != null)
+                hudWeatherIcon.style.backgroundImage = tex;
         }
 
         private void PopulateForecast()
         {
-            if (forecastDays == null) return;
+            if (forecastStats == null || forecastDays == null) return;
+            forecastStats.Clear();
             forecastDays.Clear();
 
-            // Today card
             var weather = WeatherService.Instance?.CurrentWeather ?? default;
-            AddTodayCard(weather);
 
+            // Title
+            if (forecastTitle != null)
+            {
+                var condKey = $"ui.weather.{weather.condition.ToString().ToLower()}";
+                forecastTitle.text = $"{Loc.Get("ui.weather.today", "Today")} \u2014 {Loc.Get(condKey, weather.condition.ToString())}";
+            }
+
+            // Today's stats
+            AddStatRow(forecastStats, Loc.Get("ui.weather.temp", "Temp"), $"{weather.temperature:F0}\u00b0");
+            AddStatRow(forecastStats, Loc.Get("ui.weather.humidity", "Humidity"), $"{weather.humidity:F0}%");
+            AddStatRow(forecastStats, Loc.Get("ui.weather.wind", "Wind"), $"{weather.windSpeed:F1} m/s");
+
+            var moonTex = GetMoonTexture((int)weather.moonPhase);
+            if (moonTex != null)
+                AddStatRow(forecastStats, Loc.Get("ui.weather.moon", "Moon"), "", moonTex);
+
+            // Forecast section label
+            if (forecastSectionLabel != null)
+                forecastSectionLabel.text = Loc.Get("ui.weather.forecast", "Forecast");
+
+            // Future days
             var forecast = WeatherService.Instance?.Forecast;
             if (forecast == null) return;
 
-            // Reuse today's sunrise/sunset for future days (changes ~1 min/day)
-            float sunriseHour = weather.sunriseHour;
-            float sunsetHour = weather.sunsetHour;
-
             foreach (var day in forecast)
             {
-                var card = new VisualElement();
-                card.AddToClassList("forecast-day");
-
-                // Header: day name + icon + condition + moon icon (right-aligned)
-                var header = new VisualElement();
-                header.AddToClassList("forecast-day-header");
+                var row = new VisualElement();
+                row.AddToClassList("forecast-day-row");
 
                 var dayLabelText = Loc.Get($"ui.weather.day_{day.dayLabel.ToLower()}", day.dayLabel);
                 var dayLabel = new Label(dayLabelText.ToUpper());
                 dayLabel.AddToClassList("forecast-day-name");
-                header.Add(dayLabel);
+                row.Add(dayLabel);
 
                 var icon = new VisualElement();
                 icon.AddToClassList("forecast-day-icon");
-                var dayWeatherTex = GetWeatherIcon(day.condition);
-                if (dayWeatherTex != null)
-                    icon.style.backgroundImage = dayWeatherTex;
-                header.Add(icon);
+                var dayTex = GetWeatherIcon(day.condition);
+                if (dayTex != null)
+                    icon.style.backgroundImage = dayTex;
+                row.Add(icon);
 
-                var dayCondKey = $"ui.weather.{day.condition.ToString().ToLower()}";
-                var condLabel = new Label(Loc.Get(dayCondKey, day.condition.ToString()));
-                condLabel.AddToClassList("forecast-day-condition");
-                header.Add(condLabel);
+                var tempLabel = new Label($"{day.tempHigh:F0}\u00b0/{day.tempLow:F0}\u00b0");
+                tempLabel.AddToClassList("forecast-day-temp");
+                row.Add(tempLabel);
 
-                var moonTex = GetMoonTexture((int)day.moonPhase);
-                if (moonTex != null)
-                {
-                    var moonIcon = new VisualElement();
-                    moonIcon.AddToClassList("forecast-day-moon");
-                    moonIcon.style.backgroundImage = moonTex;
-                    header.Add(moonIcon);
-                }
-
-                card.Add(header);
-
-                // Row 1: sunrise, sunset, temp
-                var statsRow1 = new VisualElement();
-                statsRow1.AddToClassList("forecast-stats-row");
-                AddStatCell(statsRow1, FormatHour(sunriseHour), Loc.Get("ui.weather.sunrise", "Sunrise"));
-                AddStatCell(statsRow1, FormatHour(sunsetHour), Loc.Get("ui.weather.sunset", "Sunset"));
-                AddStatCell(statsRow1, $"{day.tempHigh:F0}\u00b0/{day.tempLow:F0}\u00b0", Loc.Get("ui.weather.temp", "Temp"),
-                    TempClass(day.tempHigh));
-                card.Add(statsRow1);
-
-                // Row 2: humidity, wind, cloud
-                var statsRow2 = new VisualElement();
-                statsRow2.AddToClassList("forecast-stats-row");
-                AddStatCell(statsRow2, $"{day.humidity:F0}%", Loc.Get("ui.weather.humidity", "Humidity"),
-                    HumidityClass(day.humidity));
-                AddStatCell(statsRow2, $"{day.windSpeed:F1} m/s", Loc.Get("ui.weather.wind", "Wind"),
-                    WindClass(day.windSpeed));
-                AddStatCell(statsRow2, $"{day.cloudCover:F0}%", Loc.Get("ui.weather.cloud", "Cloud"));
-                card.Add(statsRow2);
-
-                forecastDays.Add(card);
+                forecastDays.Add(row);
             }
         }
 
-        private void AddTodayCard(WeatherData weather)
+        private static void AddStatRow(VisualElement parent, string label, string value, Texture2D iconTex = null)
         {
-            var card = new VisualElement();
-            card.AddToClassList("forecast-day");
-            card.AddToClassList("forecast-today");
-
-            // Header
-            var header = new VisualElement();
-            header.AddToClassList("forecast-day-header");
-
-            var dayLabel = new Label(Loc.Get("ui.weather.today", "TODAY"));
-            dayLabel.AddToClassList("forecast-day-name");
-            header.Add(dayLabel);
-
-            var icon = new VisualElement();
-            icon.AddToClassList("forecast-day-icon");
-            var todayWeatherTex = GetWeatherIcon(weather.condition);
-            if (todayWeatherTex != null)
-                icon.style.backgroundImage = todayWeatherTex;
-            header.Add(icon);
-
-            var todayCondKey = $"ui.weather.{weather.condition.ToString().ToLower()}";
-            var condLabel = new Label(Loc.Get(todayCondKey, weather.condition.ToString()));
-            condLabel.AddToClassList("forecast-day-condition");
-            header.Add(condLabel);
-
-            var moonTex = GetMoonTexture((int)weather.moonPhase);
-            if (moonTex != null)
-            {
-                var moonIcon = new VisualElement();
-                moonIcon.AddToClassList("forecast-day-moon");
-                moonIcon.style.backgroundImage = moonTex;
-                header.Add(moonIcon);
-            }
-
-            card.Add(header);
-
-            // Row 1: sunrise, sunset, temp
-            var row1 = new VisualElement();
-            row1.AddToClassList("forecast-stats-row");
-            AddStatCell(row1, FormatHour(weather.sunriseHour), Loc.Get("ui.weather.sunrise", "Sunrise"));
-            AddStatCell(row1, FormatHour(weather.sunsetHour), Loc.Get("ui.weather.sunset", "Sunset"));
-            AddStatCell(row1, $"{weather.temperature:F0}\u00b0", Loc.Get("ui.weather.temp", "Temp"),
-                TempClass(weather.temperature));
-            card.Add(row1);
-
-            // Row 2: humidity, wind, cloud
-            var row2 = new VisualElement();
-            row2.AddToClassList("forecast-stats-row");
-            AddStatCell(row2, $"{weather.humidity:F0}%", Loc.Get("ui.weather.humidity", "Humidity"),
-                HumidityClass(weather.humidity));
-            AddStatCell(row2, $"{weather.windSpeed:F1} m/s", Loc.Get("ui.weather.wind", "Wind"),
-                WindClass(weather.windSpeed));
-            AddStatCell(row2, $"{weather.cloudCover:F0}%", Loc.Get("ui.weather.cloud", "Cloud"));
-            card.Add(row2);
-
-            forecastDays.Add(card);
-        }
-
-        private static string FormatHour(float hour)
-        {
-            int h = Mathf.Clamp((int)hour, 0, 23);
-            int m = Mathf.Clamp((int)((hour - h) * 60f), 0, 59);
-            bool pm = h >= 12;
-            int display = h % 12;
-            if (display == 0) display = 12;
-            return $"{display}:{m:D2} {(pm ? "PM" : "AM")}";
-        }
-
-        private static string TempClass(float temp)
-        {
-            if (temp >= 35f) return "stat-hot";
-            if (temp <= 5f) return "stat-cold";
-            return null;
-        }
-
-        private static string HumidityClass(float humidity)
-        {
-            if (humidity <= 20f) return "stat-dry";
-            if (humidity >= 85f) return "stat-humid";
-            return null;
-        }
-
-        private static string WindClass(float windSpeed)
-        {
-            if (windSpeed >= 8f) return "stat-windy";
-            return null;
-        }
-
-        private static void AddStatCell(VisualElement parent, string value, string label,
-            string outlierClass = null)
-        {
-            var cell = new VisualElement();
-            cell.AddToClassList("forecast-stat-cell");
-
-            var val = new Label(value);
-            val.AddToClassList("forecast-stat-value");
-            if (outlierClass != null) val.AddToClassList(outlierClass);
-            cell.Add(val);
+            var row = new VisualElement();
+            row.AddToClassList("forecast-stat-row");
 
             var lbl = new Label(label);
             lbl.AddToClassList("forecast-stat-label");
-            cell.Add(lbl);
+            row.Add(lbl);
 
-            parent.Add(cell);
+            if (iconTex != null)
+            {
+                var icon = new VisualElement();
+                icon.style.width = 24;
+                icon.style.height = 24;
+                icon.style.unityBackgroundScaleMode = ScaleMode.ScaleToFit;
+                icon.style.backgroundImage = iconTex;
+                row.Add(icon);
+            }
+            else
+            {
+                var val = new Label(value);
+                val.AddToClassList("forecast-stat-value");
+                row.Add(val);
+            }
+
+            parent.Add(row);
         }
 
-        private void UpdateWeather(WeatherData weather)
+        public void SetVisitingName(string friendName)
         {
-            EnsureStaticIcons();
+            if (hudProfile == null) return;
 
-            var tex = GetWeatherIcon(weather.condition);
-            if (weatherIcon != null && tex != null)
-                weatherIcon.style.backgroundImage = tex;
-            if (weatherConditionLabel != null)
+            if (friendName != null)
             {
-                var condKey = $"ui.weather.{weather.condition.ToString().ToLower()}";
-                weatherConditionLabel.text = Loc.Get(condKey, weather.condition.ToString()).ToUpper();
+                if (visitingNameLabel == null)
+                {
+                    visitingNameLabel = new Label();
+                    visitingNameLabel.name = "hud-visiting-name";
+                    hudProfile.Add(visitingNameLabel);
+                }
+                visitingNameLabel.text = $"{friendName}'s Camp";
+                visitingNameLabel.style.display = DisplayStyle.Flex;
             }
-            if (weatherHumidity != null) weatherHumidity.text = $"{weather.humidity:F0}";
-            if (weatherTemp != null) weatherTemp.text = $"{weather.temperature:F0}\u00b0";
-            if (weatherMoon != null)
+            else
             {
-                var moonTex = GetMoonTexture((int)weather.moonPhase);
-                if (moonTex != null)
-                    weatherMoon.style.backgroundImage = moonTex;
+                if (visitingNameLabel != null)
+                    visitingNameLabel.style.display = DisplayStyle.None;
             }
         }
 
@@ -395,13 +222,6 @@ namespace Garden
             int idx = (int)condition;
             if (idx < 0 || idx >= WeatherConditionKeys.Length) return null;
             return SpriteService.Instance?.GetTexture(WeatherConditionKeys[idx]);
-        }
-
-        private void EnsureStaticIcons()
-        {
-            if (iconsLoaded) return;
-            if (SpriteService.Instance == null) return;
-            iconsLoaded = true;
         }
     }
 }
