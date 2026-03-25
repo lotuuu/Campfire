@@ -8,7 +8,7 @@
     top: 10px;
     flex-direction: row;
     align-items: flex-start;
-    padding: 0 12px;
+    padding: 0 var(--spacing-sm);
     z-index: 100;
     display: none;
 }
@@ -44,13 +44,13 @@
     top: 84px;
     left: 0;
     background-color: rgba(20, 40, 20, 0.75);
-    border-radius: 8px;
-    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-xxs) var(--spacing-xs);
     white-space: nowrap;
 }
 
 #hud-visiting-name Label {
-    font-size: 18px;
+    font-size: var(--font-sm);
     color: var(--color-text-bright);
 }
 
@@ -62,7 +62,7 @@
     border-radius: 28px;
     border-width: 2px;
     border-color: rgba(214, 154, 53, 0.3);
-    padding: 10px 24px;
+    padding: var(--spacing-xs) var(--spacing-md);
 }
 
 .hud-res {
@@ -74,7 +74,7 @@
     width: 36px;
     height: 36px;
     -unity-background-scale-mode: scale-to-fit;
-    margin-right: 6px;
+    margin-right: var(--spacing-xxs);
 }
 
 .hud-res Label {
@@ -98,7 +98,7 @@
     width: 1px;
     height: 24px;
     background-color: rgba(255, 255, 255, 0.1);
-    margin: 0 12px;
+    margin: 0 var(--spacing-sm);
 }
 
 /* ── Weather circle (right) ── */
@@ -112,14 +112,17 @@
     -unity-background-scale-mode: scale-to-fit;
 }
 
-/* ── Bloom card base (collapsed = circle-sized, hidden) ── */
+/* ══════════════════════════════════════════════
+   BLOOM CARD — ANIMATION SYSTEM
+   ══════════════════════════════════════════════ */
+
 .bloom-card {
     position: absolute;
     width: 80px;
     height: 80px;
     border-radius: 40px;
-    background-color: rgba(20, 40, 20, 0.85);
-    border-width: 1px;
+    background-color: rgba(20, 40, 20, 0.92);
+    border-width: 2px;
     border-color: rgba(214, 154, 53, 0.3);
     overflow: hidden;
     opacity: 0;
@@ -144,7 +147,8 @@
     transition-duration: 300ms, 300ms;
     transition-delay: 150ms, 150ms;
     transition-timing-function: ease, ease;
-    padding: 14px;
+    padding: var(--spacing-md);
+    flex-grow: 1;
 }
 
 .bloom-card.bloom-open .bloom-content {
@@ -161,7 +165,7 @@
 .bloom-right.bloom-open {
     width: 90%;
     height: 80%;
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
 }
 
 /* ── Profile bloom: anchored top-left ── */
@@ -173,191 +177,237 @@
 .bloom-left.bloom-open {
     width: 90%;
     height: 85%;
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
 }
 
-/* ── Forecast card content ── */
+/* ══════════════════════════════════════════════
+   FORECAST CARD — WEATHER POPUP CONTENT
+   ══════════════════════════════════════════════ */
+
 .forecast-bloom-title {
     color: rgb(214, 154, 53);
-    font-size: var(--font-md);
+    font-size: var(--font-xl);
     -unity-font-style: bold;
-    margin-bottom: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-sm);
+    border-bottom-width: 2px;
+    border-bottom-color: rgba(214, 154, 53, 0.2);
 }
 
 .forecast-stat-row {
     flex-direction: row;
     justify-content: space-between;
-    padding: 6px 0;
+    align-items: center;
+    padding: var(--spacing-sm) 0;
     border-bottom-width: 1px;
-    border-bottom-color: rgba(255, 255, 255, 0.06);
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+    min-height: 64px;
 }
 
 .forecast-stat-label {
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 22px;
+    color: var(--color-text-dim);
+    font-size: var(--font-md);
 }
 
 .forecast-stat-value {
-    color: rgb(232, 220, 200);
-    font-size: 22px;
+    color: var(--color-text-bright);
+    font-size: var(--font-md);
     -unity-font-style: bold;
 }
 
 .forecast-section-label {
-    font-size: 20px;
-    color: rgba(255, 255, 255, 0.3);
-    margin-top: var(--spacing-sm);
-    margin-bottom: var(--spacing-xs);
+    font-size: var(--font-sm);
+    color: var(--color-text-dim);
+    -unity-font-style: bold;
+    letter-spacing: 2px;
+    margin-top: var(--spacing-lg);
+    margin-bottom: var(--spacing-sm);
 }
 
 .forecast-day-row {
     flex-direction: row;
     align-items: center;
-    padding: 6px 0;
+    padding: var(--spacing-sm) 0;
     border-bottom-width: 1px;
     border-bottom-color: rgba(255, 255, 255, 0.06);
+    min-height: 72px;
 }
 
 .forecast-day-name {
-    font-size: 20px;
-    color: rgba(255, 255, 255, 0.5);
-    width: 50px;
+    font-size: var(--font-sm);
+    color: var(--color-text-dim);
+    width: 100px;
 }
 
 .forecast-day-icon {
-    width: 24px;
-    height: 24px;
+    width: 48px;
+    height: 48px;
     -unity-background-scale-mode: scale-to-fit;
-    margin-right: var(--spacing-xs);
+    margin-right: var(--spacing-sm);
 }
 
 .forecast-day-temp {
-    font-size: 22px;
-    color: rgb(232, 220, 200);
+    font-size: var(--font-md);
+    color: var(--color-text-bright);
+    -unity-font-style: bold;
     margin-left: auto;
 }
 
-/* ── Outlier color classes (kept from Forecast.uss) ── */
+/* ── Outlier color classes ── */
 .stat-hot { color: rgb(255, 110, 60); }
 .stat-cold { color: rgb(100, 175, 235); }
 .stat-dry { color: rgb(230, 145, 55); }
 .stat-humid { color: rgb(100, 175, 235); }
 .stat-windy { color: rgb(200, 210, 220); }
 
-/* ── Profile bloom content ── */
+/* ══════════════════════════════════════════════
+   PROFILE POPUP — SETTINGS & PLAYER INFO
+   ══════════════════════════════════════════════ */
+
+/* ── Section headers ── */
 .profile-section-header {
-    font-size: var(--font-xs);
-    color: rgb(160, 140, 110);
+    font-size: var(--font-sm);
+    color: rgb(214, 154, 53);
     -unity-font-style: bold;
     letter-spacing: 3px;
-    margin-top: var(--spacing-lg);
-    margin-bottom: var(--spacing-sm);
+    margin-top: var(--spacing-xl);
+    margin-bottom: var(--spacing-md);
     padding-bottom: var(--spacing-xs);
-    border-bottom-width: 1px;
-    border-bottom-color: rgba(180, 120, 60, 0.25);
+    border-bottom-width: 2px;
+    border-bottom-color: rgba(214, 154, 53, 0.2);
+}
+
+/* ── Player identity ── */
+#profile-identity {
+    align-items: center;
+    padding: var(--spacing-sm) 0;
+    margin-bottom: var(--spacing-md);
 }
 
 #profile-pic-large {
-    width: 64px;
-    height: 64px;
-    border-radius: 32px;
+    width: 120px;
+    height: 120px;
+    border-radius: 60px;
     -unity-background-scale-mode: scale-to-fit;
     background-color: rgb(60, 95, 45);
-    border-width: 2px;
+    border-width: 3px;
     border-color: rgb(214, 154, 53);
-    margin-bottom: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
 }
 
-#profile-identity {
-    align-items: center;
-    margin-bottom: var(--spacing-sm);
+#profile-identity .unity-text-field {
+    font-size: var(--font-md);
+    min-height: 80px;
 }
 
 #profile-friend-code {
-    font-size: 20px;
+    font-size: var(--font-sm);
     color: var(--color-text-dim);
-    margin-top: var(--spacing-xs);
+    margin-top: var(--spacing-sm);
+}
+
+/* ── Camp stats ── */
+#profile-stats {
+    padding: var(--spacing-sm) 0;
 }
 
 #profile-stats Label {
-    font-size: 22px;
+    font-size: var(--font-md);
     color: var(--color-text);
-    margin-bottom: var(--spacing-xxs);
+    margin-bottom: var(--spacing-xs);
 }
 
 #profile-flame-level {
-    font-size: var(--font-sm);
+    font-size: var(--font-lg);
     color: var(--color-text-accent);
     -unity-font-style: bold;
 }
 
+/* ── Toggle rows (vibration) ── */
 .profile-toggle-row {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: var(--spacing-sm);
-    min-height: 56px;
+    margin-bottom: var(--spacing-md);
+    min-height: 96px;
+    padding: var(--spacing-xs) 0;
 }
 
 .profile-toggle-row Label {
-    color: rgb(160, 140, 110);
-    font-size: 22px;
+    color: var(--color-text);
+    font-size: var(--font-md);
 }
 
+#profile-bloom .unity-toggle .unity-toggle__checkmark {
+    width: 64px;
+    height: 64px;
+    border-radius: var(--radius-sm);
+}
+
+/* ── Slider rows (music, sfx) ── */
 .profile-slider-row {
     flex-direction: row;
     align-items: center;
-    margin-bottom: var(--spacing-sm);
-    min-height: 56px;
+    margin-bottom: var(--spacing-md);
+    min-height: 96px;
+    padding: var(--spacing-xs) 0;
 }
 
 .profile-slider-row Label {
-    color: rgb(160, 140, 110);
-    font-size: 22px;
+    color: var(--color-text);
+    font-size: var(--font-md);
+    min-width: 140px;
 }
 
 .profile-slider-row .unity-base-slider {
     flex-grow: 1;
-    margin: 0 var(--spacing-xs);
-    min-height: 48px;
+    margin: 0 var(--spacing-sm);
+    min-height: 80px;
 }
 
 .profile-slider-row .unity-base-slider .unity-base-slider__dragger {
-    width: 40px;
-    height: 40px;
-    border-radius: 20px;
+    width: 64px;
+    height: 64px;
+    border-radius: 32px;
     background-color: rgb(255, 170, 60);
 }
 
 .profile-slider-row .unity-base-slider .unity-base-slider__tracker {
-    height: 8px;
+    height: 12px;
     background-color: rgba(180, 120, 60, 0.3);
-    border-radius: 4px;
-}
-
-#profile-bloom .unity-toggle .unity-toggle__checkmark {
-    width: 40px;
-    height: 40px;
     border-radius: 6px;
 }
 
-#profile-account Label {
-    font-size: 20px;
-    color: var(--color-text-dim);
-    margin-bottom: var(--spacing-xxs);
+/* ── Language dropdown ── */
+#profile-bloom .unity-popup-field {
+    min-height: 80px;
+    font-size: var(--font-md);
+    margin-bottom: var(--spacing-md);
 }
 
-/* Delete button in profile */
+/* ── Account info ── */
+#profile-account {
+    padding: var(--spacing-xs) 0;
+}
+
+#profile-account Label {
+    font-size: var(--font-sm);
+    color: var(--color-text-dim);
+    margin-bottom: var(--spacing-xs);
+    padding: var(--spacing-xxs) 0;
+}
+
+/* ── Danger zone ── */
 #profile-delete-btn {
-    min-height: 56px;
+    min-height: 96px;
     background-color: rgba(140, 40, 30, 0.7);
-    border-width: 1px;
+    border-width: 2px;
     border-color: rgba(200, 80, 60, 0.4);
     border-radius: var(--radius-sm);
     color: rgb(255, 220, 200);
-    font-size: 22px;
+    font-size: var(--font-md);
     -unity-text-align: middle-center;
-    margin-top: var(--spacing-sm);
+    margin-top: var(--spacing-md);
 }
 
 #profile-delete-btn:hover {
@@ -367,52 +417,63 @@
 #profile-confirm-row {
     flex-direction: row;
     align-items: center;
-    margin-top: var(--spacing-xs);
+    margin-top: var(--spacing-sm);
 }
 
 #profile-confirm-row Label {
     flex-grow: 1;
     color: rgb(220, 90, 70);
-    font-size: 22px;
+    font-size: var(--font-md);
     -unity-font-style: bold;
 }
 
 #profile-confirm-cancel {
-    min-height: 48px;
-    min-width: 100px;
+    min-height: 80px;
+    min-width: 180px;
     background-color: rgba(60, 40, 20, 0.6);
-    border-width: 1px;
+    border-width: 2px;
     border-color: rgba(140, 100, 50, 0.3);
     border-radius: var(--radius-sm);
     color: rgb(220, 200, 160);
-    font-size: 22px;
+    font-size: var(--font-md);
     -unity-text-align: middle-center;
-    margin-right: var(--spacing-xs);
+    margin-right: var(--spacing-sm);
+}
+
+#profile-confirm-cancel:hover {
+    background-color: rgba(80, 50, 25, 0.7);
 }
 
 #profile-confirm-delete {
-    min-height: 48px;
-    min-width: 100px;
+    min-height: 80px;
+    min-width: 180px;
     background-color: rgba(180, 40, 30, 0.8);
-    border-width: 1px;
+    border-width: 2px;
     border-color: rgba(220, 80, 60, 0.5);
     border-radius: var(--radius-sm);
     color: rgb(255, 220, 200);
-    font-size: 22px;
+    font-size: var(--font-md);
     -unity-font-style: bold;
     -unity-text-align: middle-center;
 }
 
+#profile-confirm-delete:hover {
+    background-color: rgba(200, 50, 35, 0.9);
+}
+
 #profile-debug-btn {
-    min-height: 48px;
-    margin-top: var(--spacing-sm);
+    min-height: 80px;
+    margin-top: var(--spacing-md);
     background-color: transparent;
     border-width: 0;
     color: var(--color-text-dim);
-    font-size: 20px;
+    font-size: var(--font-sm);
 }
 
-/* ── Bloom dismiss backdrop ── */
+/* ══════════════════════════════════════════════
+   BLOOM DISMISS BACKDROP
+   ══════════════════════════════════════════════ */
+
 #bloom-dismiss {
     display: none;
     position: absolute;
