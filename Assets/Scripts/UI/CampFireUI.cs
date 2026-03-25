@@ -107,6 +107,20 @@ namespace Garden
             var transitionWipe = GetComponent<TransitionWipe>();
             transitionWipe?.Initialize(root);
 
+            // Coordinate bloom popups — opening one closes the other
+            var hudProfile = root.Q("hud-profile");
+            hudProfile?.RegisterCallback<ClickEvent>(_ =>
+            {
+                if (weatherBar != null && weatherBar.IsOpen)
+                    weatherBar.CloseBloom();
+            }, TrickleDown.TrickleDown);
+
+            var hudWeather = root.Q("hud-weather");
+            hudWeather?.RegisterCallback<ClickEvent>(_ =>
+            {
+                profilePopup?.CloseBloom();
+            }, TrickleDown.TrickleDown);
+
             if (LocalizationService.Instance != null)
                 LocalizationService.Instance.OnLocaleChanged += OnLocaleChanged;
 
