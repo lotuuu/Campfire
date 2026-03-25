@@ -394,6 +394,21 @@
 
     <!-- Floating HUD (outside camp-root so paddingTop doesn't affect absolute positioning) -->
     <ui:VisualElement name="floating-hud" picking-mode="Ignore">
+        <!-- Resource panel (renders behind profile circle) -->
+        <ui:VisualElement name="hud-resources" picking-mode="Ignore">
+            <ui:VisualElement class="hud-res-pill" picking-mode="Ignore">
+                <ui:VisualElement name="hud-mana-icon" class="hud-res-icon" picking-mode="Ignore" />
+                <ui:Label name="hud-mana" text="0" picking-mode="Ignore" />
+            </ui:VisualElement>
+            <ui:VisualElement class="hud-res-pill" picking-mode="Ignore">
+                <ui:VisualElement name="hud-water-icon" class="hud-res-icon" picking-mode="Ignore" />
+                <ui:Label name="hud-water" text="0" picking-mode="Ignore" />
+            </ui:VisualElement>
+            <ui:VisualElement class="hud-res-pill" picking-mode="Ignore">
+                <ui:VisualElement name="hud-mallum-icon" class="hud-res-icon" picking-mode="Ignore" />
+                <ui:Label name="hud-mallum" text="0/0" picking-mode="Ignore" />
+            </ui:VisualElement>
+        </ui:VisualElement>
         <!-- Top row: profile circle | weather bar | menu circle -->
         <ui:VisualElement name="hud-top-row" picking-mode="Ignore">
             <ui:VisualElement name="hud-profile" class="hud-circle hud-left">
@@ -410,21 +425,6 @@
             </ui:VisualElement>
             <ui:VisualElement name="hud-menu" class="hud-circle hud-right">
                 <ui:VisualElement name="hud-menu-icon" picking-mode="Ignore" />
-            </ui:VisualElement>
-        </ui:VisualElement>
-        <!-- Resource pills stacked below profile -->
-        <ui:VisualElement name="hud-resources" picking-mode="Ignore">
-            <ui:VisualElement class="hud-res-pill" picking-mode="Ignore">
-                <ui:VisualElement name="hud-mana-icon" class="hud-res-icon" picking-mode="Ignore" />
-                <ui:Label name="hud-mana" text="0" picking-mode="Ignore" />
-            </ui:VisualElement>
-            <ui:VisualElement class="hud-res-pill" picking-mode="Ignore">
-                <ui:VisualElement name="hud-water-icon" class="hud-res-icon" picking-mode="Ignore" />
-                <ui:Label name="hud-water" text="0" picking-mode="Ignore" />
-            </ui:VisualElement>
-            <ui:VisualElement class="hud-res-pill" picking-mode="Ignore">
-                <ui:VisualElement name="hud-mallum-icon" class="hud-res-icon" picking-mode="Ignore" />
-                <ui:Label name="hud-mallum" text="0/0" picking-mode="Ignore" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
