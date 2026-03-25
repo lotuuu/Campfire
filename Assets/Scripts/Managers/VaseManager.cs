@@ -190,6 +190,7 @@ namespace Garden
 
         public float GetFillProgress(int vaseIndex)
         {
+            if (ConfigService.Instance?.VaseConfig == null) return 0f;
             var data = SaveManager.Instance.Data;
             if (vaseIndex < 0 || vaseIndex >= data.vases.Count) return 0f;
             var vase = data.vases[vaseIndex];
