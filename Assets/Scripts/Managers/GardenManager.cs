@@ -206,17 +206,17 @@ namespace Garden
             else data.inventory.Add(new InventoryItem { itemKey = itemKey, count = count });
         }
 
-        public async Task<bool> Fertilize(int gardenIndex)
+        public Task<bool> Fertilize(int gardenIndex)
     {
         var data = SaveManager.Instance.Data;
-        if (gardenIndex < 0 || gardenIndex >= data.gardens.Count) return false;
+        if (gardenIndex < 0 || gardenIndex >= data.gardens.Count) return Task.FromResult(false);
         var garden = data.gardens[gardenIndex];
-        if (!garden.mature) return false;
-        if (garden.fertilized) return false;
+        if (!garden.mature) return Task.FromResult(false);
+        if (garden.fertilized) return Task.FromResult(false);
 
         // Check inventory
         int fertCount = data.inventory.Find(i => i.itemKey == "fertilizer")?.count ?? 0;
-        if (!CurrencyManager.FreeMode && fertCount <= 0) return false;
+        if (!CurrencyManager.FreeMode && fertCount <= 0) return Task.FromResult(false);
 
         // Consume locally
         if (!CurrencyManager.FreeMode)
@@ -237,7 +237,7 @@ namespace Garden
             _ = GameService.Instance.OptimisticAction(GameService.Instance.FertilizeGarden(garden.serverId), "FertilizeGarden");
         }
 
-        return true;
+        return Task.FromResult(true);
     }
 
     // ── Garden Building ──────────────────────────────────────────
@@ -247,24 +247,24 @@ namespace Garden
             return ConfigService.Instance?.GetGardenCost(SaveManager.Instance.Data.gardens.Count);
         }
 
-        public async Task<bool> CraftEmptyGarden(int gridX, int gridY)
+        public Task<bool> CraftEmptyGarden(int gridX, int gridY)
         {
-            if (FlameManager.Instance.Level < GardenUnlockLevel) return false;
-            if (!FlameManager.Instance.CanPlaceEntity) return false;
+            if (FlameManager.Instance.Level < GardenUnlockLevel) return Task.FromResult(false);
+            if (!FlameManager.Instance.CanPlaceEntity) return Task.FromResult(false);
 
             var data = SaveManager.Instance.Data;
             var cost = GetNextGardenCost();
-            if (cost == null) return false;
+            if (cost == null) return Task.FromResult(false);
 
-            if (!CurrencyManager.Instance.CanAffordMana(cost.manaCost)) return false;
-            if (!MallumManager.CanAffordHarvests(data.inventory, cost.harvestCosts)) return false;
+            if (!CurrencyManager.Instance.CanAffordMana(cost.manaCost)) return Task.FromResult(false);
+            if (!MallumManager.CanAffordHarvests(data.inventory, cost.harvestCosts)) return Task.FromResult(false);
 
             // No dedicated craft-garden endpoint exists yet, so we require online
             // and rely on the resync after local creation to sync the serverId.
             if (GameService.Instance == null || !GameService.Instance.IsOnline)
             {
                 CampFireUI.Instance?.ShowToast("Could not reach server");
-                return false;
+                return Task.FromResult(false);
             }
 
             CurrencyManager.Instance.SpendMana(cost.manaCost);
@@ -293,7 +293,7 @@ namespace Garden
             // (no dedicated craft endpoint — server creates garden during resync)
             _ = GameService.Instance.ResyncFullState();
 
-            return true;
+            return Task.FromResult(true);
         }
 
         // ── Helpers ─────────────────────────────────────────────────
