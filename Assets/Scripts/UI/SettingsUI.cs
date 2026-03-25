@@ -20,6 +20,8 @@ namespace Garden
         private Button _confirmCancel;
         private Button _confirmDelete;
         private DropdownField _langDropdown;
+        private Toggle _vibrationToggle;
+        private Label _labelVibration;
 
         private Label _headerLanguage, _headerAudio, _headerAccount, _headerDanger;
         private Label _labelMusic, _labelSfx, _labelPlayer, _labelServer, _labelVersion, _labelConfirm;
@@ -88,6 +90,22 @@ namespace Garden
             _labelConfirm = root.Q<Label>("settings-label-confirm");
             RefreshLabels();
 
+            // Vibration
+            _vibrationToggle = root.Q<Toggle>("vibration-toggle");
+            _labelVibration = root.Q<Label>("settings-label-vibration");
+            if (_vibrationToggle != null && data != null)
+            {
+                _vibrationToggle.value = data.vibrationEnabled;
+                _vibrationToggle.RegisterValueChangedCallback(evt =>
+                {
+                    if (SaveManager.Instance?.Data != null)
+                    {
+                        SaveManager.Instance.Data.vibrationEnabled = evt.newValue;
+                        SaveManager.Instance.Save();
+                    }
+                });
+            }
+
             // Language
             _langDropdown = root.Q<DropdownField>("language-dropdown");
             if (_langDropdown != null)
@@ -143,6 +161,7 @@ namespace Garden
 
         private void RefreshLabels()
         {
+            if (_labelVibration != null) _labelVibration.text = Loc.Get("ui.settings.vibration", "Vibration");
             if (_headerLanguage != null) _headerLanguage.text = Loc.Get("ui.settings.language", "LANGUAGE");
             if (_headerAudio != null) _headerAudio.text = Loc.Get("ui.settings.audio", "AUDIO");
             if (_headerAccount != null) _headerAccount.text = Loc.Get("ui.settings.account", "ACCOUNT");

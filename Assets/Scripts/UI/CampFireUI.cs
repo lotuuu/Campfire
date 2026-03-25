@@ -43,6 +43,8 @@ namespace Garden
 
         private Label toastLabel;
         private IVisualElementScheduledItem _toastHide;
+        private VisualElement actionSpinner;
+        private VisualElement disconnectOverlay;
 
         // Deferred icon loading
         private Button settingsBtn;
@@ -127,6 +129,11 @@ namespace Garden
             settingsPanel = root.Q("settings-panel");
 
             toastLabel = root.Q<Label>("toast-label");
+            actionSpinner = root.Q("action-spinner");
+            disconnectOverlay = root.Q("disconnect-overlay");
+            var reconnectBtn = root.Q<Button>("disconnect-reconnect-btn");
+            if (reconnectBtn != null)
+                reconnectBtn.clicked += () => SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
 
             // Patch all ScrollViews: kill momentum on taps so buttons don't cause drift
             foreach (var sv in overlayBody.Query<ScrollView>().ToList())
@@ -566,6 +573,26 @@ namespace Garden
             _toastHide = toastLabel.schedule.Execute(() =>
                 toastLabel.style.display = DisplayStyle.None
             ).StartingIn(2000);
+        }
+
+        public void ShowActionSpinner()
+        {
+            if (actionSpinner == null) return;
+            actionSpinner.style.display = DisplayStyle.Flex;
+            actionSpinner.BringToFront();
+        }
+
+        public void HideActionSpinner()
+        {
+            if (actionSpinner == null) return;
+            actionSpinner.style.display = DisplayStyle.None;
+        }
+
+        public void ShowDisconnected()
+        {
+            if (disconnectOverlay == null) return;
+            disconnectOverlay.style.display = DisplayStyle.Flex;
+            disconnectOverlay.BringToFront();
         }
 
         public void CloseOverlay(bool silent = false)

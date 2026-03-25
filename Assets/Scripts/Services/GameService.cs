@@ -37,6 +37,57 @@ namespace Garden
             if (Instance == this) Instance = null;
         }
 
+        // ── Connection Loss ──
+
+        /// <summary>
+        /// Called by any service when a network request fails with a connection error.
+        /// Triggers a resync attempt; if resync also fails, shows the disconnect overlay.
+        /// </summary>
+        public void NotifyConnectionLost()
+        {
+            if (!IsOnline) return;
+            Debug.LogWarning("[GameService] Connection lost detected — attempting resync");
+            _ = ResyncFullState();
+        }
+
+        // ── Optimistic Action ──
+
+        private const int OptimisticTimeoutSeconds = 5;
+
+        /// <summary>
+        /// Fire-and-forget wrapper for optimistic server calls. If the call times out
+        /// or fails, shows a toast and resyncs full state from the server.
+        /// </summary>
+        public async Task OptimisticAction<T>(Task<T> serverCall, string actionName)
+        {
+            try
+            {
+                var timeoutTask = Task.Delay(TimeSpan.FromSeconds(OptimisticTimeoutSeconds));
+                var completed = await Task.WhenAny(serverCall, timeoutTask);
+
+                if (completed == timeoutTask)
+                {
+                    Debug.LogWarning($"[GameService] {actionName} timed out after {OptimisticTimeoutSeconds}s");
+                    CampFireUI.Instance?.ShowToast("Reconnecting...");
+                    await ResyncFullState();
+                    return;
+                }
+
+                var result = await serverCall;
+                if (result == null)
+                {
+                    CampFireUI.Instance?.ShowToast("Reconnecting...");
+                    await ResyncFullState();
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[GameService] {actionName} failed: {e.Message}");
+                CampFireUI.Instance?.ShowToast("Reconnecting...");
+                await ResyncFullState();
+            }
+        }
+
         // ── Resync ──
 
         /// <summary>
@@ -76,11 +127,13 @@ namespace Garden
                 else
                 {
                     Debug.LogWarning($"[GameService] Resync failed (HTTP {req.responseCode})");
+                    CampFireUI.Instance?.ShowDisconnected();
                 }
             }
             catch (Exception e)
             {
                 Debug.LogWarning($"[GameService] Resync failed: {e.Message}");
+                CampFireUI.Instance?.ShowDisconnected();
             }
             finally
             {

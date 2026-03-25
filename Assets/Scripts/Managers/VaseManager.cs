@@ -69,7 +69,7 @@ namespace Garden
                     // Notify server
                     if (GameService.Instance != null && GameService.Instance.IsOnline && vase.serverId > 0)
                     {
-                        _ = NotifyServerOrResync(GameService.Instance.CheckVase(vase.serverId));
+                        _ = GameService.Instance.OptimisticAction(GameService.Instance.CheckVase(vase.serverId), "CheckVase");
                     }
                 }
             }
@@ -95,7 +95,7 @@ namespace Garden
 
             // Notify server
             if (GameService.Instance != null && GameService.Instance.IsOnline && vase.serverId > 0)
-                _ = NotifyServerOrResync(GameService.Instance.InstantFinishVase(vase.serverId));
+                _ = GameService.Instance.OptimisticAction(GameService.Instance.InstantFinishVase(vase.serverId), "InstantFinishVase");
 
             return true;
         }
@@ -115,18 +115,12 @@ namespace Garden
             // Notify server
             if (GameService.Instance != null && GameService.Instance.IsOnline && vase.serverId > 0)
             {
-                _ = NotifyServerOrResync(GameService.Instance.FillVase(vase.serverId));
+                _ = GameService.Instance.OptimisticAction(GameService.Instance.FillVase(vase.serverId), "FillVase");
             }
 
             return true;
         }
 
-        private static async Task NotifyServerOrResync<T>(Task<T> serverCall)
-        {
-            var result = await serverCall;
-            if (result == null)
-                await GameService.Instance.ResyncFullState();
-        }
 
         public BuildingCost GetNextVaseCost()
         {
@@ -134,7 +128,7 @@ namespace Garden
             return ConfigService.Instance?.GetVaseCost(SaveManager.Instance.Data.vases.Count - 1);
         }
 
-        public bool CraftVase(int gridX, int gridY)
+        public async Task<bool> CraftVase(int gridX, int gridY)
         {
             if (FlameManager.Instance.Level < VaseUnlockLevel) return false;
             if (!FlameManager.Instance.CanPlaceEntity) return false;
@@ -145,6 +139,19 @@ namespace Garden
 
             if (!CurrencyManager.Instance.CanAffordMana(cost.manaCost)) return false;
             if (!MallumManager.CanAffordHarvests(data.inventory, cost.harvestCosts)) return false;
+
+            if (GameService.Instance == null || !GameService.Instance.IsOnline)
+            {
+                CampFireUI.Instance?.ShowToast("Could not reach server");
+                return false;
+            }
+
+            var result = await GameService.Instance.CraftVase(gridX, gridY);
+            if (result == null)
+            {
+                CampFireUI.Instance?.ShowToast("Could not reach server");
+                return false;
+            }
 
             CurrencyManager.Instance.SpendMana(cost.manaCost);
 
@@ -157,38 +164,14 @@ namespace Garden
                 if (entry.count <= 0) data.inventory.Remove(entry);
             }
 
-            data.vases.Add(new VaseSave { capacity = BaseCapacity, state = VaseState.Empty, gridX = gridX, gridY = gridY });
+            data.vases.Add(new VaseSave { capacity = BaseCapacity, state = VaseState.Empty, gridX = gridX, gridY = gridY, serverId = result.id });
             SaveManager.Instance.Save();
-            int newIndex = data.vases.Count - 1;
             OnVasesChanged?.Invoke();
             AudioManager.Instance?.PlaySFX("vase_craft");
-
-            // Notify server
-            if (GameService.Instance != null && GameService.Instance.IsOnline)
-            {
-                _ = NotifyServerCraftVase(newIndex, gridX, gridY);
-            }
 
             return true;
         }
 
-        private async Task NotifyServerCraftVase(int vaseIndex, int gridX, int gridY)
-        {
-            var result = await GameService.Instance.CraftVase(gridX, gridY);
-            if (result != null)
-            {
-                var data = SaveManager.Instance.Data;
-                if (vaseIndex < data.vases.Count)
-                {
-                    data.vases[vaseIndex].serverId = result.id;
-                    SaveManager.Instance.Save();
-                }
-            }
-            else
-            {
-                await GameService.Instance.ResyncFullState();
-            }
-        }
 
         public float GetRemainingSeconds(int vaseIndex)
         {

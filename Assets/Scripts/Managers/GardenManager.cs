@@ -108,7 +108,7 @@ namespace Garden
             // Notify server
             if (GameService.Instance != null && GameService.Instance.IsOnline)
             {
-                _ = NotifyServerOrResync(GameService.Instance.PlantGarden(plantName, garden.gridX, garden.gridY));
+                _ = GameService.Instance.OptimisticAction(GameService.Instance.PlantGarden(plantName, garden.gridX, garden.gridY), "PlantGarden");
             }
 
             return true;
@@ -174,6 +174,7 @@ namespace Garden
 
                 if (CheckYieldReady(garden, plantData.yieldIntervalHours, now))
                 {
+                    HapticService.Vibrate();
                     int amount = plantData.yieldAmount;
                     if (garden.fertilized)
                     {
@@ -190,19 +191,12 @@ namespace Garden
                     // Notify server
                     if (GameService.Instance != null && GameService.Instance.IsOnline && garden.serverId > 0)
                     {
-                        _ = NotifyServerOrResync(GameService.Instance.CollectGarden(garden.serverId));
+                        _ = GameService.Instance.OptimisticAction(GameService.Instance.CollectGarden(garden.serverId), "CollectGarden");
                     }
                 }
             }
 
             if (changed) SaveManager.Instance.Save();
-        }
-
-        private static async Task NotifyServerOrResync<T>(Task<T> serverCall)
-        {
-            var result = await serverCall;
-            if (result == null)
-                await GameService.Instance.ResyncFullState();
         }
 
         private static void AddItem(SaveData data, string itemKey, int count)
@@ -240,9 +234,7 @@ namespace Garden
         // Notify server
         if (GameService.Instance != null && GameService.Instance.IsOnline && garden.serverId > 0)
         {
-            var result = await GameService.Instance.FertilizeGarden(garden.serverId);
-            if (result == null)
-                await GameService.Instance.ResyncFullState();
+            _ = GameService.Instance.OptimisticAction(GameService.Instance.FertilizeGarden(garden.serverId), "FertilizeGarden");
         }
 
         return true;
@@ -255,7 +247,7 @@ namespace Garden
             return ConfigService.Instance?.GetGardenCost(SaveManager.Instance.Data.gardens.Count);
         }
 
-        public bool CraftEmptyGarden(int gridX, int gridY)
+        public async Task<bool> CraftEmptyGarden(int gridX, int gridY)
         {
             if (FlameManager.Instance.Level < GardenUnlockLevel) return false;
             if (!FlameManager.Instance.CanPlaceEntity) return false;
@@ -266,6 +258,14 @@ namespace Garden
 
             if (!CurrencyManager.Instance.CanAffordMana(cost.manaCost)) return false;
             if (!MallumManager.CanAffordHarvests(data.inventory, cost.harvestCosts)) return false;
+
+            // No dedicated craft-garden endpoint exists yet, so we require online
+            // and rely on the resync after local creation to sync the serverId.
+            if (GameService.Instance == null || !GameService.Instance.IsOnline)
+            {
+                CampFireUI.Instance?.ShowToast("Could not reach server");
+                return false;
+            }
 
             CurrencyManager.Instance.SpendMana(cost.manaCost);
 
@@ -289,20 +289,11 @@ namespace Garden
             OnGardenChanged?.Invoke(newIndex);
             AudioManager.Instance?.PlaySFX("garden_craft");
 
-            // Notify server
-            if (GameService.Instance != null && GameService.Instance.IsOnline)
-            {
-                _ = NotifyServerCraftGarden(newIndex, gridX, gridY);
-            }
+            // Resync to pick up the server-assigned garden ID
+            // (no dedicated craft endpoint — server creates garden during resync)
+            _ = GameService.Instance.ResyncFullState();
 
             return true;
-        }
-
-        private async Task NotifyServerCraftGarden(int gardenIndex, int gridX, int gridY)
-        {
-            // Server creates the garden via the plant endpoint; craft is plant with empty name
-            // For now, resync to pick up the server-assigned ID
-            await GameService.Instance.ResyncFullState();
         }
 
         // ── Helpers ─────────────────────────────────────────────────

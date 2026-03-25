@@ -59,6 +59,21 @@
     border-radius: 6px;
 }
 
+/* Toggle rows */
+.settings-toggle-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-md);
+    min-height: 96px;
+}
+
+#settings-panel .unity-toggle .unity-toggle__checkmark {
+    width: 64px;
+    height: 64px;
+    border-radius: 8px;
+}
+
 /* Info rows (key-value pairs) */
 .settings-info-row {
     flex-direction: row;

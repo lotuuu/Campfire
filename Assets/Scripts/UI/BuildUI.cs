@@ -135,9 +135,11 @@ namespace Garden
                 var recipe = FlameManager.Instance.GetUpgradeRecipe();
                 newCards.Add(BuildCardHelper.CreateBuildCard(
                     Loc.Get("ui.build.flame_name", "Upgrade Flame"), Loc.Get("ui.build.flame_desc", "Expand your camp"), "ui/buildings/flame", null,
-                    BuildCardHelper.FromFlameRecipe(recipe), "", flameAllowed, flameAllowed, () =>
+                    BuildCardHelper.FromFlameRecipe(recipe), "", flameAllowed, flameAllowed, async () =>
                     {
-                        FlameManager.Instance.UpgradeFlame();
+                        CampFireUI.Instance?.ShowActionSpinner();
+                        await FlameManager.Instance.UpgradeFlame();
+                        CampFireUI.Instance?.HideActionSpinner();
                         Refresh();
                     },
                     null));

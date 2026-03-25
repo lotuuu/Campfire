@@ -70,40 +70,38 @@ namespace Garden
             return CanAffordUpgrade(recipe, SaveManager.Instance.Data.inventory);
         }
 
-        public bool UpgradeFlame()
+        public async Task<bool> UpgradeFlame()
         {
             var recipe = Config?.GetUpgradeRecipe(Level);
             if (recipe == null) return false;
             if (!CanAffordUpgrade(recipe, SaveManager.Instance.Data.inventory)) return false;
-            ConsumeIngredients(recipe, SaveManager.Instance.Data.inventory);
-            SaveManager.Instance.Data.flameLevel++;
-            SaveManager.Instance.Save();
 
             // Build items list for server
             var items = new List<SpendItemEntry>();
             foreach (var ing in recipe.ingredients)
                 items.Add(new SpendItemEntry { item_key = ing.itemKey, count = ing.count });
 
-            if (GameService.Instance != null && GameService.Instance.IsOnline)
+            // Server-first: call server to upgrade flame
+            if (GameService.Instance == null || !GameService.Instance.IsOnline)
             {
-                _ = NotifyServerOrResync(GameService.Instance.UpgradeFlame(items, CurrencyManager.FreeMode));
+                CampFireUI.Instance?.ShowToast("Could not reach server");
+                return false;
             }
-            else if (EconomyService.Instance != null)
+
+            var result = await GameService.Instance.UpgradeFlame(items, CurrencyManager.FreeMode);
+            if (result == null)
             {
-                var req = new UpgradeFlameRequest { items = items, freeMode = CurrencyManager.FreeMode };
-                EconomyService.Instance.Enqueue("upgrade-flame", JsonUtility.ToJson(req));
+                CampFireUI.Instance?.ShowToast("Could not reach server");
+                return false;
             }
+
+            ConsumeIngredients(recipe, SaveManager.Instance.Data.inventory);
+            SaveManager.Instance.Data.flameLevel++;
+            SaveManager.Instance.Save();
 
             OnFlameUpgraded?.Invoke();
             AudioManager.Instance?.PlaySFX("flame_upgrade");
             return true;
-        }
-
-        private static async Task NotifyServerOrResync<T>(Task<T> serverCall)
-        {
-            var result = await serverCall;
-            if (result == null)
-                await GameService.Instance.ResyncFullState();
         }
 
         public static bool CanAffordUpgrade(FlameUpgradeRecipe recipe, List<InventoryItem> items)

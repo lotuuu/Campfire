@@ -165,7 +165,7 @@ namespace Garden
             return ConfigService.Instance?.GetPlotCost(SaveManager.Instance.Data.plots.Count - 1);
         }
 
-        public bool CraftPlot(int gridX, int gridY)
+        public async Task<bool> CraftPlot(int gridX, int gridY)
         {
             if (!FlameManager.Instance.CanPlaceEntity) return false;
 
@@ -176,6 +176,21 @@ namespace Garden
             if (!CurrencyManager.Instance.CanAffordMana(cost.manaCost)) return false;
             if (!MallumManager.CanAffordHarvests(data.inventory, cost.harvestCosts)) return false;
 
+            // Server-first: call server before spending resources locally
+            if (GameService.Instance == null || !GameService.Instance.IsOnline)
+            {
+                CampFireUI.Instance?.ShowToast("Could not reach server");
+                return false;
+            }
+
+            var result = await GameService.Instance.CraftPlot(gridX, gridY);
+            if (result == null)
+            {
+                CampFireUI.Instance?.ShowToast("Could not reach server");
+                return false;
+            }
+
+            // Server confirmed — spend resources locally
             CurrencyManager.Instance.SpendMana(cost.manaCost);
 
             if (!CurrencyManager.FreeMode)
@@ -187,51 +202,13 @@ namespace Garden
                 if (entry.count <= 0) data.inventory.Remove(entry);
             }
 
-            if (EconomyService.Instance != null && !CurrencyManager.FreeMode
-                && !(GameService.Instance != null && GameService.Instance.IsOnline))
-            {
-                foreach (var hc in cost.harvestCosts)
-                {
-                    var spendItems = new SpendItemsRequest
-                    {
-                        items = new List<SpendItemEntry> { new SpendItemEntry { item_key = hc.itemKey, count = hc.count } },
-                        freeMode = CurrencyManager.FreeMode
-                    };
-                    EconomyService.Instance.Enqueue("spend-items", JsonUtility.ToJson(spendItems));
-                }
-            }
-
-            data.plots.Add(new PlotSave { state = PlotState.Empty, gridX = gridX, gridY = gridY });
+            data.plots.Add(new PlotSave { state = PlotState.Empty, gridX = gridX, gridY = gridY, serverId = result.id });
             SaveManager.Instance.Save();
             int newIndex = data.plots.Count - 1;
             OnPlotChanged?.Invoke(newIndex);
             AudioManager.Instance?.PlaySFX("plot_craft");
 
-            // Notify server
-            if (GameService.Instance != null && GameService.Instance.IsOnline)
-            {
-                _ = NotifyServerCraftPlot(newIndex, gridX, gridY);
-            }
-
             return true;
-        }
-
-        private async Task NotifyServerCraftPlot(int plotIndex, int gridX, int gridY)
-        {
-            var result = await GameService.Instance.CraftPlot(gridX, gridY);
-            if (result != null)
-            {
-                var data = SaveManager.Instance.Data;
-                if (plotIndex < data.plots.Count)
-                {
-                    data.plots[plotIndex].serverId = result.id;
-                    SaveManager.Instance.Save();
-                }
-            }
-            else
-            {
-                await GameService.Instance.ResyncFullState();
-            }
         }
 
         public bool Plant(int plotIndex, string seedItemKey)
@@ -281,7 +258,7 @@ namespace Garden
             // Notify server
             if (GameService.Instance != null && GameService.Instance.IsOnline && plot.serverId > 0)
             {
-                _ = NotifyServerOrResync(GameService.Instance.PlantSeed(plot.serverId, seedItemKey));
+                _ = GameService.Instance.OptimisticAction(GameService.Instance.PlantSeed(plot.serverId, seedItemKey), "PlantSeed");
             }
 
             return true;
@@ -322,7 +299,7 @@ namespace Garden
             // Notify server with the vase that actually supplied the water
             if (GameService.Instance != null && GameService.Instance.IsOnline && plot.serverId > 0
                 && sourceVaseServerId > 0)
-                _ = NotifyServerOrResync(GameService.Instance.WaterPlot(plot.serverId, sourceVaseServerId));
+                _ = GameService.Instance.OptimisticAction(GameService.Instance.WaterPlot(plot.serverId, sourceVaseServerId), "WaterPlot");
 
             return true;
         }
@@ -496,7 +473,7 @@ namespace Garden
 
             // Await server instant finish so the plot is mature server-side before harvest
             if (GameService.Instance != null && GameService.Instance.IsOnline && plot.serverId > 0)
-                await NotifyServerOrResync(GameService.Instance.InstantFinishPlot(plot.serverId));
+                await GameService.Instance.OptimisticAction(GameService.Instance.InstantFinishPlot(plot.serverId), "InstantFinishPlot");
 
             return true;
         }
@@ -725,6 +702,7 @@ namespace Garden
                     plot.state = PlotState.Mature;
                     changed = true;
                     OnPlotChanged?.Invoke(i);
+                    HapticService.Vibrate();
 
                     // Pre-fetch harvest preview from server so it's ready when the player taps
                     if (plot.serverId > 0 && GameService.Instance != null && GameService.Instance.IsOnline)
@@ -741,13 +719,6 @@ namespace Garden
                 existing.count += count;
             else
                 data.inventory.Add(new InventoryItem { itemKey = itemKey, count = count });
-        }
-
-        private static async Task NotifyServerOrResync<T>(Task<T> serverCall)
-        {
-            var result = await serverCall;
-            if (result == null)
-                await GameService.Instance.ResyncFullState();
         }
 
         private static ServerSeedConfig LoadSeed(string seedItemKey)

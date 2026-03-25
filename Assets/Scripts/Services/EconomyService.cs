@@ -254,15 +254,14 @@ namespace Garden
                     }
                     else
                     {
-                        Debug.LogWarning($"EconomyService: Action {action.type} failed after {MaxRetries} retries, skipping.");
+                        Debug.LogWarning($"EconomyService: Action {action.type} failed after {MaxRetries} retries, resyncing.");
                         _queue.actions.RemoveAt(0);
                         SaveQueue();
+                        CampFireUI.Instance?.ShowToast("Reconnecting...");
+                        await SyncFromServer();
+                        break; // stop draining — state just changed
                     }
                 }
-
-                // Do NOT SyncFromServer here — it overwrites local state with
-                // potentially stale server data, causing race conditions with
-                // GameService-based actions (harvests, flame upgrades, etc.).
             }
             finally
             {
@@ -281,6 +280,7 @@ namespace Garden
             catch
             {
                 IsOnline = false;
+                GameService.Instance?.NotifyConnectionLost();
                 return false;
             }
         }

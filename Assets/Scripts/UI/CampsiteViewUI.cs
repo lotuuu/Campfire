@@ -929,28 +929,30 @@ namespace Garden
             ShowInteraction(type, index);
         }
 
-        private void OnEmptyCellTapped(int gridX, int gridY)
+        private async void OnEmptyCellTapped(int gridX, int gridY)
         {
             if (mode == CampsiteMode.Tutorial) return;
 
             if (mode == CampsiteMode.Placing)
             {
+                CampFireUI.Instance?.ShowActionSpinner();
                 bool success = false;
                 switch (pendingBuildingType)
                 {
                     case CampBuildingType.Plot:
-                        success = PlotManager.Instance.CraftPlot(gridX, gridY);
+                        success = await PlotManager.Instance.CraftPlot(gridX, gridY);
                         break;
                     case CampBuildingType.Vase:
-                        success = VaseManager.Instance.CraftVase(gridX, gridY);
+                        success = await VaseManager.Instance.CraftVase(gridX, gridY);
                         break;
                     case CampBuildingType.MallumHouse:
-                        success = MallumManager.Instance.CraftMallumHouse(gridX, gridY);
+                        success = await MallumManager.Instance.CraftMallumHouse(gridX, gridY);
                         break;
                     case CampBuildingType.Garden:
-                        success = GardenManager.Instance.CraftEmptyGarden(gridX, gridY);
+                        success = await GardenManager.Instance.CraftEmptyGarden(gridX, gridY);
                         break;
                 }
+                CampFireUI.Instance?.HideActionSpinner();
                 if (success)
                 {
                     pendingCraftAnimCoords = (gridX, gridY);
@@ -1002,9 +1004,12 @@ namespace Garden
                     grid.Add(BuildCardHelper.CreateBuildCard(
                         Loc.Get("ui.build.plot_name", "Plot"), Loc.Get("ui.build.plot_desc", "Grow seeds"), "ui/buildings/plot", null,
                         BuildCardHelper.FromBuildingCost(plotCost), null,
-                        canAffordPlot, canPlace, () =>
+                        canAffordPlot, canPlace, async () =>
                         {
-                            if (PlotManager.Instance.CraftPlot(gridX, gridY))
+                            CampFireUI.Instance?.ShowActionSpinner();
+                            bool ok = await PlotManager.Instance.CraftPlot(gridX, gridY);
+                            CampFireUI.Instance?.HideActionSpinner();
+                            if (ok)
                             {
                                 pendingCraftAnimCoords = (gridX, gridY);
                                 CloseInteractionPanel(silent: true);
@@ -1029,9 +1034,12 @@ namespace Garden
                         grid.Add(BuildCardHelper.CreateBuildCard(
                             Loc.Get("ui.build.vase_name", "Vase"), Loc.Get("ui.build.vase_desc", "Stores water"), "ui/buildings/vase", null,
                             BuildCardHelper.FromBuildingCost(vaseCost), null,
-                            canAffordVase, canPlace, () =>
+                            canAffordVase, canPlace, async () =>
                             {
-                                if (VaseManager.Instance.CraftVase(gridX, gridY))
+                                CampFireUI.Instance?.ShowActionSpinner();
+                                bool ok = await VaseManager.Instance.CraftVase(gridX, gridY);
+                                CampFireUI.Instance?.HideActionSpinner();
+                                if (ok)
                                 {
                                     pendingCraftAnimCoords = (gridX, gridY);
                                     CloseInteractionPanel(silent: true);
@@ -1062,9 +1070,12 @@ namespace Garden
                     grid.Add(BuildCardHelper.CreateBuildCard(
                         Loc.Get("ui.build.house_name", "House"), Loc.Get("ui.build.house_desc", "Houses 1 Mallum"), "ui/buildings/house", null,
                         BuildCardHelper.FromBuildingCost(cost), null,
-                        canAffordHouse, canPlace, () =>
+                        canAffordHouse, canPlace, async () =>
                         {
-                            if (MallumManager.Instance.CraftMallumHouse(gridX, gridY))
+                            CampFireUI.Instance?.ShowActionSpinner();
+                            bool ok = await MallumManager.Instance.CraftMallumHouse(gridX, gridY);
+                            CampFireUI.Instance?.HideActionSpinner();
+                            if (ok)
                             {
                                 pendingCraftAnimCoords = (gridX, gridY);
                                 CloseInteractionPanel(silent: true);
@@ -1089,9 +1100,12 @@ namespace Garden
                         grid.Add(BuildCardHelper.CreateBuildCard(
                             Loc.Get("ui.build.garden_name", "Garden"), Loc.Get("ui.build.garden_desc", "Grow fruit trees"), "ui/buildings/garden", null,
                             BuildCardHelper.FromBuildingCost(gardenCost), null,
-                            canAffordGarden, canPlace, () =>
+                            canAffordGarden, canPlace, async () =>
                             {
-                                if (GardenManager.Instance.CraftEmptyGarden(gridX, gridY))
+                                CampFireUI.Instance?.ShowActionSpinner();
+                                bool ok = await GardenManager.Instance.CraftEmptyGarden(gridX, gridY);
+                                CampFireUI.Instance?.HideActionSpinner();
+                                if (ok)
                                 {
                                     pendingCraftAnimCoords = (gridX, gridY);
                                     CloseInteractionPanel(silent: true);
@@ -1654,7 +1668,7 @@ namespace Garden
                 }
 
                 bool canAfford = upgradeAllowed && FlameManager.Instance.CanUpgrade();
-                var upgradeBtn = new Button(() =>
+                var upgradeBtn = new Button(async () =>
                 {
                     if (FlameLevelUpAnimator.IsPlaying) return;
                     var flameCellEl = canvas?.Q(className: "grid-cell--flame");
@@ -1662,9 +1676,12 @@ namespace Garden
 
                     // Suppress the event-driven rebuild so cells don't flash on
                     suppressRebuild = true;
-                    FlameManager.Instance.UpgradeFlame();
+                    CampFireUI.Instance?.ShowActionSpinner();
+                    bool upgraded = await FlameManager.Instance.UpgradeFlame();
+                    CampFireUI.Instance?.HideActionSpinner();
                     suppressRebuild = false;
                     pendingRebuild = false; // discard the suppressed rebuild
+                    if (!upgraded) return;
 
                     CloseInteractionPanel(silent: true);
                     int newLevel = FlameManager.Instance.Level;
@@ -2454,7 +2471,8 @@ namespace Garden
                 // Title row: name + stats + count
                 var titleRow = new VisualElement();
                 titleRow.AddToClassList("seed-card--title-row");
-                var nameLabel = new Label(seedData != null ? ConfigService.Instance.GetItemDisplayName(seedData.item_key) : plantSlug);
+                var rawName = seedData != null ? ConfigService.Instance.GetItemDisplayName(seedData.item_key) : plantSlug;
+                var nameLabel = new Label(rawName.Replace(" Seed", ""));
                 nameLabel.AddToClassList("seed-card--name");
                 titleRow.Add(nameLabel);
 

@@ -231,6 +231,12 @@
                             </ui:VisualElement>
                         </ui:VisualElement>
 
+                        <!-- Vibration -->
+                        <ui:VisualElement class="settings-toggle-row">
+                            <ui:Label name="settings-label-vibration" text="Vibration" class="settings-slider-label" />
+                            <ui:Toggle name="vibration-toggle" />
+                        </ui:VisualElement>
+
                         <!-- Audio section -->
                         <ui:Label name="settings-header-audio" text="AUDIO" class="settings-section-header" />
                         <ui:VisualElement class="settings-slider-row">
@@ -406,6 +412,20 @@
 
         <!-- Toast notification -->
         <ui:Label name="toast-label" class="toast" text="" style="display: none;" picking-mode="Ignore" />
+
+        <!-- Action spinner overlay (blocks input during synchronous server calls) -->
+        <ui:VisualElement name="action-spinner" class="action-spinner" style="display: none;">
+            <ui:Label class="action-spinner__label" text="..." />
+        </ui:VisualElement>
+
+        <!-- Disconnect overlay (shown when server connection is lost) -->
+        <ui:VisualElement name="disconnect-overlay" class="disconnect-overlay" style="display: none;">
+            <ui:VisualElement class="disconnect-overlay__card">
+                <ui:Label class="disconnect-overlay__title" text="Disconnected" />
+                <ui:Label class="disconnect-overlay__message" text="Lost connection to the server." />
+                <ui:Button name="disconnect-reconnect-btn" class="disconnect-overlay__btn" text="Reconnect" />
+            </ui:VisualElement>
+        </ui:VisualElement>
 
         <!-- Dialogue overlay (dim backdrop + portrait only; dialogue box is in flow above) -->
         <ui:VisualElement name="dialogue-overlay">

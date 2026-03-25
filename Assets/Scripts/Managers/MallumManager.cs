@@ -65,7 +65,7 @@ namespace Garden
                         if (GameService.Instance != null && GameService.Instance.IsOnline
                             && !string.IsNullOrEmpty(mallum.assignedQuestName))
                         {
-                            _ = NotifyServerOrResync(GameService.Instance.CheckQuest(mallum.assignedQuestName));
+                            _ = GameService.Instance.OptimisticAction(GameService.Instance.CheckQuest(mallum.assignedQuestName), "CheckQuest");
                         }
                     }
                 }
@@ -175,7 +175,7 @@ namespace Garden
             // Notify server
             if (GameService.Instance != null && GameService.Instance.IsOnline)
             {
-                _ = NotifyServerOrResync(GameService.Instance.StartQuest(quest.questKey));
+                _ = GameService.Instance.OptimisticAction(GameService.Instance.StartQuest(quest.questKey), "StartQuest");
             }
 
             return true;
@@ -202,20 +202,13 @@ namespace Garden
             if (GameService.Instance != null && GameService.Instance.IsOnline
                 && !string.IsNullOrEmpty(questName))
             {
-                _ = NotifyServerCollectQuest(questName);
+                _ = GameService.Instance.OptimisticAction(GameService.Instance.CollectQuest(questName), "CollectQuest");
             }
 
             return rewards;
         }
 
-        private async Task NotifyServerCollectQuest(string questName)
-        {
-            var result = await GameService.Instance.CollectQuest(questName);
-            if (result == null)
-                await GameService.Instance.ResyncFullState();
-        }
-
-        public bool CraftMallumHouse(int gridX, int gridY)
+        public async Task<bool> CraftMallumHouse(int gridX, int gridY)
         {
             if (!FlameManager.Instance.CanPlaceEntity) return false;
 
@@ -229,10 +222,23 @@ namespace Garden
             // Check harvests
             if (!CanAffordHarvests(data.inventory, cost.harvestCosts)) return false;
 
-            // Spend mana
+            // Server-first: call server to craft house
+            if (GameService.Instance == null || !GameService.Instance.IsOnline)
+            {
+                CampFireUI.Instance?.ShowToast("Could not reach server");
+                return false;
+            }
+
+            var serverResult = await GameService.Instance.CraftMallumHouse(gridX, gridY);
+            if (serverResult == null)
+            {
+                CampFireUI.Instance?.ShowToast("Could not reach server");
+                return false;
+            }
+
+            // Server confirmed — spend resources locally
             if (!CurrencyManager.Instance.SpendMana(cost.manaCost)) return false;
 
-            // Spend harvests
             if (!CurrencyManager.FreeMode)
             foreach (var hc in cost.harvestCosts)
             {
@@ -242,8 +248,13 @@ namespace Garden
                 if (entry.count <= 0) data.inventory.Remove(entry);
             }
 
-            // Place house
-            data.mallumHouses.Add(new MallumHouseSave { gridX = gridX, gridY = gridY });
+            // Place house with server-assigned ID
+            data.mallumHouses.Add(new MallumHouseSave
+            {
+                gridX = gridX,
+                gridY = gridY,
+                serverId = serverResult.id
+            });
 
             // Add new mallums
             int max = ConfigService.Instance.MallumHouseConfig.GetMaxMallums(data.mallumHouses.Count);
@@ -252,32 +263,7 @@ namespace Garden
             SaveManager.Instance.Save();
             OnMallumsChanged?.Invoke();
 
-            // Notify server
-            if (GameService.Instance != null && GameService.Instance.IsOnline)
-            {
-                _ = NotifyServerCraftHouse(gridX, gridY);
-            }
-
             return true;
-        }
-
-        private async Task NotifyServerCraftHouse(int gridX, int gridY)
-        {
-            var result = await GameService.Instance.CraftMallumHouse(gridX, gridY);
-            if (result != null)
-            {
-                var data = SaveManager.Instance.Data;
-                var house = data.mallumHouses.Find(h => h.gridX == gridX && h.gridY == gridY && h.serverId == 0);
-                if (house != null)
-                {
-                    house.serverId = result.id;
-                    SaveManager.Instance.Save();
-                }
-            }
-            else
-            {
-                await GameService.Instance.ResyncFullState();
-            }
         }
 
         public BuildingCost GetNextHouseCost()
@@ -396,7 +382,7 @@ namespace Garden
             if (GameService.Instance != null && GameService.Instance.IsOnline
                 && !string.IsNullOrEmpty(questName))
             {
-                _ = NotifyServerOrResync(GameService.Instance.SpeedUpQuest(questName));
+                _ = GameService.Instance.OptimisticAction(GameService.Instance.SpeedUpQuest(questName), "SpeedUpQuest");
             }
 
             return true;
@@ -435,7 +421,7 @@ namespace Garden
             if (GameService.Instance != null && GameService.Instance.IsOnline
                 && !string.IsNullOrEmpty(questName))
             {
-                _ = NotifyServerOrResync(GameService.Instance.SpeedUpQuest(questName));
+                _ = GameService.Instance.OptimisticAction(GameService.Instance.SpeedUpQuest(questName), "SpeedUpQuest");
             }
 
             return rewards;
@@ -494,13 +480,6 @@ namespace Garden
         private ServerQuestConfig FindQuest(string questName)
         {
             return ConfigService.Instance?.GetQuest(questName);
-        }
-
-        private static async Task NotifyServerOrResync<T>(Task<T> serverCall)
-        {
-            var result = await serverCall;
-            if (result == null)
-                await GameService.Instance.ResyncFullState();
         }
 
         // --- Static helpers (testable without MonoBehaviour) ---
@@ -646,6 +625,7 @@ namespace Garden
 
             mallum.state = MallumState.QuestComplete;
             mallum.startTimeUtc = null;
+            HapticService.Vibrate();
         }
     }
 }

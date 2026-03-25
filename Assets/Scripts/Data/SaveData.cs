@@ -31,6 +31,7 @@ namespace Garden
         public float sfxVolume = 1f;
         public int tutorialStep;
         public string locale;
+        public bool vibrationEnabled = true;
     }
 
     [Serializable]

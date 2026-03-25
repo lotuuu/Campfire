@@ -391,11 +391,14 @@ namespace Garden
                 if (request.result != UnityWebRequest.Result.Success)
                 {
                     Debug.LogError($"SocialService: PushVillageSnapshot failed: {request.error}");
+                    if (request.result == UnityWebRequest.Result.ConnectionError)
+                        GameService.Instance?.NotifyConnectionLost();
                 }
             }
             catch (Exception e)
             {
                 Debug.LogError($"SocialService: PushVillageSnapshot failed: {e.Message}");
+                GameService.Instance?.NotifyConnectionLost();
             }
         }
 

@@ -389,6 +389,77 @@
     margin: var(--spacing-xs) 0;
 }
 
+/* ── Disconnect Overlay ── */
+.disconnect-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    justify-content: center;
+    align-items: center;
+}
+
+.disconnect-overlay__card {
+    background-color: rgb(35, 25, 15);
+    border-radius: 16px;
+    border-width: 1px;
+    border-color: rgba(120, 180, 60, 0.3);
+    padding: var(--spacing-lg);
+    align-items: center;
+    min-width: 280px;
+}
+
+.disconnect-overlay__title {
+    font-size: var(--font-lg);
+    color: rgb(220, 180, 140);
+    -unity-font-style: bold;
+    margin-bottom: var(--spacing-sm);
+}
+
+.disconnect-overlay__message {
+    font-size: var(--font-sm);
+    color: rgb(180, 160, 130);
+    margin-bottom: var(--spacing-md);
+    -unity-text-align: middle-center;
+}
+
+.disconnect-overlay__btn {
+    background-color: rgb(80, 130, 60);
+    color: rgb(240, 240, 230);
+    border-radius: 12px;
+    border-width: 0;
+    padding: var(--spacing-sm) var(--spacing-lg);
+    font-size: var(--font-md);
+    -unity-font-style: bold;
+}
+
+.disconnect-overlay__btn:hover {
+    background-color: rgb(100, 150, 75);
+}
+
+/* ── Action Spinner Overlay ── */
+.action-spinner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.3);
+    justify-content: center;
+    align-items: center;
+}
+
+.action-spinner__label {
+    font-size: var(--font-lg);
+    color: rgb(220, 200, 170);
+    -unity-font-style: bold;
+    background-color: rgba(30, 20, 12, 0.9);
+    border-radius: 16px;
+    padding: var(--spacing-md) var(--spacing-lg);
+}
+
 /* ── Toast / Snackbar ── */
 .toast {
     position: absolute;
