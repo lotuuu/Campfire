@@ -7,8 +7,8 @@ namespace Garden
     public class ProfilePopupUI : MonoBehaviour
     {
         private VisualElement hudProfile;
-        private VisualElement profileBloom;
-        private VisualElement bloomDismiss;
+        private VisualElement profileBackdrop;
+        private VisualElement profilePopup;
         private VisualElement profilePicLarge;
         private VisualElement hudProfilePic;
 
@@ -44,9 +44,12 @@ namespace Garden
         public void Initialize(VisualElement root)
         {
             hudProfile = root.Q("hud-profile");
-            profileBloom = root.Q("profile-bloom");
-            if (profileBloom != null) profileBloom.style.display = DisplayStyle.None;
-            bloomDismiss = root.Q("bloom-dismiss");
+            profileBackdrop = root.Q("profile-backdrop");
+            profilePopup = root.Q("profile-popup");
+            profileBackdrop?.RegisterCallback<ClickEvent>(evt =>
+            {
+                if (evt.target == profileBackdrop) CloseBloom();
+            });
             hudProfilePic = root.Q("hud-profile-pic");
             profilePicLarge = root.Q("profile-pic-large");
 
@@ -292,21 +295,24 @@ namespace Garden
 
         public void OpenBloom()
         {
-            if (profileBloom == null) return;
+            if (profileBackdrop == null) return;
             isOpen = true;
             RefreshContent();
-            profileBloom.style.display = DisplayStyle.Flex;
-            profileBloom.schedule.Execute(() => profileBloom.AddToClassList("bloom-open"));
-            bloomDismiss?.AddToClassList("bloom-dismiss-active");
+            profileBackdrop.style.display = DisplayStyle.Flex;
+            if (profilePopup != null)
+            {
+                profilePopup.style.display = DisplayStyle.Flex;
+                profilePopup.schedule.Execute(() => profilePopup.AddToClassList("popup-visible"));
+            }
         }
 
         public void CloseBloom()
         {
-            if (profileBloom == null) return;
+            if (profileBackdrop == null) return;
             isOpen = false;
-            profileBloom.RemoveFromClassList("bloom-open");
-            profileBloom.style.display = DisplayStyle.None;
-            bloomDismiss?.RemoveFromClassList("bloom-dismiss-active");
+            profilePopup?.RemoveFromClassList("popup-visible");
+            profileBackdrop.style.display = DisplayStyle.None;
+            if (profilePopup != null) profilePopup.style.display = DisplayStyle.None;
 
             // Reset states
             if (deleteBtn != null) deleteBtn.style.display = DisplayStyle.Flex;
@@ -323,7 +329,7 @@ namespace Garden
         private void OnDebugClicked()
         {
             CloseBloom();
-            var debugPanelElement = profileBloom?.panel?.visualTree?.Q("debug-panel");
+            var debugPanelElement = profileBackdrop?.panel?.visualTree?.Q("debug-panel");
             if (debugPanelElement != null)
                 CampFireUI.Instance?.OpenOverlay("Debug", debugPanelElement);
         }

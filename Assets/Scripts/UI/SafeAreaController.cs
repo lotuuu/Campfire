@@ -31,15 +31,6 @@ namespace Garden
             var weatherBarWrapper = root.Q("hud-weather-bar-wrapper");
             if (weatherBarWrapper != null)
                 weatherBarWrapper.style.paddingTop = topBleed;
-            var forecastBloom = root.Q("forecast-bloom");
-            if (forecastBloom != null)
-                forecastBloom.style.top = topBleed;
-            var profileBloom = root.Q("profile-bloom");
-            if (profileBloom != null)
-                profileBloom.style.top = topBleed;
-            var settingsBloom = root.Q("settings-bloom");
-            if (settingsBloom != null)
-                settingsBloom.style.top = topBleed;
 
             // Pull bottom-nav background down into the bottom bleed area
             var bottomNav = root.Q("bottom-nav");

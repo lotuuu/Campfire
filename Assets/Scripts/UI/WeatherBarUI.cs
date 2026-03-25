@@ -10,8 +10,8 @@ namespace Garden
         private Label hudWeatherHumidity;
         private Label hudWeatherStatus;
         private VisualElement hudMenuIcon;
-        private VisualElement forecastBloom;
-        private VisualElement bloomDismiss;
+        private VisualElement forecastBackdrop;
+        private VisualElement forecastPopup;
         private Label forecastTitle;
         private VisualElement forecastStats;
         private VisualElement forecastDays;
@@ -35,9 +35,12 @@ namespace Garden
             hudWeatherHumidity = root.Q<Label>("hud-weather-humidity");
             hudWeatherStatus = root.Q<Label>("hud-weather-status");
             hudMenuIcon = root.Q("hud-menu-icon");
-            forecastBloom = root.Q("forecast-bloom");
-            if (forecastBloom != null) forecastBloom.style.display = DisplayStyle.None;
-            bloomDismiss = root.Q("bloom-dismiss");
+            forecastBackdrop = root.Q("forecast-backdrop");
+            forecastPopup = root.Q("forecast-popup");
+            forecastBackdrop?.RegisterCallback<ClickEvent>(evt =>
+            {
+                if (evt.target == forecastBackdrop) CloseBloom();
+            });
             forecastTitle = root.Q<Label>("forecast-bloom-title");
             forecastStats = root.Q("forecast-bloom-stats");
             forecastDays = root.Q("forecast-bloom-days");
@@ -92,21 +95,24 @@ namespace Garden
 
         private void OpenBloom()
         {
-            if (forecastBloom == null) return;
+            if (forecastBackdrop == null) return;
             isOpen = true;
             PopulateForecast();
-            forecastBloom.style.display = DisplayStyle.Flex;
-            forecastBloom.schedule.Execute(() => forecastBloom.AddToClassList("bloom-open"));
-            bloomDismiss?.AddToClassList("bloom-dismiss-active");
+            forecastBackdrop.style.display = DisplayStyle.Flex;
+            if (forecastPopup != null)
+            {
+                forecastPopup.style.display = DisplayStyle.Flex;
+                forecastPopup.schedule.Execute(() => forecastPopup.AddToClassList("popup-visible"));
+            }
         }
 
         public void CloseBloom()
         {
-            if (forecastBloom == null) return;
+            if (forecastBackdrop == null) return;
             isOpen = false;
-            forecastBloom.RemoveFromClassList("bloom-open");
-            forecastBloom.style.display = DisplayStyle.None;
-            bloomDismiss?.RemoveFromClassList("bloom-dismiss-active");
+            forecastPopup?.RemoveFromClassList("popup-visible");
+            forecastBackdrop.style.display = DisplayStyle.None;
+            if (forecastPopup != null) forecastPopup.style.display = DisplayStyle.None;
         }
 
         private void UpdateWeatherDisplay(WeatherData weather)

@@ -13,6 +13,7 @@ namespace Garden
         private VisualElement viewport;
         private VisualElement canvas;
         private VisualElement interactionBackdrop;
+        private VisualElement floatingHud;
         private VisualElement interactionPanel;
         private Label interactionTitle;
         private VisualElement interactionTitleRow;
@@ -154,6 +155,7 @@ namespace Garden
             canvas = root.Q("campsite-canvas");
             interactionBackdrop = root.Q("interaction-backdrop");
             interactionPanel = root.Q("interaction-panel");
+            floatingHud = root.Q("floating-hud");
             interactionTitle = root.Q<Label>("interaction-title");
 
             // Wrap title in a row so bell icon can sit beside it
@@ -940,16 +942,16 @@ namespace Garden
                 switch (pendingBuildingType)
                 {
                     case CampBuildingType.Plot:
-                        success = await PlotManager.Instance.CraftPlot(gridX, gridY);
+                        success = await PlotManager.Instance.BuildPlot(gridX, gridY);
                         break;
                     case CampBuildingType.Vase:
-                        success = await VaseManager.Instance.CraftVase(gridX, gridY);
+                        success = await VaseManager.Instance.BuildVase(gridX, gridY);
                         break;
                     case CampBuildingType.MallumHouse:
-                        success = await MallumManager.Instance.CraftMallumHouse(gridX, gridY);
+                        success = await MallumManager.Instance.BuildMallumHouse(gridX, gridY);
                         break;
                     case CampBuildingType.Garden:
-                        success = await GardenManager.Instance.CraftEmptyGarden(gridX, gridY);
+                        success = await GardenManager.Instance.BuildEmptyGarden(gridX, gridY);
                         break;
                 }
                 CampFireUI.Instance?.HideActionSpinner();
@@ -1007,7 +1009,7 @@ namespace Garden
                         canAffordPlot, canPlace, async () =>
                         {
                             CampFireUI.Instance?.ShowActionSpinner();
-                            bool ok = await PlotManager.Instance.CraftPlot(gridX, gridY);
+                            bool ok = await PlotManager.Instance.BuildPlot(gridX, gridY);
                             CampFireUI.Instance?.HideActionSpinner();
                             if (ok)
                             {
@@ -1037,7 +1039,7 @@ namespace Garden
                             canAffordVase, canPlace, async () =>
                             {
                                 CampFireUI.Instance?.ShowActionSpinner();
-                                bool ok = await VaseManager.Instance.CraftVase(gridX, gridY);
+                                bool ok = await VaseManager.Instance.BuildVase(gridX, gridY);
                                 CampFireUI.Instance?.HideActionSpinner();
                                 if (ok)
                                 {
@@ -1073,7 +1075,7 @@ namespace Garden
                         canAffordHouse, canPlace, async () =>
                         {
                             CampFireUI.Instance?.ShowActionSpinner();
-                            bool ok = await MallumManager.Instance.CraftMallumHouse(gridX, gridY);
+                            bool ok = await MallumManager.Instance.BuildMallumHouse(gridX, gridY);
                             CampFireUI.Instance?.HideActionSpinner();
                             if (ok)
                             {
@@ -1103,7 +1105,7 @@ namespace Garden
                             canAffordGarden, canPlace, async () =>
                             {
                                 CampFireUI.Instance?.ShowActionSpinner();
-                                bool ok = await GardenManager.Instance.CraftEmptyGarden(gridX, gridY);
+                                bool ok = await GardenManager.Instance.BuildEmptyGarden(gridX, gridY);
                                 CampFireUI.Instance?.HideActionSpinner();
                                 if (ok)
                                 {
@@ -1579,6 +1581,8 @@ namespace Garden
             if (interactionBackdrop != null)
                 interactionBackdrop.style.display = DisplayStyle.Flex;
             interactionPanel.style.display = DisplayStyle.Flex;
+            interactionPanel.schedule.Execute(() => interactionPanel.AddToClassList("popup-visible"));
+            if (floatingHud != null) floatingHud.style.display = DisplayStyle.None;
         }
 
         private void ShowFlameInteraction()
@@ -3414,9 +3418,11 @@ namespace Garden
                 interactionBackdrop.style.display = DisplayStyle.None;
             if (interactionPanel != null)
             {
+                interactionPanel.RemoveFromClassList("popup-visible");
                 interactionPanel.style.display = DisplayStyle.None;
                 interactionPanel.RemoveFromClassList("skin-panel");
             }
+            if (floatingHud != null) floatingHud.style.display = DisplayStyle.Flex;
             if (interactionTitle != null)
                 interactionTitleRow.style.display = DisplayStyle.Flex;
             openInteractionType = null;

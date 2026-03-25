@@ -6,8 +6,8 @@ namespace Garden
     public class SettingsPopupUI : MonoBehaviour
     {
         private VisualElement hudMenu;
-        private VisualElement settingsBloom;
-        private VisualElement bloomDismiss;
+        private VisualElement settingsBackdrop;
+        private VisualElement settingsPopup;
 
         private Slider musicSlider;
         private Slider sfxSlider;
@@ -23,9 +23,12 @@ namespace Garden
         public void Initialize(VisualElement root)
         {
             hudMenu = root.Q("hud-menu");
-            settingsBloom = root.Q("settings-bloom");
-            if (settingsBloom != null) settingsBloom.style.display = DisplayStyle.None;
-            bloomDismiss = root.Q("bloom-dismiss");
+            settingsBackdrop = root.Q("settings-backdrop");
+            settingsPopup = root.Q("settings-popup");
+            settingsBackdrop?.RegisterCallback<ClickEvent>(evt =>
+            {
+                if (evt.target == settingsBackdrop) CloseBloom();
+            });
 
             musicSlider = root.Q<Slider>("settings-music-slider");
             sfxSlider = root.Q<Slider>("settings-sfx-slider");
@@ -126,20 +129,23 @@ namespace Garden
 
         public void OpenBloom()
         {
-            if (settingsBloom == null) return;
+            if (settingsBackdrop == null) return;
             isOpen = true;
-            settingsBloom.style.display = DisplayStyle.Flex;
-            settingsBloom.schedule.Execute(() => settingsBloom.AddToClassList("bloom-open"));
-            bloomDismiss?.AddToClassList("bloom-dismiss-active");
+            settingsBackdrop.style.display = DisplayStyle.Flex;
+            if (settingsPopup != null)
+            {
+                settingsPopup.style.display = DisplayStyle.Flex;
+                settingsPopup.schedule.Execute(() => settingsPopup.AddToClassList("popup-visible"));
+            }
         }
 
         public void CloseBloom()
         {
-            if (settingsBloom == null) return;
+            if (settingsBackdrop == null) return;
             isOpen = false;
-            settingsBloom.RemoveFromClassList("bloom-open");
-            settingsBloom.style.display = DisplayStyle.None;
-            bloomDismiss?.RemoveFromClassList("bloom-dismiss-active");
+            settingsPopup?.RemoveFromClassList("popup-visible");
+            settingsBackdrop.style.display = DisplayStyle.None;
+            if (settingsPopup != null) settingsPopup.style.display = DisplayStyle.None;
         }
     }
 }

@@ -31,6 +31,7 @@ namespace Garden
         private TutorialUI tutorialUI;
         private RewardRevealUI rewardRevealUI;
 
+        private VisualElement floatingHud;
         private VisualElement overlayContainer;
         private VisualElement overlayBackdrop;
         private Label overlayTitle;
@@ -134,20 +135,11 @@ namespace Garden
                     weatherBar.CloseBloom();
             }, TrickleDown.TrickleDown);
 
-            // Dismiss backdrop — tap outside any bloom to close it
-            var bloomDismiss = root.Q("bloom-dismiss");
-            bloomDismiss?.RegisterCallback<ClickEvent>(_ =>
-            {
-                profilePopup?.CloseBloom();
-                if (weatherBar != null && weatherBar.IsOpen)
-                    weatherBar.CloseBloom();
-                settingsPopup?.CloseBloom();
-            });
-
             if (LocalizationService.Instance != null)
                 LocalizationService.Instance.OnLocaleChanged += OnLocaleChanged;
 
             // Overlay setup
+            floatingHud = root.Q("floating-hud");
             overlayContainer = root.Q("overlay-container");
             overlayBackdrop = root.Q("overlay-backdrop");
             overlayTitle = root.Q<Label>("overlay-title");
@@ -570,6 +562,7 @@ namespace Garden
             panel.style.display = DisplayStyle.Flex;
             overlayContainer.style.display = DisplayStyle.Flex;
             overlayContainer.BringToFront();
+            if (floatingHud != null) floatingHud.style.display = DisplayStyle.None;
         }
 
         public void ShowToast(string message)
@@ -609,6 +602,7 @@ namespace Garden
             if (!silent) AudioManager.Instance?.PlaySFX("ui_panel_close");
             HideAllPanels();
             overlayContainer.style.display = DisplayStyle.None;
+            if (floatingHud != null) floatingHud.style.display = DisplayStyle.Flex;
         }
 
         /// <summary>
