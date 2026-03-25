@@ -93,7 +93,7 @@ namespace Garden
         /// </summary>
         public Texture2D GetTextureByPercentage(string prefix, float percent01)
         {
-            int pct = Mathf.RoundToInt(percent01 * 100f);
+            int pct = Mathf.FloorToInt(percent01 * 100f);
             string bestKey = null;
             int bestThreshold = -1;
 
