@@ -19,57 +19,105 @@
     <Style src="project://database/Assets/UI/Styles/Tutorial.uss" />
     <Style src="project://database/Assets/UI/Styles/RewardReveal.uss" />
     <Style src="project://database/Assets/UI/Styles/Settings.uss" />
+    <Style src="project://database/Assets/UI/Styles/FloatingHud.uss" />
 
     <!-- Root container -->
     <ui:VisualElement name="camp-root">
 
-        <!-- Top bar frame -->
-        <ui:VisualElement name="top-bar">
-
-            <!-- Header row: player name + date/time -->
-            <ui:VisualElement name="top-header">
-                <ui:Label name="player-name" text="Camper" />
-                <ui:VisualElement name="top-header-spacer" />
-                <ui:Label name="date-time" text="--" />
+        <!-- Floating HUD -->
+        <ui:VisualElement name="floating-hud" picking-mode="Ignore">
+            <ui:VisualElement name="hud-profile" class="hud-circle hud-left">
+                <ui:VisualElement name="hud-profile-pic" />
             </ui:VisualElement>
-
-            <!-- Weather summary (tap to expand forecast) -->
-            <ui:VisualElement name="weather-bar">
-                <ui:Label name="weather-condition-label" text="--" />
-                <ui:VisualElement name="weather-icon" class="weather-cell-icon" />
-                <ui:Label name="weather-temp" text="--" />
-                <ui:Label name="weather-humidity" text="--" class="weather-summary-dim" />
-                <ui:VisualElement name="weather-moon" class="weather-summary-moon" />
-                <ui:Label name="weather-chevron" text="&#x25BC;" class="weather-summary-chevron" />
-            </ui:VisualElement>
-
-            <!-- Resources row with debug button -->
-            <ui:VisualElement name="resource-bar">
-                <ui:Button name="btn-settings" class="debug-btn settings-icon-btn" />
-                <ui:Button name="btn-debug" text="DEBUG" class="debug-btn" />
-                <ui:VisualElement style="flex-grow: 1;" />
-                <ui:VisualElement class="resource-item">
-                    <ui:VisualElement name="mana-icon" class="resource-icon" />
-                    <ui:Label name="mana-display" text="0" />
+            <ui:VisualElement name="hud-resources" class="hud-pill">
+                <ui:VisualElement class="hud-res">
+                    <ui:VisualElement name="hud-mana-icon" class="hud-res-icon" />
+                    <ui:Label name="hud-mana" text="0" />
                 </ui:VisualElement>
-                <ui:VisualElement class="resource-item">
-                    <ui:VisualElement name="water-icon" class="resource-icon" />
-                    <ui:Label name="water-display" text="0" />
+                <ui:VisualElement class="hud-res-divider" />
+                <ui:VisualElement class="hud-res">
+                    <ui:VisualElement name="hud-water-icon" class="hud-res-icon" />
+                    <ui:Label name="hud-water" text="0" />
                 </ui:VisualElement>
-                <ui:VisualElement class="resource-item">
-                    <ui:VisualElement name="mallum-icon" class="resource-icon" />
-                    <ui:Label name="mallum-display" text="0/0" />
+                <ui:VisualElement class="hud-res-divider" />
+                <ui:VisualElement class="hud-res">
+                    <ui:VisualElement name="hud-mallum-icon" class="hud-res-icon" />
+                    <ui:Label name="hud-mallum" text="0/0" />
                 </ui:VisualElement>
             </ui:VisualElement>
+            <ui:VisualElement name="hud-weather" class="hud-circle hud-right">
+                <ui:VisualElement name="hud-weather-icon" />
+            </ui:VisualElement>
+        </ui:VisualElement>
 
+        <!-- Bloom dismiss backdrop (click-outside-to-close) -->
+        <ui:VisualElement name="bloom-dismiss" />
+
+        <!-- Forecast bloom card -->
+        <ui:VisualElement name="forecast-bloom" class="bloom-card bloom-right">
+            <ui:VisualElement name="forecast-bloom-content" class="bloom-content">
+                <ui:Label name="forecast-bloom-title" class="forecast-bloom-title" />
+                <ui:VisualElement name="forecast-bloom-stats" />
+                <ui:Label text="" class="forecast-section-label" name="forecast-section-label" />
+                <ui:VisualElement name="forecast-bloom-days" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Profile bloom popup -->
+        <ui:VisualElement name="profile-bloom" class="bloom-card bloom-left">
+            <ui:ScrollView name="profile-bloom-content" class="bloom-content"
+                touch-scroll-type="Clamped" elasticity="0"
+                vertical-scroller-visibility="Hidden">
+                <ui:VisualElement name="profile-identity">
+                    <ui:VisualElement name="profile-pic-large" />
+                    <ui:TextField name="profile-display-name" label="Name" max-length="20" />
+                    <ui:Label name="profile-friend-code" text="Code: ---" />
+                </ui:VisualElement>
+                <ui:VisualElement name="profile-stats">
+                    <ui:Label name="profile-flame-level" text="Flame Level 1" />
+                    <ui:Label name="profile-date-time" text="--" />
+                    <ui:Label name="profile-weather-summary" text="--" />
+                </ui:VisualElement>
+                <ui:VisualElement name="profile-settings">
+                    <ui:Label text="SETTINGS" class="profile-section-header" />
+                    <ui:DropdownField name="profile-language-dropdown" label="Language" />
+                    <ui:VisualElement class="profile-toggle-row">
+                        <ui:Label text="Vibration" />
+                        <ui:Toggle name="profile-vibration-toggle" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="profile-slider-row">
+                        <ui:Label text="Music" />
+                        <ui:Slider name="profile-music-slider" low-value="0" high-value="100" value="100" />
+                        <ui:Label name="profile-music-value" text="100%" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="profile-slider-row">
+                        <ui:Label text="Sound FX" />
+                        <ui:Slider name="profile-sfx-slider" low-value="0" high-value="100" value="100" />
+                        <ui:Label name="profile-sfx-value" text="100%" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement name="profile-account">
+                    <ui:Label text="ACCOUNT" class="profile-section-header" />
+                    <ui:Label name="profile-player-id" text="Player: ---" />
+                    <ui:Label name="profile-server" text="Server: ---" />
+                    <ui:Label name="profile-version" text="Version: ---" />
+                </ui:VisualElement>
+                <ui:VisualElement name="profile-danger">
+                    <ui:Label text="DANGER ZONE" class="profile-section-header" />
+                    <ui:Button name="profile-delete-btn" text="Delete Save Data" />
+                    <ui:VisualElement name="profile-confirm-row" style="display: none;">
+                        <ui:Label text="Are you sure?" />
+                        <ui:Button name="profile-confirm-cancel" text="Cancel" />
+                        <ui:Button name="profile-confirm-delete" text="Delete" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:Button name="profile-debug-btn" text="DEBUG" style="display: none;" />
+            </ui:ScrollView>
         </ui:VisualElement>
 
         <!-- Main campsite grid view -->
         <ui:VisualElement name="campsite-viewport">
             <ui:VisualElement name="campsite-canvas" />
-            <ui:VisualElement name="forecast-panel">
-                <ui:VisualElement name="forecast-days" />
-            </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- Bottom navigation -->
@@ -216,64 +264,6 @@
                             <ui:VisualElement name="quest-active-section" />
                             <ui:VisualElement name="quest-available-section" />
                             <ui:VisualElement name="quest-locked-section" />
-                        </ui:ScrollView>
-                    </ui:VisualElement>
-
-                    <!-- Settings panel -->
-                    <ui:VisualElement name="settings-panel">
-                        <ui:ScrollView name="settings-scroll" vertical-scroller-visibility="Hidden" horizontal-scroller-visibility="Hidden" touch-scroll-type="Clamped" elasticity="0">
-
-                        <!-- Language section -->
-                        <ui:VisualElement class="settings-section">
-                            <ui:Label name="settings-header-language" text="LANGUAGE" class="settings-section-header settings-section-first" />
-                            <ui:VisualElement class="settings-row">
-                                <ui:DropdownField name="language-dropdown" label="Language" />
-                            </ui:VisualElement>
-                        </ui:VisualElement>
-
-                        <!-- Vibration -->
-                        <ui:VisualElement class="settings-toggle-row">
-                            <ui:Label name="settings-label-vibration" text="Vibration" class="settings-slider-label" />
-                            <ui:Toggle name="vibration-toggle" />
-                        </ui:VisualElement>
-
-                        <!-- Audio section -->
-                        <ui:Label name="settings-header-audio" text="AUDIO" class="settings-section-header" />
-                        <ui:VisualElement class="settings-slider-row">
-                            <ui:Label name="settings-label-music" text="Music" class="settings-slider-label" />
-                            <ui:Slider name="music-slider" low-value="0" high-value="100" value="100" />
-                            <ui:Label name="music-value" text="100%" class="settings-slider-value" />
-                        </ui:VisualElement>
-                        <ui:VisualElement class="settings-slider-row">
-                            <ui:Label name="settings-label-sfx" text="Sound FX" class="settings-slider-label" />
-                            <ui:Slider name="sfx-slider" low-value="0" high-value="100" value="100" />
-                            <ui:Label name="sfx-value" text="100%" class="settings-slider-value" />
-                        </ui:VisualElement>
-
-                        <!-- Account section -->
-                        <ui:Label name="settings-header-account" text="ACCOUNT" class="settings-section-header" />
-                        <ui:VisualElement class="settings-info-row">
-                            <ui:Label name="settings-label-player" text="Player" class="settings-info-label" />
-                            <ui:Label name="settings-player-id" text="---" class="settings-info-value" />
-                        </ui:VisualElement>
-                        <ui:VisualElement class="settings-info-row">
-                            <ui:Label name="settings-label-server" text="Server" class="settings-info-label" />
-                            <ui:Label name="settings-server" text="---" class="settings-info-value" />
-                        </ui:VisualElement>
-                        <ui:VisualElement class="settings-info-row">
-                            <ui:Label name="settings-label-version" text="Version" class="settings-info-label" />
-                            <ui:Label name="settings-version" text="---" class="settings-info-value" />
-                        </ui:VisualElement>
-
-                        <!-- Danger zone section -->
-                        <ui:Label name="settings-header-danger" text="DANGER ZONE" class="settings-section-header" />
-                        <ui:Button name="settings-delete-btn" text="Delete Save Data" class="settings-delete-btn" />
-                        <ui:VisualElement name="settings-confirm-row" class="settings-confirm-row" style="display: none;">
-                            <ui:Label name="settings-label-confirm" text="Are you sure?" class="settings-confirm-label" />
-                            <ui:Button name="settings-confirm-cancel" text="Cancel" class="settings-confirm-cancel" />
-                            <ui:Button name="settings-confirm-delete" text="Delete" class="settings-confirm-delete" />
-                        </ui:VisualElement>
-
                         </ui:ScrollView>
                     </ui:VisualElement>
 
