@@ -25,18 +25,10 @@ namespace Garden
             campRoot.style.paddingTop = topBleed;
             campRoot.style.paddingBottom = bottomBleed;
 
-            // Shift floating HUD down by safe area inset
-            var floatingHud = root.Q("floating-hud");
-            if (floatingHud != null)
-                floatingHud.style.top = 10 + topBleed;
-
-            // Also shift bloom cards down
-            var forecastBloom = root.Q("forecast-bloom");
-            if (forecastBloom != null)
-                forecastBloom.style.top = 10 + topBleed;
-            var profileBloom = root.Q("profile-bloom");
-            if (profileBloom != null)
-                profileBloom.style.top = 10 + topBleed;
+            // Floating HUD and bloom cards use position: absolute inside camp-root.
+            // In UI Toolkit, absolute children are positioned relative to the parent's
+            // content area (after padding), so campRoot.paddingTop already pushes them
+            // below the safe area. No additional offset needed — USS top: 10px is enough.
 
             // Pull bottom-nav background down into the bottom bleed area
             var bottomNav = root.Q("bottom-nav");
