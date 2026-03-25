@@ -134,18 +134,67 @@ New floating elements as direct children of `#camp-root`, before `#campsite-view
 
 <!-- Profile bloom popup (hidden, expands from profile button) -->
 <ui:VisualElement name="profile-bloom" class="bloom-card bloom-left">
-    <ui:VisualElement name="profile-bloom-content" class="bloom-content">
+    <ui:ScrollView name="profile-bloom-content" class="bloom-content"
+        touch-scroll-type="Clamped" elasticity="0"
+        vertical-scroller-visibility="Hidden">
+
         <!-- Player identity -->
-        <ui:VisualElement name="profile-identity" />
+        <ui:VisualElement name="profile-identity">
+            <ui:VisualElement name="profile-pic-large" />
+            <ui:TextField name="profile-display-name" label="Name" max-length="20" />
+            <ui:Label name="profile-friend-code" text="Code: ---" />
+        </ui:VisualElement>
+
         <!-- Camp stats -->
-        <ui:VisualElement name="profile-stats" />
-        <!-- Settings -->
-        <ui:VisualElement name="profile-settings" />
-        <!-- Account -->
-        <ui:VisualElement name="profile-account" />
+        <ui:VisualElement name="profile-stats">
+            <ui:Label name="profile-flame-level" text="Flame Level 1" />
+            <ui:Label name="profile-date-time" text="--" />
+            <ui:Label name="profile-weather-summary" text="--" />
+        </ui:VisualElement>
+
+        <!-- Settings: Language -->
+        <ui:VisualElement name="profile-settings">
+            <ui:Label text="SETTINGS" class="profile-section-header" />
+            <ui:DropdownField name="profile-language-dropdown" label="Language" />
+            <ui:VisualElement class="profile-toggle-row">
+                <ui:Label text="Vibration" />
+                <ui:Toggle name="profile-vibration-toggle" />
+            </ui:VisualElement>
+            <ui:VisualElement class="profile-slider-row">
+                <ui:Label text="Music" />
+                <ui:Slider name="profile-music-slider" low-value="0" high-value="100" value="100" />
+                <ui:Label name="profile-music-value" text="100%" />
+            </ui:VisualElement>
+            <ui:VisualElement class="profile-slider-row">
+                <ui:Label text="Sound FX" />
+                <ui:Slider name="profile-sfx-slider" low-value="0" high-value="100" value="100" />
+                <ui:Label name="profile-sfx-value" text="100%" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Account info -->
+        <ui:VisualElement name="profile-account">
+            <ui:Label text="ACCOUNT" class="profile-section-header" />
+            <ui:Label name="profile-player-id" text="Player: ---" />
+            <ui:Label name="profile-server" text="Server: ---" />
+            <ui:Label name="profile-version" text="Version: ---" />
+        </ui:VisualElement>
+
         <!-- Danger zone -->
-        <ui:VisualElement name="profile-danger" />
-    </ui:VisualElement>
+        <ui:VisualElement name="profile-danger">
+            <ui:Label text="DANGER ZONE" class="profile-section-header" />
+            <ui:Button name="profile-delete-btn" text="Delete Save Data" />
+            <ui:VisualElement name="profile-confirm-row" style="display: none;">
+                <ui:Label text="Are you sure?" />
+                <ui:Button name="profile-confirm-cancel" text="Cancel" />
+                <ui:Button name="profile-confirm-delete" text="Delete" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Debug (dev only) -->
+        <ui:Button name="profile-debug-btn" text="DEBUG" style="display: none;" />
+
+    </ui:ScrollView>
 </ui:VisualElement>
 ```
 
@@ -217,7 +266,7 @@ All functionality moves into `ProfilePopupUI.cs`. Remove from `CampFireUI` initi
 ## Migration Notes
 
 - The `#forecast-panel` / `#forecast-days` elements in the campsite-viewport can be removed — forecast content moves into the bloom card
-- Player name display (`#player-name`) is currently hidden unless visiting. In the new design, it shows inside the profile popup always, and the visiting-mode name display can show as a small label on the floating profile circle or as a toast
+- Player name display (`#player-name`) is currently hidden unless visiting. In the new design, the player's own name shows inside the profile popup. When visiting another player's camp, a small label (`#hud-visiting-name`) appears beneath the profile circle showing "{Name}'s Camp". This label is a child of `#hud-profile`, styled as a small pill with the same semi-transparent background, managed by `WeatherBarUI.SetVisitingName()`
 - The debug button currently in the resource bar moves into the profile popup, gated by `Debug.isDebugBuild`
 
 ## Files Changed
