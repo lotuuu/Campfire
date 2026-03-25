@@ -26,7 +26,7 @@ namespace Garden
         private VisitorUI visitorUI;
         private DialogueUI dialogueUI;
 
-        private SettingsUI settingsUI;
+        private ProfilePopupUI profilePopup;
         private TutorialUI tutorialUI;
         private RewardRevealUI rewardRevealUI;
 
@@ -39,16 +39,10 @@ namespace Garden
         private VisualElement buildPanel;
         private VisualElement debugPanelElement;
         private VisualElement questsPanel;
-        private VisualElement settingsPanel;
-
         private Label toastLabel;
         private IVisualElementScheduledItem _toastHide;
         private VisualElement actionSpinner;
         private VisualElement disconnectOverlay;
-
-        // Deferred icon loading
-        private Button settingsBtn;
-        private bool _settingsIconLoaded;
 
         // Loading gate
         private VisualElement loadingGate;
@@ -103,8 +97,8 @@ namespace Garden
             visitorUI?.Initialize(root);
             dialogueUI = GetComponent<DialogueUI>();
             dialogueUI?.Initialize(root);
-            settingsUI = GetComponent<SettingsUI>();
-            settingsUI?.Initialize(root);
+            profilePopup = GetComponent<ProfilePopupUI>();
+            profilePopup?.Initialize(root);
 
             tutorialUI = GetComponent<TutorialUI>();
             tutorialUI?.Initialize(root);
@@ -126,7 +120,6 @@ namespace Garden
             buildPanel = root.Q("build-panel");
             debugPanelElement = root.Q("debug-panel");
             questsPanel = root.Q("quests-panel");
-            settingsPanel = root.Q("settings-panel");
 
             toastLabel = root.Q<Label>("toast-label");
             actionSpinner = root.Q("action-spinner");
@@ -176,26 +169,10 @@ namespace Garden
                 letters.OnBadgeCountChanged += count => bottomNav?.UpdateSocialBadge(count);
             }
 
-            // Wire settings button
-            settingsBtn = root.Q<Button>("btn-settings");
-            if (settingsBtn != null)
+            if (Application.isEditor || Debug.isDebugBuild)
             {
-                TryLoadSettingsIcon();
-                settingsBtn.clicked += () => OpenOverlay(Loc.Get("ui.settings.title", "Settings"), settingsPanel);
-            }
-
-            // Wire debug button (editor + development builds)
-            var debugBtn = root.Q<Button>("btn-debug");
-            if (debugBtn != null)
-            {
-                if (Application.isEditor || UnityEngine.Debug.isDebugBuild)
-                {
-                    if (GetComponent<DebugService>() == null)
-                        gameObject.AddComponent<DebugService>();
-                    debugBtn.clicked += () => OpenOverlay("Debug", debugPanelElement);
-                }
-                else
-                    debugBtn.style.display = DisplayStyle.None;
+                if (GetComponent<DebugService>() == null)
+                    gameObject.AddComponent<DebugService>();
             }
 
             // Wire build placement mode (from flame popup craft items)
@@ -360,18 +337,8 @@ namespace Garden
 
         private void Update()
         {
-            TryLoadSettingsIcon();
             UpdateLoadingGate();
             UpdateLoadingElapsed();
-        }
-
-        private void TryLoadSettingsIcon()
-        {
-            if (_settingsIconLoaded || settingsBtn == null) return;
-            var gearTex = SpriteService.Instance?.GetTexture("ui/gear");
-            if (gearTex == null) return;
-            settingsBtn.style.backgroundImage = new StyleBackground(gearTex);
-            _settingsIconLoaded = true;
         }
 
         private void UpdateLoadingElapsed()
@@ -440,7 +407,7 @@ namespace Garden
                 GameService.Instance.OnStateLoaded -= OnGameReady;
             _gameDone = true;
             Debug.Log($"[INIT] Game ready at {_initStopwatch?.ElapsedMilliseconds ?? 0}ms");
-            settingsUI?.RefreshLanguageDropdown();
+            profilePopup?.RefreshLanguageDropdown();
             UpdateLoadingGate();
         }
 
@@ -629,7 +596,6 @@ namespace Garden
             if (buildPanel != null) buildPanel.style.display = DisplayStyle.None;
             if (debugPanelElement != null) debugPanelElement.style.display = DisplayStyle.None;
             if (questsPanel != null) questsPanel.style.display = DisplayStyle.None;
-            if (settingsPanel != null) settingsPanel.style.display = DisplayStyle.None;
         }
     }
 }
