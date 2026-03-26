@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -61,6 +62,8 @@ namespace Garden
         private Stopwatch _initStopwatch;
         private float _lastProgressTime;
         private int _lastDoneCount;
+        private int _knownRequestCount;
+        private int _knownGiftCount;
 
         private void Awake()
         {
@@ -347,6 +350,8 @@ namespace Garden
             {
                 SocialService.Instance.OnSignedIn -= OnSocialReady;
                 SocialService.Instance.OnInitFailed -= OnServiceFailed;
+                SocialService.Instance.OnFriendRequestsUpdated -= OnFriendRequestsUpdated;
+                SocialService.Instance.OnGiftsUpdated -= OnGiftsUpdated;
             }
             if (EconomyService.Instance != null)
             {
@@ -513,6 +518,13 @@ namespace Garden
                 if (WeatherService.Instance != null)
                     WeatherService.Instance.OnWeatherChanged += ShowToast;
 
+                // Subscribe to social notifications (friend requests & gifts)
+                if (SocialService.Instance != null)
+                {
+                    SocialService.Instance.OnFriendRequestsUpdated += OnFriendRequestsUpdated;
+                    SocialService.Instance.OnGiftsUpdated += OnGiftsUpdated;
+                }
+
                 // Start tutorial after all services are ready
                 if (TutorialManager.Instance != null && dialogueUI != null && tutorialUI != null)
                     TutorialManager.Instance.Initialize(tutorialUI, dialogueUI, campsiteView);
@@ -562,7 +574,6 @@ namespace Garden
             panel.style.display = DisplayStyle.Flex;
             overlayContainer.style.display = DisplayStyle.Flex;
             overlayContainer.BringToFront();
-            if (floatingHud != null) floatingHud.style.display = DisplayStyle.None;
         }
 
         public void ShowToast(string message)
@@ -575,6 +586,28 @@ namespace Garden
             _toastHide = toastLabel.schedule.Execute(() =>
                 toastLabel.style.display = DisplayStyle.None
             ).StartingIn(2000);
+        }
+
+        private void OnFriendRequestsUpdated(List<FriendRequest> requests)
+        {
+            int count = requests?.Count ?? 0;
+            int newCount = count - _knownRequestCount;
+            _knownRequestCount = count;
+            if (newCount > 0)
+                ShowToast(newCount == 1
+                    ? Loc.Get("ui.toast.friend_request", "New friend request!")
+                    : $"{newCount} {Loc.Get("ui.toast.friend_requests", "new friend requests!")}");
+        }
+
+        private void OnGiftsUpdated(List<GiftMessage> gifts)
+        {
+            int count = gifts?.Count ?? 0;
+            int newCount = count - _knownGiftCount;
+            _knownGiftCount = count;
+            if (newCount > 0)
+                ShowToast(newCount == 1
+                    ? Loc.Get("ui.toast.gift_received", "You received a gift!")
+                    : $"{newCount} {Loc.Get("ui.toast.gifts_received", "new gifts received!")}");
         }
 
         public void ShowActionSpinner()
@@ -602,7 +635,6 @@ namespace Garden
             if (!silent) AudioManager.Instance?.PlaySFX("ui_panel_close");
             HideAllPanels();
             overlayContainer.style.display = DisplayStyle.None;
-            if (floatingHud != null) floatingHud.style.display = DisplayStyle.Flex;
         }
 
         /// <summary>

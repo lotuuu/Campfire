@@ -116,14 +116,14 @@
 /* ── Resource panel (sits just below profile circle) ── */
 #hud-resources {
     position: absolute;
-    top: 248px;
+    top: 128px;
     left: var(--spacing-sm);
     flex-direction: column;
     background-color: rgba(20, 40, 20, 0.82);
-    border-radius: var(--radius-md);
+    border-radius: 0 var(--radius-md) var(--radius-md) var(--radius-md);
     border-width: 2px;
     border-color: rgba(214, 154, 53, 0.3);
-    padding: var(--spacing-sm) var(--spacing-sm) var(--spacing-xs) var(--spacing-sm);
+    padding: 136px var(--spacing-sm) var(--spacing-xs) var(--spacing-sm);
 }
 
 .hud-res-pill {
