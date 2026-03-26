@@ -3388,14 +3388,17 @@ namespace Garden
             var collectBtn = new Button(async () =>
             {
                 // Capture reward info before collection removes the bird
-                string rewardName = itemName;
+                string rewardKey = bird.itemKey;
                 int rewardCount = bird.itemCount;
 
                 var collected = await BirdManager.Instance.CollectBirdFromServer(index);
                 CloseInteractionPanel(silent: true);
 
                 if (collected != null)
-                    CampFireUI.Instance?.ShowToast($"+{rewardCount}x {rewardName}");
+                {
+                    var rewards = new List<RewardEntry> { new RewardEntry { itemKey = rewardKey, count = rewardCount } };
+                    RewardRevealUI.Instance?.Show(Loc.Get("ui.bird.gift_title", "Bird Gift!"), rewards, null);
+                }
                 else
                     Debug.LogWarning($"BirdUI: CollectBirdFromServer returned null for index {index}, serverId={bird.serverId}");
             })
